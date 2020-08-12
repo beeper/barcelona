@@ -425,7 +425,7 @@
 				1D5AEE4924E37D1700303692 /* Swime */,
 				1D5AEE4C24E37D6600303692 /* Vapor */,
 			);
-			productName = imessaged;
+			productName = "imessage-rest";
 			productReference = 1D5AEDAE24E3725200303692 /* imessage-rest.xpc */;
 			productType = "com.apple.product-type.xpc-service";
 		};
@@ -720,6 +720,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "imessage-rest/imessage-rest-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -750,6 +751,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "imessage-rest/imessage-rest-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
