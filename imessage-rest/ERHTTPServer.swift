@@ -17,10 +17,12 @@ private let corsConfiguration = CORSMiddleware.Configuration(
 )
 
 class ERHTTPServer {
+    static let shared = ERHTTPServer()
+    
     let app: Application = Application()
     let streamingAPI: StreamingAPI
     
-    init() {
+    private init() {
         app.http.server.configuration.port = 8090;
         app.http.server.configuration.hostname = "0.0.0.0";
         

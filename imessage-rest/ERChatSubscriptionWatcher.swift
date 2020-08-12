@@ -6,6 +6,7 @@
 //  Copyright © 2020 Eric Rabil. All rights reserved.
 //
 
+import UserNotifications
 import Foundation
 import IMCore
 
@@ -22,7 +23,8 @@ class ERChatSubscriptionWatcher {
         NotificationCenter.default.addObserver(forName: IMChatRegistryDidLoadNotification, object: nil, queue: nil) { notif in
             self.ensureAllChatsAreSubscribed()
             ERSharedBlockList()._connect()
-            print("Chats are loaded, ready for requests.")
+            
+            try! ERHTTPServer.shared.start()
         }
         
         NotificationCenter.default.addObserver(forName: IMChatRegistryDidRegisterChatNotification, object: nil, queue: nil) { notif in

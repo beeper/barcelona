@@ -90,6 +90,7 @@
 		1D5AEECC24E37F8A00303692 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEECB24E37F8A00303692 /* Constants.swift */; };
 		1D5AEECE24E3817900303692 /* ERHTTPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEECD24E3817900303692 /* ERHTTPServer.swift */; };
 		1D5AEED024E3838700303692 /* ERChatSubscriptionWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEECF24E3838700303692 /* ERChatSubscriptionWatcher.swift */; };
+		1DC66B0124E4756400CB0C5D /* TypingChatItemRepresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC66B0024E4756400CB0C5D /* TypingChatItemRepresentation.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -209,6 +210,7 @@
 		1D5AEECB24E37F8A00303692 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		1D5AEECD24E3817900303692 /* ERHTTPServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERHTTPServer.swift; sourceTree = "<group>"; };
 		1D5AEECF24E3838700303692 /* ERChatSubscriptionWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERChatSubscriptionWatcher.swift; sourceTree = "<group>"; };
+		1DC66B0024E4756400CB0C5D /* TypingChatItemRepresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypingChatItemRepresentation.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -389,6 +391,7 @@
 				1D5AEE8424E37D9F00303692 /* PluginChatItem.swift */,
 				1D5AEE8524E37D9F00303692 /* GroupActionTranscriptChatItem.swift */,
 				1D5AEE8624E37D9F00303692 /* Handle.swift */,
+				1DC66B0024E4756400CB0C5D /* TypingChatItemRepresentation.swift */,
 			);
 			path = Wrappers;
 			sourceTree = "<group>";
@@ -551,6 +554,7 @@
 				1D5AEE9624E37D9F00303692 /* SearchAPI.swift in Sources */,
 				1D5AEE9424E37D9F00303692 /* StreamingAPI.swift in Sources */,
 				1D5AEEC224E37D9F00303692 /* Handle.swift in Sources */,
+				1DC66B0124E4756400CB0C5D /* TypingChatItemRepresentation.swift in Sources */,
 				1D5AEEC524E37D9F00303692 /* ChatEvents.swift in Sources */,
 				1D5AEEC024E37D9F00303692 /* PluginChatItem.swift in Sources */,
 				1D5AEE4324E37B0100303692 /* IMCore-Shims.m in Sources */,

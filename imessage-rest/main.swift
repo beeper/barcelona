@@ -19,10 +19,6 @@ controller.addListenerID("com.ericrabil.imessage-rest", capabilities: UInt32(183
 
 ChatItem.setup()
 
-let http = ERHTTPServer()
-
-try! http.start()
-
 NSLog("Message XPC Service has started")
 
 let listener = NSXPCListener(machServiceName: kServiceName)
