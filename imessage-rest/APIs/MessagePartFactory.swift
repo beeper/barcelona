@@ -11,6 +11,9 @@ import Foundation
 import DataDetectorsCore
 import Vapor
 
+/**
+ Parses an array of MessageParts and returns a single NSAttributedString representing the contents
+ */
 func ERAttributedString(from parts: [MessagePart], fileTransferGUIDs: inout [String], on eventLoop: EventLoop) -> EventLoopFuture<NSAttributedString> {
     let promise = eventLoop.makePromise(of: NSAttributedString.self)
     var fileTransferGUIDs: [String] = []
