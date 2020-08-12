@@ -118,7 +118,7 @@
 - (IMChat*)existingChatWithGUID:(NSString*)arg1;
 - (id)existingChatForPersonID:(id)arg1;
 - (id)existingChatWithDisplayName:(id)arg1;
-- (id)existingChatWithChatIdentifier:(id)arg1;
+- (IMChat*)existingChatWithChatIdentifier:(id)arg1;
 - (id)existingChatWithGroupID:(id)arg1;
 - (id)_lookupExistingChatWithIMHandle:(id)arg1;
 - (id)_existingChatWithIdentifier:(id)arg1 style:(unsigned char)arg2 account:(id)arg3;

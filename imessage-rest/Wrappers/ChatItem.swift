@@ -133,6 +133,7 @@ struct ChatItem: Content {
         ChatItem.register(MessageRepresentation.self, for: .message)
         ChatItem.register(StubChatItemRepresentation.self, for: .phantom)
         ChatItem.register(GroupTitleChangeItemRepresentation.self, for: .groupTitle)
+        ChatItem.register(TypingChatItemRepresentation.self, for: .typing)
     }
 }
 
@@ -162,7 +163,7 @@ func wrapChatItem(unknownItem raw: NSObject, withChatGUID guid: String) -> ChatI
         case let item as IMGroupTitleChangeItem:
             chatItem = ChatItem(type: .groupTitle, item: GroupTitleChangeItemRepresentation(item, chatGUID: guid))
         case let item as IMTypingChatItem:
-            return nil
+            chatItem = ChatItem(type: .typing, item: TypingChatItemRepresentation(item, chatGUID: guid))
         default:
             break
         }

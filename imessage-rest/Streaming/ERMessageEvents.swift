@@ -21,76 +21,100 @@ private let log_messageEvents = OSLog(subsystem: Bundle.main.bundleIdentifier!, 
 class ERMessageEvents: EventDispatcher {
     override func wake() {
         addObserver(forName: ERChatMessageReceivedNotification) {
-            guard let item = $0.object as? IMItem else {
+            guard let item = $0.object as? IMItem, let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
                 return
             }
             
-            self.messageReceived(item)
+            self.messageReceived(item, inChat: chat)
         }
         
         addObserver(forName: ERChatMessagesReceivedNotification) {
-            guard let items = $0.object as? [IMItem] else {
+            guard let items = $0.object as? [IMItem], let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
                 return
             }
             
-            self.messagesReceived(items)
+            self.messagesReceived(items, inChat: chat)
         }
         
 //        addObserver(forName: ERChatMessageSentNotification) {
-//            guard let item = $0.object as? IMMessageItem else {
+//            guard let item = $0.object as? IMMessageItem, let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
 //                return
 //            }
 //
-//            self.messageSent(item)
+//            self.messageSent(item, inChat: chat)
 //        }
         
         addObserver(forName: ERChatMessagesUpdatedNotification) {
-            guard let items = $0.object as? [IMItem] else {
+            guard let items = $0.object as? [IMItem], let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
                 return
             }
             
-            self.messagesUpdated(items)
+            self.messagesUpdated(items, inChat: chat)
         }
         
         addObserver(forName: ERChatMessageUpdatedNotification) {
-            guard let item = $0.object as? IMItem else {
+            guard let item = $0.object as? IMItem, let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
                 return
             }
             
-            self.messageUpdated(item)
+            self.messageUpdated(item, inChat: chat)
         }
     }
     
     /** Counts as a new message */
-    private func messageReceived(_ item: IMItem) {
-        messagesReceived([item])
+    private func messageReceived(_ item: IMItem, inChat chatIdentifier: String) {
+        messagesReceived([item], inChat: chatIdentifier)
     }
     
     /** Counts as a new message */
-    private func messagesReceived(_ items: [IMItem]) {
-        items.forEach {
-            if let chatItem = $0._newChatItems() as? IMChatItem {
+    private func messagesReceived(_ items: [IMItem], inChat chatIdentifier: String) {
+        let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!
+        
+        items.forEach { item in
+            chat.loadMessage(withGUID: item.guid) { message in
+                guard let parsed = self.parse(message ?? item._newChatItems(), chatGUID: chat.guid) else {
+                    return
+                }
                 
-            } else if let chatItems = $0._newChatItems() as? [IMChatItem] {
-                
-            } else {
-                
+                StreamingAPI.shared.dispatch(eventFor(itemsReceived: BulkChatItemRepresentation(items: parsed)), to: nil)
             }
         }
     }
     
-    /** Counts as a new message */
-    private func messageSent(_ item: IMMessageItem) {
-        print("message sent \(item.guid)")
+    /** Counts as a new message – not used as messagesReceived gets these as well. */
+    private func messageSent(_ item: IMMessageItem, inChat chatIdentifier: String) {
+        let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!
+        
+        StreamingAPI.shared.dispatch(eventFor(itemsReceived: BulkChatItemRepresentation(items: [ChatItem(type: .message, item: MessageRepresentation(item, chatGUID: chat.guid))])), to: nil)
     }
     
     /** Counts as an update */
-    private func messagesUpdated(_ items: [IMItem]) {
-        print("messages updated \(items.map { $0.guid })")
+    private func messagesUpdated(_ items: [IMItem], inChat chatIdentifier: String) {
+        let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!
+        
+        items.forEach { item in
+            IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!.loadMessage(withGUID: item.guid) { message in
+                guard let parsed = self.parse(message ?? item._newChatItems(), chatGUID: chat.guid) else {
+                    return
+                }
+                
+                StreamingAPI.shared.dispatch(eventFor(itemsUpdated: BulkChatItemRepresentation(items: parsed)), to: nil)
+            }
+        }
+    }
+    
+    private func parse(_ unknown: Any?, chatGUID: String) -> [ChatItem]? {
+        if let array = unknown as? [NSObject] {
+            return parseArrayOf(chatItems: array, withGUID: chatGUID)
+        } else if let item = unknown as? NSObject, let parsed = wrapChatItem(unknownItem: item, withChatGUID: chatGUID) {
+            return [parsed]
+        } else {
+            return nil
+        }
     }
     
     /** Counts as an update */
-    private func messageUpdated(_ item: IMItem) {
-        print("message updated \(item.guid)")
+    private func messageUpdated(_ item: IMItem, inChat chatIdentifier: String) {
+        messagesUpdated([item], inChat: chatIdentifier)
     }
 }

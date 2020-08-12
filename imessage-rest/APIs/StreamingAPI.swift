@@ -19,6 +19,7 @@ struct Event<P: Content>: Content {
     enum EventType: String, Content {
         case bootstrap
         case itemsReceived
+        case itemsUpdated
         case itemsRemoved
         case participantsChanged
         case conversationRemoved
@@ -39,6 +40,10 @@ func eventFor(bootstrap: BootstrapData) -> Event<BootstrapData> {
 
 func eventFor(itemsReceived: BulkChatItemRepresentation) -> Event<BulkChatItemRepresentation> {
     return Event<BulkChatItemRepresentation>(type: .itemsReceived, data: itemsReceived)
+}
+
+func eventFor(itemsUpdated: BulkChatItemRepresentation) -> Event<BulkChatItemRepresentation> {
+    return Event<BulkChatItemRepresentation>(type: .itemsUpdated, data: itemsUpdated)
 }
 
 func eventFor(itemsRemoved: BulkMessageIDRepresentation) -> Event<BulkMessageIDRepresentation> {
@@ -122,7 +127,7 @@ class StreamingAPI {
         self.app = app
         self.compression = compression
         
-//        supervisor.register(MessageEvents.self)
+        supervisor.register(MessageEvents.self)
         supervisor.register(ERMessageEvents.self)
         supervisor.register(ChatEvents.self)
         supervisor.register(BlocklistEvents.self)

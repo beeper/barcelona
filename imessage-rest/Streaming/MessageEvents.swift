@@ -28,7 +28,6 @@ private let ChangedItemsExclusion = [
     IMAttachmentMessagePartChatItem.self,
     IMMessageAcknowledgmentChatItem.self,
     IMMessageStatusChatItem.self,
-    IMTypingChatItem.self
 ]
 
 class MessageEvents: EventDispatcher {
@@ -36,26 +35,6 @@ class MessageEvents: EventDispatcher {
         addObserver(forName: IMChatItemsDidChangeNotification) {
             self.itemsChanged($0)
         }
-        
-        addObserver(forName: IMChatMessageDidChangeNotification) {
-            self.messageSentOrReceived($0)
-        }
-    }
-    
-    /**
-     Receives typing messages, attachments, acknowledgments, delivery, read
-     */
-    private func messageSentOrReceived(_ notification: Notification) {
-        guard let chat = notification.object as? IMChat else { return }
-        
-        guard let userInfo = notification.userInfo as? [String: NSObject] else { return }
-        guard let rawItem = userInfo[messageKey] else { return }
-        
-        guard let chatItem = wrapChatItem(unknownItem: rawItem, withChatGUID: chat.guid) else {
-            return
-        }
-        
-        StreamingAPI.shared.dispatch(eventFor(itemsReceived: BulkChatItemRepresentation(items: [chatItem])), to: nil)
     }
     
     /**
