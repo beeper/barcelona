@@ -17,6 +17,8 @@ let _ = ERChatSubscriptionWatcher.shared
 controller.listener.addHandler(ERDaemonListener.self.shared)
 controller.addListenerID("com.ericrabil.imessage-rest", capabilities: UInt32(18341))
 
+ChatItem.setup()
+
 let http = ERHTTPServer()
 
 try! http.start()
