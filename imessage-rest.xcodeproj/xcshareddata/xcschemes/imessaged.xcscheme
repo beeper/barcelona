@@ -10,7 +10,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Run Script"
-               scriptText = "# Type a script or drag a script file from your workspace to insert its path.&#10;codesign -d --entitlements &quot;${PROJECT_DIR}/imessaged/imessaged.entitlements&quot; &quot;${TARGET_BUILD_DIR}/imessaged.xpc&quot; -f -s &quot;Apple Development&quot;&#10;">
+               scriptText = "# Type a script or drag a script file from your workspace to insert its path.&#10;codesign -d --entitlements &quot;${PROJECT_DIR}/imessage-rest/imessage-rest.entitlements&quot; &quot;${TARGET_BUILD_DIR}/imessage-rest.xpc&quot; -f -s &quot;Apple Development&quot;&#10;">
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"
@@ -60,8 +60,7 @@
       allowLocationSimulation = "YES">
       <PathRunnable
          runnableDebuggingMode = "0"
-         BundleIdentifier = "com.ericrabil.imessaged"
-         FilePath = "/Users/ericrabil/Library/Developer/Xcode/DerivedData/imessaged-fgoiczyecmvwfxbilnebeetgcqfp/Build/Products/Debug/imessaged.xpc">
+         FilePath = "/Users/ericrabil/Library/Developer/Xcode/DerivedData/imessage-rest-alxlpwnfncvwwcfexvvonivavawo/Build/Products/Debug/imessage-rest.xpc">
       </PathRunnable>
    </LaunchAction>
    <ProfileAction
