@@ -42,6 +42,7 @@ class ERHTTPServer {
         bindAttachmentsAPI(app)
         bindSearchAPI(app)
         bindContactsAPI(app)
+        bindDebugAPI(app)
     }
     
     func start() throws {

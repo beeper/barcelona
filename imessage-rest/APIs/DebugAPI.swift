@@ -1,0 +1,29 @@
+//
+//  DebugAPI.swift
+//  imessage-rest
+//
+//  Created by Eric Rabil on 8/12/20.
+//  Copyright © 2020 Eric Rabil. All rights reserved.
+//
+
+import Foundation
+import Vapor
+
+private struct HealthStruct: Content {
+    var chatsLoaded: Int;
+    var messagesLoaded: Int;
+    var contactsLoaded: Int;
+    var socketsConnected: Int;
+}
+
+/// Debug API
+public func bindDebugAPI(_ app: Application) {
+    let debug = app.grouped("debug")
+    
+    debug.get("health") { req -> HealthStruct in
+        HealthStruct(chatsLoaded: IMChatRegistry.shared.allExistingChats.count, messagesLoaded: IMChatRegistry.shared.allExistingChats.reduce(into: 0) { (result, chat) in
+            result += chat._items.count
+            result += chat.chatItems.count
+        }, contactsLoaded: IMContactStore.shared.allContacts.count, socketsConnected: StreamingAPI.shared.sockets.count)
+    }
+}

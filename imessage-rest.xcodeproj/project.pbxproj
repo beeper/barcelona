@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		1D3F36F324E4461D005E95B8 /* ERMessageEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3F36F224E4461D005E95B8 /* ERMessageEvents.swift */; };
+		1D3F36F924E4A8DB005E95B8 /* DebugAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3F36F824E4A8DB005E95B8 /* DebugAPI.swift */; };
+		1D3F36FE24E4B47A005E95B8 /* IMChatRegistry+NerfedIntents.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3F36FD24E4B47A005E95B8 /* IMChatRegistry+NerfedIntents.m */; };
 		1D5AEDDC24E3744900303692 /* CommunicationsFilter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD224E3744900303692 /* CommunicationsFilter.framework */; };
 		1D5AEDDE24E3744900303692 /* SocialUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD324E3744900303692 /* SocialUI.framework */; };
 		1D5AEDE024E3744900303692 /* IMCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD424E3744900303692 /* IMCore.framework */; };
@@ -123,6 +125,8 @@
 
 /* Begin PBXFileReference section */
 		1D3F36F224E4461D005E95B8 /* ERMessageEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERMessageEvents.swift; sourceTree = "<group>"; };
+		1D3F36F824E4A8DB005E95B8 /* DebugAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugAPI.swift; sourceTree = "<group>"; };
+		1D3F36FD24E4B47A005E95B8 /* IMChatRegistry+NerfedIntents.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "IMChatRegistry+NerfedIntents.m"; sourceTree = "<group>"; };
 		1D5AEDAE24E3725200303692 /* imessage-rest.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = "imessage-rest.xpc"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D5AEDB724E3725200303692 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1D5AEDBD24E3727C00303692 /* imessage-rest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "imessage-rest.entitlements"; sourceTree = "<group>"; };
@@ -335,6 +339,7 @@
 				1D5AEE5624E37D9E00303692 /* Chat+MessagesAPI.swift */,
 				1D5AEE5724E37D9E00303692 /* SearchAPI.swift */,
 				1D5AEE5824E37D9E00303692 /* ChatAPI.swift */,
+				1D3F36F824E4A8DB005E95B8 /* DebugAPI.swift */,
 			);
 			path = APIs;
 			sourceTree = "<group>";
@@ -363,6 +368,7 @@
 				1D5AEE6C24E37D9E00303692 /* IMHandle+ResizableImage.swift */,
 				1D5AEE6D24E37D9E00303692 /* WebSocket+Hashable.swift */,
 				1D5AEE6E24E37D9E00303692 /* NSImage+resize.swift */,
+				1D3F36FD24E4B47A005E95B8 /* IMChatRegistry+NerfedIntents.m */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -564,6 +570,7 @@
 				1D5AEEC824E37D9F00303692 /* MessageEvents.swift in Sources */,
 				1D5AEEAE24E37D9F00303692 /* RawChat.swift in Sources */,
 				1D5AEE9624E37D9F00303692 /* SearchAPI.swift in Sources */,
+				1D3F36F924E4A8DB005E95B8 /* DebugAPI.swift in Sources */,
 				1D5AEE9424E37D9F00303692 /* StreamingAPI.swift in Sources */,
 				1D5AEEC224E37D9F00303692 /* Handle.swift in Sources */,
 				1DC66B0624E4875700CB0C5D /* Contact.swift in Sources */,
@@ -599,6 +606,7 @@
 				1D5AEE9F24E37D9F00303692 /* CNContact+ResizableImage.swift in Sources */,
 				1D5AEEA524E37D9F00303692 /* String+Regex.swift in Sources */,
 				1D5AEE9A24E37D9F00303692 /* IMChatRegistry+SortedRepresentations.swift in Sources */,
+				1D3F36FE24E4B47A005E95B8 /* IMChatRegistry+NerfedIntents.m in Sources */,
 				1D5AEEB624E37D9F00303692 /* Message.swift in Sources */,
 				1D5AEEA324E37D9F00303692 /* Collection+Safe.swift in Sources */,
 				1D5AEE9024E37D9F00303692 /* AttachmentsAPI.swift in Sources */,

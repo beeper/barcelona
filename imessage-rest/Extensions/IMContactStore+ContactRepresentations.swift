@@ -14,6 +14,10 @@ extension IMContactStore {
         IMContactStore.sharedInstance()!
     }
     
+    var allContacts: [CNContact] {
+        contactStore.contacts()
+    }
+    
     /**
      Helper function for searching the contact store
      */
@@ -21,7 +25,7 @@ extension IMContactStore {
         var registry: [String: ContactRepresentation] = [:]
         var strangers: [HandleRepresentation] = []
 
-        let store = IMContactStore.sharedInstance()!.contactStore!
+        let store = contactStore!
         
         let includeStrangers = search == nil && limit == nil
         
