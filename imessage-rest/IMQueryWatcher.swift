@@ -9,9 +9,16 @@
 import Foundation
 
 private let queryKey = "__kIMChatQueryIDKey";
+private let IMChatLoadRequestDidCompleteNotification = NSNotification.Name(rawValue: "__kIMChatLoadRequestDidCompleteNotification")
 
 class IMQueryWatcher {
     static let sharedInstance = IMQueryWatcher();
+    
+    private init() {
+        NotificationCenter.default.addObserver(forName: IMChatLoadRequestDidCompleteNotification, object: nil, queue: nil) {
+            self.queryCompleted($0)
+        }
+    }
     
     private var queryObservers: [String: NSObjectProtocol] = [:];
     
@@ -38,7 +45,7 @@ class IMQueryWatcher {
         self.registerObserver(queryID: queryID, observer: observer)
     }
     
-    @objc func queryCompleted(_ notification: NSNotification) {
+    func queryCompleted(_ notification: Notification) {
         guard let query = notification.userInfo?[queryKey] as? String else { return }
         
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "IMCQ-COMPLETE-\(query)"), object: nil)
