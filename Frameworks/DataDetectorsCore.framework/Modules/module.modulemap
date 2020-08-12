@@ -1,0 +1,5 @@
+framework module DataDetectorsCore [extern_c] {
+    umbrella header "DataDetectorsCore.h"
+    export *
+    module * { export * }
+}

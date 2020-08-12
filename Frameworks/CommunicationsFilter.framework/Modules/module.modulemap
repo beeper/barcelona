@@ -1,0 +1,5 @@
+framework module CommunicationsFilter [extern_c] {
+    umbrella header "CommunicationsFilter.h"
+    export *
+    module * { export * }
+}

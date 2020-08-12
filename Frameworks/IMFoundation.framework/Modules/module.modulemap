@@ -1,0 +1,5 @@
+framework module IMFoundation [extern_c] {
+    umbrella header "IMFoundation.h"
+    export *
+    module * { export * }
+}

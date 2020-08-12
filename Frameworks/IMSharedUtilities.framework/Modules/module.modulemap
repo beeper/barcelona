@@ -1,0 +1,5 @@
+framework module IMSharedUtilities [extern_c] {
+  umbrella header "IMSharedUtilities.h"
+  export *
+  module * { export * }
+}

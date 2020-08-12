@@ -1,0 +1,5 @@
+framework module SocialUI [extern_c] {
+  umbrella header "SocialUI.h"
+  export *
+  module * { export * }
+}
