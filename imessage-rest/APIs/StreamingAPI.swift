@@ -122,7 +122,8 @@ class StreamingAPI {
         self.app = app
         self.compression = compression
         
-        supervisor.register(MessageEvents.self)
+//        supervisor.register(MessageEvents.self)
+        supervisor.register(ERMessageEvents.self)
         supervisor.register(ChatEvents.self)
         supervisor.register(BlocklistEvents.self)
         supervisor.register(ContactsEvents.self)

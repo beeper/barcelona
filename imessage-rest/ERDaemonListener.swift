@@ -312,7 +312,7 @@ class ERDaemonListener: IMDaemonListenerProtocol {
     }
     
     @objc func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, messagesUpdated arg5: [Any]!) {
-        
+        NotificationCenter.default.post(name: ERChatMessagesUpdatedNotification, object: arg5)
     }
     
     @objc func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, notifySentMessage arg5: IMMessageItem!, sendTime arg6: NSNumber!) {
@@ -320,19 +320,19 @@ class ERDaemonListener: IMDaemonListenerProtocol {
     }
     
     @objc func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, messageUpdated arg5: IMItem!) {
-        
+        NotificationCenter.default.post(name: ERChatMessageUpdatedNotification, object: arg5)
     }
     
     @objc func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, groupID arg5: String!, chatPersonCentricID arg6: String!, messagesReceived arg7: [Any]!, messagesComingFromStorage arg8: Bool) {
-        
+        NotificationCenter.default.post(name: ERChatMessagesReceivedNotification, object: arg7)
     }
     
     @objc func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, groupID arg5: String!, chatPersonCentricID arg6: String!, messageReceived arg7: IMItem!) {
-        
+        NotificationCenter.default.post(name: ERChatMessageReceivedNotification, object: arg7)
     }
     
     @objc func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, groupID arg5: String!, chatPersonCentricID arg6: String!, messageSent arg7: IMMessageItem!) {
-        
+        NotificationCenter.default.post(name: ERChatMessageSentNotification, object: arg7)
     }
     
     @objc func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, updateProperties arg5: [AnyHashable : Any]!) {

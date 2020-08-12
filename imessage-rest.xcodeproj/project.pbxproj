@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1D3F36F324E4461D005E95B8 /* ERMessageEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3F36F224E4461D005E95B8 /* ERMessageEvents.swift */; };
 		1D5AEDDC24E3744900303692 /* CommunicationsFilter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD224E3744900303692 /* CommunicationsFilter.framework */; };
 		1D5AEDDE24E3744900303692 /* SocialUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD324E3744900303692 /* SocialUI.framework */; };
 		1D5AEDE024E3744900303692 /* IMCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD424E3744900303692 /* IMCore.framework */; };
@@ -116,6 +117,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1D3F36F224E4461D005E95B8 /* ERMessageEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERMessageEvents.swift; sourceTree = "<group>"; };
 		1D5AEDAE24E3725200303692 /* imessage-rest.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = "imessage-rest.xpc"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D5AEDB724E3725200303692 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1D5AEDBD24E3727C00303692 /* imessage-rest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "imessage-rest.entitlements"; sourceTree = "<group>"; };
@@ -400,6 +402,7 @@
 				1D5AEE8B24E37D9F00303692 /* EventDispatcher.swift */,
 				1D5AEE8C24E37D9F00303692 /* BlocklistEvents.swift */,
 				1D5AEE8D24E37D9F00303692 /* MessageEvents.swift */,
+				1D3F36F224E4461D005E95B8 /* ERMessageEvents.swift */,
 			);
 			path = Streaming;
 			sourceTree = "<group>";
@@ -555,6 +558,7 @@
 				1D5AEEC124E37D9F00303692 /* GroupActionTranscriptChatItem.swift in Sources */,
 				1D5AEEAA24E37D9F00303692 /* IMHandle+ResizableImage.swift in Sources */,
 				1D5AEE9C24E37D9F00303692 /* IMChat+Acknowledgment.swift in Sources */,
+				1D3F36F324E4461D005E95B8 /* ERMessageEvents.swift in Sources */,
 				1D5AEEA824E37D9F00303692 /* CNContactStore+AllContacts.swift in Sources */,
 				1D5AEEBA24E37D9F00303692 /* GroupTitleChangeItem.swift in Sources */,
 				1D5AEEA124E37D9F00303692 /* IMChatItem+CountFix.m in Sources */,
