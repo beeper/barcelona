@@ -116,9 +116,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1D5AEDAE24E3725200303692 /* imessaged.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = imessaged.xpc; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D5AEDAE24E3725200303692 /* imessage-rest.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = "imessage-rest.xpc"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D5AEDB724E3725200303692 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		1D5AEDBD24E3727C00303692 /* imessaged.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = imessaged.entitlements; sourceTree = "<group>"; };
+		1D5AEDBD24E3727C00303692 /* imessage-rest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "imessage-rest.entitlements"; sourceTree = "<group>"; };
 		1D5AEDBF24E373ED00303692 /* IMCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IMCore.framework; path = "../imcore-rest/Frameworks/IMCore.framework"; sourceTree = "<group>"; };
 		1D5AEDC024E373ED00303692 /* ContactsFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ContactsFoundation.framework; path = "../imcore-rest/Frameworks/ContactsFoundation.framework"; sourceTree = "<group>"; };
 		1D5AEDC124E373ED00303692 /* SocialUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SocialUI.framework; path = "../imcore-rest/Frameworks/SocialUI.framework"; sourceTree = "<group>"; };
@@ -135,7 +135,7 @@
 		1D5AEDD924E3744900303692 /* CoreSDB.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreSDB.framework; path = Frameworks/CoreSDB.framework; sourceTree = "<group>"; };
 		1D5AEDDA24E3744900303692 /* ContactsFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ContactsFoundation.framework; path = Frameworks/ContactsFoundation.framework; sourceTree = "<group>"; };
 		1D5AEDDB24E3744900303692 /* IMSharedUtilities.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IMSharedUtilities.framework; path = Frameworks/IMSharedUtilities.framework; sourceTree = "<group>"; };
-		1D5AEDF124E374EA00303692 /* imessaged-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "imessaged-Bridging-Header.h"; sourceTree = "<group>"; };
+		1D5AEDF124E374EA00303692 /* imessage-rest-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "imessage-rest-Bridging-Header.h"; sourceTree = "<group>"; };
 		1D5AEDF224E374EB00303692 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		1D5AEDF424E3752B00303692 /* MessageXPCService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageXPCService.swift; sourceTree = "<group>"; };
 		1D5AEDF624E3756900303692 /* ListenerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenerDelegate.swift; sourceTree = "<group>"; };
@@ -236,7 +236,7 @@
 		1D5AEDA524E3725200303692 = {
 			isa = PBXGroup;
 			children = (
-				1D5AEDB024E3725200303692 /* imessaged */,
+				1D5AEDB024E3725200303692 /* imessage-rest */,
 				1D5AEDAF24E3725200303692 /* Products */,
 				1D5AEDBE24E373ED00303692 /* Frameworks */,
 			);
@@ -245,16 +245,16 @@
 		1D5AEDAF24E3725200303692 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1D5AEDAE24E3725200303692 /* imessaged.xpc */,
+				1D5AEDAE24E3725200303692 /* imessage-rest.xpc */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1D5AEDB024E3725200303692 /* imessaged */ = {
+		1D5AEDB024E3725200303692 /* imessage-rest */ = {
 			isa = PBXGroup;
 			children = (
 				1D5AEE3024E375D700303692 /* OpenMessage-Mac.xcodeproj */,
-				1D5AEDBD24E3727C00303692 /* imessaged.entitlements */,
+				1D5AEDBD24E3727C00303692 /* imessage-rest.entitlements */,
 				1D5AEE4E24E37D9E00303692 /* APIs */,
 				1D5AEE6F24E37D9E00303692 /* Database */,
 				1D5AEE5924E37D9E00303692 /* Extensions */,
@@ -262,7 +262,7 @@
 				1D5AEE7524E37D9E00303692 /* Wrappers */,
 				1D5AEDB724E3725200303692 /* Info.plist */,
 				1D5AEDF224E374EB00303692 /* main.swift */,
-				1D5AEDF124E374EA00303692 /* imessaged-Bridging-Header.h */,
+				1D5AEDF124E374EA00303692 /* imessage-rest-Bridging-Header.h */,
 				1D5AEDF424E3752B00303692 /* MessageXPCService.swift */,
 				1D5AEDF624E3756900303692 /* ListenerDelegate.swift */,
 				1D5AEE3C24E3760000303692 /* MessageServiceProtocol.swift */,
@@ -274,7 +274,7 @@
 				1D5AEECD24E3817900303692 /* ERHTTPServer.swift */,
 				1D5AEECF24E3838700303692 /* ERChatSubscriptionWatcher.swift */,
 			);
-			path = imessaged;
+			path = "imessage-rest";
 			sourceTree = "<group>";
 		};
 		1D5AEDBE24E373ED00303692 /* Frameworks */ = {
@@ -407,9 +407,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1D5AEDAD24E3725200303692 /* imessaged */ = {
+		1D5AEDAD24E3725200303692 /* imessage-rest */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1D5AEDBA24E3725200303692 /* Build configuration list for PBXNativeTarget "imessaged" */;
+			buildConfigurationList = 1D5AEDBA24E3725200303692 /* Build configuration list for PBXNativeTarget "imessage-rest" */;
 			buildPhases = (
 				1D5AEDAA24E3725200303692 /* Sources */,
 				1D5AEDAB24E3725200303692 /* Frameworks */,
@@ -419,14 +419,14 @@
 			);
 			dependencies = (
 			);
-			name = imessaged;
+			name = "imessage-rest";
 			packageProductDependencies = (
 				1D5AEE4624E37CDF00303692 /* GRDB */,
 				1D5AEE4924E37D1700303692 /* Swime */,
 				1D5AEE4C24E37D6600303692 /* Vapor */,
 			);
 			productName = imessaged;
-			productReference = 1D5AEDAE24E3725200303692 /* imessaged.xpc */;
+			productReference = 1D5AEDAE24E3725200303692 /* imessage-rest.xpc */;
 			productType = "com.apple.product-type.xpc-service";
 		};
 /* End PBXNativeTarget section */
@@ -444,7 +444,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 1D5AEDA924E3725200303692 /* Build configuration list for PBXProject "imessaged" */;
+			buildConfigurationList = 1D5AEDA924E3725200303692 /* Build configuration list for PBXProject "imessage-rest" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -468,7 +468,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				1D5AEDAD24E3725200303692 /* imessaged */,
+				1D5AEDAD24E3725200303692 /* imessage-rest */,
 			);
 		};
 /* End PBXProject section */
@@ -710,17 +710,17 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
 				);
-				INFOPLIST_FILE = imessaged/Info.plist;
+				INFOPLIST_FILE = "imessage-rest/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.imessaged;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ericrabil.imessage-rest";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "imessaged/imessaged-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "imessage-rest/imessage-rest-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
@@ -740,17 +740,17 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
 				);
-				INFOPLIST_FILE = imessaged/Info.plist;
+				INFOPLIST_FILE = "imessage-rest/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.imessaged;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ericrabil.imessage-rest";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "imessaged/imessaged-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "imessage-rest/imessage-rest-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -758,7 +758,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1D5AEDA924E3725200303692 /* Build configuration list for PBXProject "imessaged" */ = {
+		1D5AEDA924E3725200303692 /* Build configuration list for PBXProject "imessage-rest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1D5AEDB824E3725200303692 /* Debug */,
@@ -767,7 +767,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1D5AEDBA24E3725200303692 /* Build configuration list for PBXNativeTarget "imessaged" */ = {
+		1D5AEDBA24E3725200303692 /* Build configuration list for PBXNativeTarget "imessage-rest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1D5AEDBB24E3725200303692 /* Debug */,

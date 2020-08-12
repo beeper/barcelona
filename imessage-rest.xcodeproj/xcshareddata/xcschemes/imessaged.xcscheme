@@ -15,9 +15,9 @@
                   <BuildableReference
                      BuildableIdentifier = "primary"
                      BlueprintIdentifier = "1D5AEDAD24E3725200303692"
-                     BuildableName = "imessaged.xpc"
-                     BlueprintName = "imessaged"
-                     ReferencedContainer = "container:imessaged.xcodeproj">
+                     BuildableName = "imessage-rest.xpc"
+                     BlueprintName = "imessage-rest"
+                     ReferencedContainer = "container:imessage-rest.xcodeproj">
                   </BuildableReference>
                </EnvironmentBuildable>
             </ActionContent>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "1D5AEDAD24E3725200303692"
-               BuildableName = "imessaged.xpc"
-               BlueprintName = "imessaged"
-               ReferencedContainer = "container:imessaged.xcodeproj">
+               BuildableName = "imessage-rest.xpc"
+               BlueprintName = "imessage-rest"
+               ReferencedContainer = "container:imessage-rest.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -74,9 +74,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1D5AEDAD24E3725200303692"
-            BuildableName = "imessaged.xpc"
-            BlueprintName = "imessaged"
-            ReferencedContainer = "container:imessaged.xcodeproj">
+            BuildableName = "imessage-rest.xpc"
+            BlueprintName = "imessage-rest"
+            ReferencedContainer = "container:imessage-rest.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:imessaged.xcodeproj">
+      location = "self:/Users/ericrabil/eric.git/imessaged/imessage-rest.xcodeproj">
    </FileRef>
 </Workspace>

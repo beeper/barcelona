@@ -1,6 +1,6 @@
 //
 //  IMEventReceiver.swift
-//  imessaged
+//  imessage-rest
 //
 //  Created by Eric Rabil on 7/23/20.
 //  Copyright © 2020 Eric Rabil. All rights reserved.
