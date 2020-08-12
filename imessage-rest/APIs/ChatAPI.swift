@@ -17,6 +17,7 @@ private let log_chatAPI = OSLog(subsystem: Bundle.main.bundleIdentifier!, catego
 private let log_participantAPI = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ParticipantAPI")
 private let log_messageAPI = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "MessageAPI")
 
+// MARK: - Chats
 public func bindChatAPI(_ app: Application) {
     let chats = app.grouped("chats")
     
@@ -69,6 +70,9 @@ public func bindChatAPI(_ app: Application) {
         return req.eventLoop.makeSucceededFuture(ChatRepresentation(chat))
     }
     
+    /**
+     Re-joins a chat. This doesn't always work, nor well.
+     */
     chat.get("join") { req -> EventLoopFuture<ChatRepresentation> in
         guard let guid = req.parameters.get("guid") else { throw Abort(.badRequest) }
         guard let chat = IMChatRegistry.sharedInstance()?._chatInstance(forGUID: guid) else {
@@ -130,6 +134,7 @@ public func bindChatAPI(_ app: Application) {
     bindParticipantsAPI(chat)
 }
 
+// MARK: - Participants
 private func bindParticipantsAPI(_ chat: RoutesBuilder) {
     let participants = chat.grouped("participants")
     
@@ -146,6 +151,11 @@ private func bindParticipantsAPI(_ chat: RoutesBuilder) {
         return req.eventLoop.makeSucceededFuture(BulkHandleRepresentation(chat.participants))
     }
     
+    // MARK: - Participant Management
+    
+    /**
+     Manage the state of a set of participants
+     */
     func toggleParticipants(_ add: Bool, req: Request) throws -> EventLoopFuture<BulkHandleIDRepresentation> {
         guard let guid = req.parameters.get("guid") else { throw Abort(.badRequest) }
         guard let chat = IMChatRegistry.sharedInstance()!._chatInstance(forGUID: guid) else {

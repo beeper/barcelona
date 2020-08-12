@@ -9,6 +9,7 @@
 import Foundation
 import Vapor
 
+/** TODO: CORS Config from a GUI */
 private let corsConfiguration = CORSMiddleware.Configuration(
     allowedOrigin: .originBased,
     allowedMethods: [.GET, .POST, .PUT, .OPTIONS, .DELETE, .PATCH],
@@ -16,6 +17,9 @@ private let corsConfiguration = CORSMiddleware.Configuration(
     allowCredentials: true
 )
 
+/**
+ Managers Vapor
+ */
 class ERHTTPServer {
     static let shared = ERHTTPServer()
     
@@ -29,8 +33,10 @@ class ERHTTPServer {
         app.middleware.use(CORSMiddleware(configuration: corsConfiguration))
         app.middleware.use(ErrorMiddleware.default(environment: app.environment))
         
+        /** Socket API */
         streamingAPI = StreamingAPI(app)
         
+        /** REST APIs */
         bindChatAPI(app)
         bindHandlesAPI(app)
         bindAttachmentsAPI(app)

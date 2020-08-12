@@ -9,6 +9,9 @@
 import Foundation
 import GRDB
 
+/**
+ Represents a chat record in the chat.db file
+ */
 class RawChat: Record {
     required init(row: Row) {
         ROWID = row[Columns.ROWID]

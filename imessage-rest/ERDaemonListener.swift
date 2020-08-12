@@ -9,6 +9,9 @@
 import Foundation
 import IMCore
 
+/**
+ Interfaces with imagent, methods called here are called by the daemon.
+ */
 class ERDaemonListener: IMDaemonListenerProtocol {
     public static let shared: ERDaemonListener = ERDaemonListener()
     public static var sharedInstance: ERDaemonListener {

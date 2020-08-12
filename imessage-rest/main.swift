@@ -14,9 +14,11 @@ import Vapor
 let controller = IMDaemonController.sharedInstance()!
 let _ = ERChatSubscriptionWatcher.shared
 
+/** Registers with imagent */
 controller.listener.addHandler(ERDaemonListener.self.shared)
 controller.addListenerID("com.ericrabil.imessage-rest", capabilities: UInt32(18341))
 
+/** Sets up ChatItem serialization table */
 ChatItem.setup()
 
 NSLog("Message XPC Service has started")

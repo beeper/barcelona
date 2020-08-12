@@ -9,6 +9,9 @@
 import Foundation
 import GRDB
 
+/**
+ Represents a message record in the chat.db file
+ */
 class RawMessage: Record {
     override class var databaseTableName: String { "message" }
     

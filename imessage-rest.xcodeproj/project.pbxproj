@@ -91,6 +91,10 @@
 		1D5AEECE24E3817900303692 /* ERHTTPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEECD24E3817900303692 /* ERHTTPServer.swift */; };
 		1D5AEED024E3838700303692 /* ERChatSubscriptionWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEECF24E3838700303692 /* ERChatSubscriptionWatcher.swift */; };
 		1DC66B0124E4756400CB0C5D /* TypingChatItemRepresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC66B0024E4756400CB0C5D /* TypingChatItemRepresentation.swift */; };
+		1DC66B0624E4875700CB0C5D /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC66B0524E4875700CB0C5D /* Contact.swift */; };
+		1DC66B0824E487AB00CB0C5D /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC66B0724E487AB00CB0C5D /* Event.swift */; };
+		1DC66B0A24E488FF00CB0C5D /* DBReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC66B0924E488FF00CB0C5D /* DBReader.swift */; };
+		1DC66B0C24E4897300CB0C5D /* Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC66B0B24E4897300CB0C5D /* Search.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -211,6 +215,10 @@
 		1D5AEECD24E3817900303692 /* ERHTTPServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERHTTPServer.swift; sourceTree = "<group>"; };
 		1D5AEECF24E3838700303692 /* ERChatSubscriptionWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERChatSubscriptionWatcher.swift; sourceTree = "<group>"; };
 		1DC66B0024E4756400CB0C5D /* TypingChatItemRepresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypingChatItemRepresentation.swift; sourceTree = "<group>"; };
+		1DC66B0524E4875700CB0C5D /* Contact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
+		1DC66B0724E487AB00CB0C5D /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
+		1DC66B0924E488FF00CB0C5D /* DBReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DBReader.swift; sourceTree = "<group>"; };
+		1DC66B0B24E4897300CB0C5D /* Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Search.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -367,6 +375,8 @@
 				1D5AEE7224E37D9E00303692 /* RawMessage.swift */,
 				1D5AEE7324E37D9E00303692 /* ChatMessageJoin.swift */,
 				1D5AEE7424E37D9E00303692 /* RawHandle.swift */,
+				1DC66B0924E488FF00CB0C5D /* DBReader.swift */,
+				1DC66B0B24E4897300CB0C5D /* Search.swift */,
 			);
 			path = Database;
 			sourceTree = "<group>";
@@ -392,6 +402,7 @@
 				1D5AEE8524E37D9F00303692 /* GroupActionTranscriptChatItem.swift */,
 				1D5AEE8624E37D9F00303692 /* Handle.swift */,
 				1DC66B0024E4756400CB0C5D /* TypingChatItemRepresentation.swift */,
+				1DC66B0524E4875700CB0C5D /* Contact.swift */,
 			);
 			path = Wrappers;
 			sourceTree = "<group>";
@@ -406,6 +417,7 @@
 				1D5AEE8C24E37D9F00303692 /* BlocklistEvents.swift */,
 				1D5AEE8D24E37D9F00303692 /* MessageEvents.swift */,
 				1D3F36F224E4461D005E95B8 /* ERMessageEvents.swift */,
+				1DC66B0724E487AB00CB0C5D /* Event.swift */,
 			);
 			path = Streaming;
 			sourceTree = "<group>";
@@ -554,6 +566,7 @@
 				1D5AEE9624E37D9F00303692 /* SearchAPI.swift in Sources */,
 				1D5AEE9424E37D9F00303692 /* StreamingAPI.swift in Sources */,
 				1D5AEEC224E37D9F00303692 /* Handle.swift in Sources */,
+				1DC66B0624E4875700CB0C5D /* Contact.swift in Sources */,
 				1DC66B0124E4756400CB0C5D /* TypingChatItemRepresentation.swift in Sources */,
 				1D5AEEC524E37D9F00303692 /* ChatEvents.swift in Sources */,
 				1D5AEEC024E37D9F00303692 /* PluginChatItem.swift in Sources */,
@@ -561,6 +574,7 @@
 				1D5AEEBC24E37D9F00303692 /* Registry.swift in Sources */,
 				1D5AEEC124E37D9F00303692 /* GroupActionTranscriptChatItem.swift in Sources */,
 				1D5AEEAA24E37D9F00303692 /* IMHandle+ResizableImage.swift in Sources */,
+				1DC66B0A24E488FF00CB0C5D /* DBReader.swift in Sources */,
 				1D5AEE9C24E37D9F00303692 /* IMChat+Acknowledgment.swift in Sources */,
 				1D3F36F324E4461D005E95B8 /* ERMessageEvents.swift in Sources */,
 				1D5AEEA824E37D9F00303692 /* CNContactStore+AllContacts.swift in Sources */,
@@ -588,6 +602,8 @@
 				1D5AEEB624E37D9F00303692 /* Message.swift in Sources */,
 				1D5AEEA324E37D9F00303692 /* Collection+Safe.swift in Sources */,
 				1D5AEE9024E37D9F00303692 /* AttachmentsAPI.swift in Sources */,
+				1DC66B0C24E4897300CB0C5D /* Search.swift in Sources */,
+				1DC66B0824E487AB00CB0C5D /* Event.swift in Sources */,
 				1D5AEEB824E37D9F00303692 /* DateTranscriptChatItem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -18,6 +18,9 @@ private let IMChatJoinStateDidChangeNotification = Notification.Name(rawValue: "
 private let IMChatRegistryDidUnregisterChatNotification = Notification.Name(rawValue: "__kIMChatRegistryDidUnregisterChatNotification")
 private let IMChatRegistryDidRegisterChatNotification = Notification.Name(rawValue: "__kIMChatRegistryDidRegisterChatNotification")
 
+/**
+ Events related to IMChat
+ */
 class ChatEvents: EventDispatcher {
     override func wake() {
         addObserver(forName: IMChatParticipantsDidChangeNotification) {
@@ -41,6 +44,7 @@ class ChatEvents: EventDispatcher {
         }
     }
     
+    // MARK: - IMChat created
     private func chatWasCreated(_ notification: Notification) {
         guard let chat = notification.object as? IMChat else {
             os_log("⁉️ got chat created notification but didn't receive IMChat in notification object", type: .error, log_chatEvents)
@@ -50,6 +54,7 @@ class ChatEvents: EventDispatcher {
         StreamingAPI.shared.dispatch(eventFor(conversationCreated: chat.representation), to: nil)
     }
     
+    // MARK: - IMChat deleted
     private func chatWasRemoved(_ notification: Notification) {
         guard let chatID = notification.object as? String else {
             os_log("⁉️ got chat removed notification but didn't receive NSString in notification object", type: .error, log_chatEvents)
@@ -59,6 +64,7 @@ class ChatEvents: EventDispatcher {
         StreamingAPI.shared.dispatch(eventFor(conversationRemoved: ChatIDRepresentation(chat: chatID)), to: nil)
     }
     
+    // MARK: - IMChat Participants changed
     private func participantsChanged(_ notification: Notification) {
         guard let chat = notification.object as? IMChat else {
             os_log("⁉️ got participants changed notification but didn't receive IMChat in notification object", type: .error, log_chatEvents)
@@ -68,6 +74,7 @@ class ChatEvents: EventDispatcher {
         StreamingAPI.shared.dispatch(eventFor(participantsChanged: chat.participantHandleIDs(), in: chat.guid), to: nil)
     }
     
+    // MARK: - IMChat Displayname changed
     private func chatDisplayNameChanged(_ notification: Notification) {
         guard let chat = notification.object as? IMChat else {
             os_log("⁉️ got chat display name changed notification but didn't receive IMChat in notification object", type: .error, log_chatEvents)
@@ -77,6 +84,7 @@ class ChatEvents: EventDispatcher {
         StreamingAPI.shared.dispatch(eventFor(conversationDisplayNameChanged: chat.representation), to: nil)
     }
     
+    // MARK: - IMChat join state changed
     private func chatJoinStateChanged(_ notification: Notification) {
         guard let chat = notification.object as? IMChat else {
             os_log("⁉️ got chat join state changed notification but didn't receive IMChat in notification object", type: .error, log_chatEvents)

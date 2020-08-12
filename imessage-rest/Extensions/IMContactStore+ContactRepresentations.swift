@@ -14,6 +14,9 @@ extension IMContactStore {
         IMContactStore.sharedInstance()!
     }
     
+    /**
+     Helper function for searching the contact store
+     */
     func representations(matching search: String? = nil, limit: Int? = nil) -> BulkContactRepresentation {
         var registry: [String: ContactRepresentation] = [:]
         var strangers: [HandleRepresentation] = []
@@ -22,12 +25,14 @@ extension IMContactStore {
         
         let includeStrangers = search == nil && limit == nil
         
+        // MARK: - Contact parsing
         store.contacts(matching: search, limit: limit).forEach { contact in
             registry[contact.identifier] = ContactRepresentation(contact)
         }
         
         let registrar = IMHandleRegistrar.sharedInstance()!
         
+        // MARK: - Map handles to contacts
         registrar.allIMHandles()!.forEach { handle in
             let representation = HandleRepresentation(handle)
             

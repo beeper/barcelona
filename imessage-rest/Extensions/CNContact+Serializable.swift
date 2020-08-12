@@ -9,6 +9,9 @@
 import Contacts
 
 extension CNContact {
+    /**
+     Serialize the CNContact to VCard format
+     */
     func serialized() -> Data? {
         do {
             return try CNContactVCardSerialization.data(with: [self])
@@ -17,6 +20,9 @@ extension CNContact {
         }
     }
     
+    /**
+     String representation of the VCard data
+     */
     func serializedString() -> String? {
         guard let data = serialized() else { return nil }
         return String(data: data, encoding: .utf8);

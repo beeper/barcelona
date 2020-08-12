@@ -36,14 +36,6 @@ class ERMessageEvents: EventDispatcher {
             self.messagesReceived(items, inChat: chat)
         }
         
-//        addObserver(forName: ERChatMessageSentNotification) {
-//            guard let item = $0.object as? IMMessageItem, let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
-//                return
-//            }
-//
-//            self.messageSent(item, inChat: chat)
-//        }
-        
         addObserver(forName: ERChatMessagesUpdatedNotification) {
             guard let items = $0.object as? [IMItem], let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
                 return
@@ -79,13 +71,6 @@ class ERMessageEvents: EventDispatcher {
                 StreamingAPI.shared.dispatch(eventFor(itemsReceived: BulkChatItemRepresentation(items: parsed)), to: nil)
             }
         }
-    }
-    
-    /** Counts as a new message – not used as messagesReceived gets these as well. */
-    private func messageSent(_ item: IMMessageItem, inChat chatIdentifier: String) {
-        let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!
-        
-        StreamingAPI.shared.dispatch(eventFor(itemsReceived: BulkChatItemRepresentation(items: [ChatItem(type: .message, item: MessageRepresentation(item, chatGUID: chat.guid))])), to: nil)
     }
     
     /** Counts as an update */

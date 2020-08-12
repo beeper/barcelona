@@ -23,17 +23,25 @@ let LoadBlockList = {
     BulkHandleIDRepresentation(handles: ERSharedBlockList().copyAllItems()!.compactMap { $0.unformattedID })
 }
 
+/** Manages handles */
 public func bindHandlesAPI(_ app: Application) {
     let handles = app.grouped("handles")
     
+    // MARK: - Blocklist
+    
+    /** Manages the block list */
     let blocked = handles.grouped("blocked")
     
+    /** Get all blocked users */
     blocked.get { req -> EventLoopFuture<BulkHandleIDRepresentation> in
         return req.eventLoop.makeSucceededFuture(LoadBlockList())
     }
     
     let specific = blocked.grouped(":handle")
     
+    /**
+     Block a set of users
+     */
     specific.put { req -> EventLoopFuture<BulkHandleIDRepresentation> in
         guard let handleID = req.parameters.get("handle") else {
             throw Abort(.badRequest)

@@ -13,30 +13,7 @@ import DataDetectorsCore
 import Vapor
 import CoreFoundation
 
-let IMAttachmentString = String(data: Data(base64Encoded: "77+8")!, encoding: .utf8)!
-
-// 1048581
-
-enum FullFlagsFromMe: UInt64 {
-    case audioMessage = 19968005
-    case digitalTouch = 17862661
-    /**
-     Plugin message
-     */
-    case textOrPluginOrStickerOrImage = 1085445
-    case attachments = 1093637
-    case richLink = 1150981
-}
-
-/**
- flag |= MessageModifier
- */
-enum MessageModifiers: UInt64 {
-    case expirable = 0x1000005
-}
-
 extension Sequence where Element: NSAttributedString {
-
     func join(withSeparator separator: NSAttributedString) -> NSAttributedString {
         let finalString = NSMutableAttributedString()
         for (index, string) in enumerated() {
@@ -47,26 +24,6 @@ extension Sequence where Element: NSAttributedString {
         }
         return finalString
     }
-}
-
-/**
- flag <<= MessageFlags
- */
-enum MessageFlags: UInt64 {
-    case emote = 0x1
-    case fromMe = 0x2
-    case typingData = 0x3
-    case delayed = 0x5
-    case autoReply = 0x6
-    case alert = 0x9
-    case addressedToMe = 0xb
-    case delivered = 0xc
-    case read = 0xd
-    case systemMessage = 0xe
-    case audioMessage = 0x15
-    case externalAudio = 0x2000000
-    case isPlayed = 0x16
-    case isLocating = 0x17
 }
 
 enum MessagePartType: String, Codable {
@@ -110,7 +67,7 @@ struct DeleteMessageRequest: Content {
     var messages: [DeleteMessage]
 }
 
-func flagsForCreation(_ creation: CreateMessage) -> FullFlagsFromMe {
+private func flagsForCreation(_ creation: CreateMessage) -> FullFlagsFromMe {
     if let _ = creation.ballonBundleID { return .richLink }
     if let audio = creation.isAudioMessage { if audio { return .audioMessage } }
     if creation.parts.contains(where: { $0.type == .attachment }) { return .attachments }
@@ -119,6 +76,8 @@ func flagsForCreation(_ creation: CreateMessage) -> FullFlagsFromMe {
 
 func bindMessagesAPI(_ chat: RoutesBuilder) {
     let messages = chat.grouped("messages")
+    
+    // MARK: - Bulk
     
     /**
      Query messages in a chat
@@ -146,10 +105,9 @@ func bindMessagesAPI(_ chat: RoutesBuilder) {
         guard let chat = IMChatRegistry.sharedInstance()?._chatInstance(forGUID: guid) else { throw Abort(.notFound) }
         
         let promise = req.eventLoop.makePromise(of: BulkMessageRepresentation.self)
+        var fileTransferGUIDs: [String] = []
         
-        let factory = MessagePartFactory(eventLoop: req.eventLoop)
-        
-        factory.createAttributedStringFrom(parts: creation.parts).whenSuccess { text in
+        ERAttributedString(from: creation.parts, fileTransferGUIDs: &fileTransferGUIDs, on: req.eventLoop).whenSuccess { text in
             if text.length == 0 {
                 promise.fail(Abort(.badRequest))
                 return
@@ -162,10 +120,10 @@ func bindMessagesAPI(_ chat: RoutesBuilder) {
             }
             
             /** Creates a base message using the computed attributed string */
-            let message = IMMessage.init(sender: chat.lastSentMessage?.sender ?? Registry.sharedInstance.iMessageAccount()!.arrayOfAllIMHandles[0], time: Date(), text: text, messageSubject: subject, fileTransferGUIDs: factory.fileTransferGUIDs, flags: flagsForCreation(creation).rawValue, error: nil, guid: NSString.stringGUID(), subject: nil, balloonBundleID: nil, payloadData: nil, expressiveSendStyleID: nil)!
+            let message = IMMessage.init(sender: chat.lastSentMessage?.sender ?? Registry.sharedInstance.iMessageAccount()!.arrayOfAllIMHandles[0], time: Date(), text: text, messageSubject: subject, fileTransferGUIDs: fileTransferGUIDs, flags: flagsForCreation(creation).rawValue, error: nil, guid: NSString.stringGUID(), subject: nil, balloonBundleID: nil, payloadData: nil, expressiveSendStyleID: nil)!
             
             /** Split the base message into individual messages if it contains rich link(s) */
-            let messages = RichLinkExtractor(message: message, eventLoop: req.eventLoop).messagesBySeparatingRichLinks
+            let messages = ERExtractRichLinks(for: message)
             
             messages.forEach { message in
                 chat._sendMessage(message, adjustingSender: true, shouldQueue: true)
@@ -232,6 +190,8 @@ func bindMessagesAPI(_ chat: RoutesBuilder) {
         return promise.futureResult
     }
     
+    // MARK: - Specific
+    
     let message = messages.grouped(":messageGUID")
     
     bindTapbacksAPI(message)
@@ -258,6 +218,7 @@ func bindMessagesAPI(_ chat: RoutesBuilder) {
     }
 }
 
+// MARK: - Tapbacks
 private func bindTapbacksAPI(_ message: RoutesBuilder) {
     let tapbacks = message.grouped("tapbacks")
     

@@ -35,6 +35,8 @@ public func bindAttachmentsAPI(_ app: Application) {
         req.application.fileio.openFile(path: temporaryFileURL.path, mode: .write, flags: .allowFileCreation(), eventLoop: req.eventLoop).flatMap { fileHandle -> EventLoopFuture<Void> in
             let promise = req.eventLoop.makePromise(of: Void.self)
             
+            // MARK: - Upload phase
+            
             var first: Bool = true
             req.body.drain { part in
                 switch part {
@@ -67,6 +69,9 @@ public func bindAttachmentsAPI(_ app: Application) {
             
             return promise.futureResult
         }.always { _ in
+            
+            // MARK: - Storage phase
+            
             let center = IMFileTransferCenter.sharedInstance()!
             
             if let mime = mime {
@@ -80,6 +85,8 @@ public func bindAttachmentsAPI(_ app: Application) {
                 let transfer = IMFileTransfer()._init(withGUID: guid, filename: temporaryFilename, isDirectory: false, localURL: newURL, account: Registry.sharedInstance.iMessageAccount()!.uniqueID, otherPerson: nil, totalBytes: UInt64(bytes), hfsType: 0, hfsCreator: 0, hfsFlags: 0, isIncoming: false)!
                 transfer.setValue(mime.mime, forKey: "_mimeType")
                 transfer.setValue(IMFileManager.defaultHFS()!.utiType(ofMimeType: mime.mime), forKey: "_utiType")
+                
+                // MARK: - Transfer registration and completion
                 
                 center._addTransfer(transfer, toAccount: Registry.sharedInstance.iMessageAccount()!.uniqueID)
                 

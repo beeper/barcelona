@@ -9,6 +9,9 @@
 import Foundation
 import GRDB
 
+/**
+ Represents the chat-message join table in the chat.db file
+ */
 class ChatMessageJoin: Record {
     override class var databaseTableName: String { "chat_message_join" }
     
@@ -32,4 +35,29 @@ class ChatMessageJoin: Record {
     var chat_id: Int64?
     var message_id: Int64?
     var message_date: Int64?
+}
+
+extension DBReader {
+    /**
+     Resolve the chat GUID for a given message ROWID
+     */
+    func chatGUID(forMessageROWID ROWID: Int64, in db: Database) throws -> String? {
+        // MARK: - Join resolution
+        guard let joinResult = try ChatMessageJoin
+            .select(ChatMessageJoin.Columns.chat_id, as: Int64.self)
+            .filter(ChatMessageJoin.Columns.message_id == ROWID)
+            .fetchOne(db) else {
+            return nil
+        }
+        
+        // MARK: - Chat resolution
+        guard let guid = try RawChat
+            .select(RawChat.Columns.guid, as: String.self)
+            .filter(RawChat.Columns.ROWID == joinResult)
+            .fetchOne(db) else {
+                return nil
+        }
+        
+        return guid
+    }
 }

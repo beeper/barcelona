@@ -30,6 +30,9 @@ class Debouncer {
     }
 }
 
+/**
+ Tracks API consumption for a given IP
+ */
 private class AllotmentTracker: Debouncer {
     var allotments: Int = 0
     private let maximum: Int

@@ -9,6 +9,9 @@
 import Foundation
 import GRDB
 
+/**
+ Represents the handle table in the chat.db file
+ */
 class RawHandle: Record {
     override class var databaseTableName: String { "handle" }
     

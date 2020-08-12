@@ -8,6 +8,9 @@
 
 import Foundation
 
+/**
+ Base class for all event trackers. Manages the registration/deregistration of events.
+ */
 class EventDispatcher {
     required init(center: NotificationCenter) {
         self.center = center

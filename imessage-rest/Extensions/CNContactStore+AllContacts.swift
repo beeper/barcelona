@@ -20,6 +20,9 @@ extension CNContactStore {
         ]
     }
     
+    /**
+     Resolve all CNContacts matching the given criteria
+     */
     func contacts(matching string: String? = nil, limit: Int? = nil) -> [CNContact] {
         let keysToFetch: [CNKeyDescriptor] = CNContactStore.defaultKeysToFetch
         

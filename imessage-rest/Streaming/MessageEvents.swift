@@ -30,6 +30,9 @@ private let ChangedItemsExclusion = [
     IMMessageStatusChatItem.self,
 ]
 
+/**
+ Tracks events related to IMMessage
+ */
 class MessageEvents: EventDispatcher {
     override func wake() {
         addObserver(forName: IMChatItemsDidChangeNotification) {

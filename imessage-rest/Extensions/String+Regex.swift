@@ -9,6 +9,9 @@
 import Foundation
 
 extension String {
+    /**
+     Return all match groups for a given regex
+     */
     func groups(for regex: NSRegularExpression) -> [[String]] {
         let text = self
         let matches = regex.matches(in: text,
@@ -24,6 +27,9 @@ extension String {
         }
     }
     
+    /**
+     Returns all match groups for a given regex pattern
+     */
     func groups(for regexPattern: String) -> [[String]] {
         do {
             let regex = try NSRegularExpression(pattern: regexPattern)

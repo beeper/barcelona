@@ -11,6 +11,9 @@ import Foundation
 private let queryKey = "__kIMChatQueryIDKey";
 private let IMChatLoadRequestDidCompleteNotification = NSNotification.Name(rawValue: "__kIMChatLoadRequestDidCompleteNotification")
 
+/**
+ Watches for the completion of a query and allows code to register a callback for a given query GUID
+ */
 class IMQueryWatcher {
     static let sharedInstance = IMQueryWatcher();
     
@@ -36,6 +39,7 @@ class IMQueryWatcher {
         }
     }
     
+    /** Registers a callback for a given query GUID */
     func waitForQuery(queryID: String, callback: @escaping (NSNotification) -> ()) {
         let observer = NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "IMCQ-COMPLETE-\(queryID)"), object: nil, queue: OperationQueue.current ?? OperationQueue.main) { notif in
             callback(notif as NSNotification)
@@ -45,6 +49,7 @@ class IMQueryWatcher {
         self.registerObserver(queryID: queryID, observer: observer)
     }
     
+    /** Called when a query has completed */
     func queryCompleted(_ notification: Notification) {
         guard let query = notification.userInfo?[queryKey] as? String else { return }
         

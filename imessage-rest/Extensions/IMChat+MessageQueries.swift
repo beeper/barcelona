@@ -12,6 +12,9 @@ import os.log
 
 let log_IMChat = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "IMChat+MessageQueries")
 
+/**
+ Provides various functions to aid in the lazy resolution of messages
+ */
 extension IMChat {
     var chatItemRules: IMTranscriptChatItemRules {
         return self.value(forKey: "_chatItemRules") as! IMTranscriptChatItemRules
@@ -33,6 +36,9 @@ extension IMChat {
         }
     }
     
+    /**
+     Load a set of messages surrounding a GUID
+     */
     func loadMessages(around guid: String?, numberBefore: UInt64, numberAfter: UInt64, _ callback: @escaping ([ChatItem]) -> ()) {
         var queryID: String
         
@@ -42,6 +48,7 @@ extension IMChat {
             queryID = self.loadMessages(beforeDate: nil, limit: numberBefore + numberAfter + 1, loadImmediately: false)
         }
         
+        // Wait for query to resolve
         IMQueryWatcher.sharedInstance.waitForQuery(queryID: queryID) { _ in
             var items = self.value(forKey: "_items") as! [IMItem]
             

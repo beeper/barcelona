@@ -10,6 +10,9 @@ import Foundation
 
 private let CMFBlockListUpdatedNotification = Notification.Name(rawValue: "CMFBlockListUpdatedNotification")
 
+/**
+ Tracks events related to CommunicationsFilter.framework
+ */
 class BlocklistEvents: EventDispatcher {
     override func wake() {
         addObserver(forName: CMFBlockListUpdatedNotification) {

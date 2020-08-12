@@ -11,6 +11,9 @@ import os.log
 
 private let log_dispatchSupervisor = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "DispatchSupervisor")
 
+/**
+ Tracks an array of dispatchers and wakes/sleeps them on command.
+ */
 class DispatchSupervisor: EventDispatcher {
     var awake: Bool = false {
         didSet {
