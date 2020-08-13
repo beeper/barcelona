@@ -79,12 +79,6 @@ public func bindAttachmentsAPI(_ app: Application) {
                 let newURL = temporaryDirectoryURL.appendingPathComponent(temporaryFilename)
                 try! FileManager.default.moveItem(at: temporaryFileURL, to: newURL)
                 
-                print(newURL.isFileURL)
-                
-//                if let transfer = center.transfer(forGUID: guid), let persistentPath = IMDPersistentAttachmentController.sharedInstance()._persistentPath(for: transfer, filename: temporaryFilename, highQuality: true), let persistentURL = URL(string: "file://\(persistentPath)") {
-//                try! FileManager.default.createDirectory(at: persistentURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
-                
-                
                 let transfer = IMFileTransfer()._init(withGUID: guid, filename: temporaryFilename, isDirectory: false, localURL: newURL, account: Registry.sharedInstance.iMessageAccount()!.uniqueID, otherPerson: nil, totalBytes: UInt64(bytes), hfsType: 0, hfsCreator: 0, hfsFlags: 0, isIncoming: false)!
                 transfer.setValue(mime.mime, forKey: "_mimeType")
                 transfer.setValue(IMFileManager.defaultHFS()!.utiType(ofMimeType: mime.mime), forKey: "_utiType")
