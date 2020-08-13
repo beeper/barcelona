@@ -98,7 +98,45 @@ class RawAttachment: Record {
 struct InternalAttachmentRepresentation {
     var guid: String
     var path: String
+    var bytes: UInt64
+    var incoming: Bool
     var mime: String?
+    
+    private var account: IMAccount {
+        Registry.sharedInstance.iMessageAccount()!
+    }
+    
+    private var transferCenter: IMFileTransferCenter {
+        IMFileTransferCenter.sharedInstance()!
+    }
+    
+    var fileTransfer: IMFileTransfer {
+        if let transfer = transferCenter.transfer(forGUID: guid) {
+            return transfer
+        }
+        
+        let url = URL(string: "file://\(path)")!
+        let transfer = IMFileTransfer()._init(withGUID: guid, filename: url.lastPathComponent, isDirectory: false, localURL: url, account: account.uniqueID, otherPerson: nil, totalBytes: bytes, hfsType: 0, hfsCreator: 0, hfsFlags: 0, isIncoming: false)!
+        
+        transfer.transferredFilename = url.lastPathComponent
+        
+        if let mime = mime {
+            transfer.setValue(mime, forKey: "_mimeType")
+            transfer.setValue(IMFileManager.defaultHFS()!.utiType(ofMimeType: mime), forKey: "_utiType")
+        }
+        
+        let center = IMFileTransferCenter.sharedInstance()!
+        
+        center._addTransfer(transfer, toAccount: account.uniqueID)
+        
+        if let map = center.value(forKey: "_guidToTransferMap") as? NSDictionary {
+            map.setValue(transfer, forKey: guid)
+        }
+        
+        center.registerTransfer(withDaemon: guid)
+        
+        return transfer
+    }
 }
 
 extension DBReader {
@@ -108,7 +146,6 @@ extension DBReader {
         do {
             try pool.read { db in
                 guard let results = try RawAttachment.filter(RawAttachment.Columns.guid == guid).fetchOne(db) else {
-                    print("NO FIND")
                     promise.succeed(nil)
                     return
                 }
@@ -118,7 +155,7 @@ extension DBReader {
                     return
                 }
                 
-                promise.succeed(InternalAttachmentRepresentation(guid: guid, path: path.expandingTildeInPath, mime: results.mime_type))
+                promise.succeed(InternalAttachmentRepresentation(guid: guid, path: path.expandingTildeInPath, bytes: UInt64(results.total_bytes ?? 0), incoming: (results.is_outgoing ?? 0) == 0, mime: results.mime_type))
             }
         } catch {
             promise.fail(error)

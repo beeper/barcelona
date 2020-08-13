@@ -67,10 +67,10 @@ struct DeleteMessageRequest: Content {
     var messages: [DeleteMessage]
 }
 
-private func flagsForCreation(_ creation: CreateMessage) -> FullFlagsFromMe {
+private func flagsForCreation(_ creation: CreateMessage, transfers: [String]) -> FullFlagsFromMe {
     if let _ = creation.ballonBundleID { return .richLink }
     if let audio = creation.isAudioMessage { if audio { return .audioMessage } }
-    if creation.parts.contains(where: { $0.type == .attachment }) { return .attachments }
+    if transfers.count > 0 || creation.parts.contains(where: { $0.type == .attachment }) { return .attachments }
     return .textOrPluginOrStickerOrImage
 }
 
@@ -122,16 +122,23 @@ func bindMessagesAPI(_ chat: RoutesBuilder) {
             }
             
             /** Creates a base message using the computed attributed string */
-            let message = IMMessage.init(sender: chat.lastSentMessage?.sender ?? Registry.sharedInstance.iMessageAccount()!.arrayOfAllIMHandles[0], time: Date(), text: text, messageSubject: subject, fileTransferGUIDs: fileTransferGUIDs, flags: flagsForCreation(creation).rawValue, error: nil, guid: NSString.stringGUID(), subject: nil, balloonBundleID: nil, payloadData: nil, expressiveSendStyleID: nil)!
             
-            /** Split the base message into individual messages if it contains rich link(s) */
-            let messages = ERExtractRichLinks(for: message)
+            let message = IMMessage.instantMessage(withText: text, messageSubject: subject, fileTransferGUIDs: fileTransferGUIDs, flags: flagsForCreation(creation, transfers: fileTransferGUIDs).rawValue)
             
-            messages.forEach { message in
-                chat._sendMessage(message, adjustingSender: true, shouldQueue: true)
+            DispatchQueue.main.async {
+                /** Split the base message into individual messages if it contains rich link(s) */
+                guard let messages = message.messagesBySeparatingRichLinks() as? [IMMessage] else {
+                    print("Malformed message result when separating rich links at \(message)")
+                    promise.fail(Abort(.internalServerError))
+                    return
+                }
+                
+                messages.forEach { message in
+                    chat._sendMessage(message, adjustingSender: true, shouldQueue: true)
+                }
+                
+                promise.succeed(BulkMessageRepresentation(messages, chatGUID: guid))
             }
-            
-            promise.succeed(BulkMessageRepresentation(messages, chatGUID: guid))
         }
         
         return promise.futureResult

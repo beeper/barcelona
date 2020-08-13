@@ -77,61 +77,11 @@ private func ERAttributedString(from part: MessagePart, on eventLoop: EventLoop)
 private func ERAttributedString(forText text: String, on eventLoop: EventLoop) -> EventLoopFuture<NSAttributedString> {
     let promise = eventLoop.makePromise(of: NSAttributedString.self)
     
-    DDScanServer.scanString(text) { res in
-        let textAttributes = NSMutableAttributedString(string: text)
-        
-        var urlRanges: [NSRange] = []
-        
-        if let results = res as? [DDScannerResult] {
-            results.forEach { result in
-                switch (result.type) {
-                case "WebURL":
-                    let archive = try! NSKeyedArchiver.archivedData(withRootObject: result, requiringSecureCoding: false)
-                    
-                    let partString = textAttributes.attributedSubstring(from: result.range).string
-                    guard var url = URL(string: partString) else { break }
-                    if let scheme = url.scheme {
-                        if !(scheme == "http" || scheme == "https") { break }
-                    } else {
-                        url = URL(string: "http://\(url.absoluteString)")!
-                    }
-                    
-                    textAttributes.setAttributes([
-                        MessageAttributes.dataDetected: archive,
-                        MessageAttributes.writingDirection: -1,
-                        MessageAttributes.link: url
-                    ], range: result.range)
-                    
-                    urlRanges.append(result.range)
-                    
-                    break
-                default:
-                    return
-                }
-            }
-        }
-        
-        var sample = textAttributes.string
-        
-        urlRanges.forEach { range in
-            var replacement = ""
-            for _ in 1...range.length {
-                replacement += " "
-            }
-            
-            print("\(replacement.count) \(range.length)")
-            
-            sample.replaceSubrange(Range(range, in: sample)!, with: replacement)
-        }
-        
-        if sample.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 {
-            urlRanges.forEach { range in
-                textAttributes.addAttribute(MessageAttributes.noRichLink, value: 1, range: range)
-            }
-        }
-        
-        promise.succeed(textAttributes)
-    }
+    let textAttributes = NSMutableAttributedString(string: text)
+    
+    textAttributes.addAttribute(MessageAttributes.writingDirection, value: -1, range: NSRange(location: 0, length: text.count))
+    
+    promise.succeed(textAttributes)
     
     return promise.futureResult
 }
@@ -149,11 +99,18 @@ private func ERAttributedString(forAttachment attachment: String, on eventLoop: 
                 return
             }
             
+            let transfer = representation.fileTransfer
+            
+            guard let guid = transfer.guid, let filename = transfer.filename else {
+                promise.succeed(MessagePartParseResult(string: NSAttributedString(), transferGUIDs: []))
+                return
+            }
+            
             let attachmentAttributes = NSMutableAttributedString(string: IMAttachmentString)
             attachmentAttributes.setAttributes([
                 MessageAttributes.writingDirection: -1,
-                MessageAttributes.transferGUID: representation.guid,
-                MessageAttributes.filename: representation.path,
+                MessageAttributes.transferGUID: guid,
+                MessageAttributes.filename: filename,
             ], range: NSRange(location: 0, length: IMAttachmentString.count))
             
             promise.succeed(MessagePartParseResult(string: attachmentAttributes, transferGUIDs: [representation.guid]))

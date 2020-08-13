@@ -22,7 +22,7 @@
 - (id)uniqueSavePath;
 - (id)stringByRemovingWhitespace;
 - (struct _NSRange)__rangeOfNewlineInRange:(struct _NSRange)arg1;
-- (id)stringByResolvingAndStandardizingPath;
+- (nonnull NSString*)stringByResolvingAndStandardizingPath;
 - (BOOL)_appearsToBeBusinessID;
 - (BOOL)_appearsToBeDSID;
 - (BOOL)_appearsToBePhoneNumber;
