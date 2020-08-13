@@ -23,7 +23,7 @@ private let corsConfiguration = CORSMiddleware.Configuration(
 class ERHTTPServer {
     static let shared = ERHTTPServer()
     
-    let app: Application = Application()
+    private let app: Application = Application()
     let streamingAPI: StreamingAPI
     
     private init() {
@@ -45,11 +45,23 @@ class ERHTTPServer {
         bindDebugAPI(app)
     }
     
+    private var running: Bool = false
+    
     func start() throws {
+        if running {
+            return
+        }
+        
         try app.server.start()
+        running = true
     }
     
     func stop() {
+        if !running {
+            return
+        }
+        
         app.server.shutdown()
+        running = false
     }
 }
