@@ -11,20 +11,30 @@ import Foundation
 import DataDetectorsCore
 import Vapor
 
+struct MessagePartParseResult {
+    var string: NSAttributedString
+    var transferGUIDs: [String]
+}
+
 /**
  Parses an array of MessageParts and returns a single NSAttributedString representing the contents
  */
-func ERAttributedString(from parts: [MessagePart], fileTransferGUIDs: inout [String], on eventLoop: EventLoop) -> EventLoopFuture<NSAttributedString> {
-    let promise = eventLoop.makePromise(of: NSAttributedString.self)
+func ERAttributedString(from parts: [MessagePart], on eventLoop: EventLoop) -> EventLoopFuture<MessagePartParseResult> {
+    let promise = eventLoop.makePromise(of: MessagePartParseResult.self)
     var fileTransferGUIDs: [String] = []
     
-    let futures = parts.map { ERAttributedString(from: $0, fileTransferGUIDs: &fileTransferGUIDs, on: eventLoop) }
-    let futureOfStrings = EventLoopFuture<NSAttributedString>.whenAllSucceed(futures, on: eventLoop)
+    let futures = parts.map { ERAttributedString(from: $0, on: eventLoop) }
+    let futureOfResults = EventLoopFuture<MessagePartParseResult>.whenAllSucceed(futures, on: eventLoop)
     
-    futureOfStrings.whenSuccess { strings in
-        promise.succeed(ERInsertMessageParts(into: strings.reduce(into: NSMutableAttributedString()) { (accumulator, current) in
+    futureOfResults.whenSuccess { results in
+        let strings = results.map { $0.string }
+        let transferGUIDs = results.reduce(into: [String]()) { (accumulator, result) in
+            accumulator.append(contentsOf: result.transferGUIDs)
+        }
+        
+        promise.succeed(MessagePartParseResult(string: ERInsertMessageParts(into: strings.reduce(into: NSMutableAttributedString()) { (accumulator, current) in
             accumulator.append(current)
-        }))
+        }), transferGUIDs: transferGUIDs))
     }
     
     return promise.futureResult
@@ -52,12 +62,14 @@ private func ERInsertMessageParts(into string: NSMutableAttributedString) -> NSM
 }
 
 // MARK: - MessagePart interpreter
-private func ERAttributedString(from part: MessagePart, fileTransferGUIDs: inout [String], on eventLoop: EventLoop) -> EventLoopFuture<NSAttributedString> {
+private func ERAttributedString(from part: MessagePart, on eventLoop: EventLoop) -> EventLoopFuture<MessagePartParseResult> {
     switch part.type {
     case .text:
-        return ERAttributedString(forText: part.details, on: eventLoop)
+        return ERAttributedString(forText: part.details, on: eventLoop).map { string in
+            MessagePartParseResult(string: string, transferGUIDs: [])
+        }
     case .attachment:
-        return ERAttributedString(forAttachment: part.details, fileTransferGUIDs: &fileTransferGUIDs, on: eventLoop)
+        return ERAttributedString(forAttachment: part.details, on: eventLoop)
     }
 }
 
@@ -126,25 +138,31 @@ private func ERAttributedString(forText text: String, on eventLoop: EventLoop) -
 
 
 // MARK: - AttachmentMessagePart
-private func ERAttributedString(forAttachment attachment: String, fileTransferGUIDs: inout [String], on eventLoop: EventLoop) -> EventLoopFuture<NSAttributedString> {
-    let promise = eventLoop.makePromise(of: NSAttributedString.self)
+private func ERAttributedString(forAttachment attachment: String, on eventLoop: EventLoop) -> EventLoopFuture<MessagePartParseResult> {
+    let promise = eventLoop.makePromise(of: MessagePartParseResult.self)
     
-    guard let transfer = IMFileTransferCenter.sharedInstance()?.transfer(forGUID: attachment) else {
-        /** Unknown attachment */
-        promise.succeed(NSAttributedString())
-        return promise.futureResult
+    DBReader(pool: db, eventLoop: eventLoop).attachment(for: attachment).whenComplete { result in
+        switch result {
+        case .success(let representation):
+            guard let representation = representation else {
+                promise.succeed(MessagePartParseResult(string: NSAttributedString(), transferGUIDs: []))
+                return
+            }
+            
+            let attachmentAttributes = NSMutableAttributedString(string: IMAttachmentString)
+            attachmentAttributes.setAttributes([
+                MessageAttributes.writingDirection: -1,
+                MessageAttributes.transferGUID: representation.guid,
+                MessageAttributes.filename: representation.path,
+            ], range: NSRange(location: 0, length: IMAttachmentString.count))
+            
+            promise.succeed(MessagePartParseResult(string: attachmentAttributes, transferGUIDs: [representation.guid]))
+            break
+        case .failure(let error):
+            promise.fail(error)
+            break
+        }
     }
-    
-    fileTransferGUIDs.append(transfer.guid)
-    
-    let attachmentAttributes = NSMutableAttributedString(string: IMAttachmentString)
-    attachmentAttributes.setAttributes([
-        MessageAttributes.writingDirection: -1,
-        MessageAttributes.transferGUID: transfer.guid,
-        MessageAttributes.filename: transfer.filename
-    ], range: NSRange(location: 0, length: IMAttachmentString.count))
-    
-    promise.succeed(attachmentAttributes)
     
     return promise.futureResult
 }

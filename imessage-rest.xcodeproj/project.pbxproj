@@ -97,6 +97,7 @@
 		1DC66B0824E487AB00CB0C5D /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC66B0724E487AB00CB0C5D /* Event.swift */; };
 		1DC66B0A24E488FF00CB0C5D /* DBReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC66B0924E488FF00CB0C5D /* DBReader.swift */; };
 		1DC66B0C24E4897300CB0C5D /* Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC66B0B24E4897300CB0C5D /* Search.swift */; };
+		1DF63FA924E4DE410004527F /* RawAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF63FA824E4DE410004527F /* RawAttachment.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -223,6 +224,7 @@
 		1DC66B0724E487AB00CB0C5D /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		1DC66B0924E488FF00CB0C5D /* DBReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DBReader.swift; sourceTree = "<group>"; };
 		1DC66B0B24E4897300CB0C5D /* Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Search.swift; sourceTree = "<group>"; };
+		1DF63FA824E4DE410004527F /* RawAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawAttachment.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -383,6 +385,7 @@
 				1D5AEE7424E37D9E00303692 /* RawHandle.swift */,
 				1DC66B0924E488FF00CB0C5D /* DBReader.swift */,
 				1DC66B0B24E4897300CB0C5D /* Search.swift */,
+				1DF63FA824E4DE410004527F /* RawAttachment.swift */,
 			);
 			path = Database;
 			sourceTree = "<group>";
@@ -537,6 +540,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1D5AEEBE24E37D9F00303692 /* ChatItem.swift in Sources */,
+				1DF63FA924E4DE410004527F /* RawAttachment.swift in Sources */,
 				1D5AEED024E3838700303692 /* ERChatSubscriptionWatcher.swift in Sources */,
 				1D5AEE9524E37D9F00303692 /* Chat+MessagesAPI.swift in Sources */,
 				1D5AEECE24E3817900303692 /* ERHTTPServer.swift in Sources */,

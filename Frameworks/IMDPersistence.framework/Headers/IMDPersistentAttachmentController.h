@@ -6,13 +6,15 @@
 
 #import <Foundation/Foundation.h>
 
+@class IMFileTransfer;
+
 @interface IMDPersistentAttachmentController : NSObject
 {
 }
 
-+ (id)sharedInstance;
++ (IMDPersistentAttachmentController* _Nonnull)sharedInstance;
 - (BOOL)cleanseOrphanedFileTransfers;
-- (id)_persistentPathForTransfer:(id)arg1 filename:(id)arg2 highQuality:(BOOL)arg3;
+- (NSString*)_persistentPathForTransfer:(IMFileTransfer*)arg1 filename:(NSString*)arg2 highQuality:(BOOL)arg3;
 - (BOOL)_deleteAttachmentForTransfer:(id)arg1 highQuality:(BOOL)arg2;
 - (BOOL)deleteAttachmentsForTransfer:(id)arg1;
 - (BOOL)isSafeToDeleteAttachmentPath:(id)arg1;

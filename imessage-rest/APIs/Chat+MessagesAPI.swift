@@ -105,9 +105,11 @@ func bindMessagesAPI(_ chat: RoutesBuilder) {
         guard let chat = IMChatRegistry.sharedInstance()?._chatInstance(forGUID: guid) else { throw Abort(.notFound) }
         
         let promise = req.eventLoop.makePromise(of: BulkMessageRepresentation.self)
-        var fileTransferGUIDs: [String] = []
         
-        ERAttributedString(from: creation.parts, fileTransferGUIDs: &fileTransferGUIDs, on: req.eventLoop).whenSuccess { text in
+        ERAttributedString(from: creation.parts, on: req.eventLoop).whenSuccess { result in
+            let text = result.string
+            let fileTransferGUIDs = result.transferGUIDs
+            
             if text.length == 0 {
                 promise.fail(Abort(.badRequest))
                 return

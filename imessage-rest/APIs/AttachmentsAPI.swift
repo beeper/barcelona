@@ -9,7 +9,7 @@
 import Foundation
 import IMCore
 import IMSharedUtilities
-
+import IMDPersistence
 import Vapor
 import Swime
 
@@ -26,8 +26,7 @@ public func bindAttachmentsAPI(_ app: Application) {
         let promise = req.eventLoop.makePromise(of: AttachmentRepresentation.self)
         var temporaryFilename = NSString.stringGUID() as! String
         
-        var temporaryFileURL =
-            temporaryDirectoryURL.appendingPathComponent(temporaryFilename)
+        var temporaryFileURL = temporaryDirectoryURL.appendingPathComponent(temporaryFilename)
         
         var mime: MimeType? = nil
         var bytes: Int = 0
@@ -82,9 +81,36 @@ public func bindAttachmentsAPI(_ app: Application) {
                 
                 print(newURL.isFileURL)
                 
+//                if let transfer = center.transfer(forGUID: guid), let persistentPath = IMDPersistentAttachmentController.sharedInstance()._persistentPath(for: transfer, filename: temporaryFilename, highQuality: true), let persistentURL = URL(string: "file://\(persistentPath)") {
+//                try! FileManager.default.createDirectory(at: persistentURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
+                
+                
                 let transfer = IMFileTransfer()._init(withGUID: guid, filename: temporaryFilename, isDirectory: false, localURL: newURL, account: Registry.sharedInstance.iMessageAccount()!.uniqueID, otherPerson: nil, totalBytes: UInt64(bytes), hfsType: 0, hfsCreator: 0, hfsFlags: 0, isIncoming: false)!
                 transfer.setValue(mime.mime, forKey: "_mimeType")
                 transfer.setValue(IMFileManager.defaultHFS()!.utiType(ofMimeType: mime.mime), forKey: "_utiType")
+                
+                var persistentPath = IMDPersistentAttachmentController.sharedInstance()._persistentPath(for: transfer, filename: temporaryFilename, highQuality: true)
+                
+                #if os(macOS)
+                
+                let storedPath = "~/\(persistentPath!.split(separator: "/")[2...].joined(separator: "/"))"
+                
+                #else
+                
+                let storedPath = persistentPath
+                
+                #endif
+                
+                
+                if let persistentURL = URL(string: "file://\(persistentPath!)") {
+                    try! FileManager.default.createDirectory(at: persistentURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
+                    
+                    try! FileManager.default.moveItem(at: temporaryFileURL.appendingPathExtension(mime.ext), to: persistentURL)
+                    
+                    transfer.localURL = persistentURL
+                    transfer.filename = persistentURL.lastPathComponent
+                    transfer.transferredFilename = persistentURL.lastPathComponent
+                }
                 
                 // MARK: - Transfer registration and completion
                 
@@ -94,9 +120,21 @@ public func bindAttachmentsAPI(_ app: Application) {
                     map.setValue(transfer, forKey: guid)
                     
                     center.registerTransfer(withDaemon: guid)
+                    
+//                    IMDPersistentAttachmentController.sharedInstance()._saveAttachment(forTransfer: transfer, highQuality: false, copyWithinAttachmentStore: true)
+//                    promise.succeed(AttachmentRepresentation(transfer))
+                    
+                    do {
+                        try DBReader(pool: db, eventLoop: req.eventLoop).insert(fileTransfer: transfer, path: storedPath)
+
+                        promise.succeed(AttachmentRepresentation(transfer))
+                    } catch {
+                        print(error)
+                        promise.fail(Abort(.internalServerError))
+                    }
+                } else {
+                    promise.fail(Abort(.internalServerError))
                 }
-                
-                promise.succeed(AttachmentRepresentation(transfer))
             }
         }
         
@@ -110,10 +148,30 @@ public func bindAttachmentsAPI(_ app: Application) {
      */
     attachment.get { req -> EventLoopFuture<Response> in
         guard let guid = req.parameters.get("guid") else { throw Abort(.badRequest) }
-        guard let file = IMFileTransferCenter.sharedInstance()?.transfer(forGUID: guid, includeRemoved: false) else { throw Abort(.notFound) }
-        guard let path = file.localPath else { throw Abort(.notFound) }
-        guard file.existsAtLocalPath else { throw Abort(.notFound) }
+//        guard let file = IMFileTransferCenter.sharedInstance()?.transfer(forGUID: guid, includeRemoved: false) else { throw Abort(.notFound) }
+//        guard let path = file.localPath else { throw Abort(.notFound) }
+//        guard file.existsAtLocalPath else { throw Abort(.notFound) }
+//
+//        return req.eventLoop.makeSucceededFuture(req.fileio.streamFile(at: path))
+        let promise = req.eventLoop.makePromise(of: Response.self)
         
-        return req.eventLoop.makeSucceededFuture(req.fileio.streamFile(at: path))
+        DBReader(pool: db, eventLoop: req.eventLoop).attachment(for: guid).whenComplete { result in
+            switch result {
+            case .success(let representation):
+                guard let representation = representation else {
+                    promise.fail(Abort(.notFound))
+                    return
+                }
+                
+                promise.succeed(req.fileio.streamFile(at: representation.path))
+                break
+            case .failure(let error):
+                print(error)
+                promise.fail(Abort(.internalServerError))
+                break
+            }
+        }
+        
+        return promise.futureResult
     }
 }
