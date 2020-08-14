@@ -72,63 +72,70 @@ public func bindAttachmentsAPI(_ app: Application) {
             // MARK: - Storage phase
             
             let center = IMFileTransferCenter.sharedInstance()!
+        
+            let guid = temporaryFilename
             
             if let mime = mime {
-                let guid = temporaryFilename
                 temporaryFilename = "\(temporaryFilename).\(mime.ext)"
+                
                 let newURL = temporaryDirectoryURL.appendingPathComponent(temporaryFilename)
                 try! FileManager.default.moveItem(at: temporaryFileURL, to: newURL)
                 
-                let transfer = IMFileTransfer()._init(withGUID: guid, filename: temporaryFilename, isDirectory: false, localURL: newURL, account: Registry.sharedInstance.iMessageAccount()!.uniqueID, otherPerson: nil, totalBytes: UInt64(bytes), hfsType: 0, hfsCreator: 0, hfsFlags: 0, isIncoming: false)!
+                temporaryFileURL = newURL
+            }
+            
+            let transfer = IMFileTransfer()._init(withGUID: guid, filename: temporaryFilename, isDirectory: false, localURL: temporaryFileURL, account: Registry.sharedInstance.iMessageAccount()!.uniqueID, otherPerson: nil, totalBytes: UInt64(bytes), hfsType: 0, hfsCreator: 0, hfsFlags: 0, isIncoming: false)!
+            
+            if let mime = mime {
                 transfer.setValue(mime.mime, forKey: "_mimeType")
                 transfer.setValue(IMFileManager.defaultHFS()!.utiType(ofMimeType: mime.mime), forKey: "_utiType")
+            }
+            
+            var persistentPath = IMDPersistentAttachmentController.sharedInstance()._persistentPath(for: transfer, filename: temporaryFilename, highQuality: true)
+            
+            #if os(macOS)
+            
+            let storedPath = "~/\(persistentPath!.split(separator: "/")[2...].joined(separator: "/"))"
+            
+            #else
+            
+            let storedPath = persistentPath
+            
+            #endif
+            
+            
+            if let persistentURL = URL(string: "file://\(persistentPath!)") {
+                try! FileManager.default.createDirectory(at: persistentURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
                 
-                var persistentPath = IMDPersistentAttachmentController.sharedInstance()._persistentPath(for: transfer, filename: temporaryFilename, highQuality: true)
+                try! FileManager.default.moveItem(at: temporaryFileURL, to: persistentURL)
                 
-                #if os(macOS)
+                transfer.localURL = persistentURL
+                transfer.filename = persistentURL.lastPathComponent
+                transfer.transferredFilename = persistentURL.lastPathComponent
+            }
+            
+            // MARK: - Transfer registration and completion
+            
+            center._addTransfer(transfer, toAccount: Registry.sharedInstance.iMessageAccount()!.uniqueID)
+            
+            if let map = center.value(forKey: "_guidToTransferMap") as? NSDictionary {
+                map.setValue(transfer, forKey: guid)
                 
-                let storedPath = "~/\(persistentPath!.split(separator: "/")[2...].joined(separator: "/"))"
+                center.registerTransfer(withDaemon: guid)
                 
-                #else
-                
-                let storedPath = persistentPath
-                
-                #endif
-                
-                
-                if let persistentURL = URL(string: "file://\(persistentPath!)") {
-                    try! FileManager.default.createDirectory(at: persistentURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
-                    
-                    try! FileManager.default.moveItem(at: temporaryFileURL.appendingPathExtension(mime.ext), to: persistentURL)
-                    
-                    transfer.localURL = persistentURL
-                    transfer.filename = persistentURL.lastPathComponent
-                    transfer.transferredFilename = persistentURL.lastPathComponent
-                }
-                
-                // MARK: - Transfer registration and completion
-                
-                center._addTransfer(transfer, toAccount: Registry.sharedInstance.iMessageAccount()!.uniqueID)
-                
-                if let map = center.value(forKey: "_guidToTransferMap") as? NSDictionary {
-                    map.setValue(transfer, forKey: guid)
-                    
-                    center.registerTransfer(withDaemon: guid)
-                    
 //                    IMDPersistentAttachmentController.sharedInstance()._saveAttachment(forTransfer: transfer, highQuality: false, copyWithinAttachmentStore: true)
 //                    promise.succeed(AttachmentRepresentation(transfer))
-                    
-                    do {
-                        try DBReader(pool: db, eventLoop: req.eventLoop).insert(fileTransfer: transfer, path: storedPath)
+                
+                do {
+                    try DBReader(pool: db, eventLoop: req.eventLoop).insert(fileTransfer: transfer, path: storedPath)
 
-                        promise.succeed(AttachmentRepresentation(transfer))
-                    } catch {
-                        print(error)
-                        promise.fail(Abort(.internalServerError))
-                    }
-                } else {
+                    promise.succeed(AttachmentRepresentation(transfer))
+                } catch {
+                    print(error)
                     promise.fail(Abort(.internalServerError))
                 }
+            } else {
+                promise.fail(Abort(.internalServerError))
             }
         }
         
