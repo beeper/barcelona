@@ -8,6 +8,43 @@
 
 import Foundation
 
+#if canImport(UIKit)
+import UIKit
+
+extension UIImage {
+    func resize(w: Int, h: Int) -> UIImage {
+        let size = self.size
+        let targetSize = CGSize(width: w, height: h)
+        
+        let widthRatio  = targetSize.width  / image.size.width
+        let heightRatio = targetSize.height / image.size.height
+        
+        var newSize: CGSize
+        if widthRatio > heightRatio {
+            newSize = CGSize(width: size.width * heightRatio, height: size.height * heightRatio)
+        } else {
+            newSize = CGSize(width: size.width * widthRatio,  height: size.height * widthRatio)
+        }
+        
+        let rect = CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height)
+        
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 0)
+        image.draw(in: rect)
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage!
+    }
+    
+    func scale(image: UIImage, by scale: CGFloat) -> UIImage? {
+        let size = image.size
+        let scaledSize = CGSize(width: size.width * scale, height: size.height * scale)
+        return resize(image: image, targetSize: scaledSize)
+    }
+}
+#else
+import AppKit
+
 extension NSImage {
     func resize(w: Int, h: Int) -> Data? {
         let image = self
@@ -20,3 +57,4 @@ extension NSImage {
         return newImage.tiffRepresentation
     }
 }
+#endif
