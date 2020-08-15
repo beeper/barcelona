@@ -11,8 +11,11 @@ import Foundation
 import Vapor
 import GRDB
 
-
-let db = try! DatabasePool(path: "/Users/ericrabil/Library/Messages/chat.db")
+#if os(iOS)
+let db = try! DatabasePool(path: "/var/mobile/Library/SMS/sms.db")
+#else
+let db = try! DatabasePool(path: ("~/Library/Messages/chat.db" as NSString).expandingTildeInPath)
+#endif
 
 /**
  Interface for reading the chat.db file.
