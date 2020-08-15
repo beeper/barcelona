@@ -11,7 +11,6 @@
 		1D3F36F924E4A8DB005E95B8 /* DebugAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3F36F824E4A8DB005E95B8 /* DebugAPI.swift */; };
 		1D3F36FE24E4B47A005E95B8 /* IMChatRegistry+NerfedIntents.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3F36FD24E4B47A005E95B8 /* IMChatRegistry+NerfedIntents.m */; };
 		1D5AEDDC24E3744900303692 /* CommunicationsFilter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD224E3744900303692 /* CommunicationsFilter.framework */; };
-		1D5AEDDE24E3744900303692 /* SocialUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD324E3744900303692 /* SocialUI.framework */; };
 		1D5AEDE024E3744900303692 /* IMCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD424E3744900303692 /* IMCore.framework */; };
 		1D5AEDE224E3744900303692 /* IMDPersistence.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD524E3744900303692 /* IMDPersistence.framework */; };
 		1D5AEDE424E3744900303692 /* IMFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD624E3744900303692 /* IMFoundation.framework */; };
@@ -30,7 +29,6 @@
 		1D5AEE4A24E37D1700303692 /* Swime in Frameworks */ = {isa = PBXBuildFile; productRef = 1D5AEE4924E37D1700303692 /* Swime */; };
 		1D5AEE4D24E37D6600303692 /* Vapor in Frameworks */ = {isa = PBXBuildFile; productRef = 1D5AEE4C24E37D6600303692 /* Vapor */; };
 		1D5AEE8E24E37D9F00303692 /* HandlesAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE4F24E37D9E00303692 /* HandlesAPI.swift */; };
-		1D5AEE8F24E37D9F00303692 /* RichLinkExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5024E37D9E00303692 /* RichLinkExtractor.swift */; };
 		1D5AEE9024E37D9F00303692 /* AttachmentsAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5124E37D9E00303692 /* AttachmentsAPI.swift */; };
 		1D5AEE9124E37D9F00303692 /* MessagePartFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5224E37D9E00303692 /* MessagePartFactory.swift */; };
 		1D5AEE9224E37D9F00303692 /* Throttling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5324E37D9E00303692 /* Throttling.swift */; };
@@ -155,7 +153,6 @@
 		1D5AEE3C24E3760000303692 /* MessageServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageServiceProtocol.swift; sourceTree = "<group>"; };
 		1D5AEE4024E378F500303692 /* ERDaemonListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERDaemonListener.swift; sourceTree = "<group>"; };
 		1D5AEE4224E37B0100303692 /* IMCore-Shims.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "IMCore-Shims.m"; sourceTree = "<group>"; };
-		1D5AEE4424E37B9B00303692 /* RichLinkProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RichLinkProvider.h; sourceTree = "<group>"; };
 		1D5AEE4F24E37D9E00303692 /* HandlesAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HandlesAPI.swift; sourceTree = "<group>"; };
 		1D5AEE5024E37D9E00303692 /* RichLinkExtractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RichLinkExtractor.swift; sourceTree = "<group>"; };
 		1D5AEE5124E37D9E00303692 /* AttachmentsAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttachmentsAPI.swift; sourceTree = "<group>"; };
@@ -236,7 +233,6 @@
 				1D5AEDDC24E3744900303692 /* CommunicationsFilter.framework in Frameworks */,
 				1D5AEDE624E3744900303692 /* ContactsAutocomplete.framework in Frameworks */,
 				1D5AEDE024E3744900303692 /* IMCore.framework in Frameworks */,
-				1D5AEDDE24E3744900303692 /* SocialUI.framework in Frameworks */,
 				1D5AEE4724E37CDF00303692 /* GRDB in Frameworks */,
 				1D5AEDE424E3744900303692 /* IMFoundation.framework in Frameworks */,
 				1D5AEE4A24E37D1700303692 /* Swime in Frameworks */,
@@ -286,7 +282,6 @@
 				1D5AEE3C24E3760000303692 /* MessageServiceProtocol.swift */,
 				1D5AEE4024E378F500303692 /* ERDaemonListener.swift */,
 				1D5AEE4224E37B0100303692 /* IMCore-Shims.m */,
-				1D5AEE4424E37B9B00303692 /* RichLinkProvider.h */,
 				1D5AEEC924E37E8B00303692 /* IMQueryWatcher.swift */,
 				1D5AEECB24E37F8A00303692 /* Constants.swift */,
 				1D5AEECD24E3817900303692 /* ERHTTPServer.swift */,
@@ -560,7 +555,6 @@
 				1D5AEDF324E374EB00303692 /* main.swift in Sources */,
 				1D5AEEBB24E37D9F00303692 /* ParticipantChangeTranscriptChatItem.swift in Sources */,
 				1D5AEEA224E37D9F00303692 /* Data+Compression.swift in Sources */,
-				1D5AEE8F24E37D9F00303692 /* RichLinkExtractor.swift in Sources */,
 				1D5AEEB124E37D9F00303692 /* RawHandle.swift in Sources */,
 				1D5AEDF524E3752B00303692 /* MessageXPCService.swift in Sources */,
 				1D5AEEB424E37D9F00303692 /* Chat.swift in Sources */,

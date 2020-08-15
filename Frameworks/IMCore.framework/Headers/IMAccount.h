@@ -8,7 +8,6 @@
 
 #import "IMSystemMonitorListener-Protocol.h"
 #import "Presentity.h"
-#import <SocialUI/SocialUI.h>
 
 @class IMHandle, IMPeople, IMServiceImpl, NSArray, NSAttributedString, NSData, NSDate, NSDictionary, NSMapTable, NSMutableDictionary, NSRecursiveLock, NSString;
 

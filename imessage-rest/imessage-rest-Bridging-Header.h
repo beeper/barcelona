@@ -3,8 +3,5 @@
 //
 
 #import <CommunicationsFilter/CommunicationsFilter.h>
-#import "RichLinkProvider.h"
 
 CommunicationsFilterBlockList* ERSharedBlockList();
-
-RichLinkPluginDataSource* ERValidateDataSource(id arg1);

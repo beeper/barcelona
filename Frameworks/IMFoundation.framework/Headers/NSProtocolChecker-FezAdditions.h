@@ -5,9 +5,3 @@
 //
 
 #import <Foundation/Foundation.h>
-
-@interface NSProtocolChecker (FezAdditions)
-- (id)_imMethodSignatureForSelector:(SEL)arg1;
-- (id)initWithProtocol:(id)arg1;
-@end
-
