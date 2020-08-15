@@ -50,15 +50,15 @@ extension IMChat {
         
         // Wait for query to resolve
         IMQueryWatcher.sharedInstance.waitForQuery(queryID: queryID) { _ in
-            var items = self.value(forKey: "_items") as! [IMItem]
+            let items = self.value(forKey: "_items") as! [IMItem]
             
             let parsed = items.sorted { (item1, item2) in
                 item1.time.compare(item2.time) == .orderedDescending
             }.split {
                 $0.guid == guid
-            }.last!.prefix(Int(numberBefore + numberAfter + 1)).compactMap {
+            }.last?.prefix(Int(numberBefore + numberAfter + 1)).compactMap {
                 wrapChatItem(unknownItem: $0, withChatGUID: self.guid)
-            }
+            } ?? []
             
             callback(parsed)
         }
