@@ -42,7 +42,7 @@ struct CreateMessage: Content {
     var isAudioMessage: Bool?
     var flags: CLongLong?
     var ballonBundleID: String?
-    var payloadData: Data?
+    var payloadData: String?
     var expressiveSendStyleID: String?
 }
 
