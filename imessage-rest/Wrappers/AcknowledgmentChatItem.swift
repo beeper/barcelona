@@ -15,6 +15,7 @@ struct AcknowledgmentChatItemRepresentation: Content, ChatItemRepresentation {
     init(_ item: IMMessageAcknowledgmentChatItem, chatGUID: String?) {
         acknowledgmentType = item.messageAcknowledgmentType
         sender = item.sender?.id
+        associatedGUID = item.associatedMessageGUID
         self.load(item: item, chatGUID: chatGUID)
     }
     
@@ -24,4 +25,5 @@ struct AcknowledgmentChatItemRepresentation: Content, ChatItemRepresentation {
     var time: Double? = nil
     var sender: String?
     var acknowledgmentType: Int64
+    var associatedGUID: String
 }

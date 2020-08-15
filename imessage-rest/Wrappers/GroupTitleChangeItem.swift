@@ -29,6 +29,6 @@ struct GroupTitleChangeItemRepresentation: Content, ChatItemRepresentation {
     var chatGUID: String?
     var fromMe: Bool?
     var time: Double?
-    var title: String
+    var title: String?
     var sender: String?
 }
