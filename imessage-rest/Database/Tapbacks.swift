@@ -8,6 +8,7 @@
 
 import Foundation
 import Vapor
+import IMCore
 
 struct BulkTapbackRepresentation: Content {
     var representations: [TapbackRepresentation]

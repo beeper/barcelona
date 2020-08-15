@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import IMCore
 
 extension NSAttributedString {
     /** Convert an attributed string to HTML */

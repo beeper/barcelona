@@ -8,6 +8,8 @@
 
 import Foundation
 import Vapor
+import IMCore
+import Contacts
 
 struct ContactIDRepresentation: Content {
     var id: String

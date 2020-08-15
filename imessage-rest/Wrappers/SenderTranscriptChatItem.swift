@@ -8,7 +8,7 @@
 
 import Foundation
 import Vapor
-
+import IMCore
 
 struct SenderTranscriptChatItemRepresentation: Content, ChatItemRepresentation {
     init(_ item: IMSenderChatItem, chatGUID chat: String?) {

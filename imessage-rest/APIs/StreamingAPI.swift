@@ -9,6 +9,7 @@
 import Foundation
 import Vapor
 import os.log
+import IMCore
 
 private let log_streaming = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "StreamingAPI")
 

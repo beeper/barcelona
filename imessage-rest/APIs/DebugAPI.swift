@@ -8,6 +8,7 @@
 
 import Foundation
 import Vapor
+import IMCore
 
 private struct HealthStruct: Content {
     var chatsLoaded: Int;

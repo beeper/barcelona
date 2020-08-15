@@ -9,6 +9,7 @@
 import Foundation
 import Vapor
 import Swime
+import IMCore
 
 import os.log
 
