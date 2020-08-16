@@ -111,7 +111,7 @@
 - (id)_existingChatForIMHandle:(id)arg1 fixChatHandle:(BOOL)arg2;
 - (id)existingConversationForTUConversationUUID:(id)arg1;
 - (id)existingChatForEngramID:(id)arg1;
-- (id)exisitingChatForGroupID:(id)arg1;
+- (IMChat*)exisitingChatForGroupID:(NSString*)arg1;
 - (id)existingChatForRoom:(id)arg1 onAccount:(id)arg2;
 - (id)existingChatForIMHandles:(id)arg1;
 - (id)existingChatForIMHandle:(id)arg1;
@@ -119,7 +119,7 @@
 - (id)existingChatForPersonID:(id)arg1;
 - (id)existingChatWithDisplayName:(id)arg1;
 - (IMChat*)existingChatWithChatIdentifier:(id)arg1;
-- (id)existingChatWithGroupID:(id)arg1;
+- (IMChat*)existingChatWithGroupID:(NSString*)arg1;
 - (id)_lookupExistingChatWithIMHandle:(id)arg1;
 - (id)_existingChatWithIdentifier:(id)arg1 style:(unsigned char)arg2 account:(id)arg3;
 - (id)_existingChatWithIdentifier:(id)arg1 style:(unsigned char)arg2 service:(id)arg3;

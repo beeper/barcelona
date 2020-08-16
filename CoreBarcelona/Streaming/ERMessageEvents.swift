@@ -64,7 +64,7 @@ class ERMessageEvents: EventDispatcher {
         
         items.forEach { item in
             chat.loadMessage(withGUID: item.guid) { message in
-                guard let parsed = self.parse(message ?? item._newChatItems(), chatGUID: chat.guid) else {
+                guard let parsed = self.parse(message ?? item._newChatItems(), chatGroupID: chat.groupID) else {
                     return
                 }
                 
@@ -79,7 +79,7 @@ class ERMessageEvents: EventDispatcher {
         
         items.forEach { item in
             IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!.loadMessage(withGUID: item.guid) { message in
-                guard let parsed = self.parse(message ?? item._newChatItems(), chatGUID: chat.guid) else {
+                guard let parsed = self.parse(message ?? item._newChatItems(), chatGroupID: chat.groupID) else {
                     return
                 }
                 
@@ -88,10 +88,10 @@ class ERMessageEvents: EventDispatcher {
         }
     }
     
-    private func parse(_ unknown: Any?, chatGUID: String) -> [ChatItem]? {
+    private func parse(_ unknown: Any?, chatGroupID: String) -> [ChatItem]? {
         if let array = unknown as? [NSObject] {
-            return parseArrayOf(chatItems: array, withGUID: chatGUID)
-        } else if let item = unknown as? NSObject, let parsed = wrapChatItem(unknownItem: item, withChatGUID: chatGUID) {
+            return parseArrayOf(chatItems: array, withGroupID: chatGroupID)
+        } else if let item = unknown as? NSObject, let parsed = wrapChatItem(unknownItem: item, withChatGroupID: chatGroupID) {
             return [parsed]
         } else {
             return nil

@@ -13,18 +13,18 @@ import Vapor
 private let regex = try! NSRegularExpression(pattern: "<body.*?>([\\s\\S]*)<\\/body>")
 
 struct TextChatItemRepresentation: Content, ChatItemRepresentation {
-    init(_ item: IMTextMessagePartChatItem, chatGUID: String?) {
+    init(_ item: IMTextMessagePartChatItem, chatGroupID: String?) {
         text = item.text.string
         
         if let html = item.text.attributedString2Html?.replacingOccurrences(of: "\n", with: "") {
             self.html = html.groups(for: regex)[0][1]
         }
         
-        self.load(item: item, chatGUID: chatGUID)
+        self.load(item: item, chatGroupID: chatGroupID)
     }
     
     var guid: String?
-    var chatGUID: String?
+    var chatGroupID: String?
     var fromMe: Bool?
     var time: Double?
     var text: String

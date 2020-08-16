@@ -59,15 +59,15 @@ public func bindChatAPI(_ app: Application) {
         return promise.futureResult
     }
     
-    let chat = chats.grouped(":guid")
+    let chat = chats.grouped(":groupID")
     
     /**
-     Gets a specific chat with its GUID
+     Gets a specific chat with its GroupID
      */
     chat.get { req -> EventLoopFuture<Chat> in
-        guard let guid = req.parameters.get("guid") else { throw Abort(.badRequest) }
-        guard let chat = IMChatRegistry.sharedInstance()?._chatInstance(forGUID: guid) else {
-            os_log("Couldn't find message with GUID %@", guid, log_chatAPI)
+        guard let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
+        guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else {
+            os_log("Couldn't find chat with GroupID %@", groupID, log_chatAPI)
             throw Abort(.notFound)
         }
         
@@ -78,9 +78,9 @@ public func bindChatAPI(_ app: Application) {
      Re-joins a chat. This doesn't always work, nor well.
      */
     chat.get("join") { req -> EventLoopFuture<Chat> in
-        guard let guid = req.parameters.get("guid") else { throw Abort(.badRequest) }
-        guard let chat = IMChatRegistry.sharedInstance()?._chatInstance(forGUID: guid) else {
-            os_log("Couldn't find message with GUID %@", guid, log_chatAPI)
+        guard let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
+        guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else {
+            os_log("Couldn't find chat with GroupID %@", groupID, log_chatAPI)
             throw Abort(.notFound)
         }
         
@@ -93,8 +93,8 @@ public func bindChatAPI(_ app: Application) {
      Delete a chat
      */
     chat.delete { req -> EventLoopFuture<Chat> in
-        guard let guid = req.parameters.get("guid") else { throw Abort(.badRequest) }
-        guard let chat = IMChatRegistry.sharedInstance()!._chatInstance(forGUID: guid) else { throw Abort(.notFound) }
+        guard let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
+        guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else { throw Abort(.notFound) }
         
         let promise = req.eventLoop.makePromise(of: Chat.self)
         
@@ -118,8 +118,8 @@ public func bindChatAPI(_ app: Application) {
      Rename a chat
      */
     chat.patch("name") { req -> EventLoopFuture<Chat> in
-        guard let rename = try? req.content.decode(RenameChat.self), let chatGUID = req.parameters.get("guid") else { throw Abort(.badRequest) }
-        guard let chat = IMChatRegistry.sharedInstance()!._chatInstance(forGUID: chatGUID) else {
+        guard let rename = try? req.content.decode(RenameChat.self), let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
+        guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else {
             throw Abort(.notFound)
         }
         
@@ -146,9 +146,9 @@ private func bindParticipantsAPI(_ chat: RoutesBuilder) {
      Lookup participants of a chat
      */
     participants.get { req -> EventLoopFuture<BulkHandleRepresentation> in
-        guard let guid = req.parameters.get("guid") else { throw Abort(.badRequest) }
-        guard let chat = IMChatRegistry.sharedInstance()?._chatInstance(forGUID: guid) else {
-            os_log("Couldn't find message with GUID %@", guid, log_chatAPI)
+        guard let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
+        guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else {
+            os_log("Couldn't find chat with GroupID %@", groupID, log_chatAPI)
             throw Abort(.notFound)
         }
         
@@ -161,9 +161,9 @@ private func bindParticipantsAPI(_ chat: RoutesBuilder) {
      Manage the state of a set of participants
      */
     func toggleParticipants(_ add: Bool, req: Request) throws -> EventLoopFuture<BulkHandleIDRepresentation> {
-        guard let guid = req.parameters.get("guid") else { throw Abort(.badRequest) }
-        guard let chat = IMChatRegistry.sharedInstance()!._chatInstance(forGUID: guid) else {
-            os_log("Couldn't find message with GUID %@", guid, log_chatAPI)
+        guard let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
+        guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else {
+            os_log("Couldn't find chat with GroupID %@", groupID, log_chatAPI)
             throw Abort(.notFound)
         }
         

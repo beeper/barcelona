@@ -54,3 +54,4 @@ void IMDEnsureSharedRecordStoreInitialized();
 //NSArray *_IMDSqlOperationGetRowsForQueryWithBindingBlock(CFStringRef, NSError **, void (^)(id));
 void IMDSetIsRunningInDatabaseServerProcess(char);
 NSArray* IMDMessageRecordCopyMessagesForAssociatedGUID(CFStringRef);
+NSArray* IMDMessageRecordCopyMessagesForRowIDs(NSArray*);

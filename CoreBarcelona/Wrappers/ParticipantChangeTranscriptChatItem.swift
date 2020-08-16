@@ -11,22 +11,22 @@ import IMCore
 import Vapor
 
 struct ParticipantChangeTranscriptChatItemRepresentation: Content, ChatItemRepresentation {
-    init(_ item: IMParticipantChangeChatItem, chatGUID: String?) {
+    init(_ item: IMParticipantChangeChatItem, chatGroupID: String?) {
         initiatorID = item.sender?.id
         targetID = item.otherHandle?.id
         changeType = item.changeType
-        self.load(item: item, chatGUID: chatGUID)
+        self.load(item: item, chatGroupID: chatGroupID)
     }
     
-    init(_ item: IMParticipantChangeItem, chatGUID: String?) {
+    init(_ item: IMParticipantChangeItem, chatGroupID: String?) {
         initiatorID = item.sender
         targetID = item.otherHandle
         changeType = item.changeType
-        self.load(item: item, chatGUID: chatGUID)
+        self.load(item: item, chatGroupID: chatGroupID)
     }
     
     var guid: String?
-    var chatGUID: String?
+    var chatGroupID: String?
     var fromMe: Bool?
     var time: Double?
     var initiatorID: String?

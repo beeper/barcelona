@@ -12,7 +12,7 @@ import GRDB
 
 struct SearchResultRepresentation: Content {
     var guid: String
-    var chatGUID: String
+    var chatGroupID: String
     var text: String
     var sender: String
     var isFromMe: Bool
@@ -40,14 +40,14 @@ extension DBReader {
                 // MARK: - Result transformation
                 let representations: [SearchResultRepresentation] = try results.compactMap { result in
                     // MARK: - Chat resolution
-                    guard let chatGUID = try self.chatGUID(forMessageROWID: result.ROWID, in: db), let sender = try self.resolveSenderID(forMessage: result, in: db), let guid = result.guid, let text = result.text, let isFromMe = result.is_from_me, let dateNS = result.date else {
+                    guard let chatGroupID = try self.chatGroupID(forMessageROWID: result.ROWID, in: db), let sender = try self.resolveSenderID(forMessage: result, in: db), let guid = result.guid, let text = result.text, let isFromMe = result.is_from_me, let dateNS = result.date else {
                         return nil
                     }
                     
                     let date = NSDate.__im_dateWithNanosecondTimeInterval(sinceReferenceDate: dateNS)
                     
                     // MARK: - Transformation resolution
-                    return SearchResultRepresentation(guid: guid, chatGUID: chatGUID, text: text, sender: sender, isFromMe: isFromMe == 1, time: (date?.timeIntervalSince1970 ?? 0) * 1000, acknowledgmentType: result.associated_message_type)
+                    return SearchResultRepresentation(guid: guid, chatGroupID: chatGroupID, text: text, sender: sender, isFromMe: isFromMe == 1, time: (date?.timeIntervalSince1970 ?? 0) * 1000, acknowledgmentType: result.associated_message_type)
                 }
                 
                 promise.succeed(BulkSearchResultRepresentation(results: representations))

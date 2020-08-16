@@ -6,7 +6,7 @@
 
 #import <objc/NSObject.h>
 
-@class NSArray, NSDictionary;
+@class NSArray, NSDictionary, IMService;
 
 @interface IMServiceAgent : NSObject
 {
@@ -17,7 +17,7 @@
 + (void)forgetStatusImageAppearance;
 + (id)imageNameForStatus:(unsigned long long)arg1;
 + (id)imageURLForStatus:(unsigned long long)arg1;
-+ (id)sharedAgent;
++ (IMServiceAgent*)sharedAgent;
 + (long long)serviceAgentCapabilities;
 + (void)setServiceAgentCapabilities:(long long)arg1;
 - (id)myPictureData;
@@ -32,7 +32,7 @@
 - (void)setMyStatus:(unsigned long long)arg1 message:(id)arg2;
 - (id)notificationCenter;
 - (id)serviceWithNameNonBlocking:(id)arg1;
-- (id)serviceWithName:(id)arg1;
+- (IMService*)serviceWithName:(id)arg1;
 
 @end
 

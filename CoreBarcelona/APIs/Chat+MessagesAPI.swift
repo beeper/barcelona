@@ -71,7 +71,23 @@ extension MessagesError {
     }
 }
 
+func 
+
 func bindMessagesAPI(_ chat: RoutesBuilder) {
+    // MARK: - Chat Items
+    
+    let items = chat.grouped("items")
+    
+    items.get("associated") { req -> EventLoopFuture<BulkMessageRepresentation> in
+        guard let itemGUID = try? req.query.get(String.self, at: "item") else {
+            throw Abort(.badRequest)
+        }
+        
+        return DBReader(pool: db, eventLoop: req.eventLoop).associatedMessages(with: itemGUID).map {
+            BulkMessageRepresentation($0)
+        }
+    }
+    
     let messages = chat.grouped("messages")
     
     // MARK: - Bulk
@@ -80,8 +96,8 @@ func bindMessagesAPI(_ chat: RoutesBuilder) {
      Query messages in a chat
      */
     messages.get { req -> EventLoopFuture<BulkChatItemRepresentation> in
-        guard let guid = req.parameters.get("guid") else { throw Abort(.badRequest) }
-        guard let chat = IMChatRegistry.sharedInstance()?._chatInstance(forGUID: guid) else { throw Abort(.notFound) }
+        guard let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
+        guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else { throw Abort(.notFound) }
         let messageGUID = try? req.query.get(String.self, at: "before")
         var limit = (try? req.query.get(UInt64.self, at: "limit")) ?? 75
         
@@ -102,8 +118,8 @@ func bindMessagesAPI(_ chat: RoutesBuilder) {
      Create a ChatItem
      */
     messages.grouped(ThrottlingMiddleware(allotment: 30, expiration: 5)).post { req -> EventLoopFuture<BulkMessageRepresentation> in
-        guard let creation = try? req.content.decode(CreateMessage.self), let guid = req.parameters.get("guid") else { throw Abort(.badRequest) }
-        guard let chat = Registry.sharedInstance.chat(withGUID: guid) else { throw Abort(.notFound) }
+        guard let creation = try? req.content.decode(CreateMessage.self), let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
+        guard let chat = Registry.sharedInstance.chat(withGroupID: groupID) else { throw Abort(.notFound) }
         
         let promise = req.eventLoop.makePromise(of: BulkMessageRepresentation.self)
         
@@ -129,8 +145,8 @@ func bindMessagesAPI(_ chat: RoutesBuilder) {
      Delete a message or subpart from the message
      */
     messages.delete { req -> EventLoopFuture<OKResult> in
-        guard let deletion = try? req.content.decode(DeleteMessageRequest.self), let chatGUID = req.parameters.get("guid") else { throw Abort(.badRequest) }
-        guard let chat = Registry.sharedInstance.chat(withGUID: chatGUID) else { throw Abort(.notFound) }
+        guard let deletion = try? req.content.decode(DeleteMessageRequest.self), let chatGroupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
+        guard let chat = Registry.sharedInstance.chat(withGroupID: chatGroupID) else { throw Abort(.notFound) }
         
         let promise = req.eventLoop.makePromise(of: OKResult.self)
         
@@ -147,30 +163,6 @@ func bindMessagesAPI(_ chat: RoutesBuilder) {
         return promise.futureResult
     }
     
-    messages.get("tapbacks") { req -> EventLoopFuture<BulkTapbackRepresentation> in
-        guard let chatItemGUID = try? req.query.get(String.self, at: "chatItemGUID") else {
-            throw Abort(.badRequest)
-        }
-        
-        let reader = DBReader(pool: db, eventLoop: req.eventLoop)
-        let promise = req.eventLoop.makePromise(of: BulkTapbackRepresentation.self)
-        
-        reader.tapbacks(for: chatItemGUID).whenComplete { result in
-            switch (result) {
-            case .failure(let error):
-                print(error)
-                promise.fail(Abort(.internalServerError))
-                break
-            case .success(let representations):
-                print(representations)
-                promise.succeed(representations)
-                break
-            }
-        }
-        
-        return promise.futureResult
-    }
-    
     // MARK: - Specific
     
     let message = messages.grouped(":messageGUID")
@@ -180,19 +172,24 @@ func bindMessagesAPI(_ chat: RoutesBuilder) {
     /**
      Query a specific message
      */
-    message.get { req -> EventLoopFuture<MessageRepresentation> in
-        guard let chatGUID = req.parameters.get("guid"), let messageGUID = req.parameters.get("messageGUID") else { throw Abort(.badRequest) }
-        guard let chat = IMChatRegistry.sharedInstance()?._chatInstance(forGUID: chatGUID) else { throw Abort(.notFound) }
+    message.get { req -> EventLoopFuture<Message> in
+        guard let chatGroupID = req.parameters.get("groupID"), let messageGUID = req.parameters.get("messageGUID") else { throw Abort(.badRequest) }
+        guard let chat = Registry.sharedInstance.imChat(withGroupID: chatGroupID) else { throw Abort(.notFound) }
         
-        let promise = req.eventLoop.makePromise(of: MessageRepresentation.self)
+        let promise = req.eventLoop.makePromise(of: Message.self)
         
-        chat.loadMessage(withGUID: messageGUID) { message in
-            guard let message = message else {
-                promise.fail(Abort(.badRequest))
-                return
+        Message.message(withGUID: messageGUID, inChat: chatGroupID, on: req.eventLoop).whenComplete {
+            switch $0 {
+            case .success(let representation):
+                guard let representation = representation else {
+                    promise.fail(Abort(.notFound))
+                    return
+                }
+                
+                promise.succeed(representation)
+            case .failure(let error):
+                promise.fail(error)
             }
-            
-            promise.succeed(MessageRepresentation(message, chatGUID: chatGUID))
         }
         
         return promise.futureResult
@@ -207,8 +204,8 @@ private func bindTapbacksAPI(_ message: RoutesBuilder) {
      Send a tapback
      */
     tapbacks.post { req -> EventLoopFuture<HTTPStatus> in
-        guard let chatGUID = req.parameters.get("guid"), let messageGUID = req.parameters.get("messageGUID"), let part = try? req.query.get(Int.self, at: "part"), let ackType = try? req.query.get(Int.self, at: "type") else { throw Abort(.badRequest) }
-        guard let chat = IMChatRegistry.sharedInstance()?._chatInstance(forGUID: chatGUID) else { throw Abort(.notFound) }
+        guard let chatGroupID = req.parameters.get("groupID"), let messageGUID = req.parameters.get("messageGUID"), let part = try? req.query.get(Int.self, at: "part"), let ackType = try? req.query.get(Int.self, at: "type") else { throw Abort(.badRequest) }
+        guard let chat = Registry.sharedInstance.imChat(withGroupID: chatGroupID) else { throw Abort(.notFound) }
         
         let debugItemType = try? req.query.get(UInt8.self, at: "itemType")
         let promise = req.eventLoop.makePromise(of: HTTPStatus.self)

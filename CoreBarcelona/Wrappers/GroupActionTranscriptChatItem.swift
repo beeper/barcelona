@@ -11,20 +11,20 @@ import IMCore
 import Vapor
 
 struct GroupActionTranscriptChatItemRepresentation: Content, ChatItemRepresentation {
-    init(_ item: IMGroupActionChatItem, chatGUID: String?) {
+    init(_ item: IMGroupActionChatItem, chatGroupID: String?) {
         actionType = item.actionType
         sender = item.sender?.id
-        self.load(item: item, chatGUID: chatGUID)
+        self.load(item: item, chatGroupID: chatGroupID)
     }
     
-    init(_ item: IMGroupActionItem, chatGUID: String?) {
+    init(_ item: IMGroupActionItem, chatGroupID: String?) {
         actionType = item.actionType
         sender = item.sender
-        self.load(item: item, chatGUID: chatGUID)
+        self.load(item: item, chatGroupID: chatGroupID)
     }
     
     var guid: String?
-    var chatGUID: String?
+    var chatGroupID: String?
     var fromMe: Bool?
     var time: Double?
     var actionType: Int64

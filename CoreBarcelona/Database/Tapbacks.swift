@@ -16,7 +16,7 @@ struct BulkTapbackRepresentation: Content {
 
 struct TapbackRepresentation: Content {
     var handle: String
-    var chatGUID: String
+    var chatGroupID: String
     var associatedMessageGUID: String
     var associatedMessageType: Int64
 }
@@ -29,41 +29,38 @@ struct TapbackResult {
 }
 
 extension DBReader {
-    /**
-     Load all tapbacks for a given chat item GUID. This must include the part, i.e. p:0/ADOIJGFA-3489GJA-ADFG843-ADNFBAO
-     */
-    func tapbacks(for chatItem: String) -> EventLoopFuture<BulkTapbackRepresentation> {
-        let promise = eventLoop.makePromise(of: BulkTapbackRepresentation.self)
+    func associatedMessages(with guid: String) -> EventLoopFuture<[Message]> {
+        let promise = eventLoop.makePromise(of: [Message].self)
         
         do {
             try pool.read { db in
-                // MARK: - Raw query
-                let results = try RawMessage.fetchAll(db, sql: "SELECT * FROM message WHERE associated_message_guid = ?", arguments: [chatItem])
+                let messages = try RawMessage
+                    .select(RawMessage.Columns.guid, RawMessage.Columns.ROWID)
+                    .filter(sql: "associated_message_guid = ?", arguments: [guid])
+                    .fetchAll(db)
                 
-                var chatGUID: String? = nil
-                
-                let representations = try results.compactMap { message -> TapbackRepresentation? in
-                    guard let handleRowID = message.handle_id, let associatedMessageGUID = message.associated_message_guid, let associatedMessageType = message.associated_message_type, let fromMeRaw = message.is_from_me else { return nil }
-                    
-                    // MARK: - Chat resolution
-                    if chatGUID == nil {
-                        chatGUID = try self.chatGUID(forMessageROWID: message.ROWID, in: db)
-                        if chatGUID == nil {
-                            return nil
-                        }
+                do {
+                    let chatGroupIDs = try messages.map {
+                        try self.chatGroupID(forMessageROWID: $0.ROWID, in: db)
                     }
-                    
-                    guard let handleID = try self.resolveSenderID(forMessage: message, in: db) else { return nil }
-                    
-                    return TapbackRepresentation(handle: handleID, chatGUID: chatGUID!, associatedMessageGUID: associatedMessageGUID, associatedMessageType: associatedMessageType)
+                
+                    IMMessage.messages(withGUIDs: messages.map { $0.guid! }, on: eventLoop).map { messages -> [Message] in
+                        messages.compactMap { message -> Message? in
+                            guard let chatGroupID = chatGroupIDs[messages.index(of: message)!] else {
+                                return nil
+                            }
+                            
+                            return Message(message, chatGroupID: chatGroupID)
+                        }
+                    }.cascade(to: promise)
+                } catch {
+                    print("Failed to resolve chat group IDs for messages with error \(error)")
+                    promise.succeed([])
+                    return
                 }
-                
-                // MARK: - Query resolution
-                
-                promise.succeed(BulkTapbackRepresentation(representations: representations))
             }
         } catch {
-            promise.fail(error)
+           promise.fail(error)
         }
         
         return promise.futureResult

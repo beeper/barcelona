@@ -39,9 +39,9 @@ class ChatMessageJoin: Record {
 
 extension DBReader {
     /**
-     Resolve the chat GUID for a given message ROWID
+     Resolve the chat GroupID for a given message ROWID
      */
-    func chatGUID(forMessageROWID ROWID: Int64, in db: Database) throws -> String? {
+    func chatGroupID(forMessageROWID ROWID: Int64, in db: Database) throws -> String? {
         // MARK: - Join resolution
         guard let joinResult = try ChatMessageJoin
             .select(ChatMessageJoin.Columns.chat_id, as: Int64.self)
@@ -51,13 +51,13 @@ extension DBReader {
         }
         
         // MARK: - Chat resolution
-        guard let guid = try RawChat
-            .select(RawChat.Columns.guid, as: String.self)
+        guard let groupID = try RawChat
+            .select(RawChat.Columns.group_id, as: String.self)
             .filter(RawChat.Columns.ROWID == joinResult)
             .fetchOne(db) else {
                 return nil
         }
         
-        return guid
+        return groupID
     }
 }

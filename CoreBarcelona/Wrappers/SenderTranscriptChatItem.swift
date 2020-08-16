@@ -11,13 +11,13 @@ import Vapor
 import IMCore
 
 struct SenderTranscriptChatItemRepresentation: Content, ChatItemRepresentation {
-    init(_ item: IMSenderChatItem, chatGUID chat: String?) {
+    init(_ item: IMSenderChatItem, chatGroupID chat: String?) {
         handleID = item.handle.id
-        self.load(item: item, chatGUID: chat)
+        self.load(item: item, chatGroupID: chat)
     }
     
     var guid: String?
-    var chatGUID: String?
+    var chatGroupID: String?
     var fromMe: Bool?
     var time: Double?
     var handleID: String

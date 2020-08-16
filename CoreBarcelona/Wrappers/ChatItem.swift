@@ -29,23 +29,47 @@ enum ChatItemType: String, Content {
 
 protocol ChatItemRepresentation: Content {
     var guid: String? { get set }
-    var chatGUID: String? { get set }
+    var chatGroupID: String? { get set }
     var fromMe: Bool? { get set }
     var time: Double? { get set }
 }
 
 extension ChatItemRepresentation {
-    internal mutating func load(item: IMItem, chatGUID chat: String?) {
+    func tapbacks(on eventLoop: EventLoop) -> EventLoopFuture<[Message]> {
+        let promise = eventLoop.makePromise(of: [Message].self)
+        
+        guard let guid = guid else {
+            promise.succeed([])
+            return promise.futureResult
+        }
+        
+        DBReader(pool: db, eventLoop: eventLoop).associatedMessages(with: guid).whenComplete { result in
+            switch result {
+            case .success(let tapbacks):
+                promise.succeed(tapbacks)
+                break
+            case .failure(let error):
+                promise.fail(error)
+                break
+            }
+        }
+        
+        return promise.futureResult
+    }
+}
+
+extension ChatItemRepresentation {
+    internal mutating func load(item: IMItem, chatGroupID chat: String?) {
         guid = item.guid
-        chatGUID = chat
+        chatGroupID = chat
         fromMe = item.isFromMe
         time = (item.time?.timeIntervalSince1970 ?? 0) * 1000
     }
     
-    internal mutating func load(item: IMTranscriptChatItem, chatGUID chat: String?) {
+    internal mutating func load(item: IMTranscriptChatItem, chatGroupID chat: String?) {
         
         guid = item.guid
-        chatGUID = chat
+        chatGroupID = chat
         fromMe = item.isFromMe
         time = ((item.transcriptDate ?? item._timeAdded())?.timeIntervalSince1970 ?? item._item()?.time?.timeIntervalSince1970 ?? 0) * 1000
     }
@@ -130,14 +154,14 @@ public struct ChatItem: Content {
         ChatItem.register(TextChatItemRepresentation.self, for: .text)
         ChatItem.register(AcknowledgmentChatItemRepresentation.self, for: .acknowledgment)
         ChatItem.register(AssociatedMessageItemRepresentation.self, for: .associated)
-        ChatItem.register(MessageRepresentation.self, for: .message)
+        ChatItem.register(Message.self, for: .message)
         ChatItem.register(StubChatItemRepresentation.self, for: .phantom)
         ChatItem.register(GroupTitleChangeItemRepresentation.self, for: .groupTitle)
         ChatItem.register(TypingChatItemRepresentation.self, for: .typing)
     }
 }
 
-func wrapChatItem(unknownItem raw: NSObject, withChatGUID guid: String) -> ChatItem? {
+func wrapChatItem(unknownItem raw: NSObject, withChatGroupID groupID: String) -> ChatItem? {
     let item: NSObject = raw
     
     if item is IMTranscriptChatItem || item is IMGroupTitleChangeItem || item is IMParticipantChangeItem || item is IMGroupTitleChangeChatItem || item is IMGroupActionItem {
@@ -145,25 +169,25 @@ func wrapChatItem(unknownItem raw: NSObject, withChatGUID guid: String) -> ChatI
         
         switch (item) {
         case let item as IMDateChatItem:
-            chatItem = ChatItem(type: .date, item: DateTranscriptChatItemRepresentation(item, chatGUID: guid))
+            chatItem = ChatItem(type: .date, item: DateTranscriptChatItemRepresentation(item, chatGroupID: groupID))
         case let item as IMSenderChatItem:
-            chatItem = ChatItem(type: .sender, item: SenderTranscriptChatItemRepresentation(item, chatGUID: guid))
+            chatItem = ChatItem(type: .sender, item: SenderTranscriptChatItemRepresentation(item, chatGroupID: groupID))
         case let item as IMParticipantChangeItem:
-            chatItem = ChatItem(type: .participantChange, item: ParticipantChangeTranscriptChatItemRepresentation(item, chatGUID: guid))
+            chatItem = ChatItem(type: .participantChange, item: ParticipantChangeTranscriptChatItemRepresentation(item, chatGroupID: groupID))
         case let item as IMParticipantChangeChatItem:
-            chatItem = ChatItem(type: .participantChange, item: ParticipantChangeTranscriptChatItemRepresentation(item, chatGUID: guid))
+            chatItem = ChatItem(type: .participantChange, item: ParticipantChangeTranscriptChatItemRepresentation(item, chatGroupID: groupID))
         case let item as IMMessageStatusChatItem:
-            chatItem = ChatItem(type: .status, item: StatusChatItemRepresentation(item, chatGUID: guid))
+            chatItem = ChatItem(type: .status, item: StatusChatItemRepresentation(item, chatGroupID: groupID))
         case let item as IMGroupActionItem:
-            chatItem = ChatItem(type: .groupAction, item: GroupActionTranscriptChatItemRepresentation(item, chatGUID: guid))
+            chatItem = ChatItem(type: .groupAction, item: GroupActionTranscriptChatItemRepresentation(item, chatGroupID: groupID))
         case let item as IMGroupActionChatItem:
-            chatItem = ChatItem(type: .groupAction, item: GroupActionTranscriptChatItemRepresentation(item, chatGUID: guid))
+            chatItem = ChatItem(type: .groupAction, item: GroupActionTranscriptChatItemRepresentation(item, chatGroupID: groupID))
         case let item as IMGroupTitleChangeChatItem:
-            chatItem = ChatItem(type: .groupTitle, item: GroupTitleChangeItemRepresentation(item, chatGUID: guid))
+            chatItem = ChatItem(type: .groupTitle, item: GroupTitleChangeItemRepresentation(item, chatGroupID: groupID))
         case let item as IMGroupTitleChangeItem:
-            chatItem = ChatItem(type: .groupTitle, item: GroupTitleChangeItemRepresentation(item, chatGUID: guid))
+            chatItem = ChatItem(type: .groupTitle, item: GroupTitleChangeItemRepresentation(item, chatGroupID: groupID))
         case let item as IMTypingChatItem:
-            chatItem = ChatItem(type: .typing, item: TypingChatItemRepresentation(item, chatGUID: guid))
+            chatItem = ChatItem(type: .typing, item: TypingChatItemRepresentation(item, chatGroupID: groupID))
         default:
             break
         }
@@ -179,41 +203,41 @@ func wrapChatItem(unknownItem raw: NSObject, withChatGUID guid: String) -> ChatI
                 fatalError("Got an unexpected IMItem in the transcript parser")
             }
             
-            return ChatItem(type: .message, item: MessageRepresentation(imItem, transcriptRepresentation: chatItem, chatGUID: guid))
+            return ChatItem(type: .message, item: Message(imItem, transcriptRepresentation: chatItem, chatGroupID: groupID))
         }
     }
     
     switch (item) {
     case let item as IMAttachmentMessagePartChatItem:
-        return ChatItem(type: .attachment, item: AttachmentChatItemRepresentation(item, chatGUID: guid))
+        return ChatItem(type: .attachment, item: AttachmentChatItemRepresentation(item, chatGroupID: groupID))
     case let item as IMTranscriptPluginChatItem:
-        return ChatItem(type: .plugin, item: PluginChatItemRepresentation(item, chatGUID: guid))
+        return ChatItem(type: .plugin, item: PluginChatItemRepresentation(item, chatGroupID: groupID))
     case let item as IMTextMessagePartChatItem:
-        return ChatItem(type: .text, item: TextChatItemRepresentation(item, chatGUID: guid))
+        return ChatItem(type: .text, item: TextChatItemRepresentation(item, chatGroupID: groupID))
     case let item as IMMessageAcknowledgmentChatItem:
-        return ChatItem(type: .acknowledgment, item: AcknowledgmentChatItemRepresentation(item, chatGUID: guid))
+        return ChatItem(type: .acknowledgment, item: AcknowledgmentChatItemRepresentation(item, chatGroupID: groupID))
     case let item as IMAssociatedMessageItem:
-        return ChatItem(type: .message, item: MessageRepresentation(item, chatGUID: guid))
+        return ChatItem(type: .message, item: Message(item, chatGroupID: groupID))
     case let item as IMMessage:
-        return ChatItem(type: .message, item: MessageRepresentation(item, chatGUID: guid))
+        return ChatItem(type: .message, item: Message(item, chatGroupID: groupID))
     case let item as IMMessageItem:
-        return ChatItem(type: .message, item: MessageRepresentation(item, chatGUID: guid))
+        return ChatItem(type: .message, item: Message(item, chatGroupID: groupID))
     default:
         print("Discarding unknown ChatItem '\(item)'")
-        return ChatItem(type: .phantom, item: StubChatItemRepresentation(item, chatGUID: guid))
+        return ChatItem(type: .phantom, item: StubChatItemRepresentation(item, chatGroupID: groupID))
     }
 }
 
-func parseArrayOf(chatItems: [NSObject], withGUID guid: String) -> [ChatItem] {
+func parseArrayOf(chatItems: [NSObject], withGroupID groupID: String) -> [ChatItem] {
      let messages: [ChatItem?] = chatItems.map { item in
-         wrapChatItem(unknownItem: item, withChatGUID: guid)
+         wrapChatItem(unknownItem: item, withChatGroupID: groupID)
      }
 
      return messages.filter { $0 != nil } as! [ChatItem]
  }
 
 struct StubChatItemRepresentation: ChatItemRepresentation, Content {
-    init(_ item: NSObject, chatGUID chat: String?) {
+    init(_ item: NSObject, chatGroupID chat: String?) {
         guid = NSString.stringGUID()
         fromMe = false
         time = 0
@@ -221,7 +245,7 @@ struct StubChatItemRepresentation: ChatItemRepresentation, Content {
     }
     
     var guid: String?
-    var chatGUID: String?
+    var chatGroupID: String?
     var fromMe: Bool?
     var time: Double?
     var className: String

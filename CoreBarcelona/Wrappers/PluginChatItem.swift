@@ -11,7 +11,7 @@ import IMCore
 import Vapor
 
 struct PluginChatItemRepresentation: Content, ChatItemRepresentation {
-    init(_ item: IMTranscriptPluginChatItem, chatGUID: String?) {
+    init(_ item: IMTranscriptPluginChatItem, chatGroupID: String?) {
         payload = item.dataSource.payload.base64EncodedString()
         bundleID = item.dataSource.bundleID
         
@@ -28,11 +28,11 @@ struct PluginChatItemRepresentation: Content, ChatItemRepresentation {
                 attachments.append(attachment)
             }
         }
-        self.load(item: item, chatGUID: chatGUID)
+        self.load(item: item, chatGroupID: chatGroupID)
     }
     
     var guid: String?
-    var chatGUID: String?
+    var chatGroupID: String?
     var fromMe: Bool?
     var time: Double?
     var payload: String

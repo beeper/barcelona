@@ -12,15 +12,15 @@ import IMCore
 import Vapor
 
 struct AcknowledgmentChatItemRepresentation: Content, ChatItemRepresentation {
-    init(_ item: IMMessageAcknowledgmentChatItem, chatGUID: String?) {
+    init(_ item: IMMessageAcknowledgmentChatItem, chatGroupID: String?) {
         acknowledgmentType = item.messageAcknowledgmentType
         sender = item.sender?.id
         associatedGUID = item.associatedMessageGUID
-        self.load(item: item, chatGUID: chatGUID)
+        self.load(item: item, chatGroupID: chatGroupID)
     }
     
     var guid: String? = nil
-    var chatGUID: String? = nil
+    var chatGroupID: String? = nil
     var fromMe: Bool? = nil
     var time: Double? = nil
     var sender: String?

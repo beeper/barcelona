@@ -80,7 +80,6 @@ private func flagsForCreation(_ creation: CreateMessage, transfers: [String]) ->
 
 struct Chat: Codable {
     init(_ backing: IMChat) {
-        guid = backing.guid
         joinState = backing.joinState
         roomName = backing.roomName
         displayName = backing.displayName
@@ -95,11 +94,10 @@ struct Chat: Codable {
         style = backing.chatStyle
     }
     
-    var guid: String
+    var groupID: String
     var joinState: Int64
     var roomName: String?
     var displayName: String?
-    var groupID: String?
     var participants: [String]
     var lastAddressedHandleID: String?
     var unreadMessageCount: UInt64?
@@ -109,12 +107,8 @@ struct Chat: Codable {
     var lastMessageTime: Double
     var style: UInt8
     
-//    private var chat: IMChat {
-//        IMChatRegistry.sharedInstance()!._chatInstance(forGUID: guid)
-//    }
-    
     private func chat() -> IMChat {
-        IMChatRegistry.sharedInstance()!._chatInstance(forGUID: guid)
+        IMChatRegistry.sharedInstance()!.exisitingChat(forGroupID: groupID)
     }
     
     func delete(messages deletion: DeleteMessageRequest, on eventLoop: EventLoop) -> EventLoopFuture<[Result<Void, Error>]> {
@@ -186,7 +180,7 @@ struct Chat: Codable {
                     self.chat()._sendMessage(message, adjustingSender: true, shouldQueue: true)
                 }
                 
-                promise.succeed(BulkMessageRepresentation(messages, chatGUID: self.guid))
+                promise.succeed(BulkMessageRepresentation(messages, chatGroupID: self.groupID))
             }
         }
         

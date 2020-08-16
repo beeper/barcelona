@@ -12,14 +12,14 @@ import IMCore
 import Vapor
 
 struct AssociatedMessageItemRepresentation: Content, ChatItemRepresentation {
-    init(_ item: IMAssociatedMessageItem, chatGUID: String?) {
+    init(_ item: IMAssociatedMessageItem, chatGroupID: String?) {
         associatedGUID = item.associatedMessageGUID()
         associatedType = item.associatedMessageType()
-        self.load(item: item, chatGUID: chatGUID)
+        self.load(item: item, chatGroupID: chatGroupID)
     }
     
     var guid: String? = nil
-    var chatGUID: String? = nil
+    var chatGroupID: String? = nil
     var fromMe: Bool? = nil
     var time: Double? = nil
     var associatedGUID: String

@@ -12,16 +12,19 @@ import IMCore
 class Registry {
     static let sharedInstance = Registry()
     
-    func chat(withGUID guid: String) -> Chat? {
-        guard let imChat = imChat(withGUID: guid) else {
+    func chat(withGroupID groupID: String) -> Chat? {
+        guard let imChat = imChat(withGroupID: groupID) else {
             return nil
         }
         
         return Chat(imChat)
     }
     
-    func imChat(withGUID guid: String) -> IMChat? {
-        return IMChatRegistry.shared._chatInstance(forGUID: guid)
+    /// I hate IMCore. Seriously, delete the framework and start over.
+    func imChat(withGroupID groupID: String) -> IMChat? {
+        return IMChatRegistry.shared.allExistingChats.first {
+            $0.groupID == groupID
+        }
     }
     
     func account(withUniqueID uniqueID: String) -> IMAccount {
@@ -32,6 +35,40 @@ class Registry {
         guard let account = IMAccountController.sharedInstance().activeIMessageAccount ?? IMAccountController.sharedInstance().activeSMSAccount, let handle = account.imHandle(withID: id) else { return nil }
         
         return handle
+    }
+    
+    func suitableHandle(for service: String) -> IMHandle? {
+        guard let impl = self.resolve(service: service) else {
+            return nil
+        }
+        
+        return suitableHandle(for: impl)
+    }
+    
+    func suitableHandle(for service: IMService) -> IMHandle? {
+        guard let account = bestAccount(for: service) else {
+            return nil
+        }
+        
+        return account.loginIMHandle
+    }
+    
+    func bestAccount(for service: String) -> IMAccount? {
+        guard let service = resolve(service: service) else {
+            return nil
+        }
+        
+        return bestAccount(for: service)
+    }
+    
+    func bestAccount(for service: IMService) -> IMAccount? {
+        IMAccountController.sharedInstance()?.bestAccount(forService: service)
+    }
+    
+    private func resolve(service: String) -> IMService? {
+        let IMServiceAgentImpl = NSClassFromString("IMServiceAgentImpl") as! IMServiceAgent.Type
+        
+        return IMServiceAgentImpl.shared()?.service(withName: service)
     }
     
     func iMessageAccount() -> IMAccount? {

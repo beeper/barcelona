@@ -6,6 +6,8 @@
 
 #import "IMServiceAgent.h"
 
+@class IMServiceImpl;
+
 @interface IMServiceAgentImpl : IMServiceAgent
 {
 }
@@ -17,7 +19,7 @@
 + (void)forgetStatusImageAppearance;
 + (id)notificationCenter;
 + (void)initialize;
-+ (id)sharedAgent;
++ (IMServiceAgentImpl*)sharedAgent;
 - (unsigned long long)vcCapabilities;
 - (void)vcCapabilitiesChanged:(unsigned long long)arg1;
 - (void)setupComplete;
@@ -29,7 +31,7 @@
 - (void)setMyStatus:(unsigned long long)arg1 message:(id)arg2;
 - (void)_statusImageAppearanceChanged:(id)arg1;
 - (id)notificationCenter;
-- (id)serviceWithName:(id)arg1;
+- (IMServiceImpl*)serviceWithName:(id)arg1;
 - (void)launchIfNecessary;
 - (void)_daemonDisconnected:(id)arg1;
 - (void)_daemonConnected:(id)arg1;

@@ -7,10 +7,13 @@
 //
 
 import Foundation
+import NIO
 import IMCore
 import os.log
 
 let log_IMChat = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "IMChat+MessageQueries")
+
+private let messageQuerySystem = MultiThreadedEventLoopGroup.init(numberOfThreads: 5)
 
 /**
  Provides various functions to aid in the lazy resolution of messages
@@ -24,15 +27,14 @@ extension IMChat {
      Loads a single message into memory and resolves it once it is complete
      */
     func loadMessage(withGUID messageGUID: String, _ callback: @escaping (IMMessage?) -> ()) {
-        guard let queryID = loadMessagesBeforeAnd(afterGUID: messageGUID, numberOfMessagesToLoadBeforeGUID: 1, numberOfMessagesToLoadAfterGUID: 1, loadImmediately: false) else { return callback(nil) }
-        
-        IMQueryWatcher.sharedInstance.waitForQuery(queryID: queryID) { _ in
-            guard let message = self.message(forGUID: messageGUID), let _ = message._imMessageItem else {
-                os_log("Query finished for message with GUID %@, but result was not fully formed", messageGUID, log_IMChat)
-                return callback(nil)
+        IMMessage.message(withGUID: messageGUID, on: messageQuerySystem.next()).whenComplete { result in
+            switch result {
+            case .success(let message):
+                callback(message)
+            case .failure(let error):
+                print("Failed to load message with error \(error)")
+                callback(nil)
             }
-            
-            callback(message)
         }
     }
     
@@ -57,7 +59,7 @@ extension IMChat {
             }.split {
                 $0.guid == guid
             }.last?.prefix(Int(numberBefore + numberAfter + 1)).compactMap {
-                wrapChatItem(unknownItem: $0, withChatGUID: self.guid)
+                wrapChatItem(unknownItem: $0, withChatGroupID: self.groupID)
             } ?? []
             
             callback(parsed)

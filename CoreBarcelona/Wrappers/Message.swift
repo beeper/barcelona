@@ -11,27 +11,41 @@ import IMCore
 import Vapor
 
 struct BulkMessageRepresentation: Content {
-    init(_ messages: [IMMessage], chatGUID forChatGUID: String) {
+    init(_ messages: [IMMessage], chatGroupID: String) {
         self.messages = messages.map {
-            MessageRepresentation($0, chatGUID: forChatGUID)
+            Message($0, chatGroupID: chatGroupID)
         }
     }
     
-    init(_ messages: ArraySlice<IMMessage>, chatGUID forChatGUID: String) {
+    init(_ messages: [Message]) {
+        self.messages = messages
+    }
+    
+    init(_ messages: ArraySlice<IMMessage>, chatGroupID: String) {
         self.messages = messages.map {
-            MessageRepresentation($0, chatGUID: forChatGUID)
+            Message($0, chatGroupID: chatGroupID)
         }
     }
     
-    var messages: [MessageRepresentation]
+    var messages: [Message]
 }
 
 struct BulkMessageIDRepresentation: Content {
     var messages: [String]
 }
 
-public struct MessageRepresentation: ChatItemRepresentation {
-    init(_ item: IMItem, transcriptRepresentation: ChatItem, chatGUID: String?) {
+public struct Message: ChatItemRepresentation {
+    static func message(withGUID guid: String, inChat chat: String, on eventLoop: EventLoop) -> EventLoopFuture<Message?> {
+        IMMessage.message(withGUID: guid, on: eventLoop).map {
+            guard let message = $0 else {
+                return nil
+            }
+            
+            return Message(message, chatGroupID: chat)
+        }
+    }
+    
+    init(_ item: IMItem, transcriptRepresentation: ChatItem, chatGroupID: String?) {
         guid = item.guid
         fromMe = item.isFromMe
         time = item.time!.timeIntervalSince1970 * 1000
@@ -48,14 +62,12 @@ public struct MessageRepresentation: ChatItemRepresentation {
         flags = 0x5
         items = [transcriptRepresentation]
         
-        self.load(item: item, chatGUID: chatGUID)
+        self.load(item: item, chatGroupID: chatGroupID)
     }
     
-    init(_ backing: IMMessageItem, chatGUID inChatGUID: String?) {
-        let message = backing.message()!
-        
+    init(_ backing: IMMessageItem, message: IMMessage, chatGroupID inChatGroupID: String?) {
         guid = message.guid
-        chatGUID = inChatGUID
+        chatGroupID = inChatGroupID
         fromMe = message.isFromMe
         time = (backing.time?.timeIntervalSince1970 ?? 0) * 1000
         timeDelivered = (backing.timeDelivered?.timeIntervalSince1970 ?? 0) * 1000
@@ -70,8 +82,11 @@ public struct MessageRepresentation: ChatItemRepresentation {
         isDelivered = backing.isDelivered
         isAudioMessage = backing.isAudioMessage
         
-        if let chatGUID = chatGUID {
-            description = message.description(forPurpose: 0x2, inChat: Registry.sharedInstance.imChat(withGUID: chatGUID)!, senderDisplayName: backing._senderHandle()._displayNameWithAbbreviation)
+        let context = backing.context
+        
+        
+        if let chatGroupID = chatGroupID {
+            description = message.description(forPurpose: 0x2, inChat: Registry.sharedInstance.imChat(withGroupID: chatGroupID)!, senderDisplayName: backing._senderHandle()._displayNameWithAbbreviation)
         }
         flags = backing.flags
         items = []
@@ -79,17 +94,21 @@ public struct MessageRepresentation: ChatItemRepresentation {
         if let chatItems = try? backing._newChatItems() {
             chatItems.forEach {
                 if let item = $0 as? IMChatItem {
-                    guard let chatGUID = chatGUID, let chatItem = wrapChatItem(unknownItem: item, withChatGUID: chatGUID) else { return }
+                    guard let chatGroupID = chatGroupID, let chatItem = wrapChatItem(unknownItem: item, withChatGroupID: chatGroupID) else { return }
                     self.items.append(chatItem)
                 }
             }
         }
         
-        self.load(item: backing, chatGUID: inChatGUID)
+        self.load(item: backing, chatGroupID: inChatGroupID)
     }
     
-    init(_ message: IMMessage, chatGUID inChatGUID: String?) {
-        self.init(message._imMessageItem, chatGUID: inChatGUID)
+    init(_ backing: IMMessageItem, chatGroupID: String?) {
+        self.init(backing, message: backing.message()!, chatGroupID: chatGroupID)
+    }
+    
+    init(_ message: IMMessage, chatGroupID: String?) {
+        self.init(message._imMessageItem, chatGroupID: chatGroupID)
         
         timeRead = (message.timeRead?.timeIntervalSince1970 ?? 0) * 1000
         timeDelivered = (message.timeDelivered?.timeIntervalSince1970 ?? 0) * 1000
@@ -102,7 +121,7 @@ public struct MessageRepresentation: ChatItemRepresentation {
     }
     
     var guid: String?
-    var chatGUID: String?
+    var chatGroupID: String?
     var fromMe: Bool?
     var time: Double?
     var sender: String?

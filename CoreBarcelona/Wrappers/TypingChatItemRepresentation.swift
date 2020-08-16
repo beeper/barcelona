@@ -11,14 +11,14 @@ import IMCore
 import Vapor
 
 struct TypingChatItemRepresentation: Content, ChatItemRepresentation {
-    init(_ item: IMTypingChatItem, chatGUID: String?) {
+    init(_ item: IMTypingChatItem, chatGroupID: String?) {
         sender = item.sender?.id
         
-        self.load(item: item, chatGUID: chatGUID)
+        self.load(item: item, chatGroupID: chatGroupID)
     }
     
     var guid: String?
-    var chatGUID: String?
+    var chatGroupID: String?
     var fromMe: Bool?
     var time: Double?
     var sender: String?

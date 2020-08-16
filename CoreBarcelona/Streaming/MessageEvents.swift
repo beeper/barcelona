@@ -47,7 +47,7 @@ class MessageEvents: EventDispatcher {
         let event = eventFor(itemsReceived: BulkChatItemRepresentation(items: transcriptItems.compactMap { transcriptItem -> ChatItem? in
             os_log("👨🏻‍💻 Processing inserted IMTranscriptItem %@", transcriptItem, log_messageEvents)
             
-            return wrapChatItem(unknownItem: transcriptItem, withChatGUID: chat.guid)
+            return wrapChatItem(unknownItem: transcriptItem, withChatGroupID: chat.groupID)
         }))
         
         if (event.data?.items.count ?? 0) == 0 {

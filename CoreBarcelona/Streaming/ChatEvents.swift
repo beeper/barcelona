@@ -71,7 +71,7 @@ class ChatEvents: EventDispatcher {
             return
         }
         
-        StreamingAPI.shared.dispatch(eventFor(participantsChanged: chat.participantHandleIDs(), in: chat.guid), to: nil)
+        StreamingAPI.shared.dispatch(eventFor(participantsChanged: chat.participantHandleIDs(), in: chat.groupID), to: nil)
     }
     
     // MARK: - IMChat Displayname changed
