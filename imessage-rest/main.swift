@@ -6,28 +6,17 @@
 //  Copyright © 2020 Eric Rabil. All rights reserved.
 //
 
-import Contacts
 import Foundation
-import IMCore
-import Vapor
+import CoreBarcelona
 
-let controller = IMDaemonController.sharedInstance()!
-let _ = ERChatSubscriptionWatcher.shared
+ERBarcelonaManager.bootstrap()
 
-/** Registers with imagent */
-controller.listener.addHandler(ERDaemonListener.self.shared)
-controller.addListenerID("com.ericrabil.imessage-rest", capabilities: UInt32(18341))
-
-/** Sets up ChatItem serialization table */
-ChatItem.setup()
-
-NSLog("Message XPC Service has started")
-
-let listener = NSXPCListener(machServiceName: kServiceName)
+let listener = NSXPCListener(machServiceName: ERBarcelonaManager.machServiceName)
 let listenerDelegate = ListenerDelegate()
-
 listener.delegate = listenerDelegate
 
 listener.resume()
+
+NSLog("Message XPC Service has been started")
 
 RunLoop.current.run()
