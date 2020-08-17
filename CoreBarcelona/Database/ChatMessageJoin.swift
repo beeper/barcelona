@@ -38,6 +38,17 @@ class ChatMessageJoin: Record {
 }
 
 extension DBReader {
+    func chatGroupID(forMessageGUID guid: String, in db: Database) throws -> String? {
+        guard let ROWID = try RawMessage
+            .select(RawMessage.Columns.ROWID, as: Int64.self)
+            .filter(RawMessage.Columns.guid == guid)
+            .fetchOne(db) else {
+                return nil
+        }
+        
+        return try chatGroupID(forMessageROWID: ROWID, in: db)
+    }
+    
     /**
      Resolve the chat GroupID for a given message ROWID
      */

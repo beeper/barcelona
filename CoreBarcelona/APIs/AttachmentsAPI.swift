@@ -127,7 +127,7 @@ public func bindAttachmentsAPI(_ app: Application) {
 //                    promise.succeed(AttachmentRepresentation(transfer))
                 
                 do {
-                    try DBReader(pool: db, eventLoop: req.eventLoop).insert(fileTransfer: transfer, path: storedPath)
+                    try DBReader(pool: databasePool, eventLoop: req.eventLoop).insert(fileTransfer: transfer, path: storedPath)
 
                     promise.succeed(AttachmentRepresentation(transfer))
                 } catch {
@@ -156,7 +156,7 @@ public func bindAttachmentsAPI(_ app: Application) {
 //        return req.eventLoop.makeSucceededFuture(req.fileio.streamFile(at: path))
         let promise = req.eventLoop.makePromise(of: Response.self)
         
-        DBReader(pool: db, eventLoop: req.eventLoop).attachment(for: guid).whenComplete { result in
+        DBReader(pool: databasePool, eventLoop: req.eventLoop).attachment(for: guid).whenComplete { result in
             switch result {
             case .success(let representation):
                 guard let representation = representation else {

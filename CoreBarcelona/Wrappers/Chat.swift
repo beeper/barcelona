@@ -52,6 +52,16 @@ struct ChatIDRepresentation: Content {
     var chat: String
 }
 
+enum MessagePartType: String, Codable {
+    case text = "text"
+    case attachment = "attachment"
+}
+
+struct MessagePart: Content {
+    var type: MessagePartType
+    var details: String
+}
+
 struct CreateMessage: Codable {
     var subject: String?
     var parts: [MessagePart]
@@ -62,9 +72,23 @@ struct CreateMessage: Codable {
     var expressiveSendStyleID: String?
 }
 
-struct DeleteMessage: Codable {
+protocol MessageIdentifiable {
+    var guid: String { get set }
+}
+
+struct DeleteMessage: Codable, MessageIdentifiable {
     var guid: String
     var parts: [Int]?
+}
+
+extension MessageIdentifiable {
+    func resolveChatGroupID(on eventLoop: EventLoop) -> EventLoopFuture<String?> {
+        Chat.chatGroupID(forMessage: guid, on: eventLoop)
+    }
+    
+    func resolveChat(on eventLoop: EventLoop) -> EventLoopFuture<Chat?> {
+        Chat.chat(forMessage: guid, on: eventLoop)
+    }
 }
 
 struct DeleteMessageRequest: Codable {
@@ -94,6 +118,30 @@ struct Chat: Codable {
         style = backing.chatStyle
     }
     
+    public static func chatGroupID(forMessage guid: String, on eventLoop: EventLoop) -> EventLoopFuture<String?> {
+        let promise = eventLoop.makePromise(of: String?.self)
+        
+        do {
+            try databasePool.read { db in
+                promise.succeed(try DBReader(pool: databasePool, eventLoop: eventLoop).chatGroupID(forMessageGUID: guid, in: db))
+            }
+        } catch {
+            promise.succeed(nil)
+        }
+        
+        return promise.futureResult
+    }
+    
+    public static func chat(forMessage guid: String, on eventLoop: EventLoop) -> EventLoopFuture<Chat?> {
+        chatGroupID(forMessage: guid, on: eventLoop).map {
+            guard let groupID = $0 else {
+                return nil
+            }
+            
+            return Registry.sharedInstance.chat(withGroupID: groupID)
+        }
+    }
+    
     var groupID: String
     var joinState: Int64
     var roomName: String?
@@ -107,43 +155,34 @@ struct Chat: Codable {
     var lastMessageTime: Double
     var style: UInt8
     
-    private func chat() -> IMChat {
-        IMChatRegistry.sharedInstance()!.exisitingChat(forGroupID: groupID)
+    public func imChat() -> IMChat {
+        Registry.sharedInstance.imChat(withGroupID: groupID)!
     }
     
-    func delete(messages deletion: DeleteMessageRequest, on eventLoop: EventLoop) -> EventLoopFuture<[Result<Void, Error>]> {
-        EventLoopFuture<Void>.whenAllComplete(deletion.messages.map { request -> EventLoopFuture<Void> in
-            let future = eventLoop.makePromise(of: Void.self)
-            
-            let guid = request.guid, parts = request.parts ?? []
-            let fullMessage = parts.count == 0
-            
-            self.chat().loadMessage(withGUID: guid) { message in
-                guard let message = message else {
-                    future.fail(Abort(.notFound))
-                    return
-                }
-                
-                if fullMessage {
-                    IMDaemonController.shared()!.deleteMessage(withGUIDs: [guid], queryID: NSString.stringGUID() as String)
-                } else {
-                    let chatItems = message._imMessageItem._newChatItems()!
-                    
-                    let items: [IMChatItem] = parts.compactMap {
-                        if chatItems.count <= $0 { return nil }
-                        return chatItems[$0]
-                    }
-                    
-                    let newItem = self.chat().chatItemRules._item(withChatItemsDeleted: items, fromItem: message._imMessageItem)!
-                    
-                    print(IMDaemonController.shared()!.updateMessage(newItem))
-                }
-                
-                future.succeed(())
+    func delete(message: DeleteMessage, on eventLoop: EventLoop) -> EventLoopFuture<Void> {
+        let guid = message.guid, parts = message.parts ?? []
+        let fullMessage = parts.count == 0
+        
+        return IMMessage.message(withGUID: guid, on: eventLoop).map { message -> Void in
+            guard let message = message else {
+                return
             }
             
-            return future.futureResult
-        }, on: eventLoop)
+            if fullMessage {
+                IMDaemonController.shared()!.deleteMessage(withGUIDs: [guid], queryID: NSString.stringGUID())
+            } else {
+                let chatItems = message._imMessageItem._newChatItems()!
+                
+                let items: [IMChatItem] = parts.compactMap {
+                    if chatItems.count <= $0 { return nil }
+                    return chatItems[$0]
+                }
+                
+                let newItem = self.imChat().chatItemRules._item(withChatItemsDeleted: items, fromItem: message._imMessageItem)!
+                
+                IMDaemonController.shared()!.updateMessage(newItem)
+            }
+        }
     }
     
     func send(message: CreateMessage, on eventLoop: EventLoop) -> EventLoopFuture<BulkMessageRepresentation> {
@@ -177,7 +216,7 @@ struct Chat: Codable {
                 }
                 
                 messages.forEach { message in
-                    self.chat()._sendMessage(message, adjustingSender: true, shouldQueue: true)
+                    self.imChat()._sendMessage(message, adjustingSender: true, shouldQueue: true)
                 }
                 
                 promise.succeed(BulkMessageRepresentation(messages, chatGroupID: self.groupID))

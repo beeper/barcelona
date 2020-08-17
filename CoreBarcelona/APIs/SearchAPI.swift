@@ -18,6 +18,6 @@ public func bindSearchAPI(_ app: Application) {
     search.get("messages") { req -> EventLoopFuture<BulkSearchResultRepresentation> in
         let query = (try? req.query.get(String.self, at: "query")) ?? "", limit = try? req.query.get(Int.self, at: "limit")
         
-        return DBReader(pool: db, eventLoop: req.eventLoop).messages(matching: query, limit: limit ?? 20)
+        return DBReader(pool: databasePool, eventLoop: req.eventLoop).messages(matching: query, limit: limit ?? 20)
     }
 }

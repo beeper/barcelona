@@ -91,7 +91,7 @@ private func ERAttributedString(forText text: NSString, on eventLoop: EventLoop)
 private func ERAttributedString(forAttachment attachment: String, on eventLoop: EventLoop) -> EventLoopFuture<MessagePartParseResult> {
     let promise = eventLoop.makePromise(of: MessagePartParseResult.self)
     
-    DBReader(pool: db, eventLoop: eventLoop).attachment(for: attachment).whenComplete { result in
+    DBReader(pool: databasePool, eventLoop: eventLoop).attachment(for: attachment).whenComplete { result in
         switch result {
         case .success(let representation):
             guard let representation = representation else {

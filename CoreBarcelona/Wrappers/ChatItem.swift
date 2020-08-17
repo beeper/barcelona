@@ -43,7 +43,7 @@ extension ChatItemRepresentation {
             return promise.futureResult
         }
         
-        DBReader(pool: db, eventLoop: eventLoop).associatedMessages(with: guid).whenComplete { result in
+        DBReader(pool: databasePool, eventLoop: eventLoop).associatedMessages(with: guid).whenComplete { result in
             switch result {
             case .success(let tapbacks):
                 promise.succeed(tapbacks)

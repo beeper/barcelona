@@ -35,13 +35,25 @@ struct BulkMessageIDRepresentation: Content {
 }
 
 public struct Message: ChatItemRepresentation {
-    static func message(withGUID guid: String, inChat chat: String, on eventLoop: EventLoop) -> EventLoopFuture<Message?> {
-        IMMessage.message(withGUID: guid, on: eventLoop).map {
-            guard let message = $0 else {
-                return nil
+    static func message(withGUID guid: String, on eventLoop: EventLoop) -> EventLoopFuture<Message?> {
+        IMMessage.message(withGUID: guid, on: eventLoop).flatMap { message -> EventLoopFuture<Message?> in
+            let promise = eventLoop.makePromise(of: Message?.self)
+            
+            guard let message = message else {
+                promise.succeed(nil)
+                return promise.futureResult
             }
             
-            return Message(message, chatGroupID: chat)
+            do {
+                try databasePool.read { reader in
+                    promise.succeed(Message(message, chatGroupID: try DBReader(pool: databasePool, eventLoop: messageQuerySystem.next()).chatGroupID(forMessageROWID: message.messageID, in: reader)))
+                }
+            } catch {
+                print("Failed to resolve chat groupID when pulling message with error \(error)")
+                promise.succeed(nil)
+            }
+            
+            return promise.futureResult
         }
     }
     

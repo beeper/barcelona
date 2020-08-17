@@ -12,9 +12,9 @@ import Vapor
 import GRDB
 
 #if os(iOS)
-let db = try! DatabasePool(path: "/var/mobile/Library/SMS/sms.db")
+let databasePool = try! DatabasePool(path: "/var/mobile/Library/SMS/sms.db")
 #else
-let db = try! DatabasePool(path: ("~/Library/Messages/chat.db" as NSString).expandingTildeInPath)
+let databasePool = try! DatabasePool(path: ("~/Library/Messages/chat.db" as NSString).expandingTildeInPath)
 #endif
 
 /**

@@ -17,6 +17,14 @@ extension Chat: Content {
     
 }
 
+struct CreateChat: Content {
+    var participants: [String]
+}
+
+struct RenameChat: Content {
+    var name: String?
+}
+
 private let log_chatAPI = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ChatAPI")
 private let log_participantAPI = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ParticipantAPI")
 private let log_messageAPI = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "MessageAPI")
@@ -134,7 +142,7 @@ public func bindChatAPI(_ app: Application) {
         return promise.futureResult
     }
     
-    bindMessagesAPI(chat)
+    bindChatMessagesAPI(chat)
     bindParticipantsAPI(chat)
 }
 

@@ -35,7 +35,7 @@ extension IMMessage {
             return nil
         }
         
-        let message = IMMessage.init(fromIMMessageItem: item, sender: sender, subject: item.subject)!
+        let message = IMMessage.init(fromIMMessageItem: item, sender: sender, subject: nil)!
         
         let IMMessageItemChatContext = NSClassFromString("IMMessageItemChatContext") as! NSObject.Type
         

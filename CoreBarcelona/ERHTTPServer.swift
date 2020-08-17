@@ -38,6 +38,7 @@ class ERHTTPServer {
         
         /** REST APIs */
         bindChatAPI(app)
+        bindMessagesAPI(app)
         bindHandlesAPI(app)
         bindAttachmentsAPI(app)
         bindSearchAPI(app)

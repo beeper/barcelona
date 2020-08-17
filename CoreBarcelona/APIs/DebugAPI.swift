@@ -24,7 +24,6 @@ public func bindDebugAPI(_ app: Application) {
     debug.get("health") { req -> HealthStruct in
         HealthStruct(chatsLoaded: IMChatRegistry.shared.allExistingChats.count, messagesLoaded: IMChatRegistry.shared.allExistingChats.reduce(into: 0) { (result, chat) in
             result += chat._items.count
-            result += chat.chatItems.count
-        }, contactsLoaded: IMContactStore.shared.allContacts.count, socketsConnected: StreamingAPI.shared.sockets.count)
+        }, contactsLoaded: 0, socketsConnected: StreamingAPI.shared.sockets.count)
     }
 }
