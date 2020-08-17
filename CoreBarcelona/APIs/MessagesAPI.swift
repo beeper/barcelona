@@ -14,6 +14,11 @@ struct OKResult: Content {
     var ok: Bool
 }
 
+struct TapbackCreation: Content {
+    var item: String
+    var type: Int
+}
+
 extension DeleteMessage: Content { }
 extension DeleteMessageRequest: Content { }
 
@@ -38,13 +43,17 @@ func bindMessagesAPI(_ app: Application) {
     }
     
     associated.post { req -> EventLoopFuture<HTTPStatus> in
-        guard let itemGUID: String = try? req.query.get(String.self, at: "item"),
-            let ackType = try? req.query.get(Int.self, at: "type"),
-            let parts = itemGUID.groups(for: chatItemGUIDExtractor).first,
+        guard let creation = try? req.content.decode(TapbackCreation.self) else {
+            throw Abort(.badRequest)
+        }
+        
+        let itemGUID = creation.item
+        let ackType = creation.type
+        
+        guard let parts = itemGUID.groups(for: chatItemGUIDExtractor).first,
             let part = Int(parts[1]),
             let messageGUID = parts[safe: 2] else {
-            throw Abort(.badRequest)
-            
+                throw Abort(.badRequest)
         }
         
         return Chat.chat(forMessage: messageGUID, on: req.eventLoop).flatMap { chat in

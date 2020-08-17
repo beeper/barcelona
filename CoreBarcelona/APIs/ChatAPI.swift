@@ -153,14 +153,14 @@ private func bindParticipantsAPI(_ chat: RoutesBuilder) {
     /**
      Lookup participants of a chat
      */
-    participants.get { req -> EventLoopFuture<BulkHandleRepresentation> in
+    participants.get { req -> EventLoopFuture<BulkHandleIDRepresentation> in
         guard let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
-        guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else {
+        guard let chat = Registry.sharedInstance.chat(withGroupID: groupID) else {
             os_log("Couldn't find chat with GroupID %@", groupID, log_chatAPI)
             throw Abort(.notFound)
         }
         
-        return req.eventLoop.makeSucceededFuture(BulkHandleRepresentation(chat.participants))
+        return req.eventLoop.makeSucceededFuture(chat.participantIDs)
     }
     
     // MARK: - Participant Management
@@ -191,7 +191,8 @@ private func bindParticipantsAPI(_ chat: RoutesBuilder) {
             if add {
                 if !chat.canAddParticipants(handles) {
                     os_log("Can't add participants to this chat, bailing", log_chatAPI)
-                    throw Abort(.badRequest)
+                    promise.fail(Abort(.badRequest, reason: "You can't add pariticpants to this group."))
+                    return
                 }
                 
                 let reasonMessage = IMMessage.instantMessage(withText: NSAttributedString(string: "Get in my fucking van, kid."), messageSubject: nil, flags: 0x5)

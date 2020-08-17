@@ -62,15 +62,27 @@ extension IMMessage {
                 promise.succeed([])
                 return
             }
-            
+
             promise.succeed(results.compactMap { item in
-                guard let item = item as? IMMessageItem, let message = IMMessage.message(fromUnloadedItem: item) else {
+                guard let messageItem = item as? IMMessageItem, let message = IMMessage.message(fromUnloadedItem: messageItem) else {
+                    print("fuck! \(item)")
                     return nil
                 }
-                
+
                 return message
             })
         }
+//        EventLoopFuture<IMMessage?>.whenAllSucceed(guids.map { message -> EventLoopFuture<IMMessage?> in
+//            let promise = eventLoop.makePromise(of: IMMessage?.self)
+//
+//            IMChatHistoryController.sharedInstance()!.loadMessage(withGUID: message) {
+//                promise.succeed($0)
+//            }
+//
+//            return promise.futureResult
+//        }, on: eventLoop).map {
+//            $0.compactMap { $0 }
+//        }
         
         return promise.futureResult
     }

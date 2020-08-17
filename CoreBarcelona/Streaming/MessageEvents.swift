@@ -23,12 +23,15 @@ private let IMChatItemsOldItems = "__kIMChatItemsOldItems";
 
 private let log_messageEvents = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "MessageEvents")
 
-private let ChangedItemsExclusion = [
-    IMTextMessagePartChatItem.self,
-    IMAttachmentMessagePartChatItem.self,
+let ChangedItemsExclusion = [
+//    IMTextMessagePartChatItem.self,
+//    IMAttachmentMessagePartChatItem.self,
     IMMessageAcknowledgmentChatItem.self,
-    IMMessageStatusChatItem.self,
+    IMAssociatedMessageItem.self,
+//    IMMessageStatusChatItem.self,
 ]
+
+//private let ChangedItemsExclusion = [AnyClass.Type]()
 
 /**
  Tracks events related to IMMessage
@@ -43,12 +46,32 @@ class MessageEvents: EventDispatcher {
     /**
      Dispatches incoming transcript items
      */
-    private func process(inserted transcriptItems: [IMTranscriptChatItem], in chat: IMChat) {
-        let event = eventFor(itemsReceived: BulkChatItemRepresentation(items: transcriptItems.compactMap { transcriptItem -> ChatItem? in
+    private func process(inserted items: [NSObject], in chat: IMChat) {
+        var messages: [IMMessage] = []
+        
+        var wrapped = items.compactMap { transcriptItem -> ChatItem? in
             os_log("👨🏻‍💻 Processing inserted IMTranscriptItem %@", transcriptItem, log_messageEvents)
             
-            return wrapChatItem(unknownItem: transcriptItem, withChatGroupID: chat.groupID)
-        }))
+            switch (transcriptItem) {
+            case let item as IMMessagePartChatItem:
+                if !messages.contains(item.message) {
+                    messages.append(item.message)
+                }
+                return nil
+            default:
+                return wrapChatItem(unknownItem: transcriptItem, withChatGroupID: chat.groupID)
+            }
+        }
+        
+        messages.forEach {
+            guard let wrappedItem = wrapChatItem(unknownItem: $0, withChatGroupID: chat.groupID) else {
+                return
+            }
+            
+            wrapped.append(wrappedItem)
+        }
+        
+        let event = eventFor(itemsReceived: BulkChatItemRepresentation(items: wrapped))
         
         if (event.data?.items.count ?? 0) == 0 {
             return
@@ -74,28 +97,13 @@ class MessageEvents: EventDispatcher {
             case IMChatItemsReload:
                 break;
             case IMChatItemsInserted:
-                self.process(inserted: set.compactMap { index -> IMTranscriptChatItem? in
+                self.process(inserted: set.compactMap { index -> NSObject? in
                     guard let item = chat.chatItems[safe: index] else {
                         os_log("⁉️ Bad index when parsing chat items!", type: .error, log_messageEvents)
                         return nil
                     }
                     
-                    if ChangedItemsExclusion.contains(where: {
-                        item.isKind(of: $0)
-                    }) {
-                        os_log("🚫 Discarding excluded chat item %@", type: .debug, item, log_messageEvents)
-                        return nil
-                    }
-                    
-                    switch item {
-                    case is IMTextMessagePartChatItem:
-                        return nil
-                    case let item as IMTranscriptChatItem:
-                        return item
-                    default:
-                        os_log("🤔 Unknown chat item received at MessageEvents.swift:itemsChanged of type %@", type: .info, item, log_messageEvents)
-                        return nil
-                    }
+                    return item
                 }, in: chat)
                 
                 break;

@@ -227,6 +227,12 @@ struct Chat: Codable {
     }
 }
 
+extension Chat {
+    var participantIDs: BulkHandleIDRepresentation {
+        BulkHandleIDRepresentation(handles: participants)
+    }
+}
+
 func chatToRepresentation(_ backing: IMChat, skinny: Bool = false) -> Chat {
     return .init(backing)
 }

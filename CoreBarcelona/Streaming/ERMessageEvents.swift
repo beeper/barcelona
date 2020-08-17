@@ -24,16 +24,27 @@ class ERMessageEvents: EventDispatcher {
             guard let item = $0.object as? IMItem, let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
                 return
             }
-            
+
             self.messageReceived(item, inChat: chat)
         }
-        
+
         addObserver(forName: ERChatMessagesReceivedNotification) {
             guard let items = $0.object as? [IMItem], let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
                 return
             }
-            
+
             self.messagesReceived(items, inChat: chat)
+        }
+        
+        /// Tapbacks that are sent from me, on other devices, do not get received by other handlers. This handler receives tapbacks on all devices.
+        addObserver(forName: ERChatMessageSentNotification) {
+            guard let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
+                return
+            }
+            
+            if let associated = $0.object as? IMAssociatedMessageItem {
+                self.messagesReceived([associated], inChat: chat, overrideFromMe: true)
+            }
         }
         
         addObserver(forName: ERChatMessagesUpdatedNotification) {
@@ -59,10 +70,20 @@ class ERMessageEvents: EventDispatcher {
     }
     
     /** Counts as a new message */
-    private func messagesReceived(_ items: [IMItem], inChat chatIdentifier: String) {
+    private func messagesReceived(_ items: [IMItem], inChat chatIdentifier: String, overrideFromMe: Bool = false) {
         let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!
         
         items.forEach { item in
+            if !ChangedItemsExclusion.contains(where: {
+                item.isKind(of: $0)
+            }) {
+                return
+            }
+            
+            if item is IMAssociatedMessageItem, item.isFromMe, !overrideFromMe {
+                return
+            }
+            
             chat.loadMessage(withGUID: item.guid) { message in
                 guard let parsed = self.parse(message ?? item._newChatItems(), chatGroupID: chat.groupID) else {
                     return

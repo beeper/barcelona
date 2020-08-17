@@ -22,6 +22,7 @@ struct AttachmentRepresentation: Content {
         guard let item = IMFileTransferCenter.sharedInstance()?.transfer(forGUID: guid, includeRemoved: false) else {
             return nil
         }
+        
         self.init(item)
     }
     
