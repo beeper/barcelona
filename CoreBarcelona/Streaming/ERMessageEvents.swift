@@ -9,6 +9,7 @@
 import Foundation
 import IMCore
 import os.log
+import NIO
 
 internal let ERChatMessageReceivedNotification = NSNotification.Name(rawValue: "ERChatMessageReceivedNotification")
 internal let ERChatMessagesReceivedNotification = NSNotification.Name(rawValue: "ERChatMessagesReceivedNotification")
@@ -73,24 +74,32 @@ class ERMessageEvents: EventDispatcher {
     private func messagesReceived(_ items: [IMItem], inChat chatIdentifier: String, overrideFromMe: Bool = false) {
         let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!
         
-        items.forEach { item in
+        EventLoopFuture<ChatItem?>.whenAllSucceed(items.compactMap { item -> EventLoopFuture<ChatItem?>? in
             if !ChangedItemsExclusion.contains(where: {
                 item.isKind(of: $0)
             }) {
-                return
+                return nil
             }
             
             if item is IMAssociatedMessageItem, item.isFromMe, !overrideFromMe {
-                return
+                return nil
             }
             
+            let promise = eventProcessing_eventLoop.next().makePromise(of: ChatItem?.self)
+            
             chat.loadMessage(withGUID: item.guid) { message in
-                guard let parsed = self.parse(message ?? item._newChatItems(), chatGroupID: chat.groupID) else {
+                guard let message = message else {
                     return
                 }
                 
-                StreamingAPI.shared.dispatch(eventFor(itemsReceived: BulkChatItemRepresentation(items: parsed)), to: nil)
+                ERIndeterminateIngestor.ingest(message, in: chat.groupID).cascade(to: promise)
             }
+            
+            return promise.futureResult
+        }, on: eventProcessing_eventLoop.next()).map {
+            $0.compactMap { $0 }
+        }.whenSuccess {
+            StreamingAPI.shared.dispatch(eventFor(itemsReceived: BulkChatItemRepresentation(items: $0)), to: nil)
         }
     }
     
@@ -98,24 +107,23 @@ class ERMessageEvents: EventDispatcher {
     private func messagesUpdated(_ items: [IMItem], inChat chatIdentifier: String) {
         let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!
         
-        items.forEach { item in
-            IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!.loadMessage(withGUID: item.guid) { message in
-                guard let parsed = self.parse(message ?? item._newChatItems(), chatGroupID: chat.groupID) else {
+        EventLoopFuture<ChatItem?>.whenAllSucceed(items.map { item -> EventLoopFuture<ChatItem?> in
+            let promise = eventProcessing_eventLoop.next().makePromise(of: ChatItem?.self)
+            
+            chat.loadMessage(withGUID: item.guid) { message in
+                guard let message = message else {
+                    promise.succeed(nil)
                     return
                 }
                 
-                StreamingAPI.shared.dispatch(eventFor(itemsUpdated: BulkChatItemRepresentation(items: parsed)), to: nil)
+                ERIndeterminateIngestor.ingest(message, in: chat.groupID).cascade(to: promise)
             }
-        }
-    }
-    
-    private func parse(_ unknown: Any?, chatGroupID: String) -> [ChatItem]? {
-        if let array = unknown as? [NSObject] {
-            return parseArrayOf(chatItems: array, withGroupID: chatGroupID)
-        } else if let item = unknown as? NSObject, let parsed = wrapChatItem(unknownItem: item, withChatGroupID: chatGroupID) {
-            return [parsed]
-        } else {
-            return nil
+            
+            return promise.futureResult
+        }, on: eventProcessing_eventLoop.next()).map {
+            $0.compactMap { $0 }
+        }.whenSuccess {
+            StreamingAPI.shared.dispatch(eventFor(itemsUpdated: BulkChatItemRepresentation(items: $0)), to: nil)
         }
     }
     

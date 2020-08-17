@@ -41,29 +41,44 @@ extension IMChat {
     /**
      Load a set of messages surrounding a GUID
      */
+    func loadMessages(around guid: String?, numberBefore: UInt64, numberAfter: UInt64) -> EventLoopFuture<[ChatItem]> {
+        let eventLoop = messageQuerySystem.next()
+        
+        let promise = eventLoop.makePromise(of: [ChatItem].self)
+        
+        eventLoop.submit {
+            var queryID: String
+            
+            if let guid = guid {
+                queryID = self.loadMessagesBeforeAnd(afterGUID: guid, numberOfMessagesToLoadBeforeGUID: numberBefore, numberOfMessagesToLoadAfterGUID: numberAfter, loadImmediately: false)
+            } else {
+                queryID = self.loadMessages(beforeDate: nil, limit: numberBefore + numberAfter + 1, loadImmediately: false)
+            }
+            
+            // Wait for query to resolve
+            IMQueryWatcher.sharedInstance.waitForQuery(queryID: queryID) { _ in
+                let items = self.value(forKey: "_items") as! [IMItem]
+                
+                let parsed = items.sorted { (item1, item2) in
+                    item1.time.compare(item2.time) == .orderedDescending
+                }.split {
+                    $0.guid == guid
+                }.last?.prefix(Int(numberBefore + numberAfter + 1)).compactMap {
+                    ERIndeterminateIngestor.ingest($0, in: self.groupID)
+                } ?? []
+                
+                EventLoopFuture<ChatItem?>.whenAllSucceed(parsed, on: eventLoop).map {
+                    $0.compactMap { $0 }
+                }.cascade(to: promise)
+            }
+        }
+        
+        return promise.futureResult
+    }
+    
+    /// Callback syntax for loadMessages
     func loadMessages(around guid: String?, numberBefore: UInt64, numberAfter: UInt64, _ callback: @escaping ([ChatItem]) -> ()) {
-        var queryID: String
-        
-        if let guid = guid {
-            queryID = self.loadMessagesBeforeAnd(afterGUID: guid, numberOfMessagesToLoadBeforeGUID: numberBefore, numberOfMessagesToLoadAfterGUID: numberAfter, loadImmediately: false)
-        } else {
-            queryID = self.loadMessages(beforeDate: nil, limit: numberBefore + numberAfter + 1, loadImmediately: false)
-        }
-        
-        // Wait for query to resolve
-        IMQueryWatcher.sharedInstance.waitForQuery(queryID: queryID) { _ in
-            let items = self.value(forKey: "_items") as! [IMItem]
-            
-            let parsed = items.sorted { (item1, item2) in
-                item1.time.compare(item2.time) == .orderedDescending
-            }.split {
-                $0.guid == guid
-            }.last?.prefix(Int(numberBefore + numberAfter + 1)).compactMap {
-                wrapChatItem(unknownItem: $0, withChatGroupID: self.groupID)
-            } ?? []
-            
-            callback(parsed)
-        }
+        loadMessages(around: guid, numberBefore: numberBefore, numberAfter: numberAfter).whenSuccess(callback)
     }
     
     /**

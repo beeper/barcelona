@@ -9,6 +9,7 @@
 import Foundation
 import IMCore
 import os.log
+import NIO
 
 private let IMChatMessageDidChangeNotification = NSNotification.Name(rawValue: "__kIMChatMessageDidChangeNotification")
 private let IMChatItemsDidChangeNotification = NSNotification.Name(rawValue: "__kIMChatItemsDidChangeNotification")
@@ -49,7 +50,7 @@ class MessageEvents: EventDispatcher {
     private func process(inserted items: [NSObject], in chat: IMChat) {
         var messages: [IMMessage] = []
         
-        var wrapped = items.compactMap { transcriptItem -> ChatItem? in
+        var wrapped = items.compactMap { transcriptItem -> EventLoopFuture<ChatItem?>? in
             os_log("👨🏻‍💻 Processing inserted IMTranscriptItem %@", transcriptItem, log_messageEvents)
             
             switch (transcriptItem) {
@@ -59,25 +60,21 @@ class MessageEvents: EventDispatcher {
                 }
                 return nil
             default:
-                return wrapChatItem(unknownItem: transcriptItem, withChatGroupID: chat.groupID)
+                return ERIndeterminateIngestor.ingest(transcriptItem, in: chat.groupID)
             }
         }
         
         messages.forEach {
-            guard let wrappedItem = wrapChatItem(unknownItem: $0, withChatGroupID: chat.groupID) else {
+            wrapped.append(ERIndeterminateIngestor.ingest($0, in: chat.groupID))
+        }
+        
+        EventLoopFuture<ChatItem?>.whenAllSucceed(wrapped, on: eventProcessing_eventLoop.next()).map { $0.compactMap { $0 } }.whenSuccess { chatItems in
+            if chatItems.count == 0 {
                 return
             }
             
-            wrapped.append(wrappedItem)
+            StreamingAPI.shared.dispatch(eventFor(itemsReceived: BulkChatItemRepresentation(items: chatItems)))
         }
-        
-        let event = eventFor(itemsReceived: BulkChatItemRepresentation(items: wrapped))
-        
-        if (event.data?.items.count ?? 0) == 0 {
-            return
-        }
-        
-        StreamingAPI.shared.dispatch(event, to: nil)
     }
     
     /**

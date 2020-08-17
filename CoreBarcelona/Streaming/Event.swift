@@ -8,6 +8,7 @@
 
 import Foundation
 import Vapor
+import NIO
 
 // MARK: - Event structure
 struct Event<P: Content>: Content {
@@ -31,6 +32,8 @@ struct Event<P: Content>: Content {
         case blockListUpdated
     }
 }
+
+internal let eventProcessing_eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 3)
 
 // MARK: - Event generators
 

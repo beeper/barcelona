@@ -10,7 +10,7 @@ import Foundation
 import Vapor
 
 struct StubChatItemRepresentation: ChatItemRepresentation, Content {
-    init(_ item: NSObject, chatGroupID chat: String?) {
+    init(_ item: AnyObject, chatGroupID chat: String?) {
         guid = NSString.stringGUID()
         fromMe = false
         time = 0

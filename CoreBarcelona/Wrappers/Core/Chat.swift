@@ -219,7 +219,7 @@ struct Chat: Codable {
                     self.imChat()._sendMessage(message, adjustingSender: true, shouldQueue: true)
                 }
                 
-                promise.succeed(BulkMessageRepresentation(messages, chatGroupID: self.groupID))
+                messages.bulkRepresentation(in: self.groupID).cascade(to: promise)
             }
         }
         

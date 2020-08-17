@@ -1,91 +1,97 @@
 //
-//  File.swift
-//  imcore-rest
+//  ChatItemV2.swift
+//  CoreBarcelona
 //
-//  Created by Eric Rabil on 7/24/20.
+//  Created by Eric Rabil on 8/17/20.
 //  Copyright © 2020 Eric Rabil. All rights reserved.
 //
 
 import Foundation
-import AnyCodable
-import IMCore
 import Vapor
 
 struct BulkChatItemRepresentation: Content {
     var items: [ChatItem]
 }
 
-func wrapChatItem(unknownItem raw: NSObject, withChatGroupID groupID: String) -> ChatItem? {
-    let item: NSObject = raw
+
+public struct ChatItem: Content {
+    let type: ChatItemType
+    let item: Any?
+
+    // MARK: Codable
+    private enum CodingKeys: String, CodingKey {
+        case type
+        case payload
+    }
     
-    if item is IMTranscriptChatItem || item is IMGroupTitleChangeItem || item is IMParticipantChangeItem || item is IMGroupTitleChangeChatItem || item is IMGroupActionItem {
-        var chatItem: ChatItem? = nil
-        
-        switch (item) {
-        case let item as IMDateChatItem:
-            chatItem = ChatItem(type: .date, item: DateTranscriptChatItemRepresentation(item, chatGroupID: groupID))
-        case let item as IMSenderChatItem:
-            chatItem = ChatItem(type: .sender, item: SenderTranscriptChatItemRepresentation(item, chatGroupID: groupID))
-        case let item as IMParticipantChangeItem:
-            chatItem = ChatItem(type: .participantChange, item: ParticipantChangeTranscriptChatItemRepresentation(item, chatGroupID: groupID))
-        case let item as IMParticipantChangeChatItem:
-            chatItem = ChatItem(type: .participantChange, item: ParticipantChangeTranscriptChatItemRepresentation(item, chatGroupID: groupID))
-        case let item as IMMessageStatusChatItem:
-            chatItem = ChatItem(type: .status, item: StatusChatItemRepresentation(item, chatGroupID: groupID))
-        case let item as IMGroupActionItem:
-            chatItem = ChatItem(type: .groupAction, item: GroupActionTranscriptChatItemRepresentation(item, chatGroupID: groupID))
-        case let item as IMGroupActionChatItem:
-            chatItem = ChatItem(type: .groupAction, item: GroupActionTranscriptChatItemRepresentation(item, chatGroupID: groupID))
-        case let item as IMGroupTitleChangeChatItem:
-            chatItem = ChatItem(type: .groupTitle, item: GroupTitleChangeItemRepresentation(item, chatGroupID: groupID))
-        case let item as IMGroupTitleChangeItem:
-            chatItem = ChatItem(type: .groupTitle, item: GroupTitleChangeItemRepresentation(item, chatGroupID: groupID))
-        case let item as IMTypingChatItem:
-            chatItem = ChatItem(type: .typing, item: TypingChatItemRepresentation(item, chatGroupID: groupID))
-        default:
-            break
+    init(type: ChatItemType, item: Any?) {
+        self.type = type
+        self.item = item
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        guard let type = ChatItemType(rawValue: try container.decode(String.self, forKey: .type)) else {
+            throw Abort(.badRequest)
         }
         
-        if let chatItem = chatItem {
-            var imItem: IMItem!
-            
-            if let item = item as? IMTranscriptChatItem {
-                imItem = item._item()
-            } else if let item = item as? IMItem {
-                imItem = item
-            } else {
-                fatalError("Got an unexpected IMItem in the transcript parser")
+        self.type = type
+
+        if let decode = ChatItem.decoders[type] {
+            item = try decode(container)
+        } else {
+            item = nil
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(type, forKey: .type)
+
+        if let payload = self.item {
+            guard let encode = ChatItem.encoders[type] else {
+                let context = EncodingError.Context(codingPath: [], debugDescription: "Invalid attachment: \(type).")
+                throw EncodingError.invalidValue(self, context)
             }
-            
-            return ChatItem(type: .message, item: Message(imItem, transcriptRepresentation: chatItem, chatGroupID: groupID))
+
+            try encode(payload, &container)
+        } else {
+            try container.encodeNil(forKey: .payload)
+        }
+    }
+
+    // MARK: Registration
+    private typealias AttachmentDecoder = (KeyedDecodingContainer<CodingKeys>) throws -> Any
+    private typealias AttachmentEncoder = (Any, inout KeyedEncodingContainer<CodingKeys>) throws -> Void
+
+    private static var decoders: [ChatItemType: AttachmentDecoder] = [:]
+    private static var encoders: [ChatItemType: AttachmentEncoder] = [:]
+
+    static func register<A: Codable>(_ type: A.Type, for typeName: ChatItemType) {
+        decoders[typeName] = { container in
+            try container.decode(A.self, forKey: .payload)
+        }
+
+        encoders[typeName] = { payload, container in
+            try container.encode(payload as! A, forKey: .payload)
         }
     }
     
-    switch (item) {
-    case let item as IMAttachmentMessagePartChatItem:
-        return ChatItem(type: .attachment, item: AttachmentChatItemRepresentation(item, chatGroupID: groupID))
-    case let item as IMTranscriptPluginChatItem:
-        return ChatItem(type: .plugin, item: PluginChatItemRepresentation(item, chatGroupID: groupID))
-    case let item as IMTextMessagePartChatItem:
-        return ChatItem(type: .text, item: TextChatItemRepresentation(item, chatGroupID: groupID))
-    case let item as IMMessageAcknowledgmentChatItem:
-        return ChatItem(type: .acknowledgment, item: AcknowledgmentChatItemRepresentation(item, chatGroupID: groupID))
-    case let item as IMAssociatedMessageItem:
-        return ChatItem(type: .message, item: Message(item, chatGroupID: groupID))
-    case let item as IMMessage:
-        return ChatItem(type: .message, item: Message(item, chatGroupID: groupID))
-    case let item as IMMessageItem:
-        return ChatItem(type: .message, item: Message(item, chatGroupID: groupID))
-    default:
-        print("Discarding unknown ChatItem '\(item)'")
-        return ChatItem(type: .phantom, item: StubChatItemRepresentation(item, chatGroupID: groupID))
+    static func setup() {
+        ChatItem.register(DateTranscriptChatItemRepresentation.self, for: .date)
+        ChatItem.register(SenderTranscriptChatItemRepresentation.self, for: .sender)
+        ChatItem.register(ParticipantChangeTranscriptChatItemRepresentation.self, for: .participantChange)
+        ChatItem.register(AttachmentChatItemRepresentation.self, for: .attachment)
+        ChatItem.register(StatusChatItemRepresentation.self, for: .status)
+        ChatItem.register(GroupActionTranscriptChatItemRepresentation.self, for: .groupAction)
+        ChatItem.register(PluginChatItemRepresentation.self, for: .plugin)
+        ChatItem.register(TextChatItemRepresentation.self, for: .text)
+        ChatItem.register(AcknowledgmentChatItemRepresentation.self, for: .acknowledgment)
+        ChatItem.register(AssociatedMessageItemRepresentation.self, for: .associated)
+        ChatItem.register(Message.self, for: .message)
+        ChatItem.register(StubChatItemRepresentation.self, for: .phantom)
+        ChatItem.register(GroupTitleChangeItemRepresentation.self, for: .groupTitle)
+        ChatItem.register(TypingChatItemRepresentation.self, for: .typing)
     }
 }
-
-func parseArrayOf(chatItems: [NSObject], withGroupID groupID: String) -> [ChatItem] {
-     let messages: [ChatItem?] = chatItems.map { item in
-         wrapChatItem(unknownItem: item, withChatGroupID: groupID)
-     }
-
-     return messages.filter { $0 != nil } as! [ChatItem]
- }

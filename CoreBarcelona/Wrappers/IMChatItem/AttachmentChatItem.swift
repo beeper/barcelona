@@ -33,10 +33,14 @@ struct AttachmentRepresentation: Content {
 }
 
 struct AttachmentChatItemRepresentation: Content, ChatItemRepresentation {
-    init(_ item: IMAttachmentMessagePartChatItem, chatGroupID: String?) {
+    init(_ item: IMAttachmentMessagePartChatItem, metadata attachmentRepresentation: AttachmentRepresentation?, chatGroupID: String?) {
         transferGUID = item.transferGUID
-        metadata = AttachmentRepresentation(guid: transferGUID)
+        metadata = attachmentRepresentation
         self.load(item: item, chatGroupID: chatGroupID)
+    }
+    
+    init(_ item: IMAttachmentMessagePartChatItem, chatGroupID: String?) {
+        self.init(item, metadata: AttachmentRepresentation(guid: item.transferGUID), chatGroupID: chatGroupID)
     }
     
     var guid: String?

@@ -11,10 +11,10 @@ import IMCore
 import NIO
 
 extension Array where Element == IMMessage {
-    func bulkRepresentation(in chat: String) -> BulkMessageRepresentation {
-        BulkMessageRepresentation(self.map {
-            Message($0, chatGroupID: chat)
-        })
+    func bulkRepresentation(in chat: String) -> EventLoopFuture<BulkMessageRepresentation> {
+        ERIndeterminateIngestor.ingest(messageLike: self, in: chat).map {
+            BulkMessageRepresentation($0)
+        }
     }
 }
 

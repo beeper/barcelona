@@ -11,20 +11,8 @@ import IMCore
 import Vapor
 
 struct BulkMessageRepresentation: Content {
-    init(_ messages: [IMMessage], chatGroupID: String) {
-        self.messages = messages.map {
-            Message($0, chatGroupID: chatGroupID)
-        }
-    }
-    
     init(_ messages: [Message]) {
         self.messages = messages
-    }
-    
-    init(_ messages: ArraySlice<IMMessage>, chatGroupID: String) {
-        self.messages = messages.map {
-            Message($0, chatGroupID: chatGroupID)
-        }
     }
     
     var messages: [Message]
@@ -46,7 +34,12 @@ public struct Message: ChatItemRepresentation {
             
             do {
                 try databasePool.read { reader in
-                    promise.succeed(Message(message, chatGroupID: try DBReader(pool: databasePool, eventLoop: messageQuerySystem.next()).chatGroupID(forMessageROWID: message.messageID, in: reader)))
+                    guard let chatGroupID = try DBReader(pool: databasePool, eventLoop: messageQuerySystem.next()).chatGroupID(forMessageROWID: message.messageID, in: reader) else {
+                        promise.succeed(nil)
+                        return
+                    }
+                    
+                    ERIndeterminateIngestor.ingest(messageLike: message, in: chatGroupID, on: eventLoop).cascade(to: promise)
                 }
             } catch {
                 print("Failed to resolve chat groupID when pulling message with error \(error)")
@@ -77,7 +70,7 @@ public struct Message: ChatItemRepresentation {
         self.load(item: item, chatGroupID: chatGroupID)
     }
     
-    init(_ backing: IMMessageItem, message: IMMessage, chatGroupID inChatGroupID: String?) {
+    init(_ backing: IMMessageItem, message: IMMessage, items chatItems: [ChatItem], chatGroupID inChatGroupID: String?) {
         guid = message.guid
         chatGroupID = inChatGroupID
         fromMe = message.isFromMe
@@ -93,34 +86,22 @@ public struct Message: ChatItemRepresentation {
         isCancelTypingMessage = backing.isCancelTypingMessage()
         isDelivered = backing.isDelivered
         isAudioMessage = backing.isAudioMessage
-        
-        let context = backing.context
-        
+        items = chatItems
+        flags = backing.flags
         
         if let chatGroupID = chatGroupID {
             description = message.description(forPurpose: 0x2, inChat: Registry.sharedInstance.imChat(withGroupID: chatGroupID)!, senderDisplayName: backing._senderHandle()._displayNameWithAbbreviation)
-        }
-        flags = backing.flags
-        items = []
-        
-        if let chatItems = try? backing._newChatItems() {
-            chatItems.forEach {
-                if let item = $0 as? IMChatItem {
-                    guard let chatGroupID = chatGroupID, let chatItem = wrapChatItem(unknownItem: item, withChatGroupID: chatGroupID) else { return }
-                    self.items.append(chatItem)
-                }
-            }
         }
         
         self.load(item: backing, chatGroupID: inChatGroupID)
     }
     
-    init(_ backing: IMMessageItem, chatGroupID: String?) {
-        self.init(backing, message: backing.message()!, chatGroupID: chatGroupID)
+    init(_ backing: IMMessageItem, items: [ChatItem], chatGroupID: String?) {
+        self.init(backing, message: backing.message()!, items: items, chatGroupID: chatGroupID)
     }
     
-    init(_ message: IMMessage, chatGroupID: String?) {
-        self.init(message._imMessageItem, chatGroupID: chatGroupID)
+    init(_ message: IMMessage, items: [ChatItem], chatGroupID: String?) {
+        self.init(message._imMessageItem, items: items, chatGroupID: chatGroupID)
         
         timeRead = (message.timeRead?.timeIntervalSince1970 ?? 0) * 1000
         timeDelivered = (message.timeDelivered?.timeIntervalSince1970 ?? 0) * 1000

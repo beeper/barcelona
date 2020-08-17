@@ -44,13 +44,15 @@ extension DBReader {
                         try self.chatGroupID(forMessageROWID: $0.ROWID, in: db)
                     }
                 
-                    IMMessage.messages(withGUIDs: messages.map { $0.guid! }, on: eventLoop).map { messages -> [Message] in
-                        messages.compactMap { message -> Message? in
-                            guard let chatGroupID = chatGroupIDs[messages.index(of: message)!] else {
+                    IMMessage.messages(withGUIDs: messages.map { $0.guid! }, on: eventLoop).flatMap { messages -> EventLoopFuture<[Message]> in
+                        EventLoopFuture<Message?>.whenAllSucceed(messages.compactMap { message -> EventLoopFuture<Message?>? in
+                            guard let chatGroupID = chatGroupIDs[messages.firstIndex(of: message)!] else {
                                 return nil
                             }
                             
-                            return Message(message, chatGroupID: chatGroupID)
+                            return ERIndeterminateIngestor.ingest(messageLike: message, in: chatGroupID)
+                        }, on: self.eventLoop).map {
+                            $0.compactMap { $0 }
                         }
                     }.cascade(to: promise)
                 } catch {
