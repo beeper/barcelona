@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1D3B5AF224EB444300A65280 /* IMContactStore+AlwaysCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3B5AF024EB444300A65280 /* IMContactStore+AlwaysCache.m */; };
 		1D44864924E85BBB00FF73F3 /* CoreBarcelona.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D44864724E85BBB00FF73F3 /* CoreBarcelona.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1D44864D24E85BD500FF73F3 /* MessageServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE3C24E3760000303692 /* MessageServiceProtocol.swift */; };
 		1D44864E24E85BD500FF73F3 /* ERDaemonListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE4024E378F500303692 /* ERDaemonListener.swift */; };
@@ -127,7 +128,7 @@
 		1DD8067424E9DA2C0076D717 /* MessagesAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD8067324E9DA2C0076D717 /* MessagesAPI.swift */; };
 		1DD8068224EAE3240076D717 /* ChatItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD8068124EAE3240076D717 /* ChatItem.swift */; };
 		1DD8068424EAE3470076D717 /* ChatItem-Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD8068324EAE3470076D717 /* ChatItem-Protocols.swift */; };
-		1DD8068724EAE3B20076D717 /* ChatItem+Tapbacks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD8068624EAE3B20076D717 /* ChatItem+Tapbacks.swift */; };
+		1DD8068724EAE3B20076D717 /* ChatItemAcknowledgable+LoadTapbacks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD8068624EAE3B20076D717 /* ChatItemAcknowledgable+LoadTapbacks.swift */; };
 		1DD8068924EAE3D70076D717 /* ChatItem+SharedInit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD8068824EAE3D70076D717 /* ChatItem+SharedInit.swift */; };
 		1DD8068B24EAE4550076D717 /* ERIndeterminateIngestor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD8068A24EAE4550076D717 /* ERIndeterminateIngestor.swift */; };
 /* End PBXBuildFile section */
@@ -196,6 +197,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1D3B5AF024EB444300A65280 /* IMContactStore+AlwaysCache.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "IMContactStore+AlwaysCache.m"; sourceTree = "<group>"; };
 		1D3F36F224E4461D005E95B8 /* ERMessageEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERMessageEvents.swift; sourceTree = "<group>"; };
 		1D3F36F824E4A8DB005E95B8 /* DebugAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugAPI.swift; sourceTree = "<group>"; };
 		1D3F36FD24E4B47A005E95B8 /* IMChatRegistry+NerfedIntents.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "IMChatRegistry+NerfedIntents.m"; sourceTree = "<group>"; };
@@ -304,7 +306,7 @@
 		1DD8067324E9DA2C0076D717 /* MessagesAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesAPI.swift; sourceTree = "<group>"; };
 		1DD8068124EAE3240076D717 /* ChatItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatItem.swift; sourceTree = "<group>"; };
 		1DD8068324EAE3470076D717 /* ChatItem-Protocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatItem-Protocols.swift"; sourceTree = "<group>"; };
-		1DD8068624EAE3B20076D717 /* ChatItem+Tapbacks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatItem+Tapbacks.swift"; sourceTree = "<group>"; };
+		1DD8068624EAE3B20076D717 /* ChatItemAcknowledgable+LoadTapbacks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatItemAcknowledgable+LoadTapbacks.swift"; sourceTree = "<group>"; };
 		1DD8068824EAE3D70076D717 /* ChatItem+SharedInit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatItem+SharedInit.swift"; sourceTree = "<group>"; };
 		1DD8068A24EAE4550076D717 /* ERIndeterminateIngestor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERIndeterminateIngestor.swift; sourceTree = "<group>"; };
 		1DF63FA824E4DE410004527F /* RawAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawAttachment.swift; sourceTree = "<group>"; };
@@ -508,6 +510,7 @@
 				1D5AEE6E24E37D9E00303692 /* NSImage+resize.swift */,
 				1D3F36FD24E4B47A005E95B8 /* IMChatRegistry+NerfedIntents.m */,
 				1DD8067124E9A7330076D717 /* IMMessage+SPI.swift */,
+				1D3B5AF024EB444300A65280 /* IMContactStore+AlwaysCache.m */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -649,7 +652,7 @@
 		1DD8068524EAE3A70076D717 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				1DD8068624EAE3B20076D717 /* ChatItem+Tapbacks.swift */,
+				1DD8068624EAE3B20076D717 /* ChatItemAcknowledgable+LoadTapbacks.swift */,
 				1DD8068824EAE3D70076D717 /* ChatItem+SharedInit.swift */,
 			);
 			path = Extensions;
@@ -913,6 +916,7 @@
 				1DD8067224E9A7330076D717 /* IMMessage+SPI.swift in Sources */,
 				1DD805CE24E85D070076D717 /* WebSocket+Hashable.swift in Sources */,
 				1DD805D424E85D0A0076D717 /* EventDispatcher.swift in Sources */,
+				1D3B5AF224EB444300A65280 /* IMContactStore+AlwaysCache.m in Sources */,
 				1DD805D224E85D0A0076D717 /* ContactsEvents.swift in Sources */,
 				1DD805D824E85D0A0076D717 /* Event.swift in Sources */,
 				1DD805BE24E85D070076D717 /* IMChatItem+AcknowledgmentSummaryInfo.swift in Sources */,
@@ -944,7 +948,7 @@
 				1DD805AB24E85CF00076D717 /* MessagePartFactory.swift in Sources */,
 				1D44865124E85BD500FF73F3 /* ERHTTPServer.swift in Sources */,
 				1DD805C924E85D070076D717 /* IMBalloonPluginManager+TapbackData.swift in Sources */,
-				1DD8068724EAE3B20076D717 /* ChatItem+Tapbacks.swift in Sources */,
+				1DD8068724EAE3B20076D717 /* ChatItemAcknowledgable+LoadTapbacks.swift in Sources */,
 				1DD805DD24E85D100076D717 /* Message.swift in Sources */,
 				1DD805CB24E85D070076D717 /* CNContactStore+AllContacts.swift in Sources */,
 				1DD8068224EAE3240076D717 /* ChatItem.swift in Sources */,

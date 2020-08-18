@@ -26,6 +26,27 @@ struct ContactRepresentation: Content, Comparable {
         return lhs.id == rhs.id
     }
     
+    init(_ person: IMPerson) {
+        self.id = person.cnContactID
+        self.firstName = person.firstName
+        self.middleName = nil
+        self.lastName = person.lastName
+        self.fullName = person.fullName
+        self.nickname = person.nickname
+        self.hasPicture = person.imageDataWithoutLoading != nil
+        
+        self.handles = [person.phoneNumbers, person.allEmails].flatMap {
+            $0.compactMap {
+                guard let id = $0 as? String else {
+                    print("wtf \($0)")
+                    return nil
+                }
+                
+                return HandleRepresentation(id: id, isBusiness: false)
+            }
+        }
+    }
+    
     init(_ contact: CNContact) {
         self.id = contact.identifier
         self.firstName = contact.givenName.count == 0 ? nil : contact.givenName
@@ -41,7 +62,7 @@ struct ContactRepresentation: Content, Comparable {
             guard let countryCode = phoneNumber.value.value(forKey: "countryCode") as? String, let phoneNumber = phoneNumber.value.value(forKey: "digits") as? String else {
                 return
             }
-            guard let normalized = IMNormalizedPhoneNumberForPhoneNumber(phoneNumber, countryCode, true) as? String else {
+            guard let normalized = IMNormalizedPhoneNumberForPhoneNumber(phoneNumber, countryCode, true) else {
                 return
             }
             result.append(HandleRepresentation(id: "+\(normalized)", isBusiness: false))
@@ -59,7 +80,7 @@ struct ContactRepresentation: Content, Comparable {
     var handles: [HandleRepresentation]
     
     var empty: Bool {
-        return (fullName?.count ?? 0) == 0
+        return (self.firstName?.count ?? 0) == 0 && (self.middleName?.count ?? 0) == 0 && (self.lastName?.count ?? 0 == 0) && (self.nickname?.count ?? 0) == 0 && self.hasPicture == false
     }
     
     mutating func addHandle(_ handle: HandleRepresentation) {

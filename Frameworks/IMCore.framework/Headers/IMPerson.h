@@ -35,7 +35,7 @@
 + (id)existingABPersonForPerson:(id)arg1;
 + (id)existingABPersonWithFirstName:(id)arg1 andLastName:(id)arg2 orEmail:(id)arg3;
 + (id)existingABPersonWithFirstName:(id)arg1 lastName:(id)arg2;
-+ (id)allPeople;
++ (NSArray<IMPerson*>*)allPeople;
 @property(retain, nonatomic) CNContact *cnContact; // @synthesize cnContact=_cnContact;
 @property(readonly, nonatomic) BOOL _registered; // @synthesize _registered;
 @property(retain, nonatomic) NSString *cachedNickName; // @synthesize cachedNickName=_cachedNickName;

@@ -67,7 +67,15 @@ public func bindAttachmentsAPI(_ app: Application) {
             }
             
             return promise.futureResult
-        }.always { _ in
+        }.whenComplete { result in
+            
+            switch result {
+            case .failure(let error):
+                promise.fail(error)
+                return
+            case .success:
+                break
+            }
             
             // MARK: - Storage phase
             

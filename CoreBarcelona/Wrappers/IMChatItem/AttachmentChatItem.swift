@@ -32,7 +32,7 @@ struct AttachmentRepresentation: Content {
     var uti: String?
 }
 
-struct AttachmentChatItemRepresentation: Content, ChatItemRepresentation {
+struct AttachmentChatItemRepresentation: Content, ChatItemRepresentation, ChatItemAcknowledgable {
     init(_ item: IMAttachmentMessagePartChatItem, metadata attachmentRepresentation: AttachmentRepresentation?, chatGroupID: String?) {
         transferGUID = item.transferGUID
         metadata = attachmentRepresentation
@@ -49,4 +49,5 @@ struct AttachmentChatItemRepresentation: Content, ChatItemRepresentation {
     var time: Double?
     var transferGUID: String
     var metadata: AttachmentRepresentation?
+    var acknowledgments: [AcknowledgmentChatItemRepresentation]?
 }

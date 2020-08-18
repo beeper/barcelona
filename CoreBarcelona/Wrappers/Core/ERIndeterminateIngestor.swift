@@ -116,10 +116,51 @@ struct ERIndeterminateIngestor {
                 attachment = AttachmentChatItemRepresentation(item, chatGroupID: chat)
             }
             
-            promise.succeed(ChatItem(type: .attachment, item: attachment))
+            insertTapbacks(forChatLikeItem: attachment, on: eventLoop).map {
+                ChatItem(type: .attachment, item: $0)
+            }.cascade(to: promise)
         }
         
         return promise.futureResult
+    }
+    
+    private static func insertTapbacks<P: ChatItemAcknowledgable>(forChatLikeItem item: P, on eventLoop: EventLoop) -> EventLoopFuture<P> {
+        item.tapbacks(on: eventLoop).map {
+            var newItem = item
+            newItem.acknowledgments = $0.flatMap {
+                $0.items.map {
+                    $0.item
+                }
+            }.compactMap {
+                guard let item = $0 as? AcknowledgmentChatItemRepresentation else {
+                    return nil
+                }
+                
+                return item
+            }
+            return newItem
+        }
+    }
+    
+    private static func ingest(acknowledgable object: AnyObject, in chat: String, on eventLoop: EventLoop) -> EventLoopFuture<ChatItem?> {
+        var pending: EventLoopFuture<ChatItem?>
+        
+        switch (object) {
+        case let item as IMAttachmentMessagePartChatItem:
+            pending = ingest(attachment: item, in: chat, on: eventLoop)
+        case let item as IMTranscriptPluginChatItem:
+            pending = insertTapbacks(forChatLikeItem: PluginChatItemRepresentation(item, chatGroupID: chat), on: eventLoop).map {
+                ChatItem(type: .plugin, item: $0)
+            }
+        case let item as IMTextMessagePartChatItem:
+            pending = insertTapbacks(forChatLikeItem: TextChatItemRepresentation(item, chatGroupID: chat), on: eventLoop).map {
+                ChatItem(type: .text, item: $0)
+            }
+        default:
+            pending = eventLoop.makeSucceededFuture(nil)
+        }
+        
+        return pending
     }
     
     /// Process human-crafted chat items
@@ -127,12 +168,12 @@ struct ERIndeterminateIngestor {
         let promise = eventLoop.makePromise(of: ChatItem?.self)
         
         switch (object) {
-        case let item as IMAttachmentMessagePartChatItem:
-            ingest(attachment: item, in: chat, on: eventLoop).cascade(to: promise)
-        case let item as IMTranscriptPluginChatItem:
-            promise.succeed(ChatItem(type: .plugin, item: PluginChatItemRepresentation(item, chatGroupID: chat)))
-        case let item as IMTextMessagePartChatItem:
-            promise.succeed(ChatItem(type: .text, item: TextChatItemRepresentation(item, chatGroupID: chat)))
+        case is IMAttachmentMessagePartChatItem:
+            fallthrough
+        case is IMTranscriptPluginChatItem:
+            fallthrough
+        case is IMTextMessagePartChatItem:
+            self.ingest(acknowledgable: object, in: chat, on: eventLoop).cascade(to: promise)
         case let item as IMMessageAcknowledgmentChatItem:
             promise.succeed(ChatItem(type: .acknowledgment, item: AcknowledgmentChatItemRepresentation(item, chatGroupID: chat)))
         case is IMAssociatedMessageItem:

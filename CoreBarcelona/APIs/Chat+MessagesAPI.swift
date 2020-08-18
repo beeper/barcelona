@@ -43,9 +43,9 @@ func bindChatMessagesAPI(_ chat: RoutesBuilder) {
         
         let promise = req.eventLoop.makePromise(of: BulkChatItemRepresentation.self)
         
-        chat.loadMessages(before: messageGUID, limit: limit) { messages in
-            promise.succeed(BulkChatItemRepresentation(items: messages))
-        }
+        chat.loadMessages(around: messageGUID, numberBefore: limit - 1, numberAfter: 0).map {
+            BulkChatItemRepresentation(items: $0)
+        }.cascade(to: promise)
         
         return promise.futureResult
     }

@@ -24,21 +24,21 @@ extension IMContactStore {
     func representations(matching search: String? = nil, limit: Int? = nil) -> BulkContactRepresentation {
         var registry: [String: ContactRepresentation] = [:]
         var strangers: [HandleRepresentation] = []
-
-        let store = contactStore!
         
         let includeStrangers = search == nil && limit == nil
-        
-        // MARK: - Contact parsing
-        store.contacts(matching: search, limit: limit).forEach { contact in
-            registry[contact.identifier] = ContactRepresentation(contact)
-        }
         
         let registrar = IMHandleRegistrar.sharedInstance()!
         
         // MARK: - Map handles to contacts
         registrar.allIMHandles()!.forEach { handle in
             let representation = HandleRepresentation(handle)
+            
+            if let contact = IMContactStore.shared.fetchCNContact(forHandleID: handle.id, withKeys: CNContactStore.defaultKeysToFetch) as? CNContact {
+                let representation = ContactRepresentation(contact)
+                if !representation.empty {
+                    registry[contact.identifier] = representation
+                }
+            }
             
             guard let contactID = handle.cnContact?.identifier, var contact = registry[contactID] else {
                 if includeStrangers {

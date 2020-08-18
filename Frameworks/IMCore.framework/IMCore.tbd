@@ -468,7 +468,7 @@ exports:
                             _IMNicknameController, _IMNumberChangedChatItem,
                             _IMOneTimeCodeAccelerator,
                             _IMOrderingMetricCollector, _IMParentalControls,
-                            _IMParticipantChangeChatItem, _IMPeople, _IMPerson,
+                            _IMParticipantChangeChatItem, _IMPeople, _IMPerson, _IMPersonRegistrar
                             _IMPersonABRecordIDCache, _IMPluginPayload,
                             _IMReportSpamChatItem, _IMSMSSpamChatItem,
                             _IMSPIAttachment, _IMSPIChat, _IMSPIHandle,

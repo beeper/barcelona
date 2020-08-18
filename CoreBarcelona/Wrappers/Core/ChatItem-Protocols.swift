@@ -36,3 +36,7 @@ protocol ChatItemRepresentation: Content {
     var fromMe: Bool? { get set }
     var time: Double? { get set }
 }
+
+protocol ChatItemAcknowledgable: ChatItemRepresentation {
+    var acknowledgments: [AcknowledgmentChatItemRepresentation]? { get set }
+}

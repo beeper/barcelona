@@ -121,12 +121,17 @@ struct Chat: Codable {
     public static func chatGroupID(forMessage guid: String, on eventLoop: EventLoop) -> EventLoopFuture<String?> {
         let promise = eventLoop.makePromise(of: String?.self)
         
-        do {
-            try databasePool.read { db in
-                promise.succeed(try DBReader(pool: databasePool, eventLoop: eventLoop).chatGroupID(forMessageGUID: guid, in: db))
+        databasePool.asyncRead { result in
+            switch result {
+            case .failure(let error):
+                promise.fail(error)
+            case .success(let db):
+                do {
+                    promise.succeed(try DBReader(pool: databasePool, eventLoop: eventLoop).chatGroupID(forMessageGUID: guid, in: db))
+                } catch {
+                    promise.fail(error)
+                }
             }
-        } catch {
-            promise.succeed(nil)
         }
         
         return promise.futureResult

@@ -10,7 +10,7 @@ import Foundation
 import IMCore
 import Vapor
 
-struct PluginChatItemRepresentation: Content, ChatItemRepresentation {
+struct PluginChatItemRepresentation: Content, ChatItemRepresentation, ChatItemAcknowledgable {
     init(_ item: IMTranscriptPluginChatItem, chatGroupID: String?) {
         payload = item.dataSource.payload.base64EncodedString()
         bundleID = item.dataSource.bundleID
@@ -38,4 +38,5 @@ struct PluginChatItemRepresentation: Content, ChatItemRepresentation {
     var payload: String
     var bundleID: String
     var attachments: [AttachmentRepresentation]
+    var acknowledgments: [AcknowledgmentChatItemRepresentation]?
 }

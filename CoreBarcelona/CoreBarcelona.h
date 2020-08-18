@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <IMCore/IMCore.h>
 
 //! Project version number for CoreBarcelona.
 FOUNDATION_EXPORT double CoreBarcelonaVersionNumber;
@@ -19,3 +20,4 @@ FOUNDATION_EXPORT const unsigned char CoreBarcelonaVersionString[];
 #import <CommunicationsFilter/CommunicationsFilter.h>
 
 CommunicationsFilterBlockList* ERSharedBlockList();
+IMPersonRegistrar* ERSharedPersonRegistrar();

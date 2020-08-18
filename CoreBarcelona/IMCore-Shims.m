@@ -7,10 +7,15 @@
 //
 
 #import <CommunicationsFilter/CommunicationsFilter.h>
+#import <IMCore/IMCore.h>
 
 @implementation CNGeminiManager: NSObject
 @end
 
 CommunicationsFilterBlockList* ERSharedBlockList() {
     return [NSClassFromString(@"CommunicationsFilterBlockList") sharedInstance];
+}
+
+IMPersonRegistrar* ERSharedPersonRegistrar() {
+    return [NSClassFromString(@"IMPersonRegistrar") sharedInstance];
 }

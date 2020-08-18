@@ -9,7 +9,7 @@
 import Foundation
 import NIO
 
-extension ChatItemRepresentation {
+extension ChatItemAcknowledgable {
     func tapbacks(on eventLoop: EventLoop) -> EventLoopFuture<[Message]> {
         let promise = eventLoop.makePromise(of: [Message].self)
         

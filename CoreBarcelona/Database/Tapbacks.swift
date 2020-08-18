@@ -31,20 +31,24 @@ struct TapbackResult {
 extension DBReader {
     func associatedMessages(with guid: String) -> EventLoopFuture<[Message]> {
         let promise = eventLoop.makePromise(of: [Message].self)
-        
-        do {
-            try pool.read { db in
-                let messages = try RawMessage
-                    .select(RawMessage.Columns.guid, RawMessage.Columns.ROWID)
-                    .filter(sql: "associated_message_guid = ?", arguments: [guid])
-                    .fetchAll(db)
-                
+
+        pool.asyncRead { result in
+            switch result {
+            case .failure(let error):
+                promise.fail(error)
+                return
+            case .success(let db):
                 do {
+                    let messages = try RawMessage
+                        .select(RawMessage.Columns.guid, RawMessage.Columns.ROWID)
+                        .filter(sql: "associated_message_guid = ?", arguments: [guid])
+                        .fetchAll(db)
+                
                     let chatGroupIDs = try messages.map {
                         try self.chatGroupID(forMessageROWID: $0.ROWID, in: db)
                     }
                 
-                    IMMessage.messages(withGUIDs: messages.map { $0.guid! }, on: eventLoop).flatMap { messages -> EventLoopFuture<[Message]> in
+                    IMMessage.messages(withGUIDs: messages.map { $0.guid! }, on: self.eventLoop).flatMap { messages -> EventLoopFuture<[Message]> in
                         EventLoopFuture<Message?>.whenAllSucceed(messages.compactMap { message -> EventLoopFuture<Message?>? in
                             guard let chatGroupID = chatGroupIDs[messages.firstIndex(of: message)!] else {
                                 return nil
@@ -61,8 +65,7 @@ extension DBReader {
                     return
                 }
             }
-        } catch {
-           promise.fail(error)
+            
         }
         
         return promise.futureResult

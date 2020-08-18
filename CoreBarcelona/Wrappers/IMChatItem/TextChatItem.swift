@@ -12,7 +12,7 @@ import Vapor
 
 private let regex = try! NSRegularExpression(pattern: "<body.*?>([\\s\\S]*)<\\/body>")
 
-struct TextChatItemRepresentation: Content, ChatItemRepresentation {
+struct TextChatItemRepresentation: Content, ChatItemRepresentation, ChatItemAcknowledgable {
     init(_ item: IMTextMessagePartChatItem, chatGroupID: String?) {
         text = item.text.string
         
@@ -29,4 +29,5 @@ struct TextChatItemRepresentation: Content, ChatItemRepresentation {
     var time: Double?
     var text: String
     var html: String?
+    var acknowledgments: [AcknowledgmentChatItemRepresentation]?
 }

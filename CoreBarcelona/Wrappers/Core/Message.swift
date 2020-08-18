@@ -32,18 +32,22 @@ public struct Message: ChatItemRepresentation {
                 return promise.futureResult
             }
             
-            do {
-                try databasePool.read { reader in
-                    guard let chatGroupID = try DBReader(pool: databasePool, eventLoop: messageQuerySystem.next()).chatGroupID(forMessageROWID: message.messageID, in: reader) else {
-                        promise.succeed(nil)
-                        return
+            databasePool.asyncRead { result in
+                switch result {
+                case .failure(let error):
+                    promise.fail(error)
+                case .success(let db):
+                    do {
+                        guard let chatGroupID = try DBReader(pool: databasePool, eventLoop: messageQuerySystem.next()).chatGroupID(forMessageROWID: message.messageID, in: db) else {
+                            promise.succeed(nil)
+                            return
+                        }
+                        
+                        ERIndeterminateIngestor.ingest(messageLike: message, in: chatGroupID, on: eventLoop).cascade(to: promise)
+                    } catch {
+                        promise.fail(error)
                     }
-                    
-                    ERIndeterminateIngestor.ingest(messageLike: message, in: chatGroupID, on: eventLoop).cascade(to: promise)
                 }
-            } catch {
-                print("Failed to resolve chat groupID when pulling message with error \(error)")
-                promise.succeed(nil)
             }
             
             return promise.futureResult
