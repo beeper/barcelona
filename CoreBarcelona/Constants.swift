@@ -58,6 +58,7 @@ enum FullFlagsFromMe: UInt64 {
     case textOrPluginOrStickerOrImage = 1085445
     case attachments = 1093637
     case richLink = 1150981
+    case incomplete = 1048581
 }
 
 /**

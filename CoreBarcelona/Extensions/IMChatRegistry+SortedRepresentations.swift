@@ -17,7 +17,7 @@ extension IMChatRegistry {
     /**
      Returns all chats sorted by their last update, with a limit if requested
      */
-    func allSortedChats(limit: Int? = nil) -> [Chat] {
+    func allSortedChats(limit: Int? = nil, after: String? = nil) -> [Chat] {
         var chats = self._allCreatedChats().sorted { (chat1, chat2) in
             let time1 = chat1.lastMessage?.time ?? NSDate.__im_dateWithNanosecondTimeInterval(sinceReferenceDate: chat1.lastMessageTimeStampOnLoad)!
             let time2 = chat2.lastMessage?.time ?? NSDate.__im_dateWithNanosecondTimeInterval(sinceReferenceDate: chat2.lastMessageTimeStampOnLoad)!

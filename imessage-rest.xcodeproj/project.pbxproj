@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		1D3B5AF224EB444300A65280 /* IMContactStore+AlwaysCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3B5AF024EB444300A65280 /* IMContactStore+AlwaysCache.m */; };
+		1D3B5AF924EC810400A65280 /* Debouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3B5AF824EC810400A65280 /* Debouncer.swift */; };
+		1D3B5AFD24EDA46700A65280 /* IMChat+HistoryLoadingPatch.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3B5AFB24EDA46700A65280 /* IMChat+HistoryLoadingPatch.m */; };
+		1D3B5AFF24EF912B00A65280 /* IMChat+Reviewable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3B5AFE24EF912B00A65280 /* IMChat+Reviewable.swift */; };
 		1D44864924E85BBB00FF73F3 /* CoreBarcelona.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D44864724E85BBB00FF73F3 /* CoreBarcelona.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1D44864D24E85BD500FF73F3 /* MessageServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE3C24E3760000303692 /* MessageServiceProtocol.swift */; };
 		1D44864E24E85BD500FF73F3 /* ERDaemonListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE4024E378F500303692 /* ERDaemonListener.swift */; };
@@ -33,6 +36,9 @@
 		1D44866F24E85C7500FF73F3 /* IMFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDC324E373ED00303692 /* IMFoundation.framework */; };
 		1D44867124E85C7500FF73F3 /* IMSharedUtilities.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDC424E373ED00303692 /* IMSharedUtilities.framework */; };
 		1D5AEDF324E374EB00303692 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEDF224E374EB00303692 /* main.swift */; };
+		1D75D4DA24F197B2008F053C /* CoreUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D75D4D624F197B2008F053C /* CoreUI.framework */; };
+		1D75D4DB24F197BC008F053C /* CoreUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D75D4D624F197B2008F053C /* CoreUI.framework */; };
+		1D75D4DF24F197D1008F053C /* ERResourceServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D75D4DE24F197D1008F053C /* ERResourceServer.swift */; };
 		1DD8059F24E85CCB0076D717 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 1DD8059E24E85CCB0076D717 /* GRDB */; };
 		1DD805A124E85CCB0076D717 /* Swime in Frameworks */ = {isa = PBXBuildFile; productRef = 1DD805A024E85CCB0076D717 /* Swime */; };
 		1DD805A324E85CCB0076D717 /* Vapor in Frameworks */ = {isa = PBXBuildFile; productRef = 1DD805A224E85CCB0076D717 /* Vapor */; };
@@ -198,6 +204,12 @@
 
 /* Begin PBXFileReference section */
 		1D3B5AF024EB444300A65280 /* IMContactStore+AlwaysCache.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "IMContactStore+AlwaysCache.m"; sourceTree = "<group>"; };
+		1D3B5AF524EB623900A65280 /* com.ericrabil.imessage-rest.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "com.ericrabil.imessage-rest.plist"; sourceTree = "<group>"; };
+		1D3B5AF624EB623900A65280 /* installer.command */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = installer.command; sourceTree = "<group>"; };
+		1D3B5AF724EB624A00A65280 /* com.apple.security.xpc.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = com.apple.security.xpc.plist; sourceTree = "<group>"; };
+		1D3B5AF824EC810400A65280 /* Debouncer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debouncer.swift; sourceTree = "<group>"; };
+		1D3B5AFB24EDA46700A65280 /* IMChat+HistoryLoadingPatch.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "IMChat+HistoryLoadingPatch.m"; sourceTree = "<group>"; };
+		1D3B5AFE24EF912B00A65280 /* IMChat+Reviewable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChat+Reviewable.swift"; sourceTree = "<group>"; };
 		1D3F36F224E4461D005E95B8 /* ERMessageEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERMessageEvents.swift; sourceTree = "<group>"; };
 		1D3F36F824E4A8DB005E95B8 /* DebugAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugAPI.swift; sourceTree = "<group>"; };
 		1D3F36FD24E4B47A005E95B8 /* IMChatRegistry+NerfedIntents.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "IMChatRegistry+NerfedIntents.m"; sourceTree = "<group>"; };
@@ -290,6 +302,8 @@
 		1D5AEECB24E37F8A00303692 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		1D5AEECD24E3817900303692 /* ERHTTPServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERHTTPServer.swift; sourceTree = "<group>"; };
 		1D5AEECF24E3838700303692 /* ERChatSubscriptionWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERChatSubscriptionWatcher.swift; sourceTree = "<group>"; };
+		1D75D4D624F197B2008F053C /* CoreUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreUI.framework; path = Frameworks/CoreUI.framework; sourceTree = "<group>"; };
+		1D75D4DE24F197D1008F053C /* ERResourceServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERResourceServer.swift; sourceTree = "<group>"; };
 		1DC66B0024E4756400CB0C5D /* TypingChatItemRepresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypingChatItemRepresentation.swift; sourceTree = "<group>"; };
 		1DC66B0524E4875700CB0C5D /* Contact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
 		1DC66B0724E487AB00CB0C5D /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
@@ -322,6 +336,7 @@
 				1D44866324E85C7400FF73F3 /* IMDPersistence.framework in Frameworks */,
 				1D44866B24E85C7500FF73F3 /* ContactsFoundation.framework in Frameworks */,
 				1D44866724E85C7400FF73F3 /* IMSharedUtilities.framework in Frameworks */,
+				1D75D4DB24F197BC008F053C /* CoreUI.framework in Frameworks */,
 				1D44866124E85C7400FF73F3 /* IMCore.framework in Frameworks */,
 				1DD8059F24E85CCB0076D717 /* GRDB in Frameworks */,
 				1D44865F24E85C7400FF73F3 /* DataDetectorsCore.framework in Frameworks */,
@@ -342,6 +357,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1DD805EF24E85EAC0076D717 /* CoreBarcelona.framework in Frameworks */,
+				1D75D4DA24F197B2008F053C /* CoreUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -397,6 +413,8 @@
 				1D5AEECF24E3838700303692 /* ERChatSubscriptionWatcher.swift */,
 				1D44864824E85BBB00FF73F3 /* Info.plist */,
 				1DD805ED24E85E360076D717 /* ERBarcelonaManager.swift */,
+				1D3B5AF824EC810400A65280 /* Debouncer.swift */,
+				1D75D4DE24F197D1008F053C /* ERResourceServer.swift */,
 			);
 			path = CoreBarcelona;
 			sourceTree = "<group>";
@@ -430,6 +448,9 @@
 				1D5AEE3024E375D700303692 /* OpenMessage-Mac.xcodeproj */,
 				1D5AEDBD24E3727C00303692 /* imessage-rest.entitlements */,
 				1D5AEDB724E3725200303692 /* Info.plist */,
+				1D3B5AF524EB623900A65280 /* com.ericrabil.imessage-rest.plist */,
+				1D3B5AF624EB623900A65280 /* installer.command */,
+				1D3B5AF724EB624A00A65280 /* com.apple.security.xpc.plist */,
 				1D5AEDF224E374EB00303692 /* main.swift */,
 			);
 			path = "imessage-rest";
@@ -438,6 +459,7 @@
 		1D5AEDBE24E373ED00303692 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1D75D4D624F197B2008F053C /* CoreUI.framework */,
 				1D5AEDD224E3744900303692 /* CommunicationsFilter.framework */,
 				1D5AEDD724E3744900303692 /* ContactsAutocomplete.framework */,
 				1D5AEDDA24E3744900303692 /* ContactsFoundation.framework */,
@@ -511,6 +533,8 @@
 				1D3F36FD24E4B47A005E95B8 /* IMChatRegistry+NerfedIntents.m */,
 				1DD8067124E9A7330076D717 /* IMMessage+SPI.swift */,
 				1D3B5AF024EB444300A65280 /* IMContactStore+AlwaysCache.m */,
+				1D3B5AFB24EDA46700A65280 /* IMChat+HistoryLoadingPatch.m */,
+				1D3B5AFE24EF912B00A65280 /* IMChat+Reviewable.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -883,6 +907,7 @@
 				1DD805AD24E85CF00076D717 /* ContactsAPI.swift in Sources */,
 				1DD805D724E85D0A0076D717 /* ERMessageEvents.swift in Sources */,
 				1DD805BA24E85CFD0076D717 /* RawAttachment.swift in Sources */,
+				1D3B5AFD24EDA46700A65280 /* IMChat+HistoryLoadingPatch.m in Sources */,
 				1DD805EA24E85D100076D717 /* TypingChatItemRepresentation.swift in Sources */,
 				1DD805B824E85CFD0076D717 /* DBReader.swift in Sources */,
 				1DD805DC24E85D100076D717 /* StubChatItem.swift in Sources */,
@@ -903,6 +928,7 @@
 				1DD805EB24E85D100076D717 /* Contact.swift in Sources */,
 				1DD805C224E85D070076D717 /* CNContact+ResizableImage.swift in Sources */,
 				1DD805D024E85D070076D717 /* IMChatRegistry+NerfedIntents.m in Sources */,
+				1D3B5AFF24EF912B00A65280 /* IMChat+Reviewable.swift in Sources */,
 				1DD805D124E85D0A0076D717 /* DispatchSupervisor.swift in Sources */,
 				1DD805C824E85D070076D717 /* String+Regex.swift in Sources */,
 				1DD805B324E85CFD0076D717 /* Tapbacks.swift in Sources */,
@@ -918,6 +944,7 @@
 				1DD805D424E85D0A0076D717 /* EventDispatcher.swift in Sources */,
 				1D3B5AF224EB444300A65280 /* IMContactStore+AlwaysCache.m in Sources */,
 				1DD805D224E85D0A0076D717 /* ContactsEvents.swift in Sources */,
+				1D75D4DF24F197D1008F053C /* ERResourceServer.swift in Sources */,
 				1DD805D824E85D0A0076D717 /* Event.swift in Sources */,
 				1DD805BE24E85D070076D717 /* IMChatItem+AcknowledgmentSummaryInfo.swift in Sources */,
 				1D44865324E85BD500FF73F3 /* ListenerDelegate.swift in Sources */,
@@ -942,6 +969,7 @@
 				1DD805B224E85CF00076D717 /* DebugAPI.swift in Sources */,
 				1DD805DF24E85D100076D717 /* DateTranscriptChatItem.swift in Sources */,
 				1DD805EC24E85D100076D717 /* MessagesError.swift in Sources */,
+				1D3B5AF924EC810400A65280 /* Debouncer.swift in Sources */,
 				1DD805D524E85D0A0076D717 /* BlocklistEvents.swift in Sources */,
 				1D44864D24E85BD500FF73F3 /* MessageServiceProtocol.swift in Sources */,
 				1DD805CC24E85D070076D717 /* IMChat+Representable.swift in Sources */,
@@ -1225,6 +1253,8 @@
 					"@loader_path/../Frameworks",
 				);
 				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = "";
+				OTHER_SWIFT_FLAGS = "-D INDETERMINATE_LOG";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.apple.ericrabil.imessage-rest";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1257,6 +1287,8 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
+				OTHER_CFLAGS = "";
+				OTHER_SWIFT_FLAGS = "-D INDETERMINATE_LOG";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.apple.ericrabil.imessage-rest";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

@@ -16,6 +16,7 @@ struct OKResult: Content {
 
 struct TapbackCreation: Content {
     var item: String
+    var message: String
     var type: Int
 }
 
@@ -25,9 +26,21 @@ extension DeleteMessageRequest: Content { }
 func bindMessagesAPI(_ app: Application) {
     let messages = app.grouped("messages")
     
-    let associated = messages.grouped("associated")
+    messages.get { req -> EventLoopFuture<BulkMessageRepresentation> in
+        guard var guids = try? req.query.get([String].self, at: "guids") else {
+            throw Abort(.badRequest)
+        }
+        
+        guids = guids.map {
+            $0.replacingOccurrences(of: "\n", with: "")
+        }
+        
+        return Message.messages(withGUIDs: guids, on: messageQuerySystem.next()).map {
+            $0.representation
+        }
+    }
     
-    let chatItemGUIDExtractor = try! NSRegularExpression(pattern: "(?:\\w+:(\\d+))\\/([\\w-]+)")
+    let associated = messages.grouped("associated")
     
     /**
      Pull associated messages for a given chat item
@@ -42,19 +55,14 @@ func bindMessagesAPI(_ app: Application) {
         }
     }
     
-    associated.post { req -> EventLoopFuture<HTTPStatus> in
+    associated.post { req -> EventLoopFuture<Message> in
         guard let creation = try? req.content.decode(TapbackCreation.self) else {
-            throw Abort(.badRequest)
+            throw Abort(.badRequest, reason: "Malformed body")
         }
         
         let itemGUID = creation.item
+        let messageGUID = creation.message
         let ackType = creation.type
-        
-        guard let parts = itemGUID.groups(for: chatItemGUIDExtractor).first,
-            let part = Int(parts[1]),
-            let messageGUID = parts[safe: 2] else {
-                throw Abort(.badRequest)
-        }
         
         return Chat.chat(forMessage: messageGUID, on: req.eventLoop).flatMap { chat in
             guard let chat = chat?.imChat() else {
@@ -62,14 +70,21 @@ func bindMessagesAPI(_ app: Application) {
             }
 
             let debugItemType = try? req.query.get(UInt8.self, at: "itemType")
-            let promise = req.eventLoop.makePromise(of: HTTPStatus.self)
+            let promise = req.eventLoop.makePromise(of: Message.self)
 
-            chat.tapback(guid: messageGUID, index: part, type: ackType, overridingItemType: debugItemType) { error in
-                guard let error = error else {
-                    return promise.succeed(.ok)
+            chat.tapback(guid: messageGUID, itemGUID: itemGUID, type: ackType, overridingItemType: debugItemType).whenComplete {
+                switch $0 {
+                case .success(let message):
+                    ERIndeterminateIngestor.ingest(messageLike: message, in: chat.groupID).whenSuccess { message in
+                        guard let message = message else {
+                            promise.fail(Abort(.internalServerError, reason: "Failde to create tapback message"))
+                            return
+                        }
+                        promise.succeed(message)
+                    }
+                case .failure(let error):
+                    promise.fail(error)
                 }
-
-                promise.fail(error)
             }
 
             return promise.futureResult
@@ -115,8 +130,6 @@ func bindMessagesAPI(_ app: Application) {
     
     let message = messages.grouped(":messageGUID")
     
-    bindTapbacksAPI(message)
-    
     /**
      Query a specific message
      */
@@ -140,36 +153,5 @@ func bindMessagesAPI(_ app: Application) {
         }
         
         return promise.futureResult
-    }
-}
-
-// MARK: - Tapbacks
-private func bindTapbacksAPI(_ message: RoutesBuilder) {
-    let tapbacks = message.grouped("tapbacks")
-    
-    /**
-     Send a tapback
-     */
-    tapbacks.post { req -> EventLoopFuture<HTTPStatus> in
-        guard let messageGUID = req.parameters.get("messageGUID"), let part = try? req.query.get(Int.self, at: "part"), let ackType = try? req.query.get(Int.self, at: "type") else { throw Abort(.badRequest) }
-        
-        return Chat.chat(forMessage: messageGUID, on: req.eventLoop).flatMap { chat in
-            guard let chat = chat?.imChat() else {
-                return req.eventLoop.makeFailedFuture(Abort(.notFound, reason: "Unknown chat."))
-            }
-            
-            let debugItemType = try? req.query.get(UInt8.self, at: "itemType")
-            let promise = req.eventLoop.makePromise(of: HTTPStatus.self)
-            
-            chat.tapback(guid: messageGUID, index: part, type: ackType, overridingItemType: debugItemType) { error in
-                guard let error = error else {
-                    return promise.succeed(.ok)
-                }
-                
-                promise.fail(error)
-            }
-            
-            return promise.futureResult
-        }
     }
 }

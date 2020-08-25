@@ -11,25 +11,6 @@ import Combine
 import Vapor
 import NIO
 
-class Debouncer {
-    var delay: Double
-    weak var timer: Timer?
-
-    init(delay: Double) {
-        self.delay = delay
-    }
-
-    internal func call(_ callback: @escaping () -> ()) {
-        timer?.invalidate()
-        
-        let nextTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { _ in
-            callback()
-        }
-        
-        timer = nextTimer
-    }
-}
-
 /**
  Tracks API consumption for a given IP
  */

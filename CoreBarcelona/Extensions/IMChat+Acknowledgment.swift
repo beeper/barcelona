@@ -9,6 +9,7 @@
 import Foundation
 import IMCore
 import Vapor
+import NIO
 
 private let chatItemGUIDExtractor = try! NSRegularExpression(pattern: "(?:\\w+:\\d+)\\/([\\w-]+)")
 
@@ -16,28 +17,47 @@ extension IMChat {
     /**
      Sends a tapback for a given message, calling back with a Vapor abort if the operation fails
      */
-    func tapback(message: IMMessage, index: Int, type: Int, overridingItemType: UInt8?, _ callback: (Abort?) -> ()) {
-        guard let subpart = message.subpart(at: index) else { return callback(Abort(.notFound)) }
+    func tapback(message: IMMessage, itemGUID: String, type: Int, overridingItemType: UInt8?) -> EventLoopFuture<IMMessage> {
+        guard let subpart = message.subpart(with: itemGUID) as? IMMessagePartChatItem else {
+            return messageQuerySystem.next().makeFailedFuture(MessagesError(code: 404, message: "Not found"))
+        }
         
-        sendMessageAcknowledgment(Int64(type), forChatItem: subpart, withMessageSummaryInfo: subpart.summaryInfo(for: message, in: self, itemTypeOverride: overridingItemType))
+        let rawType = Int64(type)
         
-        callback(nil)
+//        sendMessageAcknowledgment(Int64(type), forChatItem: subpart, withMessageSummaryInfo: )
+        guard let summaryInfo = subpart.summaryInfo(for: message, in: self, itemTypeOverride: overridingItemType), let compatibilityString = IMMessageAcknowledgmentStringHelper.generateBackwardCompatibilityString(forMessageAcknowledgmentType: rawType, messageSummaryInfo: summaryInfo), let superFormat = IMCreateSuperFormatStringFromPlainTextString(compatibilityString) else {
+            return messageQuerySystem.next().makeFailedFuture(MessagesError(code: 500, message: "Internal server error"))
+        }
+        
+        let adjustedSummaryInfo = IMChat.__im_adjustMessageSummaryInfo(forSending: summaryInfo)
+        let guid = subpart.guid
+        let range = subpart.messagePartRange
+        
+        guard let message = IMMessage.instantMessage(withAssociatedMessageContent: superFormat, flags: 0, associatedMessageGUID: guid, associatedMessageType: rawType, associatedMessageRange: range, messageSummaryInfo: adjustedSummaryInfo) else {
+            return messageQuerySystem.next().makeFailedFuture(MessagesError(code: 500, message: "Couldn't create tapback message"))
+        }
+        
+        let promise = messageQuerySystem.next().makePromise(of: IMMessage.self);
+    
+        DispatchQueue.main.async {
+            self.sendMessage(message)
+            
+            promise.succeed(message)
+        }
+        
+        return promise.futureResult
     }
     
     /**
      Sends a tapback for a given message, calling back with a Vapor abort if the operation fails
      */
-    func tapback(guid: String, index: Int, type: Int, overridingItemType: UInt8?, _ callback: @escaping (Abort?) -> ()) {
-        loadMessage(withGUID: guid) { message in
-            guard let message = message else { return callback(Abort(.notFound)) }
-            self.tapback(message: message, index: index, type: type, overridingItemType: overridingItemType, callback)
+    func tapback(guid: String, itemGUID: String, type: Int, overridingItemType: UInt8?) -> EventLoopFuture<IMMessage> {
+        return IMMessage.message(withGUID: guid).flatMap {
+            guard let message = $0 else {
+                return messageQuerySystem.next().makeFailedFuture(MessagesError(code: 404, message: "Unknown message"))
+            }
+            
+            return self.tapback(message: message, itemGUID: itemGUID, type: type, overridingItemType: overridingItemType)
         }
-    }
-    
-    func associatedMessageItemsForMessage(guid: String) -> [IMAssociatedMessageItem] {
-//        print(IMDaemonController.sharedInstance()!.messages(withAssociatedGUID: guid))
-//        IMDaemonController.sharedInstance()!._populateParentMessagesIfNeeded(<#T##arg1: Any!##Any!#>)
-        
-        return []
     }
 }

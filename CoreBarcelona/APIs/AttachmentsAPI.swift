@@ -157,11 +157,6 @@ public func bindAttachmentsAPI(_ app: Application) {
      */
     attachment.get { req -> EventLoopFuture<Response> in
         guard let guid = req.parameters.get("guid") else { throw Abort(.badRequest) }
-//        guard let file = IMFileTransferCenter.sharedInstance()?.transfer(forGUID: guid, includeRemoved: false) else { throw Abort(.notFound) }
-//        guard let path = file.localPath else { throw Abort(.notFound) }
-//        guard file.existsAtLocalPath else { throw Abort(.notFound) }
-//
-//        return req.eventLoop.makeSucceededFuture(req.fileio.streamFile(at: path))
         let promise = req.eventLoop.makePromise(of: Response.self)
         
         DBReader(pool: databasePool, eventLoop: req.eventLoop).attachment(for: guid).whenComplete { result in

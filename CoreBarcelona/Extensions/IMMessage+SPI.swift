@@ -8,6 +8,7 @@
 
 import Foundation
 import IMCore
+import IMDPersistence
 import NIO
 
 extension Array where Element == IMMessage {
@@ -48,13 +49,13 @@ extension IMMessage {
         return message
     }
     
-    static func message(withGUID guid: String, on eventLoop: EventLoop) -> EventLoopFuture<IMMessage?> {
-        messages(withGUIDs: [guid], on: eventLoop).map { results in
+    static func message(withGUID guid: String, on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<IMMessage?> {
+        return messages(withGUIDs: [guid], on: eventLoop).map { results in
             results.first
         }
     }
     
-    static func messages(withGUIDs guids: [String], on eventLoop: EventLoop) -> EventLoopFuture<[IMMessage]> {
+    static func messages(withGUIDs guids: [String], on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<[IMMessage]> {
         let promise = eventLoop.makePromise(of: [IMMessage].self)
         
         IMSPIQueryIMMessageItemsWithGUIDsAndQOS(guids, QOS_CLASS_USER_INITIATED, queue) { results in
@@ -64,14 +65,21 @@ extension IMMessage {
             }
 
             promise.succeed(results.compactMap { item in
-                guard let messageItem = item as? IMMessageItem, let message = IMMessage.message(fromUnloadedItem: messageItem) else {
+                guard let messageItem = item as? IMMessageItem else {
                     print("fuck! \(item)")
                     return nil
                 }
+                
+                let manager = Unmanaged.passUnretained(messageItem)
+                
+                let message = IMMessage.message(fromUnloadedItem: manager.takeUnretainedValue())
 
+                manager.release()
+                
                 return message
             })
         }
+        
 //        EventLoopFuture<IMMessage?>.whenAllSucceed(guids.map { message -> EventLoopFuture<IMMessage?> in
 //            let promise = eventLoop.makePromise(of: IMMessage?.self)
 //

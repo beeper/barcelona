@@ -29,4 +29,5 @@ struct GroupActionTranscriptChatItemRepresentation: Content, ChatItemRepresentat
     var time: Double?
     var actionType: Int64
     var sender: String?
+    
 }

@@ -165,3 +165,4 @@
 #import <IMSharedUtilities/XCTestObservation.h>
 
 extern id _IMAttachmentPersistentPath(NSString* guid, NSURL* url, NSString* mime, CFStringRef utType);
+NSAttributedString* IMCreateSuperFormatStringFromPlainTextString(NSString*);

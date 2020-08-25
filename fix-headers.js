@@ -45,12 +45,20 @@ function fixIDParameterization(line) {
     return line.replace(/id\s?<.*>/g, "id")
 }
 
+function fixFakeShit(line) {
+    return line.replace(/CDStruct(?:_\w+)?(?:\s\*)?/g, "id ")
+}
+
 function fixIDPointer(line) {
     return line.replace(/\bid\s?\*/g, "id ");
 }
 
 function fixBrokenStruct(line) {
     return line.replace(/:\(struct \w+\s\[\d+\]\)/g, ":(id)");
+}
+
+function fixFailParse(line) {
+    return line.replace(/.*\/\/\sError\sparsing\stype.*/g, "");
 }
 
 function fixCDStruct(line) {
@@ -106,7 +114,9 @@ function applyAllFixes(text) {
         fixCDStruct,
         fixPBCodable,
         fixCNCancelationTokenInheritance,
-        fixCNObservable
+        fixCNObservable,
+	fixFakeShit,
+	fixFailParse
     ]);
 }
 

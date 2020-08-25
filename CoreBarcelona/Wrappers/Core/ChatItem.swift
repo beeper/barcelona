@@ -13,7 +13,6 @@ struct BulkChatItemRepresentation: Content {
     var items: [ChatItem]
 }
 
-
 public struct ChatItem: Content {
     let type: ChatItemType
     let item: Any?

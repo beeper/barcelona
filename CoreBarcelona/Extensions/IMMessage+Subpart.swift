@@ -19,4 +19,14 @@ extension IMMessage {
         
         return parts[index]
     }
+    
+    func subpart(with guid: String) -> IMChatItem? {
+        guard let parts = self._imMessageItem?._newChatItems() else { return nil }
+        return parts.first(where: {
+            guard let part = $0 as? IMMessagePartChatItem else {
+                return false
+            }
+            return part.guid == guid
+        })
+    }
 }

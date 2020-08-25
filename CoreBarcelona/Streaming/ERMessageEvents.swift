@@ -16,6 +16,7 @@ internal let ERChatMessagesReceivedNotification = NSNotification.Name(rawValue: 
 internal let ERChatMessageSentNotification = NSNotification.Name(rawValue: "ERChatMessageSentNotification")
 internal let ERChatMessagesUpdatedNotification = NSNotification.Name(rawValue: "ERChatMessagesUpdatedNotification")
 internal let ERChatMessageUpdatedNotification = NSNotification.Name(rawValue: "ERChatMessageUpdatedNotification")
+internal let ERChatMessagesDeletedNotification = NSNotification.Name(rawValue: "ERChatMessagesDeletedNotification")
 
 private let log_messageEvents = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ERMessageEvents")
 
@@ -27,6 +28,14 @@ class ERMessageEvents: EventDispatcher {
             }
 
             self.messageReceived(item, inChat: chat)
+        }
+        
+        addObserver(forName: ERChatMessagesDeletedNotification) {
+            guard let dict = $0.object as? [String: Any], let guids = dict["guids"] as? [String] else {
+                return
+            }
+            
+            self.messagesDeleted(guids)
         }
 
         addObserver(forName: ERChatMessagesReceivedNotification) {
@@ -65,6 +74,10 @@ class ERMessageEvents: EventDispatcher {
         }
     }
     
+    private func messagesDeleted(_ guids: [String]) {
+        StreamingAPI.shared.dispatch(eventFor(itemsRemoved: BulkMessageIDRepresentation(messages: guids)))
+    }
+    
     /** Counts as a new message */
     private func messageReceived(_ item: IMItem, inChat chatIdentifier: String) {
         messagesReceived([item], inChat: chatIdentifier)
@@ -85,20 +98,11 @@ class ERMessageEvents: EventDispatcher {
                 return nil
             }
             
-            let promise = eventProcessing_eventLoop.next().makePromise(of: ChatItem?.self)
-            
-            chat.loadMessage(withGUID: item.guid) { message in
-                guard let message = message else {
-                    return
-                }
-                
-                ERIndeterminateIngestor.ingest(message, in: chat.groupID).cascade(to: promise)
-            }
-            
-            return promise.futureResult
+            return itemGUIDAsChatItem(item.guid, in: chat.groupID)
         }, on: eventProcessing_eventLoop.next()).map {
             $0.compactMap { $0 }
         }.whenSuccess {
+            if $0.count == 0 { return }
             StreamingAPI.shared.dispatch(eventFor(itemsReceived: BulkChatItemRepresentation(items: $0)), to: nil)
         }
     }
@@ -108,18 +112,7 @@ class ERMessageEvents: EventDispatcher {
         let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!
         
         EventLoopFuture<ChatItem?>.whenAllSucceed(items.map { item -> EventLoopFuture<ChatItem?> in
-            let promise = eventProcessing_eventLoop.next().makePromise(of: ChatItem?.self)
-            
-            chat.loadMessage(withGUID: item.guid) { message in
-                guard let message = message else {
-                    promise.succeed(nil)
-                    return
-                }
-                
-                ERIndeterminateIngestor.ingest(message, in: chat.groupID).cascade(to: promise)
-            }
-            
-            return promise.futureResult
+            return itemGUIDAsChatItem(item.guid, in: chat.groupID)
         }, on: eventProcessing_eventLoop.next()).map {
             $0.compactMap { $0 }
         }.whenSuccess {
@@ -130,5 +123,15 @@ class ERMessageEvents: EventDispatcher {
     /** Counts as an update */
     private func messageUpdated(_ item: IMItem, inChat chatIdentifier: String) {
         messagesUpdated([item], inChat: chatIdentifier)
+    }
+    
+    private func itemGUIDAsChatItem(_ guid: String, in groupID: String) -> EventLoopFuture<ChatItem?> {
+        IMMessage.message(withGUID: guid).flatMap { message -> EventLoopFuture<ChatItem?> in
+            guard let message = message else {
+                return eventProcessing_eventLoop.next().makeSucceededFuture(nil)
+            }
+            
+            return ERIndeterminateIngestor.ingest(message, in: groupID)
+        }
     }
 }

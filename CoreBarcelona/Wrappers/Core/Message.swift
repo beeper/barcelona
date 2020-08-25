@@ -22,38 +22,55 @@ struct BulkMessageIDRepresentation: Content {
     var messages: [String]
 }
 
+extension Array where Element == String {
+    func er_chatItems(in chat: String) -> EventLoopFuture<[ChatItem]> {
+        IMMessage.messages(withGUIDs: self, on: messageQuerySystem.next()).flatMap {
+            return ERIndeterminateIngestor.ingest($0, in: chat)
+        }
+    }
+}
+
+extension Array where Element == Message {
+    var representation: BulkMessageRepresentation {
+        BulkMessageRepresentation(self)
+    }
+}
+
 public struct Message: ChatItemRepresentation {
     static func message(withGUID guid: String, on eventLoop: EventLoop) -> EventLoopFuture<Message?> {
         IMMessage.message(withGUID: guid, on: eventLoop).flatMap { message -> EventLoopFuture<Message?> in
-            let promise = eventLoop.makePromise(of: Message?.self)
-            
             guard let message = message else {
-                promise.succeed(nil)
-                return promise.futureResult
+                return eventLoop.makeSucceededFuture(nil)
             }
             
-            databasePool.asyncRead { result in
-                switch result {
-                case .failure(let error):
-                    promise.fail(error)
-                case .success(let db):
-                    do {
-                        guard let chatGroupID = try DBReader(pool: databasePool, eventLoop: messageQuerySystem.next()).chatGroupID(forMessageROWID: message.messageID, in: db) else {
-                            promise.succeed(nil)
-                            return
-                        }
-                        
-                        ERIndeterminateIngestor.ingest(messageLike: message, in: chatGroupID, on: eventLoop).cascade(to: promise)
-                    } catch {
-                        promise.fail(error)
-                    }
+            return DBReader.shared.chatGroupID(forMessageROWID: message.messageID).flatMap { groupID -> EventLoopFuture<Message?> in
+                guard let groupID = groupID else {
+                    return eventLoop.makeSucceededFuture(nil)
                 }
+                
+                return ERIndeterminateIngestor.ingest(messageLike: message, in: groupID)
             }
-            
-            return promise.futureResult
         }
     }
     
+    static func messages(withGUIDs guids: [String], on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<[Message]> {
+        IMMessage.messages(withGUIDs: guids, on: eventLoop).flatMap { messages -> EventLoopFuture<[Message]> in
+            EventLoopFuture<String?>.whenAllSucceed(messages.map {
+                DBReader.shared.chatGroupID(forMessageROWID: $0.messageID)
+            }, on: eventLoop).flatMap { chatGroupIDs in
+                EventLoopFuture<Message?>.whenAllSucceed(chatGroupIDs.enumerated().map {
+                    guard let id = $0.element else {
+                        return eventLoop.makeSucceededFuture(nil)
+                    }
+                    
+                    return ERIndeterminateIngestor.ingest(messageLike: messages[$0.offset], in: id)
+                }, on: eventLoop).map {
+                    $0.compactMap { $0 }
+                }
+            }
+        }
+    }
+
     init(_ item: IMItem, transcriptRepresentation: ChatItem, chatGroupID: String?) {
         guid = item.guid
         fromMe = item.isFromMe
@@ -70,6 +87,7 @@ public struct Message: ChatItemRepresentation {
         sender = item.sender
         flags = 0x5
         items = [transcriptRepresentation]
+        service = item.service ?? "iMessage"
         
         self.load(item: item, chatGroupID: chatGroupID)
     }
@@ -79,22 +97,26 @@ public struct Message: ChatItemRepresentation {
         chatGroupID = inChatGroupID
         fromMe = message.isFromMe
         time = (backing.time?.timeIntervalSince1970 ?? 0) * 1000
-        timeDelivered = (backing.timeDelivered?.timeIntervalSince1970 ?? 0) * 1000
+        timeDelivered = (backing.timeDelivered?.timeIntervalSince1970 ?? message.timeDelivered?.timeIntervalSince1970 ?? 0) * 1000
         sender = message.sender.id
         subject = message.subject?.id
-        timeRead = (backing.timeRead?.timeIntervalSince1970 ?? 0) * 1000
-        timePlayed = (backing.timePlayed?.timeIntervalSince1970 ?? 0) * 1000
+        timeRead = (backing.timeRead?.timeIntervalSince1970 ?? message.timeRead?.timeIntervalSince1970 ?? 0) * 1000
+        timePlayed = (backing.timePlayed?.timeIntervalSince1970 ?? message.timePlayed?.timeIntervalSince1970 ?? 0) * 1000
         messageSubject = backing.subject
         isSOS = backing.isSOS
-        isTypingMessage = backing.isTypingMessage
+        isTypingMessage = backing.isTypingMessage || chatItems.contains {
+            $0.type == .typing
+        }
+        
         isCancelTypingMessage = backing.isCancelTypingMessage()
         isDelivered = backing.isDelivered
         isAudioMessage = backing.isAudioMessage
         items = chatItems
         flags = backing.flags
+        service = backing.service
         
-        if let chatGroupID = chatGroupID {
-            description = message.description(forPurpose: 0x2, inChat: Registry.sharedInstance.imChat(withGroupID: chatGroupID)!, senderDisplayName: backing._senderHandle()._displayNameWithAbbreviation)
+        if let chatGroupID = chatGroupID, let senderID = (backing.sender() ?? message.sender?.id), let senderHandle = Registry.sharedInstance.imHandle(withID: senderID), let chat = Registry.sharedInstance.imChat(withGroupID: chatGroupID) {
+            description = message.description(forPurpose: 0x2, inChat: chat, senderDisplayName: senderHandle._displayNameWithAbbreviation)
         }
         
         self.load(item: backing, chatGroupID: inChatGroupID)
@@ -135,4 +157,5 @@ public struct Message: ChatItemRepresentation {
     var description: String?
     var flags: UInt64
     var items: [ChatItem]
+    var service: String
 }

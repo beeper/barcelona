@@ -76,6 +76,17 @@ protocol MessageIdentifiable {
     var guid: String { get set }
 }
 
+protocol ChatConfigurationRepresentable {
+    var readReceipts: Bool { get set }
+    var ignoreAlerts: Bool { get set }
+}
+
+struct ChatConfigurationRepresentation: Content, ChatConfigurationRepresentable {
+    var groupID: String
+    var readReceipts: Bool
+    var ignoreAlerts: Bool
+}
+
 struct DeleteMessage: Codable, MessageIdentifiable {
     var guid: String
     var parts: [Int]?
@@ -83,7 +94,7 @@ struct DeleteMessage: Codable, MessageIdentifiable {
 
 extension MessageIdentifiable {
     func resolveChatGroupID(on eventLoop: EventLoop) -> EventLoopFuture<String?> {
-        Chat.chatGroupID(forMessage: guid, on: eventLoop)
+        DBReader.shared.chatGroupID(forMessageGUID: guid)
     }
     
     func resolveChat(on eventLoop: EventLoop) -> EventLoopFuture<Chat?> {
@@ -102,43 +113,30 @@ private func flagsForCreation(_ creation: CreateMessage, transfers: [String]) ->
     return .textOrPluginOrStickerOrImage
 }
 
-struct Chat: Codable {
+struct Chat: Codable, ChatConfigurationRepresentable {
     init(_ backing: IMChat) {
         joinState = backing.joinState
         roomName = backing.roomName
         displayName = backing.displayName
         groupID = backing.groupID
-        participants = backing.participantHandleIDs() ?? []
+        participants = (backing.participantHandleIDs() ?? []).map {
+            $0.starts(with: "e:") ? $0.substring(from: .init(encodedOffset: 2)) : $0
+        }
         lastAddressedHandleID = backing.lastAddressedHandleID
         unreadMessageCount = backing.unreadMessageCount
         messageFailureCount = backing.messageFailureCount
         service = backing.account?.serviceName
-        lastMessage = backing.lastMessage?.description(forPurpose: 0x2, inChat: backing, senderDisplayName: backing.lastMessage?.sender._displayNameWithAbbreviation)
-        lastMessageTime = (backing.lastMessage?.time.timeIntervalSince1970 ?? 0) * 1000
+        lastMessage = backing.lastFinishedMessage?.description(forPurpose: 0x2, inChat: backing, senderDisplayName: backing.lastMessage?.sender._displayNameWithAbbreviation)
+        lastMessageTime = (backing.lastFinishedMessage?.time.timeIntervalSince1970 ?? 0) * 1000
         style = backing.chatStyle
-    }
-    
-    public static func chatGroupID(forMessage guid: String, on eventLoop: EventLoop) -> EventLoopFuture<String?> {
-        let promise = eventLoop.makePromise(of: String?.self)
+        readReceipts = backing.readReceipts
+        ignoreAlerts = backing.ignoreAlerts
         
-        databasePool.asyncRead { result in
-            switch result {
-            case .failure(let error):
-                promise.fail(error)
-            case .success(let db):
-                do {
-                    promise.succeed(try DBReader(pool: databasePool, eventLoop: eventLoop).chatGroupID(forMessageGUID: guid, in: db))
-                } catch {
-                    promise.fail(error)
-                }
-            }
-        }
-        
-        return promise.futureResult
+        backing.messageCount
     }
     
     public static func chat(forMessage guid: String, on eventLoop: EventLoop) -> EventLoopFuture<Chat?> {
-        chatGroupID(forMessage: guid, on: eventLoop).map {
+        DBReader.shared.chatGroupID(forMessageGUID: guid).map {
             guard let groupID = $0 else {
                 return nil
             }
@@ -159,9 +157,25 @@ struct Chat: Codable {
     var lastMessage: String?
     var lastMessageTime: Double
     var style: UInt8
+    var readReceipts: Bool
+    var ignoreAlerts: Bool
     
     public func imChat() -> IMChat {
         Registry.sharedInstance.imChat(withGroupID: groupID)!
+    }
+    
+    func messages(before: String? = nil, limit: UInt64? = nil) -> EventLoopFuture<[ChatItem]> {
+        DBReader.shared.rowID(forGroupID: groupID).flatMap {
+            guard let ROWID = $0 else {
+                return messageQuerySystem.next().makeSucceededFuture([])
+            }
+            
+            return DBReader.shared.newestMessageGUIDs(inChatROWID: ROWID, beforeMessageGUID: before, limit: Int(limit ?? 100))
+        }.flatMap {
+            IMMessage.messages(withGUIDs: $0, on: messageQuerySystem.next())
+        }.flatMap {
+            ERIndeterminateIngestor.ingest($0, in: self.groupID)
+        }
     }
     
     func delete(message: DeleteMessage, on eventLoop: EventLoop) -> EventLoopFuture<Void> {
@@ -216,7 +230,6 @@ struct Chat: Codable {
                 /** Split the base message into individual messages if it contains rich link(s) */
                 guard let messages = message.messagesBySeparatingRichLinks() as? [IMMessage] else {
                     print("Malformed message result when separating rich links at \(message)")
-//                    promise.fail(MessagesError(code: 500, message: "Failed to parse rich links"))
                     return
                 }
                 

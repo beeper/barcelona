@@ -55,3 +55,4 @@ void IMDEnsureSharedRecordStoreInitialized();
 void IMDSetIsRunningInDatabaseServerProcess(char);
 NSArray* IMDMessageRecordCopyMessagesForAssociatedGUID(CFStringRef);
 NSArray* IMDMessageRecordCopyMessagesForRowIDs(NSArray*);
+id IMDMessageRecordCopyMessageForGUID(CFStringRef);

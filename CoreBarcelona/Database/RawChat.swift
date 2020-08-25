@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import NIO
 import GRDB
 
 /**
@@ -107,4 +108,54 @@ class RawChat: Record {
     var sr_cloudkit_record_id: String?
     var last_addressed_sim_id: String?
     var is_blackholed: Int64?
+}
+
+extension DBReader {
+    func resolveChatIdentifier(from groupID: String) -> EventLoopFuture<String?> {
+        let promise = eventLoop.makePromise(of: String?.self)
+        
+        pool.asyncRead { result in
+            switch result {
+            case .failure(let error):
+                promise.fail(error)
+            case .success(let db):
+                do {
+                    let chat = try RawChat
+                        .select(RawChat.Columns.chat_identifier, as: String.self)
+                        .filter(sql: "group_id = ?", arguments: [groupID])
+                        .fetchOne(db)
+                    
+                    promise.succeed(chat)
+                } catch  {
+                    promise.fail(error)
+                }
+            }
+        }
+        
+        return promise.futureResult
+    }
+    
+    func rowID(forGroupID: String) -> EventLoopFuture<Int64?> {
+        let promise = eventLoop.makePromise(of: Int64?.self)
+        
+        pool.asyncRead { result in
+            switch result {
+            case .failure(let error):
+                promise.fail(error)
+            case .success(let db):
+                do {
+                    let ROWID = try RawChat
+                        .select(RawChat.Columns.ROWID, as: Int64.self)
+                        .filter(RawChat.Columns.group_id == forGroupID)
+                        .fetchOne(db)
+                    
+                    promise.succeed(ROWID)
+                } catch {
+                    promise.fail(error)
+                }
+            }
+        }
+        
+        return promise.futureResult
+    }
 }

@@ -116,7 +116,7 @@ struct InternalAttachmentRepresentation {
             return transfer
         }
         
-        let url = URL(string: "file://\(path)")!
+        let url = URL.init(fileURLWithPath: path)
         let transfer = IMFileTransfer()._init(withGUID: guid, filename: url.lastPathComponent, isDirectory: false, localURL: url, account: account.uniqueID, otherPerson: nil, totalBytes: bytes, hfsType: 0, hfsCreator: 0, hfsFlags: 0, isIncoming: false)!
         
         transfer.transferredFilename = url.lastPathComponent

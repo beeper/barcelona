@@ -19,6 +19,7 @@ struct Event<P: Content>: Content {
         case bootstrap
         case itemsReceived
         case itemsUpdated
+        case itemStatusChanged
         case itemsRemoved
         case participantsChanged
         case conversationRemoved
@@ -26,6 +27,8 @@ struct Event<P: Content>: Content {
         case conversationChanged
         case conversationDisplayNameChanged
         case conversationJoinStateChanged
+        case conversationUnreadCountChanged
+        case conversationPropertiesChanged
         case contactCreated
         case contactRemoved
         case contactUpdated
@@ -48,6 +51,10 @@ func eventFor(itemsReceived: BulkChatItemRepresentation) -> Event<BulkChatItemRe
 
 func eventFor(itemsUpdated: BulkChatItemRepresentation) -> Event<BulkChatItemRepresentation> {
     return Event<BulkChatItemRepresentation>(type: .itemsUpdated, data: itemsUpdated)
+}
+
+func eventFor(itemStatusChanged: StatusChatItemRepresentation) -> Event<StatusChatItemRepresentation> {
+    return Event<StatusChatItemRepresentation>(type: .itemStatusChanged, data: itemStatusChanged)
 }
 
 func eventFor(itemsRemoved: BulkMessageIDRepresentation) -> Event<BulkMessageIDRepresentation> {
@@ -83,6 +90,14 @@ func eventFor(conversationDisplayNameChanged: Chat) -> Event<Chat> {
 
 func eventFor(conversationJoinStateChanged: Chat) -> Event<Chat> {
     return Event<Chat>(type: .conversationJoinStateChanged, data: conversationJoinStateChanged)
+}
+
+func eventFor(conversationUnreadCountChanged: Chat) -> Event<Chat> {
+    return Event<Chat>(type: .conversationUnreadCountChanged, data: conversationUnreadCountChanged)
+}
+
+func eventFor(conversationPropertiesChanged: ChatConfigurationRepresentation) -> Event<ChatConfigurationRepresentation> {
+    return Event<ChatConfigurationRepresentation>(type: .conversationPropertiesChanged, data: conversationPropertiesChanged)
 }
 
 // MARK: - Contact events

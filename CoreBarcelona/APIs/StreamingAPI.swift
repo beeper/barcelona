@@ -26,6 +26,7 @@ struct BootstrapData: Content, BulkChatRepresentatable {
     
     var chats: [Chat]
     var contacts: BulkContactRepresentation
+    var messages: BulkChatItemRepresentation?
 }
 
 private var streamingAPI: StreamingAPI? = nil
@@ -56,7 +57,7 @@ class StreamingAPI {
         }
         
         app.webSocket("stream") { req, socket in
-            self.onboard(socket).whenComplete { res in
+            self.onboard(socket, chat: try? req.query.get(String.self, at: "chatPreload")).whenComplete { res in
                 switch (res) {
                 case .failure(let error):
                     os_log("🚨 onboarding failed with error %@", type: .error, String(describing: error), log_streaming)
@@ -76,7 +77,7 @@ class StreamingAPI {
     /**
      Called when a socket connects. Wakes up the event bus if it was asleep.
      */
-    func onboard(_ socket: WebSocket) -> EventLoopFuture<Void> {
+    func onboard(_ socket: WebSocket, chat preload: String? = nil) -> EventLoopFuture<Void> {
         os_log("📶 Socket connected, beginning onboard", log_streaming)
         
         DispatchQueue.main.async {
@@ -86,7 +87,23 @@ class StreamingAPI {
             }
         }
         
-        return self.dispatch(eventFor(bootstrap: BootstrapData(self.bootstrapOptions)), to: [socket])
+        var pendingMessages: EventLoopFuture<[ChatItem]>
+        
+        if let preload = preload, let chat = Registry.sharedInstance.chat(withGroupID: preload) {
+            pendingMessages = chat.messages()
+        } else {
+            pendingMessages = eventProcessing_eventLoop.next().makeSucceededFuture([])
+        }
+        
+        return pendingMessages.flatMap {
+            var bootstrap = BootstrapData(self.bootstrapOptions)
+            
+            if $0.count > 0 {
+                bootstrap.messages = .init(items: $0)
+            }
+            
+            return self.dispatch(eventFor(bootstrap: bootstrap), to: [socket])
+        }
     }
     
     /**

@@ -14,6 +14,28 @@ extension IMChat {
         Chat(self)
     }
     
+    var readReceipts: Bool {
+        get {
+            value(forChatProperty: "EnableReadReceiptForChat") as? Bool ?? false
+        }
+        set {
+            setValue(newValue == true ? 1 : 0, forChatProperty: "EnableReadReceiptForChat")
+        }
+    }
+    
+    var ignoreAlerts: Bool {
+        get {
+            value(forChatProperty: "ignoreAlertsFlag") as? Bool ?? false
+        }
+        set {
+            setValue(newValue == true ? 1 : 0, forChatProperty: "ignoreAlertsFlag")
+        }
+    }
+    
+    var properties: ChatConfigurationRepresentation {
+        ChatConfigurationRepresentation(groupID: groupID, readReceipts: readReceipts, ignoreAlerts: ignoreAlerts)
+    }
+    
     var representableParticipantIDs: BulkHandleIDRepresentation {
         BulkHandleIDRepresentation(handles: participantHandleIDs())
     }

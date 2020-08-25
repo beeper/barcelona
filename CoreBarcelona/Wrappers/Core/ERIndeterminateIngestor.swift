@@ -33,24 +33,52 @@ private let ingestor_eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 5)
 
 private let ingestor_log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ERIndeterminateIngestor")
 
+private let shouldLog = false
+
 struct ERIndeterminateIngestor {
     public static func ingest(_ object: AnyObject, in chat: String, on eventLoop: EventLoop = ingestor_eventLoop.next()) -> EventLoopFuture<ChatItem?> {
         let promise = eventLoop.makePromise(of: ChatItem?.self)
         
-        os_log("Ingesting object %@ in chat %@", String(describing: object), chat, ingestor_log)
+        if shouldLog {
+            os_log("Ingesting object %@ in chat %@", type: .debug, String(describing: object), chat, ingestor_log)
+        }
         
         if TranscriptLikeClasses.contains(where: { object.isKind(of: $0) }), !ChatLikeClasses.contains(where: { object.isKind(of: $0) }) {
-            os_log("Object %@ is transcript-like", String(describing: object), ingestor_log)
+            if shouldLog {
+                os_log("Object %@ is transcript-like", type: .debug, String(describing: object), ingestor_log)
+            }
+            
             ingest(transcriptLike: object, in: chat, on: eventLoop).cascade(to: promise)
         } else if ChatLikeClasses.contains(where: { object.isKind(of: $0) }) {
-            os_log("Object %@ is chat-like", String(describing: object), ingestor_log)
+            if shouldLog {
+                os_log("Object %@ is chat-like", type: .debug, String(describing: object), ingestor_log)
+            }
+            
             ingest(chatLike: object, in: chat, on: eventLoop).cascade(to: promise)
         } else {
-            os_log("Object %@ is a stub", String(describing: object), ingestor_log)
+            if shouldLog {
+                os_log("Object %@ is a stub", type: .debug, String(describing: object), ingestor_log)
+            }
+            
             promise.succeed(ChatItem(type: .phantom, item: StubChatItemRepresentation(object, chatGroupID: chat)))
         }
         
         return promise.futureResult
+    }
+    
+    /// Dedicated function for ingesting status items – they are not to be wrapped in Message objects as they overwrite the message data
+    public static func ingest(_ status: IMMessageStatusChatItem, in chat: String, on eventLoop: EventLoop = ingestor_eventLoop.next()) -> EventLoopFuture<StatusChatItemRepresentation?> {
+        guard let messageGUID = status._item().guid else {
+            return eventLoop.makeSucceededFuture(nil)
+        }
+        
+        return IMMessage.message(withGUID: messageGUID, on: eventLoop).map {
+            guard let message = $0 else {
+                return nil
+            }
+            
+            return StatusChatItemRepresentation(status, message: message, chatGroupID: chat)
+        }
     }
     
     public static func ingest(_ objects: [AnyObject], in chat: String, on eventLoop: EventLoop = ingestor_eventLoop.next()) -> EventLoopFuture<[ChatItem]> {
@@ -105,9 +133,7 @@ struct ERIndeterminateIngestor {
     
     /// Ingests and resolves attachment metadata, succeeding with a detailed chatitem
     private static func ingest(attachment item: IMAttachmentMessagePartChatItem, in chat: String, on eventLoop: EventLoop) -> EventLoopFuture<ChatItem?> {
-        let promise = eventLoop.makePromise(of: ChatItem?.self)
-        
-        DBReader(pool: databasePool, eventLoop: eventLoop).attachment(for: item.transferGUID).whenSuccess { transfer in
+        DBReader(pool: databasePool, eventLoop: eventLoop).attachment(for: item.transferGUID).flatMap { transfer in
             var attachment: AttachmentChatItemRepresentation!
             
             if let transfer = transfer {
@@ -116,12 +142,10 @@ struct ERIndeterminateIngestor {
                 attachment = AttachmentChatItemRepresentation(item, chatGroupID: chat)
             }
             
-            insertTapbacks(forChatLikeItem: attachment, on: eventLoop).map {
+            return insertTapbacks(forChatLikeItem: attachment, on: eventLoop).map {
                 ChatItem(type: .attachment, item: $0)
-            }.cascade(to: promise)
+            }
         }
-        
-        return promise.futureResult
     }
     
     private static func insertTapbacks<P: ChatItemAcknowledgable>(forChatLikeItem item: P, on eventLoop: EventLoop) -> EventLoopFuture<P> {
@@ -198,8 +222,6 @@ struct ERIndeterminateIngestor {
     
     /// Processes transcript-related items and wraps them in a message item
     private static func ingest(transcriptLike object: AnyObject, in chat: String, on eventLoop: EventLoop) -> EventLoopFuture<ChatItem?> {
-        let promise = eventLoop.makePromise(of: ChatItem?.self)
-        
         var imItem: IMItem!
         
         if let item = object as? IMTranscriptChatItem {
@@ -207,23 +229,20 @@ struct ERIndeterminateIngestor {
         } else if let item = object as? IMItem {
             imItem = item
         } else {
-            promise.succeed(ChatItem(type: .phantom, item: StubChatItemRepresentation(object, chatGroupID: chat)))
-            return promise.futureResult
+            return eventLoop.makeSucceededFuture(ChatItem(type: .phantom, item: StubChatItemRepresentation(object, chatGroupID: chat)))
         }
         
         var chatItem: ChatItem? = nil
         
         switch (object) {
-        case let item as IMDateChatItem:
-            chatItem = ChatItem(type: .date, item: DateTranscriptChatItemRepresentation(item, chatGroupID: chat))
-        case let item as IMSenderChatItem:
-            chatItem = ChatItem(type: .sender, item: SenderTranscriptChatItemRepresentation(item, chatGroupID: chat))
+        case is IMDateChatItem:
+            break
+        case is IMSenderChatItem:
+            break
         case let item as IMParticipantChangeItem:
             chatItem = ChatItem(type: .participantChange, item: ParticipantChangeTranscriptChatItemRepresentation(item, chatGroupID: chat))
         case let item as IMParticipantChangeChatItem:
             chatItem = ChatItem(type: .participantChange, item: ParticipantChangeTranscriptChatItemRepresentation(item, chatGroupID: chat))
-        case let item as IMMessageStatusChatItem:
-            chatItem = ChatItem(type: .status, item: StatusChatItemRepresentation(item, chatGroupID: chat))
         case let item as IMGroupActionItem:
             chatItem = ChatItem(type: .groupAction, item: GroupActionTranscriptChatItemRepresentation(item, chatGroupID: chat))
         case let item as IMGroupActionChatItem:
@@ -234,9 +253,16 @@ struct ERIndeterminateIngestor {
             chatItem = ChatItem(type: .groupTitle, item: GroupTitleChangeItemRepresentation(item, chatGroupID: chat))
         case let item as IMTypingChatItem:
             chatItem = ChatItem(type: .typing, item: TypingChatItemRepresentation(item, chatGroupID: chat))
+            
+            /// IMTypingChatItem provides its own message with populated metadata beyond what the IMItem provides
+            if let message = item.message, let chatItem = chatItem {
+                return eventLoop.makeSucceededFuture(ChatItem(type: .message, item: Message(message, items: [chatItem], chatGroupID: chat)))
+            }
         default:
             break
         }
+        
+        let promise = eventLoop.makePromise(of: ChatItem?.self)
         
         if let chatItem = chatItem {
             promise.succeed(ChatItem(type: .message, item: Message(imItem, transcriptRepresentation: chatItem, chatGroupID: chat)))

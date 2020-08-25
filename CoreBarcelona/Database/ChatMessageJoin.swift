@@ -8,6 +8,7 @@
 
 import Foundation
 import GRDB
+import NIO
 
 /**
  Represents the chat-message join table in the chat.db file
@@ -38,37 +39,128 @@ class ChatMessageJoin: Record {
 }
 
 extension DBReader {
-    func chatGroupID(forMessageGUID guid: String, in db: Database) throws -> String? {
-        guard let ROWID = try RawMessage
-            .select(RawMessage.Columns.ROWID, as: Int64.self)
-            .filter(RawMessage.Columns.guid == guid)
-            .fetchOne(db) else {
-                return nil
+    func chatGroupID(forMessageGUID guid: String) -> EventLoopFuture<String?> {
+        let promise = eventLoop.makePromise(of: String?.self)
+        
+        pool.asyncRead {
+            switch $0 {
+            case .failure(let error):
+                promise.fail(error)
+            case .success(let db):
+                do {
+                    guard let ROWID = try RawMessage
+                        .select(RawMessage.Columns.ROWID, as: Int64.self)
+                        .filter(RawMessage.Columns.guid == guid)
+                        .fetchOne(db) else {
+                            promise.succeed(nil)
+                            return
+                    }
+                    
+                    self.chatGroupID(forMessageROWID: ROWID).cascade(to: promise)
+                } catch {
+                    promise.fail(error)
+                }
+            }
         }
         
-        return try chatGroupID(forMessageROWID: ROWID, in: db)
+        return promise.futureResult
     }
     
     /**
      Resolve the chat GroupID for a given message ROWID
      */
-    func chatGroupID(forMessageROWID ROWID: Int64, in db: Database) throws -> String? {
-        // MARK: - Join resolution
-        guard let joinResult = try ChatMessageJoin
-            .select(ChatMessageJoin.Columns.chat_id, as: Int64.self)
-            .filter(ChatMessageJoin.Columns.message_id == ROWID)
-            .fetchOne(db) else {
-            return nil
+    func chatGroupID(forMessageROWID ROWID: Int64) -> EventLoopFuture<String?> {
+        return self.chatGroupIDs(forMessageRowIDs: [ROWID]).map {
+            $0[ROWID]
+        }
+    }
+    
+    func chatGroupIDs(forMessageRowIDs ROWIDs: [Int64]) -> EventLoopFuture<[Int64: String]> {
+        let promise = eventLoop.makePromise(of: [Int64: String].self)
+        
+        pool.asyncRead {
+            switch $0 {
+            case .failure(let error):
+                promise.fail(error)
+            case .success(let db):
+                do {
+                    let joins = try ChatMessageJoin
+                        .filter(ROWIDs.contains(ChatMessageJoin.Columns.message_id))
+                        .fetchAll(db)
+                    
+                    let chatRowIDs = joins.compactMap {
+                        $0.chat_id
+                    }
+                    
+                    let chatPartials = try RawChat
+                        .select([RawChat.Columns.group_id, RawChat.Columns.ROWID])
+                        .filter(chatRowIDs.contains(RawChat.Columns.ROWID))
+                        .fetchAll(db)
+                    
+                    let chatRowIDToGroupID = chatPartials.reduce(into: [Int64: String]()) { (ledger, partial) in
+                        guard let ROWID = partial.ROWID, let groupID = partial.group_id else {
+                            return
+                        }
+                        
+                        ledger[ROWID] = groupID
+                    }
+                    
+                    promise.succeed(joins.reduce(into: [Int64: String]()) { (ledger, join) in
+                        guard let chatROWID = join.chat_id, let messageROWID = join.message_id, let chatGroupID = chatRowIDToGroupID[chatROWID] else {
+                            return
+                        }
+                        
+                        ledger[messageROWID] = chatGroupID
+                    })
+                } catch {
+                    promise.fail(error)
+                }
+            }
         }
         
-        // MARK: - Chat resolution
-        guard let groupID = try RawChat
-            .select(RawChat.Columns.group_id, as: String.self)
-            .filter(RawChat.Columns.ROWID == joinResult)
-            .fetchOne(db) else {
-                return nil
+        return promise.futureResult
+    }
+    
+    func newestMessageGUIDs(inChatROWID ROWID: Int64, beforeMessageGUID: String? = nil, limit: Int = 100) -> EventLoopFuture<[String]> {
+        let promise = eventLoop.makePromise(of: [String].self)
+        
+        let resolution = beforeMessageGUID == nil ? eventLoop.makeSucceededFuture(nil) : rowID(forMessageGUID: beforeMessageGUID!)
+        
+        resolution.whenSuccess { beforeMessageROWID in
+            self.pool.asyncRead {
+                switch $0 {
+                case .failure(let error):
+                    promise.fail(error)
+                case .success(let db):
+                    do {
+                        var messageROWIDsQuery = ChatMessageJoin
+                            .select(ChatMessageJoin.Columns.message_id, as: Int64.self)
+                            .filter(ChatMessageJoin.Columns.chat_id == ROWID)
+                        
+                        if let beforeMessageROWID = beforeMessageROWID {
+                            messageROWIDsQuery = messageROWIDsQuery
+                                .filter(ChatMessageJoin.Columns.message_id <= beforeMessageROWID)
+                        }
+                        
+                        let messageROWIDs = try messageROWIDsQuery
+                            .order(ChatMessageJoin.Columns.message_id.desc)
+                            .limit(limit)
+                            .fetchAll(db)
+                        
+                        let guids = try RawMessage
+                            .select(RawMessage.Columns.guid, as: String.self)
+                            .filter(messageROWIDs.contains(RawMessage.Columns.ROWID))
+                            .order(RawMessage.Columns.ROWID.desc)
+                            .fetchAll(db)
+                        
+                        promise.succeed(guids)
+                    } catch {
+                        promise.fail(error)
+                    }
+                }
+            }
         }
         
-        return groupID
+        return promise.futureResult
     }
 }

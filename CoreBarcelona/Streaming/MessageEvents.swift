@@ -22,7 +22,10 @@ private let IMChatItemsRegenerate = "__kIMChatItemsRegenerate";
 private let IMChatItemsReload = "__kIMChatItemsReload";
 private let IMChatItemsOldItems = "__kIMChatItemsOldItems";
 
+private let IMChatValueKey = AnyHashable("__kIMChatValueKey");
+
 private let log_messageEvents = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "MessageEvents")
+private let log_shouldLog = false
 
 let ChangedItemsExclusion = [
 //    IMTextMessagePartChatItem.self,
@@ -34,46 +37,115 @@ let ChangedItemsExclusion = [
 
 //private let ChangedItemsExclusion = [AnyClass.Type]()
 
+private class MessageDebouncerController {
+    private var debouncers: [String: Debouncer] = [:]
+    
+    private func debouncer(_ guid: String) -> Debouncer {
+        if let debouncer = self.debouncers[guid] {
+            return debouncer
+        }
+        self.debouncers[guid] = Debouncer(delay: 1 / 5)
+        return self.debouncers[guid]!
+    }
+    
+    func receive(guid: String, callback: @escaping () -> ()) {
+        self.debouncer(guid).call {
+            DispatchQueue.main.async {
+                self.debouncers.removeValue(forKey: guid)
+            }
+            
+            callback()
+        }
+    }
+}
+
 /**
  Tracks events related to IMMessage
  */
 class MessageEvents: EventDispatcher {
+    private let debouncer = MessageDebouncerController()
+    
     override func wake() {
         addObserver(forName: IMChatItemsDidChangeNotification) {
             self.itemsChanged($0)
+        }
+        
+//        addObserver(forName: IMChatMessageDidChangeNotification) {
+//            guard let chat = $0.object as? IMChat, let message = $0.userInfo?[IMChatValueKey] as? IMMessage else {
+//                return
+//            }
+//
+//            self.debouncer.receive(guid: message.guid) {
+//                self.messageUpdated(message, chat: chat)
+//            }
+//        }
+    }
+    
+    private func messageUpdated(_ message: IMMessage, chat: IMChat) {
+        ERIndeterminateIngestor.ingest(message, in: chat.groupID).whenSuccess {
+            guard let item = $0 else {
+                return
+            }
+            
+            StreamingAPI.shared.dispatch(eventFor(itemsReceived: BulkChatItemRepresentation(items: [item])))
         }
     }
     
     /**
      Dispatches incoming transcript items
      */
-    private func process(inserted items: [NSObject], in chat: IMChat) {
-        var messages: [IMMessage] = []
+    private func process(inserted items: [NSObject], in chat: IMChat, on event: Event<BulkChatItemRepresentation>.EventType) {
+        var messageGUIDs: [String] = []
+        var statusChanges: [IMMessageStatusChatItem] = []
         
-        var wrapped = items.compactMap { transcriptItem -> EventLoopFuture<ChatItem?>? in
-            os_log("👨🏻‍💻 Processing inserted IMTranscriptItem %@", transcriptItem, log_messageEvents)
+        let wrapped = items.compactMap { transcriptItem -> EventLoopFuture<ChatItem?>? in
+            if log_shouldLog { os_log("👨🏻‍💻 Processing inserted IMTranscriptItem %@", transcriptItem, log_messageEvents) }
             
             switch (transcriptItem) {
             case let item as IMMessagePartChatItem:
-                if !messages.contains(item.message) {
-                    messages.append(item.message)
+                if let guid = item.message?.guid ?? item._item()?.guid {
+                    if !messageGUIDs.contains(guid) {
+                        messageGUIDs.append(guid)
+                    }
                 }
+                return nil
+            case let item as IMMessageStatusChatItem:
+                statusChanges.append(item)
                 return nil
             default:
                 return ERIndeterminateIngestor.ingest(transcriptItem, in: chat.groupID)
             }
         }
         
-        messages.forEach {
-            wrapped.append(ERIndeterminateIngestor.ingest($0, in: chat.groupID))
-        }
+        let pendingMessages = messageGUIDs.er_chatItems(in: chat.groupID)
         
         EventLoopFuture<ChatItem?>.whenAllSucceed(wrapped, on: eventProcessing_eventLoop.next()).map { $0.compactMap { $0 } }.whenSuccess { chatItems in
-            if chatItems.count == 0 {
-                return
+            pendingMessages.whenSuccess { messageChatItems in
+                if chatItems.count == 0, messageChatItems.count == 0 {
+                    return
+                }
+                
+                var merged = [ChatItem]()
+                merged.append(contentsOf: chatItems)
+                merged.append(contentsOf: messageChatItems)
+                
+                StreamingAPI.shared.dispatch(Event<BulkChatItemRepresentation>.init(type: event, data: BulkChatItemRepresentation(items: merged)))
             }
-            
-            StreamingAPI.shared.dispatch(eventFor(itemsReceived: BulkChatItemRepresentation(items: chatItems)))
+        }
+        
+        if statusChanges.count == 0 {
+            return
+        }
+        
+        EventLoopFuture<StatusChatItemRepresentation?>.whenAllSucceed(statusChanges.map {
+            ERIndeterminateIngestor.ingest($0, in: chat.groupID)
+        }, on: eventProcessing_eventLoop.next()).map {
+            $0.compactMap { $0 }
+        }.whenSuccess {
+            if $0.count == 0 { return }
+            $0.forEach { status in
+                StreamingAPI.shared.dispatch(eventFor(itemStatusChanged: status))
+            }
         }
     }
     
@@ -83,39 +155,31 @@ class MessageEvents: EventDispatcher {
     private func itemsChanged(_ notification: Notification) {
         guard let userInfo = notification.userInfo as? [String: NSObject] else { return }
         guard let chat = notification.object as? IMChat else { return }
-        guard let oldItems = userInfo[IMChatItemsOldItems] as? [IMChatItem] else { return }
         
         userInfo.forEach {
-            guard let set = $0.value as? NSIndexSet else { return }
+            guard let set = $0.value as? IndexSet else { return }
             
             switch ($0.key) {
             case IMChatItemsRegenerate:
-                break;
+                fallthrough;
             case IMChatItemsReload:
-                break;
+                fallthrough;
             case IMChatItemsInserted:
                 self.process(inserted: set.compactMap { index -> NSObject? in
                     guard let item = chat.chatItems[safe: index] else {
                         os_log("⁉️ Bad index when parsing chat items!", type: .error, log_messageEvents)
                         return nil
                     }
-                    
+
                     return item
-                }, in: chat)
-                
-                break;
+                }, in: chat, on: $0.key == IMChatItemsInserted ? .itemsReceived : .itemsUpdated)
             case IMChatItemsRemoved:
-                let guids = Array(Set(set.compactMap { index in
-                    oldItems[index]._item().guid
-                }))
-                if guids.count == 0 { return }
-                
-                StreamingAPI.shared.dispatch(eventFor(itemsRemoved: BulkMessageIDRepresentation(messages: guids)), to: nil)
-                
                 break;
             default:
                 return
             }
         }
+        
+        
     }
 }

@@ -10,23 +10,31 @@ import Foundation
 import Vapor
 import GRDB
 
-struct SearchResultRepresentation: Content {
+private class Search: Record {
+    override class var databaseTableName: String { "search" }
+    
+    required init(row: Row) {
+        guid = row[Columns.guid]
+        text = row[Columns.text]
+        super.init(row: row)
+    }
+    
+    override func encode(to container: inout PersistenceContainer) {
+        container[Columns.guid] = guid
+        container[Columns.text] = text
+    }
+    
+    enum Columns: String, ColumnExpression {
+        case guid, text
+    }
+    
     var guid: String
-    var chatGroupID: String
-    var text: String
-    var sender: String
-    var isFromMe: Bool
-    var time: Double
-    var acknowledgmentType: Int64?
-}
-
-struct BulkSearchResultRepresentation: Content {
-    var results: [SearchResultRepresentation]
+    var text: String?
 }
 
 extension DBReader {
-    func messages(matching text: String, limit: Int) -> EventLoopFuture<BulkSearchResultRepresentation> {
-        let promise = eventLoop.makePromise(of: BulkSearchResultRepresentation.self)
+    func messages(matching text: String, limit: Int) -> EventLoopFuture<BulkMessageRepresentation> {
+        let promise = eventLoop.makePromise(of: BulkMessageRepresentation.self)
         
         pool.asyncRead { result in
             switch result {
@@ -37,25 +45,14 @@ extension DBReader {
                 do {
                     // MARK: - Message table search
                     let results = try RawMessage
-                        .order(RawMessage.Columns.date.desc)
+                        .select(RawMessage.Columns.guid, as: String.self)
                         .filter(RawMessage.Columns.text.uppercased.like("%\(text)%"))
                         .limit(limit)
                         .fetchAll(db)
                     
-                    // MARK: - Result transformation
-                    let representations: [SearchResultRepresentation] = try results.compactMap { result in
-                        // MARK: - Chat resolution
-                        guard let chatGroupID = try self.chatGroupID(forMessageROWID: result.ROWID, in: db), let sender = try self.resolveSenderID(forMessage: result, in: db), let guid = result.guid, let text = result.text, let isFromMe = result.is_from_me, let dateNS = result.date else {
-                            return nil
-                        }
-                        
-                        let date = NSDate.__im_dateWithNanosecondTimeInterval(sinceReferenceDate: dateNS)
-                        
-                        // MARK: - Transformation resolution
-                        return SearchResultRepresentation(guid: guid, chatGroupID: chatGroupID, text: text, sender: sender, isFromMe: isFromMe == 1, time: (date?.timeIntervalSince1970 ?? 0) * 1000, acknowledgmentType: result.associated_message_type)
-                    }
-                    
-                    promise.succeed(BulkSearchResultRepresentation(results: representations))
+                    Message.messages(withGUIDs: results).map {
+                        $0.representation
+                    }.cascade(to: promise)
                 } catch {
                     promise.fail(error)
                 }

@@ -25,6 +25,11 @@ struct RenameChat: Content {
     var name: String?
 }
 
+struct ChatPropertiesPatch: Content {
+    var ignoreAlerts: Bool?
+    var readReceipts: Bool?
+}
+
 private let log_chatAPI = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ChatAPI")
 private let log_participantAPI = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ParticipantAPI")
 private let log_messageAPI = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "MessageAPI")
@@ -38,8 +43,9 @@ public func bindChatAPI(_ app: Application) {
      */
     chats.get { req -> EventLoopFuture<BulkChatRepresentation> in
         let limit = try? req.query.get(Int.self, at: "limit")
+        let after = try? req.query.get(String.self, at: "after")
         
-        let chats = IMChatRegistry.shared.allSortedChats(limit: limit)
+        let chats = IMChatRegistry.shared.allSortedChats(limit: limit, after: after)
         
         return req.eventLoop.makeSucceededFuture(BulkChatRepresentation(chats))
     }
@@ -140,6 +146,76 @@ public func bindChatAPI(_ app: Application) {
         }
         
         return promise.futureResult
+    }
+    
+    chat.post("typing") { req -> EventLoopFuture<HTTPStatus> in
+        return req.eventLoop.submit {
+            guard let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
+            guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else {
+                throw Abort(.notFound)
+            }
+            
+            chat.localUserIsTyping = true
+            
+            return .noContent
+        }
+    }
+    
+    chat.delete("typing") { req -> EventLoopFuture<HTTPStatus> in
+        return req.eventLoop.submit {
+            guard let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
+            guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else {
+                throw Abort(.notFound)
+            }
+            
+            chat.localUserIsTyping = false
+            
+            return .noContent
+        }
+    }
+    
+    chat.post("read") { req -> EventLoopFuture<HTTPStatus> in
+        return req.eventLoop.submit {
+            guard let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
+            guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else {
+                throw Abort(.notFound)
+            }
+            
+            let readReceipts = chat.value(forChatProperty: "EnableReadReceiptForChat") as? Bool ?? false
+            
+            chat.markAllMessagesAsRead()
+            
+            if readReceipts {
+                IMChatRegistry.shared._chat_sendReadReceipt(forAllMessages: chat)
+            }
+            
+            return .noContent
+        }
+    }
+    
+    chat.get("properties") { req -> EventLoopFuture<ChatConfigurationRepresentation> in
+        return req.eventLoop.submit {
+            guard let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
+            guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else {
+                throw Abort(.notFound)
+            }
+            
+            return chat.properties;
+        }
+    }
+    
+    chat.patch("properties") { req -> EventLoopFuture<ChatConfigurationRepresentation> in
+        return req.eventLoop.submit {
+            guard let groupID = req.parameters.get("groupID"), let patch = try? req.content.decode(ChatPropertiesPatch.self) else { throw Abort(.badRequest) }
+            guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else {
+                throw Abort(.notFound)
+            }
+            
+            chat.readReceipts = patch.readReceipts ?? chat.readReceipts
+            chat.ignoreAlerts = patch.ignoreAlerts ?? chat.ignoreAlerts
+            
+            return chat.properties
+        }
     }
     
     bindChatMessagesAPI(chat)

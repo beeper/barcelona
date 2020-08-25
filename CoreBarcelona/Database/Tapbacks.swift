@@ -43,22 +43,8 @@ extension DBReader {
                         .select(RawMessage.Columns.guid, RawMessage.Columns.ROWID)
                         .filter(sql: "associated_message_guid = ?", arguments: [guid])
                         .fetchAll(db)
-                
-                    let chatGroupIDs = try messages.map {
-                        try self.chatGroupID(forMessageROWID: $0.ROWID, in: db)
-                    }
-                
-                    IMMessage.messages(withGUIDs: messages.map { $0.guid! }, on: self.eventLoop).flatMap { messages -> EventLoopFuture<[Message]> in
-                        EventLoopFuture<Message?>.whenAllSucceed(messages.compactMap { message -> EventLoopFuture<Message?>? in
-                            guard let chatGroupID = chatGroupIDs[messages.firstIndex(of: message)!] else {
-                                return nil
-                            }
-                            
-                            return ERIndeterminateIngestor.ingest(messageLike: message, in: chatGroupID)
-                        }, on: self.eventLoop).map {
-                            $0.compactMap { $0 }
-                        }
-                    }.cascade(to: promise)
+                    
+                    Message.messages(withGUIDs: messages.map { $0.guid! }, on: self.eventLoop).cascade(to: promise)
                 } catch {
                     print("Failed to resolve chat group IDs for messages with error \(error)")
                     promise.succeed([])

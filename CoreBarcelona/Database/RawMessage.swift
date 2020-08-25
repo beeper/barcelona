@@ -8,6 +8,7 @@
 
 import Foundation
 import GRDB
+import NIO
 
 /**
  Represents a message record in the chat.db file
@@ -239,4 +240,30 @@ class RawMessage: Record {
     var was_data_detected: Int64?
     var was_deduplicated: Int64?
     var was_downgraded: Int64?
+}
+
+extension DBReader {
+    func rowID(forMessageGUID guid: String) -> EventLoopFuture<Int64?> {
+        let promise = eventLoop.makePromise(of: Int64?.self)
+        
+        pool.asyncRead {
+            switch $0 {
+            case .failure(let error):
+                promise.fail(error)
+            case .success(let db):
+                do {
+                    let ROWID = try RawMessage
+                        .select(RawMessage.Columns.ROWID, as: Int64.self)
+                        .filter(RawMessage.Columns.guid == guid)
+                        .fetchOne(db)
+                    
+                    promise.succeed(ROWID)
+                } catch {
+                    promise.fail(error)
+                }
+            }
+        }
+        
+        return promise.futureResult
+    }
 }

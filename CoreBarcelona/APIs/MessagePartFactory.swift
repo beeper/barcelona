@@ -21,7 +21,6 @@ struct MessagePartParseResult {
  */
 func ERAttributedString(from parts: [MessagePart], on eventLoop: EventLoop) -> EventLoopFuture<MessagePartParseResult> {
     let promise = eventLoop.makePromise(of: MessagePartParseResult.self)
-    var fileTransferGUIDs: [String] = []
     
     let futures = parts.map { ERAttributedString(from: $0, on: eventLoop) }
     let futureOfResults = EventLoopFuture<MessagePartParseResult>.whenAllSucceed(futures, on: eventLoop)

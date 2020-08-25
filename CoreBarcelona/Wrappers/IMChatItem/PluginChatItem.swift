@@ -12,12 +12,12 @@ import Vapor
 
 struct PluginChatItemRepresentation: Content, ChatItemRepresentation, ChatItemAcknowledgable {
     init(_ item: IMTranscriptPluginChatItem, chatGroupID: String?) {
-        payload = item.dataSource.payload.base64EncodedString()
+        payload = item.dataSource.payload?.base64EncodedString()
         bundleID = item.dataSource.bundleID
         
         attachments = []
         
-        if let rawAttachments = item.dataSource.pluginPayload?.attachments {
+        if let rawAttachments = item.dataSource.pluginPayload?.value(forKey: "attachments") as? [URL] {
             rawAttachments.forEach {
                 let components = $0.pathComponents
                 let guid = components[components.count - 2]
@@ -35,7 +35,7 @@ struct PluginChatItemRepresentation: Content, ChatItemRepresentation, ChatItemAc
     var chatGroupID: String?
     var fromMe: Bool?
     var time: Double?
-    var payload: String
+    var payload: String?
     var bundleID: String
     var attachments: [AttachmentRepresentation]
     var acknowledgments: [AcknowledgmentChatItemRepresentation]?

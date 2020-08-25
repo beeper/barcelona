@@ -9,6 +9,7 @@
 import Foundation
 import IMCore
 import os.log
+import Vapor
 
 private let log_chatEvents = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ChatEvents")
 
@@ -17,6 +18,13 @@ private let IMChatDisplayNameChangedNotification = Notification.Name(rawValue: "
 private let IMChatJoinStateDidChangeNotification = Notification.Name(rawValue: "__kIMChatJoinStateDidChangeNotification")
 private let IMChatRegistryDidUnregisterChatNotification = Notification.Name(rawValue: "__kIMChatRegistryDidUnregisterChatNotification")
 private let IMChatRegistryDidRegisterChatNotification = Notification.Name(rawValue: "__kIMChatRegistryDidRegisterChatNotification")
+private let IMChatUnreadCountChangedNotification = Notification.Name(rawValue: "__kIMChatUnreadCountChangedNotification")
+private let IMChatPropertiesChangedNotification = Notification.Name(rawValue: "__kIMChatPropertiesChangedNotification")
+
+struct ChatUnreadCountRepresentation: Content {
+    var chatGroupID: String
+    var unread: Int
+}
 
 /**
  Events related to IMChat
@@ -42,6 +50,32 @@ class ChatEvents: EventDispatcher {
         addObserver(forName: IMChatRegistryDidRegisterChatNotification) {
             self.chatWasCreated($0)
         }
+        
+        addObserver(forName: IMChatUnreadCountChangedNotification) {
+            self.unreadCountChanged($0)
+        }
+        
+        addObserver(forName: IMChatPropertiesChangedNotification) {
+            self.chatPropertiesChanged($0)
+        }
+    }
+    
+    private func chatPropertiesChanged(_ notification: Notification) {
+        guard let chat = notification.object as? IMChat else {
+            os_log("⁉️ got chat properties notification but didn't receive IMChat in notification object", type: .error, log_chatEvents)
+            return
+        }
+        
+        StreamingAPI.shared.dispatch(eventFor(conversationPropertiesChanged: chat.properties))
+    }
+    
+    private func unreadCountChanged(_ notification: Notification) {
+        guard let chat = notification.object as? IMChat else {
+            os_log("⁉️ got chat unread notification but didn't receive IMChat in notification object", type: .error, log_chatEvents)
+            return
+        }
+        
+        StreamingAPI.shared.dispatch(eventFor(conversationUnreadCountChanged: chat.representation))
     }
     
     // MARK: - IMChat created
@@ -71,6 +105,8 @@ class ChatEvents: EventDispatcher {
             return
         }
         
+        chat.scheduleForReview()
+        
         StreamingAPI.shared.dispatch(eventFor(participantsChanged: chat.participantHandleIDs(), in: chat.groupID), to: nil)
     }
     
@@ -81,6 +117,8 @@ class ChatEvents: EventDispatcher {
             return
         }
         
+        chat.scheduleForReview()
+        
         StreamingAPI.shared.dispatch(eventFor(conversationDisplayNameChanged: chat.representation), to: nil)
     }
     
@@ -90,6 +128,8 @@ class ChatEvents: EventDispatcher {
             os_log("⁉️ got chat join state changed notification but didn't receive IMChat in notification object", type: .error, log_chatEvents)
             return
         }
+        
+        chat.scheduleForReview()
         
         StreamingAPI.shared.dispatch(eventFor(conversationJoinStateChanged: chat.representation), to: nil)
     }

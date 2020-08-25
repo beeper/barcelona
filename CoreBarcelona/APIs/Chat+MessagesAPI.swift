@@ -33,7 +33,7 @@ func bindChatMessagesAPI(_ chat: RoutesBuilder) {
      */
     messages.get { req -> EventLoopFuture<BulkChatItemRepresentation> in
         guard let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
-        guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else { throw Abort(.notFound) }
+        guard let chat = Registry.sharedInstance.chat(withGroupID: groupID) else { throw Abort(.notFound) }
         let messageGUID = try? req.query.get(String.self, at: "before")
         var limit = (try? req.query.get(UInt64.self, at: "limit")) ?? 75
         
@@ -41,13 +41,9 @@ func bindChatMessagesAPI(_ chat: RoutesBuilder) {
             limit = 100
         }
         
-        let promise = req.eventLoop.makePromise(of: BulkChatItemRepresentation.self)
-        
-        chat.loadMessages(around: messageGUID, numberBefore: limit - 1, numberAfter: 0).map {
+        return chat.messages(before: messageGUID, limit: limit).map {
             BulkChatItemRepresentation(items: $0)
-        }.cascade(to: promise)
-        
-        return promise.futureResult
+        }
     }
     
     /**

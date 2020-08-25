@@ -260,7 +260,9 @@ public class ERDaemonListener: IMDaemonListenerProtocol {
     }
     
     @objc public func historicalMessageGUIDsDeleted(_ arg1: [Any]!, chatGUIDs arg2: [Any]!, queryID arg3: String!) {
-        
+        NotificationCenter.default.post(name: ERChatMessagesDeletedNotification, object: [
+            "guids": arg1
+        ])
     }
     
     @objc public func mark(asSpamQuery arg1: String!, chatID arg2: String!, services arg3: [Any]!, finishedWithResult arg4: NSNumber!) {

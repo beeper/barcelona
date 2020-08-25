@@ -25,6 +25,7 @@ class ERHTTPServer {
     
     private let app: Application = Application()
     let streamingAPI: StreamingAPI
+    let resourceServer: ERResourceServer?
     
     private init() {
         app.http.server.configuration.port = 8090;
@@ -34,7 +35,15 @@ class ERHTTPServer {
         app.middleware.use(ErrorMiddleware.default(environment: app.environment))
         
         /** Socket API */
-        streamingAPI = StreamingAPI(app)
+        streamingAPI = StreamingAPI(app, compression: false)
+        
+        /** Resource server so apple no kill me */
+        do {
+            resourceServer = try ERResourceServer(app)
+        } catch {
+            resourceServer = nil
+            print("Failed to set up resource server with error \(error)")
+        }
         
         /** REST APIs */
         bindChatAPI(app)
