@@ -37,33 +37,17 @@ let ChangedItemsExclusion = [
 
 //private let ChangedItemsExclusion = [AnyClass.Type]()
 
-private class MessageDebouncerController {
-    private var debouncers: [String: Debouncer] = [:]
-    
-    private func debouncer(_ guid: String) -> Debouncer {
-        if let debouncer = self.debouncers[guid] {
-            return debouncer
-        }
-        self.debouncers[guid] = Debouncer(delay: 1 / 5)
-        return self.debouncers[guid]!
-    }
-    
-    func receive(guid: String, callback: @escaping () -> ()) {
-        self.debouncer(guid).call {
-            DispatchQueue.main.async {
-                self.debouncers.removeValue(forKey: guid)
-            }
-            
-            callback()
-        }
-    }
+enum MessageDebounceCategory {
+    case statusChanged
 }
 
 /**
  Tracks events related to IMMessage
  */
 class MessageEvents: EventDispatcher {
-    private let debouncer = MessageDebouncerController()
+    private let debouncer = CategorizedDebounceManager<MessageDebounceCategory>([
+        .statusChanged: Double(1 / 10)
+    ])
     
     override func wake() {
         addObserver(forName: IMChatItemsDidChangeNotification) {
@@ -131,6 +115,7 @@ class MessageEvents: EventDispatcher {
                 
                 StreamingAPI.shared.dispatch(Event<BulkChatItemRepresentation>.init(type: event, data: BulkChatItemRepresentation(items: merged)))
             }
+            
         }
         
         if statusChanges.count == 0 {
@@ -144,7 +129,9 @@ class MessageEvents: EventDispatcher {
         }.whenSuccess {
             if $0.count == 0 { return }
             $0.forEach { status in
-                StreamingAPI.shared.dispatch(eventFor(itemStatusChanged: status))
+                self.debouncer.submit(status.itemGUID, category: .statusChanged) {
+                    StreamingAPI.shared.dispatch(eventFor(itemStatusChanged: status))
+                }
             }
         }
     }

@@ -26,10 +26,20 @@ struct ChatUnreadCountRepresentation: Content {
     var unread: Int
 }
 
+private enum ChatDebounceCategory {
+    case chatProperties
+    case unreadCount
+}
+
 /**
  Events related to IMChat
  */
 class ChatEvents: EventDispatcher {
+    private let debouncer = CategorizedDebounceManager<ChatDebounceCategory>([
+        .chatProperties: Double(1 / 10),
+        .unreadCount: Double(1 / 5)
+    ])
+    
     override func wake() {
         addObserver(forName: IMChatParticipantsDidChangeNotification) {
             self.participantsChanged($0)
@@ -66,7 +76,9 @@ class ChatEvents: EventDispatcher {
             return
         }
         
-        StreamingAPI.shared.dispatch(eventFor(conversationPropertiesChanged: chat.properties))
+        debouncer.submit(chat.groupID, category: .chatProperties) {
+            StreamingAPI.shared.dispatch(eventFor(conversationPropertiesChanged: chat.properties))
+        }
     }
     
     private func unreadCountChanged(_ notification: Notification) {
@@ -75,7 +87,9 @@ class ChatEvents: EventDispatcher {
             return
         }
         
-        StreamingAPI.shared.dispatch(eventFor(conversationUnreadCountChanged: chat.representation))
+        debouncer.submit(chat.groupID, category: .unreadCount) {
+            StreamingAPI.shared.dispatch(eventFor(conversationUnreadCountChanged: chat.representation))
+        }
     }
     
     // MARK: - IMChat created
