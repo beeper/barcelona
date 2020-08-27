@@ -142,7 +142,13 @@ struct InternalAttachmentRepresentation {
 
 extension DBReader {
     func attachment(for guid: String) -> EventLoopFuture<InternalAttachmentRepresentation?> {
-        let promise = eventLoop.makePromise(of: InternalAttachmentRepresentation?.self)
+        return attachments(withGUIDs: [guid]).map {
+            $0.first
+        }
+    }
+    
+    func attachments(withGUIDs guids: [String]) -> EventLoopFuture<[InternalAttachmentRepresentation]> {
+        let promise = eventLoop.makePromise(of: [InternalAttachmentRepresentation].self)
         
         pool.asyncRead { result in
             switch result {
@@ -150,17 +156,18 @@ extension DBReader {
                 promise.fail(error)
             case .success(let db):
                 do {
-                    guard let results = try RawAttachment.filter(RawAttachment.Columns.guid == guid).fetchOne(db) else {
-                        promise.succeed(nil)
-                        return
-                    }
                     
-                    guard let guid = results.guid, let path = results.filename as NSString? else {
-                        promise.succeed(nil)
-                        return
+                    let results = try RawAttachment.filter(guids.contains(RawAttachment.Columns.guid) || guids.contains(RawAttachment.Columns.original_guid)).fetchAll(db)
+                    
+                    let transfers = results.compactMap { result -> InternalAttachmentRepresentation? in
+                        guard let guid = result.guid, let path = result.filename as NSString? else {
+                            return nil
+                        }
+                        
+                        return InternalAttachmentRepresentation(guid: guid, path: path.expandingTildeInPath, bytes: UInt64(result.total_bytes ?? 0), incoming: (result.is_outgoing ?? 0) == 0, mime: result.mime_type)
                     }
 
-                    promise.succeed(InternalAttachmentRepresentation(guid: guid, path: path.expandingTildeInPath, bytes: UInt64(results.total_bytes ?? 0), incoming: (results.is_outgoing ?? 0) == 0, mime: results.mime_type))
+                    promise.succeed(transfers)
                 } catch {
                     promise.fail(error)
                 }
