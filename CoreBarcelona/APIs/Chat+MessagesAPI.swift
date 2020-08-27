@@ -55,6 +55,8 @@ func bindChatMessagesAPI(_ chat: RoutesBuilder) {
         
         let promise = req.eventLoop.makePromise(of: BulkMessageRepresentation.self)
         
+        chat.stopTyping()
+        
         chat.send(message: creation, on: req.eventLoop).whenComplete { result in
             switch (result) {
             case .success(let messages):

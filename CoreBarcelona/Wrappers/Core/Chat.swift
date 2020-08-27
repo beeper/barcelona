@@ -164,6 +164,27 @@ struct Chat: Codable, ChatConfigurationRepresentable {
         Registry.sharedInstance.imChat(withGroupID: groupID)!
     }
     
+    func startTyping() {
+        let chat = imChat()
+        
+        if chat.localTypingMessageGUID == nil {
+            chat.setValue(NSString.stringGUID(), forKey: "_typingGUID")
+            let message = IMMessage(sender: nil, time: nil, text: nil, fileTransferGUIDs: nil, flags: 0xc, error: nil, guid: chat.localTypingMessageGUID, subject: nil)
+            chat._sendMessage(message, adjustingSender: true, shouldQueue: false)
+        }
+    }
+    
+    func stopTyping() {
+        let chat = imChat()
+        
+        if let typingGUID = chat.localTypingMessageGUID {
+            print(typingGUID)
+            chat.setValue(nil, forKey: "_typingGUID")
+            let message = IMMessage(sender: nil, time: nil, text: nil, fileTransferGUIDs: nil, flags: 0xd, error: nil, guid: typingGUID, subject: nil)
+            chat.sendMessage(message)
+        }
+    }
+    
     func messages(before: String? = nil, limit: UInt64? = nil) -> EventLoopFuture<[ChatItem]> {
             guard let ROWID = $0 else {
                 return messageQuerySystem.next().makeSucceededFuture([])

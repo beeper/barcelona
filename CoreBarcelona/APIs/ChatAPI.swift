@@ -151,11 +151,11 @@ public func bindChatAPI(_ app: Application) {
     chat.post("typing") { req -> EventLoopFuture<HTTPStatus> in
         return req.eventLoop.submit {
             guard let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
-            guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else {
+            guard let chat = Registry.sharedInstance.chat(withGroupID: groupID) else {
                 throw Abort(.notFound)
             }
-            
-            chat.localUserIsTyping = true
+        
+            chat.startTyping()
             
             return .noContent
         }
@@ -164,11 +164,11 @@ public func bindChatAPI(_ app: Application) {
     chat.delete("typing") { req -> EventLoopFuture<HTTPStatus> in
         return req.eventLoop.submit {
             guard let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
-            guard let chat = Registry.sharedInstance.imChat(withGroupID: groupID) else {
+            guard let chat = Registry.sharedInstance.chat(withGroupID: groupID) else {
                 throw Abort(.notFound)
             }
             
-            chat.localUserIsTyping = false
+            chat.stopTyping()
             
             return .noContent
         }
