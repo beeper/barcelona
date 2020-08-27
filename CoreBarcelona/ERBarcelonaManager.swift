@@ -11,7 +11,9 @@ import Foundation
 
 @objc public class ERBarcelonaManager: NSObject {
     @objc public class func bootstrap() {
-            let controller = IMDaemonController.sharedInstance()!
+        IMChatRegistry.shared._defaultNumberOfMessagesToLoad = 0
+        
+        let controller = IMDaemonController.sharedInstance()!
         let _ = ERChatSubscriptionWatcher.shared
 
         /** Registers with imagent */

@@ -46,6 +46,7 @@ public class ERChatSubscriptionWatcher {
      Iterates over all loaded chats and subscribes to them
      */
     private func ensureAllChatsAreSubscribed() {
+        print("Preloading \(IMChatRegistry.shared._allCreatedChats().count) chats")
         IMChatRegistry.sharedInstance()!._allCreatedChats().forEach { ensureSubscribed(to: $0) }
     }
     
@@ -53,6 +54,7 @@ public class ERChatSubscriptionWatcher {
      Subscribe to a single chat
      */
     private func ensureSubscribed(to chat: IMChat) {
+        chat.numberOfMessagesToKeepLoaded = 0
         guard let _ = chat.chatItems else { return }
     }
 }
