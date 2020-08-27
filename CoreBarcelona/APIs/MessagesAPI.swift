@@ -64,31 +64,27 @@ func bindMessagesAPI(_ app: Application) {
         let messageGUID = creation.message
         let ackType = creation.type
         
-        return Chat.chat(forMessage: messageGUID, on: req.eventLoop).flatMap { chat in
+        let promise = req.eventLoop.makePromise(of: Message.self)
+        
+        Chat.chat(forMessage: messageGUID, on: req.eventLoop).flatMap { chat -> EventLoopFuture<Message?> in
             guard let chat = chat?.imChat() else {
                 return req.eventLoop.makeFailedFuture(Abort(.notFound, reason: "Unknown chat."))
             }
 
             let debugItemType = try? req.query.get(UInt8.self, at: "itemType")
-            let promise = req.eventLoop.makePromise(of: Message.self)
 
-            chat.tapback(guid: messageGUID, itemGUID: itemGUID, type: ackType, overridingItemType: debugItemType).whenComplete {
-                switch $0 {
-                case .success(let message):
-                    ERIndeterminateIngestor.ingest(messageLike: message, in: chat.groupID).whenSuccess { message in
-                        guard let message = message else {
-                            promise.fail(Abort(.internalServerError, reason: "Failde to create tapback message"))
-                            return
-                        }
-                        promise.succeed(message)
-                    }
-                case .failure(let error):
-                    promise.fail(error)
-                }
+            return chat.tapback(guid: messageGUID, itemGUID: itemGUID, type: ackType, overridingItemType: debugItemType).flatMap {
+                ERIndeterminateIngestor.ingest(messageLike: $0, in: chat.groupID)
             }
-
-            return promise.futureResult
-        }
+        }.flatMapThrowing { message -> Message in
+            guard let message = message else {
+                throw Abort(.internalServerError, reason: "Failed to send tapback")
+            }
+            
+            return message
+        }.cascade(to: promise)
+        
+        return promise.futureResult
     }
     
     /**
@@ -136,22 +132,12 @@ func bindMessagesAPI(_ app: Application) {
     message.get { req -> EventLoopFuture<Message> in
         guard let messageGUID = req.parameters.get("messageGUID") else { throw Abort(.badRequest) }
         
-        let promise = req.eventLoop.makePromise(of: Message.self)
-        
-        Message.message(withGUID: messageGUID, on: req.eventLoop).whenComplete {
-            switch $0 {
-            case .success(let representation):
-                guard let representation = representation else {
-                    promise.fail(Abort(.notFound))
-                    return
-                }
-                
-                promise.succeed(representation)
-            case .failure(let error):
-                promise.fail(error)
+        return Message.message(withGUID: messageGUID, on: req.eventLoop).flatMapThrowing {
+            guard let message = $0 else {
+                throw Abort(.notFound, reason: "Unknown message")
             }
+            
+            return message
         }
-        
-        return promise.futureResult
     }
 }
