@@ -36,15 +36,17 @@
 		1D44866F24E85C7500FF73F3 /* IMFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDC324E373ED00303692 /* IMFoundation.framework */; };
 		1D44867124E85C7500FF73F3 /* IMSharedUtilities.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDC424E373ED00303692 /* IMSharedUtilities.framework */; };
 		1D5AEDF324E374EB00303692 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEDF224E374EB00303692 /* main.swift */; };
-		1D75D4DA24F197B2008F053C /* CoreUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D75D4D624F197B2008F053C /* CoreUI.framework */; };
 		1D75D4DB24F197BC008F053C /* CoreUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D75D4D624F197B2008F053C /* CoreUI.framework */; };
 		1D75D4DF24F197D1008F053C /* ERResourceServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D75D4DE24F197D1008F053C /* ERResourceServer.swift */; };
+		1D75D4E124F58AEA008F053C /* StickerChatItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D75D4E024F58AEA008F053C /* StickerChatItem.swift */; };
+		1D97739C24F6CFFE0086CA5F /* AnyCodable in Frameworks */ = {isa = PBXBuildFile; productRef = 1D97739B24F6CFFE0086CA5F /* AnyCodable */; };
+		1DB9520724F6B8BF004CC87B /* AttributedStringSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB9520624F6B8BF004CC87B /* AttributedStringSerializer.swift */; };
 		1DD8059F24E85CCB0076D717 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 1DD8059E24E85CCB0076D717 /* GRDB */; };
 		1DD805A124E85CCB0076D717 /* Swime in Frameworks */ = {isa = PBXBuildFile; productRef = 1DD805A024E85CCB0076D717 /* Swime */; };
 		1DD805A324E85CCB0076D717 /* Vapor in Frameworks */ = {isa = PBXBuildFile; productRef = 1DD805A224E85CCB0076D717 /* Vapor */; };
 		1DD805A824E85CF00076D717 /* HandlesAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE4F24E37D9E00303692 /* HandlesAPI.swift */; };
 		1DD805AA24E85CF00076D717 /* AttachmentsAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5124E37D9E00303692 /* AttachmentsAPI.swift */; };
-		1DD805AB24E85CF00076D717 /* MessagePartFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5224E37D9E00303692 /* MessagePartFactory.swift */; };
+		1DD805AB24E85CF00076D717 /* AttributedStringDeserializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5224E37D9E00303692 /* AttributedStringDeserializer.swift */; };
 		1DD805AC24E85CF00076D717 /* Throttling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5324E37D9E00303692 /* Throttling.swift */; };
 		1DD805AD24E85CF00076D717 /* ContactsAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5424E37D9E00303692 /* ContactsAPI.swift */; };
 		1DD805AE24E85CF00076D717 /* StreamingAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5524E37D9E00303692 /* StreamingAPI.swift */; };
@@ -243,7 +245,7 @@
 		1D5AEE4224E37B0100303692 /* IMCore-Shims.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "IMCore-Shims.m"; sourceTree = "<group>"; };
 		1D5AEE4F24E37D9E00303692 /* HandlesAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HandlesAPI.swift; sourceTree = "<group>"; };
 		1D5AEE5124E37D9E00303692 /* AttachmentsAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttachmentsAPI.swift; sourceTree = "<group>"; };
-		1D5AEE5224E37D9E00303692 /* MessagePartFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagePartFactory.swift; sourceTree = "<group>"; };
+		1D5AEE5224E37D9E00303692 /* AttributedStringDeserializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttributedStringDeserializer.swift; sourceTree = "<group>"; };
 		1D5AEE5324E37D9E00303692 /* Throttling.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Throttling.swift; sourceTree = "<group>"; };
 		1D5AEE5424E37D9E00303692 /* ContactsAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactsAPI.swift; sourceTree = "<group>"; };
 		1D5AEE5524E37D9E00303692 /* StreamingAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamingAPI.swift; sourceTree = "<group>"; };
@@ -304,6 +306,8 @@
 		1D5AEECF24E3838700303692 /* ERChatSubscriptionWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERChatSubscriptionWatcher.swift; sourceTree = "<group>"; };
 		1D75D4D624F197B2008F053C /* CoreUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreUI.framework; path = Frameworks/CoreUI.framework; sourceTree = "<group>"; };
 		1D75D4DE24F197D1008F053C /* ERResourceServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERResourceServer.swift; sourceTree = "<group>"; };
+		1D75D4E024F58AEA008F053C /* StickerChatItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerChatItem.swift; sourceTree = "<group>"; };
+		1DB9520624F6B8BF004CC87B /* AttributedStringSerializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributedStringSerializer.swift; sourceTree = "<group>"; };
 		1DC66B0024E4756400CB0C5D /* TypingChatItemRepresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypingChatItemRepresentation.swift; sourceTree = "<group>"; };
 		1DC66B0524E4875700CB0C5D /* Contact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
 		1DC66B0724E487AB00CB0C5D /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
@@ -333,6 +337,7 @@
 			files = (
 				1D44867124E85C7500FF73F3 /* IMSharedUtilities.framework in Frameworks */,
 				1D44865724E85C7400FF73F3 /* CommunicationsFilter.framework in Frameworks */,
+				1D97739C24F6CFFE0086CA5F /* AnyCodable in Frameworks */,
 				1D44866324E85C7400FF73F3 /* IMDPersistence.framework in Frameworks */,
 				1D44866B24E85C7500FF73F3 /* ContactsFoundation.framework in Frameworks */,
 				1D44866724E85C7400FF73F3 /* IMSharedUtilities.framework in Frameworks */,
@@ -357,7 +362,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				1DD805EF24E85EAC0076D717 /* CoreBarcelona.framework in Frameworks */,
-				1D75D4DA24F197B2008F053C /* CoreUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -491,9 +495,9 @@
 		1D5AEE4E24E37D9E00303692 /* APIs */ = {
 			isa = PBXGroup;
 			children = (
+				1DB9520224F6B874004CC87B /* AttributedString */,
 				1D5AEE4F24E37D9E00303692 /* HandlesAPI.swift */,
 				1D5AEE5124E37D9E00303692 /* AttachmentsAPI.swift */,
-				1D5AEE5224E37D9E00303692 /* MessagePartFactory.swift */,
 				1D5AEE5324E37D9E00303692 /* Throttling.swift */,
 				1D5AEE5424E37D9E00303692 /* ContactsAPI.swift */,
 				1D5AEE5524E37D9E00303692 /* StreamingAPI.swift */,
@@ -584,6 +588,15 @@
 			path = Streaming;
 			sourceTree = "<group>";
 		};
+		1DB9520224F6B874004CC87B /* AttributedString */ = {
+			isa = PBXGroup;
+			children = (
+				1D5AEE5224E37D9E00303692 /* AttributedStringDeserializer.swift */,
+				1DB9520624F6B8BF004CC87B /* AttributedStringSerializer.swift */,
+			);
+			path = AttributedString;
+			sourceTree = "<group>";
+		};
 		1DD8061A24E860620076D717 /* imessage-rest-ios */ = {
 			isa = PBXGroup;
 			children = (
@@ -617,6 +630,7 @@
 				1D5AEE8324E37D9F00303692 /* StatusChatItem.swift */,
 				1D5AEE8424E37D9F00303692 /* PluginChatItem.swift */,
 				1D5AEE8124E37D9F00303692 /* AcknowledgmentChatItem.swift */,
+				1D75D4E024F58AEA008F053C /* StickerChatItem.swift */,
 			);
 			path = IMChatItem;
 			sourceTree = "<group>";
@@ -722,6 +736,7 @@
 				1DD8059E24E85CCB0076D717 /* GRDB */,
 				1DD805A024E85CCB0076D717 /* Swime */,
 				1DD805A224E85CCB0076D717 /* Vapor */,
+				1D97739B24F6CFFE0086CA5F /* AnyCodable */,
 			);
 			productName = CoreBarcelona;
 			productReference = 1D44864524E85BBB00FF73F3 /* CoreBarcelona.framework */;
@@ -824,6 +839,7 @@
 				1D5AEE4524E37CDF00303692 /* XCRemoteSwiftPackageReference "GRDB" */,
 				1D5AEE4824E37D1700303692 /* XCRemoteSwiftPackageReference "Swime" */,
 				1D5AEE4B24E37D6600303692 /* XCRemoteSwiftPackageReference "vapor" */,
+				1DB9520824F6CF26004CC87B /* XCRemoteSwiftPackageReference "AnyCodable" */,
 			);
 			productRefGroup = 1D5AEDAF24E3725200303692 /* Products */;
 			projectDirPath = "";
@@ -938,6 +954,7 @@
 				1DD805C624E85D070076D717 /* Collection+Safe.swift in Sources */,
 				1D44865024E85BD500FF73F3 /* IMQueryWatcher.swift in Sources */,
 				1DD8067424E9DA2C0076D717 /* MessagesAPI.swift in Sources */,
+				1DB9520724F6B8BF004CC87B /* AttributedStringSerializer.swift in Sources */,
 				1DD8068B24EAE4550076D717 /* ERIndeterminateIngestor.swift in Sources */,
 				1DD8067224E9A7330076D717 /* IMMessage+SPI.swift in Sources */,
 				1DD805CE24E85D070076D717 /* WebSocket+Hashable.swift in Sources */,
@@ -967,13 +984,14 @@
 				1DD805C424E85D070076D717 /* IMChatItem+CountFix.m in Sources */,
 				1DD805C324E85D070076D717 /* IMAttachmentMessagePartChatItem+TapbackType.swift in Sources */,
 				1DD805B224E85CF00076D717 /* DebugAPI.swift in Sources */,
+				1D75D4E124F58AEA008F053C /* StickerChatItem.swift in Sources */,
 				1DD805DF24E85D100076D717 /* DateTranscriptChatItem.swift in Sources */,
 				1DD805EC24E85D100076D717 /* MessagesError.swift in Sources */,
 				1D3B5AF924EC810400A65280 /* Debouncer.swift in Sources */,
 				1DD805D524E85D0A0076D717 /* BlocklistEvents.swift in Sources */,
 				1D44864D24E85BD500FF73F3 /* MessageServiceProtocol.swift in Sources */,
 				1DD805CC24E85D070076D717 /* IMChat+Representable.swift in Sources */,
-				1DD805AB24E85CF00076D717 /* MessagePartFactory.swift in Sources */,
+				1DD805AB24E85CF00076D717 /* AttributedStringDeserializer.swift in Sources */,
 				1D44865124E85BD500FF73F3 /* ERHTTPServer.swift in Sources */,
 				1DD805C924E85D070076D717 /* IMBalloonPluginManager+TapbackData.swift in Sources */,
 				1DD8068724EAE3B20076D717 /* ChatItemAcknowledgable+LoadTapbacks.swift in Sources */,
@@ -1485,9 +1503,22 @@
 				kind = branch;
 			};
 		};
+		1DB9520824F6CF26004CC87B /* XCRemoteSwiftPackageReference "AnyCodable" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Flight-School/AnyCodable";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		1D97739B24F6CFFE0086CA5F /* AnyCodable */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1DB9520824F6CF26004CC87B /* XCRemoteSwiftPackageReference "AnyCodable" */;
+			productName = AnyCodable;
+		};
 		1DD8059E24E85CCB0076D717 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 1D5AEE4524E37CDF00303692 /* XCRemoteSwiftPackageReference "GRDB" */;
