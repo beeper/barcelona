@@ -8,6 +8,7 @@
 
 import Foundation
 
+/// Fires a callback after the call function has not been called for the specified delay
 class Debouncer {
     var delay: Double
     weak var timer: Timer?
@@ -24,5 +25,67 @@ class Debouncer {
         }
         
         timer = nextTimer
+    }
+}
+
+/// Manages a set of debouncers associated with a string
+class IdentifiableDebounceManager {
+    private var debouncers: [String: Debouncer] = [:]
+    private let delay: Double
+    
+    init(_ delay: Double) {
+        self.delay = delay
+    }
+    
+    private func debouncer(forID id: String) -> Debouncer {
+        if let debouncer = debouncers[id] {
+            return debouncer
+        }
+        
+        debouncers[id] = Debouncer(delay: delay)
+        
+        return debouncers[id]!
+    }
+    
+    private func clearDebouncer(forID id: String) {
+        if let index = debouncers.index(forKey: id) {
+            debouncers.remove(at: index)
+        }
+    }
+    
+    func submit(id: String, cb: @escaping () -> ()) {
+        debouncer(forID: id).call {
+            DispatchQueue.main.async {
+                self.clearDebouncer(forID: id)
+            }
+            
+            cb()
+        }
+    }
+}
+
+/// Manages a set of managers with the specified categories
+class CategorizedDebounceManager<P: Hashable> {
+    private var debouncers: [P: IdentifiableDebounceManager] = [:]
+    private let defaultDelay: Double = 1 / 10
+    
+    init(_ configuration: [P: Double]) {
+        configuration.forEach {
+            debouncers[$0.key] = .init($0.value)
+        }
+    }
+    
+    private func debouncer(for category: P) -> IdentifiableDebounceManager {
+        if let debouncer = debouncers[category] {
+            return debouncer
+        }
+        
+        debouncers[category] = .init(defaultDelay)
+        
+        return debouncers[category]!
+    }
+    
+    func submit(_ id: String, category: P, cb: @escaping () -> ()) {
+        debouncer(for: category).submit(id: id, cb: cb)
     }
 }
