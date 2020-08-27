@@ -204,7 +204,11 @@ struct ERIndeterminateIngestor {
                 ChatItem(type: .plugin, item: $0)
             }
         case let item as IMTextMessagePartChatItem:
-            pending = insertTapbacks(forChatLikeItem: TextChatItemRepresentation(item, chatGroupID: chat), on: eventLoop).map {
+            pending = ERTextParts(from: item.text, on: eventLoop).map { parts -> TextChatItemRepresentation in
+                TextChatItemRepresentation(item, parts: parts, chatGroupID: chat)
+            }.flatMap {
+                insertTapbacks(forChatLikeItem: $0, on: eventLoop)
+            }.map {
                 ChatItem(type: .text, item: $0)
             }
         default:
@@ -260,7 +264,7 @@ struct ERIndeterminateIngestor {
         } else {
             return eventLoop.makeSucceededFuture(ChatItem(type: .phantom, item: StubChatItemRepresentation(object, chatGroupID: chat)))
         }
-        
+    
         var chatItem: ChatItem? = nil
         
         switch (object) {

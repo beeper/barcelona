@@ -22,6 +22,7 @@ struct MessageAttributes {
     static let underline = NSAttributedString.Key(rawValue: "__kIMUnderlineAttributeName")
     static let strike = NSAttributedString.Key(rawValue: "__kIMStrikethroughAttributeName")
     static let fontSize = NSAttributedString.Key(rawValue: "__kIMFontSizeAttributeName")
+    static let calendarData = NSAttributedString.Key(rawValue: "__kIMCalendarEventAttributeName")
 }
 
 /**
