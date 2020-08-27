@@ -12,13 +12,12 @@ import Vapor
 
 private let regex = try! NSRegularExpression(pattern: "<body.*?>([\\s\\S]*)<\\/body>")
 
+extension TextPart: Content { }
+
 struct TextChatItemRepresentation: Content, ChatItemRepresentation, ChatItemAcknowledgable {
-    init(_ item: IMTextMessagePartChatItem, chatGroupID: String?) {
+    init(_ item: IMTextMessagePartChatItem, parts: [TextPart], chatGroupID: String?) {
         text = item.text.string
-        
-        if let html = item.text.attributedString2Html?.replacingOccurrences(of: "\n", with: "") {
-            self.html = html.groups(for: regex)[0][1]
-        }
+        self.parts = parts
         
         self.load(item: item, chatGroupID: chatGroupID)
     }
@@ -28,6 +27,6 @@ struct TextChatItemRepresentation: Content, ChatItemRepresentation, ChatItemAckn
     var fromMe: Bool?
     var time: Double?
     var text: String
-    var html: String?
+    var parts: [TextPart]
     var acknowledgments: [AcknowledgmentChatItemRepresentation]?
 }
