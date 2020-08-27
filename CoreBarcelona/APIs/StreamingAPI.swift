@@ -39,7 +39,7 @@ class StreamingAPI {
     let app: Application
     let compression: Bool
     let supervisor = DispatchSupervisor(center: NotificationCenter.default)
-    let bootstrapOptions: BootstrapData.BootstrapOptions = BootstrapData.BootstrapOptions(chatLimit: 100, contactLimit: nil)
+    let bootstrapOptions: BootstrapData.BootstrapOptions = BootstrapData.BootstrapOptions(chatLimit: nil, contactLimit: nil)
     var sockets: [WebSocket] = []
     
     init(_ app: Application, compression: Bool = false) {
