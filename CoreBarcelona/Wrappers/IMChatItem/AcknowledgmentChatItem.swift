@@ -11,7 +11,7 @@ import IMCore
 
 import Vapor
 
-struct AcknowledgmentChatItemRepresentation: Content, ChatItemRepresentation {
+struct AcknowledgmentChatItemRepresentation: Content, AssociatedChatItemRepresentation {
     init(_ item: IMMessageAcknowledgmentChatItem, chatGroupID: String?) {
         acknowledgmentType = item.messageAcknowledgmentType
         sender = item.sender?.id
