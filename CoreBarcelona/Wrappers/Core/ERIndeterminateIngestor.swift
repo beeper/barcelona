@@ -37,38 +37,44 @@ private let ingestor_log = OSLog(subsystem: Bundle.main.bundleIdentifier!, categ
 private let shouldLog = false
 
 struct ERIndeterminateIngestor {
-    public static func ingest(_ object: AnyObject, in chat: String, on eventLoop: EventLoop = ingestor_eventLoop.next()) -> EventLoopFuture<ChatItem?> {
-        let promise = eventLoop.makePromise(of: ChatItem?.self)
-        
-        if shouldLog {
-            os_log("Ingesting object %@ in chat %@", type: .debug, String(describing: object), chat, ingestor_log)
+    public static func ingest(_ object: AnyObject, in chat: String? = nil, on eventLoop: EventLoop = ingestor_eventLoop.next()) -> EventLoopFuture<ChatItem?> {
+        resolveLazyChatGroupID(object: object, chat: chat, on: eventLoop).flatMap { chat in
+            guard let chat = chat else {
+                return eventLoop.makeSucceededFuture(nil)
+            }
+            
+            let promise = eventLoop.makePromise(of: ChatItem?.self)
+            
+            if shouldLog {
+                os_log("Ingesting object %@ in chat %@", type: .debug, String(describing: object), chat ?? "<<lazily resolved>>", ingestor_log)
+            }
+            
+            if TranscriptLikeClasses.contains(where: { object.isKind(of: $0) }), !ChatLikeClasses.contains(where: { object.isKind(of: $0) }) {
+                if shouldLog {
+                    os_log("Object %@ is transcript-like", type: .debug, String(describing: object), ingestor_log)
+                }
+                
+                ingest(transcriptLike: object, in: chat, on: eventLoop).cascade(to: promise)
+            } else if ChatLikeClasses.contains(where: { object.isKind(of: $0) }) {
+                if shouldLog {
+                    os_log("Object %@ is chat-like", type: .debug, String(describing: object), ingestor_log)
+                }
+                
+                ingest(chatLike: object, in: chat, on: eventLoop).cascade(to: promise)
+            } else {
+                if shouldLog {
+                    os_log("Object %@ is a stub", type: .debug, String(describing: object), ingestor_log)
+                }
+                
+                promise.succeed(ChatItem(type: .phantom, item: StubChatItemRepresentation(object, chatGroupID: chat)))
+            }
+            
+            return promise.futureResult
         }
-        
-        if TranscriptLikeClasses.contains(where: { object.isKind(of: $0) }), !ChatLikeClasses.contains(where: { object.isKind(of: $0) }) {
-            if shouldLog {
-                os_log("Object %@ is transcript-like", type: .debug, String(describing: object), ingestor_log)
-            }
-            
-            ingest(transcriptLike: object, in: chat, on: eventLoop).cascade(to: promise)
-        } else if ChatLikeClasses.contains(where: { object.isKind(of: $0) }) {
-            if shouldLog {
-                os_log("Object %@ is chat-like", type: .debug, String(describing: object), ingestor_log)
-            }
-            
-            ingest(chatLike: object, in: chat, on: eventLoop).cascade(to: promise)
-        } else {
-            if shouldLog {
-                os_log("Object %@ is a stub", type: .debug, String(describing: object), ingestor_log)
-            }
-            
-            promise.succeed(ChatItem(type: .phantom, item: StubChatItemRepresentation(object, chatGroupID: chat)))
-        }
-        
-        return promise.futureResult
     }
     
     /// Dedicated function for ingesting status items – they are not to be wrapped in Message objects as they overwrite the message data
-    public static func ingest(_ status: IMMessageStatusChatItem, in chat: String, on eventLoop: EventLoop = ingestor_eventLoop.next()) -> EventLoopFuture<StatusChatItemRepresentation?> {
+    public static func ingest(_ status: IMMessageStatusChatItem, in chat: String? = nil, on eventLoop: EventLoop = ingestor_eventLoop.next()) -> EventLoopFuture<StatusChatItemRepresentation?> {
         guard let messageGUID = status._item().guid else {
             return eventLoop.makeSucceededFuture(nil)
         }
@@ -82,7 +88,7 @@ struct ERIndeterminateIngestor {
         }
     }
     
-    public static func ingest(_ objects: [AnyObject], in chat: String, on eventLoop: EventLoop = ingestor_eventLoop.next()) -> EventLoopFuture<[ChatItem]> {
+    public static func ingest(_ objects: [AnyObject], in chat: String? = nil, on eventLoop: EventLoop = ingestor_eventLoop.next()) -> EventLoopFuture<[ChatItem]> {
         EventLoopFuture<ChatItem?>.whenAllSucceed(objects.map {
             self.ingest($0, in: chat, on: eventLoop)
         }, on: eventLoop).map {
@@ -91,7 +97,7 @@ struct ERIndeterminateIngestor {
     }
     
     /// Ingests an array of message-like objects and returns wrapped messages
-    public static func ingest(messageLike objects: [AnyObject], in chat: String, on eventLoop: EventLoop = ingestor_eventLoop.next()) -> EventLoopFuture<[Message]> {
+    public static func ingest(messageLike objects: [AnyObject], in chat: String? = nil, on eventLoop: EventLoop = ingestor_eventLoop.next()) -> EventLoopFuture<[Message]> {
         EventLoopFuture<Message?>.whenAllSucceed(objects.map {
             ingest(messageLike: $0, in: chat, on: eventLoop)
         }, on: eventLoop).map {
@@ -100,35 +106,55 @@ struct ERIndeterminateIngestor {
     }
     
     /// Ingests a message-like object and returns the wrapped message
-    public static func ingest(messageLike object: AnyObject, in chat: String, on eventLoop: EventLoop = ingestor_eventLoop.next()) -> EventLoopFuture<Message?> {
-        var messageItem: IMMessageItem!, message: IMMessage!
-        
-        switch (object) {
-            case let item as IMMessageItem:
-                messageItem = item
-                message = item.message()
-            case let item as IMMessage:
-                message = item
-                messageItem = item._imMessageItem
-            default:
-                print("Discarding unknown ChatItem \(object)")
-                return eventLoop.makeSucceededFuture(nil)
-        }
-        
-        var parsedChatItems: EventLoopFuture<[ChatItem]>!
-        
-        if let chatItems = messageItem._newChatItems() {
-            parsedChatItems = EventLoopFuture<ChatItem?>.whenAllSucceed(chatItems.map {
-                ingest($0, in: chat)
-            }, on: eventLoop).map {
-                $0.compactMap { $0 }
+    public static func ingest(messageLike object: AnyObject, in chat: String? = nil, on eventLoop: EventLoop = ingestor_eventLoop.next()) -> EventLoopFuture<Message?> {
+        resolveLazyChatGroupID(object: object, chat: chat, on: eventLoop).flatMap { chat in
+            var messageItem: IMMessageItem!, message: IMMessage!
+            
+            switch (object) {
+                case let item as IMMessageItem:
+                    messageItem = item
+                    message = item.message() ?? IMMessage.message(fromUnloadedItem: item)
+                case let item as IMMessage:
+                    message = item
+                    messageItem = item._imMessageItem
+                default:
+                    print("Discarding unknown ChatItem \(object)")
+                    return eventLoop.makeSucceededFuture(nil)
             }
-        } else {
-            parsedChatItems = eventLoop.makeSucceededFuture([])
-        }
-        
-        return parsedChatItems.map { chatItems in
-            Message(messageItem, message: message, items: chatItems, chatGroupID: chat)
+            
+            /// sometimes IMCore wont load the missing file transfers, so we handle that using DBReader
+            let missingGUIDs = (messageItem.fileTransferGUIDs ?? []).compactMap { guid -> String? in
+                guard let guid = guid as? String else {
+                    return nil
+                }
+                
+                return guid
+            }.filter {
+                IMFileTransferCenter.sharedInstance()?.transfer(forGUID: $0) == nil
+            }
+            
+            let pending = missingGUIDs.count > 0 ? DBReader.shared.attachments(withGUIDs: missingGUIDs) : eventLoop.makeSucceededFuture([])
+            
+            /// After the transfers are loaded, proceed with the generation of the chat item snapshots
+            return pending.mapEach {
+                $0.fileTransfer
+            }.flatMap { _ in
+                var parsedChatItems: EventLoopFuture<[ChatItem]>!
+                
+                if let chatItems = messageItem._newChatItems() {
+                    parsedChatItems = EventLoopFuture<ChatItem?>.whenAllSucceed(chatItems.map {
+                        ingest($0, in: chat)
+                    }, on: eventLoop).map {
+                        $0.compactMap { $0 }
+                    }
+                } else {
+                    parsedChatItems = eventLoop.makeSucceededFuture([])
+                }
+                
+                return parsedChatItems.map { chatItems in
+                    Message(messageItem, message: message, items: chatItems, chatGroupID: chat)
+                }
+            }
         }
     }
     
@@ -274,5 +300,19 @@ struct ERIndeterminateIngestor {
         }
         
         return promise.futureResult
+    }
+    
+    private static func resolveLazyChatGroupID(object: AnyObject, chat: String?, on eventLoop: EventLoop) -> EventLoopFuture<String?> {
+        if let chat = chat {
+            return eventLoop.makeSucceededFuture(chat)
+        } else if let object = object as? IMItem, let guid = object.guid {
+            return DBReader.shared.chatGroupID(forMessageGUID: guid)
+        } else if let object = object as? IMChatItem, let guid = object._item()?.guid {
+            return DBReader.shared.chatGroupID(forMessageGUID: guid)
+        } else if let object = object as? IMMessage, let guid = object.guid {
+            return DBReader.shared.chatGroupID(forMessageGUID: guid)
+        } else {
+            return eventLoop.makeSucceededFuture(nil)
+        }
     }
 }
