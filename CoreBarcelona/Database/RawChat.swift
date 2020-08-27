@@ -135,8 +135,8 @@ extension DBReader {
         return promise.futureResult
     }
     
-    func rowID(forGroupID: String) -> EventLoopFuture<Int64?> {
-        let promise = eventLoop.makePromise(of: Int64?.self)
+    func rowIDs(forGroupID: String) -> EventLoopFuture<[Int64]> {
+        let promise = eventLoop.makePromise(of: [Int64].self)
         
         pool.asyncRead { result in
             switch result {
@@ -147,7 +147,7 @@ extension DBReader {
                     let ROWID = try RawChat
                         .select(RawChat.Columns.ROWID, as: Int64.self)
                         .filter(RawChat.Columns.group_id == forGroupID)
-                        .fetchOne(db)
+                        .fetchAll(db)
                     
                     promise.succeed(ROWID)
                 } catch {
