@@ -56,3 +56,5 @@ void IMDSetIsRunningInDatabaseServerProcess(char);
 NSArray* IMDMessageRecordCopyMessagesForAssociatedGUID(CFStringRef);
 NSArray* IMDMessageRecordCopyMessagesForRowIDs(NSArray*);
 id IMDMessageRecordCopyMessageForGUID(CFStringRef);
+id IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve(id, id, id, id, id);
+NSArray* IMDMessageRecordCopyMessagesForGUIDs(id);

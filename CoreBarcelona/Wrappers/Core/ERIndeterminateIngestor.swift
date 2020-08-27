@@ -79,7 +79,7 @@ struct ERIndeterminateIngestor {
             return eventLoop.makeSucceededFuture(nil)
         }
         
-        return IMMessage.message(withGUID: messageGUID, on: eventLoop).map {
+        return IMMessage.imMessage(withGUID: messageGUID, on: eventLoop).map {
             guard let message = $0 else {
                 return nil
             }

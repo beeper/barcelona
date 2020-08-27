@@ -186,16 +186,14 @@ struct Chat: Codable, ChatConfigurationRepresentable {
     }
     
     func messages(before: String? = nil, limit: UInt64? = nil) -> EventLoopFuture<[ChatItem]> {
-            guard let ROWID = $0 else {
-                return messageQuerySystem.next().makeSucceededFuture([])
         DBReader.shared.rowIDs(forGroupID: groupID).flatMap { ROWIDs -> EventLoopFuture<[String]> in
             return DBReader.shared.newestMessageGUIDs(inChatROWIDs: ROWIDs, beforeMessageGUID: before, limit: Int(limit ?? 100))
+        }.flatMap { guids -> EventLoopFuture<[ChatItem]> in
+            return IMMessage.messages(withGUIDs: guids, on: messageQuerySystem.next())
+        }.map { messages -> [ChatItem] in
+            messages.sorted {
+                ($0.item as! Message).time! > ($1.item as! Message).time!
             }
-            
-        }.flatMap {
-            IMMessage.messages(withGUIDs: $0, on: messageQuerySystem.next())
-        }.flatMap {
-            ERIndeterminateIngestor.ingest($0, in: self.groupID)
         }
     }
     
@@ -203,7 +201,7 @@ struct Chat: Codable, ChatConfigurationRepresentable {
         let guid = message.guid, parts = message.parts ?? []
         let fullMessage = parts.count == 0
         
-        return IMMessage.message(withGUID: guid, on: eventLoop).map { message -> Void in
+        return IMMessage.imMessage(withGUID: guid, on: eventLoop).map { message -> Void in
             guard let message = message else {
                 return
             }

@@ -84,6 +84,10 @@ class ERMessageEvents: EventDispatcher {
     }
     
     /** Counts as a new message */
+    /**
+     Intakes tangible messages, not transcript items.
+     No typing items come here, no status items come here, no group items come here
+     */
     private func messagesReceived(_ items: [IMItem], inChat chatIdentifier: String, overrideFromMe: Bool = false) {
         let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!
         
@@ -126,12 +130,6 @@ class ERMessageEvents: EventDispatcher {
     }
     
     private func itemGUIDAsChatItem(_ guid: String, in groupID: String) -> EventLoopFuture<ChatItem?> {
-        IMMessage.message(withGUID: guid).flatMap { message -> EventLoopFuture<ChatItem?> in
-            guard let message = message else {
-                return eventProcessing_eventLoop.next().makeSucceededFuture(nil)
-            }
-            
-            return ERIndeterminateIngestor.ingest(message, in: groupID)
-        }
+        IMMessage.message(withGUID: guid)
     }
 }

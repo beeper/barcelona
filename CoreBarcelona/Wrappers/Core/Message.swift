@@ -24,9 +24,7 @@ struct BulkMessageIDRepresentation: Content {
 
 extension Array where Element == String {
     func er_chatItems(in chat: String) -> EventLoopFuture<[ChatItem]> {
-        IMMessage.messages(withGUIDs: self, on: messageQuerySystem.next()).flatMap {
-            return ERIndeterminateIngestor.ingest($0, in: chat)
-        }
+        IMMessage.messages(withGUIDs: self, on: messageQuerySystem.next())
     }
 }
 
@@ -38,35 +36,15 @@ extension Array where Element == Message {
 
 public struct Message: ChatItemRepresentation {
     static func message(withGUID guid: String, on eventLoop: EventLoop) -> EventLoopFuture<Message?> {
-        IMMessage.message(withGUID: guid, on: eventLoop).flatMap { message -> EventLoopFuture<Message?> in
-            guard let message = message else {
-                return eventLoop.makeSucceededFuture(nil)
-            }
-            
-            return DBReader.shared.chatGroupID(forMessageROWID: message.messageID).flatMap { groupID -> EventLoopFuture<Message?> in
-                guard let groupID = groupID else {
-                    return eventLoop.makeSucceededFuture(nil)
-                }
-                
-                return ERIndeterminateIngestor.ingest(messageLike: message, in: groupID)
-            }
+        IMMessage.message(withGUID: guid, on: eventLoop).map {
+            $0?.item as? Message
         }
     }
     
     static func messages(withGUIDs guids: [String], on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<[Message]> {
-        IMMessage.messages(withGUIDs: guids, on: eventLoop).flatMap { messages -> EventLoopFuture<[Message]> in
-            EventLoopFuture<String?>.whenAllSucceed(messages.map {
-                DBReader.shared.chatGroupID(forMessageROWID: $0.messageID)
-            }, on: eventLoop).flatMap { chatGroupIDs in
-                EventLoopFuture<Message?>.whenAllSucceed(chatGroupIDs.enumerated().map {
-                    guard let id = $0.element else {
-                        return eventLoop.makeSucceededFuture(nil)
-                    }
-                    
-                    return ERIndeterminateIngestor.ingest(messageLike: messages[$0.offset], in: id)
-                }, on: eventLoop).map {
-                    $0.compactMap { $0 }
-                }
+        IMMessage.messages(withGUIDs: guids, on: eventLoop).map {
+            $0.compactMap {
+                $0.item as? Message
             }
         }
     }

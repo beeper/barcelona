@@ -49,13 +49,13 @@ extension IMMessage {
         return message
     }
     
-    static func message(withGUID guid: String, on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<IMMessage?> {
-        return messages(withGUIDs: [guid], on: eventLoop).map { results in
-            results.first
+    static func imMessage(withGUID guid: String, on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<IMMessage?> {
+            return imMessages(withGUIDs: [guid], on: eventLoop).map { results in
+                results.first
+            }
         }
-    }
-    
-    static func messages(withGUIDs guids: [String], on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<[IMMessage]> {
+        
+    static func imMessages(withGUIDs guids: [String], on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<[IMMessage]> {
         let promise = eventLoop.makePromise(of: [IMMessage].self)
         
         IMSPIQueryIMMessageItemsWithGUIDsAndQOS(guids, QOS_CLASS_USER_INITIATED, queue) { results in
@@ -80,18 +80,28 @@ extension IMMessage {
             })
         }
         
-//        EventLoopFuture<IMMessage?>.whenAllSucceed(guids.map { message -> EventLoopFuture<IMMessage?> in
-//            let promise = eventLoop.makePromise(of: IMMessage?.self)
-//
-//            IMChatHistoryController.sharedInstance()!.loadMessage(withGUID: message) {
-//                promise.succeed($0)
-//            }
-//
-//            return promise.futureResult
-//        }, on: eventLoop).map {
-//            $0.compactMap { $0 }
-//        }
-        
         return promise.futureResult
+    }
+    
+    static func message(withGUID guid: String, on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<ChatItem?> {
+        return messages(withGUIDs: [guid], on: eventLoop).map { results in
+            results.first
+        }
+    }
+    
+    static func messages(withGUIDs guids: [String], on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<[ChatItem]> {
+        eventLoop.submit {
+            IMDMessageRecordCopyMessagesForGUIDs(guids)
+        }.map { records -> [Any] in
+            records?.compactMap { record -> Any in
+                IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve(record, nil, nil, nil, nil)
+            } ?? [] as [Any]
+        }.map { items in
+            items.compactMap { result -> IMItem? in
+                return result as? IMItem
+            }
+        }.flatMap {
+            ERIndeterminateIngestor.ingest($0)
+        }
     }
 }

@@ -52,7 +52,7 @@ extension IMChat {
      Sends a tapback for a given message, calling back with a Vapor abort if the operation fails
      */
     func tapback(guid: String, itemGUID: String, type: Int, overridingItemType: UInt8?) -> EventLoopFuture<IMMessage> {
-        return IMMessage.message(withGUID: guid).flatMap {
+        return IMMessage.imMessage(withGUID: guid).flatMap {
             guard let message = $0 else {
                 return messageQuerySystem.next().makeFailedFuture(MessagesError(code: 404, message: "Unknown message"))
             }
