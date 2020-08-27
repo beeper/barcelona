@@ -23,6 +23,7 @@ enum ChatItemType: String, Codable {
     case phantom
     case typing
     case acknowledgment
+    case sticker
     case groupTitle
 }
 
@@ -35,6 +36,10 @@ protocol ChatItemRepresentation: Content {
     var chatGroupID: String? { get set }
     var fromMe: Bool? { get set }
     var time: Double? { get set }
+}
+
+protocol AssociatedChatItemRepresentation: ChatItemRepresentation {
+    var associatedGUID: String { get set }
 }
 
 protocol ChatItemAcknowledgable: ChatItemRepresentation {

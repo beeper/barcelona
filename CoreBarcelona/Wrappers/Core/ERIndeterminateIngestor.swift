@@ -25,6 +25,7 @@ private let ChatLikeClasses = [
     IMTextMessagePartChatItem.self,
     IMMessageAcknowledgmentChatItem.self,
     IMAssociatedMessageItem.self,
+    IMAssociatedStickerChatItem.self,
     IMMessage.self,
     IMMessageItem.self
 ]
@@ -200,6 +201,8 @@ struct ERIndeterminateIngestor {
             self.ingest(acknowledgable: object, in: chat, on: eventLoop).cascade(to: promise)
         case let item as IMMessageAcknowledgmentChatItem:
             promise.succeed(ChatItem(type: .acknowledgment, item: AcknowledgmentChatItemRepresentation(item, chatGroupID: chat)))
+        case let item as IMAssociatedStickerChatItem:
+            promise.succeed(ChatItem(type: .sticker, item: AssociatedStickerChatItemRepresentation(item, chatGroupID: chat)))
         case is IMAssociatedMessageItem:
             fallthrough
         case is IMMessage:

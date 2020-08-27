@@ -92,5 +92,6 @@ public struct ChatItem: Content {
         ChatItem.register(StubChatItemRepresentation.self, for: .phantom)
         ChatItem.register(GroupTitleChangeItemRepresentation.self, for: .groupTitle)
         ChatItem.register(TypingChatItemRepresentation.self, for: .typing)
+        ChatItem.register(AssociatedStickerChatItemRepresentation.self, for: .sticker)
     }
 }
