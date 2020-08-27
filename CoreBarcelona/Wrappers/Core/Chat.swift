@@ -187,11 +187,14 @@ struct Chat: Codable, ChatConfigurationRepresentable {
     
     func messages(before: String? = nil, limit: UInt64? = nil) -> EventLoopFuture<[ChatItem]> {
         DBReader.shared.rowIDs(forGroupID: groupID).flatMap { ROWIDs -> EventLoopFuture<[String]> in
+            print("loading newest guids \(Date().timeIntervalSince1970 * 1000)")
             return DBReader.shared.newestMessageGUIDs(inChatROWIDs: ROWIDs, beforeMessageGUID: before, limit: Int(limit ?? 100))
         }.flatMap { guids -> EventLoopFuture<[ChatItem]> in
+            print("loading messages \(Date().timeIntervalSince1970 * 1000)")
             return IMMessage.messages(withGUIDs: guids, on: messageQuerySystem.next())
         }.map { messages -> [ChatItem] in
-            messages.sorted {
+            print("sorting messages \(Date().timeIntervalSince1970 * 1000)")
+            return messages.sorted {
                 ($0.item as! Message).time! > ($1.item as! Message).time!
             }
         }

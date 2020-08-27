@@ -90,18 +90,28 @@ extension IMMessage {
     }
     
     static func messages(withGUIDs guids: [String], on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<[ChatItem]> {
-        eventLoop.submit {
+        if guids.count == 0 {
+            return eventLoop.makeSucceededFuture([])
+        }
+        
+        return eventLoop.submit {
             IMDMessageRecordCopyMessagesForGUIDs(guids)
         }.map { records -> [Any] in
-            records?.compactMap { record -> Any in
+            print("mapping records to IMCore objects \(Date().timeIntervalSince1970 * 1000)")
+            return records?.compactMap { record -> Any in
                 IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve(record, nil, nil, nil, nil)
-            } ?? [] as [Any]
-        }.map { items in
-            items.compactMap { result -> IMItem? in
+            } ?? []
+        }.map { items -> [IMItem] in
+            print("ensuring items are IMItems \(Date().timeIntervalSince1970 * 1000)")
+            return items.compactMap { result -> IMItem? in
                 return result as? IMItem
             }
-        }.flatMap {
-            ERIndeterminateIngestor.ingest($0)
+        }.flatMap { item -> EventLoopFuture<[ChatItem]> in
+            print("ingesting items \(Date().timeIntervalSince1970 * 1000)")
+            return ERIndeterminateIngestor.ingest(item)
+        }.map {
+            print("items ingested \(Date().timeIntervalSince1970 * 1000)")
+            return $0
         }
     }
 }
