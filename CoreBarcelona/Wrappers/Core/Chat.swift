@@ -165,12 +165,12 @@ struct Chat: Codable, ChatConfigurationRepresentable {
     }
     
     func messages(before: String? = nil, limit: UInt64? = nil) -> EventLoopFuture<[ChatItem]> {
-        DBReader.shared.rowID(forGroupID: groupID).flatMap {
             guard let ROWID = $0 else {
                 return messageQuerySystem.next().makeSucceededFuture([])
+        DBReader.shared.rowIDs(forGroupID: groupID).flatMap { ROWIDs -> EventLoopFuture<[String]> in
+            return DBReader.shared.newestMessageGUIDs(inChatROWIDs: ROWIDs, beforeMessageGUID: before, limit: Int(limit ?? 100))
             }
             
-            return DBReader.shared.newestMessageGUIDs(inChatROWID: ROWID, beforeMessageGUID: before, limit: Int(limit ?? 100))
         }.flatMap {
             IMMessage.messages(withGUIDs: $0, on: messageQuerySystem.next())
         }.flatMap {

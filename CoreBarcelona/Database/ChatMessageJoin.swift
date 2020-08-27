@@ -121,7 +121,7 @@ extension DBReader {
         return promise.futureResult
     }
     
-    func newestMessageGUIDs(inChatROWID ROWID: Int64, beforeMessageGUID: String? = nil, limit: Int = 100) -> EventLoopFuture<[String]> {
+    func newestMessageGUIDs(inChatROWIDs ROWIDs: [Int64], beforeMessageGUID: String? = nil, limit: Int = 100) -> EventLoopFuture<[String]> {
         let promise = eventLoop.makePromise(of: [String].self)
         
         let resolution = beforeMessageGUID == nil ? eventLoop.makeSucceededFuture(nil) : rowID(forMessageGUID: beforeMessageGUID!)
@@ -135,7 +135,7 @@ extension DBReader {
                     do {
                         var messageROWIDsQuery = ChatMessageJoin
                             .select(ChatMessageJoin.Columns.message_id, as: Int64.self)
-                            .filter(ChatMessageJoin.Columns.chat_id == ROWID)
+                            .filter(ROWIDs.contains(ChatMessageJoin.Columns.chat_id))
                         
                         if let beforeMessageROWID = beforeMessageROWID {
                             messageROWIDsQuery = messageROWIDsQuery
@@ -143,7 +143,7 @@ extension DBReader {
                         }
                         
                         let messageROWIDs = try messageROWIDsQuery
-                            .order(ChatMessageJoin.Columns.message_id.desc)
+                            .order(ChatMessageJoin.Columns.message_date.desc)
                             .limit(limit)
                             .fetchAll(db)
                         
