@@ -7,14 +7,17 @@
 //
 
 import Foundation
-import Vapor
 
-struct StubChatItemRepresentation: ChatItemRepresentation, Content {
-    init(_ item: AnyObject, chatGroupID chat: String?) {
+struct StubChatItemRepresentation: ChatItemRepresentation {
+    init(_ item: Any?, chatGroupID chat: String?) {
         guid = NSString.stringGUID()
         fromMe = false
         time = 0
-        className = NSStringFromClass(type(of: item))
+        if let obj = item as? AnyObject {
+            className = NSStringFromClass(type(of: obj))
+        } else {
+            className = String(describing: item)
+        }
     }
     
     var guid: String?
