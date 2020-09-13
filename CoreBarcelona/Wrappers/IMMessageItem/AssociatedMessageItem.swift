@@ -9,19 +9,17 @@
 import Foundation
 import IMCore
 
-import Vapor
-
-struct AssociatedMessageItemRepresentation: Content, ChatItemRepresentation {
-    init(_ item: IMAssociatedMessageItem, chatGroupID: String?) {
-        associatedGUID = item.associatedMessageGUID()
+struct AssociatedMessageItem: ChatItemRepresentation {
+    init(_ item: IMAssociatedMessageItem, chatID: String?) {
+        associatedID = item.associatedMessageGUID()
         associatedType = item.associatedMessageType()
-        self.load(item: item, chatGroupID: chatGroupID)
+        self.load(item: item, chatID: chatID)
     }
     
-    var guid: String? = nil
-    var chatGroupID: String? = nil
+    var id: String? = nil
+    var chatID: String? = nil
     var fromMe: Bool? = nil
     var time: Double? = nil
-    var associatedGUID: String
+    var associatedID: String
     var associatedType: Int64
 }

@@ -10,8 +10,6 @@ import Foundation
 import IMSharedUtilities
 import IMCore
 
-import Vapor
-
 private let IMStickerUserInfoStickerGUIDKey = "sid"
 private let IMStickerUserInfoStickerPackGUIDKey = "pid"
 private let IMStickerUserInfoStickerHashKey = "shash"
@@ -27,9 +25,9 @@ private let IMStickerUserInfoScaleKey = "ssa"
 private let IMStickerUserInfoRotationKey = "sro"
 private let IMStickerUserInfoTranscodedScaleKey = "tssa"
 
-struct StickerInformation: Content {
-    var stickerGUID: String
-    var stickerPackGUID: String
+struct StickerInformation: Codable {
+    var stickerID: String
+    var stickerPackID: String
     var stickerHash: String
     var stickerRecipe: String?
     var bid: String?
@@ -48,8 +46,8 @@ struct StickerInformation: Content {
             return nil
         }
         
-        self.stickerGUID = stickerGUID
-        self.stickerPackGUID = stickerPackGUID
+        self.stickerID = stickerGUID
+        self.stickerPackID = stickerPackGUID
         self.stickerHash = stickerHash
         
         guard let layoutIntent = Int(rawLayoutIntent), let associatedLayoutIntent = Int(rawAssociatedLayoutIntent), let parentPreviewWidth = Double(rawParentPreviewWidth), let xScalar = Double(rawXScalar), let yScalar = Double(rawYScalar), let scale = Double(rawScale), let rotation = Double(rawRotation) else {
@@ -82,12 +80,12 @@ struct StickerInformation: Content {
     }
 }
 
-struct AssociatedStickerChatItemRepresentation: Content, AssociatedChatItemRepresentation {
-    init(_ item: IMAssociatedStickerChatItem, chatGroupID: String?) {
-        associatedGUID = item.associatedMessageGUID
+struct StickerChatItem: AssociatedChatItemRepresentation {
+    init(_ item: IMAssociatedStickerChatItem, chatID: String?) {
+        associatedID = item.associatedMessageGUID
         
         if let transfer = IMFileTransferCenter.sharedInstance()?.transfer(forGUID: item.transferGUID) {
-            self.attachment = AttachmentRepresentation(transfer)
+            self.attachment = Attachment(transfer)
             
             if transfer.isSticker, let userInfo = transfer.stickerUserInfo {
                 if let sticker = StickerInformation(userInfo as! [String: Any]) {
@@ -98,14 +96,14 @@ struct AssociatedStickerChatItemRepresentation: Content, AssociatedChatItemRepre
             }
         }
         
-        load(item: item, chatGroupID: chatGroupID)
+        load(item: item, chatID: chatID)
     }
     
-    var guid: String?
-    var chatGroupID: String?
+    var id: String?
+    var chatID: String?
     var fromMe: Bool?
     var time: Double?
-    var associatedGUID: String
-    var attachment: AttachmentRepresentation?
+    var associatedID: String
+    var attachment: Attachment?
     var sticker: StickerInformation?
 }

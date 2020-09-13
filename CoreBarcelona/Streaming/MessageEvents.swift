@@ -66,7 +66,7 @@ class MessageEvents: EventDispatcher {
     }
     
     private func messageUpdated(_ message: IMMessage, chat: IMChat) {
-        ERIndeterminateIngestor.ingest(message, in: chat.groupID).whenSuccess {
+        ERIndeterminateIngestor.ingest(message, in: chat.id).whenSuccess {
             guard let item = $0 else {
                 return
             }
@@ -97,11 +97,11 @@ class MessageEvents: EventDispatcher {
                 statusChanges.append(item)
                 return nil
             default:
-                return ERIndeterminateIngestor.ingest(transcriptItem, in: chat.groupID)
+                return ERIndeterminateIngestor.ingest(transcriptItem, in: chat.id)
             }
         }
         
-        let pendingMessages = messageGUIDs.er_chatItems(in: chat.groupID)
+        let pendingMessages = messageGUIDs.er_chatItems(in: chat.id)
         
         EventLoopFuture<ChatItem?>.whenAllSucceed(wrapped, on: eventProcessing_eventLoop.next()).map { $0.compactMap { $0 } }.whenSuccess { chatItems in
             pendingMessages.whenSuccess { messageChatItems in
@@ -115,21 +115,20 @@ class MessageEvents: EventDispatcher {
                 
                 StreamingAPI.shared.dispatch(Event<BulkChatItemRepresentation>.init(type: event, data: BulkChatItemRepresentation(items: merged)))
             }
-            
         }
         
         if statusChanges.count == 0 {
             return
         }
         
-        EventLoopFuture<StatusChatItemRepresentation?>.whenAllSucceed(statusChanges.map {
-            ERIndeterminateIngestor.ingest($0, in: chat.groupID)
+        EventLoopFuture<StatusChatItem?>.whenAllSucceed(statusChanges.map {
+            ERIndeterminateIngestor.ingest($0, in: chat.id)
         }, on: eventProcessing_eventLoop.next()).map {
             $0.compactMap { $0 }
         }.whenSuccess {
             if $0.count == 0 { return }
             $0.forEach { status in
-                self.debouncer.submit(status.itemGUID, category: .statusChanged) {
+                self.debouncer.submit(status.itemID, category: .statusChanged) {
                     StreamingAPI.shared.dispatch(eventFor(itemStatusChanged: status))
                 }
             }

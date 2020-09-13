@@ -8,25 +8,20 @@
 
 import Foundation
 import IMCore
-import Vapor
 
 private let regex = try! NSRegularExpression(pattern: "<body.*?>([\\s\\S]*)<\\/body>")
 
-extension TextPart: Content { }
-
-struct TextChatItemRepresentation: Content, ChatItemRepresentation, ChatItemAcknowledgable {
-    init(_ item: IMTextMessagePartChatItem, parts: [TextPart], chatGroupID: String?) {
-        text = item.text.string
+struct TextChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
+    init(_ item: IMTextMessagePartChatItem, parts: [TextPart], chatID: String?) {
         self.parts = parts
         
-        self.load(item: item, chatGroupID: chatGroupID)
+        self.load(item: item, chatID: chatID)
     }
     
-    var guid: String?
-    var chatGroupID: String?
+    var id: String?
+    var chatID: String?
     var fromMe: Bool?
     var time: Double?
-    var text: String
     var parts: [TextPart]
-    var acknowledgments: [AcknowledgmentChatItemRepresentation]?
+    var acknowledgments: [AcknowledgmentChatItem]?
 }

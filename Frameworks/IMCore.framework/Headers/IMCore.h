@@ -185,3 +185,5 @@ NSString* IMNormalizedPhoneNumberForPhoneNumber(NSString*, NSString*, BOOL);
 BOOL IMSPIQueryIMMessageItemsWithGUIDsAndQOS(NSArray<NSString *> *__strong, dispatch_qos_class_t, __strong dispatch_queue_t, __strong void (^)(NSArray*));
 BOOL IMSPIQueryMessagesWithGUIDsAndQOS(NSArray<NSString *> *__strong, dispatch_qos_class_t, __strong dispatch_queue_t, __strong void (^)(NSArray*));
 id IMCopyDDScannerResultFromAttributedStringData(NSData*);
+void IMChatCalculateServiceForSendingNewComposeMaybeForce(NSString* recipient, NSString* lastAddressedHandleID, NSString* simIdentifier, NSArray* addresses, BOOL appearsToBeEmail, BOOL hasDeliveredMessage, BOOL chatIsDowngraded, id historyState, id previousService);
+BOOL IMCoreSimulatedEnvironmentEnabled();

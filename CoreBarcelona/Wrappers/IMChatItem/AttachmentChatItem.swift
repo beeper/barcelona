@@ -8,46 +8,25 @@
 
 import Foundation
 import IMCore
-import Vapor
 
-struct AttachmentRepresentation: Content {
-    init(_ transfer: IMFileTransfer) {
-        mime = transfer.mimeType
-        filename = transfer.filename
-        guid = transfer.guid
-        uti = transfer.type
-    }
-    
-    init?(guid: String) {
-        guard let item = IMFileTransferCenter.sharedInstance()?.transfer(forGUID: guid, includeRemoved: false) else {
-            return nil
-        }
-        
-        self.init(item)
-    }
-    
-    var mime: String?
-    var filename: String?
-    var guid: String?
-    var uti: String?
-}
-
-struct AttachmentChatItemRepresentation: Content, ChatItemRepresentation, ChatItemAcknowledgable {
-    init(_ item: IMAttachmentMessagePartChatItem, metadata attachmentRepresentation: AttachmentRepresentation?, chatGroupID: String?) {
-        transferGUID = item.transferGUID
+/// Represents an attachment item
+struct AttachmentChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
+    init(_ item: IMAttachmentMessagePartChatItem, metadata attachmentRepresentation: Attachment?, chatID: String?) {
+        transferID = item.transferGUID
         metadata = attachmentRepresentation
-        self.load(item: item, chatGroupID: chatGroupID)
+        self.load(item: item, chatID: chatID)
     }
     
-    init(_ item: IMAttachmentMessagePartChatItem, chatGroupID: String?) {
-        self.init(item, metadata: AttachmentRepresentation(guid: item.transferGUID), chatGroupID: chatGroupID)
+    /// Attempts to fulfill the attachment data using existing sources from IMFileTransferCenter
+    init(_ item: IMAttachmentMessagePartChatItem, chatID: String?) {
+        self.init(item, metadata: Attachment(guid: item.transferGUID), chatID: chatID)
     }
     
-    var guid: String?
-    var chatGroupID: String?
+    var id: String?
+    var chatID: String?
     var fromMe: Bool?
     var time: Double?
-    var transferGUID: String
-    var metadata: AttachmentRepresentation?
-    var acknowledgments: [AcknowledgmentChatItemRepresentation]?
+    var transferID: String
+    var metadata: Attachment?
+    var acknowledgments: [AcknowledgmentChatItem]?
 }

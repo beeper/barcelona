@@ -7,11 +7,8 @@
 //
 
 import Foundation
-import Combine
 import IMCore
 import NIO
-
-import Vapor
 
 enum ChatStyle: UInt8 {
     case group = 0x2b
@@ -28,7 +25,7 @@ protocol BulkChatRepresentatable {
     var chats: [Chat] { get set }
 }
 
-struct BulkChatRepresentation: Content, BulkChatRepresentatable {
+struct BulkChatRepresentation: Codable, BulkChatRepresentatable {
     init(_ chats: [IMChat]) {
         self.chats = chats.map {
             Chat($0)
@@ -48,7 +45,7 @@ struct BulkChatRepresentation: Content, BulkChatRepresentatable {
     var chats: [Chat]
 }
 
-struct ChatIDRepresentation: Content {
+struct ChatIDRepresentation: Codable {
     var chat: String
 }
 
@@ -57,7 +54,7 @@ enum MessagePartType: String, Codable {
     case attachment = "attachment"
 }
 
-struct MessagePart: Content {
+struct MessagePart: Codable {
     var type: MessagePartType
     var details: String
 }
@@ -73,7 +70,7 @@ struct CreateMessage: Codable {
 }
 
 protocol MessageIdentifiable {
-    var guid: String { get set }
+    var id: String { get set }
 }
 
 protocol ChatConfigurationRepresentable {
@@ -81,24 +78,20 @@ protocol ChatConfigurationRepresentable {
     var ignoreAlerts: Bool { get set }
 }
 
-struct ChatConfigurationRepresentation: Content, ChatConfigurationRepresentable {
-    var groupID: String
+struct ChatConfigurationRepresentation: Codable, ChatConfigurationRepresentable {
+    var id: String
     var readReceipts: Bool
     var ignoreAlerts: Bool
 }
 
 struct DeleteMessage: Codable, MessageIdentifiable {
-    var guid: String
+    var id: String
     var parts: [Int]?
 }
 
 extension MessageIdentifiable {
-    func resolveChatGroupID(on eventLoop: EventLoop) -> EventLoopFuture<String?> {
-        DBReader.shared.chatGroupID(forMessageGUID: guid)
-    }
-    
-    func resolveChat(on eventLoop: EventLoop) -> EventLoopFuture<Chat?> {
-        Chat.chat(forMessage: guid, on: eventLoop)
+    func chat() -> EventLoopFuture<Chat?> {
+        Chat.chat(forMessage: id)
     }
 }
 
@@ -113,39 +106,41 @@ private func flagsForCreation(_ creation: CreateMessage, transfers: [String]) ->
     return .textOrPluginOrStickerOrImage
 }
 
-struct Chat: Codable, ChatConfigurationRepresentable {
+private extension String {
+    func substring(trunactingFirst prefix: Int) -> Substring {
+        self.suffix(from: self.index(startIndex, offsetBy: prefix))
+    }
+}
+
+public struct Chat: Codable, ChatConfigurationRepresentable {
     init(_ backing: IMChat) {
         joinState = backing.joinState
         roomName = backing.roomName
         displayName = backing.displayName
-        groupID = backing.groupID
-        participants = (backing.participantHandleIDs() ?? []).map {
-            $0.starts(with: "e:") ? $0.substring(from: .init(encodedOffset: 2)) : $0
-        }
+        id = backing.id
+        participants = backing.participantHandleIDs() ?? []
         lastAddressedHandleID = backing.lastAddressedHandleID
         unreadMessageCount = backing.unreadMessageCount
         messageFailureCount = backing.messageFailureCount
-        service = backing.account?.serviceName
+        service = backing.account?.service?.id
         lastMessage = backing.lastFinishedMessage?.description(forPurpose: 0x2, inChat: backing, senderDisplayName: backing.lastMessage?.sender._displayNameWithAbbreviation)
         lastMessageTime = (backing.lastFinishedMessage?.time.timeIntervalSince1970 ?? 0) * 1000
         style = backing.chatStyle
         readReceipts = backing.readReceipts
         ignoreAlerts = backing.ignoreAlerts
-        
-        backing.messageCount
     }
     
-    public static func chat(forMessage guid: String, on eventLoop: EventLoop) -> EventLoopFuture<Chat?> {
-        DBReader.shared.chatGroupID(forMessageGUID: guid).map {
-            guard let groupID = $0 else {
+    public static func chat(forMessage id: String) -> EventLoopFuture<Chat?> {
+        IMChat.chat(forMessage: id).map {
+            if let chat = $0 {
+                return Chat(chat)
+            } else {
                 return nil
             }
-            
-            return Registry.sharedInstance.chat(withGroupID: groupID)
         }
     }
     
-    var groupID: String
+    public var id: String
     var joinState: Int64
     var roomName: String?
     var displayName: String?
@@ -153,55 +148,78 @@ struct Chat: Codable, ChatConfigurationRepresentable {
     var lastAddressedHandleID: String?
     var unreadMessageCount: UInt64?
     var messageFailureCount: UInt64?
-    var service: String?
+    var service: IMServiceStyle?
     var lastMessage: String?
     var lastMessageTime: Double
     var style: UInt8
     var readReceipts: Bool
     var ignoreAlerts: Bool
     
-    public func imChat() -> IMChat {
-        Registry.sharedInstance.imChat(withGroupID: groupID)!
+    var imChat: IMChat {
+        IMChat.resolve(withIdentifier: id)!
     }
     
     func startTyping() {
-        let chat = imChat()
-        
-        if chat.localTypingMessageGUID == nil {
-            chat.setValue(NSString.stringGUID(), forKey: "_typingGUID")
-            let message = IMMessage(sender: nil, time: nil, text: nil, fileTransferGUIDs: nil, flags: 0xc, error: nil, guid: chat.localTypingMessageGUID, subject: nil)
-            chat._sendMessage(message, adjustingSender: true, shouldQueue: false)
+        if imChat.localTypingMessageGUID == nil {
+            imChat.setValue(NSString.stringGUID(), forKey: "_typingGUID")
+            let message = IMMessage(sender: nil, time: nil, text: nil, fileTransferGUIDs: nil, flags: 0xc, error: nil, guid: imChat.localTypingMessageGUID, subject: nil)
+            imChat._sendMessage(message, adjustingSender: true, shouldQueue: false)
         }
     }
     
     func stopTyping() {
-        let chat = imChat()
-        
-        if let typingGUID = chat.localTypingMessageGUID {
-            print(typingGUID)
-            chat.setValue(nil, forKey: "_typingGUID")
+        if let typingGUID = imChat.localTypingMessageGUID {
+            imChat.setValue(nil, forKey: "_typingGUID")
             let message = IMMessage(sender: nil, time: nil, text: nil, fileTransferGUIDs: nil, flags: 0xd, error: nil, guid: typingGUID, subject: nil)
-            chat.sendMessage(message)
+            imChat.sendMessage(message)
         }
     }
     
     func messages(before: String? = nil, limit: UInt64? = nil) -> EventLoopFuture<[ChatItem]> {
-        DBReader.shared.rowIDs(forGroupID: groupID).flatMap { ROWIDs -> EventLoopFuture<[String]> in
-            print("loading newest guids \(Date().timeIntervalSince1970 * 1000)")
-            return DBReader.shared.newestMessageGUIDs(inChatROWIDs: ROWIDs, beforeMessageGUID: before, limit: Int(limit ?? 100))
+        if ERBarcelonaManager.isSimulation {
+            let guids: [String] = imChat.chatItemRules._items().compactMap { item in
+                if let chatItem = item as? IMChatItem {
+                    return chatItem._item()?.guid
+                } else if let item = item as? IMItem {
+                    return item.guid
+                }
+                
+                return nil
+            }
+            
+            return IMMessage.messages(withGUIDs: guids, in: self.id, on: messageQuerySystem.next()).map { messages -> [ChatItem] in
+                messages.sorted {
+                    guard case .message(let message1) = $0, case .message(let message2) = $1 else {
+                        return false
+                    }
+                    
+                    return message1.time! > message2.time!
+                }
+            }
+        }
+        
+        return DBReader.shared.rowIDs(forIdentifier: imChat.chatIdentifier).flatMap { ROWIDs -> EventLoopFuture<[String]> in
+            let guidFetchTracker = ERTrack(log: .default, name: "Chat.swift:messages Loading newest guids for chat", format: "ChatID: %{public}s ROWIDs: %@", self.id, ROWIDs)
+            
+            return DBReader.shared.newestMessageGUIDs(inChatROWIDs: ROWIDs, beforeMessageGUID: before, limit: Int(limit ?? 100)).map {
+                guidFetchTracker()
+                return $0
+            }
         }.flatMap { guids -> EventLoopFuture<[ChatItem]> in
-            print("loading messages \(Date().timeIntervalSince1970 * 1000)")
-            return IMMessage.messages(withGUIDs: guids, on: messageQuerySystem.next())
+            IMMessage.messages(withGUIDs: guids, in: self.id, on: messageQuerySystem.next())
         }.map { messages -> [ChatItem] in
-            print("sorting messages \(Date().timeIntervalSince1970 * 1000)")
-            return messages.sorted {
-                ($0.item as! Message).time! > ($1.item as! Message).time!
+            messages.sorted {
+                guard case .message(let message1) = $0, case .message(let message2) = $1 else {
+                    return false
+                }
+                
+                return message1.time! > message2.time!
             }
         }
     }
     
     func delete(message: DeleteMessage, on eventLoop: EventLoop) -> EventLoopFuture<Void> {
-        let guid = message.guid, parts = message.parts ?? []
+        let guid = message.id, parts = message.parts ?? []
         let fullMessage = parts.count == 0
         
         return IMMessage.imMessage(withGUID: guid, on: eventLoop).map { message -> Void in
@@ -219,7 +237,7 @@ struct Chat: Codable, ChatConfigurationRepresentable {
                     return chatItems[$0]
                 }
                 
-                let newItem = self.imChat().chatItemRules._item(withChatItemsDeleted: items, fromItem: message._imMessageItem)!
+                let newItem = self.imChat.chatItemRules._item(withChatItemsDeleted: items, fromItem: message._imMessageItem)!
                 
                 IMDaemonController.shared()!.updateMessage(newItem)
             }
@@ -234,7 +252,7 @@ struct Chat: Codable, ChatConfigurationRepresentable {
             let fileTransferGUIDs = result.transferGUIDs
             
             if text.length == 0 {
-                promise.fail(Abort(.badRequest))
+                promise.fail(BarcelonaError(code: 400, message: "Cannot send an empty message"))
                 return
             }
             
@@ -256,10 +274,10 @@ struct Chat: Codable, ChatConfigurationRepresentable {
                 }
                 
                 messages.forEach { message in
-                    self.imChat()._sendMessage(message, adjustingSender: true, shouldQueue: true)
+                    self.imChat._sendMessage(message, adjustingSender: true, shouldQueue: true)
                 }
                 
-                messages.bulkRepresentation(in: self.groupID).cascade(to: promise)
+                messages.bulkRepresentation(in: self.id).cascade(to: promise)
             }
         }
         

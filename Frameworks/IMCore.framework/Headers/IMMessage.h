@@ -20,7 +20,7 @@
     NSDate *_timePlayed;
     NSString *_guid;
     NSAttributedString *_messageSubject;
-    NSArray *_fileTransferGUIDs;
+    NSArray<NSString*> *_fileTransferGUIDs;
     NSError *_error;
     NSString *_balloonBundleID;
     NSData *_payloadData;
@@ -83,7 +83,7 @@
 @property(retain, nonatomic, setter=_updateTimePlayed:) NSDate *timePlayed; // @synthesize timePlayed=_timePlayed;
 @property(retain, nonatomic, setter=_updateTimeRead:) NSDate *timeRead; // @synthesize timeRead=_timeRead;
 @property(retain, nonatomic, setter=_updateTimeDelivered:) NSDate *timeDelivered; // @synthesize timeDelivered=_timeDelivered;
-@property(copy, nonatomic, setter=_updateFileTransferGUIDs:) NSArray *fileTransferGUIDs; // @synthesize fileTransferGUIDs=_fileTransferGUIDs;
+@property(copy, nonatomic, setter=_updateFileTransferGUIDs:) NSArray<NSString*> *fileTransferGUIDs; // @synthesize fileTransferGUIDs=_fileTransferGUIDs;
 @property(nonatomic) BOOL isInvitationMessage; // @synthesize isInvitationMessage=_isInvitationMessage;
 @property(retain, nonatomic, setter=_updateError:) NSError *error; // @synthesize error=_error;
 @property(nonatomic, setter=_updateFlags:) unsigned long long flags; // @synthesize flags=_flags;

@@ -19,6 +19,7 @@ function fixNSImports(line) {
 function fixIgnoredLines(line) {
     switch (line) {
         case "- (void).cxx_destruct;":
+        case "- (id).cxx_construct;":
             return "";
         default:
             return line;
@@ -46,7 +47,7 @@ function fixIDParameterization(line) {
 }
 
 function fixFakeShit(line) {
-    return line.replace(/CDStruct(?:_\w+)?(?:\s\*)?/g, "id ")
+    return line.replace(/CDStruct(?:_\w+)?(?:\s\*)?/g, "id ").replace(/vector_(?:_\w+)?(?:\s\*)?/g, "id ")
 }
 
 function fixIDPointer(line) {
@@ -75,6 +76,10 @@ function fixCNCancelationTokenInheritance(line) {
 
 function fixCNObservable(line) {
     return line.replace(/\s:\sCNObservable\s?<?[\w\d]*>?$/g, " : NSObject").replace(/#import "CNScheduler\.h"/g, "");
+}
+
+function fixOppressionOfHobbyists(line) {
+    return line.replace(/__attribute__\(\(visibility\("hidden"\)\)\)/g, "")
 }
 
 /**
@@ -116,7 +121,8 @@ function applyAllFixes(text) {
         fixCNCancelationTokenInheritance,
         fixCNObservable,
 	fixFakeShit,
-	fixFailParse
+	fixFailParse,
+	fixOppressionOfHobbyists
     ]);
 }
 

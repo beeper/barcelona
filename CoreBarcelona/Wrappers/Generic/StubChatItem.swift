@@ -7,17 +7,31 @@
 //
 
 import Foundation
+import os.log
 
-struct StubChatItemRepresentation: ChatItemRepresentation {
+struct PhantomChatItem: ChatItemRepresentation {
     init(_ item: Any?, chatGroupID chat: String?) {
         guid = NSString.stringGUID()
         fromMe = false
         time = 0
-        if let obj = item as? AnyObject {
-            className = NSStringFromClass(type(of: obj))
+        chatGroupID = chat
+        
+        if let obj = item {
+            className = NSStringFromClass(type(of: obj as AnyObject))
         } else {
             className = String(describing: item)
         }
+        
+        switch item {
+        case let item as IMTranscriptChatItem:
+            load(item: item, chatGroupID: chat)
+        case let item as IMItem:
+            load(item: item, chatGroupID: chat)
+        default:
+            break
+        }
+        
+        os_log("StubChatItem created with unknown item: %@", log: .default, type: .error, className)
     }
     
     var guid: String?

@@ -102,7 +102,7 @@ class ERMessageEvents: EventDispatcher {
                 return nil
             }
             
-            return itemGUIDAsChatItem(item.guid, in: chat.groupID)
+            return itemGUIDAsChatItem(item.guid, in: chat.id)
         }, on: eventProcessing_eventLoop.next()).map {
             $0.compactMap { $0 }
         }.whenSuccess {
@@ -116,7 +116,7 @@ class ERMessageEvents: EventDispatcher {
         let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!
         
         EventLoopFuture<ChatItem?>.whenAllSucceed(items.map { item -> EventLoopFuture<ChatItem?> in
-            return itemGUIDAsChatItem(item.guid, in: chat.groupID)
+            return itemGUIDAsChatItem(item.guid, in: chat.id)
         }, on: eventProcessing_eventLoop.next()).map {
             $0.compactMap { $0 }
         }.whenSuccess {
@@ -129,7 +129,7 @@ class ERMessageEvents: EventDispatcher {
         messagesUpdated([item], inChat: chatIdentifier)
     }
     
-    private func itemGUIDAsChatItem(_ guid: String, in groupID: String) -> EventLoopFuture<ChatItem?> {
+    private func itemGUIDAsChatItem(_ guid: String, in chatID: String) -> EventLoopFuture<ChatItem?> {
         IMMessage.message(withGUID: guid)
     }
 }

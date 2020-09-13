@@ -116,7 +116,7 @@
 @property(nonatomic) BOOL hasSuggestedName; // @synthesize hasSuggestedName=_hasSuggestedName;
 @property(readonly, retain, nonatomic) NSString *uniqueName; // @synthesize uniqueName=_uniqueName;
 @property(retain, nonatomic) NSString *personCentricID; // @synthesize personCentricID=_personCentricID;
-@property(readonly, retain, nonatomic) NSString *ID; // @synthesize ID=_id;
+@property(readonly, retain, nonatomic, nonnull) NSString *ID; // @synthesize ID=_id;
 @property(readonly, retain, nonatomic) NSAttributedString *richStatusMessage; // @synthesize richStatusMessage=_richStatusMsg;
 @property(readonly, retain, nonatomic) NSString *previousStatusMessage; // @synthesize previousStatusMessage=_prevStatusMsg;
 @property(readonly, nonatomic) unsigned long long previousStatus; // @synthesize previousStatus=_prevStatus;

@@ -10,24 +10,22 @@ import Foundation
 import Contacts
 import IMCore
 
-import Vapor
-
-struct BulkHandleRepresentation: Content {
+struct BulkHandleRepresentation: Codable {
     init(_ handles: [IMHandle]) {
         self.handles = handles.map {
-            HandleRepresentation($0)
+            Handle($0)
         }
     }
     
-    var handles: [HandleRepresentation]
+    var handles: [Handle]
 }
 
-struct HandleRepresentation: Content, Equatable {
-    static func == (lhs: HandleRepresentation, rhs: HandleRepresentation) -> Bool {
+struct Handle: Codable, Equatable {
+    static func == (lhs: Handle, rhs: Handle) -> Bool {
         return lhs.id == rhs.id
     }
     
-    static func === (lhs: HandleRepresentation, rhs: HandleRepresentation) -> Bool {
+    static func === (lhs: Handle, rhs: Handle) -> Bool {
         return lhs.id == rhs.id
     }
     

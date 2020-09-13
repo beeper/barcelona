@@ -13,11 +13,7 @@ import DataDetectorsCore
 import Vapor
 import CoreFoundation
 
-extension CreateMessage: Content {
-    
-}
-
-extension MessagesError {
+extension BarcelonaError {
     var abort: Abort {
         Abort(.init(statusCode: code, reasonPhrase: message))
     }
@@ -32,8 +28,6 @@ func bindChatMessagesAPI(_ chat: RoutesBuilder) {
      Query messages in a chat
      */
     messages.get { req -> EventLoopFuture<BulkChatItemRepresentation> in
-        guard let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
-        guard let chat = Registry.sharedInstance.chat(withGroupID: groupID) else { throw Abort(.notFound) }
         let messageGUID = try? req.query.get(String.self, at: "before")
         var limit = (try? req.query.get(UInt64.self, at: "limit")) ?? 75
         
@@ -41,7 +35,7 @@ func bindChatMessagesAPI(_ chat: RoutesBuilder) {
             limit = 100
         }
         
-        return chat.messages(before: messageGUID, limit: limit).map {
+        return req.chat.messages(before: messageGUID, limit: limit).map {
             BulkChatItemRepresentation(items: $0)
         }
     }
@@ -50,28 +44,10 @@ func bindChatMessagesAPI(_ chat: RoutesBuilder) {
      Create a ChatItem
      */
     messages.grouped(ThrottlingMiddleware(allotment: 30, expiration: 5)).post { req -> EventLoopFuture<BulkMessageRepresentation> in
-        guard let creation = try? req.content.decode(CreateMessage.self), let groupID = req.parameters.get("groupID") else { throw Abort(.badRequest) }
-        guard let chat = Registry.sharedInstance.chat(withGroupID: groupID) else { throw Abort(.notFound) }
+        guard let creation = try? req.content.decode(CreateMessage.self) else { throw Abort(.badRequest) }
         
-        let promise = req.eventLoop.makePromise(of: BulkMessageRepresentation.self)
+        req.chat.stopTyping()
         
-        chat.stopTyping()
-        
-        chat.send(message: creation, on: req.eventLoop).whenComplete { result in
-            switch (result) {
-            case .success(let messages):
-                promise.succeed(messages)
-                break
-            case .failure(let error):
-                if let error = error as? MessagesError {
-                    promise.fail(error.abort)
-                    return
-                }
-                
-                promise.fail(error)
-            }
-        }
-        
-        return promise.futureResult
+        return req.chat.send(message: creation, on: req.eventLoop)
     }
 }

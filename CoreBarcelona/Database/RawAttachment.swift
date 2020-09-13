@@ -8,8 +8,9 @@
 
 import Foundation
 import IMCore
-import Vapor
+import os.log
 import GRDB
+import NIO
 
 class RawAttachment: Record {
     override class var databaseTableName: String { "attachment" }
@@ -96,59 +97,25 @@ class RawAttachment: Record {
     var sr_ck_record_id: String?
 }
 
-struct InternalAttachmentRepresentation {
-    var guid: String
-    var path: String
-    var bytes: UInt64
-    var incoming: Bool
-    var mime: String?
-    
-    private var account: IMAccount {
-        Registry.sharedInstance.iMessageAccount()!
-    }
-    
-    private var transferCenter: IMFileTransferCenter {
-        IMFileTransferCenter.sharedInstance()!
-    }
-    
-    var fileTransfer: IMFileTransfer {
-        if let transfer = transferCenter.transfer(forGUID: guid) {
-            return transfer
-        }
-        
-        let url = URL.init(fileURLWithPath: path)
-        let transfer = IMFileTransfer()._init(withGUID: guid, filename: url.lastPathComponent, isDirectory: false, localURL: url, account: account.uniqueID, otherPerson: nil, totalBytes: bytes, hfsType: 0, hfsCreator: 0, hfsFlags: 0, isIncoming: false)!
-        
-        transfer.transferredFilename = url.lastPathComponent
-        
-        if let mime = mime {
-            transfer.setValue(mime, forKey: "_mimeType")
-            transfer.setValue(IMFileManager.defaultHFS()!.utiType(ofMimeType: mime), forKey: "_utiType")
-        }
-        
-        let center = IMFileTransferCenter.sharedInstance()!
-        
-        center._addTransfer(transfer, toAccount: account.uniqueID)
-        
-        if let map = center.value(forKey: "_guidToTransferMap") as? NSDictionary {
-            map.setValue(transfer, forKey: guid)
-        }
-        
-        center.registerTransfer(withDaemon: guid)
-        
-        return transfer
-    }
-}
-
 extension DBReader {
-    func attachment(for guid: String) -> EventLoopFuture<InternalAttachmentRepresentation?> {
+    func attachment(for guid: String) -> EventLoopFuture<InternalAttachment?> {
         return attachments(withGUIDs: [guid]).map {
             $0.first
         }
     }
     
-    func attachments(withGUIDs guids: [String]) -> EventLoopFuture<[InternalAttachmentRepresentation]> {
-        let promise = eventLoop.makePromise(of: [InternalAttachmentRepresentation].self)
+    func attachments(withGUIDs guids: [String]) -> EventLoopFuture<[InternalAttachment]> {
+        os_log("DBReader selecting attachments with GUIDs %@", guids)
+        
+        if guids.count == 0 { return eventLoop.makeSucceededFuture([]) }
+        
+        if ERBarcelonaManager.isSimulation {
+            return eventLoop.makeSucceededFuture(guids.compactMap { guid in
+                IMFileTransferCenter.sharedInstance()?.transfer(forGUID: guid, includeRemoved: false)?.internalAttachment
+            })
+        }
+        
+        let promise = eventLoop.makePromise(of: [InternalAttachment].self)
         
         pool.asyncRead { result in
             switch result {
@@ -159,12 +126,12 @@ extension DBReader {
                     
                     let results = try RawAttachment.filter(guids.contains(RawAttachment.Columns.guid) || guids.contains(RawAttachment.Columns.original_guid)).fetchAll(db)
                     
-                    let transfers = results.compactMap { result -> InternalAttachmentRepresentation? in
+                    let transfers = results.compactMap { result -> InternalAttachment? in
                         guard let guid = result.guid, let path = result.filename as NSString? else {
                             return nil
                         }
                         
-                        return InternalAttachmentRepresentation(guid: guid, path: path.expandingTildeInPath, bytes: UInt64(result.total_bytes ?? 0), incoming: (result.is_outgoing ?? 0) == 0, mime: result.mime_type)
+                        return InternalAttachment(guid: guid, originalGUID: result.original_guid, path: path.expandingTildeInPath, bytes: UInt64(result.total_bytes ?? 0), incoming: (result.is_outgoing ?? 0) == 0, mime: result.mime_type)
                     }
 
                     promise.succeed(transfers)

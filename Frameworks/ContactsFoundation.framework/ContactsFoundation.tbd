@@ -1,8 +1,8 @@
 --- !tapi-tbd-v3
 archs:           [ x86_64 ]
-uuids:           [ 'x86_64: 821F9BDA-991A-3B55-A7B4-9443163B6B71', 'x86_64: 821F9BDA-991A-3B55-A7B4-9443163B6B71' ]
+
 platform:        zippered
-install-name:    '/System/Library/PrivateFrameworks/ContactsFoundation.framework/Versions/A/ContactsFoundation'
+install-name:    '/System/Library/PrivateFrameworks/ContactsFoundation.framework/ContactsFoundation'
 exports:         
   - archs:           [ x86_64 ]
     symbols:         [ _ABImageDirectoryPathComponent, _ABMetadataDirectoryPathComponent, 
@@ -253,7 +253,7 @@ exports:
 ...
 --- !tapi-tbd-v2
 archs:                 [ arm64 ]
-uuids:                 [ 'arm64: 0BA958AC-9959-337C-A4D7-2B34BD2D50AA' ]
+
 platform:              ios
 flags:                 [ flat_namespace ]
 install-name:          "/System/Library/PrivateFrameworks/ContactsFoundation.framework/ContactsFoundation"

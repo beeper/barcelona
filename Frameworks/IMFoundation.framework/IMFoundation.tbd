@@ -1,11 +1,11 @@
 --- !tapi-tbd-v3
-archs:           [ x86_64 ]
-uuids:           [ 'x86_64: F4E107F2-A4C8-397E-A16A-A3062E50B799', 'x86_64: F4E107F2-A4C8-397E-A16A-A3062E50B799' ]
-platform:        zippered
-install-name:    '/System/Library/PrivateFrameworks/IMFoundation.framework/Versions/A/IMFoundation'
+archs:           [ x86_64, arm64, arm64e, armv7, armv7s ]
+
+platform:        darwin
+install-name:    '/System/Library/PrivateFrameworks/IMFoundation.framework/IMFoundation'
 current-version: 800
 exports:         
-  - archs:           [ x86_64 ]
+  - archs:           [ x86_64, arm64, arm64e, armv7, armv7s ]
     symbols:         [ _CopyKeychainSearchList, _ExtractURLQueries, _FZAVErrorDomain, 
                        _FZRelayParameter_ConnectionID, _FZRelayParameter_PeerBlob, 
                        _FZRelayParameter_PeerID, _FZRelayParameter_PeerNatIP, _FZRelayParameter_PeerNatType, 
@@ -376,7 +376,7 @@ exports:
 ...
 --- !tapi-tbd-v2
 archs:                 [ arm64 ]
-uuids:                 [ 'arm64: B2D85B14-7B82-3944-BEEB-C644D365B564' ]
+
 platform:              ios
 flags:                 [ flat_namespace ]
 install-name:          "/System/Library/PrivateFrameworks/IMFoundation.framework/IMFoundation"

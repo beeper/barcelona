@@ -1,0 +1,5 @@
+framework module IDS [extern_c] {
+    umbrella header "IDS.h"
+    export *
+    module * { export * }
+}

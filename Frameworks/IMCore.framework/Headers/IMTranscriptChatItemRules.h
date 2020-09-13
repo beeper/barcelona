@@ -38,7 +38,7 @@
 - (void)_setNextStaleChatItem:(id)arg1;
 - (id)_chatItems;
 - (void)_setItems:(id)arg1;
-- (id)_items;
+- (NSArray*)_items;
 - (BOOL)_shouldShowEffectPlayButtonForMessage:(id)arg1;
 - (BOOL)shouldShowExpressiveMessageTextAsText:(id)arg1;
 - (BOOL)shouldShowRaiseMessageStatus;

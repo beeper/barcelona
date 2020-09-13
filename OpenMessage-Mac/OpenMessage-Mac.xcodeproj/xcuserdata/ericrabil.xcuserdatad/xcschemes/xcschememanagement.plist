@@ -3,11 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>SchemeUserState</key>
+	<dict/>
+	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>OpenMessage-Mac.xcscheme_^#shared#^_</key>
+		<key>1D5AEE0024E375D300303692</key>
 		<dict>
-			<key>orderHint</key>
-			<integer>5</integer>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>1D5AEE1224E375D700303692</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>1D5AEE1D24E375D700303692</key>
+		<dict>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>

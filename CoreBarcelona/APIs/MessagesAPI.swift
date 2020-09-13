@@ -27,15 +27,15 @@ func bindMessagesAPI(_ app: Application) {
     let messages = app.grouped("messages")
     
     messages.get { req -> EventLoopFuture<BulkMessageRepresentation> in
-        guard var guids = try? req.query.get([String].self, at: "guids") else {
+        guard var ids = try? req.query.get([String].self, at: "ids") else {
             throw Abort(.badRequest)
         }
         
-        guids = guids.map {
+        ids = ids.map {
             $0.replacingOccurrences(of: "\n", with: "")
         }
         
-        return Message.messages(withGUIDs: guids, on: messageQuerySystem.next()).map {
+        return Message.lazyResolve(withIdentifiers: ids, on: messageQuerySystem.next()).map {
             $0.representation
         }
     }
@@ -51,7 +51,7 @@ func bindMessagesAPI(_ app: Application) {
         }
         
         return DBReader(pool: databasePool, eventLoop: req.eventLoop).associatedMessages(with: itemGUID).map {
-            BulkMessageRepresentation($0)
+            $0.representation
         }
     }
     
@@ -66,15 +66,15 @@ func bindMessagesAPI(_ app: Application) {
         
         let promise = req.eventLoop.makePromise(of: Message.self)
         
-        Chat.chat(forMessage: messageGUID, on: req.eventLoop).flatMap { chat -> EventLoopFuture<Message?> in
-            guard let chat = chat?.imChat() else {
+        IMChat.chat(forMessage: messageGUID).flatMap { chat -> EventLoopFuture<Message?> in
+            guard let chat = chat else {
                 return req.eventLoop.makeFailedFuture(Abort(.notFound, reason: "Unknown chat."))
             }
 
             let debugItemType = try? req.query.get(UInt8.self, at: "itemType")
 
             return chat.tapback(guid: messageGUID, itemGUID: itemGUID, type: ackType, overridingItemType: debugItemType).flatMap {
-                ERIndeterminateIngestor.ingest(messageLike: $0, in: chat.groupID)
+                ERIndeterminateIngestor.ingest(messageLike: $0, in: chat.id)
             }
         }.flatMapThrowing { message -> Message in
             guard let message = message else {
@@ -101,7 +101,7 @@ func bindMessagesAPI(_ app: Application) {
         EventLoopFuture<OKResult>.whenAllComplete(deletion.messages.map { message -> EventLoopFuture<OKResult> in
             let loop = messageQuerySystem.next()
             
-            return message.resolveChat(on: loop).flatMap { chat -> EventLoopFuture<OKResult> in
+            return message.chat().flatMap { chat -> EventLoopFuture<OKResult> in
                 guard let chat = chat else {
                     return loop.makeFailedFuture(Abort(.notFound, reason: "Unknown chat."))
                 }
@@ -124,20 +124,12 @@ func bindMessagesAPI(_ app: Application) {
     
     // MARK: - Specific
     
-    let message = messages.grouped(":messageGUID")
+    let message = messages.grouped(MessageMiddleware).grouped(":\(IMMessageResourceKey)")
     
     /**
      Query a specific message
      */
-    message.get { req -> EventLoopFuture<Message> in
-        guard let messageGUID = req.parameters.get("messageGUID") else { throw Abort(.badRequest) }
-        
-        return Message.message(withGUID: messageGUID, on: req.eventLoop).flatMapThrowing {
-            guard let message = $0 else {
-                throw Abort(.notFound, reason: "Unknown message")
-            }
-            
-            return message
-        }
+    message.get { req -> Message in
+        req.message
     }
 }

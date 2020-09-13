@@ -9,7 +9,6 @@
 import Foundation
 import IMCore
 import os.log
-import Vapor
 
 private let log_chatEvents = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ChatEvents")
 
@@ -21,8 +20,8 @@ private let IMChatRegistryDidRegisterChatNotification = Notification.Name(rawVal
 private let IMChatUnreadCountChangedNotification = Notification.Name(rawValue: "__kIMChatUnreadCountChangedNotification")
 private let IMChatPropertiesChangedNotification = Notification.Name(rawValue: "__kIMChatPropertiesChangedNotification")
 
-struct ChatUnreadCountRepresentation: Content {
-    var chatGroupID: String
+struct ChatUnreadCountRepresentation: Codable {
+    var chatID: String
     var unread: Int
 }
 
@@ -76,7 +75,7 @@ class ChatEvents: EventDispatcher {
             return
         }
         
-        debouncer.submit(chat.groupID, category: .chatProperties) {
+        debouncer.submit(chat.id, category: .chatProperties) {
             StreamingAPI.shared.dispatch(eventFor(conversationPropertiesChanged: chat.properties))
         }
     }
@@ -87,7 +86,7 @@ class ChatEvents: EventDispatcher {
             return
         }
         
-        debouncer.submit(chat.groupID, category: .unreadCount) {
+        debouncer.submit(chat.id, category: .unreadCount) {
             StreamingAPI.shared.dispatch(eventFor(conversationUnreadCountChanged: chat.representation))
         }
     }
@@ -121,7 +120,7 @@ class ChatEvents: EventDispatcher {
         
         chat.scheduleForReview()
         
-        StreamingAPI.shared.dispatch(eventFor(participantsChanged: chat.participantHandleIDs(), in: chat.groupID), to: nil)
+        StreamingAPI.shared.dispatch(eventFor(participantsChanged: chat.participantHandleIDs(), in: chat.id), to: nil)
     }
     
     // MARK: - IMChat Displayname changed

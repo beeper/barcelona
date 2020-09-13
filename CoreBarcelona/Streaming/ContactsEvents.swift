@@ -25,7 +25,7 @@ private let IMCSChangeHistoryContactKey = "__kIMCSChangeHistoryContactKey"
 class ContactsEvents: EventDispatcher {
     override func wake() {
         addObserver(forName: IMCSChangeHistoryAddContactEventNotification) {
-            print($0)
+            self.contact(inserted: $0)
         }
         
         addObserver(forName: IMCSChangeHistoryUpdateContactEventNotification) {
@@ -44,7 +44,7 @@ class ContactsEvents: EventDispatcher {
             return
         }
         
-        StreamingAPI.shared.dispatch(eventFor(contactCreated: ContactRepresentation(contact)), to: nil)
+        StreamingAPI.shared.dispatch(eventFor(contactCreated: Contact(contact)), to: nil)
     }
     
     // MARK: - Contact updated
@@ -54,7 +54,7 @@ class ContactsEvents: EventDispatcher {
             return
         }
         
-        StreamingAPI.shared.dispatch(eventFor(contactUpdated: ContactRepresentation(contact)), to: nil)
+        StreamingAPI.shared.dispatch(eventFor(contactUpdated: Contact(contact)), to: nil)
     }
     
     // MARK: - Contact deleted

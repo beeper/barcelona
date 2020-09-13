@@ -39,8 +39,8 @@ class ChatMessageJoin: Record {
 }
 
 extension DBReader {
-    func chatGroupID(forMessageGUID guid: String) -> EventLoopFuture<String?> {
-        let promise = eventLoop.makePromise(of: String?.self)
+    func chatRowID(forMessageGUID guid: String) -> EventLoopFuture<Int64?> {
+        let promise = eventLoop.makePromise(of: Int64?.self)
         
         pool.asyncRead {
             switch $0 {
@@ -56,7 +56,7 @@ extension DBReader {
                             return
                     }
                     
-                    self.chatGroupID(forMessageROWID: ROWID).cascade(to: promise)
+                    promise.succeed(ROWID)
                 } catch {
                     promise.fail(error)
                 }
@@ -66,17 +66,35 @@ extension DBReader {
         return promise.futureResult
     }
     
-    /**
-     Resolve the chat GroupID for a given message ROWID
-     */
-    func chatGroupID(forMessageROWID ROWID: Int64) -> EventLoopFuture<String?> {
-        return self.chatGroupIDs(forMessageRowIDs: [ROWID]).map {
+    func chatIdentifier(forMessageGUID guid: String) -> EventLoopFuture<String?> {
+        if ERBarcelonaManager.isSimulation {
+            return eventLoop.makeSucceededFuture(IMChatRegistry.shared._chats(withMessageGUID: guid).first?.id)
+        }
+        
+        return chatRowID(forMessageGUID: guid).flatMap { ROWID in
+            guard let ROWID = ROWID else {
+                return self.eventLoop.makeSucceededFuture(nil)
+            }
+            
+            return self.chatIdentifier(forMessageRowID: ROWID)
+        }
+    }
+    
+    func chatIdentifier(forMessageRowID ROWID: Int64) -> EventLoopFuture<String?> {
+        return self.chatIdentifiers(forMessageRowIDs: [ROWID]).map {
             $0[ROWID]
         }
     }
     
-    func chatGroupIDs(forMessageRowIDs ROWIDs: [Int64]) -> EventLoopFuture<[Int64: String]> {
-        let promise = eventLoop.makePromise(of: [Int64: String].self)
+    private func partialChats(forMessageRowIDs ROWIDs: [Int64], baseColumns: [RawChat.Columns]) -> EventLoopFuture<[Int64: RawChat]> {
+        let promise = eventLoop.makePromise(of: [Int64: RawChat].self)
+        
+        var columns = baseColumns
+        if !columns.contains(where: {
+            $0 == RawChat.Columns.ROWID
+        }) {
+            columns.append(RawChat.Columns.ROWID)
+        }
         
         pool.asyncRead {
             switch $0 {
@@ -93,24 +111,24 @@ extension DBReader {
                     }
                     
                     let chatPartials = try RawChat
-                        .select([RawChat.Columns.group_id, RawChat.Columns.ROWID])
+                        .select(columns)
                         .filter(chatRowIDs.contains(RawChat.Columns.ROWID))
                         .fetchAll(db)
                     
-                    let chatRowIDToGroupID = chatPartials.reduce(into: [Int64: String]()) { (ledger, partial) in
-                        guard let ROWID = partial.ROWID, let groupID = partial.group_id else {
+                    let chatLedger = chatPartials.reduce(into: [Int64: RawChat]()) { (ledger, partial) in
+                        guard let ROWID = partial.ROWID else {
                             return
                         }
                         
-                        ledger[ROWID] = groupID
+                        ledger[ROWID] = partial
                     }
                     
-                    promise.succeed(joins.reduce(into: [Int64: String]()) { (ledger, join) in
-                        guard let chatROWID = join.chat_id, let messageROWID = join.message_id, let chatGroupID = chatRowIDToGroupID[chatROWID] else {
+                    promise.succeed(joins.reduce(into: [Int64: RawChat]()) { (ledger, join) in
+                        guard let chatROWID = join.chat_id, let messageROWID = join.message_id, let chat = chatLedger[chatROWID] else {
                             return
                         }
                         
-                        ledger[messageROWID] = chatGroupID
+                        ledger[messageROWID] = chat
                     })
                 } catch {
                     promise.fail(error)
@@ -119,6 +137,14 @@ extension DBReader {
         }
         
         return promise.futureResult
+    }
+    
+    func chatIdentifiers(forMessageRowIDs ROWIDs: [Int64]) -> EventLoopFuture<[Int64: String]> {
+        partialChats(forMessageRowIDs: ROWIDs, baseColumns: [RawChat.Columns.chat_identifier]).map {
+            $0.compactMapValues {
+                $0.chat_identifier
+            }
+        }
     }
     
     func newestMessageGUIDs(inChatROWIDs ROWIDs: [Int64], beforeMessageGUID: String? = nil, limit: Int = 100) -> EventLoopFuture<[String]> {

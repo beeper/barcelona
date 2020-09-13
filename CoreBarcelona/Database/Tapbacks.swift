@@ -7,28 +7,69 @@
 //
 
 import Foundation
-import Vapor
 import IMCore
-
-struct BulkTapbackRepresentation: Content {
-    var representations: [TapbackRepresentation]
-}
-
-struct TapbackRepresentation: Content {
-    var handle: String
-    var chatGroupID: String
-    var associatedMessageGUID: String
-    var associatedMessageType: Int64
-}
-
-struct TapbackResult {
-    var associatedMessageGUID: String
-    var associatedMessageType: Int
-    var handle: IMHandle
-    var fromMe: Bool
-}
+import NIO
 
 extension DBReader {
+    func associatedMessages(with guids: [String], in chat: String? = nil) -> EventLoopFuture<[String: [Message]]> {
+        if guids.count == 0 { return eventLoop.makeSucceededFuture([:]) }
+        let promise = eventLoop.makePromise(of: [String: [Message]].self)
+        
+        if ERBarcelonaManager.isSimulation {
+            EventLoopFuture<[String: [Message]]>.whenAllSucceed(guids.map { guid -> EventLoopFuture<[String: [Message]]> in
+                guard let chat = IMChatRegistry.shared._chats(withMessageGUID: guid).first else {
+                    return eventLoop.makeSucceededFuture([guid: []])
+                }
+                
+                let associatedGUIDs = chat.chatItems.compactMap {
+                    $0 as? IMAssociatedMessageChatItem
+                }.filter {
+                    $0.associatedMessageGUID == guid
+                }.compactMap {
+                    $0.associatedMessageGUID
+                }
+                
+                return Message.lazyResolve(withIdentifiers: associatedGUIDs, inChat: chat.id, on: eventLoop).map {
+                    [guid: $0]
+                }
+            }, on: eventLoop).map {
+                $0.reduce(into: [String: [Message]]()) { ledger, subLedger in
+                    ledger.merge(subLedger) { m1, m2 in
+                        []
+                    }
+                }
+            }.cascade(to: promise)
+            
+            return promise.futureResult
+        }
+        
+        pool.asyncRead { result in
+            switch result {
+            case .failure(let error):
+                promise.fail(error)
+            case .success(let db):
+                do {
+                    let messages = try RawMessage
+                        .select(RawMessage.Columns.guid, as: String.self)
+                        .filter(guids.contains(RawMessage.Columns.associated_message_guid))
+                        .fetchAll(db)
+                    
+                    Message.messages(withGUIDs: messages, in: chat, on: self.eventLoop).map {
+                        $0.reduce(into: [String: [Message]]()) { ledger, message in
+                            guard let associatedMessageGUID = message.associatedMessageID else { return }
+                            if ledger[associatedMessageGUID] == nil { ledger[associatedMessageGUID] = [] }
+                            ledger[associatedMessageGUID]!.append(message)
+                        }
+                    }.cascade(to: promise)
+                } catch {
+                    promise.fail(error)
+                }
+            }
+        }
+        
+        return promise.futureResult
+    }
+    
     func associatedMessages(with guid: String) -> EventLoopFuture<[Message]> {
         let promise = eventLoop.makePromise(of: [Message].self)
 

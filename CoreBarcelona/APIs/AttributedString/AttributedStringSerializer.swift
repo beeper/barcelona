@@ -23,7 +23,7 @@ struct TextPart: Codable {
     var data: AnyCodable?
 }
 
-private extension NSAttributedString {
+internal extension NSAttributedString {
     var wholeRange: NSRange {
         NSRange(location: 0, length: length)
     }
@@ -34,6 +34,14 @@ private extension NSAttributedString {
     
     func hasAttribute(forKey key: NSAttributedString.Key) -> Bool {
         return allAttributes[key] != nil
+    }
+    
+    func enumerateDelimitingAttribute(_ attribute: NSAttributedString.Key, using cb: (NSRange, inout Int) -> ()) {
+        var counter = 0
+        enumerateAttribute(attribute, in: wholeRange, options: .longestEffectiveRangeNotRequired) { _, range, _ in
+            cb(range, &counter)
+            counter += 1
+        }
     }
     
     func split(_ separator: NSAttributedString.Key) -> [NSAttributedString] {
@@ -47,22 +55,30 @@ private extension NSAttributedString {
     }
 }
 
-func ERTextParts(from string: NSAttributedString, on eventLoop: EventLoop) -> EventLoopFuture<[TextPart]> {
-    eventLoop.submit {
-        var results: [TextPart] = []
-        
-        string.split(MessageAttributes.writingDirection).forEach { substring in
-            if substring.hasAttribute(forKey: MessageAttributes.link) {
-                results.append(ERTextPart(fromLink: substring))
-            } else if substring.hasAttribute(forKey: MessageAttributes.calendarData) {
-                results.append(ERTextPart(fromCalendar: substring))
-            } else {
-                results.append(ERTextPart(fromText: substring))
-            }
+func ERTextParts(from string: NSAttributedString) -> [TextPart] {
+    var results: [TextPart] = []
+    
+    let textTracking = ERTrack(log: .default, name: "ERTextParts Computation", format: "")
+    
+    string.split(MessageAttributes.writingDirection).forEach { substring in
+        if substring.hasAttribute(forKey: MessageAttributes.link) {
+            let textLink = ERTrack(log: .default, name: "ERTextParts .link", format: "")
+            results.append(ERTextPart(fromLink: substring))
+            textLink()
+        } else if substring.hasAttribute(forKey: MessageAttributes.calendarData) {
+            let calMatch = ERTrack(log: .default, name: "ERTextParts .calendarData", format: "")
+            results.append(ERTextPart(fromCalendar: substring))
+            calMatch()
+        } else {
+            let textMatch = ERTrack(log: .default, name: "ERTextParts .text", format: "")
+            results.append(ERTextPart(fromText: substring))
+            textMatch()
         }
-        
-        return results
     }
+    
+    textTracking()
+    
+    return results
 }
 
 // MARK: - Implementations
@@ -73,8 +89,26 @@ private func ERTextPart(fromLink attributedLink: NSAttributedString) -> TextPart
 private func ERTextPart(fromCalendar attributedCalendar: NSAttributedString) -> TextPart {
     var unixTime: Double? = nil
     
-    if let calendarData = attributedCalendar.allAttributes[MessageAttributes.calendarData] as? Data, let result = IMCopyDDScannerResultFromAttributedStringData(calendarData) as? DDScannerResult, let date = result.date(fromReferenceDate: nil, referenceTimezone: nil, timezoneRef: nil, allDayRef: nil) as? Date {
-        unixTime = date.timeIntervalSince1970 * 1000
+    if let calendarData = attributedCalendar.allAttributes[MessageAttributes.calendarData] as? Data {
+        #if IMCORE_UNMANAGED
+        
+        let unmanagedResult = Unmanaged.passUnretained(IMCopyDDScannerResultFromAttributedStringData(calendarData) as! DDScannerResult), result = unmanagedResult.takeUnretainedValue()
+        
+        #else
+        
+        let result = IMCopyDDScannerResultFromAttributedStringData(calendarData) as! DDScannerResult
+        
+        #endif
+        
+        if let date = result.date(fromReferenceDate: nil, referenceTimezone: nil, timezoneRef: nil, allDayRef: nil) as? Date {
+            unixTime = date.timeIntervalSince1970 * 1000
+        }
+        
+        #if IMCORE_UNMANAGED
+        
+        unmanagedResult.release()
+        
+        #endif
     }
     
     return TextPart(type: .calendar, string: attributedCalendar.string, data: .init(unixTime))

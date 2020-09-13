@@ -39,7 +39,7 @@ class StreamingAPI {
     let app: Application
     let compression: Bool
     let supervisor = DispatchSupervisor(center: NotificationCenter.default)
-    let bootstrapOptions: BootstrapData.BootstrapOptions = BootstrapData.BootstrapOptions(chatLimit: nil, contactLimit: nil)
+    let bootstrapOptions: BootstrapData.BootstrapOptions = BootstrapData.BootstrapOptions(chatLimit: 100, contactLimit: nil)
     var sockets: [WebSocket] = []
     
     init(_ app: Application, compression: Bool = false) {
@@ -89,20 +89,20 @@ class StreamingAPI {
         
         var pendingMessages: EventLoopFuture<[ChatItem]>
         
-        if let preload = preload, let chat = Registry.sharedInstance.chat(withGroupID: preload) {
+        if let preload = preload, let chat = Chat.resolve(withIdentifier: preload) {
             pendingMessages = chat.messages()
         } else {
             pendingMessages = eventProcessing_eventLoop.next().makeSucceededFuture([])
         }
         
-        return pendingMessages.flatMap {
+        return pendingMessages.map {
             var bootstrap = BootstrapData(self.bootstrapOptions)
             
             if $0.count > 0 {
                 bootstrap.messages = .init(items: $0)
             }
             
-            return self.dispatch(eventFor(bootstrap: bootstrap), to: [socket])
+            self.dispatch(eventFor(bootstrap: bootstrap), to: [socket])
         }
     }
     
@@ -123,8 +123,10 @@ class StreamingAPI {
     /**
      Dispatch an event packet to all sockets, or a subset of sockets is specified.
      */
-    func dispatch<P: Content>(_ event: Event<P>, to sockets: [WebSocket]? = nil) -> EventLoopFuture<Void> {
-        return app.eventLoopGroup.next().submit {
+    func dispatch<P: Codable>(_ event: Event<P>, to sockets: [WebSocket]? = nil) {
+        let dispatchTracking = ERTrack(log: log_streaming, name: "Dispatching socket event", format: "Payload %@ – %d Recipients", event.type.rawValue, (sockets ?? self.sockets).count)
+        
+        app.eventLoopGroup.next().submit {
             let json = try JSONEncoder().encode(event)
             let sockets = sockets ?? self.sockets
             
@@ -135,6 +137,9 @@ class StreamingAPI {
             } else {
                 sockets.forEach { $0.send(raw: json, opcode: .text) }
             }
+        }.whenSuccess {
+            os_log("📩 finished sending %@ payload", event.type.rawValue, log_streaming)
+            dispatchTracking()
         }
     }
 }

@@ -180,7 +180,7 @@ internal class ERResourceServer {
         }
         
         resources.get("lp-default") { req -> EventLoopFuture<HTTPStatus> in
-            if let resources = NSClassFromString("LPResources") as? NSObject, let icon = resources.perform(Selector("safariIcon")) {
+            if let resources = NSClassFromString("LPResources") as? NSObject, let icon = resources.perform(Selector(("safariIcon"))) {
                 print(icon)
             }
             
@@ -205,7 +205,7 @@ internal class ERResourceServer {
             return HTTPStatus.notFound.encodeResponse(for: req)
         }
         
-        if let flip = try? req.query.get(Int.self, at: "flip") {
+        if (try? req.query.get(Int.self, at: "flip") == 1) ?? false {
             let flipped = CIImage(cgImage: image).transformed(by: CGAffineTransform(scaleX: -1, y: 1))
             let context = CIContext(options: nil)
             if let flippedCGImage = context.createCGImage(flipped, from: flipped.extent) {

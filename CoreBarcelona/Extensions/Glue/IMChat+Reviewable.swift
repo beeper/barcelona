@@ -1,0 +1,21 @@
+//
+//  IMChat+Reviewable.swift
+//  CoreBarcelona
+//
+//  Created by Eric Rabil on 8/21/20.
+//  Copyright © 2020 Eric Rabil. All rights reserved.
+//
+
+import Foundation
+import IMCore
+import os.log
+
+extension IMChat {
+    func scheduleForReview() {
+        messageQuerySystem.next().submit {
+            self._updateChatItems()
+        }.whenSuccess {
+            os_log("Updated chat items for ChatID %@", type: .debug, self.id, log_IMChat)
+        }
+    }
+}

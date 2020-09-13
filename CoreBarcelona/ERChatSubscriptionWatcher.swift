@@ -54,7 +54,7 @@ public class ERChatSubscriptionWatcher {
      Subscribe to a single chat
      */
     private func ensureSubscribed(to chat: IMChat) {
-        chat.numberOfMessagesToKeepLoaded = 0
+        chat.numberOfMessagesToKeepLoaded = ERBarcelonaManager.isSimulation ? .max : 0
         guard let _ = chat.chatItems else { return }
     }
 }

@@ -21,3 +21,4 @@ FOUNDATION_EXPORT const unsigned char CoreBarcelonaVersionString[];
 
 CommunicationsFilterBlockList* ERSharedBlockList();
 IMPersonRegistrar* ERSharedPersonRegistrar();
+NSXPCListener* ERConstructXPCListener(NSString*);

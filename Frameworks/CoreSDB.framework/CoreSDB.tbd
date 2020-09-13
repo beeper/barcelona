@@ -1,8 +1,8 @@
 --- !tapi-tbd-v3
 archs:           [ x86_64 ]
-uuids:           [ 'x86_64: B3E353BA-F2C2-368C-98C1-88D76407390E', 'x86_64: B3E353BA-F2C2-368C-98C1-88D76407390E' ]
+
 platform:        zippered
-install-name:    '/System/Library/PrivateFrameworks/CoreSDB.framework/Versions/A/CoreSDB'
+install-name:    '/System/Library/PrivateFrameworks/CoreSDB.framework/CoreSDB'
 current-version: 800
 exports:         
   - archs:           [ x86_64 ]
@@ -111,7 +111,7 @@ exports:
 ...
 --- !tapi-tbd-v2
 archs:                 [ arm64 ]
-uuids:                 [ 'arm64: 3C8D2AE3-8DB0-3228-B838-74A7957493C9' ]
+
 platform:              ios
 flags:                 [ flat_namespace ]
 install-name:          "/System/Library/PrivateFrameworks/CoreSDB.framework/CoreSDB"

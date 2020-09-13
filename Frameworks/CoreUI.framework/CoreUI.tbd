@@ -1,11 +1,11 @@
 --- !tapi-tbd-v3
-archs:           [ x86_64 ]
-uuids:           [ 'x86_64: 55EACF17-86EA-3F6E-A2CF-AF2F08C5F295', 'x86_64: 55EACF17-86EA-3F6E-A2CF-AF2F08C5F295' ]
-platform:        zippered
-install-name:    '/System/Library/PrivateFrameworks/CoreUI.framework/Versions/A/CoreUI'
+archs:           [ x86_64, arm64, arm64e, armv7, armv7s ]
+
+platform:        darwin
+install-name:    '/System/Library/PrivateFrameworks/CoreUI.framework/CoreUI'
 current-version: 609.4
 exports:         
-  - archs:           [ x86_64 ]
+  - archs:           [ x86_64, arm64, arm64e, armv7, armv7s ]
     symbols:         [ _CSIEqualMetrics, _CSIIllegalMetrics, _CUIBlendModeDescriptionFromCGBlendMode, 
                        _CUIBlendModeLSRDescriptionFromCGBlendMode, _CUICFArrayCreateWithCGRects, 
                        _CUICFDictionaryGetCGRect, _CUICFDictionarySetCFArrayOfCGRects, 

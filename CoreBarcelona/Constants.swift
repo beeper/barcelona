@@ -30,6 +30,8 @@ struct MessageAttributes {
  */
 let IMAttachmentString = String(data: Data(base64Encoded: "77+8")!, encoding: .utf8)!
 
+internal let IDSListenerID = "SOIDSListener-com.apple.imessage-rest"
+
 /**
  flag <<= MessageFlags
  */

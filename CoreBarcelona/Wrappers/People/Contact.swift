@@ -7,22 +7,26 @@
 //
 
 import Foundation
-import Vapor
-import IMCore
 import Contacts
+import IMCore
 
-struct ContactIDRepresentation: Content {
+struct ContactIDRepresentation: Codable {
     var id: String
 }
 
-struct ContactRepresentation: Content, Comparable {
-    static func < (lhs: ContactRepresentation, rhs: ContactRepresentation) -> Bool {
+struct BulkContactRepresentation: Codable {
+    var contacts: [Contact]
+    var strangers: [Handle]
+}
+
+struct Contact: Codable, Comparable {
+    static func < (lhs: Contact, rhs: Contact) -> Bool {
         guard let lhsFullName = lhs.fullName else { return false }
         guard let rhsFullName = rhs.fullName else { return true }
         return lhsFullName < rhsFullName
     }
     
-    static func == (lhs: ContactRepresentation, rhs: ContactRepresentation) -> Bool {
+    static func == (lhs: Contact, rhs: Contact) -> Bool {
         return lhs.id == rhs.id
     }
     
@@ -42,7 +46,7 @@ struct ContactRepresentation: Content, Comparable {
                     return nil
                 }
                 
-                return HandleRepresentation(id: id, isBusiness: false)
+                return Handle(id: id, isBusiness: false)
             }
         }
     }
@@ -57,7 +61,7 @@ struct ContactRepresentation: Content, Comparable {
         self.hasPicture = contact.thumbnailImageData != nil
         
         self.handles = contact.phoneNumbers.reduce(into: contact.emailAddresses.reduce(into: []) { (result, email) in
-            result.append(HandleRepresentation(id: email.value as String, isBusiness: false))
+            result.append(Handle(id: email.value as String, isBusiness: false))
         }) { (result, phoneNumber) in
             guard let countryCode = phoneNumber.value.value(forKey: "countryCode") as? String, let phoneNumber = phoneNumber.value.value(forKey: "digits") as? String else {
                 return
@@ -65,7 +69,7 @@ struct ContactRepresentation: Content, Comparable {
             guard let normalized = IMNormalizedPhoneNumberForPhoneNumber(phoneNumber, countryCode, true) else {
                 return
             }
-            result.append(HandleRepresentation(id: "+\(normalized)", isBusiness: false))
+            result.append(Handle(id: "+\(normalized)", isBusiness: false))
         }
     }
     
@@ -77,21 +81,16 @@ struct ContactRepresentation: Content, Comparable {
     var nickname: String?
     var countryCode: String?
     var hasPicture: Bool
-    var handles: [HandleRepresentation]
+    var handles: [Handle]
     
     var empty: Bool {
         return (self.firstName?.count ?? 0) == 0 && (self.middleName?.count ?? 0) == 0 && (self.lastName?.count ?? 0 == 0) && (self.nickname?.count ?? 0) == 0 && self.hasPicture == false
     }
     
-    mutating func addHandle(_ handle: HandleRepresentation) {
+    mutating func addHandle(_ handle: Handle) {
         if handles.contains(handle) {
             return
         }
         handles.append(handle)
     }
-}
-
-struct BulkContactRepresentation: Content {
-    var contacts: [ContactRepresentation]
-    var strangers: [HandleRepresentation]
 }

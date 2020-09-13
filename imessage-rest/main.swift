@@ -9,9 +9,14 @@
 import Foundation
 import CoreBarcelona
 
+func x() {
+    
+}
+
 ERBarcelonaManager.bootstrap()
 
-let listener = NSXPCListener(machServiceName: ERBarcelonaManager.machServiceName)
+//let listener = NSXPCListener(machServiceName: ERBarcelonaManager.machServiceName)
+let listener = ERConstructXPCListener(ERBarcelonaManager.machServiceName)!
 let listenerDelegate = ListenerDelegate()
 listener.delegate = listenerDelegate
 

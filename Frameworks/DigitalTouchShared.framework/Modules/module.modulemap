@@ -1,0 +1,5 @@
+framework module DigitalTouchShared [extern_c] {
+    umbrella header "DigitalTouchShared.h"
+    export *
+    module * { export * }
+}

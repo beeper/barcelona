@@ -226,7 +226,7 @@
 - (id)_imHandleWithID:(id)arg1 alreadyCanonical:(BOOL)arg2 originalID:(id)arg3 countryCode:(id)arg4;
 - (id)imHandleWithID:(id)arg1 alreadyCanonical:(BOOL)arg2;
 - (unsigned long long)defaultHandleCapabilities;
-- (id)existingIMHandleWithID:(id)arg1;
+- (IMHandle*)existingIMHandleWithID:(id)arg1;
 - (id)existingIMHandleWithID:(id)arg1 alreadyCanonical:(BOOL)arg2;
 - (id)existingIMHandleWithInfo:(id)arg1 alreadyCanonical:(BOOL)arg2;
 - (id)imHandleWithInfo:(id)arg1 alreadyCanonical:(BOOL)arg2;

@@ -19,12 +19,12 @@ public func bindAttachmentsAPI(_ app: Application) {
     /**
      Create attachment
      */
-    attachments.on(.POST, "", body: .stream) { req -> EventLoopFuture<AttachmentRepresentation> in
+    attachments.on(.POST, "", body: .stream) { req -> EventLoopFuture<Attachment> in
         let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(),
         isDirectory: true)
-
-        let promise = req.eventLoop.makePromise(of: AttachmentRepresentation.self)
-        var temporaryFilename = NSString.stringGUID() as! String
+        
+        let promise = req.eventLoop.makePromise(of: Attachment.self)
+        var temporaryFilename = NSString.stringGUID()
         
         var temporaryFileURL = temporaryDirectoryURL.appendingPathComponent(temporaryFilename)
         
@@ -83,6 +83,12 @@ public func bindAttachmentsAPI(_ app: Application) {
         
             let guid = temporaryFilename
             
+            let mime = mime ?? MimeType.all.first(where: {
+                $0.ext == req.headers.contentType?.subType
+            })
+            
+            print(mime)
+            
             if let mime = mime {
                 temporaryFilename = "\(temporaryFilename).\(mime.ext)"
                 
@@ -93,6 +99,7 @@ public func bindAttachmentsAPI(_ app: Application) {
             }
             
             let transfer = IMFileTransfer()._init(withGUID: guid, filename: temporaryFilename, isDirectory: false, localURL: temporaryFileURL, account: Registry.sharedInstance.iMessageAccount()!.uniqueID, otherPerson: nil, totalBytes: UInt64(bytes), hfsType: 0, hfsCreator: 0, hfsFlags: 0, isIncoming: false)!
+            
             
             if let mime = mime {
                 transfer.setValue(mime.mime, forKey: "_mimeType")
@@ -137,7 +144,7 @@ public func bindAttachmentsAPI(_ app: Application) {
                 do {
                     try DBReader(pool: databasePool, eventLoop: req.eventLoop).insert(fileTransfer: transfer, path: storedPath)
 
-                    promise.succeed(AttachmentRepresentation(transfer))
+                    promise.succeed(Attachment(transfer))
                 } catch {
                     print(error)
                     promise.fail(Abort(.internalServerError))
@@ -150,32 +157,12 @@ public func bindAttachmentsAPI(_ app: Application) {
         return promise.futureResult
     }
     
-    let attachment = attachments.grouped(":guid")
+    let attachment = attachments.grouped(AttachmentMiddleware).grouped(":\(AttachmentResourceKey)")
     
     /**
      Get attachment
      */
-    attachment.get { req -> EventLoopFuture<Response> in
-        guard let guid = req.parameters.get("guid") else { throw Abort(.badRequest) }
-        let promise = req.eventLoop.makePromise(of: Response.self)
-        
-        DBReader(pool: databasePool, eventLoop: req.eventLoop).attachment(for: guid).whenComplete { result in
-            switch result {
-            case .success(let representation):
-                guard let representation = representation else {
-                    promise.fail(Abort(.notFound))
-                    return
-                }
-                
-                promise.succeed(req.fileio.streamFile(at: representation.path))
-                break
-            case .failure(let error):
-                print(error)
-                promise.fail(Abort(.internalServerError))
-                break
-            }
-        }
-        
-        return promise.futureResult
+    attachment.get { req -> Response in
+        req.fileio.streamFile(at: req.attachment.path)
     }
 }

@@ -7,15 +7,14 @@
 //
 
 import Foundation
-import Vapor
 import NIO
 
 // MARK: - Event structure
-struct Event<P: Content>: Content {
+struct Event<P: Codable>: Codable {
     public let type: Event.EventType
     public let data: P?
     
-    enum EventType: String, Content {
+    enum EventType: String, Codable {
         case bootstrap
         case itemsReceived
         case itemsUpdated
@@ -53,8 +52,8 @@ func eventFor(itemsUpdated: BulkChatItemRepresentation) -> Event<BulkChatItemRep
     return Event<BulkChatItemRepresentation>(type: .itemsUpdated, data: itemsUpdated)
 }
 
-func eventFor(itemStatusChanged: StatusChatItemRepresentation) -> Event<StatusChatItemRepresentation> {
-    return Event<StatusChatItemRepresentation>(type: .itemStatusChanged, data: itemStatusChanged)
+func eventFor(itemStatusChanged: StatusChatItem) -> Event<StatusChatItem> {
+    return Event<StatusChatItem>(type: .itemStatusChanged, data: itemStatusChanged)
 }
 
 func eventFor(itemsRemoved: BulkMessageIDRepresentation) -> Event<BulkMessageIDRepresentation> {
@@ -62,7 +61,7 @@ func eventFor(itemsRemoved: BulkMessageIDRepresentation) -> Event<BulkMessageIDR
 }
 
 // MARK: - Participant events
-struct ParticipantChangeRecord: Content, BulkHandleIDRepresentable {
+struct ParticipantChangeRecord: Codable, BulkHandleIDRepresentable {
     var chat: String
     var handles: [String]
 }
@@ -101,16 +100,16 @@ func eventFor(conversationPropertiesChanged: ChatConfigurationRepresentation) ->
 }
 
 // MARK: - Contact events
-func eventFor(contactCreated: ContactRepresentation) -> Event<ContactRepresentation> {
-    return Event<ContactRepresentation>(type: .contactCreated, data: contactCreated)
+func eventFor(contactCreated: Contact) -> Event<Contact> {
+    return Event<Contact>(type: .contactCreated, data: contactCreated)
 }
 
 func eventFor(contactRemoved: ContactIDRepresentation) -> Event<ContactIDRepresentation> {
     return Event<ContactIDRepresentation>(type: .contactRemoved, data: contactRemoved)
 }
 
-func eventFor(contactUpdated: ContactRepresentation) -> Event<ContactRepresentation> {
-    return Event<ContactRepresentation>(type: .contactUpdated, data: contactUpdated)
+func eventFor(contactUpdated: Contact) -> Event<Contact> {
+    return Event<Contact>(type: .contactUpdated, data: contactUpdated)
 }
 
 // MARK: - Blocklist Events

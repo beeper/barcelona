@@ -7,41 +7,22 @@
 //
 
 import Foundation
-import Vapor
 
-enum ChatItemType: String, Codable {
-    case status
-    case attachment
-    case participantChange
-    case sender
-    case date
-    case message
-    case associated
-    case groupAction
-    case plugin
-    case text
-    case phantom
-    case typing
-    case acknowledgment
-    case sticker
-    case groupTitle
-}
-
-extension ChatItemType: Content {
+protocol ChatItemRepresentation: Codable, Identifiable {
+    associatedtype IDValue = String?
+    associatedtype TimeValue = Double?
     
-}
-
-protocol ChatItemRepresentation: Content {
-    var guid: String? { get set }
-    var chatGroupID: String? { get set }
+    var id: IDValue { get set }
+    var chatID: String? { get set }
     var fromMe: Bool? { get set }
     var time: Double? { get set }
 }
 
 protocol AssociatedChatItemRepresentation: ChatItemRepresentation {
-    var associatedGUID: String { get set }
+    var associatedID: String { get set }
 }
 
 protocol ChatItemAcknowledgable: ChatItemRepresentation {
-    var acknowledgments: [AcknowledgmentChatItemRepresentation]? { get set }
+    var id: String? { get set }
+    var acknowledgments: [AcknowledgmentChatItem]? { get set }
 }

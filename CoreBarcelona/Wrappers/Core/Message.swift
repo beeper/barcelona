@@ -8,9 +8,9 @@
 
 import Foundation
 import IMCore
-import Vapor
+import NIO
 
-struct BulkMessageRepresentation: Content {
+struct BulkMessageRepresentation: Codable {
     init(_ messages: [Message]) {
         self.messages = messages
     }
@@ -18,7 +18,7 @@ struct BulkMessageRepresentation: Content {
     var messages: [Message]
 }
 
-struct BulkMessageIDRepresentation: Content {
+struct BulkMessageIDRepresentation: Codable {
     var messages: [String]
 }
 
@@ -37,7 +37,8 @@ extension Array where Element == Message {
 public struct Message: ChatItemRepresentation {
     static func message(withGUID guid: String, on eventLoop: EventLoop) -> EventLoopFuture<Message?> {
         IMMessage.message(withGUID: guid, on: eventLoop).map {
-            $0?.item as? Message
+            guard case .message(let message) = $0 else { return nil }
+            return message
         }
     }
     
@@ -48,16 +49,17 @@ public struct Message: ChatItemRepresentation {
         }
     }
     
-    static func messages(withGUIDs guids: [String], on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<[Message]> {
-        IMMessage.messages(withGUIDs: guids, on: eventLoop).map {
+    static func messages(withGUIDs guids: [String], in chat: String? = nil, on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<[Message]> {
+        IMMessage.messages(withGUIDs: guids, in: chat, on: eventLoop).map {
             $0.compactMap {
-                $0.item as? Message
+                guard case .message(let message) = $0 else { return nil }
+                return message
             }
         }
     }
 
-    init(_ item: IMItem, transcriptRepresentation: ChatItem, chatGroupID: String?) {
-        guid = item.guid
+    init(_ item: IMItem, transcriptRepresentation: ChatItem, chatID: String?) {
+        id = item.guid
         fromMe = item.isFromMe
         time = item.time!.timeIntervalSince1970 * 1000
         timeDelivered = 0
@@ -72,14 +74,16 @@ public struct Message: ChatItemRepresentation {
         sender = item.sender
         flags = 0x5
         items = [transcriptRepresentation]
-        service = item.service ?? "iMessage"
+        service = item.service?.service?.id ?? .SMS
+        associatedMessageID = item.associatedMessageGUID() as? String
+        fileTransferIDs = []
         
-        self.load(item: item, chatGroupID: chatGroupID)
+        self.load(item: item, chatID: chatID)
     }
     
-    init(_ backing: IMMessageItem, message: IMMessage, items chatItems: [ChatItem], chatGroupID inChatGroupID: String?) {
-        guid = message.guid
-        chatGroupID = inChatGroupID
+    init(_ backing: IMMessageItem, message: IMMessage, items chatItems: [ChatItem], chatID inChatChatID: String?) {
+        id = message.guid
+        chatID = inChatChatID
         fromMe = message.isFromMe
         time = (backing.time?.timeIntervalSince1970 ?? 0) * 1000
         timeDelivered = (backing.timeDelivered?.timeIntervalSince1970 ?? message.timeDelivered?.timeIntervalSince1970 ?? 0) * 1000
@@ -87,10 +91,11 @@ public struct Message: ChatItemRepresentation {
         subject = message.subject?.id
         timeRead = (backing.timeRead?.timeIntervalSince1970 ?? message.timeRead?.timeIntervalSince1970 ?? 0) * 1000
         timePlayed = (backing.timePlayed?.timeIntervalSince1970 ?? message.timePlayed?.timeIntervalSince1970 ?? 0) * 1000
-        messageSubject = backing.subject
+        messageSubject = backing.subject ?? message.messageSubject?.string
         isSOS = backing.isSOS
         isTypingMessage = backing.isTypingMessage || chatItems.contains {
-            $0.type == .typing
+            if case .typing(_) = $0 { return true }
+            return false
         }
         
         isCancelTypingMessage = backing.isCancelTypingMessage()
@@ -98,34 +103,27 @@ public struct Message: ChatItemRepresentation {
         isAudioMessage = backing.isAudioMessage
         items = chatItems
         flags = backing.flags
-        service = backing.service
+        service = backing.service.service?.id ?? .SMS
+        associatedMessageID = message.associatedMessageGUID ?? backing.associatedMessageGUID() as? String
+        fileTransferIDs = message.fileTransferGUIDs ?? backing.fileTransferGUIDs ?? []
         
-        if let chatGroupID = chatGroupID, let senderID = (backing.sender() ?? message.sender?.id), let senderHandle = Registry.sharedInstance.imHandle(withID: senderID), let chat = Registry.sharedInstance.imChat(withGroupID: chatGroupID) {
-            description = message.description(forPurpose: 0x2, inChat: chat, senderDisplayName: senderHandle._displayNameWithAbbreviation)
+        if let chatID = chatID, let chat = IMChat.resolve(withIdentifier: chatID) {
+            description = message.description(forPurpose: 0x2, inChat: chat)
         }
         
-        self.load(item: backing, chatGroupID: inChatGroupID)
+        self.load(item: backing, chatID: inChatChatID)
     }
     
-    init(_ backing: IMMessageItem, items: [ChatItem], chatGroupID: String?) {
-        self.init(backing, message: backing.message()!, items: items, chatGroupID: chatGroupID)
+    init(_ backing: IMMessageItem, items: [ChatItem], chatID: String?) {
+        self.init(backing, message: backing.message()!, items: items, chatID: chatID)
     }
     
-    init(_ message: IMMessage, items: [ChatItem], chatGroupID: String?) {
-        self.init(message._imMessageItem, items: items, chatGroupID: chatGroupID)
-        
-        timeRead = (message.timeRead?.timeIntervalSince1970 ?? 0) * 1000
-        timeDelivered = (message.timeDelivered?.timeIntervalSince1970 ?? 0) * 1000
-        timePlayed = (message.timePlayed?.timeIntervalSince1970 ?? 0) * 1000
-        isDelivered = message.isDelivered
-        isAudioMessage = message.isAudioMessage
-        isSOS = message.isSOS
-        messageSubject = message.messageSubject?.string
-        sender = message.sender?.id
+    init(_ message: IMMessage, items: [ChatItem], chatID: String?) {
+        self.init(message._imMessageItem, message: message, items: items, chatID: chatID)
     }
     
-    var guid: String?
-    var chatGroupID: String?
+    public var id: String
+    var chatID: String?
     var fromMe: Bool?
     var time: Double?
     var sender: String?
@@ -142,5 +140,7 @@ public struct Message: ChatItemRepresentation {
     var description: String?
     var flags: UInt64
     var items: [ChatItem]
-    var service: String
+    var service: IMServiceStyle
+    var fileTransferIDs: [String]
+    var associatedMessageID: String?
 }

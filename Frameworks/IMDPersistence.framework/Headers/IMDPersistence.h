@@ -57,4 +57,4 @@ NSArray* IMDMessageRecordCopyMessagesForAssociatedGUID(CFStringRef);
 NSArray* IMDMessageRecordCopyMessagesForRowIDs(NSArray*);
 id IMDMessageRecordCopyMessageForGUID(CFStringRef);
 id IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve(id, id, id, id, id);
-NSArray* IMDMessageRecordCopyMessagesForGUIDs(id);
+_Nullable CFArrayRef IMDMessageRecordCopyMessagesForGUIDs(id);

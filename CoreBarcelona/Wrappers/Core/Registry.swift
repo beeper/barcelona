@@ -12,29 +12,38 @@ import IMCore
 class Registry {
     static let sharedInstance = Registry()
     
-    func chat(withGroupID groupID: String) -> Chat? {
-        guard let imChat = imChat(withGroupID: groupID) else {
-            return nil
-        }
-        
-        return Chat(imChat)
-    }
-    
-    /// I hate IMCore. Seriously, delete the framework and start over.
-    func imChat(withGroupID groupID: String) -> IMChat? {
-        return IMChatRegistry.shared.allExistingChats.first {
-            $0.groupID == groupID
-        }
-    }
-    
     func account(withUniqueID uniqueID: String) -> IMAccount {
         return IMAccountController.sharedInstance()!.account(forUniqueID: uniqueID)
     }
     
     func imHandle(withID id: String) -> IMHandle? {
-        guard let account = IMAccountController.sharedInstance().activeIMessageAccount ?? IMAccountController.sharedInstance().activeSMSAccount, let handle = account.imHandle(withID: id) else { return nil }
+        if let iMessageAccount = IMAccountController.sharedInstance()?.activeIMessageAccount, let handle = imHandle(withID: id, onAccount: iMessageAccount) {
+            return handle
+        } else if let SMSAccount = IMAccountController.sharedInstance()?.activeSMSAccount, let handle = imHandle(withID: id, onAccount: SMSAccount) {
+            return handle
+        } else {
+            return nil
+        }
+    }
+    
+    func imHandle(withID id: String, onService service: String) -> IMHandle? {
+        guard let account = bestAccount(for: service) else {
+            return nil
+        }
         
-        return handle
+        return imHandle(withID: id, onAccount: account)
+    }
+    
+    func imHandle(withID id: String, onService service: IMService) -> IMHandle? {
+        guard let account = bestAccount(for: service) else {
+            return nil
+        }
+        
+        return imHandle(withID: id, onAccount: account)
+    }
+    
+    func imHandle(withID id: String, onAccount account: IMAccount) -> IMHandle? {
+        account.imHandle(withID: id) ?? account.existingIMHandle(withID: id)
     }
     
     func suitableHandle(for service: String) -> IMHandle? {
@@ -65,7 +74,7 @@ class Registry {
         IMAccountController.sharedInstance()?.bestAccount(forService: service)
     }
     
-    private func resolve(service: String) -> IMService? {
+    func resolve(service: String) -> IMService? {
         let IMServiceAgentImpl = NSClassFromString("IMServiceAgentImpl") as! IMServiceAgent.Type
         
         return IMServiceAgentImpl.shared()?.service(withName: service)

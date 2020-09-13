@@ -6,16 +6,27 @@
 //  Copyright © 2020 Eric Rabil. All rights reserved.
 //
 
-import IMCore
 import Foundation
-import Vapor
+import IMCore
 import GRDB
 import NIO
 
+extension Configuration {
+    init(trace: @escaping TraceFunction) {
+        self.init()
+        self.trace = trace
+    }
+}
+
+//private let dbConfiguration = Configuration { db in
+//    print("We query! \(db)")
+//}
+private let dbConfiguration = Configuration()
+
 #if os(iOS)
-let databasePool = try! DatabasePool(path: "/var/mobile/Library/SMS/sms.db")
+let databasePool = try! DatabasePool(path: "/var/mobile/Library/SMS/sms.db", configuration: dbConfiguration)
 #else
-let databasePool = try! DatabasePool(path: ("~/Library/Messages/chat.db" as NSString).expandingTildeInPath)
+let databasePool = try! DatabasePool(path: ("~/Library/Messages/chat.db" as NSString).expandingTildeInPath, configuration: dbConfiguration)
 #endif
 
 private let defaultEventLoopGroup = MultiThreadedEventLoopGroup.init(numberOfThreads: 3)

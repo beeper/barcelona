@@ -7,9 +7,8 @@
 //
 
 import Foundation
-
 import DataDetectorsCore
-import Vapor
+import NIO
 
 struct MessagePartParseResult {
     var string: NSAttributedString
@@ -43,18 +42,8 @@ func ERAttributedString(from parts: [MessagePart], on eventLoop: EventLoop) -> E
  For each part of the attributed string, insert a MessagePart index (IMCore interop)
  */
 private func ERInsertMessageParts(into string: NSMutableAttributedString) -> NSMutableAttributedString {
-    var counter = 0
-    string.enumerateAttribute(MessageAttributes.writingDirection, in: NSRange(location: 0, length: string.length), options: .init()) { _, range, _ in
-        let noRichLink = string.attribute(MessageAttributes.noRichLink, existsIn: range)
-        if noRichLink, counter > 0 {
-            counter -= 1
-        }
-        
-        string.addAttribute(MessageAttributes.messagePart, value: counter, range: range)
-        
-        if !noRichLink {
-            counter += 1
-        }
+    string.enumerateDelimitingAttribute(MessageAttributes.writingDirection) { range, index in
+        string.addAttribute(MessageAttributes.messagePart, value: index, range: range)
     }
     
     return string

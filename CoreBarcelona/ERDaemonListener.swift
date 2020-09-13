@@ -8,6 +8,7 @@
 
 import Foundation
 import IMCore
+import os.log
 
 /**
  Interfaces with imagent, methods called here are called by the daemon.
@@ -314,6 +315,7 @@ public class ERDaemonListener: IMDaemonListenerProtocol {
     }
     
     @objc public func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, messagesUpdated arg5: [Any]!) {
+        guard let arg2 = arg2 else { return }
         NotificationCenter.default.post(name: ERChatMessagesUpdatedNotification, object: arg5, userInfo: [
             "chat": arg2
         ])
@@ -324,24 +326,28 @@ public class ERDaemonListener: IMDaemonListenerProtocol {
     }
     
     @objc public func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, messageUpdated arg5: IMItem!) {
+        guard let arg2 = arg2 else { return }
         NotificationCenter.default.post(name: ERChatMessageUpdatedNotification, object: arg5, userInfo: [
             "chat": arg2
         ])
     }
     
     @objc public func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, groupID arg5: String!, chatPersonCentricID arg6: String!, messagesReceived arg7: [Any]!, messagesComingFromStorage arg8: Bool) {
+        guard let arg2 = arg2 else { return }
         NotificationCenter.default.post(name: ERChatMessagesReceivedNotification, object: arg7, userInfo: [
             "chat": arg2
         ])
     }
     
     @objc public func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, groupID arg5: String!, chatPersonCentricID arg6: String!, messageReceived arg7: IMItem!) {
+        guard let arg2 = arg2 else { return }
         NotificationCenter.default.post(name: ERChatMessageReceivedNotification, object: arg7, userInfo: [
             "chat": arg2
         ])
     }
     
     @objc public func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, groupID arg5: String!, chatPersonCentricID arg6: String!, messageSent arg7: IMMessageItem!) {
+        guard let arg2 = arg2 else { return }
         NotificationCenter.default.post(name: ERChatMessageSentNotification, object: arg7, userInfo: [
             "chat": arg2
         ])
@@ -360,7 +366,7 @@ public class ERDaemonListener: IMDaemonListenerProtocol {
     }
     
     @objc public func loadedChats(_ arg1: [Any]!) {
-        print("Loaded chats!")
+        
     }
     
     @objc public func engroupParticipantsUpdated(forChat arg1: String!) {
@@ -500,6 +506,6 @@ public class ERDaemonListener: IMDaemonListenerProtocol {
     }
     
     @objc public func setupComplete(_ arg1: Bool, info arg2: [AnyHashable : Any]!) {
-        print("Setup completed.")
+        os_log("imagent setup completed: %d", arg1)
     }
 }

@@ -11,24 +11,10 @@ import NIO
 
 extension ChatItemAcknowledgable {
     func tapbacks(on eventLoop: EventLoop) -> EventLoopFuture<[Message]> {
-        let promise = eventLoop.makePromise(of: [Message].self)
-        
-        guard let guid = guid else {
-            promise.succeed([])
-            return promise.futureResult
+        guard let guid = id as? String else {
+            return eventLoop.makeSucceededFuture([])
         }
         
-        DBReader(pool: databasePool, eventLoop: eventLoop).associatedMessages(with: guid).whenComplete { result in
-            switch result {
-            case .success(let tapbacks):
-                promise.succeed(tapbacks)
-                break
-            case .failure(let error):
-                promise.fail(error)
-                break
-            }
-        }
-        
-        return promise.futureResult
+        return DBReader(pool: databasePool, eventLoop: eventLoop).associatedMessages(with: guid)
     }
 }

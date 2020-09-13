@@ -8,25 +8,24 @@
 
 import Foundation
 import IMCore
-import Vapor
 
-struct GroupTitleChangeItemRepresentation: Content, ChatItemRepresentation {
-    init(_ item: IMGroupTitleChangeItem, chatGroupID: String?) {
+struct GroupTitleChangeItem: ChatItemRepresentation {
+    init(_ item: IMGroupTitleChangeItem, chatID: String?) {
         title = item.title
         sender = item.sender
         
-        self.load(item: item, chatGroupID: chatGroupID)
+        self.load(item: item, chatID: chatID)
     }
     
-    init(_ item: IMGroupTitleChangeChatItem, chatGroupID: String?) {
+    init(_ item: IMGroupTitleChangeChatItem, chatID: String?) {
         title = item.title
         sender = (item.handle ?? item.sender)?.id
         
-        self.load(item: item, chatGroupID: chatGroupID)
+        self.load(item: item, chatID: chatID)
     }
     
-    var guid: String?
-    var chatGroupID: String?
+    var id: String?
+    var chatID: String?
     var fromMe: Bool?
     var time: Double?
     var title: String?

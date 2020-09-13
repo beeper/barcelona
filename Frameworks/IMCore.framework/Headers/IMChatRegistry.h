@@ -86,13 +86,13 @@
 - (void)_blockUntilQueriesComplete:(id)arg1;
 - (void)__blockUntilQueriesComplete;
 - (NSDictionary<NSString*, IMChat*>*)_chatGUIDToChatMap;
-- (id)_chatsWithMessageGUID:(id)arg1;
+- (NSArray<IMChat*>* _Nonnull)_chatsWithMessageGUID:(NSString*)arg1;
 - (id)_chatsWithMessage:(id)arg1;
 - (id)_allGUIDsForChat:(id)arg1;
 - (void)_handleAddressBookChange:(id)arg1;
 - (void)handleIMChatParticipantsDidChange:(id)arg1;
 - (id)unblackholeAndLoadChatWithIMHandles:(id)arg1;
-- (id)loadChatFromDaemonWithChatIdentifier:(id)arg1;
+- (IMChat*)loadChatFromDaemonWithChatIdentifier:(id)arg1;
 - (id)_sortedParticipantIDHashForParticipants:(id)arg1;
 - (void)_addChat:(id)arg1 participantSet:(id)arg2;
 - (void)_removeFromGroupParticipantToChatsMap:(id)arg1;

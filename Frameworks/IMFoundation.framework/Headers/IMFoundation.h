@@ -101,3 +101,49 @@
 #import <IMFoundation/_IMPingPacketData.h>
 #import <IMFoundation/_IMPingStatisticsCollector.h>
 #import <IMFoundation/_IMTimingInstance.h>
+
+BOOL IMStringIsPhoneNumber(CFStringRef);
+BOOL IMStringIsBusinessID(CFStringRef);
+BOOL IMStringIsEmail(CFStringRef);
+extern NSString* IMAttachmentCharacterString;
+extern NSString* IMBreadcrumbCharacterString;
+extern NSString* IMNonBreakingSpaceString;
+extern NSString* IMFontFamilyAttributeName;
+extern NSString* IMFontSizeAttributeName;
+extern NSString* IMItalicAttributeName;
+extern NSString* IMBoldAttributeName;
+extern NSString* IMUnderlineAttributeName;
+extern NSString* IMStrikethroughAttributeName;
+extern NSString* IMLinkAttributeName;
+extern NSString* IMAddressAttributeName;
+extern NSString* IMCalendarEventAttributeName;
+extern NSString* IMDataDetectedAttributeName;
+extern NSString* IMPhoneNumberAttributeName;
+extern NSString* IMMoneyAttributeName;
+extern NSString* IMPreformattedAttributeName;
+extern NSString* IMForegroundColorAttributeName;
+extern NSString* IMBackgroundColorAttributeName;
+extern NSString* IMMessageBackgroundColorAttributeName;
+extern NSString* IMBaseWritingDirectionAttributeName;
+extern NSString* IMUniqueSmileyNumberAttributeName;
+extern NSString* IMSmileyLengthAttributeName;
+extern NSString* IMMyNameAttributeName;
+extern NSString* IMDataDetectorResultAttributeName;
+extern NSString* IMMessageForegroundAttributeName;
+extern NSString* IMSmileyDescriptionAttributeName;
+extern NSString* IMSmileySpeechDescriptionAttributeName;
+extern NSString* IMInlineMediaWidthAttributeName;
+extern NSString* IMInlineMediaHeightAttributeName;
+extern NSString* IMSearchTermAttributeName;
+extern NSString* IMReferencedHandleAttributeName;
+extern NSString* IMFileTransferGUIDAttributeName;
+extern NSString* IMFilenameAttributeName;
+extern NSString* IMFileBookmarkAttributeName;
+extern NSString* IMMessagePartAttributeName;
+extern NSString* IMAnimatedEmojiAttributeName;
+extern NSString* IMBreadcrumbTextMarkerAttributeName;
+extern NSString* IMBreadcrumbTextOptionFlags;
+extern NSString* IMPluginPayloadAttributeName;
+extern NSString* IMOneTimeCodeAttributeName;
+extern NSString* IMPhotoSharingAttributeName;
+

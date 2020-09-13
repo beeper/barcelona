@@ -9,21 +9,19 @@
 import Foundation
 import IMCore
 
-import Vapor
-
-struct AcknowledgmentChatItemRepresentation: Content, AssociatedChatItemRepresentation {
-    init(_ item: IMMessageAcknowledgmentChatItem, chatGroupID: String?) {
+struct AcknowledgmentChatItem: AssociatedChatItemRepresentation {
+    init(_ item: IMMessageAcknowledgmentChatItem, chatID: String?) {
         acknowledgmentType = item.messageAcknowledgmentType
         sender = item.sender?.id
-        associatedGUID = item.associatedMessageGUID
-        self.load(item: item, chatGroupID: chatGroupID)
+        associatedID = item.associatedMessageGUID
+        self.load(item: item, chatID: chatID)
     }
     
-    var guid: String? = nil
-    var chatGroupID: String? = nil
+    var id: String? = nil
+    var chatID: String? = nil
     var fromMe: Bool? = nil
     var time: Double? = nil
     var sender: String?
     var acknowledgmentType: Int64
-    var associatedGUID: String
+    var associatedID: String
 }

@@ -6,8 +6,12 @@
 //  Copyright © 2020 Eric Rabil. All rights reserved.
 //
 
+#import <Foundation/Foundation.h>
 #import <CommunicationsFilter/CommunicationsFilter.h>
 #import <IMCore/IMCore.h>
+
+@interface CNGeminiManager: NSObject
+@end
 
 @implementation CNGeminiManager: NSObject
 @end
@@ -18,4 +22,9 @@ CommunicationsFilterBlockList* ERSharedBlockList() {
 
 IMPersonRegistrar* ERSharedPersonRegistrar() {
     return [NSClassFromString(@"IMPersonRegistrar") sharedInstance];
+}
+
+NSXPCListener* ERConstructXPCListener(NSString* machServiceName) {
+    NSXPCListener* xpcListener = [NSXPCListener new];
+    return [xpcListener performSelector:NSSelectorFromString(@"initWithMachServiceName:") withObject:machServiceName];
 }
