@@ -7,7 +7,7 @@
 #import <Foundation/Foundation.h>
 #import <DigitalTouchShared/ETMessage.h>
 
-@class NSArray, NSMutableArray;
+@class NSArray, NSMutableArray, UIColor;
 
 @interface ETSketchMessage : ETMessage
 {

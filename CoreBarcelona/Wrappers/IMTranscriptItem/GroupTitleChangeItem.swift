@@ -9,7 +9,7 @@
 import Foundation
 import IMCore
 
-struct GroupTitleChangeItem: ChatItemRepresentation {
+public struct GroupTitleChangeItem: ChatItemRepresentation {
     init(_ item: IMGroupTitleChangeItem, chatID: String?) {
         title = item.title
         sender = item.sender
@@ -24,10 +24,10 @@ struct GroupTitleChangeItem: ChatItemRepresentation {
         self.load(item: item, chatID: chatID)
     }
     
-    var id: String?
-    var chatID: String?
-    var fromMe: Bool?
-    var time: Double?
-    var title: String?
-    var sender: String?
+    public var id: String?
+    public var chatID: String?
+    public var fromMe: Bool?
+    public var time: Double?
+    public var title: String?
+    public var sender: String?
 }

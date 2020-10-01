@@ -9,24 +9,66 @@
 import Foundation
 import IMCore
 
-class Registry {
-    static let sharedInstance = Registry()
+public extension IMMe {
+    static var sharedInstance: IMMe {
+        perform(Selector("me"))!.takeUnretainedValue() as! IMMe
+    }
+}
+
+private extension Array where Element: Hashable {
+    var unique: [Element] {
+        Array(Set(self))
+    }
+}
+
+public class Registry {
+    public static let sharedInstance = Registry()
     
-    func account(withUniqueID uniqueID: String) -> IMAccount {
-        return IMAccountController.sharedInstance()!.account(forUniqueID: uniqueID)
+    public func account(withUniqueID uniqueID: String) -> IMAccount {
+        return IMAccountController.sharedInstance().account(forUniqueID: uniqueID)
     }
     
-    func imHandle(withID id: String) -> IMHandle? {
-        if let iMessageAccount = IMAccountController.sharedInstance()?.activeIMessageAccount, let handle = imHandle(withID: id, onAccount: iMessageAccount) {
+    public func imHandle(withID id: String) -> IMHandle? {
+        if let iMessageAccount = IMAccountController.sharedInstance().activeIMessageAccount, let handle = imHandle(withID: id, onAccount: iMessageAccount) {
             return handle
-        } else if let SMSAccount = IMAccountController.sharedInstance()?.activeSMSAccount, let handle = imHandle(withID: id, onAccount: SMSAccount) {
+        } else if let SMSAccount = IMAccountController.sharedInstance().activeSMSAccount, let handle = imHandle(withID: id, onAccount: SMSAccount) {
             return handle
         } else {
             return nil
         }
     }
     
-    func imHandle(withID id: String, onService service: String) -> IMHandle? {
+    public func imHandles(forPerson person: IMPerson) -> [IMHandle] {
+        allAccounts.flatMap {
+            $0.imHandles(for: person)
+        }
+    }
+    
+    public func imHandleIDs(forPerson person: IMPerson) -> [String] {
+        imHandles(forPerson: person).map {
+            $0.id
+        }.unique
+    }
+
+    public var allMeHandles: [IMHandle] {
+        allAccounts.flatMap { account in
+            account.aliases.compactMap { handle in
+                account.imHandle(withID: handle)
+            }
+        }
+    }
+    
+    public var uniqueMeHandleIDs: [String] {
+        allAccounts.flatMap { account in
+            account.aliases
+        }.unique
+    }
+
+    public var allAccounts: [IMAccount] {
+        IMAccountController.sharedInstance().accounts
+    }
+    
+    public func imHandle(withID id: String, onService service: String) -> IMHandle? {
         guard let account = bestAccount(for: service) else {
             return nil
         }
@@ -34,7 +76,7 @@ class Registry {
         return imHandle(withID: id, onAccount: account)
     }
     
-    func imHandle(withID id: String, onService service: IMService) -> IMHandle? {
+    public func imHandle(withID id: String, onService service: IMService) -> IMHandle? {
         guard let account = bestAccount(for: service) else {
             return nil
         }
@@ -42,11 +84,11 @@ class Registry {
         return imHandle(withID: id, onAccount: account)
     }
     
-    func imHandle(withID id: String, onAccount account: IMAccount) -> IMHandle? {
+    public func imHandle(withID id: String, onAccount account: IMAccount) -> IMHandle? {
         account.imHandle(withID: id) ?? account.existingIMHandle(withID: id)
     }
     
-    func suitableHandle(for service: String) -> IMHandle? {
+    public func suitableHandle(for service: String) -> IMHandle? {
         guard let impl = self.resolve(service: service) else {
             return nil
         }
@@ -54,7 +96,7 @@ class Registry {
         return suitableHandle(for: impl)
     }
     
-    func suitableHandle(for service: IMService) -> IMHandle? {
+    public func suitableHandle(for service: IMService) -> IMHandle? {
         guard let account = bestAccount(for: service) else {
             return nil
         }
@@ -62,7 +104,7 @@ class Registry {
         return account.loginIMHandle
     }
     
-    func bestAccount(for service: String) -> IMAccount? {
+    public func bestAccount(for service: String) -> IMAccount? {
         guard let service = resolve(service: service) else {
             return nil
         }
@@ -70,21 +112,21 @@ class Registry {
         return bestAccount(for: service)
     }
     
-    func bestAccount(for service: IMService) -> IMAccount? {
-        IMAccountController.sharedInstance()?.bestAccount(forService: service)
+    public func bestAccount(for service: IMService) -> IMAccount? {
+        IMAccountController.sharedInstance().bestAccount(forService: service)
     }
     
-    func resolve(service: String) -> IMService? {
+    public func resolve(service: String) -> IMService? {
         let IMServiceAgentImpl = NSClassFromString("IMServiceAgentImpl") as! IMServiceAgent.Type
         
         return IMServiceAgentImpl.shared()?.service(withName: service)
     }
     
-    func iMessageAccount() -> IMAccount? {
+    public func iMessageAccount() -> IMAccount? {
         return IMAccountController.sharedInstance().activeIMessageAccount
     }
     
-    func SMSAccount() -> IMAccount? {
+    public func SMSAccount() -> IMAccount? {
         return IMAccountController.sharedInstance().activeSMSAccount
     }
 }

@@ -8,6 +8,7 @@
 
 import Foundation
 import LinkPresentation
+import CoreGraphics
 
 struct RichLinkCaption: Codable {
     init(_ properties: LPCaptionBarPresentationProperties, attachments: [InternalAttachment] = []) {

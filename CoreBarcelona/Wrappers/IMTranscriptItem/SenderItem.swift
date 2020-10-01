@@ -9,15 +9,15 @@
 import Foundation
 import IMCore
 
-struct SenderItem: ChatItemRepresentation {
+public struct SenderItem: ChatItemRepresentation {
     init(_ item: IMSenderChatItem, chatID chat: String?) {
         handleID = item.handle.id
         self.load(item: item, chatID: chat)
     }
     
-    var id: String?
-    var chatID: String?
-    var fromMe: Bool?
-    var time: Double?
-    var handleID: String
+    public var id: String?
+    public var chatID: String?
+    public var fromMe: Bool?
+    public var time: Double?
+    public var handleID: String
 }

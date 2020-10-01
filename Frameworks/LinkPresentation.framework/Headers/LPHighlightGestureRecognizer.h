@@ -9,7 +9,7 @@
 
 @interface LPHighlightGestureRecognizer : NSObject
 {
-    struct CGPoint _startPointInWindowCoordinates;
+    id _startPointInWindowCoordinates;
 }
 
 - (struct CGPoint)_locationInWindow;

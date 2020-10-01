@@ -13,7 +13,7 @@
     NSMutableDictionary *_personMap;
 }
 
-+ (id)sharedInstance;
++ (IMPersonRegistrar* _Nonnull)sharedInstance;
 @property(retain) NSMutableDictionary *_personMap; // @synthesize _personMap;
 - (void)_dumpAllPersons;
 - (id)personForUniqueID:(id)arg1;

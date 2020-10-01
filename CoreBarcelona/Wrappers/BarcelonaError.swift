@@ -8,7 +8,12 @@
 
 import Foundation
 
-struct BarcelonaError: Error {
-    var code: Int
-    var message: String
+public struct BarcelonaError: Error {
+    public init(code: Int, message: String) {
+        self.code = code
+        self.message = message
+    }
+    
+    public var code: Int
+    public var message: String
 }

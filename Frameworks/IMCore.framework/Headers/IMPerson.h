@@ -59,7 +59,7 @@
 - (void)appendID:(id)arg1 toProperty:(id)arg2;
 - (void)save;
 @property(readonly, nonatomic) NSArray *mobileNumbers;
-@property(retain, nonatomic) NSArray *phoneNumbers;
+@property(retain, nonatomic, nonnull) NSArray<NSString*> *phoneNumbers;
 - (id)allHandlesForProperty:(id)arg1;
 - (void)setValues:(id)arg1 forProperty:(id)arg2;
 - (void)setValues:(id)arg1 forIMProperty:(id)arg2;
@@ -68,7 +68,7 @@
 - (id)valuesForIMProperty:(id)arg1;
 @property(readonly, nonatomic) BOOL isInAddressBook;
 @property(copy, nonatomic) NSArray *emails;
-@property(readonly, nonatomic) NSArray *allEmails;
+@property(readonly, nonatomic, nonnull) NSArray<NSString*> *allEmails;
 - (id)emailHandlesForService:(id)arg1;
 - (id)emailHandlesForService:(id)arg1 includeBaseEmail:(BOOL)arg2;
 - (void)setFirstName:(id)arg1 lastName:(id)arg2;

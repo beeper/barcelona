@@ -26,7 +26,7 @@ private func objc_unretained<P: NSObject>(_ obj: Unmanaged<P>) -> P {
     return obj.takeUnretainedValue()
 }
 
-extension IMMessage {
+public extension IMMessage {
     /**
      Takes an IMMessageItem that has no context object and resolves it into a fully formed IMMessage
      */
@@ -59,13 +59,15 @@ extension IMMessage {
         return message
     }
     
-    static func imMessage(withGUID guid: String, on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<IMMessage?> {
-        return imMessages(withGUIDs: [guid], on: eventLoop).map { results in
+    static func imMessage(withGUID guid: String, on eventLoop: EventLoop? = nil) -> EventLoopFuture<IMMessage?> {
+        return imMessages(withGUIDs: [guid], on: eventLoop ?? messageQuerySystem.next()).map { results in
             results.first
         }
     }
         
-    static func imMessages(withGUIDs guids: [String], on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<[IMMessage]> {
+    static func imMessages(withGUIDs guids: [String], on eventLoop: EventLoop? = nil) -> EventLoopFuture<[IMMessage]> {
+        let eventLoop = eventLoop ?? messageQuerySystem.next()
+        
         let promise = eventLoop.makePromise(of: [IMMessage].self)
         
         if ERBarcelonaManager.isSimulation {
@@ -93,13 +95,14 @@ extension IMMessage {
         return promise.futureResult
     }
     
-    static func message(withGUID guid: String, on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<ChatItem?> {
-        return messages(withGUIDs: [guid], on: eventLoop).map { results in
+    static func message(withGUID guid: String, on eventLoop: EventLoop? = nil) -> EventLoopFuture<ChatItem?> {
+        return messages(withGUIDs: [guid], on: eventLoop ?? messageQuerySystem.next()).map { results in
             results.first
         }
     }
     
-    static func messages(withGUIDs guids: [String], in chat: String? = nil, on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<[ChatItem]> {
+    static func messages(withGUIDs guids: [String], in chat: String? = nil, on eventLoop: EventLoop? = nil) -> EventLoopFuture<[ChatItem]> {
+        let eventLoop = eventLoop ?? messageQuerySystem.next()
         if guids.count == 0 {
             return eventLoop.makeSucceededFuture([])
         }

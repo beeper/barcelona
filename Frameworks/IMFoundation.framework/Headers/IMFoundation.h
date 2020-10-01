@@ -105,6 +105,8 @@
 BOOL IMStringIsPhoneNumber(CFStringRef);
 BOOL IMStringIsBusinessID(CFStringRef);
 BOOL IMStringIsEmail(CFStringRef);
+CFStringRef IMCountryCodeForNumber(CFStringRef);
+CFStringRef IMFormatPhoneNumber(CFStringRef, BOOL);
 extern NSString* IMAttachmentCharacterString;
 extern NSString* IMBreadcrumbCharacterString;
 extern NSString* IMNonBreakingSpaceString;

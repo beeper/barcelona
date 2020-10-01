@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import IMCore
 
 extension IMService: Resolvable, ConcreteBasicResolvable {
     public static func resolve(withIdentifiers identifiers: [IMServiceStyle]) -> [IMService] {

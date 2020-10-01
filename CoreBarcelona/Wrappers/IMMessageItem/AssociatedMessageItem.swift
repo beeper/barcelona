@@ -9,17 +9,17 @@
 import Foundation
 import IMCore
 
-struct AssociatedMessageItem: ChatItemRepresentation {
+public struct AssociatedMessageItem: ChatItemRepresentation {
     init(_ item: IMAssociatedMessageItem, chatID: String?) {
         associatedID = item.associatedMessageGUID()
         associatedType = item.associatedMessageType()
         self.load(item: item, chatID: chatID)
     }
     
-    var id: String? = nil
-    var chatID: String? = nil
-    var fromMe: Bool? = nil
-    var time: Double? = nil
-    var associatedID: String
-    var associatedType: Int64
+    public var id: String? = nil
+    public var chatID: String? = nil
+    public var fromMe: Bool? = nil
+    public var time: Double? = nil
+    public var associatedID: String
+    public var associatedType: Int64
 }

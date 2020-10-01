@@ -8,12 +8,16 @@
 
 import Foundation
 
-struct BulkChatItemRepresentation: Codable {
-    var items: [ChatItem]
+public struct BulkChatItemRepresentation: Codable {
+    public init(items: [ChatItem]) {
+        self.items = items
+    }
+    
+    public var items: [ChatItem]
 }
 
 /// Container for all possible items
-enum ChatItem {
+public enum ChatItem {
     case date(_ item: DateItem)
     case sender(_ item: SenderItem)
     case participantChange(_ item: ParticipantChangeItem)
@@ -30,4 +34,11 @@ enum ChatItem {
     case typing(_ item: TypingItem)
     case sticker(_ item: StickerChatItem)
     case action(_ item: ActionChatItem)
+    
+    public var messageValue: Message? {
+        guard case .message(let message) = self else {
+            return nil
+        }
+        return message
+    }
 }

@@ -20,7 +20,7 @@ struct RichLinkCaptionRow: Codable {
         }
         
         if let button = properties.button, button.text != nil {
-            self.button = .init(button)
+            self.button = RichLinkCaptionButton(button)
         }
     }
     

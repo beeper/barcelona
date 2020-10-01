@@ -23,9 +23,9 @@
 }
 
 + (id)bestAccountFromAccounts:(id)arg1;
-+ (IMAccountController*)sharedInstance;
++ (IMAccountController* _Nonnull)sharedInstance;
 @property(nonatomic) BOOL networkDataAvailable; // @synthesize networkDataAvailable=_networkDataAvailable;
-@property(copy) NSArray *accounts; // @synthesize accounts=_accounts;
+@property(copy, nonnull) NSArray<IMAccount*> *accounts; // @synthesize accounts=_accounts;
 - (void)_rebuildOperationalAccountsCache:(BOOL)arg1;
 - (void)_disableCache;
 - (void)_enableCache;

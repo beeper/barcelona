@@ -7,19 +7,3 @@
 //
 
 import Foundation
-
-@objc(ERListenerDelegate)
-public class ListenerDelegate: NSObject, NSXPCListenerDelegate {
-    
-    public func listener(_ listener: NSXPCListener, shouldAcceptNewConnection newConnection: NSXPCConnection) -> Bool {
-        newConnection.exportedInterface = NSXPCInterface(with: MessageServiceProtocol.self)
-        newConnection.exportedObject = MessageXPCService()
-        
-        newConnection.invalidationHandler = { NSLog("Connection did invalidate") }
-        newConnection.interruptionHandler = { NSLog("Connection did interrupt") }
-        
-        newConnection.resume()
-        
-        return true;
-    }
-}

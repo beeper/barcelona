@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import IMCore
 import NIO
 
 extension IMMessage: LazilyResolvable, ConcreteLazilyBasicResolvable {

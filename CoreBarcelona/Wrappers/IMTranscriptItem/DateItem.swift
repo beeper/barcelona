@@ -9,13 +9,13 @@
 import Foundation
 import IMCore
 
-struct DateItem: ChatItemRepresentation {
+public struct DateItem: ChatItemRepresentation {
     init(_ item: IMDateChatItem, chatID: String?) {
         self.load(item: item, chatID: chatID)
     }
     
-    var id: String?
-    var chatID: String?
-    var fromMe: Bool?
-    var time: Double?
+    public var id: String?
+    public var chatID: String?
+    public var fromMe: Bool?
+    public var time: Double?
 }

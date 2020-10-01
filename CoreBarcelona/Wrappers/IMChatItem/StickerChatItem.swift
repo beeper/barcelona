@@ -25,21 +25,21 @@ private let IMStickerUserInfoScaleKey = "ssa"
 private let IMStickerUserInfoRotationKey = "sro"
 private let IMStickerUserInfoTranscodedScaleKey = "tssa"
 
-struct StickerInformation: Codable {
-    var stickerID: String
-    var stickerPackID: String
-    var stickerHash: String
-    var stickerRecipe: String?
-    var bid: String?
-    var transcodedStickerHash: String?
-    var layoutIntent: Int
-    var associatedLayoutIntent: Int
-    var parentPreviewWidth: Double
-    var xScalar: Double
-    var yScalar: Double
-    var scale: Double
-    var rotation: Double
-    var transcodedScale: Double?
+public struct StickerInformation: Codable {
+    public var stickerID: String
+    public var stickerPackID: String
+    public var stickerHash: String
+    public var stickerRecipe: String?
+    public var bid: String?
+    public var transcodedStickerHash: String?
+    public var layoutIntent: Int
+    public var associatedLayoutIntent: Int
+    public var parentPreviewWidth: Double
+    public var xScalar: Double
+    public var yScalar: Double
+    public var scale: Double
+    public var rotation: Double
+    public var transcodedScale: Double?
     
     fileprivate init?(_ info: [String: Any?]) {
         guard let stickerGUID = info[IMStickerUserInfoStickerGUIDKey] as? String, let stickerPackGUID = info[IMStickerUserInfoStickerPackGUIDKey] as? String, let stickerHash = info[IMStickerUserInfoStickerHashKey] as? String, let rawLayoutIntent = info[IMStickerUserInfoLayoutIntentKey] as? String, let rawAssociatedLayoutIntent = info[IMStickerUserInfoAssociatedLayoutIntentKey] as? String, let rawParentPreviewWidth = info[IMStickerUserInfoParentPreviewWidthKey] as? String, let rawXScalar = info[IMStickerUserInfoXScalarKey] as? String, let rawYScalar = info[IMStickerUserInfoYScalarKey] as? String, let rawScale = info[IMStickerUserInfoScaleKey] as? String, let rawRotation = info[IMStickerUserInfoRotationKey] as? String else {
@@ -80,7 +80,7 @@ struct StickerInformation: Codable {
     }
 }
 
-struct StickerChatItem: AssociatedChatItemRepresentation {
+public struct StickerChatItem: AssociatedChatItemRepresentation {
     init(_ item: IMAssociatedStickerChatItem, chatID: String?) {
         associatedID = item.associatedMessageGUID
         
@@ -99,11 +99,11 @@ struct StickerChatItem: AssociatedChatItemRepresentation {
         load(item: item, chatID: chatID)
     }
     
-    var id: String?
-    var chatID: String?
-    var fromMe: Bool?
-    var time: Double?
-    var associatedID: String
-    var attachment: Attachment?
-    var sticker: StickerInformation?
+    public var id: String?
+    public var chatID: String?
+    public var fromMe: Bool?
+    public var time: Double?
+    public var associatedID: String
+    public var attachment: Attachment?
+    public var sticker: StickerInformation?
 }

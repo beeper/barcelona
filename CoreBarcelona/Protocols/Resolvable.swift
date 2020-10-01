@@ -15,6 +15,16 @@ public protocol Resolvable: Identifiable {
     static func resolve(withIdentifiers identifiers: [ID]) -> [instancetype]
 }
 
+extension Array: Identifiable, Resolvable, ConcreteBasicResolvable where Element: Resolvable {
+    public var id: Element.ID {
+        fatalError("Method not implemented.")
+    }
+    
+    public static func resolve(withIdentifiers identifiers: [Element.ID]) -> [Element.instancetype] {
+        Element.resolve(withIdentifiers: identifiers)
+    }
+}
+
 internal protocol ConcreteBasicResolvable: Resolvable {}
 extension ConcreteBasicResolvable {
     public static func resolve(withIdentifier identifier: ID) -> instancetype? {

@@ -1,11 +1,10 @@
 --- !tapi-tbd-v3
-archs:           [ x86_64 ]
-uuids:           [ 'x86_64: 66E56A39-EF51-3622-9DAF-67CDB76571C4', 'x86_64: 66E56A39-EF51-3622-9DAF-67CDB76571C4' ]
-platform:        zippered
-install-name:    '/System/Library/PrivateFrameworks/IDS.framework/Versions/A/IDS'
+archs:           [ x86_64, arm64, arm64e, armv7, armv7s ]
+platform:        darwin
+install-name:    '/System/Library/PrivateFrameworks/IDS.framework/IDS'
 current-version: 800
 exports:         
-  - archs:           [ x86_64 ]
+  - archs:           [ x86_64, arm64, arm64e, armv7, armv7s ]
     re-exports:      [ '/System/Library/PrivateFrameworks/IDSFoundation.framework/Versions/A/IDSFoundation' ]
     symbols:         [ _ACAccountForIDSAccount, _IDSAddPairedDevice, _IDSAppleCareSetDaemonDisconnectedBlock, 
                        _IDSAppleCareSignIDSIn, _IDSAppleCareSignIDSOut, _IDSBatchIDQueryControllerErrorDestinationSet, 
@@ -158,13 +157,12 @@ exports:
                        IDSXPCConnectionRemoteObjectPromise._interface, IDSXPCConnectionRemoteObjectPromise._pendingInvocations, 
                        IDSXPCConnectionRemoteObjectPromise._queue, IDSXPCConnectionRemoteObjectPromise._target ]
 --- !tapi-tbd-v3
-archs:           [ x86_64 ]
-uuids:           [ 'x86_64: 5B6A802A-B147-3259-A7ED-254CB5697A92', 'x86_64: 5B6A802A-B147-3259-A7ED-254CB5697A92' ]
-platform:        zippered
+archs:           [ x86_64, arm64, arm64e, armv7, armv7s ]
+platform:        darwin
 install-name:    '/System/Library/PrivateFrameworks/IDSFoundation.framework/Versions/A/IDSFoundation'
 current-version: 800
 exports:         
-  - archs:           [ x86_64 ]
+  - archs:           [ x86_64, arm64, arm64e, armv7, armv7s ]
     symbols:         [ _CUTReportingTypeConnectivityMonitor, _CUTReportingTypeDeliveryControllerTime, 
                        _CUTReportingTypeKeyTransparencyTrustedDeviceEnrollment, _CUTReportingTypeKeyTransparencyTrustedDeviceVerification, 
                        _CUTReportingTypeNGMKeyLoading, _CUTReportingTypeRegistrationAccountStatus, 

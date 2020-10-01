@@ -10,7 +10,7 @@ import Foundation
 import DigitalTouchShared
 import IMCore
 
-enum DigitalTouchMessage {
+public enum DigitalTouchMessage {
     case sketch(_ item: ETSketchData)
     case video(_ item: ETVideoData)
     case tap(_ item: ETTapData)

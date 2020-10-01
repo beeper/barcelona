@@ -10,7 +10,7 @@ import Foundation
 import IMCore
 import os.log
 
-extension IMChat {
+public extension IMChat {
     func scheduleForReview() {
         messageQuerySystem.next().submit {
             self._updateChatItems()

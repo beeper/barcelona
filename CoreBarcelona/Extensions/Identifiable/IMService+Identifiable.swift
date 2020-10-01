@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import IMCore
 
 extension IMService: Identifiable {
     public var id: IMServiceStyle {

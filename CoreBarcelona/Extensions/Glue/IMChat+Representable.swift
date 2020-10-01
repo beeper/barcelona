@@ -9,7 +9,7 @@
 import Foundation
 import IMCore
 
-extension IMChat {
+public extension IMChat {
     var representation: Chat {
         Chat(self)
     }

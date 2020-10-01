@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import IMCore
 
 extension IMChat: Identifiable {
     public var id: String {

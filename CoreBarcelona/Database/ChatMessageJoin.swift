@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import IMCore
 import GRDB
 import NIO
 
@@ -15,6 +16,8 @@ import NIO
  */
 class ChatMessageJoin: Record {
     override class var databaseTableName: String { "chat_message_join" }
+    
+    static let message = belongsTo(RawMessage.self, using: ForeignKey(["message_id"], to: ["ROWID"]))
     
     required init(row: Row) {
         chat_id = row[Columns.chat_id]

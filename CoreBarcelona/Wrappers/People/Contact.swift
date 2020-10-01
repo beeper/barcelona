@@ -10,27 +10,36 @@ import Foundation
 import Contacts
 import IMCore
 
-struct ContactIDRepresentation: Codable {
-    var id: String
+public struct ContactIDRepresentation: Codable {
+    public init(id: String) {
+        self.id = id
+    }
+    
+    public var id: String
 }
 
-struct BulkContactRepresentation: Codable {
+public struct BulkContactRepresentation: Codable {
+    public init(contacts: [Contact], strangers: [Handle]) {
+        self.contacts = contacts
+        self.strangers = strangers
+    }
+    
     var contacts: [Contact]
     var strangers: [Handle]
 }
 
-struct Contact: Codable, Comparable {
-    static func < (lhs: Contact, rhs: Contact) -> Bool {
+public struct Contact: Codable, Comparable {
+    public static func < (lhs: Contact, rhs: Contact) -> Bool {
         guard let lhsFullName = lhs.fullName else { return false }
         guard let rhsFullName = rhs.fullName else { return true }
         return lhsFullName < rhsFullName
     }
     
-    static func == (lhs: Contact, rhs: Contact) -> Bool {
+    public static func == (lhs: Contact, rhs: Contact) -> Bool {
         return lhs.id == rhs.id
     }
     
-    init(_ person: IMPerson) {
+    public init(_ person: IMPerson) {
         self.id = person.cnContactID
         self.firstName = person.firstName
         self.middleName = nil
@@ -39,19 +48,12 @@ struct Contact: Codable, Comparable {
         self.nickname = person.nickname
         self.hasPicture = person.imageDataWithoutLoading != nil
         
-        self.handles = [person.phoneNumbers, person.allEmails].flatMap {
-            $0.compactMap {
-                guard let id = $0 as? String else {
-                    print("wtf \($0)")
-                    return nil
-                }
-                
-                return Handle(id: id, isBusiness: false)
-            }
+        self.handles = person.handleIDs.map {
+            Handle(id: $0, isBusiness: false)
         }
     }
     
-    init(_ contact: CNContact) {
+    public init(_ contact: CNContact) {
         self.id = contact.identifier
         self.firstName = contact.givenName.count == 0 ? nil : contact.givenName
         self.middleName = contact.middleName.count == 0 ? nil : contact.middleName
@@ -73,21 +75,21 @@ struct Contact: Codable, Comparable {
         }
     }
     
-    var id: String
-    var firstName: String?
-    var middleName: String?
-    var lastName: String?
-    var fullName: String?
-    var nickname: String?
-    var countryCode: String?
-    var hasPicture: Bool
-    var handles: [Handle]
+    public var id: String
+    public var firstName: String?
+    public var middleName: String?
+    public var lastName: String?
+    public var fullName: String?
+    public var nickname: String?
+    public var countryCode: String?
+    public var hasPicture: Bool
+    public var handles: [Handle]
     
-    var empty: Bool {
+    public var empty: Bool {
         return (self.firstName?.count ?? 0) == 0 && (self.middleName?.count ?? 0) == 0 && (self.lastName?.count ?? 0 == 0) && (self.nickname?.count ?? 0) == 0 && self.hasPicture == false
     }
     
-    mutating func addHandle(_ handle: Handle) {
+    public mutating func addHandle(_ handle: Handle) {
         if handles.contains(handle) {
             return
         }

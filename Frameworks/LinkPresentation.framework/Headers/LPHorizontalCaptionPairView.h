@@ -17,7 +17,7 @@
     LPTextView *_leftView;
     LPTextView *_rightView;
     LPCaptionButtonPresentationProperties *_buttonProperties;
-    struct NSEdgeInsets _contentInset;
+    id _contentInset;
     long long _balancingMode;
 }
 

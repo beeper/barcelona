@@ -9,7 +9,7 @@
 import Foundation
 import DigitalTouchShared
 
-struct ETVideoData: Codable {
+public struct ETVideoData: Codable {
     init(_ message: ETVideoMessage) {
         
     }

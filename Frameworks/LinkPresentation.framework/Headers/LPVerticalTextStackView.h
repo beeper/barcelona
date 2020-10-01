@@ -15,7 +15,7 @@
 {
     NSMutableArray *_items;
     BOOL _hasEverBuilt;
-    struct NSEdgeInsets _contentInset;
+    id _contentInset;
     LPVerticalTextStackViewStyle *_style;
 }
 

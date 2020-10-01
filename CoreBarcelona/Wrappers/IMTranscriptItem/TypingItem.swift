@@ -9,16 +9,16 @@
 import Foundation
 import IMCore
 
-struct TypingItem: ChatItemRepresentation {
+public struct TypingItem: ChatItemRepresentation {
     init(_ item: IMTypingChatItem, chatID: String?) {
         sender = item.sender?.id
         
         self.load(item: item, chatID: chatID)
     }
     
-    var id: String?
-    var chatID: String?
-    var fromMe: Bool?
-    var time: Double?
-    var sender: String?
+    public var id: String?
+    public var chatID: String?
+    public var fromMe: Bool?
+    public var time: Double?
+    public var sender: String?
 }

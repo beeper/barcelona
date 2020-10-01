@@ -9,36 +9,49 @@
 import Foundation
 import Contacts
 import IMCore
+import IMFoundation
 
-struct BulkHandleRepresentation: Codable {
-    init(_ handles: [IMHandle]) {
+public struct BulkHandleRepresentation: Codable {
+    public init(_ handles: [IMHandle]) {
         self.handles = handles.map {
             Handle($0)
         }
     }
     
-    var handles: [Handle]
+    public var handles: [Handle]
 }
 
-struct Handle: Codable, Equatable {
-    static func == (lhs: Handle, rhs: Handle) -> Bool {
+public protocol BulkHandleIDRepresentable {
+    var handles: [String] { get set }
+}
+
+public struct BulkHandleIDRepresentation: Codable, BulkHandleIDRepresentable {
+    public init(handles: [String]) {
+        self.handles = handles
+    }
+    
+    public var handles: [String]
+}
+
+public struct Handle: Codable, Equatable {
+    public static func == (lhs: Handle, rhs: Handle) -> Bool {
         return lhs.id == rhs.id
     }
     
-    static func === (lhs: Handle, rhs: Handle) -> Bool {
+    public static func === (lhs: Handle, rhs: Handle) -> Bool {
         return lhs.id == rhs.id
     }
     
     init(_ handle: IMHandle) {
         id = handle.id
-        isBusiness = handle.isBusiness()
+        format = id.style
     }
     
     init(id: String, isBusiness: Bool) {
         self.id = id
-        self.isBusiness = isBusiness
+        self.format = id.style
     }
     
     var id: String
-    var isBusiness: Bool
+    var format: HandleIDStyle
 }

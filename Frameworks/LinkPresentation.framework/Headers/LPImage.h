@@ -22,7 +22,7 @@
     LPImage *_imageLoadedFromItemProvider;
     NSObject *_itemProviderLoadGroup;
     NSObject *_asynchronousLoadGroup;
-    struct CGSize _pixelSize;
+    id _pixelSize;
     BOOL _hasComputedPixelSize;
     BOOL _hasTransparency;
     BOOL _hasComputedHasTransparency;

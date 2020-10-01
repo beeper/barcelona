@@ -9,7 +9,7 @@
 import Foundation
 import IMCore
 
-extension IMChatRegistry {
+public extension IMChatRegistry {
     static var shared: IMChatRegistry {
         IMChatRegistry.sharedInstance()!
     }

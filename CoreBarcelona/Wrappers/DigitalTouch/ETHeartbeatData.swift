@@ -9,7 +9,7 @@
 import Foundation
 import DigitalTouchShared
 
-struct ETHeartbeatData: Codable {
+public struct ETHeartbeatData: Codable {
     init(_ message: ETHeartbeatMessage) {
         
     }

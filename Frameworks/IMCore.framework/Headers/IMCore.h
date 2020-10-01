@@ -187,3 +187,6 @@ BOOL IMSPIQueryMessagesWithGUIDsAndQOS(NSArray<NSString *> *__strong, dispatch_q
 id IMCopyDDScannerResultFromAttributedStringData(NSData*);
 void IMChatCalculateServiceForSendingNewComposeMaybeForce(NSString* recipient, NSString* lastAddressedHandleID, NSString* simIdentifier, NSArray* addresses, BOOL appearsToBeEmail, BOOL hasDeliveredMessage, BOOL chatIsDowngraded, id historyState, id previousService);
 BOOL IMCoreSimulatedEnvironmentEnabled();
+
+extern NSString* IMChatRegistryDidRegisterChatNotification;
+extern NSString* IMChatRegistryDidUnregisterChatNotification;

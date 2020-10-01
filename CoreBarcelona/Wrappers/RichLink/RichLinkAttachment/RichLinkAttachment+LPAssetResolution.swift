@@ -9,10 +9,16 @@
 import Foundation
 import LinkPresentation
 
+private extension NSObject {
+    var theClassName: String {
+        return NSStringFromClass(type(of: self))
+    }
+}
+
 extension RichLinkAttachment {
     /// Supports the RichLinkProvider substitution API
     mutating func calculateAttachmentIndex(forAsset asset: LPAsset, attachments: [InternalAttachment]) {
-        switch asset.className {
+        switch asset.theClassName {
         case "RichLinkAudioAttachmentSubstitute":
             fallthrough
         case "RichLinkVideoAttachmentSubstitute":

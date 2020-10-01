@@ -9,7 +9,7 @@
 import Foundation
 import IMCore
 
-struct ParticipantChangeItem: ChatItemRepresentation {
+public struct ParticipantChangeItem: ChatItemRepresentation {
     init(_ item: IMParticipantChangeChatItem, chatID: String?) {
         initiatorID = item.sender?.id
         targetID = item.otherHandle?.id
@@ -24,11 +24,11 @@ struct ParticipantChangeItem: ChatItemRepresentation {
         self.load(item: item, chatID: chatID)
     }
     
-    var id: String?
-    var chatID: String?
-    var fromMe: Bool?
-    var time: Double?
-    var initiatorID: String?
-    var targetID: String?
-    var changeType: Int64
+    public var id: String?
+    public var chatID: String?
+    public var fromMe: Bool?
+    public var time: Double?
+    public var initiatorID: String?
+    public var targetID: String?
+    public var changeType: Int64
 }

@@ -35,7 +35,7 @@ private extension LPLinkMetadata {
 }
 
 /// Codable representation of a rich link
-struct RichLink: Codable {
+public struct RichLink: Codable {
     init?(metadata: LPLinkMetadata, attachments: [InternalAttachment]) {
         guard let properties = metadata.presentationProperties else {
             return nil

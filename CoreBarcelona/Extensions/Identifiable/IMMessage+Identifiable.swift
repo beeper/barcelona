@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import IMCore
 
 extension IMMessage: Identifiable {
     public var id: String {

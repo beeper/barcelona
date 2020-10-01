@@ -9,26 +9,18 @@
 import Foundation
 import IMCore
 
-struct StatusChatItem: ChatItemRepresentation {
+public struct StatusChatItem: ChatItemRepresentation {
     init(_ item: IMMessageStatusChatItem, message: IMMessage, chatID: String?) {
         statusType = item.statusType
         itemID = item._item().guid
-        flags = Int64(message.flags)
-        timeDelivered = (message.timeDelivered?.timeIntervalSince1970 ?? 0) * 1000
-        timeRead = (message.timeRead?.timeIntervalSince1970 ?? 0) * 1000
-        timePlayed = (message.timePlayed?.timeIntervalSince1970 ?? 0) * 1000
         
         self.load(item: item, chatID: chatID)
     }
     
-    var id: String?
-    var chatID: String?
-    var fromMe: Bool?
-    var time: Double?
-    var statusType: Int64?
-    var itemID: String
-    var flags: Int64
-    var timeDelivered: Double
-    var timeRead: Double
-    var timePlayed: Double
+    public var id: String?
+    public var chatID: String?
+    public var fromMe: Bool?
+    public var time: Double?
+    public var statusType: Int64?
+    public var itemID: String
 }

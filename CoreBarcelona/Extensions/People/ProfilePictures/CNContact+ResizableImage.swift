@@ -16,12 +16,12 @@ import UIKit
 import AppKit
 #endif
 
-struct ThumbnailImageData {
-    var data: Data;
-    var mime: String;
+public struct ThumbnailImageData {
+    public var data: Data;
+    public var mime: String;
 }
 
-extension CNContact {
+public extension CNContact {
     /**
      Generates a thumbnail image of the target size, and also returns the MIME type
      */

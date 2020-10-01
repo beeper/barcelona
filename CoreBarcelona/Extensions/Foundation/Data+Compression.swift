@@ -9,7 +9,7 @@
 import Foundation
 import Compression
 
-extension Data {
+public extension Data {
     /**
      Returns a compressed version of the data using the ZLIB compression format
      */

@@ -22,14 +22,14 @@
 }
 
 + (id)imHandleForService:(id)arg1;
-+ (IMMe*)me;
++ (IMMe* _Nonnull)me;
 + (id)lastNameFromFallbackUserName;
 + (id)firstNameFromFallbackUserName;
 + (id)fallbackUserName;
 @property(readonly, nonatomic) CNContact *cnContact; // @synthesize cnContact=_cnContact;
 - (id)description;
 - (void)myPictureChanged;
-@property(readonly, nonatomic) NSArray *imHandles;
+@property(readonly, nonatomic, nonnull) NSArray<IMHandle*>* imHandles;
 @property(readonly, nonatomic) IMHandle *bestIMHandle;
 @property(readonly, nonatomic) NSString *fullName;
 @property(readonly, nonatomic) NSString *lastName;

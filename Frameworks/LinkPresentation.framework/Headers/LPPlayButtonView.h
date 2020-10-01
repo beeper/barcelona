@@ -13,7 +13,7 @@
 
 @interface LPPlayButtonView : LPComponentView <LPContentInsettable>
 {
-    struct NSEdgeInsets _contentInset;
+    id  _contentInset;
     LPMusicPlayButtonStyle *_style;
 }
 

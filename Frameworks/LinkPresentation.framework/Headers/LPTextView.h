@@ -16,7 +16,7 @@
 {
     NSTextField *_textView;
     long long _overrideMaximumNumberOfLines;
-    struct NSEdgeInsets _contentInset;
+    id  _contentInset;
     LPTextViewStyle *_style;
     NSAttributedString *_attributedString;
     double _ascender;

@@ -11,9 +11,9 @@ import IMCore
 
 extension IMItem {
     var imAccount: IMAccount? {
-        if let accountID = accountID, let preferredAccount = IMAccountController.sharedInstance()?.account(forUniqueID: accountID) {
+        if let accountID = accountID, let preferredAccount = IMAccountController.sharedInstance().account(forUniqueID: accountID) {
             return preferredAccount
-        } else if let serviceID = service, let service = serviceID.service, let alternateAccount = IMAccountController.sharedInstance()?.bestAccount(forService: service) {
+        } else if let serviceID = service, let service = serviceID.service, let alternateAccount = IMAccountController.sharedInstance().bestAccount(forService: service) {
             return alternateAccount
         } else {
             return nil

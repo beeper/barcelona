@@ -9,7 +9,7 @@
 import Foundation
 import DigitalTouchShared
 
-struct ETKissData: Codable {
+public struct ETKissData: Codable {
     init(_ message: ETKissMessage) {
         
     }

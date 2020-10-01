@@ -28,7 +28,7 @@
     LPInlineMediaPlaybackInformation *_inlinePlaybackInformation;
     BOOL _hasEverBuilt;
     BOOL _useProgressSpinner;
-    struct NSEdgeInsets _textSafeAreaInset;
+    id _textSafeAreaInset;
 }
 
 

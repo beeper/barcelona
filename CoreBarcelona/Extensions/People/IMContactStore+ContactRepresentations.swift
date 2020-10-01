@@ -11,7 +11,7 @@ import IMCore
 
 private var sharedContactStore: CNContactStore? = nil
 
-extension IMContactStore {
+public extension IMContactStore {
     static var shared: IMContactStore {
         IMContactStore.sharedInstance()!
     }
@@ -32,7 +32,7 @@ extension IMContactStore {
         
         let includeStrangers = search == nil && limit == nil
         
-        let registrar = IMHandleRegistrar.sharedInstance()!
+        let registrar = IMHandleRegistrar.sharedInstance()
         
         // MARK: - Map handles to contacts
         registrar.allIMHandles()!.forEach { handle in

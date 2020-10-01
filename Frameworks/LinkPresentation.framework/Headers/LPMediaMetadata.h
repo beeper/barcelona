@@ -14,6 +14,6 @@
 - (NSURL *)URL;
 
 @optional
-- (struct CGSize)size;
+- (id)size;
 @end
 

@@ -1,10 +1,9 @@
 --- !tapi-tbd-v3
-archs:           [ x86_64 ]
-uuids:           [ 'x86_64: 4BF73CDD-236A-3044-B295-70556CFBEDEF' ]
-platform:        macosx
-install-name:    '/System/Library/PrivateFrameworks/DigitalTouchShared.framework/Versions/A/DigitalTouchShared'
+archs:           [ x86_64, arm64, arm64e, armv7, armv7s ]
+platform:        darwin
+install-name:    '/System/Library/PrivateFrameworks/DigitalTouchShared.framework/DigitalTouchShared'
 exports:         
-  - archs:           [ x86_64 ]
+  - archs:           [ x86_64, arm64, arm64e, armv7, armv7s ]
     symbols:         [ _DOT_POINTSIZE, _DigitalTouchSharedVersionNumber, _DigitalTouchSharedVersionString, 
                        _ETAggdEphemeralAddedKey, _ETAggdEphemeralBlockedKey, _ETAggdExpiredUnreadMessagesKey, 
                        _ETAggdIMessageButtonTappedKey, _ETAggdMessageReceivedTransportTimeToAppKey, 

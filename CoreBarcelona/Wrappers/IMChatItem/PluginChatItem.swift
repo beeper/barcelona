@@ -11,14 +11,15 @@ import LinkPresentation
 import IMCore
 import os.log
 
-struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
+public struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
     init(_ item: IMTranscriptPluginChatItem, chatID: String?) {
-        payload = item.dataSource.payload?.base64EncodedString()
         bundleID = item.dataSource.bundleID
         
         os_log("PluginChatItem has fileTransferGUIDs: %@", log: .default, type: .debug, item.fileTransferGUIDs)
         
         attachments = item.attachments
+        
+        var insertPayload: Bool = true
         
         switch bundleID {
         case "com.apple.DigitalTouchBalloonProvider":
@@ -29,24 +30,36 @@ struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
         case "com.apple.messages.URLBalloonProvider":
             if let dataSource = item.dataSource, let metadata = dataSource.value(forKey: "richLinkMetadata") as? LPLinkMetadata, let richLink = RichLink(metadata: metadata, attachments: item.internalAttachments) {
                 self.richLink = richLink
-                self.payload = nil
+                insertPayload = false
             }
             break
         default:
             break
         }
         
+        if bundleID.starts(with: "com.apple.messages.MSMessageExtensionBalloonPlugin"), let payloadData = item.dataSource?.payload {
+            `extension` = MessageExtensionsData(item.dataSource.payload)
+            let dict = `extension`?.dictionary
+            let archive = `extension`?.archive
+            insertPayload = false
+        }
+        
+        if insertPayload {
+            payload = item.dataSource.payload?.base64EncodedString()
+        }
+        
         self.load(item: item, chatID: chatID)
     }
     
-    var id: String?
-    var chatID: String?
-    var fromMe: Bool?
-    var time: Double?
-    var digitalTouch: DigitalTouchMessage?
-    var richLink: RichLink?
-    var payload: String?
-    var bundleID: String
-    var attachments: [Attachment]
-    var acknowledgments: [AcknowledgmentChatItem]?
+    public var id: String?
+    public var chatID: String?
+    public var fromMe: Bool?
+    public var time: Double?
+    public var digitalTouch: DigitalTouchMessage?
+    public var richLink: RichLink?
+    public var `extension`: MessageExtensionsData?
+    public var payload: String?
+    public var bundleID: String
+    public var attachments: [Attachment]
+    public var acknowledgments: [AcknowledgmentChatItem]?
 }

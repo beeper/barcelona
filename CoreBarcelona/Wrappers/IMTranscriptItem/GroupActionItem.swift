@@ -9,7 +9,7 @@
 import Foundation
 import IMCore
 
-struct GroupActionItem: ChatItemRepresentation {
+public struct GroupActionItem: ChatItemRepresentation {
     init(_ item: IMGroupActionChatItem, chatID: String?) {
         actionType = item.actionType
         sender = item.sender?.id
@@ -22,11 +22,11 @@ struct GroupActionItem: ChatItemRepresentation {
         self.load(item: item, chatID: chatID)
     }
     
-    var id: String?
-    var chatID: String?
-    var fromMe: Bool?
-    var time: Double?
-    var actionType: Int64
-    var sender: String?
+    public var id: String?
+    public var chatID: String?
+    public var fromMe: Bool?
+    public var time: Double?
+    public var actionType: Int64
+    public var sender: String?
     
 }

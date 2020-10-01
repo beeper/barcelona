@@ -167,7 +167,7 @@
 - (BOOL)hasAlias:(id)arg1 type:(long long)arg2;
 - (BOOL)hasAlias:(id)arg1;
 - (void)_invalidateCachedAliases;
-@property(readonly, nonatomic) NSArray *aliases;
+@property(readonly, nonatomic, nonnull) NSArray<NSString*> *aliases;
 @property(readonly, nonatomic, getter=isMakoAccount) BOOL makoAccount;
 - (id)_statuses;
 - (id)_aliasInfoForAlias:(id)arg1;
@@ -213,14 +213,14 @@
 - (void)_watchBuddiesIfNecessary;
 - (BOOL)removeIMHandle:(id)arg1 fromIMPerson:(id)arg2;
 - (BOOL)addIMHandle:(id)arg1 toIMPerson:(id)arg2;
-- (id)imHandlesForIMPerson:(id)arg1;
+- (NSArray<IMHandle*>* _Nonnull)imHandlesForIMPerson:(IMPerson*)arg1;
 - (void)requestBuddyListAuthorizationFromIMHandle:(id)arg1;
 - (void)setBuddyListAuthorization:(BOOL)arg1 forIMHandle:(id)arg2;
 - (unsigned long long)sortOrderForIMHandle:(id)arg1 inGroup:(id)arg2;
 - (id)personSibsForIMHandle:(id)arg1;
 - (id)personForIMHandle:(id)arg1 identifier:(int *)arg2;
 - (id)personForIMHandle:(id)arg1;
-- (IMHandle*)imHandleWithID:(id)arg1;
+- (IMHandle*)imHandleWithID:(NSString*)arg1;
 - (id)existingIMHandleWithID:(id)arg1 countryCode:(id)arg2;
 - (id)imHandleWithID:(id)arg1 countryCode:(id)arg2;
 - (id)_imHandleWithID:(id)arg1 alreadyCanonical:(BOOL)arg2 originalID:(id)arg3 countryCode:(id)arg4;

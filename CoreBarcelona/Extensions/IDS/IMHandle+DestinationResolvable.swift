@@ -12,7 +12,7 @@ import IMCore
 import IDS
 import NIO
 
-internal enum HandleIDStyle {
+public enum HandleIDStyle: String, Codable {
     case email
     case businessID
     case phoneNumber
@@ -27,16 +27,16 @@ extension Array where Element == IMServiceStyle {
     }
 }
 
-enum IDSState: Int, Codable {
+public enum IDSState: Int, Codable {
     case unknown = 0
     case available = 1
     case unavailable = 2
     
-    var isAvailable: Bool {
+    public var isAvailable: Bool {
         self == .available
     }
     
-    init(rawValue: Int) {
+    public init(rawValue: Int) {
         switch rawValue {
         case 1: self = .available
         case 2: self = .unavailable
@@ -45,7 +45,7 @@ enum IDSState: Int, Codable {
     }
 }
 
-extension Array where Element == IMHandle {
+public extension Array where Element == IMHandle {
     var destinations: [IDSDestination] {
         compactMap {
             $0.destination
@@ -91,7 +91,7 @@ extension Array where Element == IMHandle {
 }
 
 /// Helper variables when processing string IDs into IDS destinations
-internal extension String {
+public extension String {
     var isEmail: Bool {
         IMStringIsEmail(self as CFString)
     }

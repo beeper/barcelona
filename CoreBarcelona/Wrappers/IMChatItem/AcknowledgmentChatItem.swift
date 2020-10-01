@@ -9,7 +9,7 @@
 import Foundation
 import IMCore
 
-struct AcknowledgmentChatItem: AssociatedChatItemRepresentation {
+public struct AcknowledgmentChatItem: AssociatedChatItemRepresentation {
     init(_ item: IMMessageAcknowledgmentChatItem, chatID: String?) {
         acknowledgmentType = item.messageAcknowledgmentType
         sender = item.sender?.id
@@ -17,11 +17,11 @@ struct AcknowledgmentChatItem: AssociatedChatItemRepresentation {
         self.load(item: item, chatID: chatID)
     }
     
-    var id: String? = nil
-    var chatID: String? = nil
-    var fromMe: Bool? = nil
-    var time: Double? = nil
-    var sender: String?
-    var acknowledgmentType: Int64
-    var associatedID: String
+    public var id: String? = nil
+    public var chatID: String? = nil
+    public var fromMe: Bool? = nil
+    public var time: Double? = nil
+    public var sender: String?
+    public var acknowledgmentType: Int64
+    public var associatedID: String
 }

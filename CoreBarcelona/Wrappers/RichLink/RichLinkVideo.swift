@@ -15,7 +15,7 @@ struct RichLinkVideo: Codable, RichLinkAttachment {
         hasAudio = video.properties?.hasAudio
         accessibilityText = video.properties?.accessibilityText
         youTubeURL = video.youTubeURL?.absoluteString
-        streamingURL = video.youTubeURL?.absoluteString
+        streamingURL = video.streamingURL?.absoluteString
     }
     
     var attachmentIndex: UInt64?

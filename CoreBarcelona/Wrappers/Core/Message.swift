@@ -10,26 +10,30 @@ import Foundation
 import IMCore
 import NIO
 
-struct BulkMessageRepresentation: Codable {
-    init(_ messages: [Message]) {
+public struct BulkMessageRepresentation: Codable {
+    public init(_ messages: [Message]) {
         self.messages = messages
     }
     
-    var messages: [Message]
+    public var messages: [Message]
 }
 
-struct BulkMessageIDRepresentation: Codable {
-    var messages: [String]
+public struct BulkMessageIDRepresentation: Codable {
+    public init(messages: [String]) {
+        self.messages = messages
+    }
+    
+    public var messages: [String]
 }
 
-extension Array where Element == String {
+public extension Array where Element == String {
     func er_chatItems(in chat: String) -> EventLoopFuture<[ChatItem]> {
         IMMessage.messages(withGUIDs: self, on: messageQuerySystem.next())
     }
 }
 
 extension Array where Element == Message {
-    var representation: BulkMessageRepresentation {
+    public var representation: BulkMessageRepresentation {
         BulkMessageRepresentation(self)
     }
 }
@@ -56,6 +60,14 @@ public struct Message: ChatItemRepresentation {
                 return message
             }
         }
+    }
+    
+    public static func associatedMessages(withGUID guid: String, on eventLoop: EventLoop? = nil) -> EventLoopFuture<[Message]> {
+        DBReader(pool: databasePool, eventLoop: eventLoop ?? messageQuerySystem.next()).associatedMessages(with: guid)
+    }
+    
+    public static func messages(matching query: String, limit: Int) -> EventLoopFuture<[Message]> {
+        DBReader().messages(matching: query, limit: limit)
     }
 
     init(_ item: IMItem, transcriptRepresentation: ChatItem, chatID: String?) {
@@ -123,24 +135,24 @@ public struct Message: ChatItemRepresentation {
     }
     
     public var id: String
-    var chatID: String?
-    var fromMe: Bool?
-    var time: Double?
-    var sender: String?
-    var subject: String?
-    var timeDelivered: Double
-    var timePlayed: Double
-    var timeRead: Double
-    var messageSubject: String?
-    var isSOS: Bool
-    var isTypingMessage: Bool
-    var isCancelTypingMessage: Bool
-    var isDelivered: Bool
-    var isAudioMessage: Bool
-    var description: String?
-    var flags: UInt64
-    var items: [ChatItem]
-    var service: IMServiceStyle
-    var fileTransferIDs: [String]
-    var associatedMessageID: String?
+    public var chatID: String?
+    public var fromMe: Bool?
+    public var time: Double?
+    public var sender: String?
+    public var subject: String?
+    public var timeDelivered: Double
+    public var timePlayed: Double
+    public var timeRead: Double
+    public var messageSubject: String?
+    public var isSOS: Bool
+    public var isTypingMessage: Bool
+    public var isCancelTypingMessage: Bool
+    public var isDelivered: Bool
+    public var isAudioMessage: Bool
+    public var description: String?
+    public var flags: UInt64
+    public var items: [ChatItem]
+    public var service: IMServiceStyle
+    public var fileTransferIDs: [String]
+    public var associatedMessageID: String?
 }

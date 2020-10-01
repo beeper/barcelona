@@ -8,5 +8,10 @@
 
 import Foundation
 import IMCore
-import Swime
+import NIO
 
+public extension IMFileTransfer {
+    func saveToDatabase(atPath path: String) -> EventLoopFuture<Void> {
+        DBReader().insert(fileTransfer: self, path: path)
+    }
+}

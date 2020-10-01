@@ -166,3 +166,32 @@
 
 extern id _IMAttachmentPersistentPath(NSString* guid, NSURL* url, NSString* mime, CFStringRef utType);
 NSAttributedString* IMCreateSuperFormatStringFromPlainTextString(NSString*);
+NSSet<Class> *IMExtensionPayloadUnarchivingClasses();
+
+// MARK: - Extension Payload
+extern NSString* IMExtensionPayloadBalloonLayoutInfoKey;
+extern NSString* IMExtensionPayloadBalloonLiveLayoutInfoKey;
+extern NSString* IMExtensionPayloadBalloonLayoutClassKey;
+extern NSString* IMExtensionPayloadURLKey;
+extern NSString* IMExtensionPayloadDataKey;
+extern NSString* IMExtensionPayloadDataFilePathKey;
+/// Not my typo, Apple.
+extern NSString* IMExtensionPayloadAccessibilityLableKey;
+extern NSString* IMExtensionPayloadAppIconKey;
+extern NSString* IMExtensionPayloadAppNameKey;
+extern NSString* IMExtensionPayloadAdamIDIKey;
+extern NSString* IMExtensionPayloadStatusTextKey;
+extern NSString* IMExtensionPayloadLocalizedDescriptionTextKey;
+extern NSString* IMExtensionPayloadAlternateTextKey;
+extern NSString* IMExtensionPayloadUserSessionIdentifier;
+// MARK: - Layout Info
+extern NSString* IMBalloonLayoutInfoImageTitleKey;
+extern NSString* IMBalloonLayoutInfoImageSubTitleKey;
+extern NSString* IMBalloonLayoutInfoCaptionKey;
+extern NSString* IMBalloonLayoutInfoSubcaptionKey;
+extern NSString* IMBalloonLayoutInfoSecondarySubcaptionKey;
+extern NSString* IMBalloonLayoutInfoTertiarySubcaptionKey;
+// MARK: - Bundle IDs
+extern NSString* IMBalloonBundleIdentifierBusiness;
+
+void IMSharedHelperReplaceExtensionPayloadDataWithFilePathForMessage(IMMessageItem*, NSString*);

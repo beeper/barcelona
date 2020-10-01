@@ -8,14 +8,9 @@
 
 import Foundation
 import DigitalTouchShared
+import CoreGraphics
 
-#if canImport(AppKit)
-import AppKit
-#elseif canImport(UIKit)
-import UIKit
-#endif
-
-struct Color: Codable {
+public struct Color: Codable {
     let red: CGFloat
     let blue: CGFloat
     let green: CGFloat
@@ -30,7 +25,7 @@ private func ETPExtractPoints(from strokes: [[NSValue]]) -> String? {
     return tap.points?.base64EncodedString()
 }
 
-struct ETSketchData: Codable {
+public struct ETSketchData: Codable {
     init(_ message: ETSketchMessage) {
         numberOfColors = message.numberOfColors
         

@@ -19,8 +19,10 @@ protocol IMFileTransferContainer {
 func ERPreloadFileTransfers(withGUIDs guids: [String]) -> EventLoopFuture<Void> {
     os_log("Preloading file transfers for GUIDs %@", log: .default, type: .info, guids)
     
-    return DBReader.shared.attachments(withGUIDs: guids).mapEach {
-        $0.fileTransfer
+    return DBReader.shared.attachments(withGUIDs: guids).map {
+        $0.map {
+            $0.fileTransfer
+        }
     }.map { _ in
         
     }

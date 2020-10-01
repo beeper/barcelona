@@ -15,6 +15,8 @@ import NIO
 class RawAttachment: Record {
     override class var databaseTableName: String { "attachment" }
     
+    static let messageAttachmentJoin = belongsTo(MessageAttachmentJoin.self, using: ForeignKey(["ROWID"], to: ["attachment_id"]))
+    
     required init(row: Row) {
         ROWID = row[Columns.ROWID]
         guid = row[Columns.guid]
@@ -95,6 +97,18 @@ class RawAttachment: Record {
     var sr_ck_sync_state: Int64?
     var sr_ck_server_change_token_blob: Data?
     var sr_ck_record_id: String?
+    
+    func internalAttachment(withOrigin origin: ResourceOrigin? = nil) -> InternalAttachment? {
+        guard let guid = guid, let path = filename as NSString? else {
+            return nil
+        }
+        
+        return InternalAttachment(guid: guid, originalGUID: original_guid, path: path.expandingTildeInPath, bytes: UInt64(total_bytes ?? 0), incoming: (is_outgoing ?? 0) == 0, mime: mime_type, uti: uti, origin: origin)
+    }
+    
+    var internalAttachment: InternalAttachment? {
+        internalAttachment()
+    }
 }
 
 extension DBReader {
@@ -127,11 +141,7 @@ extension DBReader {
                     let results = try RawAttachment.filter(guids.contains(RawAttachment.Columns.guid) || guids.contains(RawAttachment.Columns.original_guid)).fetchAll(db)
                     
                     let transfers = results.compactMap { result -> InternalAttachment? in
-                        guard let guid = result.guid, let path = result.filename as NSString? else {
-                            return nil
-                        }
-                        
-                        return InternalAttachment(guid: guid, originalGUID: result.original_guid, path: path.expandingTildeInPath, bytes: UInt64(result.total_bytes ?? 0), incoming: (result.is_outgoing ?? 0) == 0, mime: result.mime_type)
+                        result.internalAttachment
                     }
 
                     promise.succeed(transfers)

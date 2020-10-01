@@ -19,7 +19,7 @@ extension IMChat: Resolvable, ConcreteBasicResolvable {
                 
                 return chat
             } else {
-                guard let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: identifier) ?? IMChatRegistry.shared.loadChatFromDaemon(withChatIdentifier: identifier) else {
+                guard let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: identifier) else {
                     return nil
                 }
                 

@@ -1,0 +1,5 @@
+framework module AppSupport [extern_c] {
+    umbrella header "AppSupport.h"
+    export *
+    module * { export * }
+}

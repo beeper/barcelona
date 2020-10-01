@@ -23,8 +23,8 @@
     long long _leadingAccessoryType;
     long long _trailingAccessoryType;
     NSNumber *_minimumHeight;
-    struct CGSize _leadingIconSize;
-    struct CGSize _trailingIconSize;
+    id _leadingIconSize;
+    id _trailingIconSize;
 }
 
 

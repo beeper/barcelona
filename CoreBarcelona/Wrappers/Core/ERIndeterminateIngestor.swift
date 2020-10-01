@@ -37,7 +37,7 @@ private let ingestor_eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 5)
 
 private let ingestor_log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ERIndeterminateIngestor")
 
-func _ERTrackApply(_ type: OSSignpostType, log: OSLog, name: StaticString, signpostID: OSSignpostID, _ format: StaticString, _ interpolate: [CVarArg]) {
+private func _ERTrackApply(_ type: OSSignpostType, log: OSLog, name: StaticString, signpostID: OSSignpostID, _ format: StaticString, _ interpolate: [CVarArg]) {
     switch interpolate.count {
     case 0:
         os_signpost(type, log: ingestor_log, name: name, signpostID: signpostID, format)
@@ -54,7 +54,7 @@ func _ERTrackApply(_ type: OSSignpostType, log: OSLog, name: StaticString, signp
     }
 }
 
-func ERTrack(log: OSLog, name: StaticString, format: StaticString, object: AnyObject = Date() as AnyObject, _ interpolate: CVarArg...) -> () -> Void {
+public func ERTrack(log: OSLog, name: StaticString, format: StaticString, object: AnyObject = Date() as AnyObject, _ interpolate: CVarArg...) -> () -> Void {
     let signpostID = OSSignpostID.init(log: ingestor_log, object: object)
     var args = interpolate
     
@@ -75,9 +75,11 @@ private func track(name: StaticString, format: StaticString, object: AnyObject =
 
 private let shouldLog = false
 
-struct ERIndeterminateIngestor {
-    public static func ingest(_ object: AnyObject, in chat: String? = nil, on eventLoop: EventLoop = ingestor_eventLoop.next(), resolvingTapbacks: Bool = true, shouldPreprocess: Bool = true) -> EventLoopFuture<ChatItem?> {
-        preprocess(object, on: eventLoop, shouldRun: shouldPreprocess).flatMap {
+public struct ERIndeterminateIngestor {
+    public static func ingest(_ object: AnyObject, in chat: String? = nil, on eventLoop: EventLoop! = nil, resolvingTapbacks: Bool = true, shouldPreprocess: Bool = true) -> EventLoopFuture<ChatItem?> {
+        let eventLoop = eventLoop ?? ingestor_eventLoop.next()
+        
+        return preprocess(object, on: eventLoop, shouldRun: shouldPreprocess).flatMap {
             resolveLazyChatChatID(object: object, chat: chat, on: eventLoop)
         }.flatMap { chat in
             guard let chat = chat else {
@@ -123,7 +125,9 @@ struct ERIndeterminateIngestor {
     }
     
     /// Dedicated function for ingesting status items – they are not to be wrapped in Message objects as they overwrite the message data
-    public static func ingest(_ status: IMMessageStatusChatItem, in chat: String? = nil, on eventLoop: EventLoop = ingestor_eventLoop.next()) -> EventLoopFuture<StatusChatItem?> {
+    public static func ingest(_ status: IMMessageStatusChatItem, in chat: String? = nil, on eventLoop: EventLoop! = nil) -> EventLoopFuture<StatusChatItem?> {
+        let eventLoop = eventLoop ??  ingestor_eventLoop.next()
+        
         guard let messageGUID = status._item().guid else {
             return eventLoop.makeSucceededFuture(nil)
         }
@@ -137,8 +141,10 @@ struct ERIndeterminateIngestor {
         }
     }
     
-    public static func ingest(_ objects: [AnyObject], in chat: String? = nil, on eventLoop: EventLoop = ingestor_eventLoop.next(), resolvingTapbacks: Bool = true, shouldPreprocess: Bool = true) -> EventLoopFuture<[ChatItem]> {
-        preprocess(objects, on: eventLoop, shouldRun: shouldPreprocess).flatMap {
+    public static func ingest(_ objects: [AnyObject], in chat: String? = nil, on eventLoop: EventLoop! = nil, resolvingTapbacks: Bool = true, shouldPreprocess: Bool = true) -> EventLoopFuture<[ChatItem]> {
+        let eventLoop = eventLoop ??  ingestor_eventLoop.next()
+        
+        return preprocess(objects, on: eventLoop, shouldRun: shouldPreprocess).flatMap {
             EventLoopFuture<ChatItem?>.whenAllSucceed(objects.map {
                 self.ingest($0, in: chat, on: eventLoop, resolvingTapbacks: false, shouldPreprocess: false)
             }, on: eventLoop)
@@ -150,25 +156,33 @@ struct ERIndeterminateIngestor {
     }
     
     /// Ingests an array of message-like objects and returns wrapped messages
-    public static func ingest(messageLike objects: [AnyObject], in chat: String? = nil, on eventLoop: EventLoop = ingestor_eventLoop.next(), resolvingTapbacks: Bool = true, shouldPreprocess: Bool = true) -> EventLoopFuture<[Message]> {
-        preprocess(objects, on: eventLoop, shouldRun: shouldPreprocess).flatMap {
+    public static func ingest(messageLike objects: [AnyObject], in chat: String? = nil, on eventLoop: EventLoop! = nil, resolvingTapbacks: Bool = true, shouldPreprocess: Bool = true) -> EventLoopFuture<[Message]> {
+        let eventLoop = eventLoop ??  ingestor_eventLoop.next()
+        
+        return preprocess(objects, on: eventLoop, shouldRun: shouldPreprocess).flatMap {
             EventLoopFuture<Message?>.whenAllSucceed(objects.map {
                 ingest(messageLike: $0, in: chat, on: eventLoop, resolvingTapbacks: false, shouldPreprocess: false)
             }, on: eventLoop)
         }.map {
             $0.compactMap { $0 }
-        }.mapEach {
-            ChatItem.message($0)
+        }.map {
+            $0.map {
+                ChatItem.message($0)
+            }
         }.flatMap {
             resolvingTapbacks ? insertTapbacks(forItems: $0, in: chat, on: eventLoop) : eventLoop.makeSucceededFuture($0)
-        }.mapEachCompact {
-            guard case .message(let message) = $0 else { return nil }
-            return message
+        }.map {
+            $0.compactMap {
+                guard case .message(let message) = $0 else { return nil }
+                return message
+            }
         }
     }
     
     /// Ingests a message-like object and returns the wrapped message
-    public static func ingest(messageLike object: AnyObject, in chat: String? = nil, on eventLoop: EventLoop = ingestor_eventLoop.next(), resolvingTapbacks: Bool = true, shouldPreprocess: Bool = true) -> EventLoopFuture<Message?> {
+    public static func ingest(messageLike object: AnyObject, in chat: String? = nil, on eventLoop: EventLoop! = nil, resolvingTapbacks: Bool = true, shouldPreprocess: Bool = true) -> EventLoopFuture<Message?> {
+        let eventLoop = eventLoop ??  ingestor_eventLoop.next()
+        
         let lazyResolution = track(name: "Chat ChatID Resolver", format: "Resolving chat ChatID. Was Provided: %{public}@", chat == nil ? "NO" : "YES")
         
         return preprocess(object, on: eventLoop, shouldRun: shouldPreprocess).flatMap {
@@ -197,6 +211,10 @@ struct ERIndeterminateIngestor {
                 return eventLoop.makeSucceededFuture(nil)
             }
             
+            if let bundleID = message.balloonBundleID {
+                print("rrr")
+            }
+            
             messageFulfillment()
             
             var pending: EventLoopFuture<[InternalAttachment]>!
@@ -211,8 +229,10 @@ struct ERIndeterminateIngestor {
             pending = missingGUIDs.count > 0 ? DBReader.shared.attachments(withGUIDs: missingGUIDs) : eventLoop.makeSucceededFuture([])
             
             /// After the transfers are loaded, proceed with the generation of the chat item snapshots
-            return pending.mapEach {
-                $0.fileTransfer
+            return pending.map {
+                $0.map {
+                    $0.fileTransfer
+                }
             }.flatMap { _ in
                 attachmentResolverTracking()
                 

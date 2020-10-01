@@ -8,20 +8,26 @@
 
 import Foundation
 import CoreBarcelona
+import BarcelonaVapor
+import BarcelonaFoundation
+import os.log
+import NIO
 
-func x() {
-    
+#if os(iOS)
+ERTellJetsamToFuckOff()
+#endif
+
+if ERRunningOutOfAgent() || ProcessInfo.processInfo.environment["ERAgentShouldRunServerOnBoot"] != nil {
+    ERBarcelonaAPIService.sharedInstance.start { error in
+        if let error = error {
+            os_log("Failed to start API service with error %@, exiting", error.localizedDescription)
+            exit(-1)
+        }
+    }
 }
 
-ERBarcelonaManager.bootstrap()
+if ProcessInfo.processInfo.environment["ERRunningOutOfAgent"] == nil {
+    ERBarcelonaAPIService.sharedInstance.runXPC()
+}
 
-//let listener = NSXPCListener(machServiceName: ERBarcelonaManager.machServiceName)
-let listener = ERConstructXPCListener(ERBarcelonaManager.machServiceName)!
-let listenerDelegate = ListenerDelegate()
-listener.delegate = listenerDelegate
-
-listener.resume()
-
-NSLog("Message XPC Service has been started")
-
-RunLoop.current.run()
+RunLoop.main.run()

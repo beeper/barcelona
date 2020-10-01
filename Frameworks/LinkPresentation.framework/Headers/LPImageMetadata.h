@@ -16,7 +16,7 @@
     NSURL *_URL;
     NSString *_type;
     NSString *_accessibilityText;
-    struct CGSize _size;
+    id  _size;
 }
 
 + (BOOL)supportsSecureCoding;

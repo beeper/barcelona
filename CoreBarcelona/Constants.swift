@@ -7,35 +7,50 @@
 //
 
 import Foundation
+import os.log
+import IMCore
+
+public let HandleQueue = DispatchQueue.init(label: "HandleIDS")
 
 /** Various attributes in an IMMessage attributed string. Some are no longer used by iMessage. */
-struct MessageAttributes {
-    static let link = NSAttributedString.Key(rawValue: "__kIMLinkAttributeName")
-    static let writingDirection = NSAttributedString.Key(rawValue: "__kIMBaseWritingDirectionAttributeName")
-    static let transferGUID = NSAttributedString.Key(rawValue: "__kIMFileTransferGUIDAttributeName")
-    static let messagePart = NSAttributedString.Key(rawValue: "__kIMMessagePartAttributeName")
-    static let filename = NSAttributedString.Key(rawValue: "__kIMFilenameAttributeName")
-    static let dataDetected = NSAttributedString.Key(rawValue: "__kIMDataDetectedAttributeName")
+public struct MessageAttributes {
+    static let link = NSAttributedString.Key(rawValue: IMLinkAttributeName)
+    static let writingDirection = NSAttributedString.Key(rawValue: IMBaseWritingDirectionAttributeName)
+    static let transferGUID = NSAttributedString.Key(rawValue: IMFileTransferGUIDAttributeName)
+    static let messagePart = NSAttributedString.Key(rawValue: IMMessagePartAttributeName)
+    static let filename = NSAttributedString.Key(rawValue: IMFilenameAttributeName)
+    static let dataDetected = NSAttributedString.Key(rawValue: IMDataDetectedAttributeName)
     static let noRichLink = NSAttributedString.Key(rawValue: "__kIMNoRichLinkAttributeName")
-    static let bold = NSAttributedString.Key(rawValue: "__kIMBoldAttributeName")
-    static let italic = NSAttributedString.Key(rawValue: "__kIMItalicAttributeName")
-    static let underline = NSAttributedString.Key(rawValue: "__kIMUnderlineAttributeName")
-    static let strike = NSAttributedString.Key(rawValue: "__kIMStrikethroughAttributeName")
-    static let fontSize = NSAttributedString.Key(rawValue: "__kIMFontSizeAttributeName")
-    static let calendarData = NSAttributedString.Key(rawValue: "__kIMCalendarEventAttributeName")
+    static let bold = NSAttributedString.Key(rawValue: IMBoldAttributeName)
+    static let italic = NSAttributedString.Key(rawValue: IMItalicAttributeName)
+    static let underline = NSAttributedString.Key(rawValue: IMUnderlineAttributeName)
+    static let strike = NSAttributedString.Key(rawValue: IMStrikethroughAttributeName)
+    static let fontSize = NSAttributedString.Key(rawValue: IMFontSizeAttributeName)
+    static let calendarData = NSAttributedString.Key(rawValue: IMCalendarEventAttributeName)
+    static let breadcrumbOptions = NSAttributedString.Key(rawValue: IMBreadcrumbTextOptionFlags)
+    static let breadcrumbMarker = NSAttributedString.Key(rawValue: IMBreadcrumbTextMarkerAttributeName)
+}
+
+private func OSLog(_ category: String) -> OSLog {
+    OSLog(subsystem: Bundle.main.bundleIdentifier!, category: category)
+}
+
+internal struct Logging {
+    static let Registry = OSLog("Registry")
+    static let Database = OSLog("Database")
 }
 
 /**
  Imma be real witchu idk why this is the attachment string but IMCore uses this
  */
-let IMAttachmentString = String(data: Data(base64Encoded: "77+8")!, encoding: .utf8)!
+public let IMAttachmentString = String(data: Data(base64Encoded: "77+8")!, encoding: .utf8)!
 
 internal let IDSListenerID = "SOIDSListener-com.apple.imessage-rest"
 
 /**
  flag <<= MessageFlags
  */
-enum MessageFlags: UInt64 {
+public enum MessageFlags: UInt64 {
     case emote = 0x1
     case fromMe = 0x2
     case typingData = 0x3
@@ -52,7 +67,7 @@ enum MessageFlags: UInt64 {
     case isLocating = 0x17
 }
 
-enum FullFlagsFromMe: UInt64 {
+public enum FullFlagsFromMe: UInt64 {
     case audioMessage = 19968005
     case digitalTouch = 17862661
     /**
@@ -67,6 +82,14 @@ enum FullFlagsFromMe: UInt64 {
 /**
  flag |= MessageModifier
  */
-enum MessageModifiers: UInt64 {
+public enum MessageModifiers: UInt64 {
     case expirable = 0x1000005
 }
+
+public let ERChatMessageReceivedNotification = NSNotification.Name(rawValue: "ERChatMessageReceivedNotification")
+public let ERChatMessagesReceivedNotification = NSNotification.Name(rawValue: "ERChatMessagesReceivedNotification")
+public let ERChatMessageSentNotification = NSNotification.Name(rawValue: "ERChatMessageSentNotification")
+public let ERChatMessagesUpdatedNotification = NSNotification.Name(rawValue: "ERChatMessagesUpdatedNotification")
+public let ERChatMessageUpdatedNotification = NSNotification.Name(rawValue: "ERChatMessageUpdatedNotification")
+public let ERChatMessagesDeletedNotification = NSNotification.Name(rawValue: "ERChatMessagesDeletedNotification")
+internal let ERChatRegistryDidLoadNotification = NSNotification.Name(rawValue: "ERChatRegistryDidLoadNotification")

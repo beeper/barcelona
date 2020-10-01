@@ -9,7 +9,7 @@
 import Foundation
 import DigitalTouchShared
 
-struct ETTapData: Codable {
+public struct ETTapData: Codable {
     init(_ message: ETTapMessage) {
         
     }

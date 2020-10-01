@@ -4,15 +4,55 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>BarcelonaFoundation.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>6</integer>
+		</dict>
+		<key>BarcelonaSharedUI.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>8</integer>
+		</dict>
 		<key>BarcelonaVapor.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>2</integer>
+			<integer>3</integer>
+		</dict>
+		<key>CoreBarcelona copy.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>6</integer>
 		</dict>
 		<key>CoreBarcelona.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
+			<integer>4</integer>
+		</dict>
+		<key>MyMessage for iOS.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>7</integer>
+		</dict>
+		<key>SPMLibraries.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>5</integer>
+		</dict>
+		<key>imessage-rest iOS.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
 			<integer>1</integer>
+		</dict>
+		<key>imessage-rest-mac-controller.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
+		<key>imessage-rest-macxpc.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>5</integer>
 		</dict>
 		<key>imessage-rest.xcscheme_^#shared#^_</key>
 		<dict>
@@ -27,6 +67,11 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>1D31509E25215CC900F2DF7C</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>1D44864424E85BBB00FF73F3</key>
 		<dict>
 			<key>primary</key>
@@ -37,7 +82,27 @@
 			<key>primary</key>
 			<true/>
 		</dict>
+		<key>1D61DA412518F02E00EF8027</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>1D61DA632518F8AB00EF8027</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>1D804DE4250EC9C700F376CB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>1D9079FB250EE97500ED1EDC</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>1D907A1F250F01BB00ED1EDC</key>
 		<dict>
 			<key>primary</key>
 			<true/>

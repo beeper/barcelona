@@ -10,7 +10,7 @@ import Foundation
 import IMCore
 
 /// Represents an attachment item
-struct AttachmentChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
+public struct AttachmentChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
     init(_ item: IMAttachmentMessagePartChatItem, metadata attachmentRepresentation: Attachment?, chatID: String?) {
         transferID = item.transferGUID
         metadata = attachmentRepresentation
@@ -22,11 +22,11 @@ struct AttachmentChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
         self.init(item, metadata: Attachment(guid: item.transferGUID), chatID: chatID)
     }
     
-    var id: String?
-    var chatID: String?
-    var fromMe: Bool?
-    var time: Double?
-    var transferID: String
-    var metadata: Attachment?
-    var acknowledgments: [AcknowledgmentChatItem]?
+    public var id: String?
+    public var chatID: String?
+    public var fromMe: Bool?
+    public var time: Double?
+    public var transferID: String
+    public var metadata: Attachment?
+    public var acknowledgments: [AcknowledgmentChatItem]?
 }

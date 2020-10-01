@@ -12,7 +12,7 @@ import NIO
 
 private let chatItemGUIDExtractor = try! NSRegularExpression(pattern: "(?:\\w+:\\d+)\\/([\\w-]+)")
 
-extension IMChat {
+public extension IMChat {
     /**
      Sends a tapback for a given message, calling back with a Vapor abort if the operation fails
      */

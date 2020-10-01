@@ -71,8 +71,8 @@
     NSString *_sourceBundleIdentifier;
     id _delegate;
     NSURL *_URL;
-    struct NSEdgeInsets _textSafeAreaInset;
-    struct NSEdgeInsets _contentInset;
+    id _textSafeAreaInset;
+    id _contentInset;
 }
 
 

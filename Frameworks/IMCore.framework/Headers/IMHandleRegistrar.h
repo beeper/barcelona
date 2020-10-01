@@ -17,7 +17,7 @@
     IMBusinessNameManager *_businessNameManager;
 }
 
-+ (IMHandleRegistrar*)sharedInstance;
++ (IMHandleRegistrar* _Nonnull)sharedInstance;
 - (id)businessNameForUID:(id)arg1 updateHandler:(id)arg2;
 - (id)_existingChatSiblingsForHandle:(id)arg1;
 - (BOOL)_addressBookIsEmpty;
@@ -38,7 +38,7 @@
 - (id)CNIDToHandlesMap;
 - (void)clearCNIDToHandlesMap;
 - (void)removeHandleFromCNIDMap:(id)arg1 withCNID:(id)arg2;
-- (NSSet<IMHandle*>*)handlesForCNIdentifier:(id)arg1;
+- (NSSet<IMHandle*>* _Nonnull)handlesForCNIdentifier:(id)arg1;
 - (void)addHandleToCNIDMap:(id)arg1 CNContact:(id)arg2;
 - (void)_clearSiblingsCacheForIMHandle:(id)arg1 rebuildAfter:(BOOL)arg2;
 - (void)_buildSiblingsForIMHandle:(id)arg1;

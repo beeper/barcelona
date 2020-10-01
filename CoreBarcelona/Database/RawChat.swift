@@ -111,32 +111,14 @@ class RawChat: Record {
 }
 
 extension DBReader {
-    func resolveChatIdentifier(from groupID: String) -> EventLoopFuture<String?> {
-        let promise = eventLoop.makePromise(of: String?.self)
-        
-        pool.asyncRead { result in
-            switch result {
-            case .failure(let error):
-                promise.fail(error)
-            case .success(let db):
-                do {
-                    let chat = try RawChat
-                        .select(RawChat.Columns.chat_identifier, as: String.self)
-                        .filter(sql: "group_id = ?", arguments: [groupID])
-                        .fetchOne(db)
-                    
-                    promise.succeed(chat)
-                } catch  {
-                    promise.fail(error)
-                }
-            }
+    func rowIDs(forIdentifier identifier: String) -> EventLoopFuture<[Int64]> {
+        rowIDs(forIdentifiers: [identifier]).map {
+            $0[identifier] ?? []
         }
-        
-        return promise.futureResult
     }
     
-    func rowIDs(forIdentifier identifier: String) -> EventLoopFuture<[Int64]> {
-        let promise = eventLoop.makePromise(of: [Int64].self)
+    func rowIDs(forIdentifiers identifiers: [String]) -> EventLoopFuture<[String: [Int64]]> {
+        let promise = eventLoop.makePromise(of: [String: [Int64]].self)
         
         pool.asyncRead { result in
             switch result {
@@ -144,12 +126,22 @@ extension DBReader {
                 promise.fail(error)
             case .success(let db):
                 do {
-                    let ROWID = try RawChat
-                        .select(RawChat.Columns.ROWID, as: Int64.self)
-                        .filter(RawChat.Columns.chat_identifier == identifier)
+                    let chats = try RawChat
+                        .select([RawChat.Columns.ROWID, RawChat.Columns.chat_identifier])
+                        .filter(identifiers.contains(RawChat.Columns.chat_identifier))
                         .fetchAll(db)
                     
-                    promise.succeed(ROWID)
+                    promise.succeed(chats.reduce(into: [String: [Int64]]()) { ledger, chat in
+                        guard let ROWID = chat.ROWID, let chat_identifier = chat.chat_identifier else {
+                            return
+                        }
+                        
+                        if ledger[chat_identifier] == nil {
+                            ledger[chat_identifier] = []
+                        }
+                        
+                        ledger[chat_identifier]!.append(ROWID)
+                    })
                 } catch {
                     promise.fail(error)
                 }

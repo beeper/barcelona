@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!--
-   com.ericrabil.imessage-rest.plist
-   imessage-rest
-
-   Created by Eric Rabil on 8/14/20.
-   Copyright (c) 2020 Eric Rabil. All rights reserved.
--->
 <plist version="1.0">
-  <dict>
-    <key>Label</key>
-    <string>com.ericrabil.imessage-rest</string>
-    <key>RunAtLoad</key>
-    <true/>
-    <key>KeepAlive</key>
-    <true/>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/Users/{{CURRENT_USER}}/Library/ApplicationSupport/iMessageREST/imessage-rest.xpc/Contents/MacOS/imessage-rest</string>
-    </array>
-  </dict>
+<dict>
+	<key>Label</key>
+	<string>com.ericrabil.imessage-rest</string>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>MachServices</key>
+	<dict>
+		<key>com.ericrabil.imessage-rest</key>
+		<true/>
+	</dict>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/ericrabil/Library/ApplicationSupport/iMessageREST/imessage-rest.xpc/Contents/MacOS/imessage-rest</string>
+	</array>
+</dict>
 </plist>

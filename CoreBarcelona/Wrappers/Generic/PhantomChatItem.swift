@@ -7,9 +7,10 @@
 //
 
 import Foundation
+import IMCore
 import os.log
 
-struct PhantomChatItem: ChatItemRepresentation {
+public struct PhantomChatItem: ChatItemRepresentation {
     init(_ item: Any?, chatID chat: String?) {
         id = NSString.stringGUID()
         fromMe = false
@@ -34,9 +35,9 @@ struct PhantomChatItem: ChatItemRepresentation {
         os_log("PhantomChatItem created with unknown item: %@", log: .default, type: .error, className)
     }
     
-    var id: String?
-    var chatID: String?
-    var fromMe: Bool?
-    var time: Double?
-    var className: String
+    public var id: String?
+    public var chatID: String?
+    public var fromMe: Bool?
+    public var time: Double?
+    public var className: String
 }

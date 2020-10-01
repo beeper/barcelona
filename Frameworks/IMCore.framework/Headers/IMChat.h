@@ -210,7 +210,7 @@
 @property(readonly, nonatomic) NSString *chatIdentifier;
 - (void)_clearCachedIdentifier;
 - (unsigned long long)stateForParticipant:(id)arg1;
-- (id)participantsWithState:(unsigned long long)arg1;
+- (NSArray<IMHandle*>* _Nonnull)participantsWithState:(unsigned long long)arg1;
 - (void)_engroupParticipantsUpdated;
 - (void)_handleAttributionChanged;
 - (void)beginListeningToAttributionChanges;
@@ -307,7 +307,7 @@
 @property(readonly) NSString *vocabularyIdentifier;
 @property(readonly) NSString *pronunciationHint;
 @property(readonly) NSString *spokenPhrase;
-- (NSArray<NSString*>*)participantHandleIDs;
+- (NSArray<NSString*>* _Nonnull)participantHandleIDs;
 - (id)conversationContext;
 - (BOOL)allowedToShowConversationSync;
 - (BOOL)allowedToShowConversation;

@@ -8,7 +8,7 @@
 
 import Foundation
 
-protocol ChatItemRepresentation: Codable, Identifiable {
+public protocol ChatItemRepresentation: Codable, Identifiable {
     associatedtype IDValue = String?
     associatedtype TimeValue = Double?
     

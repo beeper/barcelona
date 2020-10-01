@@ -31,7 +31,7 @@
     float _scale;
     double _rotation;
     double _heartbreakTime;
-    struct CGPoint _normalizedCenter;
+    id _normalizedCenter;
 }
 
 + (unsigned short)messageType;

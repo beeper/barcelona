@@ -9,15 +9,15 @@
 import Foundation
 
 /// Fires a callback after the call function has not been called for the specified delay
-class Debouncer {
+open class Debouncer {
     var delay: Double
     weak var timer: Timer?
 
-    init(delay: Double) {
+    public init(delay: Double) {
         self.delay = delay
     }
 
-    internal func call(_ callback: @escaping () -> ()) {
+    public func call(_ callback: @escaping () -> ()) {
         timer?.invalidate()
         
         let nextTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { _ in
@@ -29,11 +29,11 @@ class Debouncer {
 }
 
 /// Manages a set of debouncers associated with a string
-class IdentifiableDebounceManager {
+open class IdentifiableDebounceManager {
     private var debouncers: [String: Debouncer] = [:]
     private let delay: Double
     
-    init(_ delay: Double) {
+    public init(_ delay: Double) {
         self.delay = delay
     }
     
@@ -53,7 +53,7 @@ class IdentifiableDebounceManager {
         }
     }
     
-    func submit(id: String, cb: @escaping () -> ()) {
+    public func submit(id: String, cb: @escaping () -> ()) {
         debouncer(forID: id).call {
             DispatchQueue.main.async {
                 self.clearDebouncer(forID: id)
@@ -65,11 +65,11 @@ class IdentifiableDebounceManager {
 }
 
 /// Manages a set of managers with the specified categories
-class CategorizedDebounceManager<P: Hashable> {
+open class CategorizedDebounceManager<P: Hashable> {
     private var debouncers: [P: IdentifiableDebounceManager] = [:]
     private let defaultDelay: Double = 1 / 10
     
-    init(_ configuration: [P: Double]) {
+    public init(_ configuration: [P: Double]) {
         configuration.forEach {
             debouncers[$0.key] = .init($0.value)
         }
@@ -85,7 +85,7 @@ class CategorizedDebounceManager<P: Hashable> {
         return debouncers[category]!
     }
     
-    func submit(_ id: String, category: P, cb: @escaping () -> ()) {
+    public func submit(_ id: String, category: P, cb: @escaping () -> ()) {
         debouncer(for: category).submit(id: id, cb: cb)
     }
 }

@@ -14,7 +14,7 @@
     NSMutableArray *_points;
     NSMutableArray *_delays;
     double _duration;
-    struct CGPoint _normalizedCenter;
+    id _normalizedCenter;
 }
 
 + (unsigned short)messageType;

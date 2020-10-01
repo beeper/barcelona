@@ -13,8 +13,10 @@ struct RichLinkAudio: Codable, RichLinkAttachment {
     init(_ audio: LPAudio, attachments: [InternalAttachment]) {
         calculateAttachmentIndex(forAsset: audio, attachments: attachments)
         accessibilityText = audio.properties?.accessibilityText
+        streamingURL = audio.streamingURL?.absoluteString
     }
     
     var attachmentIndex: UInt64?
     var accessibilityText: String?
+    var streamingURL: String?
 }

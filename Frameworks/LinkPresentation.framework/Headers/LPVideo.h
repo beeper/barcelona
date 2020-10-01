@@ -19,7 +19,7 @@
     NSItemProvider *_itemProvider;
     LPVideo *_videoLoadedFromItemProvider;
     NSObject *_itemProviderLoadGroup;
-    struct CGSize _intrinsicSize;
+    id  _intrinsicSize;
     AVURLAsset *_asset;
     id _mediaServicesResetNotificationHandler;
     LPVideoProperties *_properties;

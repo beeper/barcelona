@@ -16,6 +16,11 @@ import NIO
 class RawMessage: Record {
     override class var databaseTableName: String { "message" }
     
+    static let messageChatJoin = belongsTo(ChatMessageJoin.self, using: ForeignKey(["ROWID"], to: ["message_id"]))
+    static let messageHandleJoin = belongsTo(RawHandle.self, key: "handle", using: ForeignKey([RawMessage.Columns.handle_id], to: [RawHandle.Columns.ROWID]))
+    static let messageOtherHandleJoin = belongsTo(RawHandle.self, key: "otherHandle", using: ForeignKey([RawMessage.Columns.other_handle], to: [RawHandle.Columns.ROWID]))
+    static let messageAttachmentJoin = belongsTo(MessageAttachmentJoin.self, using: ForeignKey([RawMessage.Columns.ROWID], to: [MessageAttachmentJoin.Columns.message_id]))
+    
     required init(row: Row) {
         account = row[Columns.account]
         account_guid = row[Columns.account_guid]
@@ -24,7 +29,7 @@ class RawMessage: Record {
         associated_message_range_location = row[Columns.associated_message_range_location]
         associated_message_type = row[Columns.associated_message_type]
         attributedBody = row[Columns.attributedBody]
-        ballon_bundle_id = row[Columns.ballon_bundle_id]
+        balloon_bundle_id = row[Columns.balloon_bundle_id]
         cache_has_attachments = row[Columns.cache_has_attachments]
         cache_roomnames = row[Columns.cache_roomnames]
         ck_record_change_tag = row[Columns.ck_record_change_tag]
@@ -99,7 +104,7 @@ class RawMessage: Record {
         container[Columns.associated_message_range_location] = associated_message_range_location
         container[Columns.associated_message_type] = associated_message_type
         container[Columns.attributedBody] = attributedBody
-        container[Columns.ballon_bundle_id] = ballon_bundle_id
+        container[Columns.balloon_bundle_id] = balloon_bundle_id
         container[Columns.cache_has_attachments] = cache_has_attachments
         container[Columns.cache_roomnames] = cache_roomnames
         container[Columns.ck_record_change_tag] = ck_record_change_tag
@@ -166,7 +171,7 @@ class RawMessage: Record {
     }
 
     enum Columns: String, ColumnExpression {
-        case account, account_guid, associated_message_guid, associated_message_range_length, associated_message_range_location, associated_message_type, attributedBody, ballon_bundle_id, cache_has_attachments, cache_roomnames, ck_record_change_tag, ck_record_id, ck_sync_state, country, date, date_delivered, date_played, date_read, destination_caller_id, error, expire_state, expressive_send_style_id, group_action_type, group_title, guid, handle_id, has_dd_results, is_archive, is_audio_message, is_auto_reply, is_corrupt, is_delayed, is_delivered, is_emote, is_empty, is_expirable, is_finished, is_forward, is_from_me, is_played, is_prepared, is_read, is_sent, is_service_message, is_spam, is_system_message, item_type, message_action_type, message_source, message_summary_info, other_handle, payload_data, replace, reply_to_guid, ROWID, service, service_center, share_direction, share_status, sort_id, sr_ck_record_change_tag, sr_ck_record_id, sr_ck_sync_state, subject, text, time_expressive_send_played, type, version, was_data_detected, was_deduplicated, was_downgraded
+        case account, account_guid, associated_message_guid, associated_message_range_length, associated_message_range_location, associated_message_type, attributedBody, balloon_bundle_id, cache_has_attachments, cache_roomnames, ck_record_change_tag, ck_record_id, ck_sync_state, country, date, date_delivered, date_played, date_read, destination_caller_id, error, expire_state, expressive_send_style_id, group_action_type, group_title, guid, handle_id, has_dd_results, is_archive, is_audio_message, is_auto_reply, is_corrupt, is_delayed, is_delivered, is_emote, is_empty, is_expirable, is_finished, is_forward, is_from_me, is_played, is_prepared, is_read, is_sent, is_service_message, is_spam, is_system_message, item_type, message_action_type, message_source, message_summary_info, other_handle, payload_data, replace, reply_to_guid, ROWID, service, service_center, share_direction, share_status, sort_id, sr_ck_record_change_tag, sr_ck_record_id, sr_ck_sync_state, subject, text, time_expressive_send_played, type, version, was_data_detected, was_deduplicated, was_downgraded
     }
     
     var account: String?
@@ -176,7 +181,7 @@ class RawMessage: Record {
     var associated_message_range_location: Int64?
     var associated_message_type: Int64?
     var attributedBody: Data?
-    var ballon_bundle_id: String?
+    var balloon_bundle_id: String?
     var cache_has_attachments: Int64?
     var cache_roomnames: String?
     var ck_record_change_tag: String?

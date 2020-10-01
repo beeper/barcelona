@@ -10,9 +10,13 @@ import Foundation
 import LinkPresentation
 
 struct RichLinkCaptionButton: Codable {
-    init(_ properties: LPCaptionButtonPresentationProperties) {
-        text = properties.text
+    init?(_ properties: LPCaptionButtonPresentationProperties) {
+        guard let text = properties.text else {
+            return nil
+        }
+        
+        self.text = text
     }
     
-    var text: String?
+    var text: String
 }

@@ -24,7 +24,9 @@ internal extension Color {
         }
         #elseif canImport(UIKit)
         if let color = unknown as? UIColor {
-            self.init(red: color.red, blue: color.blue, green: color.green, alpha: color.alpha)
+            var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+            color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+            self.init(red: red, blue: blue, green: green, alpha: alpha)
         } else {
             return nil
         }

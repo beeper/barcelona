@@ -19,7 +19,7 @@ public enum IMServiceStyle: String, CaseIterable, Codable {
     case Phone
     case None
     
-    var service: IMServiceImpl? {
+    public var service: IMServiceImpl? {
         switch self {
         #if IDS_IMESSAGE_BIZ
         case .iMessageBiz:
@@ -38,12 +38,12 @@ public enum IMServiceStyle: String, CaseIterable, Codable {
         }
     }
     
-    var account: IMAccount? {
+    public var account: IMAccount? {
         guard let service = service else { return nil }
-        return IMAccountController.sharedInstance()?.bestAccount(forService: service)
+        return IMAccountController.sharedInstance().bestAccount(forService: service)
     }
     
-    static var services: [IMServiceImpl] {
+    public static var services: [IMServiceImpl] {
         allCases.compactMap {
             $0.service
         }

@@ -9,15 +9,47 @@
 import Foundation
 import IMCore
 
-struct Attachment: Codable {
-    init(_ transfer: IMFileTransfer) {
+public struct BulkAttachmentRepresentation: Codable {
+    public init(attachments: [Attachment]) {
+        self.attachments = attachments
+    }
+    
+    public var attachments: [Attachment]
+}
+
+public struct ResourceOrigin: Codable {
+    public init?(chatID: String? = nil, handleID: String? = nil, date: Double? = nil) {
+        self.chatID = chatID
+        self.handleID = handleID
+        self.date = date
+        
+        if chatID == nil, handleID == nil, date == nil {
+            return nil
+        }
+    }
+    
+    public var chatID: String?
+    public var handleID: String?
+    public var date: Double?
+}
+
+public struct Attachment: Codable {
+    internal init(mime: String? = nil, filename: String? = nil, id: String, uti: String? = nil, origin: ResourceOrigin? = nil) {
+        self.mime = mime
+        self.filename = filename
+        self.id = id
+        self.uti = uti
+        self.origin = origin
+    }
+    
+    public init(_ transfer: IMFileTransfer) {
         mime = transfer.mimeType
         filename = transfer.filename
         id = transfer.guid
         uti = transfer.type
     }
     
-    init?(guid: String) {
+    public init?(guid: String) {
         guard let item = IMFileTransferCenter.sharedInstance()?.transfer(forGUID: guid, includeRemoved: false) else {
             return nil
         }
@@ -25,10 +57,11 @@ struct Attachment: Codable {
         self.init(item)
     }
     
-    var mime: String?
-    var filename: String?
-    var id: String?
-    var uti: String?
+    public var mime: String?
+    public var filename: String?
+    public var id: String
+    public var uti: String?
+    public var origin: ResourceOrigin?
 }
 
 private func ERRegisterFileTransferForGUID(transfer: IMFileTransfer, guid: String) {
@@ -42,12 +75,14 @@ private func ERRegisterFileTransferForGUID(transfer: IMFileTransfer, guid: Strin
 }
 
 public struct InternalAttachment {
-    var guid: String
-    var originalGUID: String?
-    var path: String
-    var bytes: UInt64
-    var incoming: Bool
-    var mime: String?
+    public var guid: String
+    public var originalGUID: String?
+    public var path: String
+    public var bytes: UInt64
+    public var incoming: Bool
+    public var mime: String?
+    public var uti: String?
+    public var origin: ResourceOrigin?
     
     private var account: IMAccount {
         Registry.sharedInstance.iMessageAccount()!
@@ -55,6 +90,18 @@ public struct InternalAttachment {
     
     private var transferCenter: IMFileTransferCenter {
         IMFileTransferCenter.sharedInstance()!
+    }
+    
+    private var url: URL {
+        URL(fileURLWithPath: path)
+    }
+    
+    private var filename: String {
+        url.lastPathComponent
+    }
+    
+    var attachment: Attachment {
+        Attachment(mime: self.mime, filename: filename, id: guid, uti: uti, origin: origin)
     }
     
     var fileTransfer: IMFileTransfer {
