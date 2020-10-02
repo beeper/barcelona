@@ -21,7 +21,7 @@ extension Configuration {
 
 #if DEBUG
 private let dbConfiguration = Configuration { db in
-    os_log("Performing SQL query: %{private}@", type: .debug, db)
+    os_log("Executing query: %@", log: OSLog(subsystem: "CoreBarcelona", category: "SQL"), type: .debug, db)
 }
 #else
 private let dbConfiguration = Configuration()
