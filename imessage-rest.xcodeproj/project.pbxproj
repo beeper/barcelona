@@ -148,6 +148,7 @@
 		1D74D4B4250C104400A9F9A1 /* IMMessage+LazilyResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D74D4B3250C104400A9F9A1 /* IMMessage+LazilyResolvable.swift */; };
 		1D75D4DB24F197BC008F053C /* CoreUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D75D4D624F197B2008F053C /* CoreUI.framework */; };
 		1D75D4E124F58AEA008F053C /* StickerChatItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D75D4E024F58AEA008F053C /* StickerChatItem.swift */; };
+		1D7CE9812527B926003CDDE1 /* SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7CE9802527B926003CDDE1 /* SecureStorage.swift */; };
 		1D7D894C250D6AEC00DA9909 /* ERIMSimulationTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7D894B250D6AEC00DA9909 /* ERIMSimulationTools.swift */; };
 		1D7D8951250D795400DA9909 /* IMChatHistoryController+FutureLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7D8950250D795400DA9909 /* IMChatHistoryController+FutureLoading.swift */; };
 		1D7D8953250D829C00DA9909 /* IMFileTransfer+InternalAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7D8952250D829C00DA9909 /* IMFileTransfer+InternalAttachment.swift */; };
@@ -228,7 +229,6 @@
 		1D907A75250F2D8100ED1EDC /* ERBarcelonaAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D907A74250F2D8000ED1EDC /* ERBarcelonaAPIService.swift */; };
 		1D907A76250F307C00ED1EDC /* imessage-rest.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = 1D5AEDAE24E3725200303692 /* imessage-rest.xpc */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		1D9CA7FD251AC39600297E2F /* BCrypt in Frameworks */ = {isa = PBXBuildFile; productRef = 1D9CA7FC251AC39600297E2F /* BCrypt */; };
-		1D9CA802251AC3F900297E2F /* KeychainSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 1D9CA801251AC3F900297E2F /* KeychainSwift */; };
 		1D9CA807251AC7D200297E2F /* SwiftJWT in Frameworks */ = {isa = PBXBuildFile; productRef = 1D9CA806251AC7D200297E2F /* SwiftJWT */; };
 		1D9CA80B251AC7F600297E2F /* JWTManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9CA80A251AC7F600297E2F /* JWTManager.swift */; };
 		1D9CA80D251ACE7B00297E2F /* SecurityAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9CA80C251ACE7B00297E2F /* SecurityAPI.swift */; };
@@ -733,6 +733,7 @@
 		1D75D4D624F197B2008F053C /* CoreUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreUI.framework; path = Frameworks/CoreUI.framework; sourceTree = "<group>"; };
 		1D75D4DE24F197D1008F053C /* ERResourceServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERResourceServer.swift; sourceTree = "<group>"; };
 		1D75D4E024F58AEA008F053C /* StickerChatItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerChatItem.swift; sourceTree = "<group>"; };
+		1D7CE9802527B926003CDDE1 /* SecureStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureStorage.swift; sourceTree = "<group>"; };
 		1D7D894B250D6AEC00DA9909 /* ERIMSimulationTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERIMSimulationTools.swift; sourceTree = "<group>"; };
 		1D7D8950250D795400DA9909 /* IMChatHistoryController+FutureLoading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatHistoryController+FutureLoading.swift"; sourceTree = "<group>"; };
 		1D7D8952250D829C00DA9909 /* IMFileTransfer+InternalAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMFileTransfer+InternalAttachment.swift"; sourceTree = "<group>"; };
@@ -926,7 +927,6 @@
 				1D9CA807251AC7D200297E2F /* SwiftJWT in Frameworks */,
 				1DC28B91251EDA1800A9A50E /* BarcelonaFoundation.framework in Frameworks */,
 				1D83344125129753005E0A43 /* Gzip in Frameworks */,
-				1D9CA802251AC3F900297E2F /* KeychainSwift in Frameworks */,
 				1D907A17250EFC1D00ED1EDC /* Vapor in Frameworks */,
 				1DB6D7D7251920310061A0D9 /* GRDB in Frameworks */,
 				1DB6D7D9251920340061A0D9 /* AnyCodable in Frameworks */,
@@ -1618,6 +1618,7 @@
 				1D3150DE2523C84E00F2DF7C /* BarcelonaIPCServer.swift */,
 				1D3150F8252406DF00F2DF7C /* BarcelonaIPCClient.swift */,
 				1D31512F2525387E00F2DF7C /* Logging.swift */,
+				1D7CE9802527B926003CDDE1 /* SecureStorage.swift */,
 			);
 			path = BarcelonaFoundation;
 			sourceTree = "<group>";
@@ -1967,7 +1968,6 @@
 				1DB6D7D6251920310061A0D9 /* GRDB */,
 				1DB6D7D8251920340061A0D9 /* AnyCodable */,
 				1D9CA7FC251AC39600297E2F /* BCrypt */,
-				1D9CA801251AC3F900297E2F /* KeychainSwift */,
 				1D9CA806251AC7D200297E2F /* SwiftJWT */,
 			);
 			productName = SPMLibraries;
@@ -2074,7 +2074,6 @@
 				1D9079F4250ED78D00ED1EDC /* XCRemoteSwiftPackageReference "swift-nio" */,
 				1D83343D25128BD0005E0A43 /* XCRemoteSwiftPackageReference "GzipSwift" */,
 				1D9CA7F9251AC36300297E2F /* XCRemoteSwiftPackageReference "bcrypt" */,
-				1D9CA800251AC3F900297E2F /* XCRemoteSwiftPackageReference "keychain-swift" */,
 				1D9CA805251AC7D200297E2F /* XCRemoteSwiftPackageReference "Swift-JWT" */,
 			);
 			productRefGroup = 1D5AEDAF24E3725200303692 /* Products */;
@@ -2467,6 +2466,7 @@
 				1DC28B6C251ED6C800A9A50E /* XPCType.swift in Sources */,
 				1D31509525212CFD00F2DF7C /* XPCKeyedEncodingContainer.swift in Sources */,
 				1D31509925212CFD00F2DF7C /* XPCKeyedDecodingContainer.swift in Sources */,
+				1D7CE9812527B926003CDDE1 /* SecureStorage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3119,7 +3119,7 @@
 				SDKROOT = "";
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "macosx iphonesimulator iphoneos";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG BARCELONA_NO_SECURITY";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VALID_ARCHS = "i386 x86_64 armv7s armv7 arm64e arm64";
@@ -3165,6 +3165,7 @@
 				SDKROOT = "";
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "macosx iphonesimulator iphoneos";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -3549,14 +3550,6 @@
 				minimumVersion = 1.1.1;
 			};
 		};
-		1D9CA800251AC3F900297E2F /* XCRemoteSwiftPackageReference "keychain-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/evgenyneu/keychain-swift";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 19.0.0;
-			};
-		};
 		1D9CA805251AC7D200297E2F /* XCRemoteSwiftPackageReference "Swift-JWT" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Kitura/Swift-JWT";
@@ -3590,11 +3583,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1D9CA7F9251AC36300297E2F /* XCRemoteSwiftPackageReference "bcrypt" */;
 			productName = BCrypt;
-		};
-		1D9CA801251AC3F900297E2F /* KeychainSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1D9CA800251AC3F900297E2F /* XCRemoteSwiftPackageReference "keychain-swift" */;
-			productName = KeychainSwift;
 		};
 		1D9CA806251AC7D200297E2F /* SwiftJWT */ = {
 			isa = XCSwiftPackageProductDependency;

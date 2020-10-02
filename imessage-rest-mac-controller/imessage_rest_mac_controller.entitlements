@@ -212,5 +212,9 @@
     <true/>
     <key>get-task-allow</key>
     <true/>
+    <key>keychain-access-groups</key>
+    <array>
+        <string>com.ericrabil.imessage-rest</string>
+    </array>
 </dict>
 </plist>

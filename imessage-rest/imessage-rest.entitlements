@@ -4,7 +4,7 @@
 <dict>
 	<key>com.apple.private.memorystatus</key>
 	<true/>
-	<key> com.apple.dmd.emergency-mode </key>
+	<key>com.apple.dmd.emergency-mode </key>
 	<true/>
 	<key>com.apple.Contacts.database-allow </key>
 	<true/>
@@ -22,11 +22,11 @@
 	<true/>
 	<key>com.apple.coreduetd.people</key>
 	<true/>
-    <key>com.apple.security.exception.mach-register.global-name</key>
-    <array>
-        <string>com.ericrabil.imessage-rest</string>
-        <string>com.apple.ericrabil.imessage-rest</string>
-    </array>
+	<key>com.apple.security.exception.mach-register.global-name</key>
+	<array>
+		<string>com.ericrabil.imessage-rest</string>
+		<string>com.apple.ericrabil.imessage-rest</string>
+	</array>
 	<key>com.apple.developer.applesignin</key>
 	<array>
 		<string></string>
@@ -243,15 +243,19 @@
 		<string>access-calls</string>
 		<string>modify-calls</string>
 	</array>
-    <key>com.apple.security.get-task-allow</key>
-    <true/>
-    <key>get-task-allow</key>
-    <true/>
-    <key>platform-application</key>
-    <true/>
-    <key>com.apple.private.security.no-container</key>
-    <true/>
-    <key>com.apple.private.skip-library-validation</key>
-    <true/>
+	<key>com.apple.security.get-task-allow</key>
+	<true/>
+	<key>get-task-allow</key>
+	<true/>
+	<key>platform-application</key>
+	<true/>
+	<key>com.apple.private.security.no-container</key>
+	<true/>
+	<key>com.apple.private.skip-library-validation</key>
+	<true/>
+    <key>keychain-access-groups</key>
+    <array>
+        <string>com.ericrabil.imessage-rest</string>
+    </array>
 </dict>
 </plist>

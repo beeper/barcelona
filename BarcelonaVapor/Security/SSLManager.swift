@@ -9,7 +9,6 @@
 import Foundation
 import CoreBarcelona
 import BarcelonaFoundation
-import KeychainSwift
 import NIOSSL
 import Vapor
 

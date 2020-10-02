@@ -8,17 +8,10 @@
 
 import Foundation
 import CoreBarcelona
+import BarcelonaFoundation
 import BCrypt
-import KeychainSwift
 import os.log
 
-internal extension KeychainSwift {
-    static var sharedInstance: KeychainSwift {
-        keychain
-    }
-}
-
-private let keychain = KeychainSwift(keyPrefix: "barcelona-")
 private let pskDigestKey = "psk-digest"
 
 internal class PSKManager {
@@ -68,14 +61,10 @@ internal class PSKManager {
             os_log("Fetching digest from keychain", log: SecurityLog, type: .debug)
             #endif
             
-            return keychain.getData(pskDigestKey)
+            return SecureStorage.sharedInstance[data: pskDigestKey]
         }
         set {
-            if let newValue = newValue {
-                keychain.set(newValue, forKey: pskDigestKey)
-            } else {
-                keychain.delete(pskDigestKey)
-            }
+            SecureStorage.sharedInstance[data: pskDigestKey] = newValue
         }
     }
 }

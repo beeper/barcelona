@@ -8,7 +8,7 @@
 
 import Foundation
 import CoreBarcelona
-import KeychainSwift
+import BarcelonaFoundation
 import Security
 import BCrypt
 import SwiftJWT
@@ -239,27 +239,19 @@ internal class JWTManager {
     
     private var attachmentsSigningKey: Data? {
         get {
-            KeychainSwift.sharedInstance.getData(attachmentsKey)
+            SecureStorage.sharedInstance[data: attachmentsKey]
         }
         set {
-            if let newValue = newValue {
-                KeychainSwift.sharedInstance.set(newValue, forKey: attachmentsKey)
-            } else {
-                KeychainSwift.sharedInstance.delete(attachmentsKey)
-            }
+            SecureStorage.sharedInstance[data: attachmentsKey] = newValue
         }
     }
     
     private var signingKey: Data? {
         get {
-            KeychainSwift.sharedInstance.getData(jwtKey)
+            SecureStorage.sharedInstance[data: jwtKey]
         }
         set {
-            if let newValue = newValue {
-                KeychainSwift.sharedInstance.set(newValue, forKey: jwtKey)
-            } else {
-                KeychainSwift.sharedInstance.delete(jwtKey)
-            }
+            SecureStorage.sharedInstance[data: jwtKey] = newValue
         }
     }
 }
