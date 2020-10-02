@@ -9,6 +9,9 @@
 import Foundation
 import IMCore
 import NIO
+import os.log
+
+private let ManagerLog = OSLog(subsystem: "CoreBarcelona", category: "ParticipantsManager")
 
 public struct ParticipantSortRule: Equatable, Hashable {
     var handleID: String
@@ -86,6 +89,12 @@ private extension Array {
     }
 }
 
+private extension Notification {
+    var chat: IMChat? {
+        object as? IMChat ?? userInfo?["user"] as? IMChat
+    }
+}
+
 extension NotificationCenter {
     func addObserver(forName: Notification.Name, using: @escaping (Notification) -> Void) {
         addObserver(forName: forName, object: nil, queue: nil, using: using)
@@ -105,6 +114,21 @@ public class ERTimeSortedParticipantsManager {
         NotificationCenter.default.addObserver(forName: ERChatMessageReceivedNotification) { notification in
             if let ingestible = notification.object as? ERTimeSortedParticipantsManagerIngestible {
                 self.ingest(item: ingestible, inChat: notification.userInfo!["chat"] as! String)
+            }
+        }
+        
+        NotificationCenter.default.addObserver(forName: .IMChatRegistryDidRegisterChat, using: ingest(bootstrapNotification:))
+        
+        NotificationCenter.default.addObserver(forName: .IMChatRegistryDidUnregisterChat, using: ingest(bootstrapNotification:))
+        
+        NotificationCenter.default.addObserver(forName: .IMChatParticipantsDidChange, using: ingest(bootstrapNotification:))
+    }
+    
+    private func ingest(bootstrapNotification notification: Notification) {
+        if let chat = notification.chat {
+            os_log("Recomputing sorted participants with chat ID %@ per notification %@", log: ManagerLog, chat.id, notification.name.rawValue)
+            self.bootstrap(chat: chat).whenSuccess {
+                os_log("Finished recomputing sorted participants with chat ID %@ per notification %@", log: ManagerLog, chat.id, notification.name.rawValue)
             }
         }
     }
