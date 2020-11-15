@@ -28,7 +28,7 @@ public struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
             }
             break
         case "com.apple.messages.URLBalloonProvider":
-            if let dataSource = item.dataSource, let metadata = dataSource.value(forKey: "richLinkMetadata") as? LPLinkMetadata, let richLink = RichLink(metadata: metadata, attachments: item.internalAttachments) {
+            if let dataSource = item.dataSource, let metadata = dataSource.value(forKey: "richLinkMetadata") as? LPLinkMetadata, let richLink = RichLinkRepresentation(metadata: metadata, attachments: item.internalAttachments) {
                 self.richLink = richLink
                 insertPayload = false
             }
@@ -56,7 +56,7 @@ public struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
     public var fromMe: Bool?
     public var time: Double?
     public var digitalTouch: DigitalTouchMessage?
-    public var richLink: RichLink?
+    public var richLink: RichLinkRepresentation?
     public var `extension`: MessageExtensionsData?
     public var payload: String?
     public var bundleID: String

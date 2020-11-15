@@ -1,0 +1,4 @@
+module CoreBarcelona.Private {
+    header "CoreBarcelona-Private.h"
+    requires objc
+}

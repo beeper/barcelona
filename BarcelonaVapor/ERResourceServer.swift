@@ -16,6 +16,12 @@ import Vapor
 import CoreServices
 #endif
 
+#if canImport(AppKit)
+import AppKit
+#elseif canImport(UIKit)
+import UIKit
+#endif
+
 extension String: Error {}
 
 private enum AssetsFormat: String, CaseIterable {
@@ -169,6 +175,19 @@ internal class ERResourceServer {
         
         resources.get("mode") { req -> AssetsModeRepresentation in
             return AssetsModeRepresentation(mode: self.assetsFormat.mode)
+        }
+        
+        resources.grouped("symbol").get(":id") { req -> EventLoopFuture<Response> in
+            guard let symbolName = req.parameters.get("id") else {
+                return HTTPStatus.badRequest.encodeResponse(for: req)
+            }
+            
+            #if canImport(AppKit)
+            let image = NSImage()
+            #elseif canImport(UIKit)
+            #endif
+            
+            return HTTPStatus.notFound.encodeResponse(for: req)
         }
         
         resources.grouped("raw").get(":name") { req -> EventLoopFuture<Response> in

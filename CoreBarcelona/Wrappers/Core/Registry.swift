@@ -129,4 +129,12 @@ public class Registry {
     public func SMSAccount() -> IMAccount? {
         return IMAccountController.sharedInstance().activeSMSAccount
     }
+    
+    public var smsServiceEnabled: Bool {
+        ((IMService.sms() as? IMServiceImpl)?.isEnabled()) ?? false
+    }
+    
+    public var callServiceEnabled: Bool {
+        ((IMService.call() as? IMServiceImpl)?.isEnabled()) ?? false
+    }
 }

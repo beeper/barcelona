@@ -18,7 +18,7 @@ internal extension Color {
     init?(fromUnknown unknown: Any) {
         #if canImport(AppKit)
         if let rawColor = unknown as? NSColor, let color = rawColor.usingColorSpace(.genericRGB) {
-            self.init(red: color.redComponent, blue: color.blueComponent, green: color.greenComponent, alpha: color.alphaComponent)
+            self.init(red: color.redComponent * 255, blue: color.blueComponent * 255, green: color.greenComponent * 255, alpha: color.alphaComponent)
         } else {
             return nil
         }
@@ -26,7 +26,7 @@ internal extension Color {
         if let color = unknown as? UIColor {
             var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
             color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-            self.init(red: red, blue: blue, green: green, alpha: alpha)
+            self.init(red: red * 255, blue: blue * 255, green: green * 255, alpha: alpha)
         } else {
             return nil
         }

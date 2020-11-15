@@ -55,12 +55,14 @@ public extension Array where Element == IMHandle {
     /// Returns a dictionary of [HandleID: IDSState] values
     var idStatuses: [String: IDSState] {
         reduce(into: [String: IDSState]()) { ledger, handle in
-            let isSMS = handle.service?.id == .some(IMServiceStyle.SMS), isPhoneNumber = handle.isPhoneNumber
+            let isSMS = handle.service?.id == .some(IMServiceStyle.SMS), isCall = handle.service?.id == .some(IMServiceStyle.Phone), isPhoneNumber = handle.isPhoneNumber
             
-            let unconditionallyAvailable = isSMS && isPhoneNumber
+            var unconditionallyAvailable = isPhoneNumber && ((isSMS ? Registry.sharedInstance.smsServiceEnabled : isCall ? Registry.sharedInstance.callServiceEnabled : false) == true)
             
             /// If this is a phone number and the SMS service, it is always available. Otherwise, wrap the status into an IDSState
-            ledger[handle.id] = unconditionallyAvailable ? .available : .init(rawValue: Int(handle.cachedIdStatus))
+            var state: IDSState = unconditionallyAvailable ? .available : .init(rawValue: Int(handle.cachedIdStatus))
+            
+            ledger[handle.id] = state
         }
     }
     
@@ -75,6 +77,7 @@ public extension Array where Element == IMHandle {
         }
         
         let promise = messageQuerySystem.next().makePromise(of: Void.self)
+        
         
         if unresolved.count > 0, let queryController = IDSIDQueryController.sharedInstance(), let service = service ?? unresolved[0].service?.idsServiceName {
             queryController.refreshIDStatus(forDestinations: destinations, service: service, listenerID: IDSListenerID, queue: HandleQueue, completionBlock: {

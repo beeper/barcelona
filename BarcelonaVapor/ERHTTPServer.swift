@@ -65,7 +65,7 @@ private class ERVaporApplicationBuilder {
         let baseRouteGroup = app.grouped(GeneralJWTAuthorizor().compositing([]))
         #endif
         /** Socket API */
-        let _ = StreamingAPI(app, routeBuilder: baseRouteGroup, compression: false)
+        let _ = StreamingAPI(app, routeBuilder: app.grouped([Middleware]()), compression: false)
         
         /** REST APIs */
         bindChatAPI(baseRouteGroup)

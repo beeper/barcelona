@@ -54,6 +54,18 @@ class GeneralJWTAuthorizor: Authorizor {
     }
 }
 
+class WebsocketJWTAuthorizor: Authorizor {
+    func validate(headers: HTTPHeaders, request: Request) -> Bool {
+        if let authorization = headers.first(name: "sec-websocket-protocol"), let token = JWTManager.sharedInstance.validateToken(authorization, forScenario: .general) {
+            request.token = token
+            
+            return true
+        }
+        
+        return false
+    }
+}
+
 class AttachmentJWTAuthorizor: Authorizor {
     func validate(headers: HTTPHeaders, request: Request) -> Bool {
         if let cookie = headers.cookie, let authorization = cookie[AttachmentsCookieName], JWTManager.sharedInstance.validateToken(authorization.string, forScenario: .attachments) != nil {

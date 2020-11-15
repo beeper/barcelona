@@ -48,6 +48,12 @@ private extension LPLinkMetadata {
     }
 }
 
+extension NSObject {
+    static func emptyObject() -> Self {
+        perform(Selector("alloc"))!.takeUnretainedValue().perform(Selector("init")).takeUnretainedValue() as! Self
+    }
+}
+
 /// Codable representation of a rich link
 public struct RichLinkRepresentation: Codable {
     init?(metadata: LPLinkMetadata, attachments: [InternalAttachment]) {
@@ -104,10 +110,4 @@ public struct RichLinkRepresentation: Codable {
     var quotedText: String?
     var specialization: RichLinkSpecializationFormat?
     var preliminary: Bool?
-    
-    var dataForStorage: Data? {
-//        guard let RichLinkClass = NSClassFromString("RichLink")
-        
-        return nil
-    }
 }
