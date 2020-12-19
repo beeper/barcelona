@@ -16,6 +16,8 @@ public protocol ChatItemRepresentation: Codable, Identifiable {
     var chatID: String? { get set }
     var fromMe: Bool? { get set }
     var time: Double? { get set }
+    var threadIdentifier: String? { get set }
+    var threadOriginator: String? { get set }
 }
 
 protocol AssociatedChatItemRepresentation: ChatItemRepresentation {

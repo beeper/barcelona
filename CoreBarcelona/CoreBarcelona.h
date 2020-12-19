@@ -22,5 +22,4 @@ FOUNDATION_EXPORT const unsigned char CoreBarcelonaVersionString[];
 #import "libMobileGestalt.h"
 
 CommunicationsFilterBlockList* ERSharedBlockList();
-IMPersonRegistrar* ERSharedPersonRegistrar();
 NSXPCListener* ERConstructXPCListener(NSString*);

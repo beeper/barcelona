@@ -78,6 +78,8 @@ public struct CreateMessage: Codable {
     public var ballonBundleID: String?
     public var payloadData: String?
     public var expressiveSendStyleID: String?
+    public var threadIdentifier: String?
+    public var replyToPart: String?
 }
 
 public struct CreatePluginMessage: Codable {
@@ -85,6 +87,8 @@ public struct CreatePluginMessage: Codable {
     public var attachmentID: String?
     public var bundleID: String
     public var expressiveSendStyleID: String?
+    public var threadIdentifier: String?
+    public var replyToPart: String?
 }
 
 public protocol MessageIdentifiable {
@@ -287,83 +291,126 @@ public struct Chat: Codable, ChatConfigurationRepresentable {
         var payloadData = options.extensionData
         payloadData.data = payloadData.data ?? payloadData.synthesizedData
         
-        ERAttributedString(forExtensionOptions: options, on: eventLoop).whenSuccess { baseString in
-            let messageString = NSMutableAttributedString(attributedString: baseString.string)
-            messageString.append(.init(string: IMBreadcrumbCharacterString))
-                    
-            messageString.addAttributes([
-                MessageAttributes.writingDirection: -1,
-                MessageAttributes.breadcrumbOptions: 0,
-                MessageAttributes.breadcrumbMarker: options.extensionData.layoutInfo?.caption ?? "Message Extension"
-            ], range: messageString.range(of: IMBreadcrumbCharacterString))
-            
-            let messageItem = IMMessageItem.init(sender: nil, time: nil, guid: nil, type: 0)!
-            
-            messageItem.body = messageString
-            messageItem.balloonBundleID = options.bundleID
-            messageItem.payloadData = payloadData.archive
-            messageItem.flags = 5
-            messageItem.service = IMServiceStyle.iMessage.service?.internalName
-            messageItem.setValue(baseString.transferGUIDs, forKey: "fileTransferGUIDs")
-
-            ERApplyMessageExtensionQuirks(toMessageItem: messageItem, inChatID: self.id, forOptions: options)
-            
-            guard let message = IMMessage.message(fromUnloadedItem: messageItem) else {
-                promise.fail(BarcelonaError(code: 500, message: "Failed to construct IMMessage from IMMessageItem"))
-                return
+        var pendingThreadIdentifier: EventLoopFuture<String?>?
+        
+        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+            if let threadIdentifier = options.threadIdentifier {
+                pendingThreadIdentifier = eventLoop.makeSucceededFuture(threadIdentifier)
+            } else if let replyToPart = options.replyToPart {
+                pendingThreadIdentifier = IMChatItem.resolveThreadIdentifier(forIdentifier: replyToPart, on: eventLoop)
             }
-            
-            DispatchQueue.main.async {
-                self.imChat._sendMessage(message, adjustingSender: true, shouldQueue: true)
+        }
+        
+        if pendingThreadIdentifier == nil {
+            pendingThreadIdentifier = eventLoop.makeSucceededFuture(nil)
+        }
+        
+        pendingThreadIdentifier!.whenSuccess { threadIdentifier in
+            ERAttributedString(forExtensionOptions: options, on: eventLoop).whenSuccess { baseString in
+                let messageString = NSMutableAttributedString(attributedString: baseString.string)
+                messageString.append(.init(string: IMBreadcrumbCharacterString))
+                        
+                messageString.addAttributes([
+                    MessageAttributes.writingDirection: -1,
+                    MessageAttributes.breadcrumbOptions: 0,
+                    MessageAttributes.breadcrumbMarker: options.extensionData.layoutInfo?.caption ?? "Message Extension"
+                ], range: messageString.range(of: IMBreadcrumbCharacterString))
+                
+                let messageItem = IMMessageItem.init(sender: nil, time: nil, guid: nil, type: 0)!
+                
+                messageItem.body = messageString
+                messageItem.balloonBundleID = options.bundleID
+                messageItem.payloadData = payloadData.archive
+                messageItem.flags = 5
+                messageItem.service = IMServiceStyle.iMessage.service?.internalName
+                messageItem.setValue(baseString.transferGUIDs, forKey: "fileTransferGUIDs")
+                
+                if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+                    messageItem.setThreadIdentifier(threadIdentifier)
+                }
 
-                ERIndeterminateIngestor.ingest(messageLike: message, in: self.id).flatMapThrowing { message in
-                    guard let message = message else {
-                        throw BarcelonaError(code: 500, message: "Failed to construct represented message")
-                    }
+                ERApplyMessageExtensionQuirks(toMessageItem: messageItem, inChatID: self.id, forOptions: options)
+                
+                guard let message = IMMessage.message(fromUnloadedItem: messageItem) else {
+                    promise.fail(BarcelonaError(code: 500, message: "Failed to construct IMMessage from IMMessageItem"))
+                    return
+                }
+                
+                DispatchQueue.main.async {
+                    self.imChat._sendMessage(message, adjustingSender: true, shouldQueue: true)
 
-                    return BulkMessageRepresentation([message])
-                }.cascade(to: promise)
+                    ERIndeterminateIngestor.ingest(messageLike: message, in: self.id).flatMapThrowing { message in
+                        guard let message = message else {
+                            throw BarcelonaError(code: 500, message: "Failed to construct represented message")
+                        }
+
+                        return BulkMessageRepresentation([message])
+                    }.cascade(to: promise)
+                }
             }
         }
         
         return promise.futureResult
     }
     
-    public func send(message: CreateMessage, on eventLoop: EventLoop? = nil) -> EventLoopFuture<BulkMessageRepresentation> {
+    public func send(message createMessage: CreateMessage, on eventLoop: EventLoop? = nil) -> EventLoopFuture<BulkMessageRepresentation> {
         let eventLoop = eventLoop ?? messageQuerySystem.next()
         let promise = eventLoop.makePromise(of: BulkMessageRepresentation.self)
         
-        ERAttributedString(from: message.parts, on: eventLoop).whenSuccess { result in
-            let text = result.string
-            let fileTransferGUIDs = result.transferGUIDs
-            
-            if text.length == 0 {
-                promise.fail(BarcelonaError(code: 400, message: "Cannot send an empty message"))
-                return
+        var pendingThreadIdentifier: EventLoopFuture<String?>?
+        
+        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+            if let threadIdentifier = createMessage.threadIdentifier {
+                pendingThreadIdentifier = eventLoop.makeSucceededFuture(threadIdentifier)
+            } else if let replyToPart = createMessage.replyToPart {
+                pendingThreadIdentifier = IMChatItem.resolveThreadIdentifier(forIdentifier: replyToPart, on: eventLoop)
             }
-            
-            var subject: NSMutableAttributedString?
-            
-            if let rawSubject = message.subject {
-                subject = NSMutableAttributedString(string: rawSubject)
-            }
-            
-            /** Creates a base message using the computed attributed string */
-            
-            let message = IMMessage.instantMessage(withText: text, messageSubject: subject, fileTransferGUIDs: fileTransferGUIDs, flags: flagsForCreation(message, transfers: fileTransferGUIDs).rawValue)
-            
-            DispatchQueue.main.async {
-                /** Split the base message into individual messages if it contains rich link(s) */
-                guard let messages = message.messagesBySeparatingRichLinks() as? [IMMessage] else {
-                    print("Malformed message result when separating rich links at \(message)")
+        }
+        
+        if pendingThreadIdentifier == nil {
+            pendingThreadIdentifier = eventLoop.makeSucceededFuture(nil)
+        }
+        
+        
+        pendingThreadIdentifier!.whenSuccess { threadIdentifier in
+            ERAttributedString(from: createMessage.parts, on: eventLoop).whenSuccess { result in
+                let text = result.string
+                let fileTransferGUIDs = result.transferGUIDs
+                
+                if text.length == 0 {
+                    promise.fail(BarcelonaError(code: 400, message: "Cannot send an empty message"))
                     return
                 }
                 
-                messages.forEach { message in
-                    self.imChat._sendMessage(message, adjustingSender: true, shouldQueue: true)
+                var subject: NSMutableAttributedString?
+                
+                if let rawSubject = createMessage.subject {
+                    subject = NSMutableAttributedString(string: rawSubject)
                 }
                 
-                messages.bulkRepresentation(in: self.id).cascade(to: promise)
+                /** Creates a base message using the computed attributed string */
+                
+                var message: IMMessage!
+
+                if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+                    message = IMMessage.instantMessage(withText: text, messageSubject: subject, fileTransferGUIDs: fileTransferGUIDs, flags: flagsForCreation(createMessage, transfers: fileTransferGUIDs).rawValue, threadIdentifier: threadIdentifier)
+                } else {
+                    message = IMMessage.instantMessage(withText: text, messageSubject: subject, fileTransferGUIDs: fileTransferGUIDs, flags: flagsForCreation(createMessage, transfers: fileTransferGUIDs).rawValue)
+                }
+
+                DispatchQueue.main.async {
+                    /** Split the base message into individual messages if it contains rich link(s) */
+                    guard let messages = message.messagesBySeparatingRichLinks() as? [IMMessage] else {
+                        print("Malformed message result when separating rich links at \(message)")
+                        return
+                    }
+                    
+                    messages.forEach { message in
+                        self.imChat._sendMessage(message, adjustingSender: true, shouldQueue: true)
+                    }
+                    
+                    messages.bulkRepresentation(in: self.id).cascade(to: promise)
+                }
             }
         }
         

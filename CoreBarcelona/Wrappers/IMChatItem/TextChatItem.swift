@@ -35,6 +35,7 @@ public enum TextPartAttribute: Codable {
     case link(String)
     case breadcrumbMarker(String)
     case breadcrumbOptions(Int)
+    case mention(String)
     
     private enum CodingKeys: String, Codable, CodingKey {
         case key, value
@@ -60,6 +61,8 @@ public enum TextPartAttribute: Codable {
             fallthrough
         case "writingDirection":
             attribute = TextPartAttribute(rawKey: key, rawValue: try container.decode(Int.self, forKey: .value))
+        case "mention":
+            fallthrough
         case "breadcrumbMarker":
             fallthrough
         case "link":
@@ -107,6 +110,8 @@ public enum TextPartAttribute: Codable {
             self = .link(value)
         case "breadcrumbMarker":
             self = .breadcrumbMarker(value)
+        case "mention":
+            self = .mention(value)
         default:
             return nil
         }
@@ -133,6 +138,8 @@ public enum TextPartAttribute: Codable {
                 return nil
             }
             self = attribute
+        case "mention":
+            fallthrough
         case "breadcrumbMarker":
             guard let stringValue = value as? String, let attribute = TextPartAttribute(rawKey: enumKey, rawValue: stringValue) else {
                 return nil
@@ -178,10 +185,21 @@ public enum TextPartAttribute: Codable {
             return .init(value)
         case .breadcrumbOptions(let value):
             return .init(value)
+        case .mention(let value):
+            return .init(value)
         }
     }
     
     public static func enumKey(forAttributedKey key: NSAttributedString.Key) -> String? {
+        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+            switch key {
+            case MessageAttributes.mentionName:
+                return "mention"
+            default:
+                break
+            }
+        }
+        
         switch key {
         case MessageAttributes.bold:
             return "bold"
@@ -222,10 +240,21 @@ public enum TextPartAttribute: Codable {
             return "breadcrumbMarker"
         case .breadcrumbOptions:
             return "breadcrumbOptions"
+        case .mention:
+            return "mention"
         }
     }
     
     public var attributedKey: NSAttributedString.Key {
+        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+            switch self {
+            case .mention:
+                return MessageAttributes.mentionName
+            default:
+                break
+            }
+        }
+        
         switch self {
         case .bold:
             return MessageAttributes.bold
@@ -243,6 +272,8 @@ public enum TextPartAttribute: Codable {
             return MessageAttributes.breadcrumbOptions
         case .breadcrumbMarker:
             return MessageAttributes.breadcrumbMarker
+        case .mention:
+            return MessageAttributes.bold
         }
     }
     
@@ -262,6 +293,7 @@ public enum TextPartAttribute: Codable {
 public struct TextChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
     init(_ item: IMTextMessagePartChatItem, parts: [TextPart], chatID: String?) {
         self.parts = parts
+        self.text = item.text.string
         
         self.load(item: item, chatID: chatID)
     }
@@ -270,6 +302,9 @@ public struct TextChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
     public var chatID: String?
     public var fromMe: Bool?
     public var time: Double?
+    public var threadIdentifier: String?
+    public var threadOriginator: String?
     public var parts: [TextPart]
+    public var text: String
     public var acknowledgments: [AcknowledgmentChatItem]?
 }

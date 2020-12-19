@@ -59,6 +59,8 @@ public func ERTextParts(from string: NSAttributedString) -> [TextPart] {
     
     let textTracking = ERTrack(log: .default, name: "ERTextParts Computation", format: "")
     
+    print(string)
+    
     string.split(MessageAttributes.writingDirection).forEach { substring in
         var textPart: TextPart!
         
@@ -72,6 +74,8 @@ public func ERTextParts(from string: NSAttributedString) -> [TextPart] {
             calMatch()
         } else if substring.hasAttribute(forKey: MessageAttributes.breadcrumbOptions) {
             textPart = ERTextPart(fromBreadcrumb: substring)
+        } else if #available(iOS 14, macOS 10.16, watchOS 7, *), substring.hasAttribute(forKey: MessageAttributes.mentionName) {
+            textPart = ERTextPart(fromMention: substring)
         } else {
             let textMatch = ERTrack(log: .default, name: "ERTextParts .text", format: "")
             textPart = ERTextPart(fromText: substring)
@@ -103,6 +107,10 @@ private func ERInsertAttributesForTextPart(_ textPart: inout TextPart, string: N
 // MARK: - Implementations
 private func ERTextPart(fromLink attributedLink: NSAttributedString) -> TextPart {
     return TextPart(type: .link, string: attributedLink.string, data: .init(attributedLink.allAttributes[MessageAttributes.link]))
+}
+
+private func ERTextPart(fromMention mentionText: NSAttributedString) -> TextPart {
+    return TextPart(type: .text, string: mentionText.string)
 }
 
 private func ERTextPart(fromBreadcrumb breadcrumb: NSAttributedString) -> TextPart {

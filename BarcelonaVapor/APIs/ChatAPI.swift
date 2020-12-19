@@ -108,6 +108,11 @@ public func bindChatAPI(_ app: RoutesBuilder) {
      Gets a specific chat with its ID
      */
     readableChat.get { req -> Chat in
+        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+            print(IMEnableInlineReply())
+            print(req.chat.imChat.inlineReplyController()!)
+        }
+        
         return req.chat
     }
     

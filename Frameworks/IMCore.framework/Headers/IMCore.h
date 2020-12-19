@@ -83,6 +83,8 @@
 #import <IMCore/IMItem-IMChat_Internal.h>
 #import <IMCore/IMItemChatContext.h>
 #import <IMCore/IMItemsController.h>
+#import <IMCore/IMInlineReplyChatItemRules.h>
+#import <IMCore/IMInlineReplyController.h>
 #import <IMCore/IMLoadMoreChatItem.h>
 #import <IMCore/IMLoadMoreRecentChatItem.h>
 #import <IMCore/IMLocatingChatItem.h>
@@ -167,13 +169,6 @@
 #import <IMCore/IMVisibleAssociatedMessageHost-Protocol.h>
 #import <IMCore/IMWhitelistController.h>
 #import <IMCore/INSpeakable-Protocol.h>
-#import <IMCore/NSArray-IMItems.h>
-#import <IMCore/NSCoding-Protocol.h>
-#import <IMCore/NSCopying-Protocol.h>
-#import <IMCore/NSFastEnumeration-Protocol.h>
-#import <IMCore/NSObject-Protocol.h>
-#import <IMCore/NSSecureCoding-Protocol.h>
-#import <IMCore/NSString-IMAdditions.h>
 #import <IMCore/Person.h>
 #import <IMCore/Presentity.h>
 #import <IMCore/TUCallProviderManagerDelegate-Protocol.h>
@@ -223,3 +218,5 @@ extern NSString* IMChatRegistryFailedCountChangedNotification;
 extern NSString* IMChatSendingServiceChangedNotification;
 extern NSString* IMChatReceivedDowngradeNotification;
 
+API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0))
+NSString* IMCreateThreadIdentifierForMessagePartChatItem(IMMessagePartChatItem* chatItem);

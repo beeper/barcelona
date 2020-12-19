@@ -7,6 +7,7 @@
 #import <objc/NSObject.h>
 
 #import "IMChatItemRules-Protocol.h"
+#import "IMInlineReplyController.h"
 
 @class IMChat, IMChatItem, NSArray, NSMutableArray, NSString, IMMessageItem;
 
@@ -44,6 +45,7 @@
 - (BOOL)shouldShowRaiseMessageStatus;
 - (id)chatItemForIMChatItem:(id)arg1;
 - (id)testChatItems;
+- (IMInlineReplyController*) inlineReplyController API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 
 // Remaining properties
 @property(readonly, copy) NSString *debugDescription;

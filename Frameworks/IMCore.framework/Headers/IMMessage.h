@@ -54,6 +54,7 @@
 + (id)fromMeIMHandle:(id)arg1 withText:(id)arg2 fileTransferGUIDs:(id)arg3 flags:(unsigned long long)arg4;
 + (IMMessage*)instantMessageWithText:(id)arg1 messageSubject:(id)arg2 fileTransferGUIDs:(id)arg3 flags:(unsigned long long)arg4 balloonBundleID:(id)arg5 payloadData:(id)arg6 expressiveSendStyleID:(id)arg7;
 + (nonnull IMMessage*)instantMessageWithText:(id)arg1 messageSubject:(id)arg2 fileTransferGUIDs:(id)arg3 flags:(unsigned long long)arg4;
++ (nonnull IMMessage*)instantMessageWithText:(id)arg1 messageSubject:(id)arg2 fileTransferGUIDs:(id)arg3 flags:(unsigned long long)arg4 threadIdentifier:(id)arg5 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 + (nonnull IMMessage*)instantMessageWithText:(id)arg1 messageSubject:(id)arg2 flags:(unsigned long long)arg3 expressiveSendStyleID:(id)arg4;
 + (nonnull IMMessage*)instantMessageWithText:(id)arg1 messageSubject:(id)arg2 flags:(unsigned long long)arg3;
 + (nonnull IMMessage*)instantMessageWithText:(id)arg1 flags:(unsigned long long)arg2;
@@ -61,9 +62,11 @@
 + (id)locatingMessageWithGuid:(id)arg1 error:(id)arg2;
 + (id)messageWithLocation:(id)arg1 flags:(unsigned long long)arg2 error:(id)arg3 guid:(id)arg4;
 + (id)_vCardDataWithCLLocation:(id)arg1;
-+ (id)breadcrumbMessageWithText:(id)arg1 associatedMessageGUID:(id)arg2 balloonBundleID:(id)arg3 fileTransferGUIDs:(id)arg4 payloadData:(id)arg5;
++ (id)breadcrumbMessageWithText:(id)arg1 associatedMessageGUID:(id)arg2 balloonBundleID:(id)arg3 fileTransferGUIDs:(id)arg4 payloadData:(id)arg5 ;
++ (id)breadcrumbMessageWithText:(id)arg1 associatedMessageGUID:(id)arg2 balloonBundleID:(id)arg3 fileTransferGUIDs:(id)arg4 payloadData:(id)arg5 threadIdentifier:(id)arg6 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 + (id)editedMessageWithOriginalMessage:(id)arg1 originalPrefixedGUID:(id)arg2 newBody:(id)arg3;
-+ (IMMessage*)instantMessageWithAssociatedMessageContent:(id)arg1 flags:(unsigned long long)arg2 associatedMessageGUID:(id)arg3 associatedMessageType:(long long)arg4 associatedMessageRange:(struct _NSRange)arg5 messageSummaryInfo:(id)arg6;
++ (IMMessage*)instantMessageWithAssociatedMessageContent:(id)arg1 flags:(unsigned long long)arg2 associatedMessageGUID:(id)arg3 associatedMessageType:(long long)arg4 associatedMessageRange:(struct _NSRange)arg5 messageSummaryInfo:(id)arg6 ;
++ (IMMessage*)instantMessageWithAssociatedMessageContent:(id)arg1 flags:(unsigned long long)arg2 associatedMessageGUID:(id)arg3 associatedMessageType:(long long)arg4 associatedMessageRange:(struct _NSRange)arg5 messageSummaryInfo:(id)arg6 threadIdentifier:(id)arg7 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 @property(nonatomic) unsigned long long sortID; // @synthesize sortID=_sortID;
 @property(nonatomic) BOOL isSOS; // @synthesize isSOS=_isSOS;
 @property(retain, nonatomic) NSString *notificationIDSTokenURI; // @synthesize notificationIDSTokenURI=_notificationIDSTokenURI;
@@ -112,6 +115,8 @@
 @property(readonly, nonatomic) BOOL isRead;
 @property(readonly, nonatomic) BOOL isDelivered;
 @property(readonly, nonatomic) BOOL isAutoReply;
+@property(readonly, nonatomic) BOOL isReply API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+@property(readonly, nonatomic) BOOL canReply API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 @property(readonly, nonatomic) BOOL isDelayed;
 @property(readonly, nonatomic) BOOL isEmpty;
 @property(readonly, nonatomic) BOOL isFromMe;
@@ -139,6 +144,11 @@
 - (NSString*)descriptionForPurpose:(long long)arg1;
 @property(readonly, nonatomic) BOOL isAssociatedMessage;
 - (id)initWithSender:(id)arg1 time:(id)arg2 text:(id)arg3 messageSubject:(id)arg4 fileTransferGUIDs:(id)arg5 flags:(unsigned long long)arg6 error:(id)arg7 guid:(id)arg8 subject:(id)arg9 associatedMessageGUID:(id)arg10 associatedMessageType:(long long)arg11 associatedMessageRange:(struct _NSRange)arg12 associatedMessageInfo:(id)arg13;
-
+- (NSString*) threadIdentifier API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+- (void) setThreadIdentifier:(NSString*)arg1 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+- (IMMessage*) threadOriginator API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+- (void) setThreadOriginator:(IMMessage*)arg2 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+- (long long) replyCountsByPart API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+- (void) setReplyCountsByPart:(long long)arg1 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 @end
 

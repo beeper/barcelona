@@ -4,17 +4,4 @@
 //     class-dump is Copyright (C) 1997-1998, 2000-2001, 2004-2013 by Steve Nygard.
 //
 
-#import <Foundation/Foundation.h>
-
-@class CALayer, NSString;
-
-@protocol CALayerDelegate
-
-@optional
-- (id)actionForLayer:(CALayer *)arg1 forKey:(NSString *)arg2;
-- (void)layoutSublayersOfLayer:(CALayer *)arg1;
-- (void)layerWillDraw:(CALayer *)arg1;
-- (void)drawLayer:(CALayer *)arg1 inContext:(struct CGContext *)arg2;
-- (void)displayLayer:(CALayer *)arg1;
-@end
-
+#import <QuartzCore/QuartzCore.h>

@@ -9,6 +9,7 @@
 #import "IMSendProgressDelegate-Protocol.h"
 #import "INSpeakable-Protocol.h"
 #import "IMChatItem.h"
+#import "IMInlineReplyController.h"
 
 @class IMAccount, IMChatRegistry, IMHandle, IMMessage, IMMessageItem, IMOrderingTools, IMScheduledUpdater, IMSendProgress, IMTimingCollection, MKMapItem, NSArray, NSData, NSDate, NSDictionary, NSMutableArray, NSMutableDictionary, NSMutableSet, NSNumber, NSSet, NSString;
 @protocol IMChatItemRules;
@@ -223,6 +224,7 @@
 - (void)_clearPendingMessages;
 - (void)_setJoinState:(long long)arg1;
 - (BOOL)_handleIncomingItem:(id)arg1;
+- (BOOL)_handleIncomingItem:(id)arg1 updateReplyCounts:(id)arg2 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 - (void)_fixSendingItemDateAndSortID:(id)arg1;
 - (BOOL)hasSurfRequestNotFromMe:(id)arg1;
 - (BOOL)hasSurfRequestForPaymentType:(unsigned long long)arg1;
@@ -258,6 +260,8 @@
 - (BOOL)isSMS;
 - (BOOL)allParticipantsAreContacts;
 - (BOOL)hasKnownParticipants;
+- (IMInlineReplyController*) inlineReplyController API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+- (NSString*) loadInlineRepliesForThreadIdentifier:(NSString*)arg1 threadOriginator:(id)arg2 messageGuid:(NSString*)arg3 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 - (void)loadParticipantContactsIfNecessary;
 - (void)updateIsBlackholed:(BOOL)arg1;
 - (void)updateIsFiltered:(BOOL)arg1;
@@ -373,6 +377,7 @@
 - (void)endHoldingUpdatesForKey:(id)arg1;
 - (void)beginHoldingUpdatesForKey:(id)arg1;
 @property(readonly, copy, nonatomic) NSArray<IMChatItem*>* chatItems;
+- (NSArray<IMChatItem*>*) replyChatItems API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 - (void)_updateLocationShareItemsForSender:(id)arg1;
 - (void)_configureLocationShareItem:(id)arg1;
 - (void)stopTrackingParticipantLocations;

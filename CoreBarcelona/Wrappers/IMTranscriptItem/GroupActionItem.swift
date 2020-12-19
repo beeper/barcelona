@@ -26,6 +26,8 @@ public struct GroupActionItem: ChatItemRepresentation {
     public var chatID: String?
     public var fromMe: Bool?
     public var time: Double?
+    public var threadIdentifier: String?
+    public var threadOriginator: String?
     public var actionType: Int64
     public var sender: String?
     

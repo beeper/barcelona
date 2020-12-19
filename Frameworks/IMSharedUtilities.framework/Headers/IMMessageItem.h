@@ -131,6 +131,8 @@
 - (id)copyForBackwardsCompatibility;
 - (id)copyWithFlags:(unsigned long long)arg1;
 - (id)copyWithZone:(struct _NSZone *)arg1;
+- (void)setThreadIdentifier:(NSString*)arg1;
+- (NSString*)threadIdentifier;
 
 @end
 

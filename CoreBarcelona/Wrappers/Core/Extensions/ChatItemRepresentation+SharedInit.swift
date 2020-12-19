@@ -15,6 +15,11 @@ extension ChatItemRepresentation {
         chatID = chat
         fromMe = item.isFromMe
         time = (item.time?.timeIntervalSince1970 ?? 0) * 1000
+        
+        if let item = item as? IMMessagePartChatItem, #available(iOS 14, macOS 10.16, watchOS 7, *) {
+            threadIdentifier = item.threadIdentifier()
+            threadOriginator = item.threadOriginator()?.guid
+        }
     }
     
     internal mutating func load(item: IMTranscriptChatItem, chatID chat: String?) {
@@ -22,5 +27,10 @@ extension ChatItemRepresentation {
         chatID = chat
         fromMe = item.isFromMe
         time = ((item.transcriptDate ?? item._timeAdded())?.timeIntervalSince1970 ?? item._item()?.time?.timeIntervalSince1970 ?? 0) * 1000
+        
+        if let item = item as? IMMessagePartChatItem, #available(iOS 14, macOS 10.16, watchOS 7, *) {
+            threadIdentifier = item.threadIdentifier()
+            threadOriginator = item.threadOriginator()?.guid
+        }
     }
 }

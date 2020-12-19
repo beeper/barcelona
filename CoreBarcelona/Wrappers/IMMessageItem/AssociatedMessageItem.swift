@@ -16,10 +16,12 @@ public struct AssociatedMessageItem: ChatItemRepresentation {
         self.load(item: item, chatID: chatID)
     }
     
-    public var id: String? = nil
-    public var chatID: String? = nil
-    public var fromMe: Bool? = nil
-    public var time: Double? = nil
+    public var id: String?
+    public var chatID: String?
+    public var fromMe: Bool?
+    public var time: Double?
+    public var threadIdentifier: String?
+    public var threadOriginator: String?
     public var associatedID: String
     public var associatedType: Int64
 }

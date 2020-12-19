@@ -195,3 +195,17 @@ extern NSString* IMBalloonLayoutInfoTertiarySubcaptionKey;
 extern NSString* IMBalloonBundleIdentifierBusiness;
 
 void IMSharedHelperReplaceExtensionPayloadDataWithFilePathForMessage(IMMessageItem*, NSString*);
+
+API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0))
+BOOL IMEnableInlineReply();
+
+extern NSString* IMMentionAttributeName API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+extern NSString* IMMentionConfirmedMention API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+extern NSString* IMMentionAutomaticConfirmedMention API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+extern NSString* IMMentionOverrideRemoveMention API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+extern NSString* IMMentionOriginalTextMention API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+extern NSString* IMMentionPrefixCharacter API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+extern NSString* IMMentionUnconfirmedDirectMention API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+
+API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0))
+NSString* IMMessageCreateThreadIdentifierWithOriginatorGUID(long long index, long long end, long long start, NSString* guid);

@@ -55,8 +55,15 @@ public func ERAttributedString(from parts: [MessagePart], on eventLoop: EventLoo
  For each part of the attributed string, insert a MessagePart index (IMCore interop)
  */
 private func ERInsertMessageParts(into string: NSMutableAttributedString) -> NSMutableAttributedString {
+    var thisPart = 0
     string.enumerateDelimitingAttribute(MessageAttributes.writingDirection) { range, index in
-        string.addAttribute(MessageAttributes.messagePart, value: index, range: range)
+        let str = string.attributedSubstring(from: range)
+        
+        string.addAttribute(MessageAttributes.messagePart, value: thisPart, range: range)
+        
+        if str.hasAttribute(forKey: MessageAttributes.filename) {
+            thisPart += 1
+        }
     }
     
     return string

@@ -134,11 +134,7 @@
 		1D67C145250ACBCF000A4D58 /* IMHandle+DestinationResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D67C144250ACBCF000A4D58 /* IMHandle+DestinationResolvable.swift */; };
 		1D6AB229252FB1510047B202 /* RichLinkExternalComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6AB228252FB1510047B202 /* RichLinkExternalComposition.swift */; };
 		1D74074F25116CFC007250F8 /* MessageExtensionsData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D74074E25116CFC007250F8 /* MessageExtensionsData.swift */; };
-		1D7427A12531FCF3008CE101 /* IOKitUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D7427A02531FCF3008CE101 /* IOKitUser.m */; };
 		1D7427A525320262008CE101 /* CoreBarcelona-Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D7427A4253201F6008CE101 /* CoreBarcelona-Private.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		1D7427BC25320921008CE101 /* iokitmig64.h in Sources */ = {isa = PBXBuildFile; fileRef = 1D74279F2531FCE0008CE101 /* iokitmig64.h */; };
-		1D7427BD25320921008CE101 /* IOKitUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D7427A02531FCF3008CE101 /* IOKitUser.m */; };
-		1D7427BE25320921008CE101 /* DynasticRightsManagement.h in Sources */ = {isa = PBXBuildFile; fileRef = 1D7427A22531FF91008CE101 /* DynasticRightsManagement.h */; };
 		1D7427BF25320921008CE101 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEECB24E37F8A00303692 /* Constants.swift */; };
 		1D7427C125320921008CE101 /* Tapbacks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7024E37D9E00303692 /* Tapbacks.swift */; };
 		1D7427C225320921008CE101 /* RawChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7124E37D9E00303692 /* RawChat.swift */; };
@@ -284,7 +280,6 @@
 		1D74284E253209AB008CE101 /* SPMLibraries.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D9079FC250EE97500ED1EDC /* SPMLibraries.framework */; };
 		1D74285125320B53008CE101 /* IMSharedUtilities.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDDB24E3744900303692 /* IMSharedUtilities.framework */; };
 		1D74285225320B58008CE101 /* LinkPresentation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D7D8954250D987900DA9909 /* LinkPresentation.framework */; };
-		1D74285325320B7C008CE101 /* libCoreBarcelona-Static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D7427B5253208F2008CE101 /* libCoreBarcelona-Static.a */; };
 		1D74D49A250C01CB00A9F9A1 /* Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D74D499250C01CB00A9F9A1 /* Identifiable.swift */; };
 		1D74D4A0250C04A900A9F9A1 /* IMService+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D74D49F250C04A900A9F9A1 /* IMService+Identifiable.swift */; };
 		1D74D4A2250C051F00A9F9A1 /* IMChat+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D74D4A1250C051F00A9F9A1 /* IMChat+Identifiable.swift */; };
@@ -353,9 +348,11 @@
 		1D83343C251282E1005E0A43 /* MessageExtensionsQuirkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D83343B251282E1005E0A43 /* MessageExtensionsQuirkManager.swift */; };
 		1D83344125129753005E0A43 /* Gzip in Frameworks */ = {isa = PBXBuildFile; productRef = 1D83344025129753005E0A43 /* Gzip */; };
 		1D8334432512CD3A005E0A43 /* ChatHandleJoin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8334422512CD3A005E0A43 /* ChatHandleJoin.swift */; };
+		1D87EC50258BF7290030D9C6 /* IMChatItem+ThreadIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D87EC4F258BF7290030D9C6 /* IMChatItem+ThreadIdentifier.swift */; };
+		1D87EC64258BF8170030D9C6 /* IMChatItem+LazilyResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D87EC63258BF8170030D9C6 /* IMChatItem+LazilyResolvable.swift */; };
+		1D87EC6C258BFB0D0030D9C6 /* IMChatItem+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D87EC6B258BFB0D0030D9C6 /* IMChatItem+Identifiable.swift */; };
 		1D8991E6253260E100E98AAD /* DynasticRightsManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8991E5253260E100E98AAD /* DynasticRightsManagement.swift */; };
 		1D8991E72532610B00E98AAD /* DynasticRightsManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8991E5253260E100E98AAD /* DynasticRightsManagement.swift */; };
-		1D8991E82532644F00E98AAD /* iokitmig64.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D74279F2531FCE0008CE101 /* iokitmig64.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1D8991E92532646200E98AAD /* iokitmig64.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D74279F2531FCE0008CE101 /* iokitmig64.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1D8991EA2532648200E98AAD /* CoreBarcelona.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D44864724E85BBB00FF73F3 /* CoreBarcelona.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1D8991F12534304D00E98AAD /* libMobileGestalt.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D8991F02534304D00E98AAD /* libMobileGestalt.tbd */; };
@@ -394,6 +391,7 @@
 		1D9CA80F251AD29D00297E2F /* CryptographyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9CA80E251AD29D00297E2F /* CryptographyManager.swift */; };
 		1D9CA811251AD7E200297E2F /* AuthorizationMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9CA810251AD7E200297E2F /* AuthorizationMiddleware.swift */; };
 		1D9CA813251AE60A00297E2F /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9CA812251AE60A00297E2F /* Constants.swift */; };
+		1D9E3DB72562D3160042FA60 /* CoreBarcelona.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* CoreBarcelona.framework */; };
 		1D9FD6EB251E3B5B0044FAB0 /* OriginSwiftUIBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9FD6EA251E3B5B0044FAB0 /* OriginSwiftUIBridge.swift */; };
 		1D9FD6EF251E6DC50044FAB0 /* ERHTTPServerConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9FD6EC251E6C6C0044FAB0 /* ERHTTPServerConfiguration.swift */; };
 		1D9FD6F9251E763C0044FAB0 /* ERHTTPServerConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9FD6EC251E6C6C0044FAB0 /* ERHTTPServerConfiguration.swift */; };
@@ -794,11 +792,11 @@
 		1D5AEDAE24E3725200303692 /* imessage-rest.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = "imessage-rest.xpc"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D5AEDB724E3725200303692 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1D5AEDBD24E3727C00303692 /* imessage-rest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "imessage-rest.entitlements"; sourceTree = "<group>"; };
-		1D5AEDBF24E373ED00303692 /* IMCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IMCore.framework; path = "../imcore-rest/Frameworks/IMCore.framework"; sourceTree = "<group>"; };
-		1D5AEDC024E373ED00303692 /* ContactsFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ContactsFoundation.framework; path = "../imcore-rest/Frameworks/ContactsFoundation.framework"; sourceTree = "<group>"; };
-		1D5AEDC224E373ED00303692 /* ContactsAutocomplete.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ContactsAutocomplete.framework; path = "../imcore-rest/Frameworks/ContactsAutocomplete.framework"; sourceTree = "<group>"; };
-		1D5AEDC324E373ED00303692 /* IMFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IMFoundation.framework; path = "../imcore-rest/Frameworks/IMFoundation.framework"; sourceTree = "<group>"; };
-		1D5AEDC424E373ED00303692 /* IMSharedUtilities.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IMSharedUtilities.framework; path = "../imcore-rest/Frameworks/IMSharedUtilities.framework"; sourceTree = "<group>"; };
+		1D5AEDBF24E373ED00303692 /* IMCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IMCore.framework; path = Frameworks/IMCore.framework; sourceTree = "<group>"; };
+		1D5AEDC024E373ED00303692 /* ContactsFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ContactsFoundation.framework; path = Frameworks/ContactsFoundation.framework; sourceTree = "<group>"; };
+		1D5AEDC224E373ED00303692 /* ContactsAutocomplete.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ContactsAutocomplete.framework; path = Frameworks/ContactsAutocomplete.framework; sourceTree = "<group>"; };
+		1D5AEDC324E373ED00303692 /* IMFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IMFoundation.framework; path = Frameworks/IMFoundation.framework; sourceTree = "<group>"; };
+		1D5AEDC424E373ED00303692 /* IMSharedUtilities.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IMSharedUtilities.framework; path = Frameworks/IMSharedUtilities.framework; sourceTree = "<group>"; };
 		1D5AEDD224E3744900303692 /* CommunicationsFilter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CommunicationsFilter.framework; path = Frameworks/CommunicationsFilter.framework; sourceTree = "<group>"; };
 		1D5AEDD424E3744900303692 /* IMCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IMCore.framework; path = Frameworks/IMCore.framework; sourceTree = "<group>"; };
 		1D5AEDD524E3744900303692 /* IMDPersistence.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IMDPersistence.framework; path = Frameworks/IMDPersistence.framework; sourceTree = "<group>"; };
@@ -928,6 +926,9 @@
 		1D804E11250ECEB300F376CB /* String+Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Service.swift"; sourceTree = "<group>"; };
 		1D83343B251282E1005E0A43 /* MessageExtensionsQuirkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageExtensionsQuirkManager.swift; sourceTree = "<group>"; };
 		1D8334422512CD3A005E0A43 /* ChatHandleJoin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHandleJoin.swift; sourceTree = "<group>"; };
+		1D87EC4F258BF7290030D9C6 /* IMChatItem+ThreadIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatItem+ThreadIdentifier.swift"; sourceTree = "<group>"; };
+		1D87EC63258BF8170030D9C6 /* IMChatItem+LazilyResolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatItem+LazilyResolvable.swift"; sourceTree = "<group>"; };
+		1D87EC6B258BFB0D0030D9C6 /* IMChatItem+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatItem+Identifiable.swift"; sourceTree = "<group>"; };
 		1D8991E5253260E100E98AAD /* DynasticRightsManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynasticRightsManagement.swift; sourceTree = "<group>"; };
 		1D8991F02534304D00E98AAD /* libMobileGestalt.tbd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libMobileGestalt.tbd; path = Frameworks/libMobileGestalt.tbd; sourceTree = "<group>"; };
 		1D8991F32534307400E98AAD /* libMobileGestalt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libMobileGestalt.h; sourceTree = "<group>"; };
@@ -1059,7 +1060,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1D74285325320B7C008CE101 /* libCoreBarcelona-Static.a in Frameworks */,
+				1D9E3DB72562D3160042FA60 /* CoreBarcelona.framework in Frameworks */,
 				1D3150D025222D8200F2DF7C /* SPMLibraries.framework in Frameworks */,
 				1D8991F5253430C000E98AAD /* libMobileGestalt.tbd in Frameworks */,
 				1D907A12250EFB7F00ED1EDC /* BarcelonaVapor.framework in Frameworks */,
@@ -1543,6 +1544,7 @@
 		1D5AEE5924E37D9E00303692 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				1D87EC4E258BF70F0030D9C6 /* Threads */,
 				1D14A1C7250C1D0D001C5921 /* Foundation */,
 				1D3E3330250C203200EEA08B /* Glue */,
 				1D74D49E250C049E00A9F9A1 /* Identifiable */,
@@ -1655,6 +1657,7 @@
 				1DFB1EAA251011F000D84361 /* Contact+Identifiable.swift */,
 				1DD32DCE2510258300D877CF /* AttachmentChatItem+Identifiable.swift */,
 				1DCB8BDA2510439E0005A0EB /* Attachment+Identifiable.swift */,
+				1D87EC6B258BFB0D0030D9C6 /* IMChatItem+Identifiable.swift */,
 			);
 			path = Identifiable;
 			sourceTree = "<group>";
@@ -1679,6 +1682,7 @@
 				1D3E333D250C252100EEA08B /* CNContact+LazilyResolvable.swift */,
 				1D3E3346250C279F00EEA08B /* InternalAttachment+LazilyResolvable.swift */,
 				1D74D4B0250C100600A9F9A1 /* Chat+Resolvable.swift */,
+				1D87EC63258BF8170030D9C6 /* IMChatItem+LazilyResolvable.swift */,
 			);
 			path = LazilyResolvable;
 			sourceTree = "<group>";
@@ -1754,6 +1758,14 @@
 				1D9CA80C251ACE7B00297E2F /* SecurityAPI.swift */,
 			);
 			path = APIs;
+			sourceTree = "<group>";
+		};
+		1D87EC4E258BF70F0030D9C6 /* Threads */ = {
+			isa = PBXGroup;
+			children = (
+				1D87EC4F258BF7290030D9C6 /* IMChatItem+ThreadIdentifier.swift */,
+			);
+			path = Threads;
 			sourceTree = "<group>";
 		};
 		1D9079FD250EE97500ED1EDC /* SPMLibraries */ = {
@@ -1964,7 +1976,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				1D7427A525320262008CE101 /* CoreBarcelona-Private.h in Headers */,
-				1D8991E82532644F00E98AAD /* iokitmig64.h in Headers */,
 				1D44864924E85BBB00FF73F3 /* CoreBarcelona.h in Headers */,
 				1D8991F42534307400E98AAD /* libMobileGestalt.h in Headers */,
 			);
@@ -2446,7 +2457,6 @@
 				1D74D4A4250C091500A9F9A1 /* LazilyResolvable.swift in Sources */,
 				1DD805E124E85D100076D717 /* GroupTitleChangeItem.swift in Sources */,
 				1DD805E024E85D100076D717 /* TextChatItem.swift in Sources */,
-				1D7427A12531FCF3008CE101 /* IOKitUser.m in Sources */,
 				1D1E232F2501A2560069705D /* ActionChatItem.swift in Sources */,
 				1DD805B524E85CFD0076D717 /* RawMessage.swift in Sources */,
 				1DD805C124E85D070076D717 /* IMMessage+Subpart.swift in Sources */,
@@ -2526,15 +2536,17 @@
 				1D1E234B2506D76E0069705D /* DigitalTouchMessage.swift in Sources */,
 				1D3E3345250C270700EEA08B /* Attachment.swift in Sources */,
 				1DD805E224E85D100076D717 /* ParticipantChangeItem.swift in Sources */,
-				1DD805C424E85D070076D717 /* IMChatItem+CountFix.m in Sources */,
 				1DCB8BDD251043D30005A0EB /* Attachment+Searchable.swift in Sources */,
 				1DD805C324E85D070076D717 /* IMAttachmentMessagePartChatItem+TapbackType.swift in Sources */,
 				1D74D4A2250C051F00A9F9A1 /* IMChat+Identifiable.swift in Sources */,
 				1D1E23562506E0AA0069705D /* ETVideoData.swift in Sources */,
 				1D1E23582506E0C80069705D /* ETTapData.swift in Sources */,
+				1D87EC64258BF8170030D9C6 /* IMChatItem+LazilyResolvable.swift in Sources */,
 				1D1E23382501B68A0069705D /* IMItem+AccountResolvable.swift in Sources */,
 				1D74D4AD250C0E6800A9F9A1 /* IMChat+Resolvable.swift in Sources */,
+				1D87EC6C258BFB0D0030D9C6 /* IMChatItem+Identifiable.swift in Sources */,
 				1D75D4E124F58AEA008F053C /* StickerChatItem.swift in Sources */,
+				1D87EC50258BF7290030D9C6 /* IMChatItem+ThreadIdentifier.swift in Sources */,
 				1D1E23602506E1560069705D /* DigitalTouchMessage+Codable.swift in Sources */,
 				1D1E233A2501EFC40069705D /* IMTranscriptPluginChatItem+IMFileTransferContainer.swift in Sources */,
 				1DD805DF24E85D100076D717 /* DateItem.swift in Sources */,
@@ -2566,6 +2578,7 @@
 				1D3E3347250C279F00EEA08B /* InternalAttachment+LazilyResolvable.swift in Sources */,
 				1DD805BB24E85D070076D717 /* IMContactStore+ContactRepresentations.swift in Sources */,
 				1DD805CA24E85D070076D717 /* CNContact+Serializable.swift in Sources */,
+				1DD805C424E85D070076D717 /* IMChatItem+CountFix.m in Sources */,
 				1DD805E624E85D100076D717 /* StatusChatItem.swift in Sources */,
 				1DD805B624E85CFD0076D717 /* ChatMessageJoin.swift in Sources */,
 				1D74D49A250C01CB00A9F9A1 /* Identifiable.swift in Sources */,
@@ -2604,13 +2617,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1D7427BC25320921008CE101 /* iokitmig64.h in Sources */,
-				1D7427BE25320921008CE101 /* DynasticRightsManagement.h in Sources */,
 				1D7427BF25320921008CE101 /* Constants.swift in Sources */,
 				1D7427C125320921008CE101 /* Tapbacks.swift in Sources */,
-				1D7427BD25320921008CE101 /* IOKitUser.m in Sources */,
 				1D7427C225320921008CE101 /* RawChat.swift in Sources */,
 				1D7427C325320921008CE101 /* RawMessage.swift in Sources */,
+				1D7427FF25320921008CE101 /* IMChatItem+CountFix.m in Sources */,
 				1D7427C425320921008CE101 /* ChatHandleJoin.swift in Sources */,
 				1D8991E72532610B00E98AAD /* DynasticRightsManagement.swift in Sources */,
 				1D7427C525320921008CE101 /* ChatMessageJoin.swift in Sources */,
@@ -2671,7 +2682,6 @@
 				1D7427FC25320921008CE101 /* IMMessage+SPI.swift in Sources */,
 				1D7427FD25320921008CE101 /* IMMessage+Subpart.swift in Sources */,
 				1D7427FE25320921008CE101 /* IMBalloonPluginManager+IMBalloonPluginManager_GetOutOfMyWay.m in Sources */,
-				1D7427FF25320921008CE101 /* IMChatItem+CountFix.m in Sources */,
 				1D74280025320921008CE101 /* IMChatRegistry+NerfedIntents.m in Sources */,
 				1D74280125320921008CE101 /* IMChat+HistoryLoadingPatch.m in Sources */,
 				1D74280225320921008CE101 /* IMContactStore+NoOverrides.m in Sources */,
@@ -3105,12 +3115,13 @@
 					"$(ARCHS_STANDARD)",
 					arm64,
 				);
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = NO;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 6UW2D7F2RU;
+				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -3130,6 +3141,7 @@
 					"$(PROJECT_DIR)/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
+				OTHER_SWIFT_FLAGS = "-Xcc -Wno-nullability-completeness";
 				PRODUCT_BUNDLE_IDENTIFIER = com.apple.ericrabil.CoreBarcelona;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SDKROOT = "";
@@ -3148,6 +3160,7 @@
 					"-Wno-nullability-completeness",
 					"-Wno-objc-protocol-method-implementation",
 					"-Wno-arc-performSelector-leaks",
+					"-Wno-nonnull",
 				);
 			};
 			name = Debug;
@@ -3161,12 +3174,13 @@
 					"$(ARCHS_STANDARD)",
 					arm64,
 				);
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = NO;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 6UW2D7F2RU;
+				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -3186,6 +3200,7 @@
 					"$(PROJECT_DIR)/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
+				OTHER_SWIFT_FLAGS = "-Xcc -Wno-nullability-completeness";
 				PRODUCT_BUNDLE_IDENTIFIER = com.apple.ericrabil.CoreBarcelona;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SDKROOT = "";
@@ -3204,6 +3219,7 @@
 					"-Wno-nullability-completeness",
 					"-Wno-objc-protocol-method-implementation",
 					"-Wno-arc-performSelector-leaks",
+					"-Wno-nonnull",
 				);
 			};
 			name = Release;

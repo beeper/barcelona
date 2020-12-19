@@ -70,6 +70,7 @@
 - (void)addAttachmentsFromFileTransferGUIDs:(id)arg1;
 - (id)initWithMessageItem:(id)arg1;
 - (id)initWithMessage:(id)arg1;
+- (NSString*) threadIdentifier API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 
 @end
 

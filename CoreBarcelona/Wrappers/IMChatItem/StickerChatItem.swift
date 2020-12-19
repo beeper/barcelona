@@ -103,6 +103,8 @@ public struct StickerChatItem: AssociatedChatItemRepresentation {
     public var chatID: String?
     public var fromMe: Bool?
     public var time: Double?
+    public var threadIdentifier: String?
+    public var threadOriginator: String?
     public var associatedID: String
     public var attachment: Attachment?
     public var sticker: StickerInformation?

@@ -22,6 +22,14 @@
 @property(readonly, nonatomic) BOOL canDelete;
 - (id)copyWithZone:(struct _NSZone *)arg1;
 - (id)description;
+- (BOOL)itemIsThreadOriginator API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+- (BOOL)itemIsThreadOriginatorWithThreadIdentifier:(NSString*)arg1 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+- (NSString*)threadGroupIdentifier API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+
+- (BOOL) itemIsReply API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+- (BOOL) itemIsReplyContextPreview API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+- (BOOL) itemIsReplyCount API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+- (BOOL) canReply API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 
 @end
 

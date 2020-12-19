@@ -29,6 +29,9 @@ public struct MessageAttributes {
     static let calendarData = NSAttributedString.Key(rawValue: IMCalendarEventAttributeName)
     static let breadcrumbOptions = NSAttributedString.Key(rawValue: IMBreadcrumbTextOptionFlags)
     static let breadcrumbMarker = NSAttributedString.Key(rawValue: IMBreadcrumbTextMarkerAttributeName)
+    
+    @available(iOS 14, macOS 10.16, watchOS 7, *)
+    static let mentionName = NSAttributedString.Key(rawValue: IMMentionConfirmedMention)
 }
 
 private func OSLog(_ category: String) -> OSLog {

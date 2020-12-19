@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Contacts
 import IMCore
 import NIO
 
@@ -52,9 +53,9 @@ public struct ContactSearchParameters: QueryParameters {
     }
 }
 
-extension IMPerson {
+private extension CNContact {
     var handleIDs: [String] {
-        Registry.sharedInstance.imHandleIDs(forPerson: self)
+        Registry.sharedInstance.imHandleIDs(forContact: self)
     }
 }
 
@@ -66,31 +67,31 @@ private enum ContactSearchParameter: SearchParameter {
     case hasPicture(Bool)
     case handles([String])
     
-    func test(_ person: IMPerson) -> Bool {
+    func test(_ person: CNContact) -> Bool {
         switch self {
         case .ids(let ids):
-            if !ids.contains(person.cnContactID) {
+            if !ids.contains(person.id) {
                 return false
             }
         case .firstName(let firstName):
-            if !(person.firstName?.lowercased().contains(firstName) ?? false) {
+            if !(person.givenName.lowercased().contains(firstName)) {
                 return false
             }
         case .lastName(let lastName):
-            if !(person.lastName?.lowercased().contains(lastName) ?? false) {
+            if !(person.familyName.lowercased().contains(lastName)) {
                 return false
             }
         case .nickname(let nickname):
-            if !(person.nickname?.lowercased().contains(nickname) ?? false) {
+            if !(person.nickname.lowercased().contains(nickname)) {
                 return false
             }
         case .hasPicture(let hasPicture):
             if hasPicture {
-                if person.imageDataWithoutLoading == nil {
+                if person.imageData == nil {
                     return false
                 }
             } else {
-                if person.imageDataWithoutLoading != nil {
+                if person.imageData != nil {
                     return false
                 }
             }
@@ -99,7 +100,7 @@ private enum ContactSearchParameter: SearchParameter {
                 return false
             }
         }
-        
+
         return true
     }
 }
@@ -114,7 +115,7 @@ extension Contact: Searchable {
             return eventLoop.makeSucceededFuture([])
         }
         
-        return eventLoop.makeSucceededFuture(IMPerson.allPeople().filter {
+        return eventLoop.makeSucceededFuture(IMContactStore.sharedInstance()!.allContacts.filter {
             parameters.test($0)
         }.map {
             Contact($0)

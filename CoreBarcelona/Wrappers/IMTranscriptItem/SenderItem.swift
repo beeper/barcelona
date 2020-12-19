@@ -19,5 +19,7 @@ public struct SenderItem: ChatItemRepresentation {
     public var chatID: String?
     public var fromMe: Bool?
     public var time: Double?
+    public var threadIdentifier: String?
+    public var threadOriginator: String?
     public var handleID: String
 }

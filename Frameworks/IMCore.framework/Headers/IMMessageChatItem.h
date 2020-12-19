@@ -26,5 +26,7 @@
 @property(readonly) unsigned long hash;
 @property(readonly) Class superclass;
 
+-(BOOL)canReply API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+
 @end
 

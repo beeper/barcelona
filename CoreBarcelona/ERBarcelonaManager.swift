@@ -48,6 +48,10 @@ private var currentDaemonController: IMDaemonController? = nil
         return currentDaemonController!
     }
     
+    @objc public class func iChatBundleIdentifier() -> String {
+        return "com.apple.iChat"
+    }
+    
     @objc private class func swizzleDaemonControllerSharedInstance() {
         didSwizzle = true
         

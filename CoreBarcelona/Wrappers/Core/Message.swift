@@ -123,6 +123,7 @@ public struct Message: ChatItemRepresentation {
             description = message.description(forPurpose: 0x2, inChat: chat)
         }
         
+        self.load(message: message)
         self.load(item: backing, chatID: inChatChatID)
     }
     
@@ -132,6 +133,13 @@ public struct Message: ChatItemRepresentation {
     
     init(_ message: IMMessage, items: [ChatItem], chatID: String?) {
         self.init(message._imMessageItem, message: message, items: items, chatID: chatID)
+    }
+    
+    private mutating func load(message: IMMessage) {
+        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+            threadIdentifier = message.threadIdentifier()
+            threadOriginator = message.threadOriginator()?.guid
+        }
     }
     
     public var id: String
@@ -155,4 +163,6 @@ public struct Message: ChatItemRepresentation {
     public var service: IMServiceStyle
     public var fileTransferIDs: [String]
     public var associatedMessageID: String?
+    public var threadIdentifier: String?
+    public var threadOriginator: String?
 }

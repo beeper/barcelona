@@ -39,20 +39,6 @@ public struct Contact: Codable, Comparable {
         return lhs.id == rhs.id
     }
     
-    public init(_ person: IMPerson) {
-        self.id = person.cnContactID
-        self.firstName = person.firstName
-        self.middleName = nil
-        self.lastName = person.lastName
-        self.fullName = person.fullName
-        self.nickname = person.nickname
-        self.hasPicture = person.imageDataWithoutLoading != nil
-        
-        self.handles = person.handleIDs.map {
-            Handle(id: $0, isBusiness: false)
-        }
-    }
-    
     public init(_ contact: CNContact) {
         self.id = contact.identifier
         self.firstName = contact.givenName.count == 0 ? nil : contact.givenName

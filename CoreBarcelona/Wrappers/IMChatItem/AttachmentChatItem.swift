@@ -26,6 +26,8 @@ public struct AttachmentChatItem: ChatItemRepresentation, ChatItemAcknowledgable
     public var chatID: String?
     public var fromMe: Bool?
     public var time: Double?
+    public var threadIdentifier: String?
+    public var threadOriginator: String?
     public var transferID: String
     public var metadata: Attachment?
     public var acknowledgments: [AcknowledgmentChatItem]?

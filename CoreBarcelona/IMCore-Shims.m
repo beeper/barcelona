@@ -10,6 +10,13 @@
 #import <CommunicationsFilter/CommunicationsFilter.h>
 #import <IMCore/IMCore.h>
 
+#import "Extensions/Overrides/IMChatItem+CountFix.m"
+#import "Extensions/Overrides/IMBalloonPluginManager+IMBalloonPluginManager_GetOutOfMyWay.m"
+#import "Extensions/Overrides/IMChatRegistry+NerfedIntents.m"
+#import "Extensions/Overrides/IMChat+HistoryLoadingPatch.m"
+#import "Extensions/Overrides/IMContactStore+NoOverrides.m"
+#import "Extensions/Overrides/IMContactStore+AlwaysCache.m"
+
 @interface CNGeminiManager: NSObject
 @end
 
@@ -18,10 +25,6 @@
 
 CommunicationsFilterBlockList* ERSharedBlockList() {
     return [NSClassFromString(@"CommunicationsFilterBlockList") sharedInstance];
-}
-
-IMPersonRegistrar* ERSharedPersonRegistrar() {
-    return [NSClassFromString(@"IMPersonRegistrar") sharedInstance];
 }
 
 NSXPCListener* ERConstructXPCListener(NSString* machServiceName) {

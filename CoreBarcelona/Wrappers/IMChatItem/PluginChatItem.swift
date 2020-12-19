@@ -55,6 +55,8 @@ public struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
     public var chatID: String?
     public var fromMe: Bool?
     public var time: Double?
+    public var threadIdentifier: String?
+    public var threadOriginator: String?
     public var digitalTouch: DigitalTouchMessage?
     public var richLink: RichLinkRepresentation?
     public var `extension`: MessageExtensionsData?

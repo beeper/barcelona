@@ -1,8 +1,4 @@
 #import <LinkPresentation/AVAssetResourceLoaderDelegate.h>
-#import <LinkPresentation/CAAnimation-LPExtras.h>
-#import <LinkPresentation/CAAnimationDelegate.h>
-#import <LinkPresentation/CALayerDelegate.h>
-#import <LinkPresentation/CASpringAnimation-LPExtras.h>
 #import <LinkPresentation/DOMEventListener.h>
 #import <LinkPresentation/LPActionDisablingCALayerDelegate.h>
 #import <LinkPresentation/LPAnimatedImageTranscoder.h>
@@ -214,17 +210,6 @@
 #import <LinkPresentation/LPiTunesMediaTVShowUnresolvedMetadata.h>
 #import <LinkPresentation/LPiTunesMediaURLComponents.h>
 #import <LinkPresentation/LPiTunesMediaUnresolvedMetadata.h>
-#import <LinkPresentation/NSCoder-LPExtras.h>
-#import <LinkPresentation/NSColor-LPExtras.h>
-#import <LinkPresentation/NSFont-LPExtras.h>
-#import <LinkPresentation/NSImage-LPExtras.h>
-#import <LinkPresentation/NSImageView-LPExtras.h>
-#import <LinkPresentation/NSItemProvider-LPExtras.h>
-#import <LinkPresentation/NSNumber-LPExtras.h>
-#import <LinkPresentation/NSString-LPInternal.h>
-#import <LinkPresentation/NSURL-LPInternal.h>
-#import <LinkPresentation/NSValue-LPExtras.h>
-#import <LinkPresentation/NSView-LPExtras.h>
 #import <LinkPresentation/QLPreviewMenuItemDelegate.h>
 #import <LinkPresentation/WKNavigationDelegate.h>
 #import <LinkPresentation/WKScriptMessageHandler.h>

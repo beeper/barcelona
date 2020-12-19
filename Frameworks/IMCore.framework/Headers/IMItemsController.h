@@ -5,6 +5,7 @@
 //
 
 #import <objc/NSObject.h>
+#import <IMSharedUtilities/IMItem.h>
 
 @class NSArray;
 
@@ -35,7 +36,7 @@
 - (void)_removeAllItems;
 - (void)_replaceItems:(id)arg1;
 - (void)_removeItem:(id)arg1;
-- (void)_handleItem:(id)arg1;
+- (void)_handleItem:(IMItem*)arg1;
 - (void)_itemsDidChange:(id)arg1;
 @property(readonly, copy, nonatomic) NSArray *_items;
 - (id)_initWithItems:(id)arg1;

@@ -30,6 +30,8 @@ public struct ActionChatItem: ChatItemRepresentation {
     public var chatID: String?
     public var fromMe: Bool?
     public var time: Double?
+    public var threadIdentifier: String?
+    public var threadOriginator: String?
     public var sender: String?
     public var otherHandle: String?
     public var actionType: Int64

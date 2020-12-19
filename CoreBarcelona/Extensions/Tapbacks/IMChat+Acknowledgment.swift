@@ -32,7 +32,17 @@ public extension IMChat {
         let guid = subpart.guid
         let range = subpart.messagePartRange
         
-        guard let message = IMMessage.instantMessage(withAssociatedMessageContent: superFormat, flags: 0, associatedMessageGUID: guid, associatedMessageType: rawType, associatedMessageRange: range, messageSummaryInfo: adjustedSummaryInfo) else {
+        
+        
+        var message: IMMessage!
+        
+        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+            message = IMMessage.instantMessage(withAssociatedMessageContent: superFormat, flags: 0, associatedMessageGUID: guid, associatedMessageType: rawType, associatedMessageRange: range, messageSummaryInfo: adjustedSummaryInfo, threadIdentifier: nil)
+        } else {
+            message = IMMessage.instantMessage(withAssociatedMessageContent: superFormat, flags: 0, associatedMessageGUID: guid, associatedMessageType: rawType, associatedMessageRange: range, messageSummaryInfo: adjustedSummaryInfo)
+        }
+        
+        guard message != nil else {
             return messageQuerySystem.next().makeFailedFuture(BarcelonaError(code: 500, message: "Couldn't create tapback message"))
         }
         

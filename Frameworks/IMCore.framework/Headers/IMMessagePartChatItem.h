@@ -8,7 +8,7 @@
 
 #import "IMVisibleAssociatedMessageHost-Protocol.h"
 
-@class NSArray, NSAttributedString, NSString;
+@class NSArray, NSAttributedString, NSString, IMMessageItem;
 
 @interface IMMessagePartChatItem : IMMessageChatItem <IMVisibleAssociatedMessageHost>
 {
@@ -53,6 +53,8 @@
 @property(nonatomic) BOOL isBusiness; // @synthesize isBusiness=_isBusiness;
 - (BOOL)canDelete;
 - (id)copyWithZone:(struct _NSZone *)arg1;
+- (NSString*) threadIdentifier API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+- (IMMessageItem*) threadOriginator API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 @property(readonly, copy) NSString *description;
 
 // Remaining properties

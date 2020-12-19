@@ -49,8 +49,3 @@
 #import <DataDetectorsCore/DDVariableNotFoundError.h>
 #import <DataDetectorsCore/DataDetectorsSourceAccess.h>
 #import <DataDetectorsCore/DataDetectorsSourceAccessProtocol.h>
-#import <DataDetectorsCore/NSAttributedString-DataDetectorsSupport.h>
-#import <DataDetectorsCore/NSCopying.h>
-#import <DataDetectorsCore/NSMutableAttributedString-DataDetectorsSupport.h>
-#import <DataDetectorsCore/NSMutableString-DDCategories.h>
-#import <DataDetectorsCore/NSSecureCoding.h>
