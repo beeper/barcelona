@@ -12,9 +12,8 @@ import os.log
 
 public extension IMChat {
     func scheduleForReview() {
-        messageQuerySystem.next().submit {
+        DispatchQueue.main.async {
             self._updateChatItems()
-        }.whenSuccess {
             os_log("Updated chat items for ChatID %@", type: .debug, self.id, log_IMChat)
         }
     }
