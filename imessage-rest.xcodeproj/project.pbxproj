@@ -345,19 +345,17 @@
 		1D804E10250ECE3700F376CB /* Request+ContactResource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE959E6250C7CE200B1262D /* Request+ContactResource.swift */; };
 		1D804E12250ECEB300F376CB /* String+Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D804E11250ECEB300F376CB /* String+Service.swift */; };
 		1D804E13250ECF6D00F376CB /* IMCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD424E3744900303692 /* IMCore.framework */; };
+		1D81551B258ECC7C00870547 /* swizzleInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D81551A258ECC7C00870547 /* swizzleInstance.m */; };
+		1D815529258ECDE100870547 /* swizzleInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D81551A258ECC7C00870547 /* swizzleInstance.m */; };
 		1D83343C251282E1005E0A43 /* MessageExtensionsQuirkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D83343B251282E1005E0A43 /* MessageExtensionsQuirkManager.swift */; };
 		1D83344125129753005E0A43 /* Gzip in Frameworks */ = {isa = PBXBuildFile; productRef = 1D83344025129753005E0A43 /* Gzip */; };
 		1D8334432512CD3A005E0A43 /* ChatHandleJoin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8334422512CD3A005E0A43 /* ChatHandleJoin.swift */; };
 		1D87EC50258BF7290030D9C6 /* IMChatItem+ThreadIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D87EC4F258BF7290030D9C6 /* IMChatItem+ThreadIdentifier.swift */; };
 		1D87EC64258BF8170030D9C6 /* IMChatItem+LazilyResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D87EC63258BF8170030D9C6 /* IMChatItem+LazilyResolvable.swift */; };
 		1D87EC6C258BFB0D0030D9C6 /* IMChatItem+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D87EC6B258BFB0D0030D9C6 /* IMChatItem+Identifiable.swift */; };
-		1D8991E6253260E100E98AAD /* DynasticRightsManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8991E5253260E100E98AAD /* DynasticRightsManagement.swift */; };
-		1D8991E72532610B00E98AAD /* DynasticRightsManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8991E5253260E100E98AAD /* DynasticRightsManagement.swift */; };
-		1D8991E92532646200E98AAD /* iokitmig64.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D74279F2531FCE0008CE101 /* iokitmig64.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1D8991EA2532648200E98AAD /* CoreBarcelona.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D44864724E85BBB00FF73F3 /* CoreBarcelona.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1D8991F12534304D00E98AAD /* libMobileGestalt.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D8991F02534304D00E98AAD /* libMobileGestalt.tbd */; };
 		1D8991F22534304F00E98AAD /* libMobileGestalt.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D8991F02534304D00E98AAD /* libMobileGestalt.tbd */; };
-		1D8991F42534307400E98AAD /* libMobileGestalt.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D8991F32534307400E98AAD /* libMobileGestalt.h */; };
 		1D8991F5253430C000E98AAD /* libMobileGestalt.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D8991F02534304D00E98AAD /* libMobileGestalt.tbd */; };
 		1D9079E4250ED02C00ED1EDC /* Throttling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5324E37D9E00303692 /* Throttling.swift */; };
 		1D9079E5250ED02C00ED1EDC /* FutureMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE959CE250C498700B1262D /* FutureMiddleware.swift */; };
@@ -877,9 +875,6 @@
 		1D67C144250ACBCF000A4D58 /* IMHandle+DestinationResolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMHandle+DestinationResolvable.swift"; sourceTree = "<group>"; };
 		1D6AB228252FB1510047B202 /* RichLinkExternalComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichLinkExternalComposition.swift; sourceTree = "<group>"; };
 		1D74074E25116CFC007250F8 /* MessageExtensionsData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageExtensionsData.swift; sourceTree = "<group>"; };
-		1D74279F2531FCE0008CE101 /* iokitmig64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iokitmig64.h; sourceTree = "<group>"; };
-		1D7427A02531FCF3008CE101 /* IOKitUser.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IOKitUser.m; sourceTree = "<group>"; };
-		1D7427A22531FF91008CE101 /* DynasticRightsManagement.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DynasticRightsManagement.h; sourceTree = "<group>"; };
 		1D7427A3253201AF008CE101 /* CoreBarcelona.Private.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = CoreBarcelona.Private.modulemap; sourceTree = "<group>"; };
 		1D7427A4253201F6008CE101 /* CoreBarcelona-Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CoreBarcelona-Private.h"; sourceTree = "<group>"; };
 		1D7427B5253208F2008CE101 /* libCoreBarcelona-Static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libCoreBarcelona-Static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -924,14 +919,14 @@
 		1D804DE8250EC9C700F376CB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1D804DF2250ECB5600F376CB /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		1D804E11250ECEB300F376CB /* String+Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Service.swift"; sourceTree = "<group>"; };
+		1D81551A258ECC7C00870547 /* swizzleInstance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = swizzleInstance.m; sourceTree = "<group>"; };
+		1D815522258ECC9400870547 /* swizzleInstance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = swizzleInstance.h; sourceTree = "<group>"; };
 		1D83343B251282E1005E0A43 /* MessageExtensionsQuirkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageExtensionsQuirkManager.swift; sourceTree = "<group>"; };
 		1D8334422512CD3A005E0A43 /* ChatHandleJoin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHandleJoin.swift; sourceTree = "<group>"; };
 		1D87EC4F258BF7290030D9C6 /* IMChatItem+ThreadIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatItem+ThreadIdentifier.swift"; sourceTree = "<group>"; };
 		1D87EC63258BF8170030D9C6 /* IMChatItem+LazilyResolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatItem+LazilyResolvable.swift"; sourceTree = "<group>"; };
 		1D87EC6B258BFB0D0030D9C6 /* IMChatItem+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatItem+Identifiable.swift"; sourceTree = "<group>"; };
-		1D8991E5253260E100E98AAD /* DynasticRightsManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynasticRightsManagement.swift; sourceTree = "<group>"; };
 		1D8991F02534304D00E98AAD /* libMobileGestalt.tbd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libMobileGestalt.tbd; path = Frameworks/libMobileGestalt.tbd; sourceTree = "<group>"; };
-		1D8991F32534307400E98AAD /* libMobileGestalt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libMobileGestalt.h; sourceTree = "<group>"; };
 		1D9079FC250EE97500ED1EDC /* SPMLibraries.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPMLibraries.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D9079FE250EE97500ED1EDC /* SPMLibraries.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPMLibraries.h; sourceTree = "<group>"; };
 		1D9079FF250EE97500ED1EDC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -1416,7 +1411,6 @@
 		1D44864624E85BBB00FF73F3 /* CoreBarcelona */ = {
 			isa = PBXGroup;
 			children = (
-				1D74279E2531FCD0008CE101 /* DRM */,
 				1D5AEECB24E37F8A00303692 /* Constants.swift */,
 				1D44864724E85BBB00FF73F3 /* CoreBarcelona.h */,
 				1D5AEE4E24E37D9E00303692 /* APIs */,
@@ -1439,6 +1433,8 @@
 				1D1CCE0E2518EB5A002FCFA4 /* CoreBarcelona.modulemap */,
 				1D7427A3253201AF008CE101 /* CoreBarcelona.Private.modulemap */,
 				1D7427A4253201F6008CE101 /* CoreBarcelona-Private.h */,
+				1D81551A258ECC7C00870547 /* swizzleInstance.m */,
+				1D815522258ECC9400870547 /* swizzleInstance.h */,
 			);
 			path = CoreBarcelona;
 			sourceTree = "<group>";
@@ -1627,18 +1623,6 @@
 				1D83343B251282E1005E0A43 /* MessageExtensionsQuirkManager.swift */,
 			);
 			path = MessageExtensions;
-			sourceTree = "<group>";
-		};
-		1D74279E2531FCD0008CE101 /* DRM */ = {
-			isa = PBXGroup;
-			children = (
-				1D74279F2531FCE0008CE101 /* iokitmig64.h */,
-				1D8991F32534307400E98AAD /* libMobileGestalt.h */,
-				1D7427A02531FCF3008CE101 /* IOKitUser.m */,
-				1D7427A22531FF91008CE101 /* DynasticRightsManagement.h */,
-				1D8991E5253260E100E98AAD /* DynasticRightsManagement.swift */,
-			);
-			path = DRM;
 			sourceTree = "<group>";
 		};
 		1D74D49E250C049E00A9F9A1 /* Identifiable */ = {
@@ -1977,7 +1961,6 @@
 			files = (
 				1D7427A525320262008CE101 /* CoreBarcelona-Private.h in Headers */,
 				1D44864924E85BBB00FF73F3 /* CoreBarcelona.h in Headers */,
-				1D8991F42534307400E98AAD /* libMobileGestalt.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1985,7 +1968,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1D8991E92532646200E98AAD /* iokitmig64.h in Headers */,
 				1D8991EA2532648200E98AAD /* CoreBarcelona.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2450,7 +2432,6 @@
 				1D3E333A250C22E400EEA08B /* CNContact+Identifiable.swift in Sources */,
 				1DD805EA24E85D100076D717 /* TypingItem.swift in Sources */,
 				1D804CFB250E96FB00F376CB /* InternalAttachment+Resolvable.swift in Sources */,
-				1D8991E6253260E100E98AAD /* DynasticRightsManagement.swift in Sources */,
 				1DD805B824E85CFD0076D717 /* DBReader.swift in Sources */,
 				1D804D0D250EAE7400F376CB /* RichLinkAudio.swift in Sources */,
 				1DD805DC24E85D100076D717 /* PhantomChatItem.swift in Sources */,
@@ -2583,6 +2564,7 @@
 				1DD805B624E85CFD0076D717 /* ChatMessageJoin.swift in Sources */,
 				1D74D49A250C01CB00A9F9A1 /* Identifiable.swift in Sources */,
 				1DD805E324E85D100076D717 /* Registry.swift in Sources */,
+				1D81551B258ECC7C00870547 /* swizzleInstance.m in Sources */,
 				1DD805DA24E85D100076D717 /* AttachmentChatItem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2623,9 +2605,9 @@
 				1D7427C325320921008CE101 /* RawMessage.swift in Sources */,
 				1D7427FF25320921008CE101 /* IMChatItem+CountFix.m in Sources */,
 				1D7427C425320921008CE101 /* ChatHandleJoin.swift in Sources */,
-				1D8991E72532610B00E98AAD /* DynasticRightsManagement.swift in Sources */,
 				1D7427C525320921008CE101 /* ChatMessageJoin.swift in Sources */,
 				1D7427C625320921008CE101 /* RawHandle.swift in Sources */,
+				1D815529258ECDE100870547 /* swizzleInstance.m in Sources */,
 				1D7427C725320921008CE101 /* DBReader.swift in Sources */,
 				1D7427C825320921008CE101 /* Search.swift in Sources */,
 				1D7427C925320921008CE101 /* RawAttachment.swift in Sources */,
