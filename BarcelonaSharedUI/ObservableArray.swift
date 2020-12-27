@@ -33,7 +33,6 @@ public class ObservableArray<T>: ObservableObject {
     
     public func append(_ newElement: T) {
         array.append(newElement)
-        print(array)
     }
     
     public func remove(at index: Int) {

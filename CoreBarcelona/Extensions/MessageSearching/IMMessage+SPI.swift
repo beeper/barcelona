@@ -78,12 +78,9 @@ public extension IMMessage {
                     promise.succeed([])
                     return
                 }
-                
-                print(results)
 
                 promise.succeed(results.compactMap { item in
                     guard let messageItem = item as? IMMessageItem else {
-                        print("fuck! \(item)")
                         return nil
                     }
                     

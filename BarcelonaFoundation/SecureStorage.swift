@@ -48,9 +48,7 @@ public class SecureStorage {
     }
     
     private func absoluteFileURL(forKey key: String) -> URL {
-        let url = path.appendingPathComponent(key)
-        print(url)
-        return url
+        return path.appendingPathComponent(key)
     }
     
     private func absoluteFilePath(forKey key: String) -> String {

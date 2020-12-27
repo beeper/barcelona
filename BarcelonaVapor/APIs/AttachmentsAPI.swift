@@ -89,8 +89,6 @@ internal func bindAttachmentsAPI(_ builder: RoutesBuilder, readAuthorizedBuilder
                 $0.ext == req.headers.contentType?.subType
             })
             
-            print(mime)
-            
             if let mime = mime {
                 temporaryFilename = "\(temporaryFilename).\(mime.ext)"
                 

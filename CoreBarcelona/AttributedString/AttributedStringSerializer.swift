@@ -59,8 +59,6 @@ public func ERTextParts(from string: NSAttributedString) -> [TextPart] {
     
     let textTracking = ERTrack(log: .default, name: "ERTextParts Computation", format: "")
     
-    print(string)
-    
     string.split(MessageAttributes.writingDirection).forEach { substring in
         var textPart: TextPart!
         
