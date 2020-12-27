@@ -224,7 +224,7 @@
 - (void)_clearPendingMessages;
 - (void)_setJoinState:(long long)arg1;
 - (BOOL)_handleIncomingItem:(id)arg1;
-- (BOOL)_handleIncomingItem:(id)arg1 updateReplyCounts:(id)arg2 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+- (BOOL)_handleIncomingItem:(id)arg1 updateReplyCounts:(BOOL)arg2 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 - (void)_fixSendingItemDateAndSortID:(id)arg1;
 - (BOOL)hasSurfRequestNotFromMe:(id)arg1;
 - (BOOL)hasSurfRequestForPaymentType:(unsigned long long)arg1;
