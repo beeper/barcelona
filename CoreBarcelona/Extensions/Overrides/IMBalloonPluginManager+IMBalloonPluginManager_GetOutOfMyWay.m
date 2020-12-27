@@ -7,20 +7,7 @@
 //
 
 #import <IMCore/IMCore.h>
-#import <objc/runtime.h>
-
-void swizzleInstance(Class class, SEL original, SEL swizzled) {
-    Method originalMethod = class_getInstanceMethod(class, original);
-    Method swizzledMethod = class_getInstanceMethod(class, swizzled);
-    
-    BOOL didAddMethod = class_addMethod(class, original, method_getImplementation(swizzledMethod), method_getTypeEncoding(swizzledMethod));
-    
-    if (didAddMethod) {
-        class_replaceMethod(class, swizzled, method_getImplementation(originalMethod), method_getTypeEncoding(originalMethod));
-    } else {
-        method_exchangeImplementations(originalMethod, swizzledMethod);
-    }
-}
+#import "swizzleInstance.h"
 
 /**
  IMBallonPluginManager checks if I'm allowed to load balloon plugins... in the process... dumbest security ever.
