@@ -17,6 +17,7 @@ import os.log
 
 struct CreateChat: Content {
     var participants: [String]
+    var displayName: String?
 }
 
 struct RenameChat: Content {
@@ -85,15 +86,21 @@ public func bindChatAPI(_ app: RoutesBuilder) {
         guard let createChat = try? req.content.decode(CreateChat.self) else { throw Abort(.badRequest) }
         let promise = req.eventLoop.makePromise(of: Chat.self)
         
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.main.async {
             let handles = createChat.participants.compactMap {
                 Registry.sharedInstance.imHandle(withID: $0)
             }
             
-            guard let chat = IMChatRegistry.sharedInstance()!.chat(forIMHandles: handles, displayName: nil, joinedChatsOnly: false, lastAddressedHandle: nil, lastAddressedSIMID: nil) as? IMChat else {
+            let newGUID = NSString.stringGUID()
+            
+            guard let chat = IMChat()?._init(withGUID: newGUID, account: handles.last!.account, style: 0x2b, roomName: nil, displayName: createChat.displayName, lastAddressedHandle: nil, lastAddressedSIMID: nil, items: nil, participants: handles, isFiltered: true, hasHadSuccessfulQuery: false) as? IMChat else {
                 promise.fail(Abort(.badRequest))
                 return
             }
+            
+            chat._setupObservation()
+            
+            IMChatRegistry.sharedInstance()!._registerChat(chat, isIncoming: false, guid: newGUID)
             
             promise.succeed(Chat(chat))
         }
