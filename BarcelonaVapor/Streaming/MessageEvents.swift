@@ -55,6 +55,23 @@ class MessageEvents: EventDispatcher {
             self.itemsChanged($0)
         }
         
+//        addObserver(forName: .init(rawValue: "ERIncomingItem")) {
+//            guard let obj = $0.userInfo?["item"] as? NSObject, let chat = $0.object as? IMChat else {
+//                return
+//            }
+//
+//            self.process(inserted: [obj], in: chat, on: .itemsReceived)
+//        }
+        
+        
+//        addObserver(forName: IMChatMessageDidChangeNotification) {
+//            print($0)
+//        }
+        
+//        addObserver(forName: IMChatMessageReceivedNotification) {
+//            print($0)
+//        }
+        
 //        addObserver(forName: IMChatMessageDidChangeNotification) {
 //            guard let chat = $0.object as? IMChat, let message = $0.userInfo?[IMChatValueKey] as? IMMessage else {
 //                return
@@ -152,14 +169,26 @@ class MessageEvents: EventDispatcher {
             case IMChatItemsReload:
                 fallthrough;
             case IMChatItemsInserted:
+                let key = $0.key
+                
                 self.process(inserted: set.compactMap { index -> NSObject? in
                     guard let item = chat.chatItems[safe: index] else {
                         os_log("⁉️ Bad index when parsing chat items!", type: .error, log_messageEvents)
                         return nil
                     }
+                    
+                    if key == IMChatItemsInserted {
+                        if let _ = item as? IMMessagePartChatItem {
+                            return nil
+                        }
+                        
+                        if let _ = item as? IMAssociatedMessageChatItem {
+                            return nil
+                        }
+                    }
 
                     return item
-                }, in: chat, on: $0.key == IMChatItemsInserted ? .itemsReceived : .itemsUpdated)
+                }, in: chat, on: key == IMChatItemsInserted ? .itemsReceived : .itemsUpdated)
             case IMChatItemsRemoved:
                 break;
             default:

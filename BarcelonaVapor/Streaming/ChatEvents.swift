@@ -99,9 +99,9 @@ class ChatEvents: EventDispatcher {
             return
         }
         
-        ERTimeSortedParticipantsManager.sharedInstance.bootstrap(chat: chat)
-        
-        StreamingAPI.shared.dispatch(eventFor(conversationCreated: chat.representation), to: nil)
+        ERTimeSortedParticipantsManager.sharedInstance.bootstrap(chat: chat).whenSuccess {
+            StreamingAPI.shared.dispatch(eventFor(conversationCreated: chat.representation), to: nil)
+        }
     }
     
     // MARK: - IMChat deleted

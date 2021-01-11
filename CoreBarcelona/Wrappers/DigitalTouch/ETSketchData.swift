@@ -18,9 +18,7 @@ public struct Color: Codable {
 }
 
 private func ETPExtractPoints(from strokes: [[NSValue]]) -> String? {
-    let tap = ETPTap()
-    
-    DispatchQueue.main.sync {
+    let tap = ETPTap(), _ = DispatchQueue.main.sync {
         tap.read(from: strokes)
     }
     

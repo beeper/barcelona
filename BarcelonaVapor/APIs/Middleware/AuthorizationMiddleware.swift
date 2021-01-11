@@ -29,16 +29,14 @@ class CompositeAuthorizationMiddleware: Middleware, Authorizor {
     
     func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
         #if BARCELONA_NO_SECURITY
-        if true {
-            return next.respond(to: request)
-        }
+        return next.respond(to: request)
         #else
         if validate(headers: request.headers, request: request) {
             return next.respond(to: request)
+        } else {
+            return request.eventLoop.makeFailedFuture(BarcelonaError(code: 401, message: "Invalid or missing API token"))
         }
         #endif
-        
-        return request.eventLoop.makeFailedFuture(BarcelonaError(code: 401, message: "Invalid or missing API token"))
     }
 }
 

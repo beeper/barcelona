@@ -1,6 +1,5 @@
 --- !tapi-tbd-v3
 archs:           [ x86_64, arm64, arm64e, armv7, armv7s ]
-
 platform:        darwin
 install-name:    '/System/Library/Frameworks/LinkPresentation.framework/LinkPresentation'
 current-version: 119.17

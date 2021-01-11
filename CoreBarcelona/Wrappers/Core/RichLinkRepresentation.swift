@@ -26,7 +26,7 @@ private extension LPLinkMetadata {
         transformer.setValue(linkView._preferredSizeClass, forKey: "preferredSizeClass")
         transformer.setValue(linkView._sourceBundleIdentifier, forKey: "sourceBundleIdentifier")
         
-        guard let unmanagedProperties = transformer.perform("presentationProperties"), let properties = unmanagedProperties.takeUnretainedValue() as? LPWebLinkPresentationProperties else {
+        guard let unmanagedProperties = transformer.perform(Selector(("presentationProperties"))), let properties = unmanagedProperties.takeUnretainedValue() as? LPWebLinkPresentationProperties else {
             return nil
         }
         
@@ -93,7 +93,7 @@ public struct RichLinkRepresentation: Codable {
         self.itemType = metadata.itemType
         self.quotedText = properties.quotedText
         self.preliminary = properties.isPreliminary
-        self.url = metadata.url
+        self.url = metadata.originalURL
         self.specialization = metadata.specialization?.format
     }
     
@@ -104,6 +104,7 @@ public struct RichLinkRepresentation: Codable {
     var video: RichLinkVideo?
     var audio: RichLinkAudio?
     var url: URL?
+    var link: URL?
     var backgroundColor: Color?
     var style: String?
     var itemType: String?

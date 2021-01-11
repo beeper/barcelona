@@ -11,7 +11,7 @@ import NIO
 
 extension ChatItemAcknowledgable {
     func tapbacks(on eventLoop: EventLoop) -> EventLoopFuture<[Message]> {
-        guard let guid = id as? String else {
+        guard let guid = id else {
             return eventLoop.makeSucceededFuture([])
         }
         

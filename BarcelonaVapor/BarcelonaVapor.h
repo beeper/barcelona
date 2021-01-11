@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <CoreBarcelona/CoreBarcelona.h>
 
 //! Project version number for BarcelonaVapor.
 FOUNDATION_EXPORT double BarcelonaVaporVersionNumber;

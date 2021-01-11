@@ -17,6 +17,10 @@ public struct ParticipantSortRule: Equatable, Hashable {
     var handleID: String
     var lastSentMessageTime: Double
     
+    public func hash(into hasher: inout Hasher) {
+        handleID.hash(into: &hasher)
+    }
+    
     public var hashValue: Int {
         handleID.hashValue
     }

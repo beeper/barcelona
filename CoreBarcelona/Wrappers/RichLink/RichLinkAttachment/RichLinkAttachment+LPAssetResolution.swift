@@ -23,6 +23,12 @@ extension RichLinkAttachment {
             fallthrough
         case "RichLinkVideoAttachmentSubstitute":
             fallthrough
+        case "LPImageAttachmentSubstitute":
+            fallthrough
+        case "LPVideoAttachmentSubstitute":
+            fallthrough
+        case "LPAudioAttachmentSubstitute":
+            fallthrough
         case "RichLinkImageAttachmentSubstitute":
             if let substituteIndex = asset.value(forKey: "index") as? UInt64 {
                 self.attachmentIndex = substituteIndex

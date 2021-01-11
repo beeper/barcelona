@@ -73,7 +73,7 @@ private func track(name: StaticString, format: StaticString, object: AnyObject =
     return ERTrack(log: ingestor_log, name: name, format: format, object: object, interpolate)
 }
 
-private let shouldLog = false
+private let shouldLog = true
 
 public struct ERIndeterminateIngestor {
     public static func ingest(_ object: AnyObject, in chat: String? = nil, on eventLoop: EventLoop! = nil, resolvingTapbacks: Bool = true, shouldPreprocess: Bool = true) -> EventLoopFuture<ChatItem?> {
@@ -211,10 +211,6 @@ public struct ERIndeterminateIngestor {
                 return eventLoop.makeSucceededFuture(nil)
             }
             
-            if let bundleID = message.balloonBundleID {
-                print("rrr")
-            }
-            
             messageFulfillment()
             
             var pending: EventLoopFuture<[InternalAttachment]>!
@@ -222,7 +218,7 @@ public struct ERIndeterminateIngestor {
             let attachmentResolverTracking = track(name: "Attachment Resolution", format: "Resolving attachments for message %@", object: message, message.guid)
             
             /// sometimes IMCore wont load the missing file transfers, so we handle that using DBReader
-            let missingGUIDs = (messageItem.fileTransferGUIDs ?? []).filter {
+            let missingGUIDs = messageItem.fileTransferGUIDs.filter {
                 IMFileTransferCenter.sharedInstance()?.transfer(forGUID: $0) == nil
             }
             

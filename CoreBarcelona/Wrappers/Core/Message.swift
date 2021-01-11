@@ -117,7 +117,7 @@ public struct Message: ChatItemRepresentation {
         flags = backing.flags
         service = backing.service.service?.id ?? .SMS
         associatedMessageID = message.associatedMessageGUID ?? backing.associatedMessageGUID() as? String
-        fileTransferIDs = message.fileTransferGUIDs ?? backing.fileTransferGUIDs ?? []
+        fileTransferIDs = message.fileTransferGUIDs
         
         if let chatID = chatID, let chat = IMChat.resolve(withIdentifier: chatID) {
             description = message.description(forPurpose: 0x2, inChat: chat)

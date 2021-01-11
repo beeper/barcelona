@@ -241,12 +241,6 @@ extension DBReader {
                     didAddFirstStatement = true
                 }
                 
-                let messageSTMT = SQLLiteral(sql: """
-SELECT message.sender_id, message.date FROM message
-INNER JOIN chat_message_join ON message.ROWID = chat_message_join.message_id
-INNER JOIN chat ON chat_message_join.chat_id = chat.ROWID AND chat.ROWID IN (\(ROWIDs.templatedString) GROUP BY message.sender_id
-""")
-                
                 stmt.append(sql: "\(didAddFirstStatement ? " AND" : " WHERE") attachment.hide_attachment == 0")
                 didAddFirstStatement = true
                 

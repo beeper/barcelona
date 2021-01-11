@@ -93,7 +93,7 @@ public func bindChatAPI(_ app: RoutesBuilder) {
             
             let newGUID = NSString.stringGUID()
             
-            guard let chat = IMChat()?._init(withGUID: newGUID, account: handles.last!.account, style: 0x2b, roomName: nil, displayName: createChat.displayName, lastAddressedHandle: nil, lastAddressedSIMID: nil, items: nil, participants: handles, isFiltered: true, hasHadSuccessfulQuery: false) as? IMChat else {
+            guard let chat = IMChat()?._init(withGUID: newGUID, account: handles.last!.account, style: 0x2b, roomName: nil, displayName: createChat.displayName, lastAddressedHandle: nil, lastAddressedSIMID: nil, items: nil, participants: handles, isFiltered: true, hasHadSuccessfulQuery: false) else {
                 promise.fail(Abort(.badRequest))
                 return
             }

@@ -253,7 +253,7 @@ public class ERDaemonListener: IMDaemonListenerProtocol {
     }
     
     @objc public func chatLoaded(withChatIdentifier arg1: String!, chats arg2: [Any]!) {
-        print(arg1)
+        
     }
     
     @objc public func frequentRepliesQuery(_ arg1: String!, chatID arg2: String!, services arg3: [Any]!, finishedWithResult arg4: [Any]!, limit arg5: UInt64) {

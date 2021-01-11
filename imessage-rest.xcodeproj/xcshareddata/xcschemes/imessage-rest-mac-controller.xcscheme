@@ -10,12 +10,12 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Run Script"
-               scriptText = "# Type a script or drag a script file from your workspace to insert its path.&#10;codesign -d --entitlements &quot;${PROJECT_DIR}/imessage-rest-mac-controller/imessage_rest_mac_controller.entitlements&quot; &quot;${TARGET_BUILD_DIR}/imessage-rest-mac-controller.app&quot; -f -s &quot;Apple Development&quot;&#10;&#10;# Type a script or drag a script file from your workspace to insert its path.&#10;codesign -d --entitlements &quot;${PROJECT_DIR}/imessage-rest/imessage-rest.entitlements&quot; &quot;${TARGET_BUILD_DIR}/imessage-rest-mac-controller.app/Contents/XPCServices/imessage-rest.xpc&quot; -f -s &quot;Apple Development&quot;&#10;">
+               scriptText = "# Type a script or drag a script file from your workspace to insert its path.&#10;codesign --deep --entitlements &quot;${PROJECT_DIR}/imessage-rest-mac-controller/imessage_rest_mac_controller.entitlements&quot; &quot;${TARGET_BUILD_DIR}/imessage-rest-mac-controller.app&quot; -f -s &quot;Apple Development&quot;&#10;&#10;# Type a script or drag a script file from your workspace to insert its path.&#10;codesign --deep --entitlements &quot;${PROJECT_DIR}/imessage-rest/imessage-rest.entitlements&quot; &quot;${TARGET_BUILD_DIR}/imessage-rest-mac-controller.app/Contents/XPCServices/imessage-rest.xpc&quot; -f -s &quot;Apple Development&quot;&#10;&#10;echo &quot;codesign -d --entitlements \&quot;${PROJECT_DIR}/imessage-rest/imessage-rest.entitlements\&quot; \&quot;${TARGET_BUILD_DIR}/imessage-rest-mac-controller.app/Contents/XPCServices/imessage-rest.xpc\&quot; -f -s \&quot;Apple Development\&quot;&quot; &gt; ~/raw.txt&#10;">
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"
                      BlueprintIdentifier = "1D907A1F250F01BB00ED1EDC"
-                     BuildableName = "imessage-rest-mac-controller.app"
+                     BuildableName = "MyMessage.app"
                      BlueprintName = "imessage-rest-mac-controller"
                      ReferencedContainer = "container:imessage-rest.xcodeproj">
                   </BuildableReference>
@@ -33,7 +33,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "1D907A1F250F01BB00ED1EDC"
-               BuildableName = "imessage-rest-mac-controller.app"
+               BuildableName = "MyMessage.app"
                BlueprintName = "imessage-rest-mac-controller"
                ReferencedContainer = "container:imessage-rest.xcodeproj">
             </BuildableReference>
@@ -83,7 +83,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1D907A1F250F01BB00ED1EDC"
-            BuildableName = "imessage-rest-mac-controller.app"
+            BuildableName = "MyMessage.app"
             BlueprintName = "imessage-rest-mac-controller"
             ReferencedContainer = "container:imessage-rest.xcodeproj">
          </BuildableReference>
@@ -100,7 +100,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1D907A1F250F01BB00ED1EDC"
-            BuildableName = "imessage-rest-mac-controller.app"
+            BuildableName = "MyMessage.app"
             BlueprintName = "imessage-rest-mac-controller"
             ReferencedContainer = "container:imessage-rest.xcodeproj">
          </BuildableReference>

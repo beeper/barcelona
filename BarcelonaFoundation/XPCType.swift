@@ -17,12 +17,12 @@ public protocol XPCRepresentable {
 public extension XPCRepresentable {
     var intValue: Int? {
         switch self {
-        case is Int64:
-            return Int(self as! Int64)
-        case is UInt64:
-            return Int(self as! UInt64)
-        case is Int:
-            return self as! Int
+        case let int64 as Int64:
+            return Int(int64)
+        case let uint64 as UInt64:
+            return Int(uint64)
+        case let int as Int:
+            return int
         default:
             return nil
         }

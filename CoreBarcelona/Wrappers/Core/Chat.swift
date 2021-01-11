@@ -401,7 +401,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable {
                 DispatchQueue.main.async {
                     /** Split the base message into individual messages if it contains rich link(s) */
                     guard let messages = message.messagesBySeparatingRichLinks() as? [IMMessage] else {
-                        print("Malformed message result when separating rich links at \(message)")
+                        print("Malformed message result when separating rich links at \(message?.guid ?? "nil")")
                         return
                     }
                     

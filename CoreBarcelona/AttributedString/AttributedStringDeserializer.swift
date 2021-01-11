@@ -77,7 +77,7 @@ private func ERAttributedString(from part: MessagePart, on eventLoop: EventLoop)
             MessagePartParseResult(string: string, transferGUIDs: [])
         }
     case .breadcrumb:
-        return eventLoop.makeSucceededFuture(.init(string: ERAttributedString(forBreadcrumbAttributes: part.attributes ?? []) ?? NSAttributedString(), transferGUIDs: []))
+        return eventLoop.makeSucceededFuture(.init(string: ERAttributedString(forBreadcrumbAttributes: part.attributes ?? []), transferGUIDs: []))
     case .attachment:
         return ERAttributedString(forAttachment: part.details, on: eventLoop)
     }

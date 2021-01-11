@@ -15,7 +15,7 @@ import Vapor
 public func bindContactsAPI(_ app: RoutesBuilder) {
     let contacts = app.grouped("contacts")
     let readableContacts = contacts.grouped(TokenGrant.readContacts)
-    let writableContacts = contacts.grouped(TokenGrant.writeContacts)
+//    let writableContacts = contacts.grouped(TokenGrant.writeContacts)
     
     // MARK: - Bulk
     readableContacts.get { _ -> BulkContactRepresentation in
@@ -25,7 +25,7 @@ public func bindContactsAPI(_ app: RoutesBuilder) {
     // MARK: - Specific contact
     let contact = contacts.grouped(CNContactMiddleware).grouped(":\(CNContactResourceKey)")
     let readableContact = contact.grouped(TokenGrant.readContacts)
-    let writableContact = contact.grouped(TokenGrant.writeContacts)
+//    let writableContact = contact.grouped(TokenGrant.writeContacts)
     
     /**
      Get contact info

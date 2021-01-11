@@ -38,9 +38,7 @@ public struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
         }
         
         if bundleID.starts(with: "com.apple.messages.MSMessageExtensionBalloonPlugin"), let payloadData = item.dataSource?.payload {
-            `extension` = MessageExtensionsData(item.dataSource.payload)
-            let dict = `extension`?.dictionary
-            let archive = `extension`?.archive
+            `extension` = MessageExtensionsData(payloadData)
             insertPayload = false
         }
         

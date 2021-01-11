@@ -178,14 +178,14 @@ internal class ERResourceServer {
         }
         
         resources.grouped("symbol").get(":id") { req -> EventLoopFuture<Response> in
-            guard let symbolName = req.parameters.get("id") else {
-                return HTTPStatus.badRequest.encodeResponse(for: req)
-            }
-            
-            #if canImport(AppKit)
-            let image = NSImage()
-            #elseif canImport(UIKit)
-            #endif
+//            guard let symbolName = req.parameters.get("id") else {
+//                return HTTPStatus.badRequest.encodeResponse(for: req)
+//            }
+//
+//            #if canImport(AppKit)
+//            let image = NSImage()
+//            #elseif canImport(UIKit)
+//            #endif
             
             return HTTPStatus.notFound.encodeResponse(for: req)
         }
@@ -199,7 +199,7 @@ internal class ERResourceServer {
         }
         
         resources.get("lp-default") { req -> EventLoopFuture<HTTPStatus> in
-            if let resources = NSClassFromString("LPResources") as? NSObject, let icon = resources.perform(Selector(("safariIcon"))) {
+            if let resources = NSClassFromString("LPResources") as? NSObject.Type, let icon = resources.perform(#selector(LPResources.safariIcon)) {
                 print(icon)
             }
             

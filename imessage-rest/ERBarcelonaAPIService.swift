@@ -88,5 +88,8 @@ class ERBarcelonaAPIService {
         ERBarcelonaManager.teardown()
         server.emitRunningState()
         callback(nil)
+        DispatchQueue.main.asyncAfter(deadline: .init(secondsFromNow: 1)) {
+            exit(0)
+        }
     }
 }
