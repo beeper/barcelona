@@ -91,7 +91,7 @@ exports:
                        _IMDCoreSpotlightRecipientIndexer_TestHandleID, _IMDCoreSpotlightReindexMessages, 
                        _IMDCoreSpotlightSetNeedsMessageReindex, _IMDCreateCFErrorWithQueryErrorCode, 
                        _IMDCreateDeleteDeletedMessagesGuidsQuery, _IMDCreateIMItemFromIMDMessageRecordRefCopyAttachmentsIfNeededWithServiceResolve, 
-                       _IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve, 
+                       _IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve, _IMDMessageRecordCopyMessagesWithChatIdentifiersOnServicesUpToGUIDOrLimitWithOptionalThreadIdentifier, 
                        _IMDCreateIndexes, _IMDCreateIndexesWithOperation, _IMDCreateMessageSortComparatorAscending, 
                        _IMDCreateMessageSortComparatorDescending, _IMDCreateQueryRemoveMessagesFromMessageTableWithMessageGuidCount, 
                        _IMDCreateQueryRemoveMessagesFromTombStoneTableQuery, _IMDCreateTablesWithOperation, 

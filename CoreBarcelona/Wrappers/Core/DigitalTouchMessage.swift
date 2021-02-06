@@ -10,6 +10,26 @@ import Foundation
 import DigitalTouchShared
 import IMCore
 
+@objc protocol ETMessageDelegate {
+    @objc func messageWillReachSizeLimit(_ message: ETMessage) -> Void
+    @objc func messageWillStopPlaying(_ message: ETMessage) -> Void
+    @objc func messageDidStopPlaying(_ message: ETMessage) -> Void
+}
+
+@objc class DigitalTouchMessageDelegate: NSObject, ETMessageDelegate {
+    func messageWillReachSizeLimit(_ message: ETMessage) {
+        
+    }
+    
+    func messageWillStopPlaying(_ message: ETMessage) {
+        
+    }
+    
+    func messageDidStopPlaying(_ message: ETMessage) {
+        
+    }
+}
+
 public enum DigitalTouchMessage {
     case sketch(_ item: ETSketchData)
     case video(_ item: ETVideoData)

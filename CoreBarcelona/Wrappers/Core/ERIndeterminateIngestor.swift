@@ -33,7 +33,7 @@ private let ChatLikeClasses = [
     IMMessageItem.self
 ]
 
-private let ingestor_eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 5)
+private let ingestor_eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 10)
 
 private let ingestor_log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ERIndeterminateIngestor")
 
@@ -73,7 +73,9 @@ private func track(name: StaticString, format: StaticString, object: AnyObject =
     return ERTrack(log: ingestor_log, name: name, format: format, object: object, interpolate)
 }
 
-private let shouldLog = true
+private let shouldLog = false
+
+private let SPIQueue = DispatchQueue(label: "com.ericrabil.imessage-rest.SPI")
 
 public struct ERIndeterminateIngestor {
     public static func ingest(_ object: AnyObject, in chat: String? = nil, on eventLoop: EventLoop! = nil, resolvingTapbacks: Bool = true, shouldPreprocess: Bool = true) -> EventLoopFuture<ChatItem?> {
@@ -146,7 +148,7 @@ public struct ERIndeterminateIngestor {
         
         return preprocess(objects, on: eventLoop, shouldRun: shouldPreprocess).flatMap {
             EventLoopFuture<ChatItem?>.whenAllSucceed(objects.map {
-                self.ingest($0, in: chat, on: eventLoop, resolvingTapbacks: false, shouldPreprocess: false)
+                self.ingest($0, in: chat, on: ingestor_eventLoop.next(), resolvingTapbacks: false, shouldPreprocess: false)
             }, on: eventLoop)
         }.map {
             $0.compactMap { $0 }
@@ -161,7 +163,7 @@ public struct ERIndeterminateIngestor {
         
         return preprocess(objects, on: eventLoop, shouldRun: shouldPreprocess).flatMap {
             EventLoopFuture<Message?>.whenAllSucceed(objects.map {
-                ingest(messageLike: $0, in: chat, on: eventLoop, resolvingTapbacks: false, shouldPreprocess: false)
+                ingest(messageLike: $0, in: chat, on: ingestor_eventLoop.next(), resolvingTapbacks: false, shouldPreprocess: false)
             }, on: eventLoop)
         }.map {
             $0.compactMap { $0 }
@@ -325,11 +327,16 @@ public struct ERIndeterminateIngestor {
             }
         }
         
+        guard associatedLedger.count > 0 else {
+            promise.succeed(items)
+            return promise.futureResult
+        }
+        
         DBReader.shared.associatedMessages(with: Array(associatedLedger.keys), in: chat).whenSuccess { associatedMessages in
             associatedMessages.forEach { body in
                 let itemGUID = body.key, messages = body.value
                 guard let messageGUID = associatedLedger[itemGUID], var message = messageLedger[messageGUID] else { return }
-                
+
                 message.items = message.items.map { chatItem -> ChatItem in
                     switch chatItem {
                     case .text(let item):
@@ -342,13 +349,13 @@ public struct ERIndeterminateIngestor {
                         return chatItem
                     }
                 }
-                
+
                 messageLedger[messageGUID] = message
             }
-            
+
             var newItems = Array(messageLedger.values).map { ChatItem.message($0) }
             newItems.append(contentsOf: nonMessageItems)
-            
+
             promise.succeed(newItems)
         }
         

@@ -8,8 +8,8 @@
 
 import Foundation
 
-private let queryKey = "__kIMChatQueryIDKey";
-private let IMChatLoadRequestDidCompleteNotification = NSNotification.Name(rawValue: "__kIMChatLoadRequestDidCompleteNotification")
+private let queryKey = "__kERChatQueryIDKey";
+private let ERChatLoadRequestDidCompleteNotification = NSNotification.Name(rawValue: "__kERChatLoadRequestDidCompleteNotification")
 
 /**
  Watches for the completion of a query and allows code to register a callback for a given query GUID
@@ -18,7 +18,7 @@ class IMQueryWatcher {
     static let sharedInstance = IMQueryWatcher();
     
     private init() {
-        NotificationCenter.default.addObserver(forName: IMChatLoadRequestDidCompleteNotification, object: nil, queue: nil) {
+        NotificationCenter.default.addObserver(forName: ERChatLoadRequestDidCompleteNotification, object: nil, queue: nil) {
             self.queryCompleted($0)
         }
     }
@@ -40,9 +40,9 @@ class IMQueryWatcher {
     }
     
     /** Registers a callback for a given query GUID */
-    func waitForQuery(queryID: String, callback: @escaping (NSNotification) -> ()) {
+    func waitForQuery(queryID: String, callback: @escaping ([IMItem]) -> ()) {
         let observer = NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "IMCQ-COMPLETE-\(queryID)"), object: nil, queue: OperationQueue.current ?? OperationQueue.main) { notif in
-            callback(notif as NSNotification)
+            callback(notif.object as? [IMItem] ?? [])
             self.deregisterObserver(queryID: queryID)
         }
         
@@ -53,6 +53,6 @@ class IMQueryWatcher {
     func queryCompleted(_ notification: Notification) {
         guard let query = notification.userInfo?[queryKey] as? String else { return }
         
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "IMCQ-COMPLETE-\(query)"), object: nil)
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "IMCQ-COMPLETE-\(query)"), object: notification.object as? [IMItem] ?? [])
     }
 }

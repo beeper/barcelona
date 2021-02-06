@@ -8,7 +8,6 @@
 
 import Foundation
 import IMCore
-import IMDPersistence
 import NIO
 import os.log
 
@@ -22,9 +21,6 @@ extension Array where Element == IMMessage {
 
 private let queue = DispatchQueue.init(label: "com.ericrabil.imd-resolver.messages")
 private let message_log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "IMMessage+SPI")
-private func objc_unretained<P: NSObject>(_ obj: Unmanaged<P>) -> P {
-    return obj.takeUnretainedValue()
-}
 
 public extension IMMessage {
     /**
@@ -46,13 +42,13 @@ public extension IMMessage {
         
         let message = IMMessage.init(fromIMMessageItem: item, sender: sender, subject: nil)!
         
-        let IMMessageItemChatContext = NSClassFromString("IMMessageItemChatContext") as! NSObject.Type
-        
-        let context = IMMessageItemChatContext.init()
-        context.setValue(sender, forKey: "_senderHandle")
-        context.setValue(message, forKey: "_message")
-        
-        item.context = context
+//        let IMMessageItemChatContext = NSClassFromString("IMMessageItemChatContext") as! NSObject.Type
+//
+//        let context = IMMessageItemChatContext.init()
+//        context.setValue(sender, forKey: "_senderHandle")
+//        context.setValue(message, forKey: "_message")
+//
+//        item.context = context
         
         tracker()
         
@@ -104,71 +100,18 @@ public extension IMMessage {
             return eventLoop.makeSucceededFuture([])
         }
         
-        return eventLoop.flatSubmit { () -> EventLoopFuture<[IMItem]> in
-            let queryTracker = ERTrack(log: .default, name: "Querying IMD for messages", format: "")
-            
-            var records: NSArray!
-            
+        return eventLoop.flatSubmit { () -> EventLoopFuture<[ChatItem]> in
             if ERBarcelonaManager.isSimulation {
                 return IMChatHistoryController.sharedInstance()!.loadMessages(withGUIDs: guids, on: eventLoop).map { message -> [IMItem] in
                     return message.compactMap {
                         $0._imMessageItem
                     }
+                }.flatMap { items -> EventLoopFuture<[ChatItem]> in
+                    ERIndeterminateIngestor.ingest(items, in: chat)
                 }
             } else {
-                #if IMCORE_UNMANAGED
-                var unmanagedRecords: Unmanaged<CFArray>?
-                #endif
-                
-                if let imdRecordsRef = IMDMessageRecordCopyMessagesForGUIDs(guids) {
-                    records = imdRecordsRef.takeUnretainedValue()
-                    
-                    #if IMCORE_UNMANAGED
-                    unmanagedRecords = imdRecordsRef
-                    #endif
-                } else {
-                    records = [IMItem]() as NSArray
-                }
-                
-                queryTracker()
-                
-                os_log("IMMessage+spi:messages(withGUIDs) got %d records from IMD", records.count)
-                
-                let mapTracker = ERTrack(log: .default, name: "Mapping records to IMCore objects", format: "")
-                
-                let transformed: [IMItem] = records.map { record -> IMItem in
-                    #if IMCORE_UNMANAGED
-                    let item = IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve(record, nil, nil, nil, nil) as! IMItem
-                    let unmanagedItem = Unmanaged.passUnretained(item)
-                    unmanagedItem.release()
-                    return item
-                    #else
-                    return IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve(record, nil, nil, nil, nil) as! IMItem
-                    #endif
-                }
-                
-                #if IMCORE_UNMANAGED
-                if let unmanagedRecords = unmanagedRecords {
-                    unmanagedRecords.release()
-                }
-                #endif
-                
-                mapTracker()
-                
-                return eventLoop.makeSucceededFuture(transformed)
+                return ERLoadAndParseIMDMessageRecordRefsWithGUIDs(guids, in: chat)
             }
-        }.flatMap { item -> EventLoopFuture<[ChatItem]> in
-            let ingestTracker = ERTrack(log: .default, name: "IMMessage+SPI ingesting items", format: "")
-            
-            let ingestion = ERIndeterminateIngestor.ingest(item, in: chat)
-            
-            ingestion.whenSuccess { _ in
-                ingestTracker()
-            }
-            
-            return ingestion
-        }.map {
-            return $0
         }
     }
 }

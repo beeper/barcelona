@@ -171,7 +171,6 @@
 		1D804D19250EB5E500F376CB /* RichLinkAttachment+LPAssetResolution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D804D18250EB5E500F376CB /* RichLinkAttachment+LPAssetResolution.swift */; };
 		1D804DE9250EC9C700F376CB /* BarcelonaVapor.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D804DE7250EC9C700F376CB /* BarcelonaVapor.h */; };
 		1D804DED250ECB2300F376CB /* CoreBarcelona.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* CoreBarcelona.framework */; };
-		1D804DF3250ECB5600F376CB /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D804DF2250ECB5600F376CB /* main.swift */; };
 		1D804DF6250ECCBD00F376CB /* ERHTTPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEECD24E3817900303692 /* ERHTTPServer.swift */; };
 		1D804DF7250ECCC500F376CB /* CoreBarcelona+Vapor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1E23332501A6DB0069705D /* CoreBarcelona+Vapor.swift */; };
 		1D804DF9250ECD9B00F376CB /* HandlesAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE4F24E37D9E00303692 /* HandlesAPI.swift */; };
@@ -240,6 +239,7 @@
 		1D907A73250F2D3900ED1EDC /* ListenerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D907A72250F2D3900ED1EDC /* ListenerDelegate.swift */; };
 		1D907A75250F2D8100ED1EDC /* ERBarcelonaAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D907A74250F2D8000ED1EDC /* ERBarcelonaAPIService.swift */; };
 		1D907A76250F307C00ED1EDC /* imessage-rest.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = 1D5AEDAE24E3725200303692 /* imessage-rest.xpc */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1D91B49325C4786200DCBC3D /* IMDPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D91B49225C4786200DCBC3D /* IMDPersistence.swift */; };
 		1D9CA7FD251AC39600297E2F /* BCrypt in Frameworks */ = {isa = PBXBuildFile; productRef = 1D9CA7FC251AC39600297E2F /* BCrypt */; };
 		1D9CA807251AC7D200297E2F /* SwiftJWT in Frameworks */ = {isa = PBXBuildFile; productRef = 1D9CA806251AC7D200297E2F /* SwiftJWT */; };
 		1D9CA80B251AC7F600297E2F /* JWTManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9CA80A251AC7F600297E2F /* JWTManager.swift */; };
@@ -776,7 +776,6 @@
 		1D804DE5250EC9C700F376CB /* BarcelonaVapor.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaVapor.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D804DE7250EC9C700F376CB /* BarcelonaVapor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BarcelonaVapor.h; sourceTree = "<group>"; };
 		1D804DE8250EC9C700F376CB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		1D804DF2250ECB5600F376CB /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		1D804E11250ECEB300F376CB /* String+Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Service.swift"; sourceTree = "<group>"; };
 		1D81551A258ECC7C00870547 /* swizzleInstance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = swizzleInstance.m; sourceTree = "<group>"; };
 		1D815522258ECC9400870547 /* swizzleInstance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = swizzleInstance.h; sourceTree = "<group>"; };
@@ -801,6 +800,7 @@
 		1D907A70250F2CF000ED1EDC /* MessageXPCService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageXPCService.swift; sourceTree = "<group>"; };
 		1D907A72250F2D3900ED1EDC /* ListenerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenerDelegate.swift; sourceTree = "<group>"; };
 		1D907A74250F2D8000ED1EDC /* ERBarcelonaAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERBarcelonaAPIService.swift; sourceTree = "<group>"; };
+		1D91B49225C4786200DCBC3D /* IMDPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IMDPersistence.swift; sourceTree = "<group>"; };
 		1D9CA80A251AC7F600297E2F /* JWTManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JWTManager.swift; sourceTree = "<group>"; };
 		1D9CA80C251ACE7B00297E2F /* SecurityAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityAPI.swift; sourceTree = "<group>"; };
 		1D9CA80E251AD29D00297E2F /* CryptographyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptographyManager.swift; sourceTree = "<group>"; };
@@ -1252,6 +1252,7 @@
 		1D44864624E85BBB00FF73F3 /* CoreBarcelona */ = {
 			isa = PBXGroup;
 			children = (
+				1D91B49125C4785800DCBC3D /* Queries */,
 				1D5AEECB24E37F8A00303692 /* Constants.swift */,
 				1D44864724E85BBB00FF73F3 /* CoreBarcelona.h */,
 				1D5AEE4E24E37D9E00303692 /* APIs */,
@@ -1549,7 +1550,6 @@
 				1D1E23332501A6DB0069705D /* CoreBarcelona+Vapor.swift */,
 				1D3E3331250C204100EEA08B /* Vapor */,
 				1D804DE8250EC9C700F376CB /* Info.plist */,
-				1D804DF2250ECB5600F376CB /* main.swift */,
 				1D9CA812251AE60A00297E2F /* Constants.swift */,
 			);
 			path = BarcelonaVapor;
@@ -1613,6 +1613,14 @@
 				1D907A29250F01BD00ED1EDC /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		1D91B49125C4785800DCBC3D /* Queries */ = {
+			isa = PBXGroup;
+			children = (
+				1D91B49225C4786200DCBC3D /* IMDPersistence.swift */,
+			);
+			path = Queries;
 			sourceTree = "<group>";
 		};
 		1DB9520224F6B874004CC87B /* AttributedString */ = {
@@ -2291,6 +2299,7 @@
 				1D804D19250EB5E500F376CB /* RichLinkAttachment+LPAssetResolution.swift in Sources */,
 				1D3B5AF224EB444300A65280 /* IMContactStore+AlwaysCache.m in Sources */,
 				1DEE7EA6250FB2150009C74F /* IMHandle+Resolvable.swift in Sources */,
+				1D91B49325C4786200DCBC3D /* IMDPersistence.swift in Sources */,
 				1D804D13250EB1D000F376CB /* RichLinkCaption.swift in Sources */,
 				1DD805BE24E85D070076D717 /* IMChatItem+AcknowledgmentSummaryInfo.swift in Sources */,
 				1D3E333C250C230E00EEA08B /* CNContact+Resolvable.swift in Sources */,
@@ -2440,7 +2449,6 @@
 				1D804E01250ECD9B00F376CB /* DebugAPI.swift in Sources */,
 				1D9CA80B251AC7F600297E2F /* JWTManager.swift in Sources */,
 				1D804E02250ECD9B00F376CB /* MessagesAPI.swift in Sources */,
-				1D804DF3250ECB5600F376CB /* main.swift in Sources */,
 				1D804DF6250ECCBD00F376CB /* ERHTTPServer.swift in Sources */,
 				1D804DF7250ECCC500F376CB /* CoreBarcelona+Vapor.swift in Sources */,
 			);
@@ -2689,11 +2697,11 @@
 				);
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 12;
+				DYLIB_CURRENT_VERSION = 14;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = BarcelonaSharedUI/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -2725,11 +2733,11 @@
 				);
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 12;
+				DYLIB_CURRENT_VERSION = 14;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = BarcelonaSharedUI/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -2764,12 +2772,12 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEFINES_MODULE = NO;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 12;
+				DYLIB_CURRENT_VERSION = 14;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2815,12 +2823,12 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEFINES_MODULE = NO;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 12;
+				DYLIB_CURRENT_VERSION = 14;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2895,6 +2903,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -2913,7 +2922,7 @@
 				OTHER_SWIFT_FLAGS = "-Xcc -Wno-nullability-completeness -Xcc -Wno-visibility -Xcc -Wno-objc-protocol-method-implementation -Xcc -Wno-arc-performSelector-leaks -Xcc -Wno-nonnull -Xcc -Wno-strict-prototypes -Xcc -Wno-property-attribute-mismatch -Xcc -Wno-incomplete-umbrella";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
-				SWIFT_OPTIMIZATION_LEVEL = "-Osize";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = (
 					"-Wno-nullability-completeness",
@@ -2968,6 +2977,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -2978,10 +2988,11 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_SWIFT_FLAGS = "-Xcc -Wno-nullability-completeness -Xcc -Wno-visibility -Xcc -Wno-objc-protocol-method-implementation -Xcc -Wno-arc-performSelector-leaks -Xcc -Wno-nonnull -Xcc -Wno-strict-prototypes -Xcc -Wno-property-attribute-mismatch -Xcc -Wno-incomplete-umbrella";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
-				SWIFT_OPTIMIZATION_LEVEL = "-Osize";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = (
 					"-Wno-nullability-completeness",
@@ -3158,11 +3169,11 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = 6UW2D7F2RU;
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 12;
+				DYLIB_CURRENT_VERSION = 14;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3199,11 +3210,11 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = 6UW2D7F2RU;
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 12;
+				DYLIB_CURRENT_VERSION = 14;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3240,11 +3251,11 @@
 				);
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 6UW2D7F2RU;
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 12;
+				DYLIB_CURRENT_VERSION = 14;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = SPMLibraries/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -3277,11 +3288,11 @@
 				);
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 6UW2D7F2RU;
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 12;
+				DYLIB_CURRENT_VERSION = 14;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = SPMLibraries/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -3377,10 +3388,10 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 12;
+				DYLIB_CURRENT_VERSION = 14;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3417,10 +3428,10 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 14;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 12;
+				DYLIB_CURRENT_VERSION = 14;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

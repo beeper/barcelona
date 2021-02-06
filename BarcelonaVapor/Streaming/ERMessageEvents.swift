@@ -40,16 +40,16 @@ class ERMessageEvents: EventDispatcher {
             self.messagesReceived(items, inChat: chat)
         }
         
-        #if BARCELONA_MESSAGES_SENT_NOTIFICATION
         /// Tapbacks that are sent from me, on other devices, do not get received by other handlers. This handler receives tapbacks on all devices.
         addObserver(forName: ERChatMessageSentNotification) {
-            guard let item = $0.object as? IMItem, let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
+            guard let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
                 return
             }
             
-            self.messagesReceived([item], inChat: chat)
+            if let associated = $0.object as? IMAssociatedMessageItem {
+                self.messagesReceived([associated], inChat: chat, overrideFromMe: true)
+            }
         }
-        #endif
         
         addObserver(forName: ERChatMessagesUpdatedNotification) {
             guard let items = $0.object as? [IMItem], let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
@@ -82,11 +82,21 @@ class ERMessageEvents: EventDispatcher {
      Intakes tangible messages, not transcript items.
      No typing items come here, no status items come here, no group items come here
      */
-    private func messagesReceived(_ items: [IMItem], inChat chatIdentifier: String) {
+    private func messagesReceived(_ items: [IMItem], inChat chatIdentifier: String, overrideFromMe: Bool = false) {
         let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!
         
         EventLoopFuture<ChatItem?>.whenAllSucceed(items.compactMap { item -> EventLoopFuture<ChatItem?>? in
-            itemGUIDAsChatItem(item.guid, in: chat.id)
+            if !ChangedItemsExclusion.contains(where: {
+                item.isKind(of: $0)
+            }) {
+                return nil
+            }
+            
+            if item is IMAssociatedMessageItem, item.isFromMe, !overrideFromMe {
+                return nil
+            }
+            
+            return itemGUIDAsChatItem(item.guid, in: chat.id)
         }, on: eventProcessing_eventLoop.next()).map {
             $0.compactMap { $0 }
         }.map {

@@ -39,6 +39,7 @@
 #import <IMDPersistence/NSCoding.h>
 #import <IMDPersistence/NSObject.h>
 #import <IMDPersistence/SGMessagesSuggestionsServiceDelegate.h>
+#import <IMSharedUtilities/IMItem.h>
 
 struct IMDSqlOperation {
     
@@ -53,8 +54,12 @@ void IMDEnsureSharedRecordStoreInitialized();
 //NSArray *_IMDSqlOperationGetRowsWithBindingBlock(IMDSqlOperation *, CFStringRef, dispatch_block_t);
 //NSArray *_IMDSqlOperationGetRowsForQueryWithBindingBlock(CFStringRef, NSError **, void (^)(id));
 void IMDSetIsRunningInDatabaseServerProcess(char);
-NSArray* IMDMessageRecordCopyMessagesForAssociatedGUID(CFStringRef);
 NSArray* IMDMessageRecordCopyMessagesForRowIDs(NSArray*);
 id IMDMessageRecordCopyMessageForGUID(CFStringRef);
-id IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve(id, id, id, id, id);
-_Nullable CFArrayRef IMDMessageRecordCopyMessagesForGUIDs(id);
+IMItem* IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve(id, id, id, id, id) CF_RETURNS_RETAINED;
+_Nullable CFArrayRef IMDMessageRecordCopyMessagesForGUIDs(id) CF_RETURNS_RETAINED;
+
+CFArrayRef IMDMessageRecordCopyArrayOfAssociatedMessagesForMessageGUIDFromSender(NSString *, NSString *, NSError **) CF_RETURNS_RETAINED;
+CFArrayRef IMDMessageRecordCopyMessagesForAssociatedGUID(NSString *) CF_RETURNS_RETAINED;
+CFArrayRef IMDMessageRecordCopyMessagesWithChatIdentifiersOnServicesUpToGUIDOrLimit(CFArrayRef, CFArrayRef, CFStringRef, Boolean, Boolean, int64_t) CF_RETURNS_RETAINED;
+CFArrayRef IMDMessageRecordCopyMessagesWithChatIdentifiersOnServicesUpToGUIDOrLimitWithOptionalThreadIdentifier(CFArrayRef, CFArrayRef, CFStringRef, CFStringRef, Boolean, Boolean, int64_t) CF_RETURNS_RETAINED;

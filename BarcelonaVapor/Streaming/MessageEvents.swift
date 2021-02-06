@@ -176,16 +176,6 @@ class MessageEvents: EventDispatcher {
                         os_log("⁉️ Bad index when parsing chat items!", type: .error, log_messageEvents)
                         return nil
                     }
-                    
-                    if key == IMChatItemsInserted {
-                        if let _ = item as? IMMessagePartChatItem {
-                            return nil
-                        }
-                        
-                        if let _ = item as? IMAssociatedMessageChatItem {
-                            return nil
-                        }
-                    }
 
                     return item
                 }, in: chat, on: key == IMChatItemsInserted ? .itemsReceived : .itemsUpdated)

@@ -96,3 +96,5 @@ public let ERChatMessagesUpdatedNotification = NSNotification.Name(rawValue: "ER
 public let ERChatMessageUpdatedNotification = NSNotification.Name(rawValue: "ERChatMessageUpdatedNotification")
 public let ERChatMessagesDeletedNotification = NSNotification.Name(rawValue: "ERChatMessagesDeletedNotification")
 internal let ERChatRegistryDidLoadNotification = NSNotification.Name(rawValue: "ERChatRegistryDidLoadNotification")
+
+public let ERDefaultMessageQueryLimit: Int64 = 75

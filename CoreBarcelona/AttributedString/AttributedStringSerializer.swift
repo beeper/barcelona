@@ -119,25 +119,14 @@ private func ERTextPart(fromCalendar attributedCalendar: NSAttributedString) -> 
     var unixTime: Double? = nil
     
     if let calendarData = attributedCalendar.allAttributes[MessageAttributes.calendarData] as? Data {
-        #if IMCORE_UNMANAGED
+        var result = IMCopyDDScannerResultFromAttributedStringData(calendarData)
         
-        let unmanagedResult = Unmanaged.passUnretained(IMCopyDDScannerResultFromAttributedStringData(calendarData) as! DDScannerResult), result = unmanagedResult.takeUnretainedValue()
-        
-        #else
-        
-        let result = IMCopyDDScannerResultFromAttributedStringData(calendarData) as! DDScannerResult
-        
-        #endif
-        
-        if let date = result.date(fromReferenceDate: nil, referenceTimezone: nil, timezoneRef: nil, allDayRef: nil) as? Date {
+        if let date = result?.date(fromReferenceDate: nil, referenceTimezone: nil, timezoneRef: nil, allDayRef: nil) as? Date {
             unixTime = date.timeIntervalSince1970 * 1000
         }
         
-        #if IMCORE_UNMANAGED
-        
-        unmanagedResult.release()
-        
-        #endif
+        CFRelease(result!)
+        result = nil
     }
     
     return TextPart(type: .calendar, string: attributedCalendar.string, data: .init(unixTime))

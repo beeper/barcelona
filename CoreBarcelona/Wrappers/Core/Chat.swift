@@ -10,6 +10,7 @@ import Foundation
 import IMSharedUtilities
 import IMCore
 import NIO
+import os.log
 
 public enum ChatStyle: UInt8 {
     case group = 0x2b
@@ -148,6 +149,8 @@ private extension NSAttributedString {
     }
 }
 
+private let log = OSLog(subsystem: "CoreBarcelona", category: "Chat")
+
 public struct Chat: Codable, ChatConfigurationRepresentable {
     public init(_ backing: IMChat) {
         joinState = backing.joinState
@@ -215,7 +218,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable {
         }
     }
     
-    public func messages(before: String? = nil, limit: UInt64? = nil) -> EventLoopFuture<[ChatItem]> {
+    public func messages(before: String? = nil, limit: Int64? = nil) -> EventLoopFuture<[ChatItem]> {
         if ERBarcelonaManager.isSimulation {
             let guids: [String] = imChat.chatItemRules._items().compactMap { item in
                 if let chatItem = item as? IMChatItem {
@@ -238,24 +241,14 @@ public struct Chat: Codable, ChatConfigurationRepresentable {
             }
         }
         
-        return DBReader.shared.rowIDs(forIdentifier: imChat.chatIdentifier).flatMap { ROWIDs -> EventLoopFuture<[String]> in
-            let guidFetchTracker = ERTrack(log: .default, name: "Chat.swift:messages Loading newest guids for chat", format: "ChatID: %{public}s ROWIDs: %@", self.id, ROWIDs)
-            
-            return DBReader.shared.newestMessageGUIDs(inChatROWIDs: ROWIDs, beforeMessageGUID: before, limit: Int(limit ?? 100)).map {
-                guidFetchTracker()
-                return $0
-            }
-        }.flatMap { guids -> EventLoopFuture<[ChatItem]> in
-            IMMessage.messages(withGUIDs: guids, in: self.id, on: messageQuerySystem.next())
-        }.map { messages -> [ChatItem] in
-            messages.sorted {
-                guard case .message(let message1) = $0, case .message(let message2) = $1 else {
-                    return false
-                }
-                
-                return message1.time! > message2.time!
-            }
-        }
+        #if DEBUG
+        let signpostID = OSSignpostID(log: log)
+        os_signpost(.begin, log: .default, name: "Chat.messages():IMDCopy", signpostID: signpostID)
+        #endif
+        
+        os_log("Querying IMD for recent messages using chat fast-path", log: log)
+        
+        return ERLoadAndParseIMDMessageRecordRefs(withChatIdentifier: self.id, onServices: [.iMessage], beforeGUID: before, limit: limit)
     }
     
     public func delete(message: DeleteMessage, on eventLoop: EventLoop) -> EventLoopFuture<Void> {

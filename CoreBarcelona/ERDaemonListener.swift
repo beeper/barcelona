@@ -322,7 +322,6 @@ public class ERDaemonListener: IMDaemonListenerProtocol {
     }
     
     @objc public func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, notifySentMessage arg5: IMMessageItem!, sendTime arg6: NSNumber!) {
-        
     }
     
     @objc public func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, messageUpdated arg5: IMItem!) {

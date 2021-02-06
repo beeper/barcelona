@@ -156,11 +156,17 @@ extension DBReader {
         let resolution = beforeMessageGUID == nil ? eventLoop.makeSucceededFuture(nil) : rowID(forMessageGUID: beforeMessageGUID!)
         
         resolution.whenSuccess { beforeMessageROWID in
+            let guidFetchTracker = ERTrack(log: .default, name: "ChatMessageJoin.swift:newestMessageGUIDs Loading newest guids for chat", format: "")
+            
             self.pool.asyncRead {
+                guidFetchTracker()
+                
                 switch $0 {
                 case .failure(let error):
                     promise.fail(error)
                 case .success(let db):
+                    let ROWIDQuery = ERTrack(log: .default, name: "ChatMessageJoin.swift:newestMessageGUIDs Loading message ROWIDs", format: "")
+                    
                     do {
                         var messageROWIDsQuery = ChatMessageJoin
                             .select(ChatMessageJoin.Columns.message_id, as: Int64.self)
@@ -176,11 +182,22 @@ extension DBReader {
                             .limit(limit)
                             .fetchAll(db)
                         
+                        ROWIDQuery()
+                        
+                        guard messageROWIDs.count > 0 else {
+                            promise.succeed([])
+                            return
+                        }
+                        
+                        let rawMessageFetcher = ERTrack(log: .default, name: "ChatMessageJoin.swift:newestMessageGUIDs Fetching RawMessage for message ROWIDs", format: "")
+                        
                         let guids = try RawMessage
                             .select(RawMessage.Columns.guid, as: String.self)
                             .filter(messageROWIDs.contains(RawMessage.Columns.ROWID))
                             .order(RawMessage.Columns.ROWID.desc)
                             .fetchAll(db)
+                        
+                        rawMessageFetcher()
                         
                         promise.succeed(guids)
                     } catch {

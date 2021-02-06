@@ -13,18 +13,20 @@ import NIO
 import os.log
 
 extension Configuration {
-    init(trace: @escaping TraceFunction) {
+    init(trace: TraceFunction?) {
         self.init()
         self.trace = trace
+        maximumReaderCount = 25
+        qos = .init(qosClass: .userInitiated, relativePriority: 9999)
     }
 }
 
 #if DEBUG
-private let dbConfiguration = Configuration { db in
+private var dbConfiguration = Configuration { db in
     os_log("Executing query: %@", log: OSLog(subsystem: "CoreBarcelona", category: "SQL"), type: .debug, db)
 }
 #else
-private let dbConfiguration = Configuration()
+private var dbConfiguration = Configuration(trace: nil)
 #endif
 
 #if os(iOS)
@@ -124,13 +126,6 @@ public struct DBReader {
 
 typealias HandleTimestampRecord = (handle_id: String, date: Int64, chat_id: String)
 
-let handleTimestampQuery = """
-SELECT DISTINCT handle.id AS handle_id, MAX(message.date) AS date, chat.chat_identifier AS chat_id FROM message
-INNER JOIN handle ON message.handle_id = handle.ROWID
-INNER JOIN chat_message_join ON message.ROWID = chat_message_join.message_id
-INNER JOIN chat ON chat_message_join.chat_id = chat.ROWID AND chat.chat_identifier IN (?) GROUP BY handle_id, chat_identifier ORDER BY message.date DESC
-"""
-
 private class HandleTimestampSynthesized: Record {
     override class var databaseTableName: String { "chat_message_join" }
     
@@ -167,7 +162,6 @@ extension DBReader {
         let promise = eventLoop.makePromise(of: [HandleTimestampRecord].self)
         
         pool.asyncRead { result in
-//            try db.get().execute(sql: <#T##String#>)
             do {
                 let db = try result.get()
                 
@@ -180,7 +174,6 @@ INNER JOIN handle ON message.handle_id = handle.ROWID
 INNER JOIN chat_message_join ON message.ROWID = chat_message_join.message_id
 INNER JOIN chat ON chat_message_join.chat_id = chat.ROWID AND chat.chat_identifier IN (\(chatIDs.templatedString))  GROUP BY handle_id, chat_identifier ORDER BY message.date DESC
 """)
-//                let records = try HandleTimestampSynthesized.select(literal: .init).fetchAll(db)
                 
                 try stmt.setArguments(StatementArguments(chatIDs))
                 let results = try Array(try HandleTimestampSynthesized.fetchCursor(stmt))

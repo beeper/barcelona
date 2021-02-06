@@ -9,22 +9,19 @@
 import Foundation
 import LinkPresentation
 import IMCore
-import os.log
+import DigitalTouchShared
 
 public struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
     init(_ item: IMTranscriptPluginChatItem, chatID: String?) {
         bundleID = item.dataSource.bundleID
-        
-        os_log("PluginChatItem has fileTransferGUIDs: %@", log: .default, type: .debug, item.fileTransferGUIDs)
-        
         attachments = item.attachments
         
         var insertPayload: Bool = true
         
         switch bundleID {
         case "com.apple.DigitalTouchBalloonProvider":
-            if let payloadData = item.dataSource?.payload, let digitalTouchMessage = DigitalTouchMessage(data: payloadData) {
-                digitalTouch = digitalTouchMessage
+            if let dataSource = item.dataSource, let messages = dataSource.perform(Selector(("createSessionMessages")))?.takeUnretainedValue() as? Array<ETMessage>, let message = messages.first {
+                digitalTouch = DigitalTouchMessage(message: message)
             }
             break
         case "com.apple.messages.URLBalloonProvider":

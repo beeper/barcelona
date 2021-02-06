@@ -20,7 +20,7 @@ extension DBReader {
                 guard let chat = IMChatRegistry.shared._chats(withMessageGUID: guid).first else {
                     return eventLoop.makeSucceededFuture([guid: []])
                 }
-                
+
                 let associatedGUIDs = chat.chatItems.compactMap {
                     $0 as? IMAssociatedMessageChatItem
                 }.filter {
@@ -28,7 +28,7 @@ extension DBReader {
                 }.compactMap {
                     $0.associatedMessageGUID
                 }
-                
+
                 return Message.lazyResolve(withIdentifiers: associatedGUIDs, inChat: chat.id, on: eventLoop).map {
                     [guid: $0]
                 }
@@ -39,7 +39,7 @@ extension DBReader {
                     }
                 }
             }.cascade(to: promise)
-            
+
             return promise.futureResult
         }
         
@@ -54,7 +54,7 @@ extension DBReader {
                         .filter(guids.contains(RawMessage.Columns.associated_message_guid))
                         .fetchAll(db)
                     
-                    Message.messages(withGUIDs: messages, in: chat, on: self.eventLoop).map {
+                    Message.dirtyMessages(withGUIDs: messages, in: chat, on: self.eventLoop).map {
                         $0.reduce(into: [String: [Message]]()) { ledger, message in
                             guard let associatedMessageGUID = message.associatedMessageID else { return }
                             if ledger[associatedMessageGUID] == nil { ledger[associatedMessageGUID] = [] }

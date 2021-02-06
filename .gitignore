@@ -2,3 +2,7 @@
 xcuserdata/
 DRM
 build/
+ios_build
+macos_build
+macos_staging
+archive

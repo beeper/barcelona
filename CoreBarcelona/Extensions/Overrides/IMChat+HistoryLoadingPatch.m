@@ -31,6 +31,7 @@
         }
         
         swizzleInstance(IMChat.class, @selector(_handleIncomingItem:), @selector(xxx_handleIncomingItem:));
+        swizzleInstance(IMChat.class, @selector(_insertHistoricalMessages:queryID:isRefresh:isHistoryQuery:limit:), @selector(xxx_insertHistoricalMessages:queryID:isRefresh:isHistoryQuery:limit:));
         
         if (@available(iOS 14, macOS 10.16, watchOS 7, *)) {
             swizzleInstance(IMChat.class, @selector(_handleIncomingItem:updateReplyCounts:), @selector(xxx_handleIncomingItem:updateReplyCounts:));
@@ -44,6 +45,14 @@
     }
     
     [self _ghetto_updateChatItemsWithReason:arg2 block:arg3 shouldPost:arg4];
+}
+
+- (void)xxx_insertHistoricalMessages:(id)arg1 queryID:(id)arg2 isRefresh:(BOOL)arg3 isHistoryQuery:(BOOL)arg4 limit:(unsigned long long)arg5; {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"__kERChatLoadRequestDidCompleteNotification" object:arg1 userInfo:@{
+        @"__kERChatQueryIDKey": arg2
+    }];
+    
+    [self xxx_insertHistoricalMessages:arg1 queryID:arg2 isRefresh:arg3 isHistoryQuery:arg4 limit:arg5];
 }
 
 - (void)xxx_emitIncomingItem:(id)arg1 {

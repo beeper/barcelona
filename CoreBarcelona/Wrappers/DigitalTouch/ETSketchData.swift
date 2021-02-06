@@ -17,14 +17,6 @@ public struct Color: Codable {
     let alpha: CGFloat
 }
 
-private func ETPExtractPoints(from strokes: [[NSValue]]) -> String? {
-    let tap = ETPTap(), _ = DispatchQueue.main.sync {
-        tap.read(from: strokes)
-    }
-    
-    return tap.points?.base64EncodedString()
-}
-
 public struct ETSketchData: Codable {
     init(_ message: ETSketchMessage) {
         numberOfColors = message.numberOfColors
@@ -34,10 +26,6 @@ public struct ETSketchData: Codable {
         }
         
         strokes = []
-        
-        if let strokeData = ETPExtractPoints(from: message.strokes) {
-            print(strokeData)
-        }
     }
     
     let numberOfColors: UInt64
