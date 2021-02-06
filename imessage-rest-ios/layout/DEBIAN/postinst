@@ -1,0 +1,2 @@
+#!/bin/sh
+launchctl load -w /Library/LaunchAgents/com.ericrabil.barcelonad.plist || true

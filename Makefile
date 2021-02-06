@@ -18,7 +18,7 @@ CURRENT_VERSION := $(shell cd $(BARCELONA_SRC_DIR) && xcrun agvtool what-marketi
 IOS_BUILD_DIR = $(WORKING_DIR)/ios_build
 IOS_DESTINATION = generic/platform=iOS,name=Any iOS Device
 IOS_ARCHS = arm64
-BARCELONA_IOS_DIR ?= $(call resolve,"../barcelona-ios")
+BARCELONA_IOS_DIR ?= $(call resolve,"imessage-rest-ios")
 BARCLEONA_XCPROJ = $(BARCELONA_SRC_DIR)/imessage-rest.xcodeproj
 BARCELONA_IOS_STAGING = $(BARCELONA_IOS_DIR)/layout
 IOS_ARCHIVE_PATH = $(ARCHIVE_DIR)/MyMessage iOS $(VERSION).deb

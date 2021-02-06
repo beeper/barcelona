@@ -1,0 +1,9 @@
+Package: com.ericrabil.barcelonad
+Name: Barcelona
+Depends: mobilesubstrate, com.rpetrich.rocketbootstrap, firmware (>= 13.0)
+Architecture: iphoneos-arm
+Description: iMessage API over HTTP
+Maintainer: Eric Rabil
+Author: Eric Rabil
+Section: Tools
+Version: 0.0.4
