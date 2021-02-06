@@ -1,6 +1,8 @@
 # imessage-rest
 A high-performance and featured API for iMessage.
 
+Wanna chat? Hop on [Discord](https://discord.gg/ck26FwFJun).
+
 ## Getting Started
 
 ### Prerequisites
