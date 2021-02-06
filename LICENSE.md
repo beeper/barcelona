@@ -659,3 +659,10 @@ specific requirements.
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 <https://www.gnu.org/licenses/>.
+
+                            Amendments
+
+  1. Prohibition of commercial use without prior authorization.
+  
+IN NO CIRCUMSTANCE MAY THIS SOFTWARE OR ANY DERIVATIVE BE USED IN A COMMERCIAL
+OR FOR-PROFIT CONTEXT WITHOUT THE EXPLICIT AUTHORIZATION OF THE CREATOR (Eric Rabil).
