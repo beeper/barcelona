@@ -44,7 +44,22 @@ We use [SemVer](http://semver.org/) for versioning.
 - [Other Contributors](https://github.com/open-imcore/imessage-rest/contributors)
 
 ### License
-This project is licensed under the GNU Affero General Public License – see the [LICENSE.md](LICENSE.md) for details.
+This project is licensed under the GNU Affero General Public License (with the following amendments) – see the [LICENSE.md](LICENSE.md) for details.
+
+```
+                            Amendments
+
+  1. Prohibition of commercial use without prior authorization.
+  
+IN NO CIRCUMSTANCE MAY THIS SOFTWARE OR ANY DERIVATIVE BE USED IN A COMMERCIAL
+OR FOR-PROFIT CONTEXT WITHOUT THE EXPLICIT AUTHORIZATION OF THE CREATOR (Eric Rabil).
+
+  2. Attribution to the original creator.
+  
+ANY SOFTWARE OF WHICH ANY COMPONENT OF THIS CODEBASE, OR ANY OF ITS DERIVATIVES,
+MAKES UP A SUBSTANTIAL PORTION OF THE PROJECT MUST INCLUDE AN ATTRIBUTION TO THE
+CREATOR (Eric Rabil) AND LINK TO THE ORIGINAL PROJECT.
+```
 
 ### Acknowledgments
 - I could not have done this without [Hopper](https://www.hopperapp.com/) – It is an excellent tool for reverse-engineering and I have spent countless hours using it for this project.
