@@ -64,3 +64,7 @@ CREATOR (Eric Rabil) AND LINK TO THE ORIGINAL PROJECT.
 ### Acknowledgments
 - I could not have done this without [Hopper](https://www.hopperapp.com/) – It is an excellent tool for reverse-engineering and I have spent countless hours using it for this project.
 - The Messages team has fleshed out a truly remarkable ecosystem of frameworks and daemons. The struggles working with these APIs were due to a lack of documentation – the frameworks themselves are very feature-rich and easy to use once properly understood.
+
+### Documentation
+
+- [REST API](https://www.notion.so/MyMessage-API-Documentation-6b50937acef44341aa177999a28f0c3c)
