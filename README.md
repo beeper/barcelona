@@ -1,5 +1,5 @@
 # imessage-rest
-A high-performance and featured API for iMessage.
+A high-performance, fully-featured REST API for iMessage.
 
 Wanna chat? Hop on [Discord](https://discord.gg/ck26FwFJun).
 
@@ -18,7 +18,7 @@ These are not strict requirements – this project is simply only ensured to bu
 You should be able to just fire up the project and build what you please. Running the `imessage-rest.xpc` service from Xcode requires a bit of fenagling to trick Xcode into running an XPC service, but once you are able to select is as an executable debugging it should be a breeze.
 
 #### Custom Distribution
-If you're trying to make a custom distribution, running `make all` should be suffice. You can also run `make ios` or `make macos` if you just want one platform to build.
+If you're trying to make a custom distribution, running `make all` should suffice. You can also run `make ios` or `make macos` if you just want one platform to build.
 
 ### Installing
 For iOS, a `.deb` file is generated and can be installed to automate the installation process.
