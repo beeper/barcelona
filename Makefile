@@ -35,7 +35,7 @@ xcbuild_scheme = "xcodebuild ARCHS=\"$(4)\" ONLY_ACTIVE_ARCH=NO -scheme \"$(1)\"
 xcbuild_ios_scheme = $(call xcbuild_scheme,$(1),$(IOS_DESTINATION),$(IOS_BUILD_DIR),$(IOS_ARCHS))
 xcbuild_macos_scheme = $(call xcbuild_scheme,$(1),$(MACOS_DESTINATION),$(MACOS_BUILD_DIR),$(MACOS_ARCHS))
 
-codesign_daemon = "codesign --deep --entitlements \"imessage-rest/imessage-rest.entitlements\" \"$(1)\" -f -s \"Apple Development\""
+codesign_daemon = "codesign --deep --entitlements \"imessage-rest/imessage-rest.entitlements\" \"$(1)\" -f -s '-'"
 codesign_mac_daemon = $(call codesign_daemon,"macos_build/$(1)")
 codesign_ios_daemon = $(call codesign_daemon,"ios_build/$(1)")
 
