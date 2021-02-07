@@ -659,16 +659,3 @@ specific requirements.
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 <https://www.gnu.org/licenses/>.
-
-                            Amendments
-
-  1. Prohibition of commercial use without prior authorization.
-  
-IN NO CIRCUMSTANCE MAY THIS SOFTWARE OR ANY DERIVATIVE BE USED IN A COMMERCIAL
-OR FOR-PROFIT CONTEXT WITHOUT THE EXPLICIT AUTHORIZATION OF THE CREATOR (Eric Rabil).
-
-  2. Attribution to the original creator.
-  
-ANY SOFTWARE OF WHICH ANY COMPONENT OF THIS CODEBASE, OR ANY OF ITS DERIVATIVES,
-MAKES UP A SUBSTANTIAL PORTION OF THE PROJECT MUST INCLUDE AN ATTRIBUTION TO THE
-CREATOR (Eric Rabil) AND LINK TO THE ORIGINAL PROJECT.
