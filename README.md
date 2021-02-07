@@ -25,7 +25,13 @@ For iOS, a `.deb` file is generated and can be installed to automate the install
 
 For macOS, there is no automated installation process. The only piece of manual installation is installing `Staging/Library/Preferences/com.apple.security.xpc.plist` to `/Library/Preferences`. This file is also included in archives targeting macOS.
 
-### Built With
+## Documentation
+
+Documentation for the REST API provided by this software is available [here](https://www.notion.so/MyMessage-API-Documentation-6b50937acef44341aa177999a28f0c3c).
+
+Client libraries are available for different environments, wrapping most functionality with a simple, familiar API.
+
+## Built With
 - [Vapor](https://github.com/vapor/vapor) – The REST framework
 - [Swift Package Manager](https://github.com/apple/swift-package-manager) – Dependency management
 - [GRDB](https://github.com/groue/GRDB.swift) – Used for SQLite
@@ -33,23 +39,19 @@ For macOS, there is no automated installation process. The only piece of manual 
 - The IM family of frameworks
 - Tons and tons of love, reverse engineering, and muzzled AMFI
 
-### Contributing
+## Contributing
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
 ### Versioning
 We use [SemVer](http://semver.org/) for versioning.
 
-### Authors
-- **Eric Rabil** – Creator and maintainer
+## Authors
+- **[Eric Rabil](https://twitter.com/ericrabil)** – Creator and maintainer
 - [Other Contributors](https://github.com/open-imcore/imessage-rest/contributors)
 
-### License
+## License
 This project is licensed under the GNU Affero General Public License (with the following amendments) – see the [LICENSE.md](LICENSE.md) for details.
 
-### Acknowledgments
+## Acknowledgments
 - I could not have done this without [Hopper](https://www.hopperapp.com/) – It is an excellent tool for reverse-engineering and I have spent countless hours using it for this project.
 - The Messages team has fleshed out a truly remarkable ecosystem of frameworks and daemons. The struggles working with these APIs were due to a lack of documentation – the frameworks themselves are very feature-rich and easy to use once properly understood.
-
-### Documentation
-
-- [REST API](https://www.notion.so/MyMessage-API-Documentation-6b50937acef44341aa177999a28f0c3c)
