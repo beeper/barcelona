@@ -16,6 +16,12 @@ jobs:
 
       - name: Build macOS
         run: make macos
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: macOS-build
+          path: archive
   ios-builder:
     name: iOS Builder
     runs-on: macos-latest
@@ -32,3 +38,9 @@ jobs:
 
       - name: Build iOS
         run: make ios
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: iOS-build
+          path: archive
