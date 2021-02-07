@@ -10,7 +10,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Run Script"
-               scriptText = "# Type a script or drag a script file from your workspace to insert its path.&#10;codesign -d --entitlements &quot;${PROJECT_DIR}/imessage-rest/imessage-rest.entitlements&quot; &quot;${TARGET_BUILD_DIR}/imessage-rest iOS.xpc&quot; -f -s &quot;Apple Development&quot;&#10;">
+               scriptText = "# Type a script or drag a script file from your workspace to insert its path.&#10;codesign -d --entitlements &quot;${PROJECT_DIR}/imessage-rest/imessage-rest.entitlements&quot; &quot;${TARGET_BUILD_DIR}/imessage-rest iOS.xpc&quot; -f -s &quot;-&quot;&#10;">
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"
