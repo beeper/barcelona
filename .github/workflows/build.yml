@@ -1,0 +1,28 @@
+name: Builder
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  mac-builder:
+    name: macOS Builder
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build macOS
+        run: make macos
+  ios-builder:
+    name: iOS Builder
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build iOS
+        run: make ios
