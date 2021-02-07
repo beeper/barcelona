@@ -78,6 +78,12 @@ archive-ios:
 	rm -f "$(IOS_ARCHIVE_PATH)"
 	mkdir -p $(ARCHIVE_DIR)
 
+	mkdir -p $(IMESSAGE_APPLICATIONS_DIR)
+	mkdir -p $(IMESSAGE_XPC_DIR)
+
+	mv "$(IMESSAGE_APP_SRC)" "$(IMESSAGE_APP_TARGET)"
+	mv "$(IMESSAGE_XPC_SRC)" "$(IMESSAGE_XPC_TARGET)"
+
 	$(eval FIRST_FILE := $(shell ls $(BARCELONA_IOS_DIR)/packages | head -1))
 	$(eval PACKAGE_PATH = $(BARCELONA_IOS_DIR)/packages/$(FIRST_FILE))
 
@@ -87,7 +93,7 @@ archive-macos:
 	rm -rf $(MACOS_STAGING_DIR)
 	mkdir -p $(MACOS_STAGING_DIR) $(ARCHIVE_DIR)
 
-	cp -r "$(MACOS_BUILD_DIR)/MyMessage.app" "$(MACOS_STAGING_DIR)/MyMessage.app"
+	mv "$(MACOS_BUILD_DIR)/MyMessage.app" "$(MACOS_STAGING_DIR)/MyMessage.app"
 
 	cp -r "$(BARCELONA_SRC_DIR)/Staging/" "$(MACOS_STAGING_DIR)/"
 	tar -cvzf "$(MACOS_ARCHIVE_PATH)" -C "$(MACOS_STAGING_DIR)" .
