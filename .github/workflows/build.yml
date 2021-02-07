@@ -21,6 +21,12 @@ jobs:
     runs-on: macos-latest
 
     steps:
+      - name: Prepare Theos
+        uses: Randomblock1/theos-action@v1
+        with:
+          theos-dir: '~/theos'
+          theos-sdks: 'https://github.com/xybp888/iOS-SDKs'
+
       - name: Checkout code
         uses: actions/checkout@v2
 
