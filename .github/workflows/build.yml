@@ -30,6 +30,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: prepare environment
+        shell: bash
+        run: |
+          brew install ldid make
+          echo "THEOS=$GITHUB_WORKSPACE/${{ inputs.theos-dir }}" >> $GITHUB_ENV
+          PATH="/usr/local/opt/make/libexec/gnubin:$PATH" >> $GITHUB_ENV
+          echo "Succesfully installed tools!"
+
       - name: Setup Theos
         uses: actions/checkout@main
         with:
