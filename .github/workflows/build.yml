@@ -35,6 +35,11 @@ jobs:
           path: theos
           submodules: recursive
 
+      - name: What the hell is going on
+        run: |
+          ls $GITHUB_WORKSPACE
+          ls $GITHUB_WORKSPACE/theos
+
       - name: Download SDKs
         run: |
           curl -LO https://github.com/xybp888/iOS-SDKs/archive/master.zip
