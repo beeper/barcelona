@@ -27,17 +27,27 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Prepare Theos
-        uses: Randomblock1/theos-action@v1
+      - name: Setup Theos
+        uses: actions/checkout@main
         with:
-          theos-dir: '~/theos'
-          theos-sdks: 'https://github.com/xybp888/iOS-SDKs'
+          repository: theos/theos
+          ref: 8771215f765e774bfefdacc6ddf0e151c2973d49
+          path: theos
+          submodules: recursive
+
+      - name: Download SDKs
+        run: |
+          curl -LO https://github.com/xybp888/iOS-SDKs/archive/master.zip
+          bsdtar --strip-components=1 -xf master.zip --directory $GITHUB_WORKSPACE/theos/sdks
+          rm -f master.zip
 
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Build iOS
-        run: make ios
+        run: |
+          export THEOS=$GITHUB_WORKSPACE/theos
+          make ios
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
