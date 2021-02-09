@@ -27,7 +27,7 @@ MACOS_ARCHIVE_PATH = $(ARCHIVE_DIR)/MyMessage macOS $(VERSION).tar.gz
 IMESSAGE_XPC_DIR = $(BARCELONA_IOS_STAGING)/Library/Application Support/Barcelona
 IMESSAGE_XPC_TARGET = $(IMESSAGE_XPC_DIR)/imessage-rest.xpc
 IMESSAGE_APPLICATIONS_DIR = $(BARCELONA_IOS_STAGING)/Applications
-IMESSAGE_APP_TARGET = $(IMESSAGE_APPLICATIONS_DIR)/MyMessage for iOS.app
+IMESSAGE_APPLICATIONS_TARGET = $(IMESSAGE_APPLICATIONS_DIR)/MyMessage for iOS.app
 IMESSAGE_APP_SRC = $(IOS_BUILD_DIR)/MyMessage for iOS.app
 IMESSAGE_XPC_SRC = $(IOS_BUILD_DIR)/imessage-rest.xpc
 
@@ -71,18 +71,19 @@ xcbuild-macos:
 
 compile-ios-deb:
 	rm -rf $(BARCELONA_IOS_DIR)/packages/*
+	rm -rf "$(IMESSAGE_APPLICATIONS_TARGET)" "$(IMESSAGE_XPC_TARGET)"
+
+	mkdir -p "$(IMESSAGE_APPLICATIONS_DIR)"
+	mkdir -p "$(IMESSAGE_XPC_DIR)"
+
+	mv "$(IMESSAGE_APP_SRC)" "$(IMESSAGE_APPLICATIONS_DIR)"
+	mv "$(IMESSAGE_XPC_SRC)" "$(IMESSAGE_XPC_TARGET)"
 
 	cd $(BARCELONA_IOS_DIR) && PACKAGE_VERSION=$(VERSION) make package
 
 archive-ios:
 	rm -f "$(IOS_ARCHIVE_PATH)"
 	mkdir -p $(ARCHIVE_DIR)
-
-	mkdir -p $(IMESSAGE_APPLICATIONS_DIR)
-	mkdir -p $(IMESSAGE_XPC_DIR)
-
-	mv "$(IMESSAGE_APP_SRC)" "$(IMESSAGE_APP_TARGET)"
-	mv "$(IMESSAGE_XPC_SRC)" "$(IMESSAGE_XPC_TARGET)"
 
 	$(eval FIRST_FILE := $(shell ls $(BARCELONA_IOS_DIR)/packages | head -1))
 	$(eval PACKAGE_PATH = $(BARCELONA_IOS_DIR)/packages/$(FIRST_FILE))
