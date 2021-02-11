@@ -288,7 +288,7 @@
 @property(readonly, nonatomic) IMMessage *lastFinishedMessage;
 @property(readonly, nonatomic) IMMessage *firstMessage;
 @property(readonly, nonatomic) BOOL isPinned API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
-@property(readonly, nonatomic) NSString* pinningIdentifier API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+@property(readonly, nonatomic, nonnull) NSString* pinningIdentifier API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 -(BOOL)isPinned API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 -(NSString*)pinningIdentifier API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 - (IMMessage*)messageForGUID:(id)arg1;

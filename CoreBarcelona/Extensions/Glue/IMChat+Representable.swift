@@ -16,10 +16,9 @@ extension IMPinnedConversationsController {
             return
         }
         
-        let newSet = self.mutablePinnedConversationIdentifierSet
-        newSet.remove(chat.pinningIdentifier!)
-        
-        self.mutablePinnedConversationIdentifierSet = newSet
+        pinnedChats = pinnedChats.filter {
+            $0.pinningIdentifier != chat.pinningIdentifier
+        }
     }
     
     func pin(chat: IMChat) {
@@ -27,21 +26,25 @@ extension IMPinnedConversationsController {
             return
         }
         
-        let newSet = self.mutablePinnedConversationIdentifierSet
-        newSet.add(chat.pinningIdentifier!)
+        var chats = pinnedChats
+        chats.append(chat)
         
-        self.mutablePinnedConversationIdentifierSet = newSet
+        pinnedChats = chats
     }
     
-    private var mutablePinnedConversationIdentifierSet: NSMutableOrderedSet {
+    private var pinnedChats: [IMChat] {
         get {
-            NSMutableOrderedSet(orderedSet: pinnedConversationIdentifierSet)
+            self.pinnedConversationIdentifiers().compactMap {
+                IMChatRegistry.shared.existingChat(withPinningIdentifier: $0)
+            }
         }
         set {
             #if os(macOS)
-            self.setPinnedChats(IMChat.resolve(withIdentifiers: newValue.array.compactMap { $0 as? String }), withUpdateReason: "we in this bitch")
+            self.setPinnedChats(newValue, withUpdateReason: "we in this bitch")
             #else
-            self.setPinnedConversationIdentifiers(newValue)
+            self.setPinnedConversationIdentifiers(NSOrderedSet(array: newValue.map {
+                $0.pinningIdentifier
+            }))
             #endif
         }
     }

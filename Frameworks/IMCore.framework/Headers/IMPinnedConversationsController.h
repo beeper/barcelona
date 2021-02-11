@@ -32,7 +32,7 @@ API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0))
 +(id)_forceSyncDispatchQueue;
 +(id)_ubiquitousDispatchQueue;
 -(void)conversationWasDeletedWithIdentifier:(id)arg1 ;
--(id)pinnedConversationIdentifiers;
+-(NSArray<NSString*>* _Nonnull)pinnedConversationIdentifiers;
 -(void)conversationsWereDeletedWithIdentifiers:(id)arg1 ;
 -(NSUbiquitousKeyValueStore *)dataStore;
 -(id)init;

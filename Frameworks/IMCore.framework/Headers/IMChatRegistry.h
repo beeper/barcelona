@@ -197,6 +197,7 @@
 - (void)_chat_loadPagedHistory:(id)arg1 numberOfMessagesBefore:(unsigned long long)arg2 numberOfMessagesAfter:(unsigned long long)arg3 messageGUID:(id)arg4 queryID:(id)arg5;
 - (void)_chat_loadHistory:(id)arg1 limit:(unsigned long long)arg2 beforeGUID:(id)arg3 afterGUID:(id)arg4 queryID:(id)arg5 ;
 - (void)_chat_loadHistory:(id)arg1 limit:(unsigned long long)arg2 beforeGUID:(id)arg3 afterGUID:(id)arg4 threadIdentifier:(id)arg6 queryID:(id)arg5 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+- (IMChat*)existingChatWithPinningIdentifier:(NSString*)arg1 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 - (void)_chat:(id)arg1 updateIsBlackholed:(BOOL)arg2;
 - (void)_chat:(id)arg1 updateIsFiltered:(BOOL)arg2;
 - (void)_chat:(id)arg1 updateLastAddressedSIMID:(id)arg2;
