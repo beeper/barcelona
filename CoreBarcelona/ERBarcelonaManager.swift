@@ -63,16 +63,6 @@ private var currentDaemonController: IMDaemonController? = nil
     @objc private class func swizzleDaemonControllerSharedInstance() {
         didSwizzle = true
         
-        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
-            let originalMax = #selector(IMPinnedConversationsController.maximumNumberOfPinnedConversations)
-            let newMax = #selector(ERBarcelonaManager.maximumNumberOfPinnedConversations)
-            
-            let originalMethod = class_getClassMethod(IMPinnedConversationsController.self, originalMax)!
-            let newMethod = class_getClassMethod(ERBarcelonaManager.self, newMax)!
-            
-            method_exchangeImplementations(originalMethod, newMethod)
-        }
-        
         if isSimulation {
             return
         }
@@ -84,10 +74,6 @@ private var currentDaemonController: IMDaemonController? = nil
         let newMethod = class_getClassMethod(ERBarcelonaManager.self, newSelector)!
         
         method_exchangeImplementations(originalMethod, newMethod)
-    }
-    
-    @objc public class func maximumNumberOfPinnedConversations() -> CUnsignedLongLong {
-        return .init(ERMaximumNumberOfPinnedConversationsOverride)
     }
     
     @objc private static var observer: NSObjectProtocol?
