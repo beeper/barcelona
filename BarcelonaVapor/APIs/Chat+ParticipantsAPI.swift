@@ -46,18 +46,24 @@ func bindParticipantsAPI(readableChat: RoutesBuilder, writableChat: RoutesBuilde
         return req.eventLoop.submit {
             let handles = insertion.handles.compactMap { Registry.sharedInstance.imHandle(withID: $0, onAccount: account) }
             
+            var reasonMessage: IMMessage!
+            
+            let inviteText = add ? "Get in my van, kid." : "Goodbye, skank."
+            
+            if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+                reasonMessage = IMMessage.instantMessage(withText: NSAttributedString(string: inviteText), messageSubject: nil, flags: 0x5, threadIdentifier: nil)
+            } else {
+                reasonMessage = IMMessage.instantMessage(withText: NSAttributedString(string: inviteText), messageSubject: nil, flags: 0x5)
+            }
+            
             if add {
                 if !chat.canAddParticipants(handles) {
                     os_log("Can't add participants to this chat, bailing", log_participantAPI)
                     throw Abort(.badRequest, reason: "You can't add pariticpants to this group.")
                 }
                 
-                let reasonMessage = IMMessage.instantMessage(withText: NSAttributedString(string: "Get in my fucking van, kid."), messageSubject: nil, flags: 0x5)
-                
                 chat.inviteParticipantsToiMessageChat(handles, reason: reasonMessage)
             } else {
-                let reasonMessage = IMMessage.instantMessage(withText: NSAttributedString(string: "Goodbye, skank."), messageSubject: nil, flags: 0x5)
-                
                 chat.removeParticipantsFromiMessageChat(handles, reason: reasonMessage)
             }
             

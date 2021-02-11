@@ -57,6 +57,7 @@
 + (nonnull IMMessage*)instantMessageWithText:(id)arg1 messageSubject:(id)arg2 fileTransferGUIDs:(id)arg3 flags:(unsigned long long)arg4 threadIdentifier:(id)arg5 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 + (nonnull IMMessage*)instantMessageWithText:(id)arg1 messageSubject:(id)arg2 flags:(unsigned long long)arg3 expressiveSendStyleID:(id)arg4;
 + (nonnull IMMessage*)instantMessageWithText:(id)arg1 messageSubject:(id)arg2 flags:(unsigned long long)arg3;
++ (nonnull IMMessage*)instantMessageWithText:(id)arg1 messageSubject:(id)arg2 flags:(unsigned long long)arg3 threadIdentifier:(NSString*)arg4 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 + (nonnull IMMessage*)instantMessageWithText:(id)arg1 flags:(unsigned long long)arg2;
 + (id)defaultInvitationMessageFromSender:(id)arg1 flags:(unsigned long long)arg2;
 + (id)locatingMessageWithGuid:(id)arg1 error:(id)arg2;
