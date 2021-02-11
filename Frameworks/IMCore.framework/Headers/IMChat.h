@@ -379,6 +379,7 @@
 - (void)beginHoldingUpdatesForKey:(id)arg1;
 @property(readonly, copy, nonatomic) NSArray<IMChatItem*>* chatItems;
 - (NSArray<IMChatItem*>*) replyChatItems API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+- (void)sendGroupPhotoUpdate:(NSString*)guid API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 - (void)_updateLocationShareItemsForSender:(id)arg1;
 - (void)_configureLocationShareItem:(id)arg1;
 - (void)stopTrackingParticipantLocations;
