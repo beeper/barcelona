@@ -37,7 +37,7 @@ public struct ChatSearchParameters: QueryParameters {
     public var has_failed: Bool?
     /// Narrow the results to chats with the last message text containing a given string
     public var last_message_text: String?
-    /// Narrow the results to chats that are pinned
+    /// Narrow the results to chats that are/are not pinned
     public var pinned: Bool?
     /// Max number of results to return
     public var limit: Int?
