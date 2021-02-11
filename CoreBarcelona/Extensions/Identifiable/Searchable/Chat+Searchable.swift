@@ -37,6 +37,8 @@ public struct ChatSearchParameters: QueryParameters {
     public var has_failed: Bool?
     /// Narrow the results to chats with the last message text containing a given string
     public var last_message_text: String?
+    /// Narrow the results to chats that are pinned
+    public var pinned: Bool?
     /// Max number of results to return
     public var limit: Int?
     public var page: Int?
@@ -88,6 +90,10 @@ public struct ChatSearchParameters: QueryParameters {
             parameters.append(.lastMessageText(lastMessageText.lowercased()))
         }
         
+        if let pinned = pinned {
+            parameters.append(.pinned(pinned))
+        }
+        
         return parameters
     }
 }
@@ -112,6 +118,7 @@ private enum ChatSearchParameter {
     case hasUnread(Bool)
     case hasFailed(Bool)
     case lastMessageText(String)
+    case pinned(Bool)
 }
 
 extension ChatSearchParameter: SearchParameter {
@@ -171,6 +178,10 @@ extension ChatSearchParameter: SearchParameter {
             }
         case .displayName(let displayName):
             if !(chat.displayName?.lowercased().contains(displayName) ?? false) {
+                return false
+            }
+        case .pinned(let pinned):
+            if chat.pinned != pinned {
                 return false
             }
         }
