@@ -15,11 +15,14 @@ private var isRunning: Bool = false
 private var didSwizzle: Bool = false
 private var currentDaemonController: IMDaemonController? = nil
 
+/// Manages the connection with IMAgent
 @objc public class ERBarcelonaManager: NSObject {
+    /// Whether we are running in a simulated environment
     @objc class var isSimulation: Bool {
         IMCoreSimulatedEnvironmentEnabled()
     }
     
+    /// The daemon controller for the current environment
     private class var controller: IMDaemonController {
         if isSimulation {
             return IMSimulatedDaemonController.sharedInstance() as! IMSimulatedDaemonController
@@ -28,6 +31,7 @@ private var currentDaemonController: IMDaemonController? = nil
         }
     }
     
+    /// Clears out the daemon controller
     private class func resetController() {
         if isSimulation {
             return
@@ -36,6 +40,8 @@ private var currentDaemonController: IMDaemonController? = nil
         currentDaemonController = nil
     }
     
+    /// Returns the daemon controller to use when interacting with imagent
+    /// - Returns: daemon controller
     @objc public class func sharedDaemonController() -> IMDaemonController {
         if IMCoreSimulatedEnvironmentEnabled() {
             return IMSimulatedDaemonController.shared()
@@ -48,12 +54,24 @@ private var currentDaemonController: IMDaemonController? = nil
         return currentDaemonController!
     }
     
+    /// The bundle identifier used for iChat
     @objc public class func iChatBundleIdentifier() -> String {
         return "com.apple.iChat"
     }
     
+    /// Points IMDaemonController.sharedInstance ro ERBarcelonaManager.sharedDaemonController
     @objc private class func swizzleDaemonControllerSharedInstance() {
         didSwizzle = true
+        
+        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+            let originalMax = #selector(IMPinnedConversationsController.maximumNumberOfPinnedConversations)
+            let newMax = #selector(ERBarcelonaManager.maximumNumberOfPinnedConversations)
+            
+            let originalMethod = class_getClassMethod(IMPinnedConversationsController.self, originalMax)!
+            let newMethod = class_getClassMethod(ERBarcelonaManager.self, newMax)!
+            
+            method_exchangeImplementations(originalMethod, newMethod)
+        }
         
         if isSimulation {
             return
@@ -68,8 +86,13 @@ private var currentDaemonController: IMDaemonController? = nil
         method_exchangeImplementations(originalMethod, newMethod)
     }
     
+    @objc public class func maximumNumberOfPinnedConversations() -> CUnsignedLongLong {
+        return .init(ERMaximumNumberOfPinnedConversationsOverride)
+    }
+    
     @objc private static var observer: NSObjectProtocol?
     
+    /// Tears down the IMCore state
     @objc public class func teardown() {
         if !isRunning {
             os_log("ERBarcelonaManager.teardown called while offline, discarding", type: .error)
@@ -92,6 +115,7 @@ private var currentDaemonController: IMDaemonController? = nil
         isRunning = false
     }
     
+    /// Bootstraps the IMCore state
     @objc public class func bootstrap() {
         if !didSwizzle {
             swizzleDaemonControllerSharedInstance()
@@ -123,6 +147,8 @@ private var currentDaemonController: IMDaemonController? = nil
         }
     }
     
+    /// Bootstraps the IMCore state, executing a callback once completed
+    /// - Parameter completion: completion callback
     @objc public class func bootstrap(completion: @escaping (Error?) -> ()) {
         if isRunning {
             os_log("ERBarcelonaManager.bootstrap called while running, discarding", type: .error)

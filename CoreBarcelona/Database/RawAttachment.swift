@@ -98,6 +98,9 @@ class RawAttachment: Record {
     var sr_ck_server_change_token_blob: Data?
     var sr_ck_record_id: String?
     
+    /// Constructs an internal attachment representation centered around a resource origin
+    /// - Parameter origin: origin to pass to the internal attachment
+    /// - Returns: an internal attachment object
     func internalAttachment(withOrigin origin: ResourceOrigin? = nil) -> InternalAttachment? {
         guard let guid = guid, let path = filename as NSString? else {
             return nil

@@ -248,6 +248,9 @@ class RawMessage: Record {
 }
 
 extension DBReader {
+    /// Resolves the ROWID for a message with the given GUID
+    /// - Parameter guid: GUID of the message to resolve
+    /// - Returns: ROWID of the message
     func rowID(forMessageGUID guid: String) -> EventLoopFuture<Int64?> {
         let promise = eventLoop.makePromise(of: Int64?.self)
         

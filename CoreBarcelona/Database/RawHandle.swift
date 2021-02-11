@@ -48,6 +48,9 @@ class RawHandle: Record {
 }
 
 extension DBReader {
+    /// Returns the ROWIDs of handles with the given identifiers
+    /// - Parameter ids: identifiers to resolve
+    /// - Returns: ledger of handle ID to ROWID
     func handleROWIDs(forIds ids: [String]) -> EventLoopFuture<[String: Int64]> {
         let promise = eventLoop.makePromise(of: [String: Int64].self)
         

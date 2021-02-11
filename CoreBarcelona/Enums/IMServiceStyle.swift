@@ -9,6 +9,7 @@
 import Foundation
 import IMCore
 
+/// Different styles of IMCore services
 public enum IMServiceStyle: String, CaseIterable, Codable {
     case iMessage
     #if IDS_IMESSAGE_BIZ

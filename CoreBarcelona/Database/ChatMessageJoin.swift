@@ -42,6 +42,9 @@ class ChatMessageJoin: Record {
 }
 
 extension DBReader {
+    /// Returns the chat ROWID for a message with the given GUID
+    /// - Parameter guid: guid of the message to query
+    /// - Returns: ROWID of the chat the message resides in
     func chatRowID(forMessageGUID guid: String) -> EventLoopFuture<Int64?> {
         let promise = eventLoop.makePromise(of: Int64?.self)
         
@@ -69,6 +72,9 @@ extension DBReader {
         return promise.futureResult
     }
     
+    /// Returns the chat id for a message with the given GUID
+    /// - Parameter guid: guid of the message to query
+    /// - Returns: identifier of the chat the message resides in
     func chatIdentifier(forMessageGUID guid: String) -> EventLoopFuture<String?> {
         if ERBarcelonaManager.isSimulation {
             return eventLoop.makeSucceededFuture(IMChatRegistry.shared._chats(withMessageGUID: guid).first?.id)
@@ -83,12 +89,20 @@ extension DBReader {
         }
     }
     
+    /// Returns the chat id for a message with the given ROWID
+    /// - Parameter ROWID: ROWID of the message to query
+    /// - Returns: identifier of the chat the message resides in
     func chatIdentifier(forMessageRowID ROWID: Int64) -> EventLoopFuture<String?> {
         return self.chatIdentifiers(forMessageRowIDs: [ROWID]).map {
             $0[ROWID]
         }
     }
     
+    /// Returns a ledger of partial chats for the given message IDs
+    /// - Parameters:
+    ///   - ROWIDs: ROWIDs to resolve chats from
+    ///   - baseColumns: columns to return in the chat objects
+    /// - Returns: ledger of message ROWID to chat partials
     private func partialChats(forMessageRowIDs ROWIDs: [Int64], baseColumns: [RawChat.Columns]) -> EventLoopFuture<[Int64: RawChat]> {
         let promise = eventLoop.makePromise(of: [Int64: RawChat].self)
         
@@ -142,6 +156,9 @@ extension DBReader {
         return promise.futureResult
     }
     
+    /// Resolves the identifiers for chats with the given identifiers
+    /// - Parameter ROWIDs: message ROWIDs to resolve
+    /// - Returns: ledger of message ROWID to chat identifier
     func chatIdentifiers(forMessageRowIDs ROWIDs: [Int64]) -> EventLoopFuture<[Int64: String]> {
         partialChats(forMessageRowIDs: ROWIDs, baseColumns: [RawChat.Columns.chat_identifier]).map {
             $0.compactMapValues {
@@ -150,6 +167,12 @@ extension DBReader {
         }
     }
     
+    /// Resolves the most recent GUIDs for chats with the given ROWIDs
+    /// - Parameters:
+    ///   - ROWIDs: ROWIDs of the chats to resolve
+    ///   - beforeMessageGUID: message GUID to load messages before
+    ///   - limit: max number of results to return
+    /// - Returns: array of message GUIDs matching the query
     func newestMessageGUIDs(inChatROWIDs ROWIDs: [Int64], beforeMessageGUID: String? = nil, limit: Int = 100) -> EventLoopFuture<[String]> {
         let promise = eventLoop.makePromise(of: [String].self)
         

@@ -111,12 +111,18 @@ class RawChat: Record {
 }
 
 extension DBReader {
+    /// Returns the ROWiDs for a chat with the given identifier
+    /// - Parameter identifier: identifier of the chat to resolve
+    /// - Returns: array of ROWIDs
     func rowIDs(forIdentifier identifier: String) -> EventLoopFuture<[Int64]> {
         rowIDs(forIdentifiers: [identifier]).map {
             $0[identifier] ?? []
         }
     }
     
+    /// Resolves all ROWIDs for all chat identifiers
+    /// - Parameter identifiers: chat identifiers to resolve
+    /// - Returns: dictionary of chat identifier to ROWIDs
     func rowIDs(forIdentifiers identifiers: [String]) -> EventLoopFuture<[String: [Int64]]> {
         let promise = eventLoop.makePromise(of: [String: [Int64]].self)
         

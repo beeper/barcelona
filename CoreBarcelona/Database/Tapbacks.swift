@@ -11,6 +11,11 @@ import IMCore
 import NIO
 
 extension DBReader {
+    /// Loads messages associated with the given GUIDs
+    /// - Parameters:
+    ///   - guids: GUIDs of messages to resolve associations
+    ///   - chat: ID of the chat the messages reside in. if omitted, they will be resolved at ingestion
+    /// - Returns: Dictionary of GUIDs from the guids parameter to an array of associated messages
     func associatedMessages(with guids: [String], in chat: String? = nil) -> EventLoopFuture<[String: [Message]]> {
         if guids.count == 0 { return eventLoop.makeSucceededFuture([:]) }
         let promise = eventLoop.makePromise(of: [String: [Message]].self)
@@ -70,6 +75,9 @@ extension DBReader {
         return promise.futureResult
     }
     
+    /// Resolves associated messages with the given GUID
+    /// - Parameter guid: GUID of the message to load associations
+    /// - Returns: array of Messages
     func associatedMessages(with guid: String) -> EventLoopFuture<[Message]> {
         let promise = eventLoop.makePromise(of: [Message].self)
 

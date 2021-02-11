@@ -52,12 +52,18 @@ public struct DBReader {
         self.eventLoop = eventLoop
     }
     
+    /// Resolves the sender ID for given message object
+    /// - Parameter message: message object to resolve the sender ID of
+    /// - Returns: ID of the sender
     func resolveSenderID(forMessage message: RawMessage) -> EventLoopFuture<String?> {
         resolveSenderIDs(forMessages: [message]).map {
             $0[message.ROWID]
         }
     }
     
+    /// Resolves sender IDs for the given message objects
+    /// - Parameter messages: messages to resolve senders of
+    /// - Returns: ledger of message ROWID to sender ID
     func resolveSenderIDs(forMessages messages: [RawMessage]) -> EventLoopFuture<[Int64: String]> {
         let promise = eventLoop.makePromise(of: [Int64: String].self)
         
@@ -106,6 +112,11 @@ public struct DBReader {
         return promise.futureResult
     }
     
+    /// Inserts a file transfer object into the database
+    /// - Parameters:
+    ///   - fileTransfer: transfer to save to the database
+    ///   - path: path to the file transfer
+    /// - Returns: NIO future
     func insert(fileTransfer: IMFileTransfer, path: String) -> EventLoopFuture<Void> {
         let promise = eventLoop.makePromise(of: Void.self)
         
@@ -144,6 +155,7 @@ private class HandleTimestampSynthesized: Record {
     var chat_id: String
     var date: Int64
     
+    /// Tuple used when sorting an array of handles for a chat
     var record: HandleTimestampRecord {
         (handle_id: handle_id, date: date, chat_id: chat_id)
     }
@@ -158,6 +170,9 @@ private extension Array where Element == HandleTimestampSynthesized {
 }
 
 extension DBReader {
+    /// Returns an arrya of handle/timestamp records used for sorting an array of chat participants
+    /// - Parameter chatIDs: identifiers of the chats to pull participants for (typically this should just be identifiers for the same chat on different services)
+    /// - Returns: array of handle/timestamp pairs
     func handleTimestampRecords(forChatIdentifiers chatIDs: [String]) -> EventLoopFuture<[HandleTimestampRecord]> {
         let promise = eventLoop.makePromise(of: [HandleTimestampRecord].self)
         

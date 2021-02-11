@@ -90,6 +90,7 @@ private enum SearchFulfillmentResult {
     case handleIDs([String: Int64])
 }
 
+/// These extensions are used for the search APIs
 extension DBReader {
     func queryMessages(withParameters params: MessageQueryParameters) -> EventLoopFuture<[Message]> {
         let limit = params.limit ?? 20
