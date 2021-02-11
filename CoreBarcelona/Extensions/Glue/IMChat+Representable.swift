@@ -9,6 +9,44 @@
 import Foundation
 import IMCore
 
+@available(iOS 14, macOS 10.16, watchOS 7, *)
+extension IMPinnedConversationsController {
+    func unpin(chat: IMChat) {
+        if !pinnedConversationsContains(chat) {
+            return
+        }
+        
+        let newSet = self.mutablePinnedConversationIdentifierSet
+        newSet.remove(chat.pinningIdentifier!)
+        
+        self.mutablePinnedConversationIdentifierSet = newSet
+    }
+    
+    func pin(chat: IMChat) {
+        if pinnedConversationsContains(chat) {
+            return
+        }
+        
+        let newSet = self.mutablePinnedConversationIdentifierSet
+        newSet.add(chat.pinningIdentifier!)
+        
+        self.mutablePinnedConversationIdentifierSet = newSet
+    }
+    
+    private var mutablePinnedConversationIdentifierSet: NSMutableOrderedSet {
+        get {
+            NSMutableOrderedSet(orderedSet: pinnedConversationIdentifierSet)
+        }
+        set {
+            #if os(macOS)
+            self.setPinnedChats(IMChat.resolve(withIdentifiers: newValue.array.compactMap { $0 as? String }), withUpdateReason: "we in this bitch")
+            #else
+            self.setPinnedConversationIdentifiers(newValue)
+            #endif
+        }
+    }
+}
+
 public extension IMChat {
     var representation: Chat {
         Chat(self)
@@ -32,8 +70,26 @@ public extension IMChat {
         }
     }
     
+    var pinned: Bool {
+        get {
+            if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+                return isPinned
+            } else {
+                return false
+            }
+        }
+        set {
+            if newValue == pinned {
+                return
+            }
+            if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+                newValue ? IMPinnedConversationsController.sharedInstance().pin(chat: self) : IMPinnedConversationsController.sharedInstance().unpin(chat: self)
+            }
+        }
+    }
+    
     var properties: ChatConfigurationRepresentation {
-        ChatConfigurationRepresentation(id: id, readReceipts: readReceipts, ignoreAlerts: ignoreAlerts)
+        ChatConfigurationRepresentation(id: id, readReceipts: readReceipts, ignoreAlerts: ignoreAlerts, pinned: pinned)
     }
     
     var representableParticipantIDs: BulkHandleIDRepresentation {

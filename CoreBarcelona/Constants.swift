@@ -98,3 +98,5 @@ public let ERChatMessagesDeletedNotification = NSNotification.Name(rawValue: "ER
 internal let ERChatRegistryDidLoadNotification = NSNotification.Name(rawValue: "ERChatRegistryDidLoadNotification")
 
 public let ERDefaultMessageQueryLimit: Int64 = 75
+
+public let ERMaximumNumberOfPinnedConversationsOverride = 100

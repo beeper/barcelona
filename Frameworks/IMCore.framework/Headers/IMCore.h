@@ -121,6 +121,7 @@
 #import <IMCore/IMPeopleCollection.h>
 #import <IMCore/IMPerson.h>
 #import <IMCore/IMPersonRegistrar.h>
+#import <IMCore/IMPinnedConversationsController.h>
 #import <IMCore/IMPluginChatItemProtocol-Protocol.h>
 #import <IMCore/IMPluginPayload.h>
 #import <IMCore/IMRecentItemsList-FetchUtilities.h>

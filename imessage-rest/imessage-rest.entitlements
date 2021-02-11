@@ -31,6 +31,8 @@
 	<array>
 		<string></string>
 	</array>
+    <key>com.apple.developer.ubiquity-kvstore-identifier</key>
+    <string>com.apple.messages.pinning</string>
 	<key>com.apple.developer.siri</key>
 	<true/>
 	<key>com.apple.dmd.policy</key>
@@ -233,6 +235,7 @@
 		<string>com.apple.MessagesHistoryImporter</string>
 		<string>com.apple.madrid</string>
 		<string>com.apple.iChat.inputLine</string>
+        <string>com.apple.messages.pinning</string>
 	</array>
 	<key>com.apple.system.get-alert-tone</key>
 	<true/>

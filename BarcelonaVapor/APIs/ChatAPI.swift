@@ -27,6 +27,7 @@ struct RenameChat: Content {
 struct ChatPropertiesPatch: Content {
     var ignoreAlerts: Bool?
     var readReceipts: Bool?
+    var pinned: Bool?
 }
 
 private let log_chatAPI = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ChatAPI")
@@ -185,6 +186,7 @@ public func bindChatAPI(_ app: RoutesBuilder) {
         
         req.imChat.readReceipts = patch.readReceipts ?? req.imChat.readReceipts
         req.imChat.ignoreAlerts = patch.ignoreAlerts ?? req.imChat.ignoreAlerts
+        req.imChat.pinned = patch.pinned ?? req.imChat.pinned
         
         return req.imChat.properties
     }

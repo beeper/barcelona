@@ -424,7 +424,7 @@ exports:
                             _IMBalloonPluginAttributionController,
                             _IMBalloonPluginDataSource, _IMBalloonPluginManager,
                             _IMBlackholeChatItem, _IMChat, _IMInlineReplyController, _IMInlineReplyChatItemRules,
-                            _IMChatHistoryController, _IMChatItem, _IMChatRegistry,
+                            _IMChatHistoryController, _IMChatItem, _IMChatRegistry, _IMPinnedConversationsController,
                             _IMCloudKitAccountNeedsRepairSyncProgress,
                             _IMCloudKitCloudKitStorageIsFullSyncProgress,
                             _IMCloudKitDeviceStorageIsFullSyncProgress,
