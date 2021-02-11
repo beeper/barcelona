@@ -34,15 +34,3 @@ class ChatHandleJoin: Record {
     var chat_id: Int64?
     var handle_id: Int64?
 }
-
-extension DBReader {
-    func chatParticipants(forChatROWID: Int64, columns: [RawHandle.Columns]) -> EventLoopFuture<[RawHandle]> {
-        let promise = eventLoop.makePromise(of: [RawHandle].self)
-        
-        pool.asyncRead { db in
-            
-        }
-        
-        return promise.futureResult
-    }
-}
