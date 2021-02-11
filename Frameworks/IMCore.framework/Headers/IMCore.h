@@ -218,7 +218,6 @@ extern NSString* IMChatRegistryLastFailedMessageDateChangedNotification;
 extern NSString* IMChatRegistryFailedCountChangedNotification;
 extern NSString* IMChatSendingServiceChangedNotification;
 extern NSString* IMChatReceivedDowngradeNotification;
-extern NSString* IMGroupPhotoGuidKey;
 
 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0))
 NSString* IMCreateThreadIdentifierForMessagePartChatItem(IMMessagePartChatItem* chatItem);

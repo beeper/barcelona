@@ -126,7 +126,6 @@ exports:
                             _IMChatPurgedAttachmentsDownloadBatchCompleteNotification,
                             _IMChatPurgedAttachmentsDownloadCompleteNotification,
                             _IMChatQueryIDKey,
-                            _IMGroupPhotoGuidKey,
                             _IMChatReceivedDowngradeNotification,
                             _IMChatRecipientDidChangeNotification,
                             _IMChatRecipientReceivedDowngradeNotification,
