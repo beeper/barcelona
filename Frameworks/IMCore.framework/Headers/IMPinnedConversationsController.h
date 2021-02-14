@@ -36,8 +36,7 @@ API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0))
 -(void)conversationsWereDeletedWithIdentifiers:(id)arg1 ;
 -(NSUbiquitousKeyValueStore *)dataStore;
 -(id)init;
--(void)setPinnedConversationIdentifiers:(NSOrderedSet<NSString*>*)arg1 API_AVAILABLE(ios(14.0), watchos(7.0));
--(void)setPinnedChats:(NSArray<IMChat*>*)arg1 withUpdateReason:(NSString*)arg2 API_AVAILABLE(macos(10.16));
+-(void)setPinnedChats:(NSArray<IMChat*>*)arg1 withUpdateReason:(NSString*)arg2 API_AVAILABLE(ios(14.0), watchos(7.0), macos(10.16));
 -(void)fetchPinnedConversationIdentifiersFromLocalStore;
 -(BOOL)shouldSync;
 -(void)_postDeferredPinnedConversationsDidChangeNotificationIfNecessary;

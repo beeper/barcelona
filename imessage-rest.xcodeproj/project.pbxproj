@@ -250,6 +250,8 @@
 		1D9FD6EB251E3B5B0044FAB0 /* OriginSwiftUIBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9FD6EA251E3B5B0044FAB0 /* OriginSwiftUIBridge.swift */; };
 		1D9FD6EF251E6DC50044FAB0 /* ERHTTPServerConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9FD6EC251E6C6C0044FAB0 /* ERHTTPServerConfiguration.swift */; };
 		1D9FD6F9251E763C0044FAB0 /* ERHTTPServerConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9FD6EC251E6C6C0044FAB0 /* ERHTTPServerConfiguration.swift */; };
+		1DA977CA25D8BD9D00586D6C /* IMPinnedConversationsController+PinHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA977C925D8BD9D00586D6C /* IMPinnedConversationsController+PinHelpers.swift */; };
+		1DA977D825D8BEF300586D6C /* IMChat+WritablePinned.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA977D725D8BEF300586D6C /* IMChat+WritablePinned.swift */; };
 		1DB51164251B91B3005E08F9 /* Request+Security.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB51163251B91B3005E08F9 /* Request+Security.swift */; };
 		1DB51166251B9341005E08F9 /* ClaimsMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB51165251B9341005E08F9 /* ClaimsMiddleware.swift */; };
 		1DB6D7CF25190F910061A0D9 /* ERMachXPCiOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DB6D7CE25190F910061A0D9 /* ERMachXPCiOS.m */; };
@@ -808,6 +810,8 @@
 		1D9CA812251AE60A00297E2F /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		1D9FD6EA251E3B5B0044FAB0 /* OriginSwiftUIBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OriginSwiftUIBridge.swift; sourceTree = "<group>"; };
 		1D9FD6EC251E6C6C0044FAB0 /* ERHTTPServerConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERHTTPServerConfiguration.swift; sourceTree = "<group>"; };
+		1DA977C925D8BD9D00586D6C /* IMPinnedConversationsController+PinHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMPinnedConversationsController+PinHelpers.swift"; sourceTree = "<group>"; };
+		1DA977D725D8BEF300586D6C /* IMChat+WritablePinned.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChat+WritablePinned.swift"; sourceTree = "<group>"; };
 		1DB51163251B91B3005E08F9 /* Request+Security.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Request+Security.swift"; sourceTree = "<group>"; };
 		1DB51165251B9341005E08F9 /* ClaimsMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaimsMiddleware.swift; sourceTree = "<group>"; };
 		1DB6D7CD25190F910061A0D9 /* imessage-rest-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "imessage-rest-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -1371,6 +1375,7 @@
 		1D5AEE5924E37D9E00303692 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				1DA977C825D8BD9100586D6C /* Pinning */,
 				1D87EC4E258BF70F0030D9C6 /* Threads */,
 				1D14A1C7250C1D0D001C5921 /* Foundation */,
 				1D3E3330250C203200EEA08B /* Glue */,
@@ -1621,6 +1626,15 @@
 				1D91B49225C4786200DCBC3D /* IMDPersistence.swift */,
 			);
 			path = Queries;
+			sourceTree = "<group>";
+		};
+		1DA977C825D8BD9100586D6C /* Pinning */ = {
+			isa = PBXGroup;
+			children = (
+				1DA977C925D8BD9D00586D6C /* IMPinnedConversationsController+PinHelpers.swift */,
+				1DA977D725D8BEF300586D6C /* IMChat+WritablePinned.swift */,
+			);
+			path = Pinning;
 			sourceTree = "<group>";
 		};
 		1DB9520224F6B874004CC87B /* AttributedString */ = {
@@ -2294,6 +2308,7 @@
 				1DD8067224E9A7330076D717 /* IMMessage+SPI.swift in Sources */,
 				1D1E23362501B0190069705D /* ChatItem+Codable.swift in Sources */,
 				1D6AB229252FB1510047B202 /* RichLinkExternalComposition.swift in Sources */,
+				1DA977CA25D8BD9D00586D6C /* IMPinnedConversationsController+PinHelpers.swift in Sources */,
 				1D1E235A2506E0D10069705D /* ETHeartbeatData.swift in Sources */,
 				1D3E3338250C217C00EEA08B /* IMHandle+Identifiable.swift in Sources */,
 				1D804D19250EB5E500F376CB /* RichLinkAttachment+LPAssetResolution.swift in Sources */,
@@ -2362,6 +2377,7 @@
 				1DD805E924E85D100076D717 /* Handle.swift in Sources */,
 				1D7D894C250D6AEC00DA9909 /* ERIMSimulationTools.swift in Sources */,
 				1DD805BD24E85D070076D717 /* IMChatRegistry+SortedRepresentations.swift in Sources */,
+				1DA977D825D8BEF300586D6C /* IMChat+WritablePinned.swift in Sources */,
 				1DD805BC24E85D070076D717 /* IMChat+MessageQueries.swift in Sources */,
 				1D44865524E85BD500FF73F3 /* Constants.swift in Sources */,
 				1D74D4A0250C04A900A9F9A1 /* IMService+Identifiable.swift in Sources */,
