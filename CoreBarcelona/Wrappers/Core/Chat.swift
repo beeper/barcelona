@@ -71,7 +71,25 @@ public struct MessagePart: Codable {
     public var attributes: [TextPartAttribute]?
 }
 
-public struct CreateMessage: Codable {
+public protocol CreateMessageBase: Codable {
+    var threadIdentifier: String? { get set }
+    var replyToPart: String? { get set }
+}
+
+extension CreateMessageBase {
+    func resolveThreadIdentifier(on eventLoop: EventLoop) -> EventLoopFuture<String?> {
+        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+            if let threadIdentifier = threadIdentifier {
+                return eventLoop.makeSucceededFuture(threadIdentifier)
+            } else if let replyToPart = replyToPart {
+                return IMChatItem.resolveThreadIdentifier(forIdentifier: replyToPart, on: eventLoop)
+            }
+        }
+        return eventLoop.makeSucceededFuture(nil)
+    }
+}
+
+public struct CreateMessage: Codable, CreateMessageBase {
     public var subject: String?
     public var parts: [MessagePart]
     public var isAudioMessage: Bool?
@@ -83,7 +101,7 @@ public struct CreateMessage: Codable {
     public var replyToPart: String?
 }
 
-public struct CreatePluginMessage: Codable {
+public struct CreatePluginMessage: Codable, CreateMessageBase {
     public var extensionData: MessageExtensionsData
     public var attachmentID: String?
     public var bundleID: String
@@ -284,21 +302,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable {
         var payloadData = options.extensionData
         payloadData.data = payloadData.data ?? payloadData.synthesizedData
         
-        var pendingThreadIdentifier: EventLoopFuture<String?>?
-        
-        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
-            if let threadIdentifier = options.threadIdentifier {
-                pendingThreadIdentifier = eventLoop.makeSucceededFuture(threadIdentifier)
-            } else if let replyToPart = options.replyToPart {
-                pendingThreadIdentifier = IMChatItem.resolveThreadIdentifier(forIdentifier: replyToPart, on: eventLoop)
-            }
-        }
-        
-        if pendingThreadIdentifier == nil {
-            pendingThreadIdentifier = eventLoop.makeSucceededFuture(nil)
-        }
-        
-        pendingThreadIdentifier!.whenSuccess { threadIdentifier in
+        options.resolveThreadIdentifier(on: eventLoop).whenSuccess { threadIdentifier in
             ERAttributedString(forExtensionOptions: options, on: eventLoop).whenSuccess { baseString in
                 let messageString = NSMutableAttributedString(attributedString: baseString.string)
                 messageString.append(.init(string: IMBreadcrumbCharacterString))
@@ -350,22 +354,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable {
         let eventLoop = eventLoop ?? messageQuerySystem.next()
         let promise = eventLoop.makePromise(of: BulkMessageRepresentation.self)
         
-        var pendingThreadIdentifier: EventLoopFuture<String?>?
-        
-        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
-            if let threadIdentifier = createMessage.threadIdentifier {
-                pendingThreadIdentifier = eventLoop.makeSucceededFuture(threadIdentifier)
-            } else if let replyToPart = createMessage.replyToPart {
-                pendingThreadIdentifier = IMChatItem.resolveThreadIdentifier(forIdentifier: replyToPart, on: eventLoop)
-            }
-        }
-        
-        if pendingThreadIdentifier == nil {
-            pendingThreadIdentifier = eventLoop.makeSucceededFuture(nil)
-        }
-        
-        
-        pendingThreadIdentifier!.whenSuccess { threadIdentifier in
+        createMessage.resolveThreadIdentifier(on: eventLoop).whenSuccess { threadIdentifier in
             ERAttributedString(from: createMessage.parts, on: eventLoop).whenSuccess { result in
                 let text = result.string
                 let fileTransferGUIDs = result.transferGUIDs
