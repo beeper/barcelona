@@ -252,6 +252,7 @@
 		1D9FD6F9251E763C0044FAB0 /* ERHTTPServerConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9FD6EC251E6C6C0044FAB0 /* ERHTTPServerConfiguration.swift */; };
 		1DA977CA25D8BD9D00586D6C /* IMPinnedConversationsController+PinHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA977C925D8BD9D00586D6C /* IMPinnedConversationsController+PinHelpers.swift */; };
 		1DA977D825D8BEF300586D6C /* IMChat+WritablePinned.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA977D725D8BEF300586D6C /* IMChat+WritablePinned.swift */; };
+		1DA977E625D8C12100586D6C /* IMChatRegistry+SafePinnedProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA977E525D8C12100586D6C /* IMChatRegistry+SafePinnedProxy.swift */; };
 		1DB51164251B91B3005E08F9 /* Request+Security.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB51163251B91B3005E08F9 /* Request+Security.swift */; };
 		1DB51166251B9341005E08F9 /* ClaimsMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB51165251B9341005E08F9 /* ClaimsMiddleware.swift */; };
 		1DB6D7CF25190F910061A0D9 /* ERMachXPCiOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DB6D7CE25190F910061A0D9 /* ERMachXPCiOS.m */; };
@@ -812,6 +813,7 @@
 		1D9FD6EC251E6C6C0044FAB0 /* ERHTTPServerConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERHTTPServerConfiguration.swift; sourceTree = "<group>"; };
 		1DA977C925D8BD9D00586D6C /* IMPinnedConversationsController+PinHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMPinnedConversationsController+PinHelpers.swift"; sourceTree = "<group>"; };
 		1DA977D725D8BEF300586D6C /* IMChat+WritablePinned.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChat+WritablePinned.swift"; sourceTree = "<group>"; };
+		1DA977E525D8C12100586D6C /* IMChatRegistry+SafePinnedProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatRegistry+SafePinnedProxy.swift"; sourceTree = "<group>"; };
 		1DB51163251B91B3005E08F9 /* Request+Security.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Request+Security.swift"; sourceTree = "<group>"; };
 		1DB51165251B9341005E08F9 /* ClaimsMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaimsMiddleware.swift; sourceTree = "<group>"; };
 		1DB6D7CD25190F910061A0D9 /* imessage-rest-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "imessage-rest-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -1633,6 +1635,7 @@
 			children = (
 				1DA977C925D8BD9D00586D6C /* IMPinnedConversationsController+PinHelpers.swift */,
 				1DA977D725D8BEF300586D6C /* IMChat+WritablePinned.swift */,
+				1DA977E525D8C12100586D6C /* IMChatRegistry+SafePinnedProxy.swift */,
 			);
 			path = Pinning;
 			sourceTree = "<group>";
@@ -2294,6 +2297,7 @@
 				1D74D4B4250C104400A9F9A1 /* IMMessage+LazilyResolvable.swift in Sources */,
 				1DFB1EA7250FFE3F00D84361 /* Chat+Searchable.swift in Sources */,
 				1D7D8959250DB43400DA9909 /* RichLinkRepresentation.swift in Sources */,
+				1DA977E625D8C12100586D6C /* IMChatRegistry+SafePinnedProxy.swift in Sources */,
 				1DD805B324E85CFD0076D717 /* Tapbacks.swift in Sources */,
 				1DD805EE24E85E360076D717 /* ERBarcelonaManager.swift in Sources */,
 				1D8334432512CD3A005E0A43 /* ChatHandleJoin.swift in Sources */,
