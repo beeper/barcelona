@@ -12,7 +12,9 @@ import NIO
 
 public struct BulkMessageRepresentation: Codable {
     public init(_ messages: [Message]) {
-        self.messages = messages
+        self.messages = messages.sorted(by: {
+            ($0.time ?? 0) > ($1.time ?? 0)
+        })
     }
     
     public var messages: [Message]
