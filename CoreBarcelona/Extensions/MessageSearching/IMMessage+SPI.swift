@@ -26,7 +26,7 @@ public extension IMMessage {
     /**
      Takes an IMMessageItem that has no context object and resolves it into a fully formed IMMessage
      */
-    static func message(fromUnloadedItem item: IMMessageItem) -> IMMessage? {
+    static func message(fromUnloadedItem item: IMMessageItem, withSubject subject: NSMutableAttributedString? = nil) -> IMMessage? {
         var rawSender: String? = item.sender()
         
         if item.sender() == nil, item.isFromMe(), let suitableHandle = Registry.sharedInstance.suitableHandle(for: item.service) {
@@ -40,7 +40,7 @@ public extension IMMessage {
         
         let tracker = ERTrack(log: message_log, name: "messageFromIMMessageItem", format: "guid %@", item.guid)
         
-        let message = IMMessage.init(fromIMMessageItem: item, sender: sender, subject: nil)!
+        let message = IMMessage.init(fromIMMessageItem: item, sender: sender, subject: subject)!
         
 //        let IMMessageItemChatContext = NSClassFromString("IMMessageItemChatContext") as! NSObject.Type
 //

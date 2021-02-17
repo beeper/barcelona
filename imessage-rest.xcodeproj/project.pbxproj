@@ -10,6 +10,9 @@
 		1D04810F251D9CF5003166FF /* MessageServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE3C24E3760000303692 /* MessageServiceProtocol.swift */; };
 		1D048110251D9CFD003166FF /* MessageServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE3C24E3760000303692 /* MessageServiceProtocol.swift */; };
 		1D14A1C1250C170F001C5921 /* Message+LazilyResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D14A1C0250C170F001C5921 /* Message+LazilyResolvable.swift */; };
+		1D1ACA8B25DD865E00A04BB6 /* CreateMessageBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1ACA8A25DD865E00A04BB6 /* CreateMessageBase.swift */; };
+		1D1ACA9525DD869F00A04BB6 /* CreateMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1ACA9425DD869F00A04BB6 /* CreateMessage.swift */; };
+		1D1ACA9B25DD86D200A04BB6 /* CreatePluginMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1ACA9A25DD86D200A04BB6 /* CreatePluginMessage.swift */; };
 		1D1E232F2501A2560069705D /* ActionChatItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1E232E2501A2560069705D /* ActionChatItem.swift */; };
 		1D1E23362501B0190069705D /* ChatItem+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1E23352501B0190069705D /* ChatItem+Codable.swift */; };
 		1D1E23382501B68A0069705D /* IMItem+AccountResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1E23372501B68A0069705D /* IMItem+AccountResolvable.swift */; };
@@ -555,6 +558,9 @@
 /* Begin PBXFileReference section */
 		1D14A1C0250C170F001C5921 /* Message+LazilyResolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message+LazilyResolvable.swift"; sourceTree = "<group>"; };
 		1D14A1C4250C1C90001C5921 /* Collection+Safe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Collection+Safe.swift"; sourceTree = "<group>"; };
+		1D1ACA8A25DD865E00A04BB6 /* CreateMessageBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateMessageBase.swift; sourceTree = "<group>"; };
+		1D1ACA9425DD869F00A04BB6 /* CreateMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateMessage.swift; sourceTree = "<group>"; };
+		1D1ACA9A25DD86D200A04BB6 /* CreatePluginMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePluginMessage.swift; sourceTree = "<group>"; };
 		1D1CCE0E2518EB5A002FCFA4 /* CoreBarcelona.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = CoreBarcelona.modulemap; sourceTree = "<group>"; };
 		1D1E232E2501A2560069705D /* ActionChatItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionChatItem.swift; sourceTree = "<group>"; };
 		1D1E23332501A6DB0069705D /* CoreBarcelona+Vapor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoreBarcelona+Vapor.swift"; sourceTree = "<group>"; };
@@ -1051,6 +1057,16 @@
 				1D5AEE6824E37D9E00303692 /* IMBalloonPluginManager+TapbackData.swift */,
 			);
 			path = Tapbacks;
+			sourceTree = "<group>";
+		};
+		1D1ACA8925DD865300A04BB6 /* MessageCreators */ = {
+			isa = PBXGroup;
+			children = (
+				1D1ACA8A25DD865E00A04BB6 /* CreateMessageBase.swift */,
+				1D1ACA9425DD869F00A04BB6 /* CreateMessage.swift */,
+				1D1ACA9A25DD86D200A04BB6 /* CreatePluginMessage.swift */,
+			);
+			path = MessageCreators;
 			sourceTree = "<group>";
 		};
 		1D1E233B2501F14F0069705D /* Protocols */ = {
@@ -1724,6 +1740,7 @@
 		1DD8067F24EAE2DB0076D717 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				1D1ACA8925DD865300A04BB6 /* MessageCreators */,
 				1DD8068524EAE3A70076D717 /* Extensions */,
 				1D5AEE8024E37D9F00303692 /* Registry.swift */,
 				1D5AEE7824E37D9E00303692 /* Chat.swift */,
@@ -2260,6 +2277,8 @@
 				1D804D03250EADE300F376CB /* Color+CrossPlatform.swift in Sources */,
 				1D1E233F2501F1AE0069705D /* IMAttachmentMessagePartChatItem+IMFileTransferContainer.swift in Sources */,
 				1D7FB3AD24FEB13200B7B956 /* ChatItem.swift in Sources */,
+				1D1ACA9B25DD86D200A04BB6 /* CreatePluginMessage.swift in Sources */,
+				1D1ACA8B25DD865E00A04BB6 /* CreateMessageBase.swift in Sources */,
 				1DD805BF24E85D070076D717 /* IMChat+Acknowledgment.swift in Sources */,
 				1DD8068424EAE3470076D717 /* ChatItem-Protocols.swift in Sources */,
 				1DD805DB24E85D100076D717 /* Chat.swift in Sources */,
@@ -2322,6 +2341,7 @@
 				1DD805E724E85D100076D717 /* PluginChatItem.swift in Sources */,
 				1D804E12250ECEB300F376CB /* String+Service.swift in Sources */,
 				1DEE7EA4250FA4B40009C74F /* Message+Searchable.swift in Sources */,
+				1D1ACA9525DD869F00A04BB6 /* CreateMessage.swift in Sources */,
 				1D804D05250EAE1700F376CB /* RichLinkCaptionButton.swift in Sources */,
 				1DD805B724E85CFD0076D717 /* RawHandle.swift in Sources */,
 				1D3E3343250C269B00EEA08B /* InternalAttachment+Identifiable.swift in Sources */,
