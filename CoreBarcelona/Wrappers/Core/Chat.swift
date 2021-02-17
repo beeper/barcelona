@@ -176,12 +176,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable {
         style = backing.chatStyle
         readReceipts = backing.readReceipts
         ignoreAlerts = backing.ignoreAlerts
-        
-        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
-            pinned = backing.isPinned
-        } else {
-            pinned  = false
-        }
+        pinned = backing.pinned
     }
     
     public static func chat(forMessage id: String) -> EventLoopFuture<Chat?> {
