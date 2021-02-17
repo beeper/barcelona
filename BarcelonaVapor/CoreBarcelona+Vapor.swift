@@ -26,6 +26,7 @@ extension MessagePart: Content { }
 extension ChatConfigurationRepresentation: Content { }
 extension CreateMessage: Content { }
 extension BulkAttachmentRepresentation: Content { }
+extension BulkChatIDRepresentation: Content { }
 
 // MARK: - Message Objects
 extension Message: Content { }

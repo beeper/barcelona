@@ -48,6 +48,20 @@ public func bindChatAPI(_ app: RoutesBuilder) {
         return BulkChatRepresentation(IMChatRegistry.shared.allSortedChats())
     }
     
+    readableChats.get("pinned") { req -> BulkChatIDRepresentation in
+        BulkChatIDRepresentation(chats: IMChatRegistry.sharedInstance().pinnedChatIdentifiers)
+    }
+    
+    writableChats.post("pinned") { req -> BulkChatIDRepresentation in
+        guard let pinned = try? req.content.decode(BulkChatIDRepresentation.self) else {
+            throw Abort(.badRequest)
+        }
+        
+        IMChatRegistry.sharedInstance()!.pinnedChatIdentifiers = pinned.chats
+        
+        return BulkChatIDRepresentation(chats: IMChatRegistry.sharedInstance()!.pinnedChatIdentifiers)
+    }
+    
     messageSending.grouped("bulk").post("message") { req -> EventLoopFuture<BulkMessageRepresentation> in
         guard let creation = try? req.content.decode(CreateMessage.self), let chatIDs = try? req.query.get([String].self, at: "chats") else {
             throw Abort(.badRequest)

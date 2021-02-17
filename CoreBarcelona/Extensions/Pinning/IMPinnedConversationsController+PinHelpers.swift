@@ -43,22 +43,7 @@ public extension IMPinnedConversationsController {
             }
         }
         set {
-            self.setPinnedChats(newValue, withUpdateReason: "we in this bitch")
-        }
-    }
-    
-    /**
-        All pinned IMChat identifiers.
-        This is not the same as pinnedConversationIdentifiers – that uses their pinningIdentifier, which does not always match chat.id
-     */
-    var pinnedChatIdentifiers: [String] {
-        get {
-            pinnedChats.map {
-                $0.id
-            }
-        }
-        set {
-            pinnedChats = IMChat.resolve(withIdentifiers: newValue)
+            self.setPinnedChats(newValue, withUpdateReason: "contextMenu")
         }
     }
 }

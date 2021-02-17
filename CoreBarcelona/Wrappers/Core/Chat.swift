@@ -55,6 +55,14 @@ public struct ChatIDRepresentation: Codable {
     public var chat: String
 }
 
+public struct BulkChatIDRepresentation: Codable {
+    public init(chats: [String]) {
+        self.chats = chats
+    }
+    
+    public var chats: [String]
+}
+
 public enum MessagePartType: String, Codable {
     case text
     case attachment
