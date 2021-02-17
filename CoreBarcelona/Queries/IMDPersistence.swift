@@ -43,6 +43,12 @@ private func ERParseIMDMessageRecordRefs(_ refs: NSArray, in chat: String? = nil
     }
 }
 
+private func ERResolveGUIDsForChat(withChatIdentifier chatIdentifier: String, beforeGUID: String? = nil, limit: Int? = nil) -> EventLoopFuture<[String]> {
+    DBReader.shared.rowIDs(forIdentifier: chatIdentifier).flatMap { ROWIDs in
+        DBReader.shared.newestMessageGUIDs(inChatROWIDs: ROWIDs, beforeMessageGUID: beforeGUID, limit: limit)
+    }
+}
+
 
 /// Loads an array of IMDMessageRecordRefs from IMDPersistence
 /// - Parameter guids: guids of the messages to load
@@ -54,23 +60,6 @@ private func ERLoadIMDMessageRecordRefsWithGUIDs(_ guids: [String]) -> NSArray {
     
     return results as NSArray
 }
-
-
-/// Performs an advanced query of messages with the given parameters
-/// - Parameters:
-///   - chatIdentifier: identifier of the chat to load messages from
-///   - services: chat services to load messages from
-///   - beforeGUID: GUID of the message all messages must precede
-///   - limit: max number of messages to return
-/// - Returns: array of IMDMessageRecordRefs
-private func ERLoadIMDMessageRecordRefs(withChatIdentifier chatIdentifier: String, onServices services: [IMServiceStyle] = [], beforeGUID: String? = nil, limit: Int64) -> NSArray {
-    guard let records = IMDMessageRecordCopyMessagesWithChatIdentifiersOnServicesUpToGUIDOrLimitWithOptionalThreadIdentifier([chatIdentifier] as CFArray, services.map { $0.rawValue } as CFArray, beforeGUID as CFString?, nil, true, false, limit) else {
-        return [] as NSArray
-    }
-    
-    return records as NSArray
-}
-
 
 /// Resolves ChatItems with the given GUIDs
 /// - Parameters:
@@ -91,8 +80,8 @@ internal func ERLoadAndParseIMDMessageRecordRefsWithGUIDs(_ guids: [String], in 
 ///   - beforeGUID: GUID of the message all messages must precede
 ///   - limit: max number of messages to return
 /// - Returns: NIO future of ChatItems
-internal func ERLoadAndParseIMDMessageRecordRefs(withChatIdentifier chatIdentifier: String, onServices services: [IMServiceStyle] = [], beforeGUID: String? = nil, limit: Int64? = nil) -> EventLoopFuture<[ChatItem]> {
-    let refs = ERLoadIMDMessageRecordRefs(withChatIdentifier: chatIdentifier, onServices: services, beforeGUID: beforeGUID, limit: limit ?? ERDefaultMessageQueryLimit)
-    
-    return ERParseIMDMessageRecordRefs(refs, in: chatIdentifier)
+internal func ERLoadAndParseIMDMessageRecordRefs(withChatIdentifier chatIdentifier: String, onServices services: [IMServiceStyle] = [], beforeGUID: String? = nil, limit: Int? = nil) -> EventLoopFuture<[ChatItem]> {
+    ERResolveGUIDsForChat(withChatIdentifier: chatIdentifier, beforeGUID: beforeGUID, limit: limit).flatMap {
+        ERLoadAndParseIMDMessageRecordRefsWithGUIDs($0, in: chatIdentifier)
+    }
 }
