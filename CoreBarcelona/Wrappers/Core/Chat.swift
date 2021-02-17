@@ -218,7 +218,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable {
         }
     }
     
-    public func messages(before: String? = nil, limit: Int64? = nil) -> EventLoopFuture<[ChatItem]> {
+    public func messages(before: String? = nil, limit: Int? = nil) -> EventLoopFuture<[ChatItem]> {
         if ERBarcelonaManager.isSimulation {
             let guids: [String] = imChat.chatItemRules._items().compactMap { item in
                 if let chatItem = item as? IMChatItem {

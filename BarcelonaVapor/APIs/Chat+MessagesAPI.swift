@@ -31,7 +31,7 @@ func bindChatMessagesAPI(readableChat: RoutesBuilder, writableChat: RoutesBuilde
      */
     readableMessages.get { req -> EventLoopFuture<BulkMessageRepresentation> in
         let messageGUID = try? req.query.get(String.self, at: "before")
-        let limit = (try? req.query.get(Int64.self, at: "limit")) ?? ERDefaultMessageQueryLimit
+        let limit = (try? req.query.get(Int.self, at: "limit")) ?? ERDefaultMessageQueryLimit
         
         
         return req.chat.messages(before: messageGUID, limit: limit).map {
