@@ -13,6 +13,7 @@
 		1D1ACA8B25DD865E00A04BB6 /* CreateMessageBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1ACA8A25DD865E00A04BB6 /* CreateMessageBase.swift */; };
 		1D1ACA9525DD869F00A04BB6 /* CreateMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1ACA9425DD869F00A04BB6 /* CreateMessage.swift */; };
 		1D1ACA9B25DD86D200A04BB6 /* CreatePluginMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1ACA9A25DD86D200A04BB6 /* CreatePluginMessage.swift */; };
+		1D1ACAA125DD879100A04BB6 /* IMChat+ChatStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1ACAA025DD879100A04BB6 /* IMChat+ChatStyle.swift */; };
 		1D1E232F2501A2560069705D /* ActionChatItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1E232E2501A2560069705D /* ActionChatItem.swift */; };
 		1D1E23362501B0190069705D /* ChatItem+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1E23352501B0190069705D /* ChatItem+Codable.swift */; };
 		1D1E23382501B68A0069705D /* IMItem+AccountResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1E23372501B68A0069705D /* IMItem+AccountResolvable.swift */; };
@@ -561,6 +562,7 @@
 		1D1ACA8A25DD865E00A04BB6 /* CreateMessageBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateMessageBase.swift; sourceTree = "<group>"; };
 		1D1ACA9425DD869F00A04BB6 /* CreateMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateMessage.swift; sourceTree = "<group>"; };
 		1D1ACA9A25DD86D200A04BB6 /* CreatePluginMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePluginMessage.swift; sourceTree = "<group>"; };
+		1D1ACAA025DD879100A04BB6 /* IMChat+ChatStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChat+ChatStyle.swift"; sourceTree = "<group>"; };
 		1D1CCE0E2518EB5A002FCFA4 /* CoreBarcelona.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = CoreBarcelona.modulemap; sourceTree = "<group>"; };
 		1D1E232E2501A2560069705D /* ActionChatItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionChatItem.swift; sourceTree = "<group>"; };
 		1D1E23332501A6DB0069705D /* CoreBarcelona+Vapor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoreBarcelona+Vapor.swift"; sourceTree = "<group>"; };
@@ -1230,6 +1232,7 @@
 				1D804D02250EADE300F376CB /* Color+CrossPlatform.swift */,
 				1D804E11250ECEB300F376CB /* String+Service.swift */,
 				1D3F0C472515192D00E1DBEB /* IMChat+TimeSortedParticipants.swift */,
+				1D1ACAA025DD879100A04BB6 /* IMChat+ChatStyle.swift */,
 			);
 			path = Glue;
 			sourceTree = "<group>";
@@ -2330,6 +2333,7 @@
 				1DD805C024E85D070076D717 /* IMBalloonPluginManager+IMBalloonPluginManager_GetOutOfMyWay.m in Sources */,
 				1D14A1C1250C170F001C5921 /* Message+LazilyResolvable.swift in Sources */,
 				1D804D16250EB5BF00F376CB /* LPAsset.swift in Sources */,
+				1D1ACAA125DD879100A04BB6 /* IMChat+ChatStyle.swift in Sources */,
 				1D44865424E85BD500FF73F3 /* ERChatSubscriptionWatcher.swift in Sources */,
 				1D44864E24E85BD500FF73F3 /* ERDaemonListener.swift in Sources */,
 				1D1E235E2506E0DE0069705D /* ETKissData.swift in Sources */,

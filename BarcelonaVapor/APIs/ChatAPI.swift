@@ -93,7 +93,7 @@ public func bindChatAPI(_ app: RoutesBuilder) {
             
             let newGUID = NSString.stringGUID()
             
-            guard let chat = IMChat()?._init(withGUID: newGUID, account: handles.last!.account, style: 0x2b, roomName: nil, displayName: createChat.displayName, lastAddressedHandle: nil, lastAddressedSIMID: nil, items: nil, participants: handles, isFiltered: true, hasHadSuccessfulQuery: false) else {
+            guard let chat = IMChat()?._init(withGUID: newGUID, account: handles.last!.account, style: ChatStyle.group.rawValue, roomName: nil, displayName: createChat.displayName, lastAddressedHandle: nil, lastAddressedSIMID: nil, items: nil, participants: handles, isFiltered: true, hasHadSuccessfulQuery: false) else {
                 promise.fail(Abort(.badRequest))
                 return
             }
@@ -137,7 +137,7 @@ public func bindChatAPI(_ app: RoutesBuilder) {
         
         req.imChat.deleteAllHistory()
         
-        if req.imChat.chatStyle == 0x2d && req.imChat.recipient == nil { req.imChat.remove() }
+        if req.imChat.isSingle && req.imChat.recipient == nil { req.imChat.remove() }
         else if req.imChat.account.service.isLegacyService { req.imChat.leave() }
         
         return req.chat
