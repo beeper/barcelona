@@ -13,7 +13,7 @@
 
 @class LPArtworkMetadata, LPImage, NSString;
 
-@interface LPiTunesMediaMovieMetadata : LPSpecializationMetadata <LPLinkMetadataPresentationTransformer, LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility, LPLinkMetadataStoreTransformer>
+@interface LPiTunesMediaMovieMetadata : LPSpecializationMetadata <LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility, LPLinkMetadataStoreTransformer>
 {
     NSString *_storeFrontIdentifier;
     NSString *_storeIdentifier;

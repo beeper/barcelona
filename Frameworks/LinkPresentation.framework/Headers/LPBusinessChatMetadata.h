@@ -11,7 +11,7 @@
 
 @class NSString;
 
-@interface LPBusinessChatMetadata : LPSpecializationMetadata <LPLinkMetadataPresentationTransformer, LPLinkMetadataPreviewTransformer>
+@interface LPBusinessChatMetadata : LPSpecializationMetadata <LPLinkMetadataPreviewTransformer>
 {
     NSString *_subtitle;
 }

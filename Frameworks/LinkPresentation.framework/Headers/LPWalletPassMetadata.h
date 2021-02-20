@@ -12,7 +12,7 @@
 
 @class NSDate, NSString;
 
-@interface LPWalletPassMetadata : LPSpecializationMetadata <LPLinkMetadataPresentationTransformer, LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility>
+@interface LPWalletPassMetadata : LPSpecializationMetadata <LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility>
 {
     NSString *_name;
     long long _style;

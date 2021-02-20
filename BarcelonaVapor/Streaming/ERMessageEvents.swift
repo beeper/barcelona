@@ -97,7 +97,7 @@ class ERMessageEvents: EventDispatcher {
             }
             
             return itemGUIDAsChatItem(item.guid, in: chat.id)
-        }, on: eventProcessing_eventLoop.next()).map {
+        }, on: eventProcessingEventLoop.next()).map {
             $0.compactMap { $0 }
         }.map {
             BulkChatItemRepresentation(items: $0)
@@ -113,7 +113,7 @@ class ERMessageEvents: EventDispatcher {
         
         EventLoopFuture<ChatItem?>.whenAllSucceed(items.map { item -> EventLoopFuture<ChatItem?> in
             return itemGUIDAsChatItem(item.guid, in: chat.id)
-        }, on: eventProcessing_eventLoop.next()).map {
+        }, on: eventProcessingEventLoop.next()).map {
             $0.compactMap { $0 }
         }.whenSuccess {
             if $0.count == 0 { return }

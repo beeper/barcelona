@@ -12,7 +12,7 @@
 
 @class LPImage, NSDate, NSString;
 
-@interface LPApplePhotosMomentMetadata : LPSpecializationMetadata <LPLinkMetadataPresentationTransformer, LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility>
+@interface LPApplePhotosMomentMetadata : LPSpecializationMetadata <LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility>
 {
     NSString *_title;
     unsigned long long _photoCount;

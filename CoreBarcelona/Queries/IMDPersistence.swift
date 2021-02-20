@@ -11,14 +11,23 @@ import IMDPersistence
 import NIO
 import os.log
 
-internal func CFRelease(_ object: AnyObject) {
-    Unmanaged.passUnretained(object).release()
+private func ERCreateIMItemFromIMDMessageRecordRefs(_ refs: NSArray) -> EventLoopFuture<[IMItem]> {
+    return messageQuerySystem.next().submit {
+        return (refs as NSArray).compactMap {
+            IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve($0, nil, nil, nil, nil)
+        }
+    }
 }
 
-internal func CFRetain(_ object: AnyObject) {
-    Unmanaged.passUnretained(object).retain()
+private func ERConvertIMDMessageRecordRefsToIMMessage(_ refs: NSArray) -> EventLoopFuture<[IMMessage]> {
+    ERCreateIMItemFromIMDMessageRecordRefs(refs).map {
+        $0.compactMap {
+            $0 as? IMMessageItem
+        }.compactMap {
+            IMMessage.message(fromUnloadedItem: $0)
+        }
+    }
 }
-
 
 /// Parses an array of IMDMessageRecordRef
 /// - Parameters:
@@ -26,20 +35,10 @@ internal func CFRetain(_ object: AnyObject) {
 ///   - chat: the ID of the chat the messages reside in. if omitted, the chat ID will be resolved at ingestion
 /// - Returns: An NIO future of ChatItems
 private func ERParseIMDMessageRecordRefs(_ refs: NSArray, in chat: String? = nil) -> EventLoopFuture<[ChatItem]> {
-    return messageQuerySystem.next().submit {
-        return (refs as NSArray).compactMap {
-            IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve($0, nil, nil, nil, nil)
-        }
-    }.flatMap { items -> EventLoopFuture<[ChatItem]> in
+    return ERCreateIMItemFromIMDMessageRecordRefs(refs).flatMap { items -> EventLoopFuture<[ChatItem]> in
         os_log("Ingesting chat items")
         
-        let ingestion = ERIndeterminateIngestor.ingest(items, in: chat)
-        
-        ingestion.whenSuccess { _ in
-            items.forEach(CFRelease(_:))
-        }
-        
-        return ingestion
+        return ERIndeterminateIngestor.ingest(items, in: chat)
     }
 }
 
@@ -61,6 +60,12 @@ private func ERLoadIMDMessageRecordRefsWithGUIDs(_ guids: [String]) -> NSArray {
     return results as NSArray
 }
 
+internal func ERLoadIMMessagesWithGUIDs(_ guids: [String]) -> EventLoopFuture<[IMMessage]> {
+    let refs = ERLoadIMDMessageRecordRefsWithGUIDs(guids)
+    
+    return ERConvertIMDMessageRecordRefsToIMMessage(refs)
+}
+
 /// Resolves ChatItems with the given GUIDs
 /// - Parameters:
 ///   - guids: GUIDs of messages to load
@@ -72,6 +77,11 @@ internal func ERLoadAndParseIMDMessageRecordRefsWithGUIDs(_ guids: [String], in 
     return ERParseIMDMessageRecordRefs(refs, in: chat)
 }
 
+internal func ERLoadIMMessages(withChatIdentifier chatIdentifier: String, onServices services: [IMServiceStyle] = [], beforeGUID: String? = nil, limit: Int? = nil) -> EventLoopFuture<[IMMessage]> {
+    ERResolveGUIDsForChat(withChatIdentifier: chatIdentifier, beforeGUID: beforeGUID, limit: limit).flatMap {
+        ERLoadIMMessagesWithGUIDs($0)
+    }
+}
 
 /// Resolves ChatItems with the given parameters
 /// - Parameters:

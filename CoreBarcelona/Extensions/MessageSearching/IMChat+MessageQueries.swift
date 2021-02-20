@@ -13,7 +13,7 @@ import os.log
 
 let log_IMChat = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "IMChat+MessageQueries")
 
-let messageQuerySystem = MultiThreadedEventLoopGroup.init(numberOfThreads: 5)
+internal let messageQuerySystem = MultiThreadedEventLoopGroup.init(numberOfThreads: 1)
 
 /**
  Provides various functions to aid in the lazy resolution of messages

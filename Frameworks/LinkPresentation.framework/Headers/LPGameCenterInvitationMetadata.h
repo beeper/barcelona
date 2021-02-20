@@ -12,7 +12,7 @@
 
 @class LPImage, NSString;
 
-@interface LPGameCenterInvitationMetadata : LPSpecializationMetadata <LPLinkMetadataPresentationTransformer, LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility>
+@interface LPGameCenterInvitationMetadata : LPSpecializationMetadata <LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility>
 {
     unsigned int _numberOfPlayers;
     unsigned int _minimumNumberOfPlayers;

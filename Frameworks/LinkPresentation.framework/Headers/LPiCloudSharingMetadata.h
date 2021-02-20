@@ -12,7 +12,7 @@
 
 @class LPImage, NSString;
 
-@interface LPiCloudSharingMetadata : LPSpecializationMetadata <LPLinkMetadataPresentationTransformer, LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility>
+@interface LPiCloudSharingMetadata : LPSpecializationMetadata <LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility>
 {
     NSString *_applicationBundleIdenfier;
     NSString *_application;

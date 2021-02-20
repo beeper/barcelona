@@ -13,7 +13,7 @@
 
 @class LPImage, NSDate, NSString;
 
-@interface LPFileMetadata : LPSpecializationMetadata <LPLinkMetadataPresentationTransformer, LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility, LPMultipleMetadataPresentationTransformer>
+@interface LPFileMetadata : LPSpecializationMetadata <LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility, LPMultipleMetadataPresentationTransformer>
 {
     NSString *_name;
     NSString *_type;

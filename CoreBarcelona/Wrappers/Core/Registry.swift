@@ -9,12 +9,6 @@
 import Foundation
 import IMCore
 
-public extension IMMe {
-    static var sharedInstance: IMMe {
-        perform(Selector("me"))!.takeUnretainedValue() as! IMMe
-    }
-}
-
 private extension Array where Element: Hashable {
     var unique: [Element] {
         Array(Set(self))

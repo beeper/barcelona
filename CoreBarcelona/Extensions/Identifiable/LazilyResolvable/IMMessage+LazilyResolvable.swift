@@ -12,6 +12,6 @@ import NIO
 
 extension IMMessage: LazilyResolvable, ConcreteLazilyBasicResolvable {
     public static func lazyResolve(withIdentifiers identifiers: [String], on eventLoop: EventLoop?) -> EventLoopFuture<[IMMessage]> {
-        imMessages(withGUIDs: identifiers, on: eventLoop ?? messageQuerySystem.next())
+        ERLoadIMMessagesWithGUIDs(identifiers)
     }
 }

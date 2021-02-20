@@ -11,7 +11,7 @@
 
 @class LPImage, NSString;
 
-@interface LPAppleTVMetadata : LPSpecializationMetadata <LPLinkMetadataPresentationTransformer, LPLinkMetadataPreviewTransformer>
+@interface LPAppleTVMetadata : LPSpecializationMetadata <LPLinkMetadataPreviewTransformer>
 {
     NSString *_title;
     NSString *_subtitle;

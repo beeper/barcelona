@@ -98,6 +98,10 @@ private var currentDaemonController: IMDaemonController? = nil
         
         resetController()
         
+        try! messageQuerySystem.syncShutdownGracefully()
+        try! ingestorEventLoop.syncShutdownGracefully()
+        try! databaseEventLoopGroup.syncShutdownGracefully()
+        
         isRunning = false
     }
     

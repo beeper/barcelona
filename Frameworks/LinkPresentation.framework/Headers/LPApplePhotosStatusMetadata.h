@@ -10,7 +10,7 @@
 
 @class NSAttributedString, NSString;
 
-@interface LPApplePhotosStatusMetadata : LPSpecializationMetadata <LPLinkMetadataPresentationTransformer>
+@interface LPApplePhotosStatusMetadata : LPSpecializationMetadata
 {
     NSAttributedString *_status;
 }

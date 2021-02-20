@@ -175,7 +175,7 @@ class StreamingAPI {
         if let preload = preload, let chat = Chat.resolve(withIdentifier: preload) {
             pendingMessages = chat.messages()
         } else {
-            pendingMessages = eventProcessing_eventLoop.next().makeSucceededFuture([])
+            pendingMessages = eventProcessingEventLoop.next().makeSucceededFuture([])
         }
         
         return pendingMessages.map {

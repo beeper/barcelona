@@ -33,17 +33,3 @@ public struct SwizzleGenie {
         method_exchangeImplementations(originalMethod, newMethod)
     }
 }
-
-public extension NSObject {
-    class func construct(usingInitializer initializer: String, withArgument arg: Any, andWithArgument arg1: Any) -> Self {
-        return ((perform(Selector("alloc")) as Unmanaged<AnyObject>).takeRetainedValue() as! Self).perform(Selector(initializer), with: arg, with: arg1)?.takeUnretainedValue() as! Self
-    }
-    
-    class func construct(usingInitializer initializer: String, withArgument arg: Any) -> Self {
-        return ((perform(Selector("alloc")) as Unmanaged<AnyObject>).takeRetainedValue() as! Self).perform(Selector(initializer), with: arg)?.takeUnretainedValue() as! Self
-    }
-    
-    class func construct(usingInitializer initializer: String) -> Self {
-        return ((perform(Selector("alloc")) as Unmanaged<AnyObject>).takeRetainedValue() as! Self).perform(Selector(initializer))?.takeUnretainedValue() as! Self
-    }
-}

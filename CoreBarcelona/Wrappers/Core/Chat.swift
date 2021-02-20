@@ -197,7 +197,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable {
         let guid = message.id, parts = message.parts ?? []
         let fullMessage = parts.count == 0
         
-        return IMMessage.imMessage(withGUID: guid, on: eventLoop).map { message -> Void in
+        return IMMessage.lazyResolve(withIdentifier: guid, on: eventLoop).map { message -> Void in
             guard let message = message else {
                 return
             }

@@ -13,7 +13,7 @@
 
 @class LPImage, LPVideo, NSArray, NSString;
 
-@interface LPiTunesMediaSoftwareMetadata : LPSpecializationMetadata <LPLinkMetadataPresentationTransformer, LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility, LPLinkMetadataStoreTransformer>
+@interface LPiTunesMediaSoftwareMetadata : LPSpecializationMetadata <LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility, LPLinkMetadataStoreTransformer>
 {
     BOOL _isMessagesOnlyApp;
     NSString *_storeFrontIdentifier;

@@ -125,7 +125,6 @@ private func ERTextPart(fromCalendar attributedCalendar: NSAttributedString) -> 
             unixTime = date.timeIntervalSince1970 * 1000
         }
         
-        CFRelease(result!)
         result = nil
     }
     

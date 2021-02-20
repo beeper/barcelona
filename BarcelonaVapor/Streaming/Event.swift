@@ -36,7 +36,7 @@ struct Event<P: Codable>: Codable {
     }
 }
 
-internal let eventProcessing_eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 3)
+public let eventProcessingEventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 3)
 
 // MARK: - Event generators
 

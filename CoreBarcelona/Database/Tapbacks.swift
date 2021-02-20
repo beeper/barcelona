@@ -59,7 +59,7 @@ extension DBReader {
                         .filter(guids.contains(RawMessage.Columns.associated_message_guid))
                         .fetchAll(db)
                     
-                    Message.dirtyMessages(withGUIDs: messages, in: chat, on: self.eventLoop).map {
+                    Message.messages(withGUIDs: messages, in: chat, on: self.eventLoop).map {
                         $0.reduce(into: [String: [Message]]()) { ledger, message in
                             guard let associatedMessageGUID = message.associatedMessageID else { return }
                             if ledger[associatedMessageGUID] == nil { ledger[associatedMessageGUID] = [] }

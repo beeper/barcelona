@@ -10,7 +10,7 @@
 
 @class NSString;
 
-@interface LPSummarizedLinkMetadata : LPSpecializationMetadata <LPLinkMetadataPresentationTransformer>
+@interface LPSummarizedLinkMetadata : LPSpecializationMetadata
 {
 }
 

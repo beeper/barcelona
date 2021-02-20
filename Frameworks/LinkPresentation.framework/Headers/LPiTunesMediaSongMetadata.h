@@ -14,7 +14,7 @@
 
 @class LPArtworkMetadata, LPImage, NSArray, NSString, NSURL;
 
-@interface LPiTunesMediaSongMetadata : LPSpecializationMetadata <LPLinkMetadataPresentationTransformer, LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility, LPLinkMetadataStoreTransformer, LPLinkMetadataStatusTransformer>
+@interface LPiTunesMediaSongMetadata : LPSpecializationMetadata <LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility, LPLinkMetadataStoreTransformer, LPLinkMetadataStatusTransformer>
 {
     NSString *_storeFrontIdentifier;
     NSString *_storeIdentifier;

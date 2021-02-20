@@ -121,7 +121,7 @@ class MessageEvents: EventDispatcher {
         
         let pendingMessages = messageGUIDs.er_chatItems(in: chat.id)
         
-        EventLoopFuture<ChatItem?>.whenAllSucceed(wrapped, on: eventProcessing_eventLoop.next()).map { $0.compactMap { $0 } }.whenSuccess { chatItems in
+        EventLoopFuture<ChatItem?>.whenAllSucceed(wrapped, on: eventProcessingEventLoop.next()).map { $0.compactMap { $0 } }.whenSuccess { chatItems in
             pendingMessages.whenSuccess { messageChatItems in
                 if chatItems.count == 0, messageChatItems.count == 0 {
                     return
@@ -141,7 +141,7 @@ class MessageEvents: EventDispatcher {
         
         EventLoopFuture<StatusChatItem?>.whenAllSucceed(statusChanges.map {
             ERIndeterminateIngestor.ingest($0, in: chat.id)
-        }, on: eventProcessing_eventLoop.next()).map {
+        }, on: eventProcessingEventLoop.next()).map {
             $0.compactMap { $0 }
         }.whenSuccess {
             if $0.count == 0 { return }

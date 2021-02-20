@@ -55,39 +55,6 @@ public extension IMMessage {
         return message
     }
     
-    static func imMessage(withGUID guid: String, on eventLoop: EventLoop? = nil) -> EventLoopFuture<IMMessage?> {
-        return imMessages(withGUIDs: [guid], on: eventLoop ?? messageQuerySystem.next()).map { results in
-            results.first
-        }
-    }
-        
-    static func imMessages(withGUIDs guids: [String], on eventLoop: EventLoop? = nil) -> EventLoopFuture<[IMMessage]> {
-        let eventLoop = eventLoop ?? messageQuerySystem.next()
-        
-        let promise = eventLoop.makePromise(of: [IMMessage].self)
-        
-        if ERBarcelonaManager.isSimulation {
-            IMChatHistoryController.sharedInstance()!.loadMessages(withGUIDs: guids, on: eventLoop).cascade(to: promise)
-        } else {
-            IMSPIQueryIMMessageItemsWithGUIDsAndQOS(guids, QOS_CLASS_USER_INITIATED, queue) { results in
-                guard let results = results else {
-                    promise.succeed([])
-                    return
-                }
-
-                promise.succeed(results.compactMap { item in
-                    guard let messageItem = item as? IMMessageItem else {
-                        return nil
-                    }
-                    
-                    return IMMessage.message(fromUnloadedItem: messageItem)
-                })
-            }
-        }
-        
-        return promise.futureResult
-    }
-    
     static func message(withGUID guid: String, on eventLoop: EventLoop? = nil) -> EventLoopFuture<ChatItem?> {
         return messages(withGUIDs: [guid], on: eventLoop ?? messageQuerySystem.next()).map { results in
             results.first

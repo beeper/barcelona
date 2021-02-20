@@ -86,6 +86,7 @@ class ERBarcelonaAPIService {
     func stop(callback: @escaping (Error?) -> ()) {
         ERHTTPServer.shared.stop()
         ERBarcelonaManager.teardown()
+        try! eventProcessingEventLoop.syncShutdownGracefully()
         server.emitRunningState()
         callback(nil)
         DispatchQueue.main.asyncAfter(deadline: .init(secondsFromNow: 1)) {

@@ -48,13 +48,6 @@ public struct Message: ChatItemRepresentation {
         }
     }
     
-    /// You can call this when you don't need transcript messages, it can be faster but will not always return all results due to IMCore discarding non-IMMessageItems
-    static func dirtyMessages(withGUIDs guids: [String], in chat: String? = nil, on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<[Message]> {
-        IMMessage.imMessages(withGUIDs: guids, on: eventLoop).flatMap { messages in
-            ERIndeterminateIngestor.ingest(messageLike: messages, in: chat)
-        }
-    }
-    
     static func messages(withGUIDs guids: [String], in chat: String? = nil, on eventLoop: EventLoop = messageQuerySystem.next()) -> EventLoopFuture<[Message]> {
         IMMessage.messages(withGUIDs: guids, in: chat, on: eventLoop).map {
             $0.compactMap {

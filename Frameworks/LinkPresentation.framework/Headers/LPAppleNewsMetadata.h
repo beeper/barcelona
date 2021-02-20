@@ -11,7 +11,7 @@
 
 @class NSString;
 
-@interface LPAppleNewsMetadata : LPSpecializationMetadata <LPLinkMetadataPresentationTransformer, LPLinkMetadataPreviewTransformer>
+@interface LPAppleNewsMetadata : LPSpecializationMetadata <LPLinkMetadataPreviewTransformer>
 {
     NSString *_source;
     NSString *_title;

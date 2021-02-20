@@ -12,7 +12,7 @@
 
 @class LPImage, NSArray, NSString;
 
-@interface LPMapCollectionMetadata : LPSpecializationMetadata <LPLinkMetadataPresentationTransformer, LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility>
+@interface LPMapCollectionMetadata : LPSpecializationMetadata <LPLinkMetadataPreviewTransformer, LPLinkMetadataBackwardCompatibility>
 {
     unsigned int _numberOfItems;
     NSString *_name;

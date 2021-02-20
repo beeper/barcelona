@@ -35,7 +35,7 @@ let databasePool = try! DatabasePool(path: "/var/mobile/Library/SMS/sms.db", con
 let databasePool = try! DatabasePool(path: ("~/Library/Messages/chat.db" as NSString).expandingTildeInPath, configuration: dbConfiguration)
 #endif
 
-private let defaultEventLoopGroup = MultiThreadedEventLoopGroup.init(numberOfThreads: 3)
+internal let databaseEventLoopGroup = MultiThreadedEventLoopGroup.init(numberOfThreads: 3)
 
 /**
  Interface for reading the chat.db file.
@@ -47,7 +47,7 @@ public struct DBReader {
     var pool: DatabasePool
     var eventLoop: EventLoop
     
-    init(pool: DatabasePool = databasePool, eventLoop: EventLoop = defaultEventLoopGroup.next()) {
+    init(pool: DatabasePool = databasePool, eventLoop: EventLoop = databaseEventLoopGroup.next()) {
         self.pool = pool
         self.eventLoop = eventLoop
     }
@@ -207,6 +207,6 @@ INNER JOIN chat ON chat_message_join.chat_id = chat.ROWID AND chat.chat_identifi
 
 extension DBReader {
     static var shared: DBReader {
-        DBReader(pool: databasePool, eventLoop: defaultEventLoopGroup.next())
+        DBReader(pool: databasePool, eventLoop: databaseEventLoopGroup.next())
     }
 }

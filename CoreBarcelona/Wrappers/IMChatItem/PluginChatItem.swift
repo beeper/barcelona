@@ -20,9 +20,10 @@ public struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
         
         switch bundleID {
         case "com.apple.DigitalTouchBalloonProvider":
-            if let dataSource = item.dataSource, let messages = dataSource.perform(Selector(("createSessionMessages")))?.takeUnretainedValue() as? Array<ETMessage>, let message = messages.first {
-                digitalTouch = DigitalTouchMessage(message: message)
-            }
+//            if let dataSource = item.dataSource, let messages = dataSource.perform(Selector(("createSessionMessages")))?.takeUnretainedValue() as? Array<ETMessage>, let message = messages.first {
+//                digitalTouch = DigitalTouchMessage(message: message)
+//            }
+            insertPayload = false
             break
         case "com.apple.messages.URLBalloonProvider":
             if let dataSource = item.dataSource, let metadata = dataSource.value(forKey: "richLinkMetadata") as? LPLinkMetadata, let richLink = RichLinkRepresentation(metadata: metadata, attachments: item.internalAttachments) {

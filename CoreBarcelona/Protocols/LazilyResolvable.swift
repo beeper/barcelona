@@ -14,6 +14,7 @@ public protocol LazilyResolvable: Identifiable {
     typealias BulkResult = EventLoopFuture<[instancetype]>
     
     static func lazyResolve(withIdentifier identifier: ID, on eventLoop: EventLoop?) -> EventLoopFuture<instancetype?>
+    static func lazyResolve(withIdentifier identifier: ID) -> EventLoopFuture<instancetype?>
     static func lazyResolve(withIdentifiers identifiers: [ID], on eventLoop: EventLoop?) -> BulkResult
     static func lazyResolve(withIdentifiers identifiers: [ID]) -> BulkResult
 }
@@ -24,6 +25,10 @@ extension ConcreteLazilyBasicResolvable {
         lazyResolve(withIdentifiers: [identifier], on: eventLoop).map {
             $0.first
         }
+    }
+    
+    public static func lazyResolve(withIdentifier identifier: ID) -> EventLoopFuture<instancetype?> {
+        lazyResolve(withIdentifier: identifier, on: nil)
     }
     
     public static func lazyResolve(withIdentifiers identifiers: [ID]) -> BulkResult {

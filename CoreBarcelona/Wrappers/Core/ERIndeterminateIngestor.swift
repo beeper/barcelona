@@ -33,7 +33,7 @@ private let ChatLikeClasses = [
     IMMessageItem.self
 ]
 
-private let ingestor_eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 10)
+internal let ingestorEventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 3)
 
 private let ingestor_log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ERIndeterminateIngestor")
 
@@ -79,7 +79,7 @@ private let SPIQueue = DispatchQueue(label: "com.ericrabil.imessage-rest.SPI")
 
 public struct ERIndeterminateIngestor {
     public static func ingest(_ object: AnyObject, in chat: String? = nil, on eventLoop: EventLoop! = nil, resolvingTapbacks: Bool = true, shouldPreprocess: Bool = true) -> EventLoopFuture<ChatItem?> {
-        let eventLoop = eventLoop ?? ingestor_eventLoop.next()
+        let eventLoop = eventLoop ?? ingestorEventLoop.next()
         
         return preprocess(object, on: eventLoop, shouldRun: shouldPreprocess).flatMap {
             resolveLazyChatChatID(object: object, chat: chat, on: eventLoop)
@@ -128,13 +128,13 @@ public struct ERIndeterminateIngestor {
     
     /// Dedicated function for ingesting status items – they are not to be wrapped in Message objects as they overwrite the message data
     public static func ingest(_ status: IMMessageStatusChatItem, in chat: String? = nil, on eventLoop: EventLoop! = nil) -> EventLoopFuture<StatusChatItem?> {
-        let eventLoop = eventLoop ??  ingestor_eventLoop.next()
+        let eventLoop = eventLoop ??  ingestorEventLoop.next()
         
         guard let messageGUID = status._item().guid else {
             return eventLoop.makeSucceededFuture(nil)
         }
         
-        return IMMessage.imMessage(withGUID: messageGUID, on: eventLoop).map {
+        return IMMessage.lazyResolve(withIdentifier: messageGUID, on: eventLoop).map {
             guard let message = $0 else {
                 return nil
             }
@@ -144,11 +144,11 @@ public struct ERIndeterminateIngestor {
     }
     
     public static func ingest(_ objects: [AnyObject], in chat: String? = nil, on eventLoop: EventLoop! = nil, resolvingTapbacks: Bool = true, shouldPreprocess: Bool = true) -> EventLoopFuture<[ChatItem]> {
-        let eventLoop = eventLoop ??  ingestor_eventLoop.next()
+        let eventLoop = eventLoop ??  ingestorEventLoop.next()
         
         return preprocess(objects, on: eventLoop, shouldRun: shouldPreprocess).flatMap {
             EventLoopFuture<ChatItem?>.whenAllSucceed(objects.map {
-                self.ingest($0, in: chat, on: ingestor_eventLoop.next(), resolvingTapbacks: false, shouldPreprocess: false)
+                self.ingest($0, in: chat, on: ingestorEventLoop.next(), resolvingTapbacks: false, shouldPreprocess: false)
             }, on: eventLoop)
         }.map {
             $0.compactMap { $0 }
@@ -159,11 +159,11 @@ public struct ERIndeterminateIngestor {
     
     /// Ingests an array of message-like objects and returns wrapped messages
     public static func ingest(messageLike objects: [AnyObject], in chat: String? = nil, on eventLoop: EventLoop! = nil, resolvingTapbacks: Bool = true, shouldPreprocess: Bool = true) -> EventLoopFuture<[Message]> {
-        let eventLoop = eventLoop ??  ingestor_eventLoop.next()
+        let eventLoop = eventLoop ??  ingestorEventLoop.next()
         
         return preprocess(objects, on: eventLoop, shouldRun: shouldPreprocess).flatMap {
             EventLoopFuture<Message?>.whenAllSucceed(objects.map {
-                ingest(messageLike: $0, in: chat, on: ingestor_eventLoop.next(), resolvingTapbacks: false, shouldPreprocess: false)
+                ingest(messageLike: $0, in: chat, on: ingestorEventLoop.next(), resolvingTapbacks: false, shouldPreprocess: false)
             }, on: eventLoop)
         }.map {
             $0.compactMap { $0 }
@@ -183,7 +183,7 @@ public struct ERIndeterminateIngestor {
     
     /// Ingests a message-like object and returns the wrapped message
     public static func ingest(messageLike object: AnyObject, in chat: String? = nil, on eventLoop: EventLoop! = nil, resolvingTapbacks: Bool = true, shouldPreprocess: Bool = true) -> EventLoopFuture<Message?> {
-        let eventLoop = eventLoop ??  ingestor_eventLoop.next()
+        let eventLoop = eventLoop ??  ingestorEventLoop.next()
         
         let lazyResolution = track(name: "Chat ChatID Resolver", format: "Resolving chat ChatID. Was Provided: %{public}@", chat == nil ? "NO" : "YES")
         

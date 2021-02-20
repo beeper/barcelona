@@ -15,9 +15,7 @@ private extension LPLinkMetadata {
             return nil
         }
         
-        let LPLinkMetadataPresentationTransformer = NSClassFromString("LPLinkMetadataPresentationTransformer") as! NSObject.Type
-        
-        let transformer = LPLinkMetadataPresentationTransformer.init()
+        let transformer = LPLinkMetadataPresentationTransformer.init()!
         
         transformer.setValue(self, forKey: "metadata")
         transformer.setValue(linkView.value(forKey: "URL"), forKey: "URL")
@@ -26,7 +24,7 @@ private extension LPLinkMetadata {
         transformer.setValue(linkView._preferredSizeClass, forKey: "preferredSizeClass")
         transformer.setValue(linkView._sourceBundleIdentifier, forKey: "sourceBundleIdentifier")
         
-        guard let unmanagedProperties = transformer.perform(Selector(("presentationProperties"))), let properties = unmanagedProperties.takeUnretainedValue() as? LPWebLinkPresentationProperties else {
+        guard let properties = transformer.presentationProperties() as? LPWebLinkPresentationProperties else {
             return nil
         }
         
@@ -45,12 +43,6 @@ private extension LPLinkMetadata {
         }
         
         return properties
-    }
-}
-
-extension NSObject {
-    static func emptyObject() -> Self {
-        perform(Selector("alloc"))!.takeUnretainedValue().perform(Selector("init")).takeUnretainedValue() as! Self
     }
 }
 
