@@ -14,6 +14,16 @@ import IMDPersistence
 import Vapor
 import Swime
 
+private extension InternalAttachment {
+    var type: HTTPMediaType {
+        guard let parts = mime?.split(separator: "/"), let mediaType = parts.first, let mediaSubtype = parts.last else {
+            return .any
+        }
+        
+        return .init(type: String(mediaType), subType: String(mediaSubtype))
+    }
+}
+
 internal func bindAttachmentsAPI(_ builder: RoutesBuilder, readAuthorizedBuilder: RoutesBuilder) {
     let attachments = builder.grouped("attachments")
     let readAuthorizedAttachments = readAuthorizedBuilder.grouped("attachments")
@@ -155,6 +165,6 @@ internal func bindAttachmentsAPI(_ builder: RoutesBuilder, readAuthorizedBuilder
      Get attachment
      */
     attachment.get { req -> Response in
-        req.fileio.streamFile(at: req.attachment.path)
+        req.fileio.streamFile(at: req.attachment.path, mediaType: req.attachment.type)
     }
 }
