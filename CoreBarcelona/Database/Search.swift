@@ -258,7 +258,7 @@ extension DBReader {
                 }
                 
                 if let name = parameters.name {
-                    stmt.append(literal: SQLLiteral(sql: " AND LOWER(attachment.name) LIKE ?", arguments: ["%\(name)%"]))
+                    stmt.append(literal: SQLLiteral(sql: " AND LOWER(attachment.filename) LIKE ?", arguments: ["%\(name)%"]))
                 }
                 
                 stmt.append(sql: " ORDER BY attachment.ROWID DESC")
