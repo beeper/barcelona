@@ -34,7 +34,7 @@
 @property(retain, nonatomic) id backgroundColor; // @synthesize backgroundColor=_backgroundColor;
 @property(retain, nonatomic) LPAudio *audio; // @synthesize audio=_audio;
 @property(retain, nonatomic) LPVideo *video; // @synthesize video=_video;
-@property(retain, nonatomic) NSArray *alternateImages; // @synthesize alternateImages=_alternateImages;
+@property(retain, nonatomic) NSArray<LPImage*> *alternateImages; // @synthesize alternateImages=_alternateImages;
 @property(retain, nonatomic) LPImagePresentationProperties *imageProperties; // @synthesize imageProperties=_imageProperties;
 @property(retain, nonatomic) LPImage *image; // @synthesize image=_image;
 @property(copy, nonatomic) NSString *quotedText; // @synthesize quotedText=_quotedText;

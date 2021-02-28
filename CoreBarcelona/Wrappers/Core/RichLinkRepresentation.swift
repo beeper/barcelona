@@ -73,6 +73,12 @@ public struct RichLinkRepresentation: Codable {
             self.image = RichLinkImage(image, properties.imageProperties, attachments: attachments)
         }
         
+        if let alternateImages = properties.alternateImages {
+            self.alternateImages = alternateImages.compactMap {
+                RichLinkImage($0, properties.imageProperties, attachments: attachments)
+            }
+        }
+        
         if let video = properties.video {
             self.video = RichLinkVideo(video, attachments: attachments)
         }
@@ -93,6 +99,7 @@ public struct RichLinkRepresentation: Codable {
     var mediaTopCaptionBar: RichLinkCaption?
     var mediaBottomCaptionBar: RichLinkCaption?
     var image: RichLinkImage?
+    var alternateImages: [RichLinkImage]?
     var video: RichLinkVideo?
     var audio: RichLinkAudio?
     var url: URL?
