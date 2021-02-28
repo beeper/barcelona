@@ -91,7 +91,7 @@ public struct RichLinkRepresentation: Codable {
         self.itemType = metadata.itemType
         self.quotedText = properties.quotedText
         self.preliminary = properties.isPreliminary
-        self.url = metadata.originalURL
+        self.url = metadata.originalURL ?? metadata.url
         self.specialization = metadata.specialization?.format
     }
     
