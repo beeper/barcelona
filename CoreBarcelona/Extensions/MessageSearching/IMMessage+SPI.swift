@@ -38,21 +38,7 @@ public extension IMMessage {
             return nil
         }
         
-        let tracker = ERTrack(log: message_log, name: "messageFromIMMessageItem", format: "guid %@", item.guid)
-        
-        let message = IMMessage.init(fromIMMessageItem: item, sender: sender, subject: subject)!
-        
-//        let IMMessageItemChatContext = NSClassFromString("IMMessageItemChatContext") as! NSObject.Type
-//
-//        let context = IMMessageItemChatContext.init()
-//        context.setValue(sender, forKey: "_senderHandle")
-//        context.setValue(message, forKey: "_message")
-//
-//        item.context = context
-        
-        tracker()
-        
-        return message
+        return IMMessage(fromIMMessageItem: item, sender: sender, subject: subject)!
     }
     
     static func message(withGUID guid: String, on eventLoop: EventLoop? = nil) -> EventLoopFuture<ChatItem?> {
