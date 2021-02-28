@@ -8,6 +8,9 @@
 
 import Foundation
 import IMCore
+import AVFoundation
+import ImageIO
+import CoreServices
 
 public struct BulkAttachmentRepresentation: Codable {
     public init(attachments: [Attachment]) {
@@ -33,13 +36,58 @@ public struct ResourceOrigin: Codable {
     public var date: Double?
 }
 
+private extension IMFileTransfer {
+    private var ensuredUTI: CFString? {
+        if let uti = type {
+            return uti as CFString
+        } else if let mime = mimeType {
+            return UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mime as CFString, nil)?.takeRetainedValue()
+        } else {
+            return nil
+        }
+    }
+    
+    var mediaSize: Size? {
+        guard let uti = ensuredUTI else {
+            return nil
+        }
+        
+        if UTTypeConformsTo(uti, kUTTypeVideo) || UTTypeConformsTo(uti, kUTTypeMovie) {
+            guard let track = AVURLAsset(url: localURL).tracks(withMediaType: .video).first else {
+                return nil
+            }
+            
+            let size = track.naturalSize.applying(track.preferredTransform)
+            return .init(cgSize: size)
+        } else if UTTypeConformsTo(uti, kUTTypeImage) {
+            guard let source = CGImageSourceCreateWithURL(localURL as CFURL, nil) else {
+                return nil
+            }
+            
+            let propertiesOptions = [kCGImageSourceShouldCache: false] as CFDictionary
+            guard let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, propertiesOptions) as? [CFString: Any] else {
+                return nil
+            }
+            
+            if let width = properties[kCGImagePropertyWidth] as? CGFloat, let height = properties[kCGImagePropertyHeight] as? CGFloat {
+                return .init(width: width, height: height)
+            } else if let width = properties[kCGImagePropertyPixelHeight] as? CGFloat, let height = properties[kCGImagePropertyPixelHeight] as? CGFloat {
+                return .init(width: width, height: height)
+            }
+        }
+        
+        return nil
+    }
+}
+
 public struct Attachment: Codable {
-    internal init(mime: String? = nil, filename: String? = nil, id: String, uti: String? = nil, origin: ResourceOrigin? = nil) {
+    internal init(mime: String? = nil, filename: String? = nil, id: String, uti: String? = nil, origin: ResourceOrigin? = nil, size: Size? = nil) {
         self.mime = mime
         self.filename = filename
         self.id = id
         self.uti = uti
         self.origin = origin
+        self.size = size
     }
     
     public init(_ transfer: IMFileTransfer) {
@@ -47,6 +95,7 @@ public struct Attachment: Codable {
         filename = transfer.filename
         id = transfer.guid
         uti = transfer.type
+        size = transfer.mediaSize
     }
     
     public init?(guid: String) {
@@ -62,6 +111,7 @@ public struct Attachment: Codable {
     public var id: String
     public var uti: String?
     public var origin: ResourceOrigin?
+    public var size: Size?
 }
 
 private func ERRegisterFileTransferForGUID(transfer: IMFileTransfer, guid: String) {
@@ -72,6 +122,21 @@ private func ERRegisterFileTransferForGUID(transfer: IMFileTransfer, guid: Strin
     }
     
     center.registerTransfer(withDaemon: guid)
+}
+
+public struct Size: Codable {
+    public var width: Float
+    public var height: Float
+    
+    public init(cgSize: CGSize) {
+        width = Float(cgSize.width)
+        height = Float(cgSize.height)
+    }
+    
+    public init(width: CGFloat, height: CGFloat) {
+        self.width = Float(width)
+        self.height = Float(height)
+    }
 }
 
 public struct InternalAttachment {
@@ -101,7 +166,7 @@ public struct InternalAttachment {
     }
     
     var attachment: Attachment {
-        Attachment(mime: self.mime, filename: filename, id: guid, uti: uti, origin: origin)
+        Attachment(mime: self.mime, filename: filename, id: guid, uti: uti, origin: origin, size: fileTransfer.mediaSize)
     }
     
     var fileTransfer: IMFileTransfer {
