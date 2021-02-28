@@ -11,6 +11,24 @@ import LinkPresentation
 import IMCore
 import DigitalTouchShared
 
+#if canImport(AppKit)
+import AppKit
+#elseif canImport(UIKit)
+import UIKit
+#endif
+
+private func withLightAppearance<T>(_ closure: () throws -> T) rethrows -> T {
+    #if canImport(AppKit)
+    let previousAppearance = NSAppearance.current
+    NSAppearance.current = NSAppearance.init(named: .aqua)
+    defer {
+        NSAppearance.current = previousAppearance
+    }
+    #endif
+    
+    return try closure()
+}
+
 public struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
     init(_ item: IMTranscriptPluginChatItem, chatID: String?) {
         bundleID = item.dataSource.bundleID
@@ -26,9 +44,11 @@ public struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
             insertPayload = false
             break
         case "com.apple.messages.URLBalloonProvider":
-            if let dataSource = item.dataSource, let metadata = dataSource.value(forKey: "richLinkMetadata") as? LPLinkMetadata, let richLink = RichLinkRepresentation(metadata: metadata, attachments: item.internalAttachments) {
-                self.richLink = richLink
-                insertPayload = false
+            withLightAppearance {
+                if let dataSource = item.dataSource, let metadata = dataSource.value(forKey: "richLinkMetadata") as? LPLinkMetadata, let richLink = RichLinkRepresentation(metadata: metadata, attachments: item.internalAttachments) {
+                    self.richLink = richLink
+                    insertPayload = false
+                }
             }
             break
         default:
