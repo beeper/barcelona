@@ -262,6 +262,7 @@
 		1DB6D7D52519202F0061A0D9 /* Swime in Frameworks */ = {isa = PBXBuildFile; productRef = 1DB6D7D42519202F0061A0D9 /* Swime */; };
 		1DB6D7D7251920310061A0D9 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 1DB6D7D6251920310061A0D9 /* GRDB */; };
 		1DB6D7D9251920340061A0D9 /* AnyCodable in Frameworks */ = {isa = PBXBuildFile; productRef = 1DB6D7D8251920340061A0D9 /* AnyCodable */; };
+		1DB9059025E58E120087D014 /* Image+AsPNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB9058F25E58E120087D014 /* Image+AsPNG.swift */; };
 		1DC28B65251ED59700A9A50E /* BarcelonaFoundation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DC28B63251ED59700A9A50E /* BarcelonaFoundation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1DC28B6A251ED5AB00A9A50E /* CoreXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC28B69251ED5AB00A9A50E /* CoreXPC.swift */; };
 		1DC28B6C251ED6C800A9A50E /* XPCType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC28B6B251ED6C800A9A50E /* XPCType.swift */; };
@@ -821,6 +822,7 @@
 		1DB6D7CD25190F910061A0D9 /* imessage-rest-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "imessage-rest-Bridging-Header.h"; sourceTree = "<group>"; };
 		1DB6D7CE25190F910061A0D9 /* ERMachXPCiOS.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ERMachXPCiOS.m; sourceTree = "<group>"; };
 		1DB6D7D3251913890061A0D9 /* kern_memorystatus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kern_memorystatus.h; sourceTree = "<group>"; };
+		1DB9058F25E58E120087D014 /* Image+AsPNG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Image+AsPNG.swift"; sourceTree = "<group>"; };
 		1DB9520624F6B8BF004CC87B /* AttributedStringSerializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributedStringSerializer.swift; sourceTree = "<group>"; };
 		1DC28B61251ED59700A9A50E /* BarcelonaFoundation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaFoundation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DC28B63251ED59700A9A50E /* BarcelonaFoundation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BarcelonaFoundation.h; sourceTree = "<group>"; };
@@ -1264,6 +1266,7 @@
 			children = (
 				1D3E3340250C264900EEA08B /* IMFileTransfer+Creatable.swift */,
 				1D7D8952250D829C00DA9909 /* IMFileTransfer+InternalAttachment.swift */,
+				1DB9058F25E58E120087D014 /* Image+AsPNG.swift */,
 			);
 			path = IMFileTransfer;
 			sourceTree = "<group>";
@@ -2284,6 +2287,7 @@
 				1D1ACA8B25DD865E00A04BB6 /* CreateMessageBase.swift in Sources */,
 				1DD805BF24E85D070076D717 /* IMChat+Acknowledgment.swift in Sources */,
 				1DD8068424EAE3470076D717 /* ChatItem-Protocols.swift in Sources */,
+				1DB9059025E58E120087D014 /* Image+AsPNG.swift in Sources */,
 				1DD805DB24E85D100076D717 /* Chat.swift in Sources */,
 				1DD805C524E85D070076D717 /* Data+Compression.swift in Sources */,
 				1DD805EB24E85D100076D717 /* Contact.swift in Sources */,
