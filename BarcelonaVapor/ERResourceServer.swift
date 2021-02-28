@@ -238,7 +238,8 @@ internal class ERResourceServer {
 
         let fileResponse = Response.init(status: .ok, version: req.version, headers: .init([
             ("content-type", "image/png"),
-            ("content-length", String(data.count))
+            ("content-length", String(data.count)),
+            ("cache-control", "public, max-age=3600")
         ]), body: .init(data: data))
 
         return req.eventLoop.makeSucceededFuture(fileResponse)
