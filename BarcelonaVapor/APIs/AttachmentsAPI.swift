@@ -165,6 +165,29 @@ internal func bindAttachmentsAPI(_ builder: RoutesBuilder, readAuthorizedBuilder
      Get attachment
      */
     attachment.get { req -> Response in
-        req.fileio.streamFile(at: req.attachment.path, mediaType: req.attachment.type)
+        var cacheControl = HTTPHeaders.CacheControl()
+        
+        cacheControl.isPublic = true
+        cacheControl.maxAge = 3600
+        
+        switch req.attachment.type.subType {
+        case "heic":
+            // transcode
+            if let png = try Data(contentsOf: URL(fileURLWithPath: req.attachment.path)).pngRepresentation {
+                let res = Response()
+                res.headers.contentType = .png
+                res.headers.cacheControl = cacheControl
+                res.body = .init(data: png)
+                return res
+            }
+            break
+        default:
+            break
+        }
+        
+        let streamResponse = req.fileio.streamFile(at: req.attachment.path, mediaType: req.attachment.type)
+        streamResponse.headers.cacheControl = cacheControl
+        
+        return streamResponse
     }
 }
