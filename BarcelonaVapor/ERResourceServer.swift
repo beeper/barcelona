@@ -28,7 +28,7 @@ private enum AssetsFormat: String, CaseIterable {
     case localSocialUI = "~/Library/Application Support/MyMessage/Assets.SocialUI.car"
     case localChatKit = "~/Library/Application Support/MyMessage/Assets.ChatKit.car"
     case ios = "/System/Library/PrivateFrameworks/ChatKit.framework/Assets.car"
-    case iosMac = "/System/iOSSupport/System/Library/PrivateFrameworks/ChatKit.framework/Assets.car"
+    case iosMac = "/System/iOSSupport/System/Library/PrivateFrameworks/ChatKit.framework/Resources/Assets.car"
     case mac = "/System/Library/PrivateFrameworks/SocialUI.framework/Resources/Assets.car"
     
     var url: URL {
