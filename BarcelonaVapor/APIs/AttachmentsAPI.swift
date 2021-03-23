@@ -24,6 +24,14 @@ private extension InternalAttachment {
     }
 }
 
+private func createPersistentPath(for transfer: IMFileTransfer, filename: String, highQuality: Bool) -> String {
+    if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+        return IMDPersistentAttachmentController.sharedInstance()._persistentPath(for: transfer, filename: filename, highQuality: highQuality, chatGUID: nil, storeAtExternalPath: nil)
+    } else {
+        return IMDPersistentAttachmentController.sharedInstance()._persistentPath(for: transfer, filename: filename, highQuality: highQuality)
+    }
+}
+
 internal func bindAttachmentsAPI(_ builder: RoutesBuilder, readAuthorizedBuilder: RoutesBuilder) {
     let attachments = builder.grouped("attachments")
     let readAuthorizedAttachments = readAuthorizedBuilder.grouped("attachments")
@@ -36,9 +44,9 @@ internal func bindAttachmentsAPI(_ builder: RoutesBuilder, readAuthorizedBuilder
         isDirectory: true)
         
         let promise = req.eventLoop.makePromise(of: Attachment.self)
-        var temporaryFilename = NSString.stringGUID()
-        
-        var temporaryFileURL = temporaryDirectoryURL.appendingPathComponent(temporaryFilename)
+        let fsFilename = NSString.stringGUID()
+        let filename = (try? req.query.get(String.self, at: "filename")) ?? fsFilename
+        let temporaryFileURL = temporaryDirectoryURL.appendingPathComponent(fsFilename)
         
         var mime: MimeType? = nil
         var bytes: Int = 0
@@ -80,7 +88,6 @@ internal func bindAttachmentsAPI(_ builder: RoutesBuilder, readAuthorizedBuilder
             
             return promise.futureResult
         }.whenComplete { result in
-            
             switch result {
             case .failure(let error):
                 promise.fail(error)
@@ -93,22 +100,13 @@ internal func bindAttachmentsAPI(_ builder: RoutesBuilder, readAuthorizedBuilder
             
             let center = IMFileTransferCenter.sharedInstance()!
         
-            let guid = temporaryFilename
+            let guid = fsFilename
             
             let mime = mime ?? MimeType.all.first(where: {
                 $0.ext == req.headers.contentType?.subType
             })
             
-            if let mime = mime {
-                temporaryFilename = "\(temporaryFilename).\(mime.ext)"
-                
-                let newURL = temporaryDirectoryURL.appendingPathComponent(temporaryFilename)
-                try! FileManager.default.moveItem(at: temporaryFileURL, to: newURL)
-                
-                temporaryFileURL = newURL
-            }
-            
-            let transfer = IMFileTransfer()._init(withGUID: guid, filename: temporaryFilename, isDirectory: false, localURL: temporaryFileURL, account: Registry.sharedInstance.iMessageAccount()!.uniqueID, otherPerson: nil, totalBytes: UInt64(bytes), hfsType: 0, hfsCreator: 0, hfsFlags: 0, isIncoming: false)!
+            let transfer = IMFileTransfer()._init(withGUID: guid, filename: filename, isDirectory: false, localURL: temporaryFileURL, account: Registry.sharedInstance.iMessageAccount()!.uniqueID, otherPerson: nil, totalBytes: UInt64(bytes), hfsType: 0, hfsCreator: 0, hfsFlags: 0, isIncoming: false)!
             
             
             if let mime = mime {
@@ -116,11 +114,11 @@ internal func bindAttachmentsAPI(_ builder: RoutesBuilder, readAuthorizedBuilder
                 transfer.setValue(IMFileManager.defaultHFS()!.utiType(ofMimeType: mime.mime), forKey: "_utiType")
             }
             
-            var persistentPath = IMDPersistentAttachmentController.sharedInstance()._persistentPath(for: transfer, filename: temporaryFilename, highQuality: true)
+            var persistentPath = createPersistentPath(for: transfer, filename: fsFilename, highQuality: true)
             
             #if os(macOS)
             
-            let storedPath = "~/\(persistentPath!.split(separator: "/")[2...].joined(separator: "/"))"
+            let storedPath = "~/\(persistentPath.split(separator: "/")[2...].joined(separator: "/"))"
             
             #else
             
@@ -129,7 +127,7 @@ internal func bindAttachmentsAPI(_ builder: RoutesBuilder, readAuthorizedBuilder
             #endif
             
             
-            if let persistentURL = URL(string: "file://\(persistentPath!)") {
+            if let persistentURL = URL(string: "file://\(persistentPath)") {
                 try! FileManager.default.createDirectory(at: persistentURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
                 
                 try! FileManager.default.moveItem(at: temporaryFileURL, to: persistentURL)

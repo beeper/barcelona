@@ -14,6 +14,7 @@
 
 + (IMDPersistentAttachmentController* _Nonnull)sharedInstance;
 - (BOOL)cleanseOrphanedFileTransfers;
+- (NSString*)_persistentPathForTransfer:(IMFileTransfer*)arg1 filename:(NSString*)arg2 highQuality:(BOOL)arg3 chatGUID:(NSString* _Nullable)arg4 storeAtExternalPath:(id)arg5 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 - (NSString*)_persistentPathForTransfer:(IMFileTransfer*)arg1 filename:(NSString*)arg2 highQuality:(BOOL)arg3;
 - (BOOL)_deleteAttachmentForTransfer:(id)arg1 highQuality:(BOOL)arg2;
 - (BOOL)deleteAttachmentsForTransfer:(id)arg1;
