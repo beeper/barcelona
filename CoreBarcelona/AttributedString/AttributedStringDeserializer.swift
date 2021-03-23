@@ -59,11 +59,11 @@ private func ERInsertMessageParts(into string: NSMutableAttributedString) -> NSM
     string.enumerateDelimitingAttribute(MessageAttributes.writingDirection) { range, index in
         let str = string.attributedSubstring(from: range)
         
-        string.addAttribute(MessageAttributes.messagePart, value: thisPart, range: range)
-        
-        if str.hasAttribute(forKey: MessageAttributes.filename) {
+        if str.hasAttribute(forKey: MessageAttributes.filename) && index > 0 {
             thisPart += 1
         }
+        
+        string.addAttribute(MessageAttributes.messagePart, value: thisPart, range: range)
     }
     
     return string
