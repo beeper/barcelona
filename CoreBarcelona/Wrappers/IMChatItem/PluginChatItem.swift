@@ -10,6 +10,8 @@ import Foundation
 import LinkPresentation
 import IMCore
 import DigitalTouchShared
+import SpriteKit
+import os.log
 
 #if canImport(AppKit)
 import AppKit
@@ -29,6 +31,30 @@ private func withLightAppearance<T>(_ closure: () throws -> T) rethrows -> T {
     return try closure()
 }
 
+private let frameProperties = [
+    kCGImagePropertyPNGDictionary as String: [
+        kCGImagePropertyAPNGLoopCount as String: 0
+    ]
+] as CFDictionary
+
+private func withETCGDestination(atURL url: URL, count: Int = 0, callback: (CGImageDestination) -> ()) {
+    guard let destination = CGImageDestinationCreateWithURL(url as CFURL, kUTTypePNG, count, frameProperties as CFDictionary) else {
+        return
+    }
+    
+    callback(destination)
+    
+    CGImageDestinationFinalize(destination)
+}
+
+private func ETMessageRenderRect() -> CGRect {
+    .init(x: 0, y: 0, width: ETMessageRenderBufferWidth, height: ETMessageRenderBufferHeight)
+}
+
+private let ETSpriteFPS = 60.0
+
+private let ETParseLog = OSLog(subsystem: "com.ericrabil.imessage-rest", category: "ETParseLog")
+
 public struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
     init(_ item: IMTranscriptPluginChatItem, chatID: String?) {
         bundleID = item.dataSource.bundleID
@@ -38,9 +64,68 @@ public struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
         
         switch bundleID {
         case "com.apple.DigitalTouchBalloonProvider":
-//            if let dataSource = item.dataSource, let messages = dataSource.perform(Selector(("createSessionMessages")))?.takeUnretainedValue() as? Array<ETMessage>, let message = messages.first {
-//                digitalTouch = DigitalTouchMessage(message: message)
-//            }
+            if let dataSource = item.dataSource, let messages = dataSource.perform(Selector(("createSessionMessages")))?.takeUnretainedValue() as? Array<ETMessage>, let message = messages.first {
+                
+                digitalTouch = DigitalTouchMessage(message: message)
+                switch (message) {
+                case let message as ETSketchMessage:
+                    withETCGDestination(atURL: URL(fileURLWithPath: "/Users/ericrabil/penis.png")) {
+                        let sketchView = ETGLSketchView(frame: ETMessageRenderRect())
+                        sketchView.messageData = message
+                        sketchView.sample(into: $0, frameProperties: [:] as CFDictionary, usingAlpha: true)
+                    }
+                    
+                    break
+                case is ETTapMessage:
+                    fallthrough
+                case is ETKissMessage:
+                    fallthrough
+                case is ETAngerMessage:
+                    fallthrough
+                case is ETHeartbeatMessage:
+                    let duration = Int(message.messageDuration * ETSpriteFPS)
+                    withETCGDestination(atURL: URL(fileURLWithPath: "/Users/ericrabil/dts-\(item.id).png"), count: duration) { destination in
+                        let rect = ETMessageRenderRect()
+                        
+                        message.isRenderingOffscreen = true
+                        
+                        let scene = SKScene(size: rect.size)
+                        scene.backgroundColor = .black
+                        scene.anchorPoint = .init(x: 0.5, y: 0.5)
+                        
+                        let view = SKView(frame: rect as NSRect)
+                        view.presentScene(scene)
+                        view.isPaused = false
+                        view.shouldCullNonVisibleNodes = false
+                        
+                        scene.perform(Selector("_update:"), with: 0.0)
+                        
+                        message.display(inScene: scene)
+                        
+                        var passes = 0
+                        
+                        os_log("Rendering ETSpriteMessage with %d frames and duration %.2f", log: ETParseLog, duration, message.messageDuration)
+                        
+                        repeat {
+                            view.isPaused = false
+                            
+                            let pos = Double(passes) / ETSpriteFPS
+                            
+                            scene.perform(Selector("_update:"), with: pos)
+                            
+                            view.isPaused = true
+                            
+                            if let cgImage = view.texture(from: scene)?.cgImage() {
+                                CGImageDestinationAddImage(destination, cgImage, frameProperties)
+                            }
+                            
+                            passes += 1
+                        } while (passes < duration)
+                    }
+                default:
+                    break
+                }
+            }
             insertPayload = false
             break
         case "com.apple.messages.URLBalloonProvider":

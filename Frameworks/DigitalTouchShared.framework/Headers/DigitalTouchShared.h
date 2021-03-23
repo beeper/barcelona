@@ -24,3 +24,8 @@
 #import <DigitalTouchShared/ETUtility.h>
 #import <DigitalTouchShared/ETVideoMessage.h>
 #import <DigitalTouchShared/KissNode.h>
+
+#import <CoreGraphics/CoreGraphics.h>
+
+extern CGFloat ETMessageRenderBufferWidth;
+extern CGFloat ETMessageRenderBufferHeight;

@@ -5,6 +5,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <CoreGraphics/CoreGraphics.h>
 
 #import "ETGLSketchRendererDelegate.h"
 
@@ -86,10 +87,10 @@
 - (BOOL)_doesPoint:(id)arg1 predateTime:(double)arg2;
 - (void)drawFrameBeforeWisp;
 - (void)_drawCurrentPointAdvancingPlayback;
-- (void)sampleIntoDestination:(struct CGImageDestination *)arg1 frameProperties:(struct __CFDictionary *)arg2 usingAlpha:(BOOL)arg3;
+- (void)sampleIntoDestination:(CGImageDestinationRef)arg1 frameProperties:(CFDictionaryRef)arg2 usingAlpha:(BOOL)arg3;
 - (void)beginStrokeWithColor:(id)arg1;
 - (void)animateOutWithCompletion:(id)arg1;
-- (id)initWithFrame:(struct CGRect)arg1;
+- (instancetype _Nonnull)initWithFrame:(struct CGRect)arg1;
 - (void)setGLContextAsCurrent;
 
 @end

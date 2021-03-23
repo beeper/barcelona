@@ -31,3 +31,5 @@ NSXPCListener* ERConstructXPCListener(NSString* machServiceName) {
     NSXPCListener* xpcListener = [NSXPCListener new];
     return [xpcListener performSelector:NSSelectorFromString(@"initWithMachServiceName:") withObject:machServiceName];
 }
+
+#import <DigitalTouchShared/DigitalTouchShared.h>
