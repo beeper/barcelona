@@ -71,7 +71,7 @@ private extension IMFileTransfer {
             
             if let width = properties[kCGImagePropertyWidth] as? CGFloat, let height = properties[kCGImagePropertyHeight] as? CGFloat {
                 return .init(width: width, height: height)
-            } else if let width = properties[kCGImagePropertyPixelHeight] as? CGFloat, let height = properties[kCGImagePropertyPixelHeight] as? CGFloat {
+            } else if let width = properties[kCGImagePropertyPixelWidth] as? CGFloat, let height = properties[kCGImagePropertyPixelHeight] as? CGFloat {
                 return .init(width: width, height: height)
             }
         }
