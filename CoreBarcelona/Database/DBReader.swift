@@ -121,7 +121,7 @@ public struct DBReader {
         let promise = eventLoop.makePromise(of: Void.self)
         
         pool.asyncWrite({ db in
-            try db.execute(sql: "INSERT INTO attachment ( guid,  original_guid,  created_date,  start_date,  filename,  uti,  mime_type,  transfer_state,  is_outgoing,  transfer_name,  total_bytes) VALUES (   ?,   ?,  ?,   ?,   ?,   ?,   ?,   ?,   ?,   ?,   ? );", arguments: [fileTransfer.guid, fileTransfer.guid,  Int(fileTransfer.createdDate.timeIntervalSinceReferenceDate), Int(fileTransfer.startDate?.timeIntervalSinceReferenceDate ?? 0), path, fileTransfer.type, fileTransfer.mimeType, 5, !fileTransfer.isIncoming, fileTransfer.transferredFilename, fileTransfer.totalBytes])
+            try db.execute(sql: "INSERT INTO attachment ( guid,  original_guid,  created_date,  start_date,  filename,  uti,  mime_type,  transfer_state,  is_outgoing,  transfer_name,  total_bytes) VALUES (   ?,   ?,  ?,   ?,   ?,   ?,   ?,   ?,   ?,   ?,   ? );", arguments: [fileTransfer.guid, fileTransfer.guid,  Int(fileTransfer.createdDate?.timeIntervalSinceReferenceDate ?? 0), Int(fileTransfer.startDate?.timeIntervalSinceReferenceDate ?? 0), path, fileTransfer.type, fileTransfer.mimeType, 5, !fileTransfer.isIncoming, fileTransfer.transferredFilename, fileTransfer.totalBytes])
         }, completion: { db, result in
             switch result {
             case .failure(let error):
