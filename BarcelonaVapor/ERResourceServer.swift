@@ -27,6 +27,7 @@ extension String: Error {}
 private enum AssetsFormat: String, CaseIterable {
     case localSocialUI = "~/Library/Application Support/MyMessage/Assets.SocialUI.car"
     case localChatKit = "~/Library/Application Support/MyMessage/Assets.ChatKit.car"
+    case localChatKitRetina = "~/Library/Application Support/MyMessage/Assets.ChatKitRetina.car"
     case ios = "/System/Library/PrivateFrameworks/ChatKit.framework/Assets.car"
     case iosMac = "/System/iOSSupport/System/Library/PrivateFrameworks/ChatKit.framework/Resources/Assets.car"
     case mac = "/System/Library/PrivateFrameworks/SocialUI.framework/Resources/Assets.car"
@@ -39,6 +40,8 @@ private enum AssetsFormat: String, CaseIterable {
         switch self {
         case .ios:
             fallthrough
+        case .localChatKitRetina:
+            return .ChatKitRetina
         case .iosMac:
             fallthrough
         case .localChatKit:
@@ -60,6 +63,7 @@ private enum AssetsFormat: String, CaseIterable {
 internal enum AssetsMode: String, Content {
     case SocialUI
     case ChatKit
+    case ChatKitRetina
 }
 
 private struct AssetsModeRepresentation: Content {
@@ -149,7 +153,8 @@ private let CatalogBindings: [AssetsFormat: [String: String]] = [
     .ios: ChatKitBindings,
     .iosMac: ChatKitBindings,
     .localChatKit: ChatKitBindings,
-    .localSocialUI: SocialUIBindings
+    .localSocialUI: SocialUIBindings,
+    .localChatKitRetina: ChatKitBindings
 ]
 
 internal class ERResourceServer {
