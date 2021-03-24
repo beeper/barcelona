@@ -157,6 +157,8 @@ private let CatalogBindings: [AssetsFormat: [String: String]] = [
     .localChatKitRetina: ChatKitBindings
 ]
 
+private let ciContext = CIContext(options: nil)
+
 internal class ERResourceServer {
     private let assetsFormat: AssetsFormat
     private let assetsURL: URL
@@ -231,8 +233,8 @@ internal class ERResourceServer {
         
         if (try? req.query.get(Int.self, at: "flip") == 1) ?? false {
             let flipped = CIImage(cgImage: image).transformed(by: CGAffineTransform(scaleX: -1, y: 1))
-            let context = CIContext(options: nil)
-            if let flippedCGImage = context.createCGImage(flipped, from: flipped.extent) {
+            
+            if let flippedCGImage = ciContext.createCGImage(flipped, from: flipped.extent) {
                 image = flippedCGImage
             }
         }
