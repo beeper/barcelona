@@ -64,6 +64,10 @@ private func ERInsertMessageParts(into string: NSMutableAttributedString) -> NSM
         }
         
         string.addAttribute(MessageAttributes.messagePart, value: thisPart, range: range)
+        
+        if str.hasAttribute(forKey: MessageAttributes.filename) && index == 0 {
+            thisPart += 1
+        }
     }
     
     return string
