@@ -293,8 +293,8 @@ public enum TextPartAttribute: Codable {
 public struct TextChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
     init(_ item: IMTextMessagePartChatItem, parts: [TextPart], chatID: String?) {
         self.parts = parts
-        self.text = item.text.string
         self.text = item.text?.string ?? ""
+        self.subject = item.subject?.string
         
         self.load(item: item, chatID: chatID)
     }
@@ -307,5 +307,6 @@ public struct TextChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
     public var threadOriginator: String?
     public var parts: [TextPart]
     public var text: String
+    public var subject: String?
     public var acknowledgments: [AcknowledgmentChatItem]?
 }
