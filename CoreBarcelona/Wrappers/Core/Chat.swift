@@ -68,12 +68,14 @@ public protocol MessageIdentifiable {
 public protocol ChatConfigurationRepresentable {
     var readReceipts: Bool { get set }
     var ignoreAlerts: Bool { get set }
+    var groupPhotoID: String? { get set }
 }
 
 public struct ChatConfigurationRepresentation: Codable, ChatConfigurationRepresentable {
     public var id: String
     public var readReceipts: Bool
     public var ignoreAlerts: Bool
+    public var groupPhotoID: String?
 }
 
 public struct DeleteMessage: Codable, MessageIdentifiable {
@@ -108,6 +110,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable {
         style = backing.chatStyle
         readReceipts = backing.readReceipts
         ignoreAlerts = backing.ignoreAlerts
+        groupPhotoID = backing.groupPhotoID
     }
     
     public static func chat(forMessage id: String) -> EventLoopFuture<Chat?> {
@@ -133,6 +136,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable {
     public var style: UInt8
     public var readReceipts: Bool
     public var ignoreAlerts: Bool
+    public var groupPhotoID: String?
     
     mutating func setTimeSortedParticipants(participants: [HandleTimestampRecord]) {
         self.participants = participants.map {

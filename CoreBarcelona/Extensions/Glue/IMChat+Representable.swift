@@ -32,8 +32,24 @@ public extension IMChat {
         }
     }
     
+    var groupPhotoID: String? {
+        get {
+            if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+                return value(forChatProperty: IMGroupPhotoGuidKey) as? String
+            } else {
+                return nil
+            }
+        }
+        set {
+            if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+                setValue(newValue, forChatProperty: IMGroupPhotoGuidKey)
+                sendGroupPhotoUpdate(newValue)
+            }
+        }
+    }
+    
     var properties: ChatConfigurationRepresentation {
-        ChatConfigurationRepresentation(id: id, readReceipts: readReceipts, ignoreAlerts: ignoreAlerts)
+        ChatConfigurationRepresentation(id: id, readReceipts: readReceipts, ignoreAlerts: ignoreAlerts, groupPhotoID: groupPhotoID)
     }
     
     var representableParticipantIDs: BulkHandleIDRepresentation {
