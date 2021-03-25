@@ -54,7 +54,11 @@ internal extension NSAttributedString {
     }
 }
 
-public func ERTextParts(from string: NSAttributedString) -> [TextPart] {
+public func ERTextParts(from string: NSAttributedString?) -> [TextPart] {
+    guard let string = string else {
+        return []
+    }
+    
     var results: [TextPart] = []
     
     let textTracking = ERTrack(log: .default, name: "ERTextParts Computation", format: "")

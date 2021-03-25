@@ -294,6 +294,7 @@ public struct TextChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
     init(_ item: IMTextMessagePartChatItem, parts: [TextPart], chatID: String?) {
         self.parts = parts
         self.text = item.text.string
+        self.text = item.text?.string ?? ""
         
         self.load(item: item, chatID: chatID)
     }

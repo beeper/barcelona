@@ -42,7 +42,7 @@
 @property(retain, nonatomic, setter=_setVisibleAssociatedMessageChatItems:) NSArray *visibleAssociatedMessageChatItems; // @synthesize visibleAssociatedMessageChatItems=_visibleAssociatedMessageChatItems;
 @property(nonatomic) struct _NSRange messagePartRange; // @synthesize messagePartRange=_messagePartRange;
 @property(nonatomic) long long index; // @synthesize index=_index;
-@property(readonly, copy, nonatomic) NSAttributedString *text; // @synthesize text=_text;
+@property(readonly, copy, nonatomic, nullable) NSAttributedString *text; // @synthesize text=_text;
 @property(readonly, nonatomic) BOOL requiresSiriAttribution;
 - (BOOL)canSendMessageAcknowledgment;
 - (void)_setMessageEditChatItems:(id)arg1;
