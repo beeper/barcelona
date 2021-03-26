@@ -21,7 +21,7 @@ jobs:
           path: |
             $GITHUB_WORKSPACE/SourcePackages
             /Users/runner/Library/Developer/Xcode/DerivedData
-          key: ${{ runner.os }}-build
+          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
       - name: Build macOS
         run: make macos
@@ -76,7 +76,7 @@ jobs:
           path: |
             $GITHUB_WORKSPACE/SourcePackages
             /Users/runner/Library/Developer/Xcode/DerivedData
-          key: ${{ runner.os }}-build
+          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
       - name: Build iOS
         run: |
