@@ -14,12 +14,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
         
-      - name: Cache Build
+      - name: Cache macOS Build
         id: cache-build
         uses: actions/cache@v2
         with:
           path: |
             $GITHUB_WORKSPACE/SourcePackages
+            $GITHUB_WORKSPACE/macos_build
             /Users/runner/Library/Developer/Xcode/DerivedData
           key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
@@ -69,12 +70,13 @@ jobs:
           bsdtar --strip-components=1 -xf master.zip --directory $GITHUB_WORKSPACE/theos/sdks
           rm -f master.zip
 
-      - name: Cache Build
+      - name: Cache iOS Build
         id: cache-build
         uses: actions/cache@v2
         with:
           path: |
             $GITHUB_WORKSPACE/SourcePackages
+            $GITHUB_WORKSPACE/ios_build
             /Users/runner/Library/Developer/Xcode/DerivedData
           key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
