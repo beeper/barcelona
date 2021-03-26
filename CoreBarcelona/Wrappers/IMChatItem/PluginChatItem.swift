@@ -45,8 +45,14 @@ public struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
             break
         case "com.apple.messages.URLBalloonProvider":
             withLightAppearance {
-                if let dataSource = item.dataSource, let metadata = dataSource.value(forKey: "richLinkMetadata") as? LPLinkMetadata, let richLink = RichLinkRepresentation(metadata: metadata, attachments: item.internalAttachments) {
-                    self.richLink = richLink
+                if let dataSource = item.dataSource {
+                    if let metadata = dataSource.value(forKey: "richLinkMetadata") as? LPLinkMetadata, let richLink = RichLinkRepresentation(metadata: metadata, attachments: item.internalAttachments) {
+                        self.richLink = richLink
+                    } else if let url = dataSource.value(forKey: "url") as? URL {
+                        let urlString = url.absoluteString
+                        self.fallback = .text(.init(item, text: urlString, parts: [.init(type: .link, string: urlString, data: .init(urlString), attributes: [])], chatID: chatID))
+                    }
+                    
                     insertPayload = false
                 }
             }
@@ -75,6 +81,7 @@ public struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
     public var threadOriginator: String?
     public var digitalTouch: DigitalTouchMessage?
     public var richLink: RichLinkRepresentation?
+    public var fallback: ChatItem?
     public var `extension`: MessageExtensionsData?
     public var payload: String?
     public var bundleID: String

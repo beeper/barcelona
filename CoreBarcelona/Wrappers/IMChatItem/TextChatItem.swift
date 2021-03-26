@@ -299,6 +299,13 @@ public struct TextChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
         self.load(item: item, chatID: chatID)
     }
     
+    init(_ item: IMTranscriptPluginChatItem, text: String, parts: [TextPart], chatID: String?) {
+        self.parts = parts
+        self.text = text
+        
+        self.load(item: item, chatID: chatID)
+    }
+    
     public var id: String?
     public var chatID: String?
     public var fromMe: Bool?

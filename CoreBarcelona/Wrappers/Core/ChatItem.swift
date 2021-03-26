@@ -17,7 +17,7 @@ public struct BulkChatItemRepresentation: Codable {
 }
 
 /// Container for all possible items
-public enum ChatItem {
+public indirect enum ChatItem {
     case date(_ item: DateItem)
     case sender(_ item: SenderItem)
     case participantChange(_ item: ParticipantChangeItem)
