@@ -12,10 +12,6 @@ import IMCore
 import os.log
 import NIO
 
-private let IMChatMessageDidChangeNotification = NSNotification.Name(rawValue: "__kIMChatMessageDidChangeNotification")
-private let IMChatItemsDidChangeNotification = NSNotification.Name(rawValue: "__kIMChatItemsDidChangeNotification")
-private let IMChatMessageReceivedNotification = NSNotification.Name(rawValue: "__kIMChatMessageReceivedNotification")
-
 private let messageKey = "__kIMChatValueKey";
 private let IMChatItemsRemoved = "__kIMChatItemsRemoved";
 private let IMChatItemsInserted = "__kIMChatItemsInserted";
@@ -51,7 +47,7 @@ class MessageEvents: EventDispatcher {
     ])
     
     override func wake() {
-        addObserver(forName: IMChatItemsDidChangeNotification) {
+        addObserver(forName: .IMChatItemsDidChange) {
             self.itemsChanged($0)
         }
         
