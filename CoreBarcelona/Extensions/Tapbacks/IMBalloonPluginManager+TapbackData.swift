@@ -27,7 +27,7 @@ extension IMBalloonPluginManager {
                NSDictionary.self,
                NSMutableData.self,
                NSMutableString.self,
-               NSClassFromString("RichLink").self!
+//               NSClassFromString("RichLink").self!
        ]
     }
     
