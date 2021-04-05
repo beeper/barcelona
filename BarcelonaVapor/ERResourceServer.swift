@@ -260,6 +260,16 @@ internal class ERResourceServer {
         return req.eventLoop.makeSucceededFuture(fileResponse)
     }
     
+    private func cache(for scale: Int) -> ResourceCache {
+        guard let cache = self.caches[scale] else {
+            let newCache = ResourceCache()
+            self.caches[scale] = newCache
+            return newCache
+        }
+        
+        return cache
+    }
+    
     private func getOrCreateImageData(_ name: String, scale: Int = 1, horizontalFlip: Bool = false) -> Data? {
         if let cached = self.caches[scale]?.fetch(name: name, mirrored: horizontalFlip) {
             return cached
@@ -273,11 +283,7 @@ internal class ERResourceServer {
             return nil
         }
         
-        if self.caches[scale] == nil {
-            self.caches[scale] = .init()
-        }
-        
-        self.caches[scale]!.store(data, name: name, mirrored: horizontalFlip)
+        self.cache(for: scale).store(data, name: name, mirrored: horizontalFlip)
         
         return data
     }
