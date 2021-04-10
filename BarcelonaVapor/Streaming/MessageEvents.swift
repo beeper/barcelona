@@ -115,10 +115,16 @@ class MessageEvents: EventDispatcher {
             }
         }
         
-        let pendingMessages = Array(messageGUIDs).er_chatItems(in: chat.id)
-        
-        pendingMessages.whenSuccess { chatItems in
-            StreamingAPI.shared.dispatch(Event<BulkChatItemRepresentation>.init(type: event, data: BulkChatItemRepresentation(items: chatItems)))
+        if messageGUIDs.count > 0 {
+            let pendingMessages = Array(messageGUIDs).er_chatItems(in: chat.id)
+            
+            pendingMessages.whenSuccess { chatItems in
+                if chatItems.count == 0 {
+                    return
+                }
+                
+                StreamingAPI.shared.dispatch(Event<BulkChatItemRepresentation>.init(type: event, data: BulkChatItemRepresentation(items: chatItems)))
+            }
         }
         
         if statusChanges.count == 0 {

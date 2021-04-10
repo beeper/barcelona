@@ -69,6 +69,10 @@ class ERMessageEvents: EventDispatcher {
     }
     
     private func messagesDeleted(_ guids: [String]) {
+        if guids.count == 0 {
+            return
+        }
+        
         StreamingAPI.shared.dispatch(eventFor(itemsRemoved: BulkMessageIDRepresentation(messages: guids)))
     }
     
