@@ -13,13 +13,7 @@ import os.log
 
 private let log_chatEvents = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ChatEvents")
 
-private let IMChatParticipantsDidChangeNotification = Notification.Name(rawValue: "__kIMChatParticipantsDidChangeNotification")
-private let IMChatDisplayNameChangedNotification = Notification.Name(rawValue: "__kIMChatDisplayNameChangedNotification")
-private let IMChatJoinStateDidChangeNotification = Notification.Name(rawValue: "__kIMChatJoinStateDidChangeNotification")
-private let IMChatRegistryDidUnregisterChatNotification = Notification.Name(rawValue: "__kIMChatRegistryDidUnregisterChatNotification")
-private let IMChatRegistryDidRegisterChatNotification = Notification.Name(rawValue: "__kIMChatRegistryDidRegisterChatNotification")
 private let IMChatUnreadCountChangedNotification = Notification.Name(rawValue: "__kIMChatUnreadCountChangedNotification")
-private let IMChatPropertiesChangedNotification = Notification.Name(rawValue: "__kIMChatPropertiesChangedNotification")
 
 struct ChatUnreadCountRepresentation: Codable {
     var chatID: String
@@ -41,23 +35,23 @@ class ChatEvents: EventDispatcher {
     ])
     
     override func wake() {
-        addObserver(forName: IMChatParticipantsDidChangeNotification) {
+        addObserver(forName: .IMChatParticipantsDidChange) {
             self.participantsChanged($0)
         }
         
-        addObserver(forName: IMChatDisplayNameChangedNotification) {
+        addObserver(forName: .IMChatDisplayNameChanged) {
             self.chatDisplayNameChanged($0)
         }
         
-        addObserver(forName: IMChatJoinStateDidChangeNotification) {
+        addObserver(forName: .IMChatJoinStateDidChange) {
             self.chatJoinStateChanged($0)
         }
         
-        addObserver(forName: IMChatRegistryDidUnregisterChatNotification) {
+        addObserver(forName: .IMChatRegistryDidUnregisterChat) {
             self.chatWasRemoved($0)
         }
         
-        addObserver(forName: IMChatRegistryDidRegisterChatNotification) {
+        addObserver(forName: .IMChatRegistryDidRegisterChat) {
             self.chatWasCreated($0)
         }
         
@@ -65,7 +59,7 @@ class ChatEvents: EventDispatcher {
             self.unreadCountChanged($0)
         }
         
-        addObserver(forName: IMChatPropertiesChangedNotification) {
+        addObserver(forName: .IMChatPropertiesChanged) {
             self.chatPropertiesChanged($0)
         }
     }

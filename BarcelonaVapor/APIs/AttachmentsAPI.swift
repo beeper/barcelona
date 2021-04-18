@@ -122,7 +122,7 @@ internal func bindAttachmentsAPI(_ builder: RoutesBuilder, readAuthorizedBuilder
             
             #else
             
-            let storedPath = persistentPath!
+            let storedPath = persistentPath
             
             #endif
             

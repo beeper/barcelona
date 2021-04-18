@@ -13,24 +13,6 @@ import DigitalTouchShared
 import SpriteKit
 import os.log
 
-#if canImport(AppKit)
-import AppKit
-#elseif canImport(UIKit)
-import UIKit
-#endif
-
-private func withLightAppearance<T>(_ closure: () throws -> T) rethrows -> T {
-    #if canImport(AppKit)
-    let previousAppearance = NSAppearance.current
-    NSAppearance.current = NSAppearance.init(named: .aqua)
-    defer {
-        NSAppearance.current = previousAppearance
-    }
-    #endif
-    
-    return try closure()
-}
-
 private let frameProperties = [
     kCGImagePropertyPNGDictionary as String: [
         kCGImagePropertyAPNGLoopCount as String: 0
@@ -129,11 +111,15 @@ public struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
             insertPayload = false
             break
         case "com.apple.messages.URLBalloonProvider":
-            withLightAppearance {
-                if let dataSource = item.dataSource, let metadata = dataSource.value(forKey: "richLinkMetadata") as? LPLinkMetadata, let richLink = RichLinkRepresentation(metadata: metadata, attachments: item.internalAttachments) {
+            if let dataSource = item.dataSource {
+                if let metadata = dataSource.value(forKey: "richLinkMetadata") as? LPLinkMetadata, let richLink = RichLinkRepresentation(metadata: metadata, attachments: item.internalAttachments) {
                     self.richLink = richLink
-                    insertPayload = false
+                } else if let url = dataSource.value(forKey: "url") as? URL {
+                    let urlString = url.absoluteString
+                    self.fallback = .text(.init(item, text: urlString, parts: [.init(type: .link, string: urlString, data: .init(urlString), attributes: [])], chatID: chatID))
                 }
+                
+                insertPayload = false
             }
             break
         default:
@@ -160,6 +146,7 @@ public struct PluginChatItem: ChatItemRepresentation, ChatItemAcknowledgable {
     public var threadOriginator: String?
     public var digitalTouch: DigitalTouchMessage?
     public var richLink: RichLinkRepresentation?
+    public var fallback: ChatItem?
     public var `extension`: MessageExtensionsData?
     public var payload: String?
     public var bundleID: String

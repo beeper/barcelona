@@ -12,7 +12,7 @@ import IMCore
 public struct AcknowledgmentChatItem: AssociatedChatItemRepresentation {
     init(_ item: IMMessageAcknowledgmentChatItem, chatID: String?) {
         acknowledgmentType = item.messageAcknowledgmentType
-        sender = item.sender?.id
+        sender = item.sender?.id ?? item._item()?.senderID
         associatedID = item.associatedMessageGUID
         self.load(item: item, chatID: chatID)
     }

@@ -12,10 +12,6 @@ import IMCore
 import os.log
 import NIO
 
-private let IMChatMessageDidChangeNotification = NSNotification.Name(rawValue: "__kIMChatMessageDidChangeNotification")
-private let IMChatItemsDidChangeNotification = NSNotification.Name(rawValue: "__kIMChatItemsDidChangeNotification")
-private let IMChatMessageReceivedNotification = NSNotification.Name(rawValue: "__kIMChatMessageReceivedNotification")
-
 private let messageKey = "__kIMChatValueKey";
 private let IMChatItemsRemoved = "__kIMChatItemsRemoved";
 private let IMChatItemsInserted = "__kIMChatItemsInserted";
@@ -51,7 +47,7 @@ class MessageEvents: EventDispatcher {
     ])
     
     override func wake() {
-        addObserver(forName: IMChatItemsDidChangeNotification) {
+        addObserver(forName: .IMChatItemsDidChange) {
             self.itemsChanged($0)
         }
         
@@ -97,41 +93,37 @@ class MessageEvents: EventDispatcher {
      Dispatches incoming transcript items
      */
     private func process(inserted items: [NSObject], in chat: IMChat, on event: Event<BulkChatItemRepresentation>.EventType) {
-        var messageGUIDs: [String] = []
+        var messageGUIDs: Set<String> = .init()
         var statusChanges: [IMMessageStatusChatItem] = []
         
-        let wrapped = items.compactMap { transcriptItem -> EventLoopFuture<ChatItem?>? in
-            if log_shouldLog { os_log("👨🏻‍💻 Processing inserted IMTranscriptItem %@", transcriptItem, log_messageEvents) }
+        for item in items {
+            if log_shouldLog { os_log("👨🏻‍💻 Processing inserted IMItem %@", item, log_messageEvents) }
             
-            switch (transcriptItem) {
+            switch (item) {
             case let item as IMMessagePartChatItem:
                 if let guid = item.message?.guid ?? item._item()?.guid {
-                    if !messageGUIDs.contains(guid) {
-                        messageGUIDs.append(guid)
-                    }
+                    messageGUIDs.insert(guid)
                 }
-                return nil
+            case let item as IMTranscriptChatItem:
+                if let guid = item.guid ?? item._item()?.guid {
+                    messageGUIDs.insert(guid)
+                }
             case let item as IMMessageStatusChatItem:
                 statusChanges.append(item)
-                return nil
             default:
-                return ERIndeterminateIngestor.ingest(transcriptItem, in: chat.id)
+                print("asdf")
             }
         }
         
-        let pendingMessages = messageGUIDs.er_chatItems(in: chat.id)
-        
-        EventLoopFuture<ChatItem?>.whenAllSucceed(wrapped, on: eventProcessingEventLoop.next()).map { $0.compactMap { $0 } }.whenSuccess { chatItems in
-            pendingMessages.whenSuccess { messageChatItems in
-                if chatItems.count == 0, messageChatItems.count == 0 {
+        if messageGUIDs.count > 0 {
+            let pendingMessages = Array(messageGUIDs).er_chatItems(in: chat.id)
+            
+            pendingMessages.whenSuccess { chatItems in
+                if chatItems.count == 0 {
                     return
                 }
                 
-                var merged = [ChatItem]()
-                merged.append(contentsOf: chatItems)
-                merged.append(contentsOf: messageChatItems)
-                
-                StreamingAPI.shared.dispatch(Event<BulkChatItemRepresentation>.init(type: event, data: BulkChatItemRepresentation(items: merged)))
+                StreamingAPI.shared.dispatch(Event<BulkChatItemRepresentation>.init(type: event, data: BulkChatItemRepresentation(items: chatItems)))
             }
         }
         

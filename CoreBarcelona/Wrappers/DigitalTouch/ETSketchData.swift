@@ -17,6 +17,11 @@ public struct Color: Codable {
     let alpha: CGFloat
 }
 
+public struct DynamicColor: Codable {
+    let light: Color?
+    let dark: Color?
+}
+
 public struct ETSketchData: Codable {
     init(_ message: ETSketchMessage) {
         numberOfColors = message.numberOfColors

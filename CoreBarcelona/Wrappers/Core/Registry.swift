@@ -105,7 +105,11 @@ public class Registry {
     }
     
     public func bestAccount(for service: IMService) -> IMAccount? {
-        IMAccountController.sharedInstance().bestAccount(forService: service)
+        if let serviceImpl = service as? IMServiceImpl, let account = serviceImpl.value(forKey: "bestAccount") as? IMAccount {
+            return account
+        }
+        
+        return IMAccountController.sharedInstance().bestAccount(forService: service)
     }
     
     public func resolve(service: String) -> IMService? {

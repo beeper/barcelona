@@ -11,13 +11,23 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v2
+        
+      - name: Cache macOS Build
+        id: cache-build
+        uses: actions/cache@v2
+        with:
+          path: |
+            $GITHUB_WORKSPACE/SourcePackages
+            $GITHUB_WORKSPACE/macos_build
+            /Users/runner/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
       - name: Build macOS
         run: make macos
 
-      - name: Archive artifacts
+      - name: Archive Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: macOS-build
@@ -27,17 +37,25 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: prepare environment
+      - name: Prepare Environment
         run: |
           brew install ldid make
           echo "THEOS=$GITHUB_WORKSPACE/theos" >> $GITHUB_ENV
           PATH="/usr/local/opt/make/libexec/gnubin:$PATH" >> $GITHUB_ENV
           echo "Succesfully installed tools!"
+ 
+      - name: Cache Theos
+        id: cache-theos
+        uses: actions/cache@v2
+        with:
+          path: theos
+          key: ${{ runner.os }}-theos
 
       - name: Setup Theos
+        if: steps.cache-theos.outputs.cache-hit != 'true'
         uses: actions/checkout@main
         with:
           repository: theos/theos
@@ -46,18 +64,30 @@ jobs:
           submodules: recursive
 
       - name: Download SDKs
+        if: steps.cache-theos.outputs.cache-hit != 'true'
         run: |
           curl -LO https://github.com/xybp888/iOS-SDKs/archive/master.zip
           bsdtar --strip-components=1 -xf master.zip --directory $GITHUB_WORKSPACE/theos/sdks
           rm -f master.zip
+
+      - name: Cache iOS Build
+        id: cache-build
+        uses: actions/cache@v2
+        with:
+          path: |
+            $GITHUB_WORKSPACE/SourcePackages
+            $GITHUB_WORKSPACE/ios_build
+            /Users/runner/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
       - name: Build iOS
         run: |
           export THEOS=$GITHUB_WORKSPACE/theos
           make ios
 
-      - name: Archive artifacts
+      - name: Archive Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: iOS-build
           path: archive
+          

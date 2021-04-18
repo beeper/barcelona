@@ -12,7 +12,7 @@
 #import "kern_memorystatus.h"
 
 void ERTellJetsamToFuckOff() {
-    if (memorystatus_control(MEMORYSTATUS_CMD_SET_JETSAM_HIGH_WATER_MARK, getpid(), 60, 0, 0) != 0 || memorystatus_control(MEMORYSTATUS_CMD_SET_JETSAM_TASK_LIMIT, getpid(), 75, 0, 0) != 0) {
+    if (memorystatus_control(MEMORYSTATUS_CMD_SET_JETSAM_HIGH_WATER_MARK, getpid(), 150, 0, 0) != 0 || memorystatus_control(MEMORYSTATUS_CMD_SET_JETSAM_TASK_LIMIT, getpid(), 200, 0, 0) != 0) {
         NSLog(@"Failed to tell Jetsam to fuck off! %s", strerror(errno));
         exit(1);
     }

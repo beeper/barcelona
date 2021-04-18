@@ -14,7 +14,7 @@ struct RichLinkCaptionText: Codable {
         text = properties.text
         
         if let color = properties.color {
-            self.color = Color(fromUnknown: color)
+            self.color = DynamicColor(fromUnknown: color)
         }
         
         maximumNumberOfLines = properties.maximumNumberOfLines?.doubleValue
@@ -24,5 +24,5 @@ struct RichLinkCaptionText: Codable {
     var text: String?
     var maximumNumberOfLines: Double?
     var textScale: Double
-    var color: Color?
+    var color: DynamicColor?
 }

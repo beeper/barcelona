@@ -31,7 +31,7 @@ IMESSAGE_APPLICATIONS_TARGET = $(IMESSAGE_APPLICATIONS_DIR)/MyMessage for iOS.ap
 IMESSAGE_APP_SRC = $(IOS_BUILD_DIR)/MyMessage for iOS.app
 IMESSAGE_XPC_SRC = $(IOS_BUILD_DIR)/imessage-rest.xpc
 
-xcbuild_scheme = "xcodebuild ARCHS=\"$(4)\" ONLY_ACTIVE_ARCH=NO -scheme \"$(1)\" -project \"$(BARCLEONA_XCPROJ)\" -destination \"$(2)\" -configuration \"$(BUILD_CONFIGURATION)\" CONFIGURATION_BUILD_DIR=\"$(3)\""
+xcbuild_scheme = "xcodebuild ARCHS=\"$(4)\" ONLY_ACTIVE_ARCH=NO -clonedSourcePackagesDirPath SourcePackages -scheme \"$(1)\" -project \"$(BARCLEONA_XCPROJ)\" -destination \"$(2)\" -configuration \"$(BUILD_CONFIGURATION)\" CONFIGURATION_BUILD_DIR=\"$(3)\""
 xcbuild_ios_scheme = $(call xcbuild_scheme,$(1),$(IOS_DESTINATION),$(IOS_BUILD_DIR),$(IOS_ARCHS))
 xcbuild_macos_scheme = $(call xcbuild_scheme,$(1),$(MACOS_DESTINATION),$(MACOS_BUILD_DIR),$(MACOS_ARCHS))
 

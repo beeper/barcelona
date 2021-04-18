@@ -129,13 +129,13 @@ public struct Size: Codable {
     public var height: Float
     
     public init(cgSize: CGSize) {
-        width = Float(cgSize.width)
-        height = Float(cgSize.height)
+        width = abs(Float(cgSize.width))
+        height = abs(Float(cgSize.height))
     }
     
     public init(width: CGFloat, height: CGFloat) {
-        self.width = Float(width)
-        self.height = Float(height)
+        self.width = abs(Float(width))
+        self.height = abs(Float(height))
     }
 }
 

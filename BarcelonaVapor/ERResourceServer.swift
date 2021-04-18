@@ -8,7 +8,6 @@
 
 import Foundation
 import CoreUI
-import CoreImage
 import LinkPresentation
 import Vapor
 
@@ -27,6 +26,7 @@ extension String: Error {}
 private enum AssetsFormat: String, CaseIterable {
     case localSocialUI = "~/Library/Application Support/MyMessage/Assets.SocialUI.car"
     case localChatKit = "~/Library/Application Support/MyMessage/Assets.ChatKit.car"
+    case localChatKitRetina = "~/Library/Application Support/MyMessage/Assets.ChatKitRetina.car"
     case ios = "/System/Library/PrivateFrameworks/ChatKit.framework/Assets.car"
     case iosMac = "/System/iOSSupport/System/Library/PrivateFrameworks/ChatKit.framework/Resources/Assets.car"
     case mac = "/System/Library/PrivateFrameworks/SocialUI.framework/Resources/Assets.car"
@@ -39,6 +39,8 @@ private enum AssetsFormat: String, CaseIterable {
         switch self {
         case .ios:
             fallthrough
+        case .localChatKitRetina:
+            return .ChatKitRetina
         case .iosMac:
             fallthrough
         case .localChatKit:
@@ -60,6 +62,7 @@ private enum AssetsFormat: String, CaseIterable {
 internal enum AssetsMode: String, Content {
     case SocialUI
     case ChatKit
+    case ChatKitRetina
 }
 
 private struct AssetsModeRepresentation: Content {
@@ -149,13 +152,37 @@ private let CatalogBindings: [AssetsFormat: [String: String]] = [
     .ios: ChatKitBindings,
     .iosMac: ChatKitBindings,
     .localChatKit: ChatKitBindings,
-    .localSocialUI: SocialUIBindings
+    .localSocialUI: SocialUIBindings,
+    .localChatKitRetina: ChatKitBindings
 ]
+
+private class ResourceCache {
+    var mirrored: [String: Data] = [:]
+    var normal: [String: Data] = [:]
+    
+    func store(_ data: Data, name: String, mirrored: Bool) {
+        if mirrored {
+            self.mirrored[name] = data
+        } else {
+            self.normal[name] = data
+        }
+    }
+    
+    func fetch(name: String, mirrored: Bool) -> Data? {
+        if mirrored {
+            return self.mirrored[name]
+        } else {
+            return self.normal[name]
+        }
+    }
+}
 
 internal class ERResourceServer {
     private let assetsFormat: AssetsFormat
     private let assetsURL: URL
     private let catalog: CUICatalog
+    
+    private var caches: [Int: ResourceCache] = [:]
     
     public init(_ app: Application) throws {
         let resources = app.grouped("resources")
@@ -220,20 +247,8 @@ internal class ERResourceServer {
     }
     
     private func respondWithImage(_ name: String, req: Request) -> EventLoopFuture<Response> {
-        guard var image = self.cgImageWithName(name, scale: Double((try? req.query.get(Int.self, at: "scale")) ?? 1)) else {
+        guard let data = self.getOrCreateImageData(name, scale: (try? req.query.get(Int.self, at: "scale")) ?? 1, horizontalFlip: (try? req.query.get(Int.self, at: "flip") == 1) ?? false) else {
             return HTTPStatus.notFound.encodeResponse(for: req)
-        }
-        
-        if (try? req.query.get(Int.self, at: "flip") == 1) ?? false {
-            let flipped = CIImage(cgImage: image).transformed(by: CGAffineTransform(scaleX: -1, y: 1))
-            let context = CIContext(options: nil)
-            if let flippedCGImage = context.createCGImage(flipped, from: flipped.extent) {
-                image = flippedCGImage
-            }
-        }
-
-        guard let data = image.png else {
-            return HTTPStatus.internalServerError.encodeResponse(for: req)
         }
 
         let fileResponse = Response.init(status: .ok, version: req.version, headers: .init([
@@ -243,6 +258,34 @@ internal class ERResourceServer {
         ]), body: .init(data: data))
 
         return req.eventLoop.makeSucceededFuture(fileResponse)
+    }
+    
+    private func cache(for scale: Int) -> ResourceCache {
+        guard let cache = self.caches[scale] else {
+            let newCache = ResourceCache()
+            self.caches[scale] = newCache
+            return newCache
+        }
+        
+        return cache
+    }
+    
+    private func getOrCreateImageData(_ name: String, scale: Int = 1, horizontalFlip: Bool = false) -> Data? {
+        if let cached = self.caches[scale]?.fetch(name: name, mirrored: horizontalFlip) {
+            return cached
+        }
+        
+        guard let cgImage = self.cgImageWithName(name, scale: Double(scale), horizontalFlip: horizontalFlip) else {
+            return nil
+        }
+        
+        guard let data = cgImage.png else {
+            return nil
+        }
+        
+        self.cache(for: scale).store(data, name: name, mirrored: horizontalFlip)
+        
+        return data
     }
     
     private func cgImageWithName(_ name: String, scale: Double = 1.0, horizontalFlip: Bool = false) -> CGImage? {
@@ -258,11 +301,18 @@ internal class ERResourceServer {
             imageScale = images.first?.scale ?? 0
         }
         
-        guard let image = catalog.image(withName: name, scaleFactor: imageScale), let ptr = image.image() else {
+        guard let cuiImage = catalog.image(withName: name, scaleFactor: imageScale), var cgImage = cuiImage.image()?.takeUnretainedValue() else {
             return nil
         }
         
-        return ptr.takeUnretainedValue()
+        if horizontalFlip, let context = CGContext(data: nil, width: cgImage.width, height: cgImage.height, bitsPerComponent: cgImage.bitsPerComponent, bytesPerRow: cgImage.width * 4, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue) {
+            context.scaleBy(x: -1.0, y: 1.0)
+            context.draw(cgImage, in: CGRect(x: -cgImage.width, y: 0, width: cgImage.width, height: cgImage.height))
+            
+            cgImage = context.makeImage() ?? cgImage
+        }
+        
+        return cgImage
     }
     
     private var bindings: [String: String] {

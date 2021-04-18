@@ -23,7 +23,7 @@ struct RichLinkImage: Codable, RichLinkAttachment {
             filter = properties.filter
             scalingMode = properties.scalingMode
             if let maskColor = properties.maskColor {
-                self.maskColor = Color(fromUnknown: maskColor)
+                self.maskColor = DynamicColor(fromUnknown: maskColor)
             }
         }
         
@@ -31,7 +31,7 @@ struct RichLinkImage: Codable, RichLinkAttachment {
             type = properties.type
             accessibilityText = properties.accessibilityText
             if let overlaidTextColor = properties.overlaidTextColor {
-                self.overlaidTextColor = Color(fromUnknown: overlaidTextColor)
+                self.overlaidTextColor = DynamicColor(fromUnknown: overlaidTextColor)
             }
         }
     }
@@ -41,8 +41,8 @@ struct RichLinkImage: Codable, RichLinkAttachment {
     var requireFixedSize: Bool?
     var filter: Int64?
     var scalingMode: Int64?
-    var maskColor: Color?
+    var maskColor: DynamicColor?
     var type: Int64?
     var accessibilityText: String?
-    var overlaidTextColor: Color?
+    var overlaidTextColor: DynamicColor?
 }

@@ -206,6 +206,7 @@ extern NSString* IMMentionOverrideRemoveMention API_AVAILABLE(macos(10.16), ios(
 extern NSString* IMMentionOriginalTextMention API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 extern NSString* IMMentionPrefixCharacter API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 extern NSString* IMMentionUnconfirmedDirectMention API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
+extern NSString* IMGroupPhotoGuidKey API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 
 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0))
 NSString* IMMessageCreateThreadIdentifierWithOriginatorGUID(long long index, long long end, long long start, NSString* guid);
