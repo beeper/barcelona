@@ -66,7 +66,7 @@ public struct RichLinkRepresentation: Codable {
         }
         
         if let color = properties.backgroundColor {
-            self.backgroundColor = Color(fromUnknown: color)
+            self.backgroundColor = DynamicColor(fromUnknown: color)
         }
         
         if let image = properties.image {
@@ -104,7 +104,7 @@ public struct RichLinkRepresentation: Codable {
     var audio: RichLinkAudio?
     var url: URL?
     var link: URL?
-    var backgroundColor: Color?
+    var backgroundColor: DynamicColor?
     var style: String?
     var itemType: String?
     var quotedText: String?
