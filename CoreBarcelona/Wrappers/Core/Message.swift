@@ -115,7 +115,7 @@ public struct Message: ChatItemRepresentation {
         fileTransferIDs = message.fileTransferGUIDs
         
         if let chatID = chatID, let chat = IMChat.resolve(withIdentifier: chatID) {
-            description = message.description(forPurpose: 0x2, inChat: chat)
+            description = try? message.description(forPurpose: 0x2, inChat: chat)
         }
         
         self.load(message: message)
