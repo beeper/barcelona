@@ -32,6 +32,50 @@
 		1D1E235C2506E0D60069705D /* ETAngerData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1E235B2506E0D60069705D /* ETAngerData.swift */; };
 		1D1E235E2506E0DE0069705D /* ETKissData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1E235D2506E0DE0069705D /* ETKissData.swift */; };
 		1D1E23602506E1560069705D /* DigitalTouchMessage+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1E235F2506E1560069705D /* DigitalTouchMessage+Codable.swift */; };
+		1D22AD62265C3CCA0095EE7E /* BarcelonaMautrixIPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D22AD60265C3CCA0095EE7E /* BarcelonaMautrixIPC.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		1D22AD65265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D22AD5E265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework */; };
+		1D22AD66265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D22AD5E265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1D22AD6A265C3D4A0095EE7E /* CoreBarcelona.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* CoreBarcelona.framework */; };
+		1D22AD6F265C3D540095EE7E /* SPMLibraries.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D9079FC250EE97500ED1EDC /* SPMLibraries.framework */; };
+		1D22AD7A265C3EB00095EE7E /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD79265C3EB00095EE7E /* main.swift */; };
+		1D22AD7E265C3ECB0095EE7E /* BarcelonaFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DC28B61251ED59700A9A50E /* BarcelonaFoundation.framework */; };
+		1D22AD7F265C3ECB0095EE7E /* BarcelonaFoundation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1DC28B61251ED59700A9A50E /* BarcelonaFoundation.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1D22AD82265C3ECB0095EE7E /* BarcelonaMautrixIPC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D22AD5E265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework */; };
+		1D22AD83265C3ECB0095EE7E /* BarcelonaMautrixIPC.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D22AD5E265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1D22AD86265C3ECB0095EE7E /* CoreBarcelona.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* CoreBarcelona.framework */; };
+		1D22AD87265C3ECB0095EE7E /* CoreBarcelona.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* CoreBarcelona.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1D22AD8A265C3ECB0095EE7E /* SPMLibraries.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D9079FC250EE97500ED1EDC /* SPMLibraries.framework */; };
+		1D22AD8B265C3ECB0095EE7E /* SPMLibraries.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D9079FC250EE97500ED1EDC /* SPMLibraries.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1D22AD90265C41620095EE7E /* BLMautrixTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD8F265C41620095EE7E /* BLMautrixTask.swift */; };
+		1D22AD92265C423A0095EE7E /* BLMautrixRuntimeConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD91265C423A0095EE7E /* BLMautrixRuntimeConfig.swift */; };
+		1D22AD95265C45D60095EE7E /* IPCCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD94265C45D60095EE7E /* IPCCommand.swift */; };
+		1D22AD98265C4EFD0095EE7E /* SendMessageCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD97265C4EFD0095EE7E /* SendMessageCommand.swift */; };
+		1D22AD9A265C4F250095EE7E /* SendMediaMessageCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD99265C4F250095EE7E /* SendMediaMessageCommand.swift */; };
+		1D22AD9D265C4F540095EE7E /* ChatResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD9C265C4F530095EE7E /* ChatResolvable.swift */; };
+		1D22AD9F265C4FCB0095EE7E /* TapbackCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD9E265C4FCB0095EE7E /* TapbackCommand.swift */; };
+		1D22ADA1265C4FF30095EE7E /* TargetResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADA0265C4FF30095EE7E /* TargetResolvable.swift */; };
+		1D22ADA2265C50550095EE7E /* IMCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD424E3744900303692 /* IMCore.framework */; };
+		1D22ADA6265C50730095EE7E /* SendReadReceiptCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADA5265C50730095EE7E /* SendReadReceiptCommand.swift */; };
+		1D22ADA8265C50C00095EE7E /* SendTypingCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADA7265C50C00095EE7E /* SendTypingCommand.swift */; };
+		1D22ADAA265C50DE0095EE7E /* GetChatsCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADA9265C50DE0095EE7E /* GetChatsCommand.swift */; };
+		1D22ADAC265C51270095EE7E /* GetGroupChatInfoCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADAB265C51270095EE7E /* GetGroupChatInfoCommand.swift */; };
+		1D22ADAE265C51450095EE7E /* GetGroupChatAvatarCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADAD265C51450095EE7E /* GetGroupChatAvatarCommand.swift */; };
+		1D22ADB0265C515E0095EE7E /* GetContactCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADAF265C515E0095EE7E /* GetContactCommand.swift */; };
+		1D22ADB2265C516F0095EE7E /* ContactResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADB1265C516F0095EE7E /* ContactResolvable.swift */; };
+		1D22ADB4265C523E0095EE7E /* GetMessagesAfterCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADB3265C523E0095EE7E /* GetMessagesAfterCommand.swift */; };
+		1D22ADB6265C52650095EE7E /* GetRecentMessagesCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADB5265C52650095EE7E /* GetRecentMessagesCommand.swift */; };
+		1D22ADB8265C56140095EE7E /* IPCCommand.codegen.js in Resources */ = {isa = PBXBuildFile; fileRef = 1D22ADB7265C56140095EE7E /* IPCCommand.codegen.js */; };
+		1D22ADBC265C592B0095EE7E /* BLMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADBB265C592B0095EE7E /* BLMessage.swift */; };
+		1D22ADBF265C597C0095EE7E /* BLAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADBE265C597C0095EE7E /* BLAttachment.swift */; };
+		1D22ADC1265C599A0095EE7E /* BLAssociatedMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADC0265C599A0095EE7E /* BLAssociatedMessage.swift */; };
+		1D22ADC3265C59E30095EE7E /* BLReadReceipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADC2265C59E30095EE7E /* BLReadReceipt.swift */; };
+		1D22ADC5265C5A080095EE7E /* BLTypingNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADC4265C5A080095EE7E /* BLTypingNotification.swift */; };
+		1D22ADC7265C5A240095EE7E /* BLChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADC6265C5A240095EE7E /* BLChat.swift */; };
+		1D22ADC9265C5A620095EE7E /* BLPartialMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADC8265C5A620095EE7E /* BLPartialMessage.swift */; };
+		1D22ADCB265C5A8F0095EE7E /* BLContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADCA265C5A8F0095EE7E /* BLContact.swift */; };
+		1D22ADCD265C5B0C0095EE7E /* BLMessageStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADCC265C5B0C0095EE7E /* BLMessageStatus.swift */; };
+		1D22ADCF265C5B710095EE7E /* BLStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADCE265C5B710095EE7E /* BLStruct.swift */; };
+		1D22ADD1265C5C5B0095EE7E /* BLStruct.codegen.js in Resources */ = {isa = PBXBuildFile; fileRef = 1D22ADD0265C5C5B0095EE7E /* BLStruct.codegen.js */; };
 		1D31509225212CFD00F2DF7C /* XPCCodingKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D31508925212CFC00F2DF7C /* XPCCodingKey.swift */; };
 		1D31509325212CFD00F2DF7C /* XPCUnkeyedDecodingContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D31508A25212CFC00F2DF7C /* XPCUnkeyedDecodingContainer.swift */; };
 		1D31509425212CFD00F2DF7C /* XPCSingleValueEncodingContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D31508B25212CFC00F2DF7C /* XPCSingleValueEncodingContainer.swift */; };
@@ -349,6 +393,55 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		1D22AD63265C3CCA0095EE7E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D22AD5D265C3CCA0095EE7E;
+			remoteInfo = BarcelonaMautrixIPC;
+		};
+		1D22AD6C265C3D4A0095EE7E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D44864424E85BBB00FF73F3;
+			remoteInfo = CoreBarcelona;
+		};
+		1D22AD71265C3D540095EE7E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D9079FB250EE97500ED1EDC;
+			remoteInfo = SPMLibraries;
+		};
+		1D22AD80265C3ECB0095EE7E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1DC28B60251ED59700A9A50E;
+			remoteInfo = BarcelonaFoundation;
+		};
+		1D22AD84265C3ECB0095EE7E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D22AD5D265C3CCA0095EE7E;
+			remoteInfo = BarcelonaMautrixIPC;
+		};
+		1D22AD88265C3ECB0095EE7E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D44864424E85BBB00FF73F3;
+			remoteInfo = CoreBarcelona;
+		};
+		1D22AD8C265C3ECB0095EE7E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D9079FB250EE97500ED1EDC;
+			remoteInfo = SPMLibraries;
+		};
 		1D3150C325215E1E00F2DF7C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
@@ -471,6 +564,29 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		1D22AD75265C3EB00095EE7E /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		1D22AD8E265C3ECB0095EE7E /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				1D22AD87265C3ECB0095EE7E /* CoreBarcelona.framework in Embed Frameworks */,
+				1D22AD83265C3ECB0095EE7E /* BarcelonaMautrixIPC.framework in Embed Frameworks */,
+				1D22AD7F265C3ECB0095EE7E /* BarcelonaFoundation.framework in Embed Frameworks */,
+				1D22AD8B265C3ECB0095EE7E /* SPMLibraries.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1D3150C525215E1E00F2DF7C /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -523,6 +639,7 @@
 			files = (
 				1DC28B97251EDA1E00A9A50E /* BarcelonaFoundation.framework in Embed Frameworks */,
 				1D31513E25253B6E00F2DF7C /* BarcelonaSharedUI.framework in Embed Frameworks */,
+				1D22AD66265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -584,6 +701,40 @@
 		1D1E235B2506E0D60069705D /* ETAngerData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ETAngerData.swift; sourceTree = "<group>"; };
 		1D1E235D2506E0DE0069705D /* ETKissData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ETKissData.swift; sourceTree = "<group>"; };
 		1D1E235F2506E1560069705D /* DigitalTouchMessage+Codable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DigitalTouchMessage+Codable.swift"; sourceTree = "<group>"; };
+		1D22AD5E265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaMautrixIPC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D22AD60265C3CCA0095EE7E /* BarcelonaMautrixIPC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BarcelonaMautrixIPC.h; sourceTree = "<group>"; };
+		1D22AD61265C3CCA0095EE7E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1D22AD77265C3EB00095EE7E /* barcelona-mautrix */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "barcelona-mautrix"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D22AD79265C3EB00095EE7E /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		1D22AD8F265C41620095EE7E /* BLMautrixTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLMautrixTask.swift; sourceTree = "<group>"; };
+		1D22AD91265C423A0095EE7E /* BLMautrixRuntimeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLMautrixRuntimeConfig.swift; sourceTree = "<group>"; };
+		1D22AD94265C45D60095EE7E /* IPCCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPCCommand.swift; sourceTree = "<group>"; };
+		1D22AD97265C4EFD0095EE7E /* SendMessageCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendMessageCommand.swift; sourceTree = "<group>"; };
+		1D22AD99265C4F250095EE7E /* SendMediaMessageCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendMediaMessageCommand.swift; sourceTree = "<group>"; };
+		1D22AD9C265C4F530095EE7E /* ChatResolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatResolvable.swift; sourceTree = "<group>"; };
+		1D22AD9E265C4FCB0095EE7E /* TapbackCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapbackCommand.swift; sourceTree = "<group>"; };
+		1D22ADA0265C4FF30095EE7E /* TargetResolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TargetResolvable.swift; sourceTree = "<group>"; };
+		1D22ADA5265C50730095EE7E /* SendReadReceiptCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendReadReceiptCommand.swift; sourceTree = "<group>"; };
+		1D22ADA7265C50C00095EE7E /* SendTypingCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendTypingCommand.swift; sourceTree = "<group>"; };
+		1D22ADA9265C50DE0095EE7E /* GetChatsCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetChatsCommand.swift; sourceTree = "<group>"; };
+		1D22ADAB265C51270095EE7E /* GetGroupChatInfoCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetGroupChatInfoCommand.swift; sourceTree = "<group>"; };
+		1D22ADAD265C51450095EE7E /* GetGroupChatAvatarCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetGroupChatAvatarCommand.swift; sourceTree = "<group>"; };
+		1D22ADAF265C515E0095EE7E /* GetContactCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetContactCommand.swift; sourceTree = "<group>"; };
+		1D22ADB1265C516F0095EE7E /* ContactResolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactResolvable.swift; sourceTree = "<group>"; };
+		1D22ADB3265C523E0095EE7E /* GetMessagesAfterCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetMessagesAfterCommand.swift; sourceTree = "<group>"; };
+		1D22ADB5265C52650095EE7E /* GetRecentMessagesCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetRecentMessagesCommand.swift; sourceTree = "<group>"; };
+		1D22ADB7265C56140095EE7E /* IPCCommand.codegen.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = IPCCommand.codegen.js; sourceTree = "<group>"; };
+		1D22ADBB265C592B0095EE7E /* BLMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLMessage.swift; sourceTree = "<group>"; };
+		1D22ADBE265C597C0095EE7E /* BLAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLAttachment.swift; sourceTree = "<group>"; };
+		1D22ADC0265C599A0095EE7E /* BLAssociatedMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLAssociatedMessage.swift; sourceTree = "<group>"; };
+		1D22ADC2265C59E30095EE7E /* BLReadReceipt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLReadReceipt.swift; sourceTree = "<group>"; };
+		1D22ADC4265C5A080095EE7E /* BLTypingNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLTypingNotification.swift; sourceTree = "<group>"; };
+		1D22ADC6265C5A240095EE7E /* BLChat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLChat.swift; sourceTree = "<group>"; };
+		1D22ADC8265C5A620095EE7E /* BLPartialMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLPartialMessage.swift; sourceTree = "<group>"; };
+		1D22ADCA265C5A8F0095EE7E /* BLContact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLContact.swift; sourceTree = "<group>"; };
+		1D22ADCC265C5B0C0095EE7E /* BLMessageStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLMessageStatus.swift; sourceTree = "<group>"; };
+		1D22ADCE265C5B710095EE7E /* BLStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLStruct.swift; sourceTree = "<group>"; };
+		1D22ADD0265C5C5B0095EE7E /* BLStruct.codegen.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = BLStruct.codegen.js; sourceTree = "<group>"; };
 		1D31508925212CFC00F2DF7C /* XPCCodingKey.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XPCCodingKey.swift; sourceTree = "<group>"; };
 		1D31508A25212CFC00F2DF7C /* XPCUnkeyedDecodingContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XPCUnkeyedDecodingContainer.swift; sourceTree = "<group>"; };
 		1D31508B25212CFC00F2DF7C /* XPCSingleValueEncodingContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XPCSingleValueEncodingContainer.swift; sourceTree = "<group>"; };
@@ -875,6 +1026,27 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1D22AD5B265C3CCA0095EE7E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D22AD6A265C3D4A0095EE7E /* CoreBarcelona.framework in Frameworks */,
+				1D22ADA2265C50550095EE7E /* IMCore.framework in Frameworks */,
+				1D22AD6F265C3D540095EE7E /* SPMLibraries.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1D22AD74265C3EB00095EE7E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D22AD86265C3ECB0095EE7E /* CoreBarcelona.framework in Frameworks */,
+				1D22AD82265C3ECB0095EE7E /* BarcelonaMautrixIPC.framework in Frameworks */,
+				1D22AD7E265C3ECB0095EE7E /* BarcelonaFoundation.framework in Frameworks */,
+				1D22AD8A265C3ECB0095EE7E /* SPMLibraries.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1D31509C25215CC900F2DF7C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -974,6 +1146,7 @@
 			files = (
 				1DC28B96251EDA1E00A9A50E /* BarcelonaFoundation.framework in Frameworks */,
 				1D31513D25253B6E00F2DF7C /* BarcelonaSharedUI.framework in Frameworks */,
+				1D22AD65265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework in Frameworks */,
 				1D844FBE259908A100960E4A /* AppSupport.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1096,6 +1269,84 @@
 				1D1E235D2506E0DE0069705D /* ETKissData.swift */,
 			);
 			path = DigitalTouch;
+			sourceTree = "<group>";
+		};
+		1D22AD5F265C3CCA0095EE7E /* BarcelonaMautrixIPC */ = {
+			isa = PBXGroup;
+			children = (
+				1D22AD93265C45BB0095EE7E /* Commands */,
+				1D22AD60265C3CCA0095EE7E /* BarcelonaMautrixIPC.h */,
+				1D22AD61265C3CCA0095EE7E /* Info.plist */,
+				1D22AD8F265C41620095EE7E /* BLMautrixTask.swift */,
+				1D22AD91265C423A0095EE7E /* BLMautrixRuntimeConfig.swift */,
+			);
+			path = BarcelonaMautrixIPC;
+			sourceTree = "<group>";
+		};
+		1D22AD78265C3EB00095EE7E /* barcelona-mautrix */ = {
+			isa = PBXGroup;
+			children = (
+				1D22AD79265C3EB00095EE7E /* main.swift */,
+			);
+			path = "barcelona-mautrix";
+			sourceTree = "<group>";
+		};
+		1D22AD93265C45BB0095EE7E /* Commands */ = {
+			isa = PBXGroup;
+			children = (
+				1D22ADBD265C596D0095EE7E /* Structs */,
+				1D22AD9B265C4F400095EE7E /* Protocols */,
+				1D22AD96265C4EEF0095EE7E /* Requests */,
+				1D22AD94265C45D60095EE7E /* IPCCommand.swift */,
+				1D22ADB7265C56140095EE7E /* IPCCommand.codegen.js */,
+			);
+			path = Commands;
+			sourceTree = "<group>";
+		};
+		1D22AD96265C4EEF0095EE7E /* Requests */ = {
+			isa = PBXGroup;
+			children = (
+				1D22AD97265C4EFD0095EE7E /* SendMessageCommand.swift */,
+				1D22AD99265C4F250095EE7E /* SendMediaMessageCommand.swift */,
+				1D22AD9E265C4FCB0095EE7E /* TapbackCommand.swift */,
+				1D22ADA5265C50730095EE7E /* SendReadReceiptCommand.swift */,
+				1D22ADA7265C50C00095EE7E /* SendTypingCommand.swift */,
+				1D22ADA9265C50DE0095EE7E /* GetChatsCommand.swift */,
+				1D22ADAB265C51270095EE7E /* GetGroupChatInfoCommand.swift */,
+				1D22ADAD265C51450095EE7E /* GetGroupChatAvatarCommand.swift */,
+				1D22ADAF265C515E0095EE7E /* GetContactCommand.swift */,
+				1D22ADB3265C523E0095EE7E /* GetMessagesAfterCommand.swift */,
+				1D22ADB5265C52650095EE7E /* GetRecentMessagesCommand.swift */,
+			);
+			path = Requests;
+			sourceTree = "<group>";
+		};
+		1D22AD9B265C4F400095EE7E /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				1D22AD9C265C4F530095EE7E /* ChatResolvable.swift */,
+				1D22ADA0265C4FF30095EE7E /* TargetResolvable.swift */,
+				1D22ADB1265C516F0095EE7E /* ContactResolvable.swift */,
+			);
+			path = Protocols;
+			sourceTree = "<group>";
+		};
+		1D22ADBD265C596D0095EE7E /* Structs */ = {
+			isa = PBXGroup;
+			children = (
+				1D22ADBB265C592B0095EE7E /* BLMessage.swift */,
+				1D22ADCC265C5B0C0095EE7E /* BLMessageStatus.swift */,
+				1D22ADC8265C5A620095EE7E /* BLPartialMessage.swift */,
+				1D22ADBE265C597C0095EE7E /* BLAttachment.swift */,
+				1D22ADC0265C599A0095EE7E /* BLAssociatedMessage.swift */,
+				1D22ADC2265C59E30095EE7E /* BLReadReceipt.swift */,
+				1D22ADC4265C5A080095EE7E /* BLTypingNotification.swift */,
+				1D22ADC6265C5A240095EE7E /* BLChat.swift */,
+				1D22ADCA265C5A8F0095EE7E /* BLContact.swift */,
+				1D22ADCE265C5B710095EE7E /* BLStruct.swift */,
+				1D22ADD0265C5C5B0095EE7E /* BLStruct.codegen.js */,
+			);
+			path = Structs;
 			sourceTree = "<group>";
 		};
 		1D31508825212CFC00F2DF7C /* CodableXPC */ = {
@@ -1314,6 +1565,8 @@
 				1DC28B62251ED59700A9A50E /* BarcelonaFoundation */,
 				1D3150A025215CC900F2DF7C /* MyMessage for iOS */,
 				1D31513725253B6E00F2DF7C /* BarcelonaSharedUI */,
+				1D22AD5F265C3CCA0095EE7E /* BarcelonaMautrixIPC */,
+				1D22AD78265C3EB00095EE7E /* barcelona-mautrix */,
 				1D5AEDAF24E3725200303692 /* Products */,
 				1D5AEDBE24E373ED00303692 /* Frameworks */,
 			);
@@ -1331,6 +1584,8 @@
 				1DC28B61251ED59700A9A50E /* BarcelonaFoundation.framework */,
 				1D31509F25215CC900F2DF7C /* MyMessage for iOS.app */,
 				1D31513625253B6E00F2DF7C /* BarcelonaSharedUI.framework */,
+				1D22AD5E265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework */,
+				1D22AD77265C3EB00095EE7E /* barcelona-mautrix */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1808,6 +2063,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		1D22AD59265C3CCA0095EE7E /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D22AD62265C3CCA0095EE7E /* BarcelonaMautrixIPC.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1D31513125253B6E00F2DF7C /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -1873,6 +2136,48 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		1D22AD5D265C3CCA0095EE7E /* BarcelonaMautrixIPC */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1D22AD69265C3CCA0095EE7E /* Build configuration list for PBXNativeTarget "BarcelonaMautrixIPC" */;
+			buildPhases = (
+				1D22AD59265C3CCA0095EE7E /* Headers */,
+				1D22AD5A265C3CCA0095EE7E /* Sources */,
+				1D22AD5B265C3CCA0095EE7E /* Frameworks */,
+				1D22AD5C265C3CCA0095EE7E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1D22AD6D265C3D4A0095EE7E /* PBXTargetDependency */,
+				1D22AD72265C3D540095EE7E /* PBXTargetDependency */,
+			);
+			name = BarcelonaMautrixIPC;
+			productName = BarcelonaMautrixIPC;
+			productReference = 1D22AD5E265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		1D22AD76265C3EB00095EE7E /* barcelona-mautrix */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1D22AD7B265C3EB00095EE7E /* Build configuration list for PBXNativeTarget "barcelona-mautrix" */;
+			buildPhases = (
+				1D22AD73265C3EB00095EE7E /* Sources */,
+				1D22AD74265C3EB00095EE7E /* Frameworks */,
+				1D22AD75265C3EB00095EE7E /* CopyFiles */,
+				1D22AD8E265C3ECB0095EE7E /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1D22AD81265C3ECB0095EE7E /* PBXTargetDependency */,
+				1D22AD85265C3ECB0095EE7E /* PBXTargetDependency */,
+				1D22AD89265C3ECB0095EE7E /* PBXTargetDependency */,
+				1D22AD8D265C3ECB0095EE7E /* PBXTargetDependency */,
+			);
+			name = "barcelona-mautrix";
+			productName = "barcelona-mautrix";
+			productReference = 1D22AD77265C3EB00095EE7E /* barcelona-mautrix */;
+			productType = "com.apple.product-type.tool";
+		};
 		1D31509E25215CC900F2DF7C /* MyMessage for iOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1D3150BB25215CCC00F2DF7C /* Build configuration list for PBXNativeTarget "MyMessage for iOS" */;
@@ -2049,6 +2354,7 @@
 				1D907A78250F307C00ED1EDC /* PBXTargetDependency */,
 				1DC28B99251EDA1E00A9A50E /* PBXTargetDependency */,
 				1D31513C25253B6E00F2DF7C /* PBXTargetDependency */,
+				1D22AD64265C3CCA0095EE7E /* PBXTargetDependency */,
 			);
 			name = "imessage-rest-mac-controller";
 			packageProductDependencies = (
@@ -2083,10 +2389,17 @@
 		1D5AEDA624E3725200303692 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1150;
+				LastSwiftUpdateCheck = 1250;
 				LastUpgradeCheck = 1160;
 				ORGANIZATIONNAME = "Eric Rabil";
 				TargetAttributes = {
+					1D22AD5D265C3CCA0095EE7E = {
+						CreatedOnToolsVersion = 12.5;
+						LastSwiftMigration = 1250;
+					};
+					1D22AD76265C3EB00095EE7E = {
+						CreatedOnToolsVersion = 12.5;
+					};
 					1D31509E25215CC900F2DF7C = {
 						CreatedOnToolsVersion = 11.5;
 					};
@@ -2148,11 +2461,22 @@
 				1DC28B60251ED59700A9A50E /* BarcelonaFoundation */,
 				1D31509E25215CC900F2DF7C /* MyMessage for iOS */,
 				1D31513525253B6E00F2DF7C /* BarcelonaSharedUI */,
+				1D22AD5D265C3CCA0095EE7E /* BarcelonaMautrixIPC */,
+				1D22AD76265C3EB00095EE7E /* barcelona-mautrix */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		1D22AD5C265C3CCA0095EE7E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D22ADD1265C5C5B0095EE7E /* BLStruct.codegen.js in Resources */,
+				1D22ADB8265C56140095EE7E /* IPCCommand.codegen.js in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1D31509D25215CC900F2DF7C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2226,6 +2550,48 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		1D22AD5A265C3CCA0095EE7E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D22ADAC265C51270095EE7E /* GetGroupChatInfoCommand.swift in Sources */,
+				1D22ADB4265C523E0095EE7E /* GetMessagesAfterCommand.swift in Sources */,
+				1D22ADA8265C50C00095EE7E /* SendTypingCommand.swift in Sources */,
+				1D22ADC1265C599A0095EE7E /* BLAssociatedMessage.swift in Sources */,
+				1D22AD95265C45D60095EE7E /* IPCCommand.swift in Sources */,
+				1D22ADCB265C5A8F0095EE7E /* BLContact.swift in Sources */,
+				1D22ADBF265C597C0095EE7E /* BLAttachment.swift in Sources */,
+				1D22ADB2265C516F0095EE7E /* ContactResolvable.swift in Sources */,
+				1D22ADBC265C592B0095EE7E /* BLMessage.swift in Sources */,
+				1D22ADC3265C59E30095EE7E /* BLReadReceipt.swift in Sources */,
+				1D22ADC9265C5A620095EE7E /* BLPartialMessage.swift in Sources */,
+				1D22ADCD265C5B0C0095EE7E /* BLMessageStatus.swift in Sources */,
+				1D22ADB6265C52650095EE7E /* GetRecentMessagesCommand.swift in Sources */,
+				1D22AD98265C4EFD0095EE7E /* SendMessageCommand.swift in Sources */,
+				1D22ADA6265C50730095EE7E /* SendReadReceiptCommand.swift in Sources */,
+				1D22AD9D265C4F540095EE7E /* ChatResolvable.swift in Sources */,
+				1D22ADAE265C51450095EE7E /* GetGroupChatAvatarCommand.swift in Sources */,
+				1D22AD90265C41620095EE7E /* BLMautrixTask.swift in Sources */,
+				1D22ADC5265C5A080095EE7E /* BLTypingNotification.swift in Sources */,
+				1D22AD9F265C4FCB0095EE7E /* TapbackCommand.swift in Sources */,
+				1D22ADB0265C515E0095EE7E /* GetContactCommand.swift in Sources */,
+				1D22ADCF265C5B710095EE7E /* BLStruct.swift in Sources */,
+				1D22ADC7265C5A240095EE7E /* BLChat.swift in Sources */,
+				1D22AD92265C423A0095EE7E /* BLMautrixRuntimeConfig.swift in Sources */,
+				1D22AD9A265C4F250095EE7E /* SendMediaMessageCommand.swift in Sources */,
+				1D22ADA1265C4FF30095EE7E /* TargetResolvable.swift in Sources */,
+				1D22ADAA265C50DE0095EE7E /* GetChatsCommand.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1D22AD73265C3EB00095EE7E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D22AD7A265C3EB00095EE7E /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1D31509B25215CC900F2DF7C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2542,6 +2908,41 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1D22AD64265C3CCA0095EE7E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D22AD5D265C3CCA0095EE7E /* BarcelonaMautrixIPC */;
+			targetProxy = 1D22AD63265C3CCA0095EE7E /* PBXContainerItemProxy */;
+		};
+		1D22AD6D265C3D4A0095EE7E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D44864424E85BBB00FF73F3 /* CoreBarcelona */;
+			targetProxy = 1D22AD6C265C3D4A0095EE7E /* PBXContainerItemProxy */;
+		};
+		1D22AD72265C3D540095EE7E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D9079FB250EE97500ED1EDC /* SPMLibraries */;
+			targetProxy = 1D22AD71265C3D540095EE7E /* PBXContainerItemProxy */;
+		};
+		1D22AD81265C3ECB0095EE7E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1DC28B60251ED59700A9A50E /* BarcelonaFoundation */;
+			targetProxy = 1D22AD80265C3ECB0095EE7E /* PBXContainerItemProxy */;
+		};
+		1D22AD85265C3ECB0095EE7E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D22AD5D265C3CCA0095EE7E /* BarcelonaMautrixIPC */;
+			targetProxy = 1D22AD84265C3ECB0095EE7E /* PBXContainerItemProxy */;
+		};
+		1D22AD89265C3ECB0095EE7E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D44864424E85BBB00FF73F3 /* CoreBarcelona */;
+			targetProxy = 1D22AD88265C3ECB0095EE7E /* PBXContainerItemProxy */;
+		};
+		1D22AD8D265C3ECB0095EE7E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D9079FB250EE97500ED1EDC /* SPMLibraries */;
+			targetProxy = 1D22AD8C265C3ECB0095EE7E /* PBXContainerItemProxy */;
+		};
 		1D3150C425215E1E00F2DF7C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1DC28B60251ED59700A9A50E /* BarcelonaFoundation */;
@@ -2653,6 +3054,115 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		1D22AD67265C3CCA0095EE7E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					arm64,
+				);
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
+				INFOPLIST_FILE = BarcelonaMautrixIPC/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.apple.ericrabil.BarcelonaMautrixIPC;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = "";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "macosx iphonesimulator iphoneos";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		1D22AD68265C3CCA0095EE7E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					arm64,
+				);
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
+				INFOPLIST_FILE = BarcelonaMautrixIPC/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.apple.ericrabil.BarcelonaMautrixIPC;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = "";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "macosx iphonesimulator iphoneos";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		1D22AD7C265C3EB00095EE7E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6UW2D7F2RU;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		1D22AD7D265C3EB00095EE7E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6UW2D7F2RU;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		1D3150BC25215CCC00F2DF7C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -3487,6 +3997,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1D22AD69265C3CCA0095EE7E /* Build configuration list for PBXNativeTarget "BarcelonaMautrixIPC" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1D22AD67265C3CCA0095EE7E /* Debug */,
+				1D22AD68265C3CCA0095EE7E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1D22AD7B265C3EB00095EE7E /* Build configuration list for PBXNativeTarget "barcelona-mautrix" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1D22AD7C265C3EB00095EE7E /* Debug */,
+				1D22AD7D265C3EB00095EE7E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		1D3150BB25215CCC00F2DF7C /* Build configuration list for PBXNativeTarget "MyMessage for iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
