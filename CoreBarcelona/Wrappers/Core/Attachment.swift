@@ -81,13 +81,14 @@ private extension IMFileTransfer {
 }
 
 public struct Attachment: Codable {
-    internal init(mime: String? = nil, filename: String? = nil, id: String, uti: String? = nil, origin: ResourceOrigin? = nil, size: Size? = nil) {
+    internal init(mime: String? = nil, filename: String? = nil, id: String, uti: String? = nil, origin: ResourceOrigin? = nil, size: Size? = nil, sticker: StickerInformation? = nil) {
         self.mime = mime
         self.filename = filename
         self.id = id
         self.uti = uti
         self.origin = origin
         self.size = size
+        self.sticker = sticker
     }
     
     public init(_ transfer: IMFileTransfer) {
@@ -96,6 +97,12 @@ public struct Attachment: Codable {
         id = transfer.guid
         uti = transfer.type
         size = transfer.mediaSize
+        
+        if transfer.isSticker {
+            sticker = StickerInformation(transfer.stickerUserInfo)
+        } else {
+            sticker = nil
+        }
     }
     
     public init?(guid: String) {
@@ -112,6 +119,7 @@ public struct Attachment: Codable {
     public var uti: String?
     public var origin: ResourceOrigin?
     public var size: Size?
+    public var sticker: StickerInformation?
 }
 
 private func ERRegisterFileTransferForGUID(transfer: IMFileTransfer, guid: String) {
@@ -166,7 +174,7 @@ public struct InternalAttachment {
     }
     
     var attachment: Attachment {
-        Attachment(mime: self.mime, filename: filename, id: guid, uti: uti, origin: origin, size: fileTransfer.mediaSize)
+        Attachment(mime: self.mime, filename: filename, id: guid, uti: uti, origin: origin, size: fileTransfer.mediaSize, sticker: fileTransfer.isSticker ? .init(fileTransfer.stickerUserInfo) : nil)
     }
     
     var fileTransfer: IMFileTransfer {
