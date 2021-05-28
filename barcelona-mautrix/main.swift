@@ -7,7 +7,14 @@
 //
 
 import Foundation
-import CoreBarcelona
+import BarcelonaMautrixIPC
 
-print("Hello, World!")
+BLCreatePayloadReader { payload in
+    
+}
 
+RunLoop.current.add(Timer(timeInterval: 1, repeats: true) { _ in
+    BLInfo("test")
+}, forMode: .default)
+
+RunLoop.current.run()

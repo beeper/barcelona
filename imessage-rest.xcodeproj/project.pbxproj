@@ -9,6 +9,17 @@
 /* Begin PBXBuildFile section */
 		1D04810F251D9CF5003166FF /* MessageServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE3C24E3760000303692 /* MessageServiceProtocol.swift */; };
 		1D048110251D9CFD003166FF /* MessageServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE3C24E3760000303692 /* MessageServiceProtocol.swift */; };
+		1D0DC2B726618E5800E4B6FF /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0DC2B626618E5800E4B6FF /* main.swift */; };
+		1D0DC2B826618E6900E4B6FF /* BarcelonaFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DC28B61251ED59700A9A50E /* BarcelonaFoundation.framework */; };
+		1D0DC2B926618E6900E4B6FF /* BarcelonaFoundation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1DC28B61251ED59700A9A50E /* BarcelonaFoundation.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1D0DC2BC26618E6900E4B6FF /* CoreBarcelona.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* CoreBarcelona.framework */; };
+		1D0DC2BD26618E6900E4B6FF /* CoreBarcelona.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* CoreBarcelona.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1D0DC2C026618E6900E4B6FF /* SPMLibraries.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D9079FC250EE97500ED1EDC /* SPMLibraries.framework */; };
+		1D0DC2C126618E6900E4B6FF /* SPMLibraries.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D9079FC250EE97500ED1EDC /* SPMLibraries.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1D0DC2C52661900200E4B6FF /* BarcelonaMautrixIPC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D22AD5E265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework */; };
+		1D0DC2C62661900200E4B6FF /* BarcelonaMautrixIPC.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D22AD5E265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1D0DC2CA266190CB00E4B6FF /* BLLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0DC2C9266190CB00E4B6FF /* BLLogger.swift */; };
+		1D0DC2CC26619F3400E4B6FF /* LogCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0DC2CB26619F3400E4B6FF /* LogCommand.swift */; };
 		1D14A1C1250C170F001C5921 /* Message+LazilyResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D14A1C0250C170F001C5921 /* Message+LazilyResolvable.swift */; };
 		1D1ACA8B25DD865E00A04BB6 /* CreateMessageBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1ACA8A25DD865E00A04BB6 /* CreateMessageBase.swift */; };
 		1D1ACA9525DD869F00A04BB6 /* CreateMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1ACA9425DD869F00A04BB6 /* CreateMessage.swift */; };
@@ -37,17 +48,7 @@
 		1D22AD66265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D22AD5E265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1D22AD6A265C3D4A0095EE7E /* CoreBarcelona.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* CoreBarcelona.framework */; };
 		1D22AD6F265C3D540095EE7E /* SPMLibraries.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D9079FC250EE97500ED1EDC /* SPMLibraries.framework */; };
-		1D22AD7A265C3EB00095EE7E /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD79265C3EB00095EE7E /* main.swift */; };
-		1D22AD7E265C3ECB0095EE7E /* BarcelonaFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DC28B61251ED59700A9A50E /* BarcelonaFoundation.framework */; };
-		1D22AD7F265C3ECB0095EE7E /* BarcelonaFoundation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1DC28B61251ED59700A9A50E /* BarcelonaFoundation.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		1D22AD82265C3ECB0095EE7E /* BarcelonaMautrixIPC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D22AD5E265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework */; };
-		1D22AD83265C3ECB0095EE7E /* BarcelonaMautrixIPC.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D22AD5E265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		1D22AD86265C3ECB0095EE7E /* CoreBarcelona.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* CoreBarcelona.framework */; };
-		1D22AD87265C3ECB0095EE7E /* CoreBarcelona.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* CoreBarcelona.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		1D22AD8A265C3ECB0095EE7E /* SPMLibraries.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D9079FC250EE97500ED1EDC /* SPMLibraries.framework */; };
-		1D22AD8B265C3ECB0095EE7E /* SPMLibraries.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D9079FC250EE97500ED1EDC /* SPMLibraries.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		1D22AD90265C41620095EE7E /* BLMautrixTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD8F265C41620095EE7E /* BLMautrixTask.swift */; };
-		1D22AD92265C423A0095EE7E /* BLMautrixRuntimeConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD91265C423A0095EE7E /* BLMautrixRuntimeConfig.swift */; };
+		1D22AD90265C41620095EE7E /* BLStandardIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD8F265C41620095EE7E /* BLStandardIO.swift */; };
 		1D22AD95265C45D60095EE7E /* IPCCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD94265C45D60095EE7E /* IPCCommand.swift */; };
 		1D22AD98265C4EFD0095EE7E /* SendMessageCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD97265C4EFD0095EE7E /* SendMessageCommand.swift */; };
 		1D22AD9A265C4F250095EE7E /* SendMediaMessageCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD99265C4F250095EE7E /* SendMediaMessageCommand.swift */; };
@@ -175,6 +176,7 @@
 		1D5AEDF324E374EB00303692 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEDF224E374EB00303692 /* main.swift */; };
 		1D5B8F72251D8771001087F5 /* SSLManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5B8F71251D8771001087F5 /* SSLManager.swift */; };
 		1D5DA668251AA96B00BEE0AB /* PSKManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5DA667251AA96B00BEE0AB /* PSKManager.swift */; };
+		1D5FA00C265D8C970076DE0D /* ErrorCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5FA00B265D8C970076DE0D /* ErrorCommand.swift */; };
 		1D61DA692518F8AB00EF8027 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEDF224E374EB00303692 /* main.swift */; };
 		1D61DA6A2518F8AB00EF8027 /* ListenerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D907A72250F2D3900ED1EDC /* ListenerDelegate.swift */; };
 		1D61DA6B2518F8AB00EF8027 /* MessageXPCService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D907A70250F2CF000ED1EDC /* MessageXPCService.swift */; };
@@ -393,6 +395,34 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		1D0DC2BA26618E6900E4B6FF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1DC28B60251ED59700A9A50E;
+			remoteInfo = BarcelonaFoundation;
+		};
+		1D0DC2BE26618E6900E4B6FF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D44864424E85BBB00FF73F3;
+			remoteInfo = CoreBarcelona;
+		};
+		1D0DC2C226618E6900E4B6FF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D9079FB250EE97500ED1EDC;
+			remoteInfo = SPMLibraries;
+		};
+		1D0DC2C72661900200E4B6FF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D22AD5D265C3CCA0095EE7E;
+			remoteInfo = BarcelonaMautrixIPC;
+		};
 		1D22AD63265C3CCA0095EE7E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
@@ -408,34 +438,6 @@
 			remoteInfo = CoreBarcelona;
 		};
 		1D22AD71265C3D540095EE7E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 1D9079FB250EE97500ED1EDC;
-			remoteInfo = SPMLibraries;
-		};
-		1D22AD80265C3ECB0095EE7E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 1DC28B60251ED59700A9A50E;
-			remoteInfo = BarcelonaFoundation;
-		};
-		1D22AD84265C3ECB0095EE7E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 1D22AD5D265C3CCA0095EE7E;
-			remoteInfo = BarcelonaMautrixIPC;
-		};
-		1D22AD88265C3ECB0095EE7E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 1D44864424E85BBB00FF73F3;
-			remoteInfo = CoreBarcelona;
-		};
-		1D22AD8C265C3ECB0095EE7E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
 			proxyType = 1;
@@ -564,25 +566,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		1D22AD75265C3EB00095EE7E /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-		};
-		1D22AD8E265C3ECB0095EE7E /* Embed Frameworks */ = {
+		1D0DC2C426618E6900E4B6FF /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				1D22AD87265C3ECB0095EE7E /* CoreBarcelona.framework in Embed Frameworks */,
-				1D22AD83265C3ECB0095EE7E /* BarcelonaMautrixIPC.framework in Embed Frameworks */,
-				1D22AD7F265C3ECB0095EE7E /* BarcelonaFoundation.framework in Embed Frameworks */,
-				1D22AD8B265C3ECB0095EE7E /* SPMLibraries.framework in Embed Frameworks */,
+				1D0DC2C126618E6900E4B6FF /* SPMLibraries.framework in Embed Frameworks */,
+				1D0DC2B926618E6900E4B6FF /* BarcelonaFoundation.framework in Embed Frameworks */,
+				1D0DC2C62661900200E4B6FF /* BarcelonaMautrixIPC.framework in Embed Frameworks */,
+				1D0DC2BD26618E6900E4B6FF /* CoreBarcelona.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -675,6 +668,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1D0DC2AF26618E4E00E4B6FF /* barcelona-mautrix.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "barcelona-mautrix.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D0DC2B126618E4E00E4B6FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1D0DC2B526618E5800E4B6FF /* barcelona-mautrix-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "barcelona-mautrix-Bridging-Header.h"; sourceTree = "<group>"; };
+		1D0DC2B626618E5800E4B6FF /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		1D0DC2C9266190CB00E4B6FF /* BLLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLLogger.swift; sourceTree = "<group>"; };
+		1D0DC2CB26619F3400E4B6FF /* LogCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogCommand.swift; sourceTree = "<group>"; };
 		1D14A1C0250C170F001C5921 /* Message+LazilyResolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message+LazilyResolvable.swift"; sourceTree = "<group>"; };
 		1D14A1C4250C1C90001C5921 /* Collection+Safe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Collection+Safe.swift"; sourceTree = "<group>"; };
 		1D1ACA8A25DD865E00A04BB6 /* CreateMessageBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateMessageBase.swift; sourceTree = "<group>"; };
@@ -704,10 +703,7 @@
 		1D22AD5E265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaMautrixIPC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D22AD60265C3CCA0095EE7E /* BarcelonaMautrixIPC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BarcelonaMautrixIPC.h; sourceTree = "<group>"; };
 		1D22AD61265C3CCA0095EE7E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		1D22AD77265C3EB00095EE7E /* barcelona-mautrix */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "barcelona-mautrix"; sourceTree = BUILT_PRODUCTS_DIR; };
-		1D22AD79265C3EB00095EE7E /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		1D22AD8F265C41620095EE7E /* BLMautrixTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLMautrixTask.swift; sourceTree = "<group>"; };
-		1D22AD91265C423A0095EE7E /* BLMautrixRuntimeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLMautrixRuntimeConfig.swift; sourceTree = "<group>"; };
+		1D22AD8F265C41620095EE7E /* BLStandardIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLStandardIO.swift; sourceTree = "<group>"; };
 		1D22AD94265C45D60095EE7E /* IPCCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPCCommand.swift; sourceTree = "<group>"; };
 		1D22AD97265C4EFD0095EE7E /* SendMessageCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendMessageCommand.swift; sourceTree = "<group>"; };
 		1D22AD99265C4F250095EE7E /* SendMediaMessageCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendMediaMessageCommand.swift; sourceTree = "<group>"; };
@@ -892,6 +888,7 @@
 		1D5AEECF24E3838700303692 /* ERChatSubscriptionWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERChatSubscriptionWatcher.swift; sourceTree = "<group>"; };
 		1D5B8F71251D8771001087F5 /* SSLManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSLManager.swift; sourceTree = "<group>"; };
 		1D5DA667251AA96B00BEE0AB /* PSKManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PSKManager.swift; sourceTree = "<group>"; };
+		1D5FA00B265D8C970076DE0D /* ErrorCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorCommand.swift; sourceTree = "<group>"; };
 		1D61DA792518F8AB00EF8027 /* imessage-rest iOS.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = "imessage-rest iOS.xpc"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D67C144250ACBCF000A4D58 /* IMHandle+DestinationResolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMHandle+DestinationResolvable.swift"; sourceTree = "<group>"; };
 		1D6AB228252FB1510047B202 /* RichLinkExternalComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichLinkExternalComposition.swift; sourceTree = "<group>"; };
@@ -1026,6 +1023,17 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1D0DC2AC26618E4E00E4B6FF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D0DC2C026618E6900E4B6FF /* SPMLibraries.framework in Frameworks */,
+				1D0DC2B826618E6900E4B6FF /* BarcelonaFoundation.framework in Frameworks */,
+				1D0DC2C52661900200E4B6FF /* BarcelonaMautrixIPC.framework in Frameworks */,
+				1D0DC2BC26618E6900E4B6FF /* CoreBarcelona.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1D22AD5B265C3CCA0095EE7E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1033,17 +1041,6 @@
 				1D22AD6A265C3D4A0095EE7E /* CoreBarcelona.framework in Frameworks */,
 				1D22ADA2265C50550095EE7E /* IMCore.framework in Frameworks */,
 				1D22AD6F265C3D540095EE7E /* SPMLibraries.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		1D22AD74265C3EB00095EE7E /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				1D22AD86265C3ECB0095EE7E /* CoreBarcelona.framework in Frameworks */,
-				1D22AD82265C3ECB0095EE7E /* BarcelonaMautrixIPC.framework in Frameworks */,
-				1D22AD7E265C3ECB0095EE7E /* BarcelonaFoundation.framework in Frameworks */,
-				1D22AD8A265C3ECB0095EE7E /* SPMLibraries.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1162,6 +1159,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1D0DC2B026618E4E00E4B6FF /* barcelona-mautrix */ = {
+			isa = PBXGroup;
+			children = (
+				1D0DC2B126618E4E00E4B6FF /* Info.plist */,
+				1D0DC2B626618E5800E4B6FF /* main.swift */,
+				1D0DC2B526618E5800E4B6FF /* barcelona-mautrix-Bridging-Header.h */,
+			);
+			path = "barcelona-mautrix";
+			sourceTree = "<group>";
+		};
 		1D14A1C6250C1CBF001C5921 /* ProfilePictures */ = {
 			isa = PBXGroup;
 			children = (
@@ -1277,18 +1284,10 @@
 				1D22AD93265C45BB0095EE7E /* Commands */,
 				1D22AD60265C3CCA0095EE7E /* BarcelonaMautrixIPC.h */,
 				1D22AD61265C3CCA0095EE7E /* Info.plist */,
-				1D22AD8F265C41620095EE7E /* BLMautrixTask.swift */,
-				1D22AD91265C423A0095EE7E /* BLMautrixRuntimeConfig.swift */,
+				1D22AD8F265C41620095EE7E /* BLStandardIO.swift */,
+				1D0DC2C9266190CB00E4B6FF /* BLLogger.swift */,
 			);
 			path = BarcelonaMautrixIPC;
-			sourceTree = "<group>";
-		};
-		1D22AD78265C3EB00095EE7E /* barcelona-mautrix */ = {
-			isa = PBXGroup;
-			children = (
-				1D22AD79265C3EB00095EE7E /* main.swift */,
-			);
-			path = "barcelona-mautrix";
 			sourceTree = "<group>";
 		};
 		1D22AD93265C45BB0095EE7E /* Commands */ = {
@@ -1317,6 +1316,8 @@
 				1D22ADAF265C515E0095EE7E /* GetContactCommand.swift */,
 				1D22ADB3265C523E0095EE7E /* GetMessagesAfterCommand.swift */,
 				1D22ADB5265C52650095EE7E /* GetRecentMessagesCommand.swift */,
+				1D5FA00B265D8C970076DE0D /* ErrorCommand.swift */,
+				1D0DC2CB26619F3400E4B6FF /* LogCommand.swift */,
 			);
 			path = Requests;
 			sourceTree = "<group>";
@@ -1566,7 +1567,7 @@
 				1D3150A025215CC900F2DF7C /* MyMessage for iOS */,
 				1D31513725253B6E00F2DF7C /* BarcelonaSharedUI */,
 				1D22AD5F265C3CCA0095EE7E /* BarcelonaMautrixIPC */,
-				1D22AD78265C3EB00095EE7E /* barcelona-mautrix */,
+				1D0DC2B026618E4E00E4B6FF /* barcelona-mautrix */,
 				1D5AEDAF24E3725200303692 /* Products */,
 				1D5AEDBE24E373ED00303692 /* Frameworks */,
 			);
@@ -1585,7 +1586,7 @@
 				1D31509F25215CC900F2DF7C /* MyMessage for iOS.app */,
 				1D31513625253B6E00F2DF7C /* BarcelonaSharedUI.framework */,
 				1D22AD5E265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework */,
-				1D22AD77265C3EB00095EE7E /* barcelona-mautrix */,
+				1D0DC2AF26618E4E00E4B6FF /* barcelona-mautrix.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2136,6 +2137,28 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		1D0DC2AE26618E4E00E4B6FF /* barcelona-mautrix */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1D0DC2B226618E4E00E4B6FF /* Build configuration list for PBXNativeTarget "barcelona-mautrix" */;
+			buildPhases = (
+				1D0DC2AB26618E4E00E4B6FF /* Sources */,
+				1D0DC2AC26618E4E00E4B6FF /* Frameworks */,
+				1D0DC2AD26618E4E00E4B6FF /* Resources */,
+				1D0DC2C426618E6900E4B6FF /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1D0DC2BB26618E6900E4B6FF /* PBXTargetDependency */,
+				1D0DC2BF26618E6900E4B6FF /* PBXTargetDependency */,
+				1D0DC2C326618E6900E4B6FF /* PBXTargetDependency */,
+				1D0DC2C82661900200E4B6FF /* PBXTargetDependency */,
+			);
+			name = "barcelona-mautrix";
+			productName = "mautrix-imessage";
+			productReference = 1D0DC2AF26618E4E00E4B6FF /* barcelona-mautrix.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
 		1D22AD5D265C3CCA0095EE7E /* BarcelonaMautrixIPC */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1D22AD69265C3CCA0095EE7E /* Build configuration list for PBXNativeTarget "BarcelonaMautrixIPC" */;
@@ -2155,28 +2178,6 @@
 			productName = BarcelonaMautrixIPC;
 			productReference = 1D22AD5E265C3CCA0095EE7E /* BarcelonaMautrixIPC.framework */;
 			productType = "com.apple.product-type.framework";
-		};
-		1D22AD76265C3EB00095EE7E /* barcelona-mautrix */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 1D22AD7B265C3EB00095EE7E /* Build configuration list for PBXNativeTarget "barcelona-mautrix" */;
-			buildPhases = (
-				1D22AD73265C3EB00095EE7E /* Sources */,
-				1D22AD74265C3EB00095EE7E /* Frameworks */,
-				1D22AD75265C3EB00095EE7E /* CopyFiles */,
-				1D22AD8E265C3ECB0095EE7E /* Embed Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				1D22AD81265C3ECB0095EE7E /* PBXTargetDependency */,
-				1D22AD85265C3ECB0095EE7E /* PBXTargetDependency */,
-				1D22AD89265C3ECB0095EE7E /* PBXTargetDependency */,
-				1D22AD8D265C3ECB0095EE7E /* PBXTargetDependency */,
-			);
-			name = "barcelona-mautrix";
-			productName = "barcelona-mautrix";
-			productReference = 1D22AD77265C3EB00095EE7E /* barcelona-mautrix */;
-			productType = "com.apple.product-type.tool";
 		};
 		1D31509E25215CC900F2DF7C /* MyMessage for iOS */ = {
 			isa = PBXNativeTarget;
@@ -2393,12 +2394,13 @@
 				LastUpgradeCheck = 1160;
 				ORGANIZATIONNAME = "Eric Rabil";
 				TargetAttributes = {
-					1D22AD5D265C3CCA0095EE7E = {
+					1D0DC2AE26618E4E00E4B6FF = {
 						CreatedOnToolsVersion = 12.5;
 						LastSwiftMigration = 1250;
 					};
-					1D22AD76265C3EB00095EE7E = {
+					1D22AD5D265C3CCA0095EE7E = {
 						CreatedOnToolsVersion = 12.5;
+						LastSwiftMigration = 1250;
 					};
 					1D31509E25215CC900F2DF7C = {
 						CreatedOnToolsVersion = 11.5;
@@ -2462,12 +2464,19 @@
 				1D31509E25215CC900F2DF7C /* MyMessage for iOS */,
 				1D31513525253B6E00F2DF7C /* BarcelonaSharedUI */,
 				1D22AD5D265C3CCA0095EE7E /* BarcelonaMautrixIPC */,
-				1D22AD76265C3EB00095EE7E /* barcelona-mautrix */,
+				1D0DC2AE26618E4E00E4B6FF /* barcelona-mautrix */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		1D0DC2AD26618E4E00E4B6FF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1D22AD5C265C3CCA0095EE7E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2550,13 +2559,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		1D0DC2AB26618E4E00E4B6FF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D0DC2B726618E5800E4B6FF /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1D22AD5A265C3CCA0095EE7E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				1D22ADAC265C51270095EE7E /* GetGroupChatInfoCommand.swift in Sources */,
 				1D22ADB4265C523E0095EE7E /* GetMessagesAfterCommand.swift in Sources */,
+				1D0DC2CA266190CB00E4B6FF /* BLLogger.swift in Sources */,
 				1D22ADA8265C50C00095EE7E /* SendTypingCommand.swift in Sources */,
+				1D0DC2CC26619F3400E4B6FF /* LogCommand.swift in Sources */,
 				1D22ADC1265C599A0095EE7E /* BLAssociatedMessage.swift in Sources */,
 				1D22AD95265C45D60095EE7E /* IPCCommand.swift in Sources */,
 				1D22ADCB265C5A8F0095EE7E /* BLContact.swift in Sources */,
@@ -2568,27 +2587,19 @@
 				1D22ADCD265C5B0C0095EE7E /* BLMessageStatus.swift in Sources */,
 				1D22ADB6265C52650095EE7E /* GetRecentMessagesCommand.swift in Sources */,
 				1D22AD98265C4EFD0095EE7E /* SendMessageCommand.swift in Sources */,
+				1D5FA00C265D8C970076DE0D /* ErrorCommand.swift in Sources */,
 				1D22ADA6265C50730095EE7E /* SendReadReceiptCommand.swift in Sources */,
 				1D22AD9D265C4F540095EE7E /* ChatResolvable.swift in Sources */,
 				1D22ADAE265C51450095EE7E /* GetGroupChatAvatarCommand.swift in Sources */,
-				1D22AD90265C41620095EE7E /* BLMautrixTask.swift in Sources */,
+				1D22AD90265C41620095EE7E /* BLStandardIO.swift in Sources */,
 				1D22ADC5265C5A080095EE7E /* BLTypingNotification.swift in Sources */,
 				1D22AD9F265C4FCB0095EE7E /* TapbackCommand.swift in Sources */,
 				1D22ADB0265C515E0095EE7E /* GetContactCommand.swift in Sources */,
 				1D22ADCF265C5B710095EE7E /* BLStruct.swift in Sources */,
 				1D22ADC7265C5A240095EE7E /* BLChat.swift in Sources */,
-				1D22AD92265C423A0095EE7E /* BLMautrixRuntimeConfig.swift in Sources */,
 				1D22AD9A265C4F250095EE7E /* SendMediaMessageCommand.swift in Sources */,
 				1D22ADA1265C4FF30095EE7E /* TargetResolvable.swift in Sources */,
 				1D22ADAA265C50DE0095EE7E /* GetChatsCommand.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		1D22AD73265C3EB00095EE7E /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				1D22AD7A265C3EB00095EE7E /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2908,6 +2919,26 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1D0DC2BB26618E6900E4B6FF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1DC28B60251ED59700A9A50E /* BarcelonaFoundation */;
+			targetProxy = 1D0DC2BA26618E6900E4B6FF /* PBXContainerItemProxy */;
+		};
+		1D0DC2BF26618E6900E4B6FF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D44864424E85BBB00FF73F3 /* CoreBarcelona */;
+			targetProxy = 1D0DC2BE26618E6900E4B6FF /* PBXContainerItemProxy */;
+		};
+		1D0DC2C326618E6900E4B6FF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D9079FB250EE97500ED1EDC /* SPMLibraries */;
+			targetProxy = 1D0DC2C226618E6900E4B6FF /* PBXContainerItemProxy */;
+		};
+		1D0DC2C82661900200E4B6FF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D22AD5D265C3CCA0095EE7E /* BarcelonaMautrixIPC */;
+			targetProxy = 1D0DC2C72661900200E4B6FF /* PBXContainerItemProxy */;
+		};
 		1D22AD64265C3CCA0095EE7E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1D22AD5D265C3CCA0095EE7E /* BarcelonaMautrixIPC */;
@@ -2922,26 +2953,6 @@
 			isa = PBXTargetDependency;
 			target = 1D9079FB250EE97500ED1EDC /* SPMLibraries */;
 			targetProxy = 1D22AD71265C3D540095EE7E /* PBXContainerItemProxy */;
-		};
-		1D22AD81265C3ECB0095EE7E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 1DC28B60251ED59700A9A50E /* BarcelonaFoundation */;
-			targetProxy = 1D22AD80265C3ECB0095EE7E /* PBXContainerItemProxy */;
-		};
-		1D22AD85265C3ECB0095EE7E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 1D22AD5D265C3CCA0095EE7E /* BarcelonaMautrixIPC */;
-			targetProxy = 1D22AD84265C3ECB0095EE7E /* PBXContainerItemProxy */;
-		};
-		1D22AD89265C3ECB0095EE7E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 1D44864424E85BBB00FF73F3 /* CoreBarcelona */;
-			targetProxy = 1D22AD88265C3ECB0095EE7E /* PBXContainerItemProxy */;
-		};
-		1D22AD8D265C3ECB0095EE7E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 1D9079FB250EE97500ED1EDC /* SPMLibraries */;
-			targetProxy = 1D22AD8C265C3ECB0095EE7E /* PBXContainerItemProxy */;
 		};
 		1D3150C425215E1E00F2DF7C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3054,6 +3065,79 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		1D0DC2B326618E4E00E4B6FF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					arm64,
+				);
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
+				INFOPLIST_FILE = "barcelona-mautrix/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACH_O_TYPE = mh_execute;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.apple.ericrabil.barcelona-mautrix";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = "";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "macosx iphonesimulator iphoneos";
+				SWIFT_OBJC_BRIDGING_HEADER = "barcelona-mautrix/barcelona-mautrix-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Debug;
+		};
+		1D0DC2B426618E4E00E4B6FF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					arm64,
+				);
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
+				INFOPLIST_FILE = "barcelona-mautrix/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACH_O_TYPE = mh_execute;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.apple.ericrabil.barcelona-mautrix";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = "";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "macosx iphonesimulator iphoneos";
+				SWIFT_OBJC_BRIDGING_HEADER = "barcelona-mautrix/barcelona-mautrix-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Release;
+		};
 		1D22AD67265C3CCA0095EE7E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -3081,7 +3165,6 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.apple.ericrabil.BarcelonaMautrixIPC;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SDKROOT = "";
@@ -3121,7 +3204,6 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.apple.ericrabil.BarcelonaMautrixIPC;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SDKROOT = "";
@@ -3131,35 +3213,6 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
-		};
-		1D22AD7C265C3EB00095EE7E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 6UW2D7F2RU;
-				ENABLE_HARDENED_RUNTIME = YES;
-				MACOSX_DEPLOYMENT_TARGET = 11.3;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Debug;
-		};
-		1D22AD7D265C3EB00095EE7E /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 6UW2D7F2RU;
-				ENABLE_HARDENED_RUNTIME = YES;
-				MACOSX_DEPLOYMENT_TARGET = 11.3;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -3997,20 +4050,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1D0DC2B226618E4E00E4B6FF /* Build configuration list for PBXNativeTarget "barcelona-mautrix" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1D0DC2B326618E4E00E4B6FF /* Debug */,
+				1D0DC2B426618E4E00E4B6FF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		1D22AD69265C3CCA0095EE7E /* Build configuration list for PBXNativeTarget "BarcelonaMautrixIPC" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1D22AD67265C3CCA0095EE7E /* Debug */,
 				1D22AD68265C3CCA0095EE7E /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		1D22AD7B265C3EB00095EE7E /* Build configuration list for PBXNativeTarget "barcelona-mautrix" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				1D22AD7C265C3EB00095EE7E /* Debug */,
-				1D22AD7D265C3EB00095EE7E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

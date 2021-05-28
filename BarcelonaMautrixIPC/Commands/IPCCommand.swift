@@ -31,13 +31,15 @@ public enum IPCCommand: Codable {
     case chat(BLChat)
     case contact(BLContact)
     case send_message_status(BLMessageStatus)
+    case error(ErrorCommand)
+    case log(LogCommand)
     
     private enum CodingKeys: CodingKey, CaseIterable {
         case command
         case data
     }
     
-    private enum CommandName: String, Codable {
+    public enum CommandName: String, Codable {
         case send_message
         case send_media
         case send_tapback
@@ -55,9 +57,11 @@ public enum IPCCommand: Codable {
         case chat
         case contact
         case send_message_status
+        case error
+        case log
     }
 
-    private var commandName: CommandName {
+    public var commandName: CommandName {
         switch self {
         case .send_message(_): return .send_message
         case .send_media(_): return .send_media
@@ -76,6 +80,8 @@ public enum IPCCommand: Codable {
         case .chat(_): return .chat
         case .contact(_): return .contact
         case .send_message_status(_): return .send_message_status
+        case .error(_): return .error
+        case .log(_): return .log
         }
     }
 
@@ -118,6 +124,10 @@ public enum IPCCommand: Codable {
         case .contact(let command):
             try container.encode(command, forKey: .data)
         case .send_message_status(let command):
+            try container.encode(command, forKey: .data)
+        case .error(let command):
+            try container.encode(command, forKey: .data)
+        case .log(let command):
             try container.encode(command, forKey: .data)
         }
     }
@@ -162,8 +172,13 @@ public enum IPCCommand: Codable {
             self = .contact(try container.decode(BLContact.self, forKey: .data))
         case .send_message_status:
             self = .send_message_status(try container.decode(BLMessageStatus.self, forKey: .data))
+        case .error:
+            self = .error(try container.decode(ErrorCommand.self, forKey: .data))
+        case .log:
+            self = .log(try container.decode(LogCommand.self, forKey: .data))
         }
-    }}
+    }
+}
 
 public struct IPCPayload: Codable {
     public var command: IPCCommand
@@ -176,14 +191,32 @@ public struct IPCPayload: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
-        try container.encode(id, forKey: .id)
+        if command.commandName != .log {
+            try container.encode(id, forKey: .id)
+        }
+        
         try command.encode(to: encoder)
     }
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        id = try container.decode(Int.self, forKey: .id)
         command = try IPCCommand(from: decoder)
+        let commandID = try? container.decode(Int.self, forKey: .id)
+        
+        if command.commandName != .log, commandID == nil {
+            throw DecodingError.valueNotFound(Int.self, .init(codingPath: [CodingKeys.id], debugDescription: "Command ID not provided but it was not a logging message"))
+        }
+        
+        id = commandID ?? -1
+    }
+    
+    public init(id: Int, command: IPCCommand) {
+        self.id = id
+        self.command = command
+    }
+    
+    public func reply(withCommand command: IPCCommand) {
+        BLWritePayload(IPCPayload(id: id, command: command))
     }
 }
