@@ -91,12 +91,13 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
         decoder.dateDecodingStrategy = .iso8601
         
         for chunk in chunks {
-            guard let payload = try? JSONDecoder().decode(IPCPayload.self, from: chunk) else {
-                BLWarn("Received malformed payload", module: "BLStandardIO")
-                continue
+            do {
+                let payload = try JSONDecoder().decode(IPCPayload.self, from: chunk)
+                cb(payload)
+            } catch {
+                BLWarn("Failed to decode payload: %@", module: "BCStandardIO", error.localizedDescription)
+                BLInfo("Raw payload: %@", module: "BCStandardIO", String(data: chunk, encoding: .utf8)!)
             }
-            
-            cb(payload)
         }
     }
 }
