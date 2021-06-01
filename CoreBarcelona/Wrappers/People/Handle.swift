@@ -42,16 +42,16 @@ public struct Handle: Codable, Equatable {
         return lhs.id == rhs.id
     }
     
-    init(_ handle: IMHandle) {
+    public init(_ handle: IMHandle) {
         id = handle.id
         format = id.style
     }
     
-    init(id: String, isBusiness: Bool) {
+    public init(id: String, isBusiness: Bool) {
         self.id = id
         self.format = id.style
     }
     
-    var id: String
-    var format: HandleIDStyle
+    public var id: String
+    public var format: HandleIDStyle
 }
