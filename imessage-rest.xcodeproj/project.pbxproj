@@ -309,6 +309,7 @@
 		1DB6D7D7251920310061A0D9 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 1DB6D7D6251920310061A0D9 /* GRDB */; };
 		1DB6D7D9251920340061A0D9 /* AnyCodable in Frameworks */ = {isa = PBXBuildFile; productRef = 1DB6D7D8251920340061A0D9 /* AnyCodable */; };
 		1DB9059025E58E120087D014 /* Image+AsPNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB9058F25E58E120087D014 /* Image+AsPNG.swift */; };
+		1DC05C522666D920004DD35D /* IMCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD424E3744900303692 /* IMCore.framework */; };
 		1DC28B65251ED59700A9A50E /* BarcelonaFoundation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DC28B63251ED59700A9A50E /* BarcelonaFoundation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1DC28B6A251ED5AB00A9A50E /* CoreXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC28B69251ED5AB00A9A50E /* CoreXPC.swift */; };
 		1DC28B6C251ED6C800A9A50E /* XPCType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC28B6B251ED6C800A9A50E /* XPCType.swift */; };
@@ -972,6 +973,7 @@
 		1DB6D7D3251913890061A0D9 /* kern_memorystatus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kern_memorystatus.h; sourceTree = "<group>"; };
 		1DB9058F25E58E120087D014 /* Image+AsPNG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Image+AsPNG.swift"; sourceTree = "<group>"; };
 		1DB9520624F6B8BF004CC87B /* AttributedStringSerializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributedStringSerializer.swift; sourceTree = "<group>"; };
+		1DC05C542666D962004DD35D /* barcelona-mautrix.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "barcelona-mautrix.entitlements"; sourceTree = "<group>"; };
 		1DC28B61251ED59700A9A50E /* BarcelonaFoundation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaFoundation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DC28B63251ED59700A9A50E /* BarcelonaFoundation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BarcelonaFoundation.h; sourceTree = "<group>"; };
 		1DC28B64251ED59700A9A50E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -1165,6 +1167,7 @@
 				1D0DC2B126618E4E00E4B6FF /* Info.plist */,
 				1D0DC2B626618E5800E4B6FF /* main.swift */,
 				1D0DC2B526618E5800E4B6FF /* barcelona-mautrix-Bridging-Header.h */,
+				1DC05C542666D962004DD35D /* barcelona-mautrix.entitlements */,
 			);
 			path = "barcelona-mautrix";
 			sourceTree = "<group>";
@@ -3080,6 +3083,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
 				INFOPLIST_FILE = "barcelona-mautrix/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -3117,6 +3124,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
 				INFOPLIST_FILE = "barcelona-mautrix/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				LD_RUNPATH_SEARCH_PATHS = (
