@@ -7,9 +7,20 @@
 //
 
 import Foundation
+import CoreBarcelona
 
 public struct BLAttachment: Codable {
     public var mime_type: String?
     public var file_name: String
     public var path_on_disk: String
+    
+    public init?(guid: String) {
+        guard let attachment = Attachment(guid: guid) else {
+            return nil
+        }
+        
+        mime_type = attachment.mime
+        file_name = attachment.filename ?? guid
+        path_on_disk = attachment.path!
+    }
 }

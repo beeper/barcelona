@@ -9,5 +9,5 @@
 import Foundation
 
 public struct GetChatsCommand: Codable {
-    public var min_timestamp: Int
+    public var min_timestamp: Double
 }

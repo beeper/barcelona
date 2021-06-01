@@ -95,7 +95,7 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
                 let payload = try JSONDecoder().decode(IPCPayload.self, from: chunk)
                 cb(payload)
             } catch {
-                BLWarn("Failed to decode payload: %@", module: "BCStandardIO", error.localizedDescription)
+                BLWarn("Failed to decode payload: %@", module: "BCStandardIO", "\(error)")
                 BLInfo("Raw payload: %@", module: "BCStandardIO", String(data: chunk, encoding: .utf8)!)
             }
         }

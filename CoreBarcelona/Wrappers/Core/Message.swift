@@ -134,6 +134,7 @@ public struct Message: ChatItemRepresentation {
         if #available(iOS 14, macOS 10.16, watchOS 7, *) {
             threadIdentifier = message.threadIdentifier()
             threadOriginator = message.threadOriginator()?.guid
+            
         }
     }
     
@@ -160,4 +161,5 @@ public struct Message: ChatItemRepresentation {
     public var associatedMessageID: String?
     public var threadIdentifier: String?
     public var threadOriginator: String?
+    public var threadOriginatorPart: Int?
 }

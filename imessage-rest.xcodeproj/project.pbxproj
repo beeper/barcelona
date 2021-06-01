@@ -309,6 +309,7 @@
 		1DB6D7D7251920310061A0D9 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 1DB6D7D6251920310061A0D9 /* GRDB */; };
 		1DB6D7D9251920340061A0D9 /* AnyCodable in Frameworks */ = {isa = PBXBuildFile; productRef = 1DB6D7D8251920340061A0D9 /* AnyCodable */; };
 		1DB9059025E58E120087D014 /* Image+AsPNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB9058F25E58E120087D014 /* Image+AsPNG.swift */; };
+		1DC05C512666D790004DD35D /* IPCResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC05C502666D790004DD35D /* IPCResponse.swift */; };
 		1DC05C522666D920004DD35D /* IMCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD424E3744900303692 /* IMCore.framework */; };
 		1DC28B65251ED59700A9A50E /* BarcelonaFoundation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DC28B63251ED59700A9A50E /* BarcelonaFoundation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1DC28B6A251ED5AB00A9A50E /* CoreXPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC28B69251ED5AB00A9A50E /* CoreXPC.swift */; };
@@ -973,6 +974,7 @@
 		1DB6D7D3251913890061A0D9 /* kern_memorystatus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kern_memorystatus.h; sourceTree = "<group>"; };
 		1DB9058F25E58E120087D014 /* Image+AsPNG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Image+AsPNG.swift"; sourceTree = "<group>"; };
 		1DB9520624F6B8BF004CC87B /* AttributedStringSerializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributedStringSerializer.swift; sourceTree = "<group>"; };
+		1DC05C502666D790004DD35D /* IPCResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPCResponse.swift; sourceTree = "<group>"; };
 		1DC05C542666D962004DD35D /* barcelona-mautrix.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "barcelona-mautrix.entitlements"; sourceTree = "<group>"; };
 		1DC28B61251ED59700A9A50E /* BarcelonaFoundation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaFoundation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DC28B63251ED59700A9A50E /* BarcelonaFoundation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BarcelonaFoundation.h; sourceTree = "<group>"; };
@@ -1031,6 +1033,7 @@
 			files = (
 				1D0DC2C026618E6900E4B6FF /* SPMLibraries.framework in Frameworks */,
 				1D0DC2B826618E6900E4B6FF /* BarcelonaFoundation.framework in Frameworks */,
+				1DC05C522666D920004DD35D /* IMCore.framework in Frameworks */,
 				1D0DC2C52661900200E4B6FF /* BarcelonaMautrixIPC.framework in Frameworks */,
 				1D0DC2BC26618E6900E4B6FF /* CoreBarcelona.framework in Frameworks */,
 			);
@@ -1296,6 +1299,7 @@
 		1D22AD93265C45BB0095EE7E /* Commands */ = {
 			isa = PBXGroup;
 			children = (
+				1DC05C4F2666D76C004DD35D /* Response */,
 				1D22ADBD265C596D0095EE7E /* Structs */,
 				1D22AD9B265C4F400095EE7E /* Protocols */,
 				1D22AD96265C4EEF0095EE7E /* Requests */,
@@ -1911,6 +1915,14 @@
 				1DB9520624F6B8BF004CC87B /* AttributedStringSerializer.swift */,
 			);
 			path = AttributedString;
+			sourceTree = "<group>";
+		};
+		1DC05C4F2666D76C004DD35D /* Response */ = {
+			isa = PBXGroup;
+			children = (
+				1DC05C502666D790004DD35D /* IPCResponse.swift */,
+			);
+			path = Response;
 			sourceTree = "<group>";
 		};
 		1DC28B62251ED59700A9A50E /* BarcelonaFoundation */ = {
@@ -2577,6 +2589,7 @@
 				1D22ADAC265C51270095EE7E /* GetGroupChatInfoCommand.swift in Sources */,
 				1D22ADB4265C523E0095EE7E /* GetMessagesAfterCommand.swift in Sources */,
 				1D0DC2CA266190CB00E4B6FF /* BLLogger.swift in Sources */,
+				1DC05C512666D790004DD35D /* IPCResponse.swift in Sources */,
 				1D22ADA8265C50C00095EE7E /* SendTypingCommand.swift in Sources */,
 				1D0DC2CC26619F3400E4B6FF /* LogCommand.swift in Sources */,
 				1D22ADC1265C599A0095EE7E /* BLAssociatedMessage.swift in Sources */,

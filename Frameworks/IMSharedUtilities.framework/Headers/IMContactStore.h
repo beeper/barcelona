@@ -101,7 +101,7 @@
 - (void)setBatchFetchingCompleted;
 - (BOOL)isBatchFetchingForLaunchCompleted;
 - (id)completedContact:(id)arg1 withKeys:(id)arg2;
-- (id)fetchCNContactForHandleWithID:(id)arg1;
+- (CNContact* _Nullable)fetchCNContactForHandleWithID:(id)arg1;
 - (id)fetchCNContactForHandleID:(id)arg1 withKeys:(id)arg2;
 - (void)fetchCNContactsForHandlesWithIDs:(id)arg1 isFinalBatch:(BOOL)arg2;
 - (void)cacheBatchFetchResults:(id)arg1 handleIDsWithoutCNID:(id)arg2;

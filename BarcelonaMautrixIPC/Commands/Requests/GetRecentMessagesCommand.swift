@@ -10,5 +10,5 @@ import Foundation
 
 public struct GetRecentMessagesCommand: Codable, ChatResolvable {
     public var chat_guid: String
-    public var limit: Int
+    public var limit: Int?
 }

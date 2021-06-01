@@ -15,6 +15,14 @@ public protocol ContactResolvable {
 
 public extension ContactResolvable {
     var contact: CNContact? {
-        CNContact.resolve(withIdentifier: user_guid)
+        IMContactStore.shared.fetchCNContactForHandle(withID: user_guid)
+    }
+    
+    var blContact: BLContact? {
+        guard let contact = contact else {
+            return nil
+        }
+        
+        return contact.barcelonaContact.blContact(withGUID: user_guid, avatar: contact.thumbnailImage(size: 0)?.data.base64EncodedString())
     }
 }

@@ -7,6 +7,36 @@
 //
 
 import Foundation
+import Contacts
+import CoreBarcelona
+
+public extension CNContact {
+    var barcelonaContact: Contact {
+        Contact(self)
+    }
+}
+
+public extension Contact {
+    func blContact(withGUID guid: String, avatar: String? = nil) -> BLContact {
+        BLContact(first_name: firstName, last_name: lastName, nickname: nickname, avatar: avatar, phones: phoneNumbers, emails: emailAddresses, user_guid: guid, contact_id: id)
+    }
+    
+    var phoneNumbers: [String] {
+        handles.filter {
+            $0.format == .phoneNumber
+        }.map {
+            $0.id
+        }
+    }
+    
+    var emailAddresses: [String] {
+        handles.filter {
+            $0.format == .email
+        }.map {
+            $0.id
+        }
+    }
+}
 
 public struct BLContact: Codable {
     public var first_name: String?

@@ -22,6 +22,17 @@ public struct ContactSearchParameters: QueryParameters {
     public var limit: Int?
     public var page: Int?
     
+    public init(ids: [String]? = nil, first_name: String? = nil, last_name: String? = nil, nickname: String? = nil, has_picture: Bool? = nil, handles: [String]? = nil, limit: Int? = nil, page: Int? = nil) {
+        self.ids = ids
+        self.first_name = first_name
+        self.last_name = last_name
+        self.nickname = nickname
+        self.has_picture = has_picture
+        self.handles = handles
+        self.limit = limit
+        self.page = page
+    }
+    
     fileprivate var parameters: [ContactSearchParameter] {
         var parameters: [ContactSearchParameter] = []
         
@@ -106,19 +117,19 @@ private enum ContactSearchParameter: SearchParameter {
 }
 
 extension Contact: Searchable {
-    public static func resolve(withParameters rawParameters: ContactSearchParameters, on eventLoop: EventLoop?) -> EventLoopFuture<[Contact]> {
-        let eventLoop = eventLoop ?? messageQuerySystem.next()
-        
+    public static func resolve(withParameters rawParameters: ContactSearchParameters) -> [Contact] {
         let parameters = rawParameters.parameters
         
-        if parameters.count == 0 {
-            return eventLoop.makeSucceededFuture([])
+        guard parameters.count > 0 else {
+            return []
         }
         
-        return eventLoop.makeSucceededFuture(IMContactStore.sharedInstance()!.allContacts.filter {
-            parameters.test($0)
-        }.map {
+        return IMContactStore.sharedInstance()!.allContacts.filter(parameters.test).map {
             Contact($0)
-        })
+        }
+    }
+    
+    public static func resolve(withParameters rawParameters: ContactSearchParameters, on eventLoop: EventLoop?) -> EventLoopFuture<[Contact]> {
+        (eventLoop ?? messageQuerySystem.next()).makeSucceededFuture(resolve(withParameters: rawParameters))
     }
 }

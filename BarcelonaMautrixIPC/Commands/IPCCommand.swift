@@ -12,6 +12,18 @@ public struct _IPCCommand: Codable {
     public var hello: Bool
 }
 
+public struct IPCError: Error {
+    public let message: String?
+    
+    public init(_ message: String? = nil) {
+        self.message = message
+    }
+    
+    public var localizedDescription: String {
+        self.message ?? "An unknown error occurred"
+    }
+}
+
 /// Need to update the enums codable data? Paste the cases at the top into IPCCommand.codegen.js and then paste the output of that below the CodingKeys declaration
 public enum IPCCommand: Codable {
     case send_message(SendMessageCommand)
@@ -33,6 +45,7 @@ public enum IPCCommand: Codable {
     case send_message_status(BLMessageStatus)
     case error(ErrorCommand)
     case log(LogCommand)
+    case response(IPCResponse)
     
     private enum CodingKeys: CodingKey, CaseIterable {
         case command
@@ -59,9 +72,10 @@ public enum IPCCommand: Codable {
         case send_message_status
         case error
         case log
+        case response
     }
 
-    public var commandName: CommandName {
+    public var name: CommandName {
         switch self {
         case .send_message(_): return .send_message
         case .send_media(_): return .send_media
@@ -82,13 +96,14 @@ public enum IPCCommand: Codable {
         case .send_message_status(_): return .send_message_status
         case .error(_): return .error
         case .log(_): return .log
+        case .response(_): return .response
         }
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encode(commandName, forKey: .command)
+        try container.encode(name, forKey: .command)
 
         switch self {
         case .send_message(let command):
@@ -128,6 +143,8 @@ public enum IPCCommand: Codable {
         case .error(let command):
             try container.encode(command, forKey: .data)
         case .log(let command):
+            try container.encode(command, forKey: .data)
+        case .response(let command):
             try container.encode(command, forKey: .data)
         }
     }
@@ -176,6 +193,8 @@ public enum IPCCommand: Codable {
             self = .error(try container.decode(ErrorCommand.self, forKey: .data))
         case .log:
             self = .log(try container.decode(LogCommand.self, forKey: .data))
+        case .response:
+            throw IPCError("Responses cannot be decoded until they have a type identifier")
         }
     }
 }
@@ -191,7 +210,7 @@ public struct IPCPayload: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
-        if command.commandName != .log {
+        if command.name != .log {
             try container.encode(id, forKey: .id)
         }
         
@@ -204,7 +223,7 @@ public struct IPCPayload: Codable {
         command = try IPCCommand(from: decoder)
         let commandID = try? container.decode(Int.self, forKey: .id)
         
-        if command.commandName != .log, commandID == nil {
+        if command.name != .log, commandID == nil {
             throw DecodingError.valueNotFound(Int.self, .init(codingPath: [CodingKeys.id], debugDescription: "Command ID not provided but it was not a logging message"))
         }
         

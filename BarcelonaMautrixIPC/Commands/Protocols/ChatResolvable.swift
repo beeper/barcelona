@@ -14,7 +14,7 @@ public protocol ChatResolvable {
 }
 
 public extension ChatResolvable {
-    var chat: Chat? {
-        Chat.resolve(withIdentifier: chat_guid)
+    var chat: IMChat? {
+        IMChatRegistry.shared.existingChat(withGUID: chat_guid)
     }
 }

@@ -120,6 +120,10 @@ public struct Attachment: Codable {
     public var origin: ResourceOrigin?
     public var size: Size?
     public var sticker: StickerInformation?
+    
+    public var path: String? {
+        IMFileTransferCenter.sharedInstance()!.transfer(forGUID: id, includeRemoved: false)?.localPath
+    }
 }
 
 private func ERRegisterFileTransferForGUID(transfer: IMFileTransfer, guid: String) {
