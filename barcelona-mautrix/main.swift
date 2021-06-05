@@ -48,35 +48,67 @@ func BLOnceReady(_ block: @escaping () -> ()) {
     BLReadyProtocols[nonce] = observer
 }
 
+extension Array where Element == IMServiceStyle {
+    static let CBMessageServices: [IMServiceStyle] = [.iMessage, .SMS]
+}
+
+extension Array where Element == ChatItem {
+    var messages: [Message] {
+        compactMap {
+            guard case let .message(item) = $0 else {
+                return nil
+            }
+            
+            return item
+        }
+    }
+    
+    var blMessages: [BLMessage] {
+        messages.map(BLMessage.init(message:))
+    }
+}
+
 func BLHandlePayload(_ payload: IPCPayload) {
     BLInfo("Got a payload with type \(payload.command.name)")
     
     switch payload.command {
     case .get_chats(_):
         payload.reply(withCommand: .response(.chats_resolved(IMChatRegistry.shared.allChats.map { $0.guid })))
-        break
     case .get_chat(let req):
-        if let chat = req.chat?.blChat {
-            payload.reply(withCommand: .response(.chat_resolved(chat)))
-        }
-    case .get_contact(let req):
-        BLInfo("Contact ID: %@", req.user_guid)
-        if let contact = req.blContact {
-            payload.reply(withCommand: .response(.contact(contact)))
-        }
-    case .get_recent_messages(let req):
-        guard let chat = req.chat else {
+        guard let chat = req.blChat else {
+            payload.fail(strategy: .chat_not_found)
             break
         }
         
-        threadGroup.execute {
-            Chat(chat).messages(before: nil, limit: req.limit).whenSuccess { items in
-                payload.respond(.messages(items.compactMap {
-                    $0.messageValue
-                }.map {
-                    BLMessage(message: $0)
-                }))
-            }
+        payload.respond(.chat_resolved(chat))
+    case .get_contact(let req):
+        guard let contact = req.blContact else {
+            payload.fail(strategy: .contact_not_found)
+            break
+        }
+        
+        payload.respond(.contact(contact))
+    case .get_recent_messages(let req):
+        guard let chat = req.chat else {
+            payload.fail(strategy: .chat_not_found)
+            break
+        }
+        
+        CBLoadChatItems(withChatIdentifier: chat.id, onServices: .CBMessageServices, limit: req.limit).map {
+            $0.blMessages
+        }.whenSuccess {
+            payload.respond(.messages($0))
+        }
+    case .get_messages_after(let req):
+        guard let chat = req.chat else {
+            payload.fail(strategy: .chat_not_found)
+            break
+        }
+        
+        CBLoadChatItems(withChatIdentifier: chat.id, onServices: .CBMessageServices, beforeDate: req.date, limit: req.limit).map {
+            $0.blMessages
+        }.whenSuccess {
+            payload.respond(.messages($0))
         }
     case .get_chat_avatar(let req):
         guard let chat = req.chat, let groupPhotoID = chat.groupPhotoID else {
@@ -85,7 +117,32 @@ func BLHandlePayload(_ payload: IPCPayload) {
         }
         
         payload.respond(.chat_avatar(BLAttachment(guid: groupPhotoID)))
-        break
+    case .send_message(let req):
+        guard let chat = req.cbChat else {
+            payload.fail(strategy: .chat_not_found)
+            break
+        }
+        
+        let messageCreation = CreateMessage(parts: [
+            .init(type: .text, details: req.text)
+        ])
+        
+        chat.send(message: messageCreation).map {
+            $0.messages.map {
+                $0.partialMessage
+            }
+        }.whenSuccess {
+            $0.forEach {
+                payload.respond(.message_receipt($0))
+            }
+        }
+    case .send_tapback(let req):
+        guard let chat = req.cbChat else {
+            payload.fail(strategy: .chat_not_found)
+            break
+        }
+        
+        
     default:
         break
     }

@@ -82,7 +82,7 @@ public struct StickerChatItem: AssociatedChatItemRepresentation {
     init(_ item: IMAssociatedStickerChatItem, chatID: String?) {
         associatedID = item.associatedMessageGUID
         
-        if let transfer = IMFileTransferCenter.sharedInstance()?.transfer(forGUID: item.transferGUID) {
+        if let transfer = IMFileTransferCenter.sharedInstance().transfer(forGUID: item.transferGUID) {
             self.attachment = Attachment(transfer)
         }
         

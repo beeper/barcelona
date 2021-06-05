@@ -81,7 +81,7 @@ private extension IMFileTransfer {
 }
 
 public struct Attachment: Codable {
-    internal init(mime: String? = nil, filename: String? = nil, id: String, uti: String? = nil, origin: ResourceOrigin? = nil, size: Size? = nil, sticker: StickerInformation? = nil) {
+    public init(mime: String? = nil, filename: String? = nil, id: String, uti: String? = nil, origin: ResourceOrigin? = nil, size: Size? = nil, sticker: StickerInformation? = nil) {
         self.mime = mime
         self.filename = filename
         self.id = id
@@ -106,7 +106,7 @@ public struct Attachment: Codable {
     }
     
     public init?(guid: String) {
-        guard let item = IMFileTransferCenter.sharedInstance()?.transfer(forGUID: guid, includeRemoved: false) else {
+        guard let item = IMFileTransferCenter.sharedInstance().transfer(forGUID: guid, includeRemoved: false) else {
             return nil
         }
         
@@ -122,12 +122,12 @@ public struct Attachment: Codable {
     public var sticker: StickerInformation?
     
     public var path: String? {
-        IMFileTransferCenter.sharedInstance()!.transfer(forGUID: id, includeRemoved: false)?.localPath
+        IMFileTransferCenter.sharedInstance().transfer(forGUID: id, includeRemoved: false)?.localPath
     }
 }
 
 private func ERRegisterFileTransferForGUID(transfer: IMFileTransfer, guid: String) {
-    let center = IMFileTransferCenter.sharedInstance()!
+    let center = IMFileTransferCenter.sharedInstance()
     
     if let map = center.value(forKey: "_guidToTransferMap") as? NSDictionary {
         map.setValue(transfer, forKey: guid)
@@ -166,7 +166,7 @@ public struct InternalAttachment {
     }
     
     private var transferCenter: IMFileTransferCenter {
-        IMFileTransferCenter.sharedInstance()!
+        IMFileTransferCenter.sharedInstance()
     }
     
     private var url: URL {
@@ -198,7 +198,7 @@ public struct InternalAttachment {
             transfer.setValue(IMFileManager.defaultHFS()!.utiType(ofMimeType: mime), forKey: "_utiType")
         }
         
-        IMFileTransferCenter.sharedInstance()!._addTransfer(transfer, toAccount: account.uniqueID)
+        IMFileTransferCenter.sharedInstance()._addTransfer(transfer, toAccount: account.uniqueID)
         
         ERRegisterFileTransferForGUID(transfer: transfer, guid: guid)
         
@@ -212,7 +212,7 @@ public struct InternalAttachment {
 
 extension InternalAttachment {
     init?(guid: String) {
-        guard let transfer = IMFileTransferCenter.sharedInstance()!.transfer(forGUID: guid) else {
+        guard let transfer = IMFileTransferCenter.sharedInstance().transfer(forGUID: guid) else {
             return nil
         }
         

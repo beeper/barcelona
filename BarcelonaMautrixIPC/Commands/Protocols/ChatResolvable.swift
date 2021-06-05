@@ -17,4 +17,16 @@ public extension ChatResolvable {
     var chat: IMChat? {
         IMChatRegistry.shared.existingChat(withGUID: chat_guid)
     }
+    
+    var cbChat: Chat? {
+        guard let chat = chat else {
+            return nil
+        }
+        
+        return Chat(chat)
+    }
+    
+    var blChat: BLChat? {
+        chat?.blChat
+    }
 }

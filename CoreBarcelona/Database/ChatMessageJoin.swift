@@ -173,7 +173,7 @@ extension DBReader {
     ///   - beforeMessageGUID: message GUID to load messages before
     ///   - limit: max number of results to return
     /// - Returns: array of message GUIDs matching the query
-    func newestMessageGUIDs(inChatROWIDs ROWIDs: [Int64], beforeMessageGUID: String? = nil, limit: Int? = nil) -> EventLoopFuture<[String]> {
+    func newestMessageGUIDs(inChatROWIDs ROWIDs: [Int64], beforeDate: Date? = nil, beforeMessageGUID: String? = nil, limit: Int? = nil) -> EventLoopFuture<[String]> {
         let promise = eventLoop.makePromise(of: [String].self)
         
         let resolution = beforeMessageGUID == nil ? eventLoop.makeSucceededFuture(nil) : rowID(forMessageGUID: beforeMessageGUID!)
@@ -198,6 +198,11 @@ extension DBReader {
                         if let beforeMessageROWID = beforeMessageROWID {
                             messageROWIDsQuery = messageROWIDsQuery
                                 .filter(ChatMessageJoin.Columns.message_id <= beforeMessageROWID)
+                        }
+                        
+                        if let beforeDate = beforeDate {
+                            messageROWIDsQuery = messageROWIDsQuery
+                                .filter(ChatMessageJoin.Columns.message_date < beforeDate.timeIntervalSinceReferenceDate)
                         }
                         
                         let messageROWIDs = try messageROWIDsQuery

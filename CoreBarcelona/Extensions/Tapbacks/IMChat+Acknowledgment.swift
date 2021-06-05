@@ -32,8 +32,6 @@ public extension IMChat {
         let guid = subpart.guid
         let range = subpart.messagePartRange
         
-        
-        
         var message: IMMessage!
         
         if #available(iOS 14, macOS 10.16, watchOS 7, *) {

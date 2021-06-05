@@ -128,7 +128,7 @@ extension DBReader {
         
         if ERBarcelonaManager.isSimulation {
             return eventLoop.makeSucceededFuture(guids.compactMap { guid in
-                IMFileTransferCenter.sharedInstance()?.transfer(forGUID: guid, includeRemoved: false)?.internalAttachment
+                IMFileTransferCenter.sharedInstance().transfer(forGUID: guid, includeRemoved: false)?.internalAttachment
             })
         }
         

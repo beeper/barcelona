@@ -31,7 +31,7 @@ extension IMAttachmentMessagePartChatItem {
      Computed type representing this attachment
      */
     var tapBackType: TapBackSpecificItemType {
-        guard let transferGUID = transferGUID, let transfer = IMFileTransferCenter.sharedInstance()?.transfer(forGUID: transferGUID) else { return .attachment }
+        guard let transferGUID = transferGUID, let transfer = IMFileTransferCenter.sharedInstance().transfer(forGUID: transferGUID) else { return .attachment }
         
         let utType = transfer.type as CFString
         if (isAudioMessage || UTTypeConformsTo(utType, kUTTypeAudio)) { return .audioMessage }

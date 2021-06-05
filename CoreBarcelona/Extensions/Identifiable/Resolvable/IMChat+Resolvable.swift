@@ -32,4 +32,3 @@ extension IMChat: Resolvable, ConcreteBasicResolvable {
         IMChatRegistry.shared._chats(withMessageGUID: guid).first
     }
 }
-

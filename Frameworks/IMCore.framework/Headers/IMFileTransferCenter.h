@@ -25,7 +25,7 @@
 + (Class)fileTransferClass;
 + (Class)transferCenterClass;
 + (void)setTransferCenterClass:(Class)arg1;
-+ (IMFileTransferCenter*)sharedInstance;
++ (IMFileTransferCenter* _Nonnull)sharedInstance;
 - (void)preWarmConnection;
 - (void)_daemonRestarted:(id)arg1;
 - (void)_initiateHighQualityVariantDownloadWithDaemonForGUID:(id)arg1;

@@ -15,12 +15,6 @@ struct OKResult: Content {
     var ok: Bool
 }
 
-struct TapbackCreation: Content {
-    var item: String
-    var message: String
-    var type: Int
-}
-
 func bindMessagesAPI(_ app: RoutesBuilder) {
     let messages = app.grouped("messages")
     let readableMessages = messages.grouped(TokenGrant.readMessages)

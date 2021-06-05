@@ -31,6 +31,15 @@ private extension NSAttributedString {
 }
 
 public struct CreatePluginMessage: Codable, CreateMessageBase {
+    public init(extensionData: MessageExtensionsData, attachmentID: String? = nil, bundleID: String, expressiveSendStyleID: String? = nil, threadIdentifier: String? = nil, replyToPart: String? = nil) {
+        self.extensionData = extensionData
+        self.attachmentID = attachmentID
+        self.bundleID = bundleID
+        self.expressiveSendStyleID = expressiveSendStyleID
+        self.threadIdentifier = threadIdentifier
+        self.replyToPart = replyToPart
+    }
+    
     public var extensionData: MessageExtensionsData
     public var attachmentID: String?
     public var bundleID: String

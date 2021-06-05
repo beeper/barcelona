@@ -59,6 +59,12 @@ public struct MessagePart: Codable {
     public var type: MessagePartType
     public var details: String
     public var attributes: [TextPartAttribute]?
+    
+    public init(type: MessagePartType, details: String, attributes: [TextPartAttribute]? = nil) {
+        self.type = type
+        self.details = details
+        self.attributes = attributes
+    }
 }
 
 public protocol MessageIdentifiable {
@@ -81,6 +87,11 @@ public struct ChatConfigurationRepresentation: Codable, ChatConfigurationReprese
 public struct DeleteMessage: Codable, MessageIdentifiable {
     public var id: String
     public var parts: [Int]?
+    
+    public init(id: String, parts: [Int]? = nil) {
+        self.id = id
+        self.parts = parts
+    }
 }
 
 extension MessageIdentifiable {
@@ -91,6 +102,22 @@ extension MessageIdentifiable {
 
 public struct DeleteMessageRequest: Codable {
     public var messages: [DeleteMessage]
+    
+    public init(messages: [DeleteMessage]) {
+        self.messages = messages
+    }
+}
+
+public struct TapbackCreation: Codable {
+    public var item: String
+    public var message: String
+    public var type: Int
+    
+    public init(item: String, message: String, type: Int) {
+        self.item = item
+        self.message = message
+        self.type = type
+    }
 }
 
 private let log = OSLog(subsystem: "CoreBarcelona", category: "Chat")
@@ -164,7 +191,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable {
         }
     }
     
-    public func messages(before: String? = nil, limit: Int? = nil) -> EventLoopFuture<[ChatItem]> {
+    public func messages(before: String? = nil, limit: Int? = nil, beforeDate: Date? = nil) -> EventLoopFuture<[ChatItem]> {
         if ERBarcelonaManager.isSimulation {
             let guids: [String] = imChat.chatItemRules._items().compactMap { item in
                 if let chatItem = item as? IMChatItem {
@@ -194,7 +221,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable {
         
         os_log("Querying IMD for recent messages using chat fast-path", log: log)
         
-        return ERLoadAndParseIMDMessageRecordRefs(withChatIdentifier: self.id, onServices: [.iMessage], beforeGUID: before, limit: limit)
+        return CBLoadChatItems(withChatIdentifier: self.id, onServices: [.iMessage], beforeGUID: before, limit: limit)
     }
     
     public func delete(message: DeleteMessage, on eventLoop: EventLoop) -> EventLoopFuture<Void> {
@@ -261,6 +288,12 @@ public struct Chat: Codable, ChatConfigurationRepresentable {
             }
             
             return promise.futureResult
+        }
+    }
+    
+    public func tapback(_ creation: TapbackCreation) -> EventLoopFuture<Message?> {
+        imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil).flatMap {
+            ERIndeterminateIngestor.ingest(messageLike: $0, in: id)
         }
     }
 }

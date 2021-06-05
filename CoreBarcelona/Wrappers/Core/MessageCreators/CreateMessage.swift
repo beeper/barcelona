@@ -18,6 +18,18 @@ private func flagsForCreation(_ creation: CreateMessage, transfers: [String]) ->
 }
 
 public struct CreateMessage: Codable, CreateMessageBase {
+    public init(subject: String? = nil, parts: [MessagePart], isAudioMessage: Bool? = nil, flags: CLongLong? = nil, ballonBundleID: String? = nil, payloadData: String? = nil, expressiveSendStyleID: String? = nil, threadIdentifier: String? = nil, replyToPart: String? = nil) {
+        self.subject = subject
+        self.parts = parts
+        self.isAudioMessage = isAudioMessage
+        self.flags = flags
+        self.ballonBundleID = ballonBundleID
+        self.payloadData = payloadData
+        self.expressiveSendStyleID = expressiveSendStyleID
+        self.threadIdentifier = threadIdentifier
+        self.replyToPart = replyToPart
+    }
+    
     public var subject: String?
     public var parts: [MessagePart]
     public var isAudioMessage: Bool?

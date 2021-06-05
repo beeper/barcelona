@@ -17,6 +17,20 @@ private extension Message {
     var isGroup: Bool {
         IMChat.resolve(withIdentifier: chatID!)!.isGroup
     }
+    
+    var textContent: String {
+        let items: [TextChatItem] = items.compactMap {
+            guard case let .text(item) = $0 else {
+                return nil
+            }
+            
+            return item
+        }
+        
+        return items.reduce(into: "") { acc, item in
+            acc += item.text
+        }
+    }
 }
 
 public struct BLMessage: Codable, ChatResolvable {
@@ -36,7 +50,7 @@ public struct BLMessage: Codable, ChatResolvable {
         guid = message.id
         timestamp = message.time!
         subject = message.subject
-        text = message.description!
+        text = message.textContent
         chat_guid = IMChat.resolve(withIdentifier: message.chatID!)!.guid!
         sender_guid = message.blSenderGUID
         is_from_me = message.fromMe ?? false

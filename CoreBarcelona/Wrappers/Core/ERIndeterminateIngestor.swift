@@ -221,7 +221,7 @@ public struct ERIndeterminateIngestor {
             
             /// sometimes IMCore wont load the missing file transfers, so we handle that using DBReader
             let missingGUIDs = messageItem.fileTransferGUIDs.filter {
-                IMFileTransferCenter.sharedInstance()?.transfer(forGUID: $0) == nil
+                IMFileTransferCenter.sharedInstance().transfer(forGUID: $0) == nil
             }
             
             pending = missingGUIDs.count > 0 ? DBReader.shared.attachments(withGUIDs: missingGUIDs) : eventLoop.makeSucceededFuture([])
@@ -274,7 +274,7 @@ public struct ERIndeterminateIngestor {
     private static func ingest(attachment item: IMAttachmentMessagePartChatItem, in chat: String, on eventLoop: EventLoop, resolvingTapbacks: Bool = true) -> EventLoopFuture<ChatItem?> {
         var attachment: AttachmentChatItem!
         
-        if let transfer = IMFileTransferCenter.sharedInstance()!.transfer(forGUID: item.transferGUID) {
+        if let transfer = IMFileTransferCenter.sharedInstance().transfer(forGUID: item.transferGUID) {
             attachment = AttachmentChatItem(item, metadata: Attachment(transfer), chatID: chat)
         } else {
             attachment = AttachmentChatItem(item, chatID: chat)

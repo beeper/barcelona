@@ -238,4 +238,12 @@ public struct IPCPayload: Codable {
     public func reply(withCommand command: IPCCommand) {
         BLWritePayload(IPCPayload(id: id, command: command))
     }
+    
+    public func fail(code: String, message: String) {
+        reply(withCommand: .error(.init(code: code, message: message)))
+    }
+    
+    public func fail(strategy: ErrorStrategy) {
+        reply(withCommand: strategy.asCommand)
+    }
 }

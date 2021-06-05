@@ -135,6 +135,7 @@
 		1D31514825253BF400F2DF7C /* RunningModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D315127252536A100F2DF7C /* RunningModel.swift */; };
 		1D31514925253BF400F2DF7C /* ServerStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3151232525327100F2DF7C /* ServerStatus.swift */; };
 		1D31514A25253BF400F2DF7C /* ObservableArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D31512B252536E000F2DF7C /* ObservableArray.swift */; };
+		1D369E28266C124F00DEF6F0 /* BLDebugManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D369E27266C124F00DEF6F0 /* BLDebugManager.swift */; };
 		1D3B5AF224EB444300A65280 /* IMContactStore+AlwaysCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3B5AF024EB444300A65280 /* IMContactStore+AlwaysCache.m */; };
 		1D3B5AF924EC810400A65280 /* Debouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3B5AF824EC810400A65280 /* Debouncer.swift */; };
 		1D3B5AFD24EDA46700A65280 /* IMChat+HistoryLoadingPatch.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3B5AFB24EDA46700A65280 /* IMChat+HistoryLoadingPatch.m */; };
@@ -781,6 +782,7 @@
 		1D31513625253B6E00F2DF7C /* BarcelonaSharedUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaSharedUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D31513825253B6E00F2DF7C /* BarcelonaSharedUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BarcelonaSharedUI.h; sourceTree = "<group>"; };
 		1D31513925253B6E00F2DF7C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1D369E27266C124F00DEF6F0 /* BLDebugManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLDebugManager.swift; sourceTree = "<group>"; };
 		1D3B5AF024EB444300A65280 /* IMContactStore+AlwaysCache.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "IMContactStore+AlwaysCache.m"; sourceTree = "<group>"; };
 		1D3B5AF524EB623900A65280 /* com.ericrabil.imessage-rest.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "com.ericrabil.imessage-rest.plist"; sourceTree = "<group>"; };
 		1D3B5AF624EB623900A65280 /* installer.command */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = installer.command; sourceTree = "<group>"; };
@@ -1292,6 +1294,7 @@
 				1D22AD61265C3CCA0095EE7E /* Info.plist */,
 				1D22AD8F265C41620095EE7E /* BLStandardIO.swift */,
 				1D0DC2C9266190CB00E4B6FF /* BLLogger.swift */,
+				1D369E27266C124F00DEF6F0 /* BLDebugManager.swift */,
 			);
 			path = BarcelonaMautrixIPC;
 			sourceTree = "<group>";
@@ -2595,6 +2598,7 @@
 				1D22ADC1265C599A0095EE7E /* BLAssociatedMessage.swift in Sources */,
 				1D22AD95265C45D60095EE7E /* IPCCommand.swift in Sources */,
 				1D22ADCB265C5A8F0095EE7E /* BLContact.swift in Sources */,
+				1D369E28266C124F00DEF6F0 /* BLDebugManager.swift in Sources */,
 				1D22ADBF265C597C0095EE7E /* BLAttachment.swift in Sources */,
 				1D22ADB2265C516F0095EE7E /* ContactResolvable.swift in Sources */,
 				1D22ADBC265C592B0095EE7E /* BLMessage.swift in Sources */,

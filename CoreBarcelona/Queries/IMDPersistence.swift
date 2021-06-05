@@ -42,9 +42,9 @@ private func ERParseIMDMessageRecordRefs(_ refs: NSArray, in chat: String? = nil
     }
 }
 
-private func ERResolveGUIDsForChat(withChatIdentifier chatIdentifier: String, beforeGUID: String? = nil, limit: Int? = nil) -> EventLoopFuture<[String]> {
+private func ERResolveGUIDsForChat(withChatIdentifier chatIdentifier: String, beforeDate date: Date? = nil, beforeGUID: String? = nil, limit: Int? = nil) -> EventLoopFuture<[String]> {
     DBReader.shared.rowIDs(forIdentifier: chatIdentifier).flatMap { ROWIDs in
-        DBReader.shared.newestMessageGUIDs(inChatROWIDs: ROWIDs, beforeMessageGUID: beforeGUID, limit: limit)
+        DBReader.shared.newestMessageGUIDs(inChatROWIDs: ROWIDs, beforeDate: date, beforeMessageGUID: beforeGUID, limit: limit)
     }
 }
 
@@ -90,8 +90,8 @@ internal func ERLoadIMMessages(withChatIdentifier chatIdentifier: String, onServ
 ///   - beforeGUID: GUID of the message all messages must precede
 ///   - limit: max number of messages to return
 /// - Returns: NIO future of ChatItems
-internal func ERLoadAndParseIMDMessageRecordRefs(withChatIdentifier chatIdentifier: String, onServices services: [IMServiceStyle] = [], beforeGUID: String? = nil, limit: Int? = nil) -> EventLoopFuture<[ChatItem]> {
-    ERResolveGUIDsForChat(withChatIdentifier: chatIdentifier, beforeGUID: beforeGUID, limit: limit).flatMap {
+public func CBLoadChatItems(withChatIdentifier chatIdentifier: String, onServices services: [IMServiceStyle] = [], beforeDate date: Date? = nil, beforeGUID: String? = nil, limit: Int? = nil) -> EventLoopFuture<[ChatItem]> {
+    ERResolveGUIDsForChat(withChatIdentifier: chatIdentifier, beforeDate: date, beforeGUID: beforeGUID, limit: limit).flatMap {
         ERLoadAndParseIMDMessageRecordRefsWithGUIDs($0, in: chatIdentifier)
     }
 }

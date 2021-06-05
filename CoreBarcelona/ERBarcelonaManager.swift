@@ -94,7 +94,7 @@ private var currentDaemonController: IMDaemonController? = nil
             IMChatRegistry.shared._unregisterChat(withGUID: $0.guid)
         }
         
-        IMFileTransferCenter.sharedInstance()?._clearTransfers()
+        IMFileTransferCenter.sharedInstance()._clearTransfers()
         
         resetController()
         

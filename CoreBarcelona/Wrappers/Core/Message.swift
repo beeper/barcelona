@@ -40,6 +40,20 @@ extension Array where Element == Message {
     }
 }
 
+private func CBExtractThreadOriginatorAndPartFromIdentifier(_ identifier: String) -> (String, Int)? {
+    let parts = identifier.split(separator: ",")
+    
+    guard parts.count > 2 else {
+        return nil
+    }
+    
+    guard let part = Int(parts[1]), let identifier = parts.last else {
+        return nil
+    }
+    
+    return (String(identifier), part)
+}
+
 public struct Message: ChatItemRepresentation {
     static func message(withGUID guid: String, on eventLoop: EventLoop) -> EventLoopFuture<Message?> {
         IMMessage.message(withGUID: guid, on: eventLoop).map {
@@ -132,9 +146,11 @@ public struct Message: ChatItemRepresentation {
     
     private mutating func load(message: IMMessage) {
         if #available(iOS 14, macOS 10.16, watchOS 7, *) {
-            threadIdentifier = message.threadIdentifier()
-            threadOriginator = message.threadOriginator()?.guid
-            
+            if let rawThreadIdentifier = message.threadIdentifier(), let (threadIdentifier, threadOriginatorPart) = CBExtractThreadOriginatorAndPartFromIdentifier(rawThreadIdentifier) {
+                self.threadIdentifier = threadIdentifier
+                self.threadOriginator = threadIdentifier
+                self.threadOriginatorPart = threadOriginatorPart
+            }
         }
     }
     
