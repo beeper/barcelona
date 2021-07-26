@@ -7,15 +7,14 @@
 //
 
 import Foundation
-import CoreBarcelona
-import NIO
+import Barcelona
 
 public protocol TargetResolvable {
     var target_guid: String { get set }
 }
 
 public extension TargetResolvable {
-    func resolveTarget() -> EventLoopFuture<Message?> {
+    func resolveTarget() -> Promise<Message?, Error> {
         Message.lazyResolve(withIdentifier: target_guid)
     }
 }

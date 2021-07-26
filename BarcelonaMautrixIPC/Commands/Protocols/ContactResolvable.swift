@@ -7,7 +7,9 @@
 //
 
 import Foundation
-import CoreBarcelona
+import Barcelona
+import Contacts
+import IMCore
 
 public protocol ContactResolvable {
     var user_guid: String { get set }

@@ -72,9 +72,25 @@ extension JSONDecoder.DateDecodingStrategy {
     }
 }
 
+private let jujitsuEncoder: JSONEncoder = {
+    let encoder = JSONEncoder()
+    
+    encoder.dateEncodingStrategy = .iso8601withFractionalSeconds
+    encoder.outputFormatting = .prettyPrinted
+    
+    return encoder
+}()
+
 public func BLWritePayload(_ payload: IPCPayload) {
     let encoder = JSONEncoder()
     encoder.dateEncodingStrategy = .iso8601withFractionalSeconds
+    
+    if payload.command.name != .log {
+        BLJujitsuClient.shared.sendEvent(named: "ipc", payload: [
+            "direction": "toMautrix",
+            "json": String(data: try! jujitsuEncoder.encode(payload), encoding: .utf8)!
+        ])
+    }
     
     FileHandle.standardOutput.write(try! encoder.encode(payload))
 }
@@ -93,6 +109,12 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
         for chunk in chunks {
             do {
                 let payload = try JSONDecoder().decode(IPCPayload.self, from: chunk)
+                
+                BLJujitsuClient.shared.sendEvent(named: "ipc", payload: [
+                    "direction": "toBarcelona",
+                    "json": String(data: try! jujitsuEncoder.encode(payload), encoding: .utf8)!
+                ])
+                
                 cb(payload)
             } catch {
                 BLWarn("Failed to decode payload: %@", module: "BCStandardIO", "\(error)")

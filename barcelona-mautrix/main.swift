@@ -7,11 +7,10 @@
 //
 
 import Foundation
-import CoreBarcelona
+import Barcelona
 import BarcelonaMautrixIPC
 import IMCore
 import Combine
-import NIO
 
 extension Notification.Name {
     static let barcelonaReady = Notification.Name("barcelonaReady")
@@ -64,9 +63,27 @@ extension Array where Element == ChatItem {
     }
     
     var blMessages: [BLMessage] {
-        messages.map(BLMessage.init(message:))
+        var messages = messages.map(BLMessage.init(message:))
+        
+        messages.sort(by: <)
+        
+        return messages
     }
 }
+
+class BLChatDelegate: ChatDelegate {
+    static let shared = BLChatDelegate()
+    
+    func chat(_ chat: Chat, willSendMessages messages: [IMMessage], fromCreateMessage createMessage: CreateMessage) {
+        BLMetricStore.shared.set(messages.map(\.guid), forKey: .lastSentMessageGUIDs)
+    }
+    
+    func chat(_ chat: Chat, willSendMessages messages: [IMMessage], fromCreatePluginMessage createPluginMessage: CreatePluginMessage) {
+        BLMetricStore.shared.set(messages.map(\.guid), forKey: .lastSentMessageGUIDs)
+    }
+}
+
+Chat.delegate = BLChatDelegate.shared
 
 func BLHandlePayload(_ payload: IPCPayload) {
     BLInfo("Got a payload with type \(payload.command.name)")
@@ -75,6 +92,8 @@ func BLHandlePayload(_ payload: IPCPayload) {
     case .get_chats(_):
         payload.reply(withCommand: .response(.chats_resolved(IMChatRegistry.shared.allChats.map { $0.guid })))
     case .get_chat(let req):
+        BLInfo("Getting chat with id \(req.chat_guid)")
+        
         guard let chat = req.blChat else {
             payload.fail(strategy: .chat_not_found)
             break
@@ -100,6 +119,8 @@ func BLHandlePayload(_ payload: IPCPayload) {
             payload.respond(.messages($0))
         }
     case .get_messages_after(let req):
+        BLInfo("Getting messages after time \(req.timestamp)")
+        
         guard let chat = req.chat else {
             payload.fail(strategy: .chat_not_found)
             break
@@ -131,18 +152,78 @@ func BLHandlePayload(_ payload: IPCPayload) {
             $0.messages.map {
                 $0.partialMessage
             }
-        }.whenSuccess {
-            $0.forEach {
+        }.whenSuccess { messages in
+            messages.forEach {
                 payload.respond(.message_receipt($0))
             }
         }
+    case .send_media(let req):
+        guard let chat = req.cbChat else {
+            payload.fail(strategy: .chat_not_found)
+            break
+        }
+        
+        CBInitializeFileTransfer(withMimeType: req.mime_type, forService: chat.service!, filename: req.file_name, path: URL(fileURLWithPath: req.path_on_disk)).whenSuccess { transfer in
+            let messageCreation = CreateMessage(parts: [
+                .init(type: .attachment, details: transfer.guid)
+            ])
+            
+            chat.send(message: messageCreation).map {
+                $0.messages.map {
+                    $0.partialMessage
+                }
+            }.whenSuccess {
+                $0.forEach {
+                    payload.respond(.message_receipt($0))
+                }
+            }
+        }
+        break
     case .send_tapback(let req):
         guard let chat = req.cbChat else {
             payload.fail(strategy: .chat_not_found)
             break
         }
         
+        guard let creation = req.creation else {
+            payload.fail(strategy: .internal_error("Failed to create tapback operation"))
+            break
+        }
         
+        chat.tapback(creation).map {
+            $0?.partialMessage
+        }.whenComplete { result in
+            switch result {
+            case .success(let message):
+                guard let message = message else {
+                    return
+                }
+                
+                payload.respond(.message_receipt(message))
+            case .failure(let error):
+                BLError("Failed to send tapback with error", error.localizedDescription)
+            }
+        }
+    case .send_read_receipt(let req):
+        guard let chat = req.chat else {
+            payload.fail(strategy: .chat_not_found)
+            break
+        }
+        
+        chat.markAllMessagesAsRead()
+        payload.respond(.ack)
+    case .set_typing(let req):
+        guard let chat = req.cbChat else {
+            payload.fail(strategy: .chat_not_found)
+            break
+        }
+        
+        if req.typing {
+            chat.startTyping()
+        } else {
+            chat.stopTyping()
+        }
+        payload.respond(.ack)
     default:
         break
     }
@@ -170,6 +251,10 @@ ERBarcelonaManager.bootstrap { error in
     ready = true
     BLInfo("BLMautrix is ready", module: "ERBarcelonaManager")
     NotificationCenter.default.post(name: .barcelonaReady, object: nil)
+    
+    BLEventHandler.shared.run()
+    
+    BLInfo("BLMautrix event handler is running", module: "ERBarcelonaManager")
 }
 
 RunLoop.current.run()

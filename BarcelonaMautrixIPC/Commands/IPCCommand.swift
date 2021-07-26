@@ -201,7 +201,7 @@ public enum IPCCommand: Codable {
 
 public struct IPCPayload: Codable {
     public var command: IPCCommand
-    public var id: Int
+    public var id: Int?
     
     private enum CodingKeys: CodingKey, CaseIterable {
         case id
@@ -210,7 +210,7 @@ public struct IPCPayload: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
-        if command.name != .log {
+        if command.name != .log, let id = id {
             try container.encode(id, forKey: .id)
         }
         
@@ -230,7 +230,7 @@ public struct IPCPayload: Codable {
         id = commandID ?? -1
     }
     
-    public init(id: Int, command: IPCCommand) {
+    public init(id: Int? = nil, command: IPCCommand) {
         self.id = id
         self.command = command
     }

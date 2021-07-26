@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import CoreBarcelona
+import Barcelona
 
 public struct TapbackCommand: Codable, ChatResolvable, TargetResolvable {
     public var chat_guid: String
@@ -16,7 +16,7 @@ public struct TapbackCommand: Codable, ChatResolvable, TargetResolvable {
 }
 
 public extension TapbackCommand {
-    public var creation: TapbackCreation {
-        TapbackCreation(
+    var creation: TapbackCreation? {
+        return TapbackCreation(item: target_guid, message: target_guid, type: type)
     }
 }

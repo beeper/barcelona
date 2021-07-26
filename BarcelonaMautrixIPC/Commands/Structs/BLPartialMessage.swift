@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import CoreBarcelona
+import Barcelona
 
 public struct BLPartialMessage: Codable {
     public var guid: String
@@ -16,6 +16,6 @@ public struct BLPartialMessage: Codable {
 
 public extension Message {
     var partialMessage: BLPartialMessage {
-        BLPartialMessage(guid: id, timestamp: time ?? 0)
+        BLPartialMessage(guid: id, timestamp: (time ?? 0) / 1000)
     }
 }

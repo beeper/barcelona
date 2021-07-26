@@ -2,8 +2,8 @@
 //  BarcelonaFoundation.h
 //  BarcelonaFoundation
 //
-//  Created by Eric Rabil on 9/25/20.
-//  Copyright © 2020 Eric Rabil. All rights reserved.
+//  Created by Eric Rabil on 7/24/21.
+//  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -17,7 +17,3 @@ FOUNDATION_EXPORT const unsigned char BarcelonaFoundationVersionString[];
 // In this header, you should import all the public headers of your framework using statements like #import <BarcelonaFoundation/PublicHeader.h>
 
 
-#ifdef __IPHONE_9_0
-#import "xpc.h"
-#import "AppSupport+RocketBootstrap.h"
-#endif

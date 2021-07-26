@@ -48,8 +48,8 @@
 + (void)_setApplicationWillTerminate;
 + (void)_blockUntilSendQueueIsEmpty;
 + (BOOL)_applicationWillTerminate;
-+ (IMDaemonController*)sharedController;
-+ (IMDaemonController*)sharedInstance;
++ (IMDaemonController* _Nonnull)sharedController;
++ (IMDaemonController* _Nonnull)sharedInstance;
 @property(copy, nonatomic) id prewarmingBlock; // @synthesize prewarmingBlock=_prewarmingBlock;
 @property(retain, nonatomic) NSMutableDictionary *requestQOSClassCompletionBlocks; // @synthesize requestQOSClassCompletionBlocks=_requestQOSClassCompletionBlocks;
 @property(readonly, nonatomic, getter=isRequestingConnection) BOOL requestingConnection; // @synthesize requestingConnection=_requestingConnection;

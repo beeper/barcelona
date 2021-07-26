@@ -15,7 +15,7 @@
 
 + (id)dictionaryForChat:(id)arg1;
 + (void)beginSimulatingDaemon;
-+ (id)sharedInstance;
++ (instancetype _Nonnull)sharedInstance;
 @property(retain, nonatomic) NSArray *listeners; // @synthesize listeners=_listeners;
 - (unsigned int)capabilitiesForListenerID:(id)arg1;
 - (BOOL)isConnected;

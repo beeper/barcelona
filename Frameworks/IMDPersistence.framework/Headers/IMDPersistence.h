@@ -58,6 +58,7 @@ NSArray* IMDMessageRecordCopyMessagesForRowIDs(NSArray*);
 id IMDMessageRecordCopyMessageForGUID(CFStringRef);
 IMItem* IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve(id, id, id, id, id) CF_RETURNS_RETAINED;
 _Nullable CFArrayRef IMDMessageRecordCopyMessagesForGUIDs(id) CF_RETURNS_RETAINED;
+id IMDAttachmentRecordCopyAttachmentForGUID(CFStringRef) CF_RETURNS_RETAINED;
 
 //CFArrayRef IMDMessageRecordCopyArrayOfAssociatedMessagesForMessageGUIDFromSender(NSString *, NSString *, NSError **) CF_RETURNS_RETAINED;
 //CFArrayRef IMDMessageRecordCopyMessagesForAssociatedGUID(NSString *) CF_RETURNS_RETAINED;

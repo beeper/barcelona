@@ -2,12 +2,11 @@
 //  BarcelonaMautrixIPC.h
 //  BarcelonaMautrixIPC
 //
-//  Created by Eric Rabil on 5/24/21.
+//  Created by Eric Rabil on 7/23/21.
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
-#import <CoreBarcelona/CoreBarcelona.h>
 
 //! Project version number for BarcelonaMautrixIPC.
 FOUNDATION_EXPORT double BarcelonaMautrixIPCVersionNumber;

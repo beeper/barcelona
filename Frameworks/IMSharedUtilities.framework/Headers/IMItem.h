@@ -10,7 +10,7 @@
 #import <Foundation/Foundation.h>
 #import <Foundation/Foundation.h>
 
-@class NSData, NSDate, NSDictionary, NSString;
+@class NSData, NSDate, NSDictionary, NSString, IMMessage;
 
 @interface IMItem : NSObject <NSSecureCoding, NSCopying, IMRemoteObjectCoding>
 {

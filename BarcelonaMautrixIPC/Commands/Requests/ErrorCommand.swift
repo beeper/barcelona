@@ -18,6 +18,7 @@ public enum ErrorStrategy {
     case chat_not_found
     case contact_not_found
     case command_not_found(String)
+    case internal_error(String)
     
     public var code: String {
         switch self {
@@ -29,6 +30,8 @@ public enum ErrorStrategy {
             return "not_found"
         case .command_not_found(_):
             return "unknown_command"
+        case .internal_error(_):
+            return "internal_error"
         }
     }
     
@@ -42,6 +45,8 @@ public enum ErrorStrategy {
             return "That contact does not exist"
         case .command_not_found(let command):
             return "Unknown command ".appendingFormat("'%@'", command)
+        case .internal_error(let error):
+            return "Internal Error: \(error)"
         }
     }
     

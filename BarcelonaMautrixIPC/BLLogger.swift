@@ -11,7 +11,13 @@ import Foundation
 private let BLDefaultModule = ""
 
 public func BLLog(_ str: String, level: IPCLoggingLevel = .info, module: String? = nil, _ fmt: CVarArg...) {
-    BLWritePayload(.init(id: -1, command: .log(LogCommand(time: .init(), level: level, module: module ?? BLDefaultModule, message: String(format: str, fmt)))))
+    let message = String(format: str, fmt)
+    BLJujitsuClient.shared.sendEvent(named: "log", payload: [
+        "level": level.rawValue,
+        "message": message
+    ])
+    
+    BLWritePayload(.init(id: -1, command: .log(LogCommand(time: .init(), level: level, module: module ?? BLDefaultModule, message: message))))
 }
 
 public func BLDebug(_ str: String, module: String? = nil, _ fmt: CVarArg...) {

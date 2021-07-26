@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import CoreBarcelona
+import Barcelona
 
 private extension Message {
     var blSenderGUID: String {
@@ -35,7 +35,7 @@ private extension Message {
 
 public struct BLMessage: Codable, ChatResolvable {
     public var guid: String
-    public var timestamp: Double?
+    public var timestamp: Double
     public var subject: String?
     public var text: String
     public var chat_guid: String
@@ -45,10 +45,12 @@ public struct BLMessage: Codable, ChatResolvable {
     public var thread_originator_part: Int
     public var attachments: [BLAttachment]?
     public var associated_message: BLAssociatedMessage?
+    public var group_action_type: Int?
+    public var new_group_title: String?
     
     public init(message: Message) {
         guid = message.id
-        timestamp = message.time!
+        timestamp = (message.time ?? 0) / 1000
         subject = message.subject
         text = message.textContent
         chat_guid = IMChat.resolve(withIdentifier: message.chatID!)!.guid!
@@ -59,5 +61,32 @@ public struct BLMessage: Codable, ChatResolvable {
         attachments = message.fileTransferIDs.compactMap {
             BLAttachment(guid: $0)
         }
+        
+        for item in message.items {
+            switch item {
+            case .groupTitle(let changeItem):
+                self.new_group_title = changeItem.title
+            case .groupAction(let action):
+                self.group_action_type = Int(action.actionType)
+            default:
+                break
+            }
+        }
+    }
+    
+    public static func < (left: BLMessage, right: BLMessage) -> Bool {
+        left.timestamp < right.timestamp
+    }
+    
+    public static func > (left: BLMessage, right: BLMessage) -> Bool {
+        left.timestamp < right.timestamp
+    }
+    
+    public static func <= (left: BLMessage, right: BLMessage) -> Bool {
+        left.timestamp <= right.timestamp
+    }
+    
+    public static func >= (left: BLMessage, right: BLMessage) -> Bool {
+        left.timestamp >= right.timestamp
     }
 }

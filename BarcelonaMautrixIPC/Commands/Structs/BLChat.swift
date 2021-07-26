@@ -7,7 +7,8 @@
 //
 
 import Foundation
-import CoreBarcelona
+import Barcelona
+import IMCore
 
 public extension IMChat {
     var blChat: BLChat {
@@ -17,7 +18,7 @@ public extension IMChat {
 
 public extension Chat {
     var blChat: BLChat {
-        BLChat(chat_guid: id, title: displayName, members: participants)
+        BLChat(chat_guid: imChat.guid, title: displayName, members: participants)
     }
 }
 

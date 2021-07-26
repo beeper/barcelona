@@ -21,6 +21,7 @@ public enum IPCResponse: Encodable {
     case messages([BLMessage])
     case chat_avatar(BLAttachment?)
     case message_receipt(BLPartialMessage)
+    case ack
     
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
@@ -38,6 +39,8 @@ public enum IPCResponse: Encodable {
             try container.encode(data)
         case .message_receipt(let data):
             try container.encode(data)
+        case .ack:
+            try container.encodeNil()
         }
     }
 }

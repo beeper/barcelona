@@ -29,7 +29,7 @@
 - (id)_typingMessage;
 - (id)_itemForGUID:(id)arg1;
 - (id)_member:(id)arg1;
-- (unsigned long long)_indexOfItem:(id)arg1;
+- (unsigned long long)_indexOfItem:(IMItem*)arg1;
 - (void)_setSortID:(id)arg1;
 - (void)_resortItems;
 - (void)_replaceStaleTypingMessage;
@@ -38,7 +38,7 @@
 - (void)_removeItem:(id)arg1;
 - (void)_handleItem:(IMItem*)arg1;
 - (void)_itemsDidChange:(id)arg1;
-@property(readonly, copy, nonatomic) NSArray *_items;
+@property(readonly, copy, nonatomic) NSArray<IMItem*> *_items;
 - (id)_initWithItems:(id)arg1;
 - (BOOL)_shouldPinUnsentMessagesToBottom;
 - (void)assignSortIDsToItems:(id)arg1 shouldRecalculateSortIDForAllMessages:(BOOL)arg2;

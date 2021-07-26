@@ -6,6 +6,8 @@
 
 #import <IMSharedUtilities/IMItem.h>
 
+@class IMMessage;
+
 @interface IMItem (IMChat_Internal)
 + (Class)contextClass;
 - (id)_copy;
@@ -14,7 +16,7 @@
 - (id)_otherHandle;
 - (IMHandle*)_senderHandle;
 - (void)_updateContextWithSenderHandle:(id)arg1 otherHandle:(id)arg2;
-- (id)message;
+- (IMMessage*)message;
 - (BOOL)isIncomingTypingOrCancelTypingMessage;
 - (BOOL)isTypingOrCancelTypingMessage;
 - (BOOL)shouldGenerateTopLevelChatItem;

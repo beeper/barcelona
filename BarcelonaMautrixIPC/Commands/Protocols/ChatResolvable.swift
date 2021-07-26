@@ -7,7 +7,8 @@
 //
 
 import Foundation
-import CoreBarcelona
+import Barcelona
+import IMCore
 
 public protocol ChatResolvable {
     var chat_guid: String { get set }

@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import CoreBarcelona
+import Barcelona
 
 public struct BLAttachment: Codable {
     public var mime_type: String?

@@ -7,7 +7,7 @@
 	<key>com.apple.accounts.inactive.fullaccess</key>
 	<true/>
 	<key>com.apple.application-identifier</key>
-	<string>com.apple.iChat</string>
+	<string>com.apple.imagent</string>
 	<key>com.apple.imagent</key>
 	<true/>
 	<key>com.apple.imagent.av</key>

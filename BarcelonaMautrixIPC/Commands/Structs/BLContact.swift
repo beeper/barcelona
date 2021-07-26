@@ -8,7 +8,7 @@
 
 import Foundation
 import Contacts
-import CoreBarcelona
+import Barcelona
 
 public extension CNContact {
     var barcelonaContact: Contact {
