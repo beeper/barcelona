@@ -15,7 +15,7 @@ public protocol CreateMessageBase: Codable {
     var replyToPart: String? { get set }
     
     func imMessage(inChat chatIdentifier: String) -> Promise<IMMessage, Error>
-    func parseToAttributed() -> Promise<MessagePartParseResult, Error>
+    func parseToAttributed() -> MessagePartParseResult
     func createIMMessageItem(withThreadIdentifier threadIdentifier: String?, withChatIdentifier chatIdentifier: String, withParseResult parseResult: MessagePartParseResult) throws -> (IMMessageItem, NSMutableAttributedString?)
 }
 
@@ -45,9 +45,7 @@ extension CreateMessageBase {
     
     public func imMessage(inChat chatIdentifier: String) -> Promise<IMMessage, Error> {
         resolveThreadIdentifier().then { threadIdentifier in
-            parseToAttributed().map {
-                (threadIdentifier, $0)
-            }
+            (threadIdentifier, parseToAttributed())
         }.then { packed in
             let (imMessageItem, subject) = try createIMMessageItem(withThreadIdentifier: packed.0, withChatIdentifier: chatIdentifier, withParseResult: packed.1)
             

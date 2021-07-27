@@ -109,7 +109,7 @@ public class ERMessageEvents: EventDispatcher {
             }
             
             return itemGUIDAsChatItem(item.guid, in: chat.id)
-        }).map {
+        }).then {
             $0.compactMap { $0?.eraseToAnyChatItem() }
         }.whenSuccess {
             if $0.count == 0 { return }

@@ -21,9 +21,13 @@ class Grapple {
     
     static func main() {
         BarcelonaManager.shared.bootstrap().whenSuccess { success in
-            CLI(name: "grapple", commands: [
+            let exitCode = CLI(name: "grapple", commands: [
                 SendMessageCommand(), ChatCommands(), DebugCommands()
             ]).go()
+            
+            guard exitCode == 0 else {
+                exit(exitCode)
+            }
         }
 
         RunLoop.main.run()

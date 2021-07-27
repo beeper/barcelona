@@ -41,7 +41,11 @@ public class Promise<Output, Failure: Error>: Publisher {
     }
     
     public static func whenAllSucceed(_ promises: [Promise<Output, Failure>]) -> Promise<[Output], Failure> {
-        Promise<[Output], Failure>(backing: Publishers.MergeMany(promises).collect().eraseToAnyPublisher())
+        guard promises.count > 0 else {
+            return Promise<[Output], Failure>(backing: Just([Output]()).setFailureType(to: Failure.self).share())
+        }
+        
+        return Promise<[Output], Failure>(backing: Publishers.MergeMany(promises).collect())
     }
     
     public init(_ cb: @escaping (@escaping (Output) -> (), @escaping (Failure) -> ()) -> ()) {
@@ -125,6 +129,7 @@ public class Promise<Output, Failure: Error>: Publisher {
     public func whenComplete(_ cb: @escaping (Result<Output, Failure>) -> Void) -> Self {
         var cancellable: AnyCancellable?
         
+        var receivedValue = false
         let finish = {
             guard let cancellable = cancellable else {
                 return
@@ -141,11 +146,16 @@ public class Promise<Output, Failure: Error>: Publisher {
             case .failure(let error):
                 cb(.failure(error))
             default:
+                if receivedValue {
+                    break
+                }
+                
                 fatalError("unknown completion received in promise")
             }
-        }, receiveValue: {
+        }, receiveValue: { value in
+            receivedValue = true
             finish()
-            cb(.success($0))
+            cb(.success(value))
         })
         
         cancellable!.store(in: &cancellables)

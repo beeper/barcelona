@@ -40,13 +40,19 @@ extension ERTimeSortedParticipantsManagerIngestible {
             return nil
         }
         
-        return ParticipantSortRule(handleID: handleID, lastSentMessageTime: effectiveTime ?? 0)
+        return ParticipantSortRule(handleID: handleID, lastSentMessageTime: effectiveTime)
+    }
+}
+
+fileprivate extension ERTimeSortedParticipantsManagerIngestible {
+    var bestHandleIDForMe: String {
+        Registry.sharedInstance.uniqueMeHandleIDs.first!
     }
 }
 
 extension IMItem: ERTimeSortedParticipantsManagerIngestible {
     public var senderID: String? {
-        self.sender
+        self.sender ?? (isFromMe ? bestHandleIDForMe : nil)
     }
     
     public var effectiveTime: Double {
@@ -56,7 +62,7 @@ extension IMItem: ERTimeSortedParticipantsManagerIngestible {
 
 extension IMMessage: ERTimeSortedParticipantsManagerIngestible {
     public var senderID: String? {
-        self.sender?.id
+        self.sender?.id ?? (isFromMe ? bestHandleIDForMe : nil)
     }
     
     public var effectiveTime: Double {
@@ -72,7 +78,7 @@ extension IMTranscriptChatItem {
 
 extension Message: ERTimeSortedParticipantsManagerIngestible {
     public var senderID: String? {
-        self.sender
+        self.sender ?? (fromMe ? bestHandleIDForMe : nil)
     }
     
     public var effectiveTime: Double {

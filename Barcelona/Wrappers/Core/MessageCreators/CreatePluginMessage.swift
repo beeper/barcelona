@@ -46,7 +46,7 @@ public struct CreatePluginMessage: Codable, CreateMessageBase {
     public var threadIdentifier: String?
     public var replyToPart: String?
     
-    public func parseToAttributed()  -> Promise<MessagePartParseResult, Error> {
+    public func parseToAttributed() -> MessagePartParseResult {
         ERAttributedString(forExtensionOptions: self)
     }
     

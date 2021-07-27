@@ -9,7 +9,6 @@
 import Foundation
 import DataDetectorsCore
 import IMCore
-import Combine
 
 public struct MessagePartParseResult {
     var string: NSAttributedString
@@ -31,17 +30,16 @@ private extension NSMutableAttributedString {
 /**
  Parses an array of MessageParts and returns a single NSAttributedString representing the contents
  */
-public func ERAttributedString(from parts: [MessagePart]) -> Promise<MessagePartParseResult, Error> {
-    Promise.whenAllSucceed(parts.map { ERAttributedString(from: $0) }).then { results in
-        let strings = results.map { $0.string }
-        let transferGUIDs = results.reduce(into: [String]()) { (accumulator, result) in
-            accumulator.append(contentsOf: result.transferGUIDs)
-        }
-        
-        return MessagePartParseResult(string: ERInsertMessageParts(into: strings.reduce(into: NSMutableAttributedString()) { (accumulator, current) in
-            accumulator.append(current)
-        }), transferGUIDs: transferGUIDs)
+public func ERAttributedString(from parts: [MessagePart]) -> MessagePartParseResult {
+    let results = parts.map { ERAttributedString(from: $0) }
+    let strings = results.map { $0.string }
+    let transferGUIDs = results.reduce(into: [String]()) { (accumulator, result) in
+        accumulator.append(contentsOf: result.transferGUIDs)
     }
+    
+    return MessagePartParseResult(string: ERInsertMessageParts(into: strings.reduce(into: NSMutableAttributedString()) { (accumulator, current) in
+        accumulator.append(current)
+    }), transferGUIDs: transferGUIDs)
 }
 
 /**
@@ -67,14 +65,12 @@ private func ERInsertMessageParts(into string: NSMutableAttributedString) -> NSM
 }
 
 // MARK: - MessagePart interpreter
-private func ERAttributedString(from part: MessagePart) -> Promise<MessagePartParseResult, Error> {
+private func ERAttributedString(from part: MessagePart) -> MessagePartParseResult {
     switch part.type {
     case .text:
-        return ERAttributedString(forText: part.details as NSString, withAttributes: part.attributes).then { string in
-            MessagePartParseResult(string: string, transferGUIDs: [])
-        }
+        return MessagePartParseResult(string: ERAttributedString(forText: part.details as NSString, withAttributes: part.attributes), transferGUIDs: [])
     case .breadcrumb:
-        return .success(.init(string: ERAttributedString(forBreadcrumbAttributes: part.attributes ?? []), transferGUIDs: []))
+        return MessagePartParseResult(string: ERAttributedString(forBreadcrumbAttributes: part.attributes ?? []), transferGUIDs: [])
     case .attachment:
         return ERAttributedString(forAttachment: part.details)
     }
@@ -90,37 +86,31 @@ private func ERAttributedString(forBreadcrumbAttributes attributes: [TextPartAtt
 }
 
 // MARK: - TextMessagePart
-private func ERAttributedString(forText text: NSString, withAttributes attributes: [TextPartAttribute]? = nil) -> Promise<NSAttributedString, Error> {
-    Promise { resolve in
-        let textAttributes = NSMutableAttributedString(string: text as String)
-        textAttributes.addAttribute(MessageAttributes.writingDirection, value: -1, range: textAttributes.wholeRange)
-        textAttributes.addAttributes(attributes)
-        
-        resolve(textAttributes)
-    }
+private func ERAttributedString(forText text: NSString, withAttributes attributes: [TextPartAttribute]? = nil) -> NSAttributedString {
+    let textAttributes = NSMutableAttributedString(string: text as String)
+    textAttributes.addAttribute(MessageAttributes.writingDirection, value: -1, range: textAttributes.wholeRange)
+    textAttributes.addAttributes(attributes)
+    
+    return textAttributes
 }
 
 
 // MARK: - AttachmentMessagePart
-private func ERAttributedString(forAttachment attachment: String) -> Promise<MessagePartParseResult, Error> {
-    DBReader(pool: databasePool).attachment(for: attachment).then { representation in
-        guard let representation = representation else {
-            return MessagePartParseResult(string: NSAttributedString(), transferGUIDs: [])
-        }
-        
-        let transfer = representation.fileTransfer
-        
-        guard let guid = transfer.guid, let filename = transfer.filename else {
-            return MessagePartParseResult(string: NSAttributedString(), transferGUIDs: [])
-        }
-        
-        let attachmentAttributes = NSMutableAttributedString(string: IMAttachmentString)
-        attachmentAttributes.setAttributes([
-            MessageAttributes.writingDirection: -1,
-            MessageAttributes.transferGUID: guid,
-            MessageAttributes.filename: filename,
-        ], range: NSRange(location: 0, length: IMAttachmentString.count))
-        
-        return MessagePartParseResult(string: attachmentAttributes, transferGUIDs: [representation.guid])
+private func ERAttributedString(forAttachment attachment: String) -> MessagePartParseResult {
+    guard let transfer = IMFileTransferCenter.sharedInstance().transfer(forGUID: attachment) else {
+        return MessagePartParseResult(string: NSAttributedString(), transferGUIDs: [])
     }
+    
+    guard let guid = transfer.guid, let filename = transfer.filename else {
+        return MessagePartParseResult(string: NSAttributedString(), transferGUIDs: [])
+    }
+    
+    let attachmentAttributes = NSMutableAttributedString(string: IMAttachmentString)
+    attachmentAttributes.setAttributes([
+        MessageAttributes.writingDirection: -1,
+        MessageAttributes.transferGUID: guid,
+        MessageAttributes.filename: filename,
+    ], range: NSRange(location: 0, length: IMAttachmentString.count))
+    
+    return MessagePartParseResult(string: attachmentAttributes, transferGUIDs: [transfer.guid])
 }

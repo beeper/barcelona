@@ -117,9 +117,15 @@ public class BarcelonaManager {
     }
     
     public func bootstrap() -> Promise<Bool, Never> {
+        NotificationCenter.default.addObserver(forName: .IMChatRegistryDidLoad) {
+            print($0)
+        }
+        
         guard BLBootstrapController() else {
             return .success(false)
         }
+        
+        
         
         return Promise(backing: NotificationCenter.default.publisher(for: .IMChatRegistryDidLoad)).then { _ in
             return true

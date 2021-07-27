@@ -20,7 +20,7 @@ func ERApplyMessageExtensionQuirks(toMessageItem messageItem: IMMessageItem, inC
     }
 }
 
-func ERAttributedString(forExtensionOptions options: CreatePluginMessage) -> Promise<MessagePartParseResult, Error> {
+func ERAttributedString(forExtensionOptions options: CreatePluginMessage) -> MessagePartParseResult {
     var parts: [MessagePart] = []
     
     if let attachmentID = options.attachmentID {

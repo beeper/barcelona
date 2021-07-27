@@ -47,12 +47,12 @@ public struct BLMessage: Codable, ChatResolvable {
     
     public init(message: Message) {
         guid = message.id
-        timestamp = (message.time ?? 0) / 1000
+        timestamp = message.time
         subject = message.subject
         text = message.textContent
         chat_guid = IMChat.resolve(withIdentifier: message.chatID)!.guid!
         sender_guid = message.blSenderGUID
-        is_from_me = message.fromMe ?? false
+        is_from_me = message.fromMe
         thread_originator_guid = message.threadIdentifier
         thread_originator_part = 0
         attachments = message.fileTransferIDs.compactMap {
@@ -65,8 +65,14 @@ public struct BLMessage: Codable, ChatResolvable {
                 self.new_group_title = changeItem.title
             case let action as GroupActionItem:
                 self.group_action_type = Int(action.actionType)
+            case let acknowledgment as AcknowledgmentChatItem:
+                guard let parsedID = CBMessageItemIdentifierData(rawValue: acknowledgment.associatedID), let part = parsedID.part else {
+                    continue
+                }
+                
+                self.associated_message = BLTapback(chat_guid: chat_guid, target_guid: acknowledgment.associatedID, target_part: part, type: Int(acknowledgment.acknowledgmentType))
             default:
-                break
+                continue
             }
         }
     }

@@ -162,84 +162,15 @@ public struct Attachment: Codable, Hashable {
     }
 }
 
-private func CBUTIType(ofMimeType mimeType: String) -> String {
-    IMFileManager.defaultHFS()!.utiType(ofMimeType: mimeType) as! String
-}
-
-internal func CBPersistentFileTransferPath(for transfer: IMFileTransfer, filename: String, highQuality: Bool) -> String {
-    if #available(iOS 14, macOS 10.16, watchOS 7, *) {
-        return IMDPersistentAttachmentController.sharedInstance()._persistentPath(for: transfer, filename: filename, highQuality: highQuality, chatGUID: nil, storeAtExternalPath: nil)
-    } else {
-        return IMDPersistentAttachmentController.sharedInstance()._persistentPath(for: transfer, filename: filename, highQuality: highQuality)
-    }
-}
-
-internal func CBPersistentFileTransferURL(for transfer: IMFileTransfer, filename: String, highQuality: Bool) -> URL {
-    return URL(fileURLWithPath: CBPersistentFileTransferPath(for: transfer, filename: filename, highQuality: highQuality))
-}
-
-internal func CBAdaptPersistentPathToStoredPath(_ persistentPath: String) -> String {
-    #if os(macOS)
-    return "~/\(persistentPath.split(separator: "/")[2...].joined(separator: "/"))"
-    #else
-    return persistentPath
-    #endif
-}
-
-internal func CBEnsureFileTransferContainerExists(_ containerURL: URL) throws {
-    try FileManager.default.createDirectory(at: containerURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
-}
-
-internal func CBRegisterFileTransferWithDaemon(_ transfer: IMFileTransfer, forService service: IMServiceStyle) {
-    IMFileTransferCenter.sharedInstance()._addTransfer(transfer, toAccount: service.account)
+public func CBInitializeFileTransfer(filename: String, path: URL) -> IMFileTransfer {
+    let guid = IMFileTransferCenter.sharedInstance().guidForNewOutgoingTransfer(withLocalURL: path)
     
-    if let map = IMFileTransferCenter.sharedInstance().value(forKey: "_guidToTransferMap") as? NSDictionary {
-        map.setValue(transfer, forKey: transfer.guid)
-    }
+    let transfer = IMFileTransferCenter.sharedInstance().transfer(forGUID: guid)!
+    transfer.transferredFilename = filename
     
-    IMFileTransferCenter.sharedInstance().registerTransfer(withDaemon: transfer)
-}
-
-public func CBInitializeFileTransfer(withMimeType mimeType: String, forService service: IMServiceStyle, filename: String, path: URL, bytes: UInt64? = nil) -> Promise<IMFileTransfer, Error> {
-    Promise { () -> IMFileTransfer in
-        let guid = NSString.stringGUID()
-        
-        guard let bytes = bytes ?? (try? FileManager.default.attributesOfItem(atPath: path.path)[.size] as? UInt64) else {
-            throw BarcelonaError(code: 500, message: "Failed to measure size of file")
-        }
-        
-        let transfer = IMFileTransfer()._init(withGUID: guid, filename: filename, isDirectory: false, localURL: path, account: service.account, otherPerson: nil, totalBytes: bytes, hfsType: 0, hfsCreator: 0, hfsFlags: 0, isIncoming: false)!
-        
-        transfer.setValue(mimeType, forKey: "_mimeType")
-        transfer.setValue(CBUTIType(ofMimeType: mimeType), forKey: "_utiType")
-        
-        let persistentPath = CBPersistentFileTransferURL(for: transfer, filename: filename, highQuality: true)
-        try CBEnsureFileTransferContainerExists(persistentPath)
-        
-        try FileManager.default.copyItem(at: path, to: persistentPath)
-        
-        transfer.localURL = persistentPath
-        transfer.filename = filename
-        transfer.transferredFilename = filename
-        
-        CBRegisterFileTransferWithDaemon(transfer, forService: service)
-        
-        return transfer
-    }.then { transfer in
-        transfer.saveToDatabase(atPath: CBAdaptPersistentPathToStoredPath(transfer.localPath)).map { _ in
-            transfer
-        }
-    }
-}
-
-private func ERRegisterFileTransferForGUID(transfer: IMFileTransfer, guid: String) {
-    let center = IMFileTransferCenter.sharedInstance()
+    IMFileTransferCenter.sharedInstance().registerTransfer(withDaemon: guid)
     
-    if let map = center.value(forKey: "_guidToTransferMap") as? NSDictionary {
-        map.setValue(transfer, forKey: guid)
-    }
-    
-    center.registerTransfer(withDaemon: guid)
+    return transfer
 }
 
 public struct Size: Codable, Hashable {
@@ -298,25 +229,7 @@ public struct InternalAttachment {
             }
         }
         
-        let url = URL.init(fileURLWithPath: path)
-        let transfer = IMFileTransfer()._init(withGUID: guid, filename: url.lastPathComponent, isDirectory: false, localURL: url, account: account.uniqueID, otherPerson: nil, totalBytes: bytes, hfsType: 0, hfsCreator: 0, hfsFlags: 0, isIncoming: false)!
-        
-        transfer.transferredFilename = url.lastPathComponent
-        
-        if let mime = mime {
-            transfer.setValue(mime, forKey: "_mimeType")
-            transfer.setValue(IMFileManager.defaultHFS()!.utiType(ofMimeType: mime), forKey: "_utiType")
-        }
-        
-        IMFileTransferCenter.sharedInstance()._addTransfer(transfer, toAccount: account.uniqueID)
-        
-        ERRegisterFileTransferForGUID(transfer: transfer, guid: guid)
-        
-        if let originalGUID = originalGUID {
-            ERRegisterFileTransferForGUID(transfer: transfer, guid: originalGUID)
-        }
-        
-        return transfer
+        return CBInitializeFileTransfer(filename: url.lastPathComponent, path: url)
     }
 }
 

@@ -174,7 +174,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     public var threadOriginatorPart: Int?
     
     public var debugDescription: String {
-        String(format: "Message(id=%@,sender=%@,typing=%d,items=[%@])", id ?? "(nil)", sender ?? "(nil)", isTypingMessage, items.map(\.debugDescription).joined(separator: ", "))
+        String(format: "Message(id=%@,sender=%@,typing=%d,items=[%@])", id, sender ?? "(nil)", isTypingMessage, items.map(\.debugDescription).joined(separator: ", "))
     }
     
     public var imChat: IMChat {

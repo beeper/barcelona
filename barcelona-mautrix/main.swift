@@ -12,6 +12,9 @@ import BarcelonaMautrixIPC
 import IMCore
 import Combine
 
+CFPreferencesSetAppValue("Log" as CFString, true as CFBoolean, kCFPreferencesCurrentApplication)
+CFPreferencesSetAppValue("Log.All" as CFString, true as CFBoolean, kCFPreferencesCurrentApplication)
+
 extension Notification.Name {
     static let barcelonaReady = Notification.Name("barcelonaReady")
 }
@@ -149,17 +152,17 @@ func BLHandlePayload(_ payload: IPCPayload) {
             break
         }
         
-        CBInitializeFileTransfer(withMimeType: req.mime_type, forService: chat.service!, filename: req.file_name, path: URL(fileURLWithPath: req.path_on_disk)).whenSuccess { transfer in
-            let messageCreation = CreateMessage(parts: [
-                .init(type: .attachment, details: transfer.guid)
-            ])
+        let transfer = CBInitializeFileTransfer(filename: req.file_name, path: URL(fileURLWithPath: req.path_on_disk))
+        let messageCreation = CreateMessage(parts: [
+            .init(type: .attachment, details: transfer.guid)
+        ])
             
-            chat.send(message: messageCreation).then {
-                $0.map(\.partialMessage)
-            }.whenSuccess {
-                $0.forEach {
-                    payload.respond(.message_receipt($0))
-                }
+            
+        chat.send(message: messageCreation).then {
+            $0.map(\.partialMessage)
+        }.whenSuccess {
+            $0.forEach {
+                payload.respond(.message_receipt($0))
             }
         }
         break
@@ -241,4 +244,4 @@ BarcelonaManager.shared.bootstrap().whenSuccess { success in
     BLInfo("BLMautrix event handler is running", module: "ERBarcelonaManager")
 }
 
-RunLoop.current.run()
+RunLoop.main.run()

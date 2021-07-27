@@ -43,12 +43,14 @@ public struct StatusChatItem: ChatItem, Hashable {
         threadOriginator = item.threadOriginatorID
         statusType = .init(rawValue: item.statusType)
         itemID = item._item().guid
+        sender = item._item().senderID!
     }
     
     public var id: String
     public var chatID: String
     public var fromMe: Bool
     public var time: Double
+    public var sender: String
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var statusType: StatusType?
