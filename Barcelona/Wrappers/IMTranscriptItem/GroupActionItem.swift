@@ -23,22 +23,32 @@ public struct GroupActionItem: ChatItemOwned, Hashable {
         }
     }
     
-    init(_ item: IMGroupActionChatItem, chatID: String?) {
+    init(_ item: IMGroupActionChatItem, chatID: String) {
+        id = item.id
+        self.chatID = chatID
+        fromMe = item.isFromMe
+        time = item.effectiveTime
         actionType = item.actionType
         sender = item.sender?.id
-        self.load(item: item, chatID: chatID)
+        threadIdentifier = item.threadIdentifier
+        threadOriginator = item.threadOriginatorID
     }
     
-    init(_ item: IMGroupActionItem, chatID: String?) {
+    init(_ item: IMGroupActionItem, chatID: String) {
+        id = item.id
+        self.chatID = chatID
+        fromMe = item.isFromMe
+        time = item.effectiveTime
         actionType = item.actionType
         sender = item.sender
-        self.load(item: item, chatID: chatID)
+        threadIdentifier = item.threadIdentifier
+        threadOriginator = item.threadOriginatorID
     }
     
-    public var id: String?
-    public var chatID: String?
-    public var fromMe: Bool?
-    public var time: Double?
+    public var id: String
+    public var chatID: String
+    public var fromMe: Bool
+    public var time: Double
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var actionType: Int64

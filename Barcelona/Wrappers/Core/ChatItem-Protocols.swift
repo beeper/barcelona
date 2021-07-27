@@ -112,9 +112,9 @@ public protocol ChatItem: Codable, CustomDebugStringConvertible {
     init?(ingesting item: NSObject, context: IngestionContext)
     
     var id: String { get set }
-    var chatID: String? { get set }
-    var fromMe: Bool? { get set }
-    var time: Double? { get set }
+    var chatID: String { get set }
+    var fromMe: Bool { get set }
+    var time: Double { get set }
     var threadIdentifier: String? { get set }
     var threadOriginator: String? { get set }
     var type: ChatItemType { get }
@@ -128,7 +128,7 @@ public protocol ChatItem: Codable, CustomDebugStringConvertible {
 
 public extension ChatItem {
     var debugDescription: String {
-        "\(type) { id=\(id) fromMe=\(fromMe.debugString) }"
+        "\(type) { id=\(id) fromMe=\(fromMe) }"
     }
 }
 
@@ -186,9 +186,9 @@ public class AnyChatItem: ChatItem, Hashable, ChatItemOwned, ChatItemAcknowledga
     public static var ingestionClasses: [NSObject.Type] { [] }
     
     public var id: String { get { item.id } set { item.id = newValue } }
-    public var chatID: String? { get { item.chatID } set { item.chatID = newValue } }
-    public var fromMe: Bool? { get { item.fromMe } set { item.fromMe = newValue } }
-    public var time: Double? { get { item.time } set { item.time = newValue } }
+    public var chatID: String { get { item.chatID } set { item.chatID = newValue } }
+    public var fromMe: Bool { get { item.fromMe } set { item.fromMe = newValue } }
+    public var time: Double { get { item.time } set { item.time = newValue } }
     public var threadIdentifier: String? { get { item.threadIdentifier } set { item.threadIdentifier = newValue } }
     public var threadOriginator: String? { get { item.threadOriginator } set { item.threadOriginator = newValue } }
     public var type: ChatItemType { item.type }

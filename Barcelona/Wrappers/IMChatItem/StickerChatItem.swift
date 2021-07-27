@@ -85,21 +85,25 @@ public struct StickerChatItem: ChatItemAssociable, Hashable {
         self.init(item as! IMAssociatedStickerChatItem, chatID: context.chatID)
     }
     
-    init(_ item: IMAssociatedStickerChatItem, chatID: String?) {
+    init(_ item: IMAssociatedStickerChatItem, chatID: String) {
+        id = item.id
+        self.chatID = chatID
+        fromMe = item.isFromMe
+        time = item.effectiveTime
+        threadIdentifier = item.threadIdentifier
+        threadOriginator = item.threadOriginatorID
         associatedID = item.associatedMessageGUID
         sender = item.sender.id
         
         if let transfer = IMFileTransferCenter.sharedInstance().transfer(forGUID: item.transferGUID) {
             self.attachment = Attachment(transfer)
         }
-        
-        load(item: item, chatID: chatID)
     }
     
-    public var id: String?
-    public var chatID: String?
-    public var fromMe: Bool?
-    public var time: Double?
+    public var id: String
+    public var chatID: String
+    public var fromMe: Bool
+    public var time: Double
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var associatedID: String

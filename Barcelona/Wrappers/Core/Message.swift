@@ -77,9 +77,13 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         }
     }
 
-    init(_ item: IMItem, transcriptRepresentation: ChatItem, chatID: String?) {
-        id = item.guid
+    init(_ item: IMItem, transcriptRepresentation: ChatItem, chatID: String) {
+        id = item.id
+        self.chatID = chatID
         fromMe = item.isFromMe
+        time = item.effectiveTime
+        threadIdentifier = item.threadIdentifier
+        threadOriginator = item.threadOriginatorID
         subject = nil
         isSOS = false
         isTypingMessage = false
@@ -93,14 +97,13 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         associatedMessageID = item.associatedMessageGUID() as? String
         fileTransferIDs = []
         item.bareReceipt.assign(toMessage: &self)
-        
-        self.load(item: item, chatID: chatID)
     }
     
-    init(_ backing: IMMessageItem, message: IMMessage, items chatItems: [ChatItem], chatID messageChatID: String?) {
-        id = message.guid
-        chatID = messageChatID
+    init(_ backing: IMMessageItem, message: IMMessage, items chatItems: [ChatItem], chatID: String) {
+        id = message.id
+        self.chatID = chatID
         fromMe = message.isFromMe
+        time = message.effectiveTime
         service = backing.resolveServiceStyle(inChat: chatID)
         sender = message.resolveSenderID(inService: service)
         subject = message.subject?.id
@@ -118,21 +121,20 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         associatedMessageID = message.associatedMessageGUID ?? backing.associatedMessageGUID() as? String
         fileTransferIDs = message.fileTransferGUIDs
         
-        if let chatID = chatID, let chat = IMChat.resolve(withIdentifier: chatID) {
+        if let chat = IMChat.resolve(withIdentifier: chatID) {
             description = try? message.description(forPurpose: 0x2, inChat: chat)
         }
         
         // load timestamps
         message.receipt.merging(receipt: backing.receipt).assign(toMessage: &self)
         self.load(message: message)
-        self.load(item: backing, chatID: chatID)
     }
     
-    init(_ backing: IMMessageItem, items: [ChatItem], chatID: String?) {
+    init(_ backing: IMMessageItem, items: [ChatItem], chatID: String) {
         self.init(backing, message: backing.message() ?? IMMessage.message(fromUnloadedItem: backing)!, items: items, chatID: chatID)
     }
     
-    init(_ message: IMMessage, items: [ChatItem], chatID: String?) {
+    init(_ message: IMMessage, items: [ChatItem], chatID: String) {
         self.init(message._imMessageItem, message: message, items: items, chatID: chatID)
     }
     
@@ -147,9 +149,9 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     }
     
     public var id: String
-    public var chatID: String?
-    public var fromMe: Bool?
-    public var time: Double?
+    public var chatID: String
+    public var fromMe: Bool
+    public var time: Double
     public var sender: String?
     public var subject: String?
     public var timeDelivered: Double = 0
@@ -175,16 +177,12 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         String(format: "Message(id=%@,sender=%@,typing=%d,items=[%@])", id ?? "(nil)", sender ?? "(nil)", isTypingMessage, items.map(\.debugDescription).joined(separator: ", "))
     }
     
-    public var imChat: IMChat? {
-        guard let chatID = chatID else {
-            return nil
-        }
-        
-        return IMChat.resolve(withIdentifier: chatID)
+    public var imChat: IMChat {
+        IMChat.resolve(withIdentifier: chatID)!
     }
     
-    public var chat: Chat? {
-        imChat?.representation
+    public var chat: Chat {
+        imChat.representation
     }
     
     public var associableItemIDs: [String] {

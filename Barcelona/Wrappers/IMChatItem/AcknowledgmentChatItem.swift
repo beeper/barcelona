@@ -16,17 +16,22 @@ public struct AcknowledgmentChatItem: ChatItemAssociable, ChatItemOwned, Hashabl
         self.init(item as! IMMessageAcknowledgmentChatItem, chatID: context.chatID)
     }
     
-    init(_ item: IMMessageAcknowledgmentChatItem, chatID: String?) {
+    init(_ item: IMMessageAcknowledgmentChatItem, chatID: String) {
+        id = item.id
+        self.chatID = chatID
+        fromMe = item.isFromMe
+        time = item.effectiveTime
+        threadIdentifier = item.threadIdentifier
+        threadOriginator = item.threadOriginatorID
         acknowledgmentType = item.messageAcknowledgmentType
         sender = item.sender?.id ?? item._item()?.senderID
         associatedID = item.associatedMessageGUID
-        self.load(item: item, chatID: chatID)
     }
     
-    public var id: String?
-    public var chatID: String?
-    public var fromMe: Bool?
-    public var time: Double?
+    public var id: String
+    public var chatID: String
+    public var fromMe: Bool
+    public var time: Double
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var sender: String?

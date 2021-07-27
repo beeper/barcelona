@@ -9,6 +9,28 @@
 import Foundation
 import IMCore
 
+protocol IMMessageActionItemParseable: IMCoreDataResolvable {
+    var actionType: Int64 { get }
+    var senderID: String? { get }
+    var otherHandleID: String? { get }
+}
+
+extension IMMessageActionItem: IMMessageActionItemParseable {
+    var otherHandleID: String? {
+        otherHandle
+    }
+}
+
+extension IMMessageActionChatItem: IMMessageActionItemParseable {
+    var senderID: String? {
+        sender?.id
+    }
+    
+    var otherHandleID: String? {
+        otherHandle?.id
+    }
+}
+
 public struct ActionChatItem: ChatItemOwned, Hashable {
     public static let ingestionClasses: [NSObject.Type] = [IMMessageActionItem.self, IMMessageActionChatItem.self]
     
@@ -23,26 +45,22 @@ public struct ActionChatItem: ChatItemOwned, Hashable {
         }
     }
     
-    init(_ item: IMMessageActionItem, chat: String) {
+    init(_ item: IMMessageActionItemParseable, chat: String) {
+        id = item.id
+        chatID = chat
+        fromMe = item.isFromMe
+        time = item.effectiveTime
+        threadIdentifier = item.threadIdentifier
+        threadOriginator = item.threadOriginatorID
         actionType = item.actionType
-        sender = item.sender
-        otherHandle = item.otherHandle
-        
-        load(item: item, chatID: chat)
+        sender = item.senderID
+        otherHandle = item.otherHandleID
     }
     
-    init(_ item: IMMessageActionChatItem, chat: String) {
-        actionType = item.actionType
-        sender = item.sender?.id
-        otherHandle = item.otherHandle?.id
-        
-        load(item: item, chatID: chat)
-    }
-    
-    public var id: String?
-    public var chatID: String?
-    public var fromMe: Bool?
-    public var time: Double?
+    public var id: String
+    public var chatID: String
+    public var fromMe: Bool
+    public var time: Double
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var sender: String?

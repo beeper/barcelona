@@ -18,7 +18,13 @@ public struct PluginChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
         self.init(item as! IMTranscriptPluginChatItem, chatID: context.chatID)
     }
     
-    init(_ item: IMTranscriptPluginChatItem, chatID: String?) {
+    init(_ item: IMTranscriptPluginChatItem, chatID: String) {
+        id = item.id
+        self.chatID = chatID
+        fromMe = item.isFromMe
+        time = item.effectiveTime
+        threadIdentifier = item.threadIdentifier
+        threadOriginator = item.threadOriginatorID
         bundleID = item.dataSource.bundleID
         attachments = item.attachments
         
@@ -55,14 +61,12 @@ public struct PluginChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
         if insertPayload {
             payload = item.dataSource.payload?.base64EncodedString()
         }
-        
-        self.load(item: item, chatID: chatID)
     }
     
-    public var id: String?
-    public var chatID: String?
-    public var fromMe: Bool?
-    public var time: Double?
+    public var id: String
+    public var chatID: String
+    public var fromMe: Bool
+    public var time: Double
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var digitalTouch: DigitalTouchMessage?

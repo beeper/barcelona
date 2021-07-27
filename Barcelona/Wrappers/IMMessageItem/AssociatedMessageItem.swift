@@ -16,16 +16,21 @@ public struct AssociatedMessageItem: ChatItem, Hashable {
         self.init(item as! IMAssociatedMessageItem, chatID: context.chatID)
     }
     
-    init(_ item: IMAssociatedMessageItem, chatID: String?) {
+    init(_ item: IMAssociatedMessageItem, chatID: String) {
+        id = item.id
+        self.chatID = chatID
+        fromMe = item.isFromMe()
+        time = item.effectiveTime
         associatedID = item.associatedMessageGUID()
         associatedType = item.associatedMessageType()
-        self.load(item: item, chatID: chatID)
+        threadIdentifier = item.threadIdentifier()
+        threadOriginator = item.threadOriginatorID
     }
     
-    public var id: String?
-    public var chatID: String?
-    public var fromMe: Bool?
-    public var time: Double?
+    public var id: String
+    public var chatID: String
+    public var fromMe: Bool
+    public var time: Double
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var associatedID: String

@@ -17,7 +17,7 @@ public struct PhantomChatItem: ChatItem, Hashable {
         self.init(item, chatID: context.chatID)
     }
     
-    init(_ item: Any?, chatID chat: String?) {
+    init(_ item: Any?, chatID chat: String) {
         id = NSString.stringGUID()
         fromMe = false
         time = 0
@@ -30,10 +30,12 @@ public struct PhantomChatItem: ChatItem, Hashable {
         }
         
         switch item {
-        case let item as IMTranscriptChatItem:
-            load(item: item, chatID: chat)
-        case let item as IMItem:
-            load(item: item, chatID: chat)
+        case let item as IMCoreDataResolvable:
+            id = item.id
+            fromMe = item.isFromMe
+            time = item.effectiveTime
+            threadIdentifier = item.threadIdentifier
+            threadOriginator = item.threadOriginatorID
         default:
             break
         }
@@ -42,9 +44,9 @@ public struct PhantomChatItem: ChatItem, Hashable {
     }
     
     public var id: String
-    public var chatID: String?
-    public var fromMe: Bool?
-    public var time: Double?
+    public var chatID: String
+    public var fromMe: Bool
+    public var time: Double
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var className: String

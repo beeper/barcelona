@@ -34,17 +34,21 @@ public struct StatusChatItem: ChatItem, Hashable {
         self.init(item: item as! IMMessageStatusChatItem, chatID: context.chatID)
     }
     
-    public init(item: IMMessageStatusChatItem, chatID: String?) {
+    public init(item: IMMessageStatusChatItem, chatID: String) {
+        id = item.id
+        self.chatID = chatID
+        fromMe = item.isFromMe
+        time = item.effectiveTime
+        threadIdentifier = item.threadIdentifier
+        threadOriginator = item.threadOriginatorID
         statusType = .init(rawValue: item.statusType)
         itemID = item._item().guid
-        
-        self.load(item: item, chatID: chatID)
     }
     
-    public var id: String?
-    public var chatID: String?
-    public var fromMe: Bool?
-    public var time: Double?
+    public var id: String
+    public var chatID: String
+    public var fromMe: Bool
+    public var time: Double
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var statusType: StatusType?
@@ -55,6 +59,6 @@ public struct StatusChatItem: ChatItem, Hashable {
     }
     
     public var debugDescription: String {
-        "\(type) { id=\(id.debugString) fromMe=\(fromMe.debugString) status=\(statusType.debugString) }"
+        "\(type) { id=\(id) fromMe=\(fromMe) status=\(statusType.debugString) }"
     }
 }

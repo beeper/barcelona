@@ -205,7 +205,7 @@ extension DBReader {
                     $0.flatMap {
                         $0
                     }.sorted { m1, m2 in
-                        m1.time! > m2.time!
+                        m1.time > m2.time
                     }
                 }
             }
@@ -382,7 +382,7 @@ extension DBReader {
                         
                         Message.messages(withGUIDs: results).then {
                             $0.sorted(by: { m1, m2 in
-                                m1.time! > m2.time!
+                                m1.time > m2.time
                             })
                         }.pipe(resolve, reject)
                     } catch {

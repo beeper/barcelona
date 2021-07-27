@@ -9,7 +9,7 @@
 import Foundation
 
 extension Message: LazilyResolvable, ConcreteLazilyBasicResolvable {
-    public static func lazyResolve(withIdentifiers identifiers: [String?]) -> Promise<[Message], Error> {
+    public static func lazyResolve(withIdentifiers identifiers: [String]) -> Promise<[Message], Error> {
         lazyResolve(withIdentifiers: identifiers.compactMap { $0 }, inChat: nil)
     }
     

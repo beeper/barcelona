@@ -8,6 +8,7 @@
 
 import Foundation
 import Barcelona
+import IMCore
 
 private extension Message {
     var blSenderGUID: String {
@@ -15,16 +16,12 @@ private extension Message {
     }
     
     var isGroup: Bool {
-        IMChat.resolve(withIdentifier: chatID!)!.isGroup
+        IMChat.resolve(withIdentifier: chatID)!.isGroup
     }
     
     var textContent: String {
         let items: [TextChatItem] = items.compactMap {
-            guard case let .text(item) = $0 else {
-                return nil
-            }
-            
-            return item
+            $0.item as? TextChatItem
         }
         
         return items.reduce(into: "") { acc, item in
@@ -53,7 +50,7 @@ public struct BLMessage: Codable, ChatResolvable {
         timestamp = (message.time ?? 0) / 1000
         subject = message.subject
         text = message.textContent
-        chat_guid = IMChat.resolve(withIdentifier: message.chatID!)!.guid!
+        chat_guid = IMChat.resolve(withIdentifier: message.chatID)!.guid!
         sender_guid = message.blSenderGUID
         is_from_me = message.fromMe ?? false
         thread_originator_guid = message.threadIdentifier
@@ -63,10 +60,10 @@ public struct BLMessage: Codable, ChatResolvable {
         }
         
         for item in message.items {
-            switch item {
-            case .groupTitle(let changeItem):
+            switch item.item {
+            case let changeItem as GroupTitleChangeItem:
                 self.new_group_title = changeItem.title
-            case .groupAction(let action):
+            case let action as GroupActionItem:
                 self.group_action_type = Int(action.actionType)
             default:
                 break

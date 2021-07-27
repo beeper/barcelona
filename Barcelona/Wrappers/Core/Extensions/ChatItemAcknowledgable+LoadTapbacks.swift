@@ -10,10 +10,6 @@ import Foundation
 
 extension ChatItemAcknowledgable {
     func tapbacks() -> Promise<[Message], Error> {
-        guard let guid = id else {
-            return .success([])
-        }
-        
-        return DBReader(pool: databasePool).associatedMessages(with: guid)
+        return DBReader(pool: databasePool).associatedMessages(with: id)
     }
 }

@@ -297,25 +297,33 @@ public struct TextChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
         self.init(item as! IMTextMessagePartChatItem, parts: context.textParts, chatID: context.chatID)
     }
     
-    init(_ item: IMTextMessagePartChatItem, parts: [TextPart]? = nil, chatID: String?) {
+    init(_ item: IMTextMessagePartChatItem, parts: [TextPart]? = nil, chatID: String) {
+        id = item.id
+        self.chatID = chatID
+        fromMe = item.isFromMe
+        time = item.effectiveTime
+        threadIdentifier = item.threadIdentifier
+        threadOriginator = item.threadOriginatorID
         self.text = item.text?.string ?? ""
         self.parts = parts ?? ERTextParts(from: item.text ?? NSAttributedString())
         self.subject = item.subject?.string
-        
-        self.load(item: item, chatID: chatID)
     }
     
-    init(_ item: IMTranscriptPluginChatItem, text: String, parts: [TextPart], chatID: String?) {
+    init(_ item: IMTranscriptPluginChatItem, text: String, parts: [TextPart], chatID: String) {
+        id = item.id
+        self.chatID = chatID
+        fromMe = item.isFromMe
+        time = item.effectiveTime
+        threadIdentifier = item.threadIdentifier
+        threadOriginator = item.threadOriginatorID
         self.parts = parts
         self.text = text
-        
-        self.load(item: item, chatID: chatID)
     }
     
-    public var id: String?
-    public var chatID: String?
-    public var fromMe: Bool?
-    public var time: Double?
+    public var id: String
+    public var chatID: String
+    public var fromMe: Bool
+    public var time: Double
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var parts: [TextPart]
@@ -328,6 +336,6 @@ public struct TextChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
     }
     
     public var debugDescription: String {
-        "\(type) { id=\(id.debugString) fromMe=\(fromMe.debugString) text=\(text) }"
+        "\(type) { id=\(id) fromMe=\(fromMe) text=\(text) }"
     }
 }

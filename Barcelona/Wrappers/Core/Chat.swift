@@ -210,7 +210,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
                 messages.compactMap {
                     $0 as? Message
                 }.sorted {
-                    return $0.time! > $1.time!
+                    return $0.time > $1.time
                 }
             }
         }

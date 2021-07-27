@@ -17,16 +17,19 @@ public struct AttachmentChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
         self.init(item as! IMAttachmentMessagePartChatItem, metadata: context.attachment, chatID: context.chatID)
     }
     
-    init(_ item: IMAttachmentMessagePartChatItem, metadata attachmentRepresentation: Attachment? = nil, chatID: String?) {
+    init(_ item: IMAttachmentMessagePartChatItem, metadata attachmentRepresentation: Attachment? = nil, chatID: String) {
+        id = item.id
+        self.chatID = chatID
+        fromMe = item.isFromMe
+        time = item.effectiveTime
         transferID = item.transferGUID
         metadata = attachmentRepresentation ?? Attachment(guid: item.transferGUID)
-        self.load(item: item, chatID: chatID)
     }
     
-    public var id: String?
-    public var chatID: String?
-    public var fromMe: Bool?
-    public var time: Double?
+    public var id: String
+    public var chatID: String
+    public var fromMe: Bool
+    public var time: Double
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var transferID: String

@@ -121,8 +121,8 @@ public class Promise<Output, Failure: Error>: Publisher {
         then(cb)
     }
     
-    @inline(__always)
-    public func whenSuccess(_ cb: @escaping (Output) -> Void) -> Void {
+    @discardableResult
+    public func whenComplete(_ cb: @escaping (Result<Output, Failure>) -> Void) -> Self {
         var cancellable: AnyCancellable?
         
         let finish = {
@@ -134,12 +134,45 @@ public class Promise<Output, Failure: Error>: Publisher {
             cancellable.cancel()
         }
         
-        cancellable = sink(receiveCompletion: { _ in finish() }, receiveValue: {
+        cancellable = sink(receiveCompletion: { completion in
             finish()
-            cb($0)
+            
+            switch completion {
+            case .failure(let error):
+                cb(.failure(error))
+            default:
+                fatalError("unknown completion received in promise")
+            }
+        }, receiveValue: {
+            finish()
+            cb(.success($0))
         })
         
         cancellable!.store(in: &cancellables)
+        
+        return self
+    }
+    
+    @discardableResult
+    public func whenSuccess(_ cb: @escaping (Output) -> Void) -> Self {
+        whenComplete { result in
+            guard case .success(let output) = result else {
+                return
+            }
+            
+            cb(output)
+        }
+    }
+    
+    @discardableResult
+    public func whenFailure(_ cb: @escaping (Failure) -> Void) -> Self {
+        whenComplete { result in
+            guard case .failure(let error) = result else {
+                return
+            }
+            
+            cb(error)
+        }
     }
 }
 

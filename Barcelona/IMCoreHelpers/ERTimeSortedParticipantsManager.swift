@@ -29,9 +29,9 @@ public struct ParticipantSortRule: Equatable, Hashable {
     }
 }
 
-protocol ERTimeSortedParticipantsManagerIngestible {
+public protocol ERTimeSortedParticipantsManagerIngestible {
     var senderID: String? { get }
-    var numberTime: Double? { get }
+    var effectiveTime: Double { get }
 }
 
 extension ERTimeSortedParticipantsManagerIngestible {
@@ -40,46 +40,42 @@ extension ERTimeSortedParticipantsManagerIngestible {
             return nil
         }
         
-        return ParticipantSortRule(handleID: handleID, lastSentMessageTime: numberTime ?? 0)
+        return ParticipantSortRule(handleID: handleID, lastSentMessageTime: effectiveTime ?? 0)
     }
 }
 
 extension IMItem: ERTimeSortedParticipantsManagerIngestible {
-    var senderID: String? {
+    public var senderID: String? {
         self.sender
     }
     
-    var numberTime: Double? {
+    public var effectiveTime: Double {
         (self.time?.timeIntervalSince1970 ?? 0) * 1000
     }
 }
 
 extension IMMessage: ERTimeSortedParticipantsManagerIngestible {
-    var senderID: String? {
+    public var senderID: String? {
         self.sender?.id
     }
     
-    var numberTime: Double? {
+    public var effectiveTime: Double {
         (self.time?.timeIntervalSince1970 ?? 0) * 1000
     }
 }
 
-extension IMMessageChatItem: ERTimeSortedParticipantsManagerIngestible {
-    var senderID: String? {
-        self.sender?.id
-    }
-    
-    var numberTime: Double? {
-        (self.time?.timeIntervalSince1970 ?? 0) * 1000
+extension IMTranscriptChatItem {
+    public var effectiveTime: Double {
+        (self.transcriptDate?.timeIntervalSince1970 ?? 0) * 1000
     }
 }
 
 extension Message: ERTimeSortedParticipantsManagerIngestible {
-    var senderID: String? {
+    public var senderID: String? {
         self.sender
     }
     
-    var numberTime: Double? {
+    public var effectiveTime: Double {
         self.time
     }
 }

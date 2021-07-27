@@ -18,14 +18,6 @@ extension Notification.Name {
 
 var ready = false
 
-let threadGroup = MultiThreadedEventLoopGroup(numberOfThreads: 3)
-
-extension MultiThreadedEventLoopGroup {
-    func execute(_ task: @escaping () -> ()) {
-        next().execute(task)
-    }
-}
-
 var BLReadyProtocols: [UUID: NSObjectProtocol] = [:]
 func BLOnceReady(_ block: @escaping () -> ()) {
     let nonce = UUID()
@@ -54,11 +46,7 @@ extension Array where Element == IMServiceStyle {
 extension Array where Element == ChatItem {
     var messages: [Message] {
         compactMap {
-            guard case let .message(item) = $0 else {
-                return nil
-            }
-            
-            return item
+            $0 as? Message
         }
     }
     
@@ -148,10 +136,8 @@ func BLHandlePayload(_ payload: IPCPayload) {
             .init(type: .text, details: req.text)
         ])
         
-        chat.send(message: messageCreation).map {
-            $0.messages.map {
-                $0.partialMessage
-            }
+        chat.send(message: messageCreation).then {
+            $0.map(\.partialMessage)
         }.whenSuccess { messages in
             messages.forEach {
                 payload.respond(.message_receipt($0))
@@ -168,10 +154,8 @@ func BLHandlePayload(_ payload: IPCPayload) {
                 .init(type: .attachment, details: transfer.guid)
             ])
             
-            chat.send(message: messageCreation).map {
-                $0.messages.map {
-                    $0.partialMessage
-                }
+            chat.send(message: messageCreation).then {
+                $0.map(\.partialMessage)
             }.whenSuccess {
                 $0.forEach {
                     payload.respond(.message_receipt($0))
@@ -190,7 +174,7 @@ func BLHandlePayload(_ payload: IPCPayload) {
             break
         }
         
-        chat.tapback(creation).map {
+        chat.tapback(creation).then {
             $0?.partialMessage
         }.whenComplete { result in
             switch result {
@@ -242,9 +226,9 @@ BLCreatePayloadReader { payload in
 
 BLInfo("Bootstrapping", module: "ERBarcelonaManager")
 
-ERBarcelonaManager.bootstrap { error in
-    if let error = error {
-        BLError("Failed to bootstrap with error %@", module: "ERBarcelonaManager", error.localizedDescription)
+BarcelonaManager.shared.bootstrap().whenSuccess { success in
+    guard success else {
+        BLError("Failed to bootstrap")
         exit(-1)
     }
     

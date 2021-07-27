@@ -9,6 +9,32 @@
 import Foundation
 import IMCore
 
+protocol IMParticipantChangeParseable: IMCoreDataResolvable {
+    var initiatorID: String? { get }
+    var targetID: String? { get }
+    var changeType: Int64 { get }
+}
+
+extension IMParticipantChangeChatItem: IMParticipantChangeParseable {
+    var initiatorID: String? {
+        sender?.id
+    }
+    
+    var targetID: String? {
+        otherHandle?.id
+    }
+}
+
+extension IMParticipantChangeItem: IMParticipantChangeParseable {
+    var initiatorID: String? {
+        sender
+    }
+    
+    var targetID: String? {
+        otherHandle
+    }
+}
+
 public struct ParticipantChangeItem: ChatItem, Hashable {
     public static let ingestionClasses: [NSObject.Type] = [IMParticipantChangeChatItem.self, IMParticipantChangeItem.self]
     
@@ -23,24 +49,22 @@ public struct ParticipantChangeItem: ChatItem, Hashable {
         }
     }
     
-    init(_ item: IMParticipantChangeChatItem, chatID: String?) {
-        initiatorID = item.sender?.id
-        targetID = item.otherHandle?.id
+    init(_ item: IMParticipantChangeParseable, chatID: String) {
+        id = item.id
+        self.chatID = chatID
+        fromMe = item.isFromMe
+        time = item.effectiveTime
+        threadIdentifier = item.threadIdentifier
+        threadOriginator = item.threadOriginatorID
+        initiatorID = item.initiatorID
+        targetID = item.targetID
         changeType = item.changeType
-        self.load(item: item, chatID: chatID)
     }
     
-    init(_ item: IMParticipantChangeItem, chatID: String?) {
-        initiatorID = item.sender
-        targetID = item.otherHandle
-        changeType = item.changeType
-        self.load(item: item, chatID: chatID)
-    }
-    
-    public var id: String?
-    public var chatID: String?
-    public var fromMe: Bool?
-    public var time: Double?
+    public var id: String
+    public var chatID: String
+    public var fromMe: Bool
+    public var time: Double
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var initiatorID: String?

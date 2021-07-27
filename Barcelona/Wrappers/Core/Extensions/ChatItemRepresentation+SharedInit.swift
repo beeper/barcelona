@@ -9,28 +9,42 @@
 import Foundation
 import IMCore
 
-extension ChatItem {
-    internal mutating func load(item: IMItem, chatID chat: String?) {
-        id = item.guid
-        chatID = chat
-        fromMe = item.isFromMe
-        time = (item.time?.timeIntervalSince1970 ?? 0) * 1000
-        
-        if let item = item as? IMMessagePartChatItem, #available(iOS 14, macOS 10.16, watchOS 7, *) {
-            threadIdentifier = item.threadIdentifier()
-            threadOriginator = item.threadOriginator()?.guid
+public protocol IMCoreDataResolvable: NSObjectProtocol {
+    var id: String { get }
+    var isFromMe: Bool { get }
+    var effectiveTime: Double { get }
+    var threadIdentifier: String? { get }
+    var threadOriginator: IMMessageItem? { get }
+    var threadOriginatorID: String? { get }
+}
+
+private let sel_threadOriginator = Selector("threadOriginator")
+private let sel_threadIdentifier = Selector("threadIdentifier")
+
+extension IMCoreDataResolvable {
+    public var threadIdentifier: String? {
+        guard #available(iOS 14, macOS 10.16, watchOS 7, *), self.responds(to: sel_threadIdentifier) else {
+            return nil
         }
+        
+        return self.perform(sel_threadIdentifier)?.takeUnretainedValue() as? String
     }
     
-    internal mutating func load(item: IMTranscriptChatItem, chatID chat: String?) {
-        id = item.guid
-        chatID = chat
-        fromMe = item.isFromMe
-        time = ((item.transcriptDate ?? item._timeAdded())?.timeIntervalSince1970 ?? item._item()?.time?.timeIntervalSince1970 ?? 0) * 1000
-        
-        if let item = item as? IMMessagePartChatItem, #available(iOS 14, macOS 10.16, watchOS 7, *) {
-            threadIdentifier = item.threadIdentifier()
-            threadOriginator = item.threadOriginator()?.guid
+    public var threadOriginator: IMMessageItem? {
+        guard #available(iOS 14, macOS 10.16, watchOS 7, *), self.responds(to: sel_threadOriginator) else {
+            return nil
         }
+        
+        return self.perform(sel_threadOriginator)?.takeUnretainedValue() as? IMMessageItem
+    }
+    
+    public var threadOriginatorID: String? {
+        threadOriginator?.id
     }
 }
+
+extension IMItem: IMCoreDataResolvable {
+    public var id: String { guid! }
+}
+
+extension IMTranscriptChatItem: IMCoreDataResolvable {}

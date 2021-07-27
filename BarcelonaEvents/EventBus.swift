@@ -102,3 +102,8 @@ public extension Publisher where Output == Event, Failure == Never {
     }
 }
 
+public extension Publisher where Failure == Never {
+    func receiveForever(_ cb: @escaping (Output) -> ()) {
+        sink(receiveValue: cb).store(in: &eventSubscriptions)
+    }
+}

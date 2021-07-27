@@ -9,6 +9,18 @@
 import Foundation
 import IMCore
 
+public protocol IMGroupTitleItemConforming: IMCoreDataResolvable {
+    var title: String! { get }
+    var senderID: String? { get }
+}
+
+extension IMGroupTitleChangeItem: IMGroupTitleItemConforming {}
+extension IMGroupTitleChangeChatItem: IMGroupTitleItemConforming {
+    public var senderID: String? {
+        (handle ?? sender)?.id
+    }
+}
+
 public struct GroupTitleChangeItem: ChatItemOwned, Hashable {
     public static let ingestionClasses: [NSObject.Type] = [IMGroupTitleChangeItem.self, IMGroupTitleChangeChatItem.self]
     
@@ -23,24 +35,21 @@ public struct GroupTitleChangeItem: ChatItemOwned, Hashable {
         }
     }
     
-    init(_ item: IMGroupTitleChangeItem, chatID: String?) {
+    init(_ item: IMGroupTitleItemConforming, chatID: String) {
+        id = item.id
+        self.chatID = chatID
+        fromMe = item.isFromMe
+        time = item.effectiveTime
         title = item.title
-        sender = item.sender
-        
-        self.load(item: item, chatID: chatID)
+        sender = item.senderID
+        threadIdentifier = item.threadIdentifier
+        threadOriginator = item.threadOriginatorID
     }
     
-    init(_ item: IMGroupTitleChangeChatItem, chatID: String?) {
-        title = item.title
-        sender = (item.handle ?? item.sender)?.id
-        
-        self.load(item: item, chatID: chatID)
-    }
-    
-    public var id: String?
-    public var chatID: String?
-    public var fromMe: Bool?
-    public var time: Double?
+    public var id: String
+    public var chatID: String
+    public var fromMe: Bool
+    public var time: Double
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var title: String?

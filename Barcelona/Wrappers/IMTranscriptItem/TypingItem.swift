@@ -16,16 +16,18 @@ public struct TypingItem: ChatItemOwned, Hashable {
         self.init(item as! IMTypingChatItem, chatID: context.chatID)
     }
     
-    init(_ item: IMTypingChatItem, chatID: String?) {
+    init(_ item: IMTypingChatItem, chatID: String) {
+        id = item.id
+        fromMe = item.isFromMe
         sender = item.sender?.id
-        
-        self.load(item: item, chatID: chatID)
+        time = item.effectiveTime
+        self.chatID = chatID
     }
     
-    public var id: String?
-    public var chatID: String?
-    public var fromMe: Bool?
-    public var time: Double?
+    public var id: String = ""
+    public var chatID: String = ""
+    public var fromMe: Bool
+    public var time: Double
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var sender: String?
