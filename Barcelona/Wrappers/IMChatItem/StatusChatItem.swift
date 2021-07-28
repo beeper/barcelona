@@ -27,7 +27,7 @@ private extension Optional where Wrapped == StatusType {
     }
 }
 
-public struct StatusChatItem: ChatItem, Hashable {
+public struct StatusChatItem: ChatItemOwned, Hashable {
     public static let ingestionClasses: [NSObject.Type] = [IMMessageStatusChatItem.self]
     
     public init(ingesting item: NSObject, context: IngestionContext) {
@@ -37,20 +37,20 @@ public struct StatusChatItem: ChatItem, Hashable {
     public init(item: IMMessageStatusChatItem, chatID: String) {
         id = item.id
         self.chatID = chatID
-        fromMe = item.isFromMe
+        fromMe = Registry.sharedInstance.uniqueMeHandleIDs.contains(item._item().handle!)
         time = item.effectiveTime
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
         statusType = .init(rawValue: item.statusType)
         itemID = item._item().guid
-        sender = item._item().senderID!
+        sender = item._item().handle
     }
     
     public var id: String
     public var chatID: String
     public var fromMe: Bool
     public var time: Double
-    public var sender: String
+    public var sender: String?
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var statusType: StatusType?

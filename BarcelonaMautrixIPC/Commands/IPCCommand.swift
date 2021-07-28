@@ -223,11 +223,7 @@ public struct IPCPayload: Codable {
         command = try IPCCommand(from: decoder)
         let commandID = try? container.decode(Int.self, forKey: .id)
         
-        if command.name != .log, commandID == nil {
-            throw DecodingError.valueNotFound(Int.self, .init(codingPath: [CodingKeys.id], debugDescription: "Command ID not provided but it was not a logging message"))
-        }
-        
-        id = commandID ?? -1
+        id = commandID
     }
     
     public init(id: Int? = nil, command: IPCCommand) {
@@ -236,6 +232,10 @@ public struct IPCPayload: Codable {
     }
     
     public func reply(withCommand command: IPCCommand) {
+        guard let id = id else {
+            return BLDebug("Reply issued for a command that had no ID. Inbound name: %@ Outbound name: %@", self.command.name.rawValue, self.command.name.rawValue)
+        }
+        
         BLWritePayload(IPCPayload(id: id, command: command))
     }
     

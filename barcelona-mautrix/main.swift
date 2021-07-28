@@ -62,20 +62,6 @@ extension Array where Element == ChatItem {
     }
 }
 
-class BLChatDelegate: ChatDelegate {
-    static let shared = BLChatDelegate()
-    
-    func chat(_ chat: Chat, willSendMessages messages: [IMMessage], fromCreateMessage createMessage: CreateMessage) {
-        BLMetricStore.shared.set(messages.map(\.guid), forKey: .lastSentMessageGUIDs)
-    }
-    
-    func chat(_ chat: Chat, willSendMessages messages: [IMMessage], fromCreatePluginMessage createPluginMessage: CreatePluginMessage) {
-        BLMetricStore.shared.set(messages.map(\.guid), forKey: .lastSentMessageGUIDs)
-    }
-}
-
-Chat.delegate = BLChatDelegate.shared
-
 func BLHandlePayload(_ payload: IPCPayload) {
     BLInfo("Got a payload with type \(payload.command.name)")
     
@@ -142,6 +128,8 @@ func BLHandlePayload(_ payload: IPCPayload) {
         chat.send(message: messageCreation).then {
             $0.map(\.partialMessage)
         }.whenSuccess { messages in
+            BLMetricStore.shared.set(messages.map(\.guid), forKey: .lastSentMessageGUIDs)
+            
             messages.forEach {
                 payload.respond(.message_receipt($0))
             }
@@ -160,8 +148,10 @@ func BLHandlePayload(_ payload: IPCPayload) {
             
         chat.send(message: messageCreation).then {
             $0.map(\.partialMessage)
-        }.whenSuccess {
-            $0.forEach {
+        }.whenSuccess { messages in
+            BLMetricStore.shared.set(messages.map(\.guid), forKey: .lastSentMessageGUIDs)
+            
+            messages.forEach {
                 payload.respond(.message_receipt($0))
             }
         }
@@ -198,19 +188,13 @@ func BLHandlePayload(_ payload: IPCPayload) {
         }
         
         chat.markAllMessagesAsRead()
-        payload.respond(.ack)
     case .set_typing(let req):
         guard let chat = req.cbChat else {
             payload.fail(strategy: .chat_not_found)
             break
         }
         
-        if req.typing {
-            chat.startTyping()
-        } else {
-            chat.stopTyping()
-        }
-        payload.respond(.ack)
+        chat.setTyping(req.typing)
     default:
         break
     }

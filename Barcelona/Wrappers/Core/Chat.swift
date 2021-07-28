@@ -177,21 +177,18 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
         IMChat.resolve(withIdentifier: id)!
     }
     
-    public func startTyping() {
-        if imChat.localTypingMessageGUID == nil {
-            imChat.setValue(NSString.stringGUID(), forKey: "_typingGUID")
+    public var isTyping: Bool {
+        get {
+            imChat.localUserIsTyping
         }
-        
-        let message = IMMessage(sender: nil, time: nil, text: nil, fileTransferGUIDs: nil, flags: 0xc, error: nil, guid: imChat.localTypingMessageGUID, subject: nil)
-        imChat._sendMessage(message, adjustingSender: true, shouldQueue: false)
+        set {
+            setTyping(newValue)
+        }
     }
     
-    public func stopTyping() {
-        if let typingGUID = imChat.localTypingMessageGUID {
-            imChat.setValue(nil, forKey: "_typingGUID")
-            let message = IMMessage(sender: nil, time: nil, text: nil, fileTransferGUIDs: nil, flags: 0xd, error: nil, guid: typingGUID, subject: nil)
-            imChat.sendMessage(message)
-        }
+    
+    public func setTyping(_ typing: Bool) {
+        imChat.localUserIsTyping = typing
     }
     
     public func messages(before: String? = nil, limit: Int? = nil, beforeDate: Date? = nil) -> Promise<[Message], Error> {
@@ -283,7 +280,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
             Chat.delegate?.chat(self, willSendMessages: messages, fromCreateMessage: createMessage)
             
             messages.forEach {
-                self.imChat._sendMessage($0, adjustingSender: true, shouldQueue: true)
+                self.imChat.sendMessage($0)
             }
             
             return messages.bulkRepresentation(in: self.id)

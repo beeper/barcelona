@@ -9,6 +9,16 @@
 import Barcelona
 import BarcelonaEvents
 
+private extension ChatItemOwned {
+    var mautrixFriendlyGUID: String {
+        "\(chat.service!.rawValue);\(chat.imChat.isGroup ? "+" : "-");\(sender!)"
+    }
+    
+    var chat: Chat {
+        Chat.resolve(withIdentifier: chatID)!
+    }
+}
+
 public class BLEventHandler {
     public static let shared = BLEventHandler()
     
@@ -47,7 +57,7 @@ public class BLEventHandler {
             case .itemStatusChanged(let item):
                 switch item.statusType {
                 case .read:
-                    send(.read_receipt(BLReadReceipt(sender_guid: item.sender, is_from_me: item.fromMe, chat_guid: Chat.resolve(withIdentifier: item.chatID)!.imChat.guid, read_up_to: item.itemID)))
+                    send(.read_receipt(BLReadReceipt(sender_guid: item.mautrixFriendlyGUID, is_from_me: item.fromMe, chat_guid: Chat.resolve(withIdentifier: item.chatID)!.imChat.guid, read_up_to: item.itemID)))
                 default:
                     break
                 }

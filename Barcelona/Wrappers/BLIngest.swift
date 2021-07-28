@@ -41,7 +41,7 @@ private func BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -> 
         return .success(items)
     }
     
-    return DBReader.shared.associatedMessages(with: messages.values.flatMap(\.associableItemIDs)).then { associations in
+    return DBReader.shared.associatedMessages(with: messages.values.flatMap(\.associableItemIDs), in: chat).then { associations in
         associations.forEach { itemID, associatedMessages in
             guard let messageID = associatedLedger[itemID], let message = messages[messageID] else {
                 return
@@ -123,11 +123,11 @@ public func BLIngestObjects(_ objects: [NSObject], inChat chat: String? = nil) -
             }
     }
     
-    return BLLoadFileTransfers(forObjects: objects).receive(on: RunLoop.main).then {
+    return BLLoadFileTransfers(forObjects: objects).then {
         BLParseObjects(objects, inChat: chat)
     }.then {
         BLLoadTapbacks(forItems: $0, inChat: chat)
-    }
+    }.receive(on: DispatchQueue.main)
 }
 
 public func BLIngestObject(_ object: NSObject, inChat chat: String? = nil) -> Promise<ChatItem, Error> {
