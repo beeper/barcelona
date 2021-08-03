@@ -72,7 +72,7 @@ open class IdentifiableDebounceManager {
     ///   - cb: task to execute if conditions are met
     public func submit(id: String, cb: @escaping () -> ()) {
         debouncer(forID: id).call {
-            DispatchQueue.main.async {
+            RunLoop.main.schedule {
                 self.clearDebouncer(forID: id)
             }
             

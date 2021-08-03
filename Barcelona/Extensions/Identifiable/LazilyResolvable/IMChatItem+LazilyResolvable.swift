@@ -13,6 +13,7 @@ public struct CBMessageItemIdentifierData: Codable, CustomStringConvertible, Raw
     public init?(rawValue: String) {
         switch rawValue.first {
         case "t":
+            // we dont care about typing. we dont. we dont. we dont. we dont. we dont.
             return nil
         case "p":
             // part
@@ -32,7 +33,7 @@ public struct CBMessageItemIdentifierData: Codable, CustomStringConvertible, Raw
             }
             
             self.id = String(id)
-            additionalData = components[1...].map { String($0) }
+            additionalData = components[1...].map(String.init)
         }
     }
     
@@ -79,22 +80,14 @@ public extension String {
 }
 
 extension IMChatItem: LazilyResolvable, ConcreteLazilyBasicResolvable {
-    public static func lazyResolve(withIdentifiers identifiers: [String]) -> Promise<[IMChatItem], Error> {
-        let messageIdentifiers: [String] = identifiers.compactMap {
-            $0.cb_messageIDExtracted
-        }.map {
-            String($0)
-        }
-        
-        return IMMessage.lazyResolve(withIdentifiers: messageIdentifiers).then {
-            $0.flatMap {
-                $0._imMessageItem._newChatItems().filter {
-                    guard let transcriptChatItem = $0 as? IMTranscriptChatItem, identifiers.contains(transcriptChatItem.guid) else {
-                        return false
-                    }
-                    return true
-                }
+    public static func lazyResolve(withIdentifiers identifiers: [String]) -> Promise<[IMChatItem]> {
+        IMMessage.lazyResolve(withIdentifiers: identifiers.map(\.cb_messageIDExtracted)).flatMap {
+            $0._imMessageItem._newChatItems()
+        }.filter {
+            guard let transcriptChatItem = $0 as? IMTranscriptChatItem, identifiers.contains(transcriptChatItem.guid) else {
+                return false
             }
+            return true
         }
     }
 }

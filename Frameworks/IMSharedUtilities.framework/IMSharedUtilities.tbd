@@ -12,6 +12,7 @@ exports:
                             _AttachmentsAutomationLogMilestoneWithOptionFlags,
                             _FZCreateIMMessageItemsFromSerializedArray,
                             _FZCreateSerializedIMMessageItemsfromArray,
+                            _IMMessageCreateAssociatedMessageGUIDFromThreadIdentifier,
                             _FormattedDataFilePath,
                             _FormattedRecentDomainDirectory,
                             _FormattedRecentsCacheFilePath,

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import BarcelonaFoundation
 
 private extension FileHandle {
     func handleDataAsynchronously(_ cb: @escaping (Data) -> ()) {
@@ -81,6 +82,8 @@ private let jujitsuEncoder: JSONEncoder = {
     return encoder
 }()
 
+private var BL_IS_WRITING_META_PAYLOAD = false
+
 public func BLWritePayload(_ payload: IPCPayload) {
     let encoder = JSONEncoder()
     encoder.dateEncodingStrategy = .iso8601withFractionalSeconds
@@ -90,6 +93,15 @@ public func BLWritePayload(_ payload: IPCPayload) {
             "direction": "toMautrix",
             "json": String(data: try! jujitsuEncoder.encode(payload), encoding: .utf8)!
         ])
+    }
+    
+    if !BL_IS_WRITING_META_PAYLOAD, payload.command.name != .log {
+        BL_IS_WRITING_META_PAYLOAD = true
+        CLInfo(
+            "BLStandardIO",
+            "Outgoing! %@ %d", payload.command.name.rawValue, payload.id ?? -1
+        )
+        BL_IS_WRITING_META_PAYLOAD = false
     }
     
     FileHandle.standardOutput.write(try! encoder.encode(payload))
@@ -115,10 +127,12 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
                     "json": String(data: try! jujitsuEncoder.encode(payload), encoding: .utf8)!
                 ])
                 
+                CLInfo("BLStandardIO", "Incoming! %@ %d", payload.command.name.rawValue, payload.id ?? -1)
+                
                 cb(payload)
             } catch {
-                BLWarn("Failed to decode payload: %@", module: "BCStandardIO", "\(error)")
-                BLInfo("Raw payload: %@", module: "BCStandardIO", String(data: chunk, encoding: .utf8)!)
+                CLWarn("MautrixIPC", "Failed to decode payload: %@", "\(error)")
+                CLInfo("MautrixIPC", "Raw payload: %@", String(data: chunk, encoding: .utf8)!)
             }
         }
     }

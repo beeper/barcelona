@@ -10,7 +10,11 @@ import Foundation
 import IMCore
 
 extension IMMessage: LazilyResolvable, ConcreteLazilyBasicResolvable {
-    public static func lazyResolve(withIdentifiers identifiers: [String]) -> Promise<[IMMessage], Error> {
-        ERLoadIMMessagesWithGUIDs(identifiers)
+    public static func resolveSync(withIdentifiers identifiers: [String]) -> [IMMessage] {
+        BLLoadIMMessages(withGUIDs: identifiers)
+    }
+    
+    public static func lazyResolve(withIdentifiers identifiers: [String]) -> Promise<[IMMessage]> {
+        .success(BLLoadIMMessages(withGUIDs: identifiers))
     }
 }

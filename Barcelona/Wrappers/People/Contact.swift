@@ -40,8 +40,8 @@ public struct Contact: Codable, Hashable, Comparable {
         self.nickname = contact.nickname.count == 0 ? nil : contact.nickname
         self.hasPicture = contact.thumbnailImageData != nil
         
-        self.handles = contact.phoneNumbers.reduce(into: contact.emailAddresses.reduce(into: []) { (result, email) in
-            result.append(Handle(id: email.value as String, isBusiness: false))
+        self.handles = contact.phoneNumbers.reduce(into: contact.emailAddresses.map { email in
+            Handle(id: email.value as String, isBusiness: false)
         }) { (result, phoneNumber) in
             guard let countryCode = phoneNumber.value.value(forKey: "countryCode") as? String, let phoneNumber = phoneNumber.value.value(forKey: "digits") as? String else {
                 return

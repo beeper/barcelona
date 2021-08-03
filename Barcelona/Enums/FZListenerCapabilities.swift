@@ -31,8 +31,6 @@ public enum FZListenerCapabilities: UInt32 {
     ]
     
     static var defaults_: UInt32 {
-        defaults.reduce(into: 0) { acc, cap in
-            acc |= cap.rawValue
-        }
+        defaults.map(\.rawValue).reduce(into: 0, |=)
     }
 }

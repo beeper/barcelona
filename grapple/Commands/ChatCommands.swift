@@ -32,5 +32,18 @@ class ChatCommands: CommandGroup {
         }
     }
     
-    var children: [Routable] = [ListChats()]
+    class RecentMessages: Command {
+        let name = "recent-messages"
+        
+        @Param var id: String
+        
+        func execute() throws {
+            CBLoadChatItems(withChatIdentifier: "chat32445357915332717", onServices: [.iMessage, .SMS], limit: 20).then {
+                print($0)
+                exit(0)
+            }
+        }
+    }
+    
+    var children: [Routable] = [ListChats(), RecentMessages()]
 }

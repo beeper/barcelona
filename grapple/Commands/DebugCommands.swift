@@ -32,13 +32,10 @@ class DebugCommands: CommandGroup {
         func execute() throws {
             let bus = EventBus()
 
-            let log = OSLog(subsystem: "com.ericrabil.grapple", category: "EventBusLogging")
-            log.rerouteToStandardOutput = true
-            
             bus.resume()
 
             bus.publisher.receiveEvent { event in
-                log("receiveEvent(%@): %@", event.label, String(debugDescribing: event.value))
+                BLInfo("BLEvents", "receiveEvent(%@): %@", event.label, String(debugDescribing: event.value))
             }
         }
     }

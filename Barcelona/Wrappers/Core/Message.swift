@@ -8,15 +8,24 @@
 
 import Foundation
 import IMCore
+import IMSharedUtilities
 
 public extension Array where Element == String {
-    func er_chatItems(in chat: String) -> Promise<[ChatItem], Error> {
+    func er_chatItems(in chat: String) -> Promise<[ChatItem]> {
         IMMessage.messages(withGUIDs: self)
     }
 }
 
 private func CBExtractThreadOriginatorAndPartFromIdentifier(_ identifier: String) -> (String, Int)? {
     let parts = identifier.split(separator: ",")
+    
+    if #available(macOS 10.16, iOS 14.0, *), let identifierData = CBMessageItemIdentifierData(rawValue: IMMessageCreateAssociatedMessageGUIDFromThreadIdentifier(identifier)) {
+        guard let part = identifierData.part else {
+            return nil
+        }
+        
+        return (identifierData.id, part)
+    }
     
     guard parts.count > 2 else {
         return nil
@@ -38,26 +47,22 @@ private extension IngestionContext {
 }
 
 public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
-    static func message(withGUID guid: String) -> Promise<Message?, Error> {
-        IMMessage.message(withGUID: guid).then {
+    static func message(withGUID guid: String, in chatID: String? = nil) -> Promise<Message?> {
+        IMMessage.message(withGUID: guid, in: chatID).then {
             $0 as? Message
         }
     }
     
-    static func messages(withGUIDs guids: [String], in chat: String? = nil) -> Promise<[Message], Error> {
-        IMMessage.messages(withGUIDs: guids, in: chat).then {
-            $0.compactMap {
-                $0 as? Message
-            }
+    static func messages(withGUIDs guids: [String], in chat: String? = nil) -> Promise<[Message]> {
+        IMMessage.messages(withGUIDs: guids, in: chat).compactMap {
+            $0 as? Message
         }
     }
     
-    public static func associatedMessages(withGUID guid: String) -> Promise<[Message], Error> {
-        DBReader.shared.associatedMessages(with: guid)
-    }
-    
-    public static func messages(matching query: String, limit: Int) -> Promise<[Message], Error> {
-        DBReader().messages(matching: query, limit: limit)
+    public static func messages(matching query: String, limit: Int) -> Promise<[Message]> {
+        DBReader.shared.messages(matching: query, limit: limit)
+            .then { guids in BLLoadChatItems(withGUIDs: guids) }
+            .compactMap { $0 as? Message }
     }
     
     public static let ingestionClasses: [NSObject.Type] = [IMItem.self, IMMessage.self, IMMessageItem.self]
@@ -67,8 +72,10 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         case let item as IMMessageItem:
             if let message = context.message {
                 self.init(item, message: message, items: context.ingest(item._newChatItems()), chatID: context.chatID)
+            } else if let items = item._newChatItems() {
+                self.init(item, items: context.ingest(items), chatID: context.chatID)
             } else {
-                self.init(item, items: context.ingest(item._newChatItems()), chatID: context.chatID)
+                return nil
             }
         case let item as IMMessage:
             self.init(item, items: context.ingest(item._imMessageItem._newChatItems()), chatID: context.chatID)
@@ -127,7 +134,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         
         // load timestamps
         message.receipt.merging(receipt: backing.receipt).assign(toMessage: &self)
-        self.load(message: message)
+        self.load(message: message, backing: backing)
     }
     
     init(_ backing: IMMessageItem, items: [ChatItem], chatID: String) {
@@ -138,9 +145,13 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         self.init(message._imMessageItem, message: message, items: items, chatID: chatID)
     }
     
-    private mutating func load(message: IMMessage) {
+    private mutating func load(message: IMMessage, backing: IMMessageItem) {
         if #available(iOS 14, macOS 10.16, watchOS 7, *) {
-            if let rawThreadIdentifier = message.threadIdentifier(), let (threadIdentifier, threadOriginatorPart) = CBExtractThreadOriginatorAndPartFromIdentifier(rawThreadIdentifier) {
+            if let rawThreadIdentifier = message.threadIdentifier() ?? backing.threadIdentifier {
+                guard let (threadIdentifier, threadOriginatorPart) = CBExtractThreadOriginatorAndPartFromIdentifier(rawThreadIdentifier) else {
+                    return
+                }
+                
                 self.threadIdentifier = threadIdentifier
                 self.threadOriginator = threadIdentifier
                 self.threadOriginatorPart = threadOriginatorPart

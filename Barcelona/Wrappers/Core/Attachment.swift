@@ -22,21 +22,7 @@ public struct BulkAttachmentRepresentation: Codable {
     public var attachments: [Attachment]
 }
 
-public struct ResourceOrigin: Codable, Hashable {
-    public init?(chatID: String? = nil, handleID: String? = nil, date: Double? = nil) {
-        self.chatID = chatID
-        self.handleID = handleID
-        self.date = date
-        
-        if chatID == nil, handleID == nil, date == nil {
-            return nil
-        }
-    }
-    
-    public var chatID: String?
-    public var handleID: String?
-    public var date: Double?
-}
+
 
 internal extension IMFileTransfer {
     var ensuredUTI: CFString? {
@@ -54,7 +40,7 @@ internal extension IMFileTransfer {
             return localPath
         }
         
-        if let path = CBLoadAttachmentPathForTransfer(withGUID: guid) {
+        if let path = BLLoadAttachmentPathForTransfer(withGUID: guid) {
             self.localPath = path
             return path
         }
@@ -158,7 +144,7 @@ public struct Attachment: Codable, Hashable {
     public var sticker: StickerInformation?
     
     public var path: String? {
-        IMFileTransferCenter.sharedInstance().transfer(forGUID: id, includeRemoved: false)?.localPath ?? CBLoadAttachmentPathForTransfer(withGUID: id)
+        IMFileTransferCenter.sharedInstance().transfer(forGUID: id, includeRemoved: false)?.localPath ?? BLLoadAttachmentPathForTransfer(withGUID: id)
     }
 }
 
@@ -169,6 +155,9 @@ public func CBInitializeFileTransfer(filename: String, path: URL) -> IMFileTrans
     transfer.transferredFilename = filename
     
     IMFileTransferCenter.sharedInstance().registerTransfer(withDaemon: guid)
+    
+    transfer.shouldForceArchive = true
+    IMFileTransferCenter.sharedInstance().sendTransfer(transfer)
     
     return transfer
 }
@@ -188,7 +177,7 @@ public struct Size: Codable, Hashable {
     }
 }
 
-public struct InternalAttachment {
+public struct BarcelonaAttachment {
     public var guid: String
     public var originalGUID: String?
     public var path: String
@@ -218,6 +207,7 @@ public struct InternalAttachment {
         Attachment(mime: self.mime, filename: filename, id: guid, uti: uti, origin: origin, size: fileTransfer.mediaSize, sticker: fileTransfer.isSticker ? .init(fileTransfer.stickerUserInfo) : nil)
     }
     
+    @usableFromInline
     func registerFileTransferIfNeeded() {
         let _ = fileTransfer
     }
@@ -233,7 +223,7 @@ public struct InternalAttachment {
     }
 }
 
-extension InternalAttachment {
+extension BarcelonaAttachment {
     init?(guid: String) {
         guard let transfer = IMFileTransferCenter.sharedInstance().transfer(forGUID: guid) else {
             return nil

@@ -12,15 +12,15 @@ import GRDB
 /**
  Represents a message record in the chat.db file
  */
-class RawMessage: Record {
-    override class var databaseTableName: String { "message" }
+public class RawMessage: Record {
+    public override class var databaseTableName: String { "message" }
     
-    static let messageChatJoin = belongsTo(ChatMessageJoin.self, using: ForeignKey(["ROWID"], to: ["message_id"]))
-    static let messageHandleJoin = belongsTo(RawHandle.self, key: "handle", using: ForeignKey([RawMessage.Columns.handle_id], to: [RawHandle.Columns.ROWID]))
-    static let messageOtherHandleJoin = belongsTo(RawHandle.self, key: "otherHandle", using: ForeignKey([RawMessage.Columns.other_handle], to: [RawHandle.Columns.ROWID]))
-    static let messageAttachmentJoin = belongsTo(MessageAttachmentJoin.self, using: ForeignKey([RawMessage.Columns.ROWID], to: [MessageAttachmentJoin.Columns.message_id]))
+    public static let messageChatJoin = belongsTo(ChatMessageJoin.self, using: ForeignKey(["ROWID"], to: ["message_id"]))
+    public static let messageHandleJoin = belongsTo(RawHandle.self, key: "handle", using: ForeignKey([RawMessage.Columns.handle_id], to: [RawHandle.Columns.ROWID]))
+    public static let messageOtherHandleJoin = belongsTo(RawHandle.self, key: "otherHandle", using: ForeignKey([RawMessage.Columns.other_handle], to: [RawHandle.Columns.ROWID]))
+    public static let messageAttachmentJoin = belongsTo(MessageAttachmentJoin.self, using: ForeignKey([RawMessage.Columns.ROWID], to: [MessageAttachmentJoin.Columns.message_id]))
     
-    required init(row: Row) {
+    public required init(row: Row) {
         account = row[Columns.account]
         account_guid = row[Columns.account_guid]
         associated_message_guid = row[Columns.associated_message_guid]
@@ -95,7 +95,7 @@ class RawMessage: Record {
         super.init(row: row)
     }
     
-    override func encode(to container: inout PersistenceContainer) {
+    public override func encode(to container: inout PersistenceContainer) {
         container[Columns.account] = account
         container[Columns.account_guid] = account_guid
         container[Columns.associated_message_guid] = associated_message_guid
@@ -169,106 +169,90 @@ class RawMessage: Record {
         container[Columns.was_downgraded] = was_downgraded
     }
 
-    enum Columns: String, ColumnExpression {
+    public enum Columns: String, ColumnExpression {
         case account, account_guid, associated_message_guid, associated_message_range_length, associated_message_range_location, associated_message_type, attributedBody, balloon_bundle_id, cache_has_attachments, cache_roomnames, ck_record_change_tag, ck_record_id, ck_sync_state, country, date, date_delivered, date_played, date_read, destination_caller_id, error, expire_state, expressive_send_style_id, group_action_type, group_title, guid, handle_id, has_dd_results, is_archive, is_audio_message, is_auto_reply, is_corrupt, is_delayed, is_delivered, is_emote, is_empty, is_expirable, is_finished, is_forward, is_from_me, is_played, is_prepared, is_read, is_sent, is_service_message, is_spam, is_system_message, item_type, message_action_type, message_source, message_summary_info, other_handle, payload_data, replace, reply_to_guid, ROWID, service, service_center, share_direction, share_status, sort_id, sr_ck_record_change_tag, sr_ck_record_id, sr_ck_sync_state, subject, text, time_expressive_send_played, type, version, was_data_detected, was_deduplicated, was_downgraded
     }
     
-    var account: String?
-    var account_guid: String?
-    var associated_message_guid: String?
-    var associated_message_range_length: Int64?
-    var associated_message_range_location: Int64?
-    var associated_message_type: Int64?
-    var attributedBody: Data?
-    var balloon_bundle_id: String?
-    var cache_has_attachments: Int64?
-    var cache_roomnames: String?
-    var ck_record_change_tag: String?
-    var ck_record_id: String?
-    var ck_sync_state: Int64?
-    var country: String?
-    var date: Int64?
-    var date_delivered: Int64?
-    var date_played: Int64?
-    var date_read: Int64?
-    var destination_caller_id: String?
-    var error: Int64?
-    var expire_state: Int64?
-    var expressive_send_style_id: String?
-    var group_action_type: Int64?
-    var group_title: String?
-    var guid: String?
-    var handle_id: Int64?
-    var has_dd_results: Int64?
-    var is_archive: Int64?
-    var is_audio_message: Int64?
-    var is_auto_reply: Int64?
-    var is_corrupt: Int64?
-    var is_delayed: Int64?
-    var is_delivered: Int64?
-    var is_emote: Int64?
-    var is_empty: Int64?
-    var is_expirable: Int64?
-    var is_finished: Int64?
-    var is_forward: Int64?
-    var is_from_me: Int64?
-    var is_played: Int64?
-    var is_prepared: Int64?
-    var is_read: Int64?
-    var is_sent: Int64?
-    var is_service_message: Int64?
-    var is_spam: Int64?
-    var is_system_message: Int64?
-    var item_type: Int64?
-    var message_action_type: Int64?
-    var message_source: Int64?
-    var message_summary_info: Data?
-    var other_handle: Int64?
-    var payload_data: Data?
-    var replace: Int64?
-    var reply_to_guid: String?
-    var ROWID: Int64
-    var service: String?
-    var service_center: String?
-    var share_direction: Int64?
-    var share_status: Int64?
-    var sort_id: Int64?
-    var sr_ck_record_change_tag: String?
-    var sr_ck_record_id: String?
-    var sr_ck_sync_state: Int64?
-    var subject: String?
-    var text: String?
-    var time_expressive_send_played: Int64?
-    var type: Int64?
-    var version: Int64?
-    var was_data_detected: Int64?
-    var was_deduplicated: Int64?
-    var was_downgraded: Int64?
+    public var account: String?
+    public var account_guid: String?
+    public var associated_message_guid: String?
+    public var associated_message_range_length: Int64?
+    public var associated_message_range_location: Int64?
+    public var associated_message_type: Int64?
+    public var attributedBody: Data?
+    public var balloon_bundle_id: String?
+    public var cache_has_attachments: Int64?
+    public var cache_roomnames: String?
+    public var ck_record_change_tag: String?
+    public var ck_record_id: String?
+    public var ck_sync_state: Int64?
+    public var country: String?
+    public var date: Int64?
+    public var date_delivered: Int64?
+    public var date_played: Int64?
+    public var date_read: Int64?
+    public var destination_caller_id: String?
+    public var error: Int64?
+    public var expire_state: Int64?
+    public var expressive_send_style_id: String?
+    public var group_action_type: Int64?
+    public var group_title: String?
+    public var guid: String?
+    public var handle_id: Int64?
+    public var has_dd_results: Int64?
+    public var is_archive: Int64?
+    public var is_audio_message: Int64?
+    public var is_auto_reply: Int64?
+    public var is_corrupt: Int64?
+    public var is_delayed: Int64?
+    public var is_delivered: Int64?
+    public var is_emote: Int64?
+    public var is_empty: Int64?
+    public var is_expirable: Int64?
+    public var is_finished: Int64?
+    public var is_forward: Int64?
+    public var is_from_me: Int64?
+    public var is_played: Int64?
+    public var is_prepared: Int64?
+    public var is_read: Int64?
+    public var is_sent: Int64?
+    public var is_service_message: Int64?
+    public var is_spam: Int64?
+    public var is_system_message: Int64?
+    public var item_type: Int64?
+    public var message_action_type: Int64?
+    public var message_source: Int64?
+    public var message_summary_info: Data?
+    public var other_handle: Int64?
+    public var payload_data: Data?
+    public var replace: Int64?
+    public var reply_to_guid: String?
+    public var ROWID: Int64
+    public var service: String?
+    public var service_center: String?
+    public var share_direction: Int64?
+    public var share_status: Int64?
+    public var sort_id: Int64?
+    public var sr_ck_record_change_tag: String?
+    public var sr_ck_record_id: String?
+    public var sr_ck_sync_state: Int64?
+    public var subject: String?
+    public var text: String?
+    public var time_expressive_send_played: Int64?
+    public var type: Int64?
+    public var version: Int64?
+    public var was_data_detected: Int64?
+    public var was_deduplicated: Int64?
+    public var was_downgraded: Int64?
 }
 
-extension DBReader {
-    /// Resolves the ROWID for a message with the given GUID
-    /// - Parameter guid: GUID of the message to resolve
-    /// - Returns: ROWID of the message
-    func rowID(forMessageGUID guid: String) -> Promise<Int64?, Error> {
-        Promise { resolve, reject in
-            pool.asyncRead {
-                switch $0 {
-                case .failure(let error):
-                    reject(error)
-                case .success(let db):
-                    do {
-                        let ROWID = try RawMessage
-                            .select(RawMessage.Columns.ROWID, as: Int64.self)
-                            .filter(RawMessage.Columns.guid == guid)
-                            .fetchOne(db)
-                        
-                        resolve(ROWID)
-                    } catch {
-                        reject(error)
-                    }
-                }
-            }
+internal extension RawMessage {
+    static func joiningOnROWIDsWhenNotEmpty(ROWIDs: [Int64], withColumns columns: [RawMessage.Columns]) -> QueryInterfaceRequest<RawMessage> {
+        if ROWIDs.count > 0 {
+            return RawMessage.joining(required: RawMessage.messageChatJoin.filter(ROWIDs.contains(ChatMessageJoin.Columns.chat_id))).select(columns)
+        } else {
+            return RawMessage.select(columns)
         }
     }
 }
+

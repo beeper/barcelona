@@ -33,6 +33,7 @@ public enum ChatItemType: String, Codable, CaseIterable {
         }
     }.dictionary(keyedBy: \.0, valuedBy: \.1)
     
+    @usableFromInline
     static func ingest(object: NSObject, context: IngestionContext) -> ChatItem {
         ingestionMapping[object.className]?.init(ingesting: object, context: context) ?? PhantomChatItem(object, chatID: context.chatID)
     }
@@ -86,11 +87,19 @@ public enum ChatItemType: String, Codable, CaseIterable {
 }
 
 public struct IngestionContext {
+    
+    @usableFromInline
+    internal init(chatID: String) {
+        self.chatID = chatID
+    }
+    
     public let chatID: String
     public let attachment: Attachment? = nil
     public let textParts: [TextPart]? = nil
     public let text: String? = nil
     public let message: IMMessage? = nil
+    
+    
 }
 
 internal extension Optional where Wrapped == String {

@@ -10,6 +10,7 @@ import Foundation
 import IMCore
 
 extension IMAttachmentMessagePartChatItem: IMFileTransferContainer {
+    @usableFromInline
     var fileTransferGUIDs: [String] {
         [self.transferGUID]
     }

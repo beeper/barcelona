@@ -42,7 +42,7 @@ extension CNContactStore {
                 }
             }
         } catch {
-            print("failed to enumerate contacts! \(error)")
+            CLFault("Contacts", "Failed to enumerate contacts with error %@", error as NSError)
         }
         
         return results

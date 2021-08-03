@@ -13,4 +13,6 @@ public struct SendMediaMessageCommand: Codable, ChatResolvable {
     public var path_on_disk: String
     public var file_name: String
     public var mime_type: String
+    public var reply_to: String?
+    public var reply_to_part: Int?
 }

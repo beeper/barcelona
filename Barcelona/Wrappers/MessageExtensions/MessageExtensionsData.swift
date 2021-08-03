@@ -151,8 +151,6 @@ public struct MessageExtensionsData: Codable, Hashable {
         statusText = payloadDictionary[IMExtensionPayloadStatusTextKey] as? String
         localizedDescription = payloadDictionary[IMExtensionPayloadLocalizedDescriptionTextKey] as? String
         alternateText = payloadDictionary[IMExtensionPayloadAlternateTextKey] as? String
-        
-        print("fuck!")
     }
     
     public var dictionary: NSDictionary {

@@ -38,18 +38,18 @@ public class BLEventHandler {
                             return
                         }
                         
-                        BLInfo("typing: %@", String(data: try! JSONEncoder().encode(message), encoding: .utf8)!)
+                        CLInfo("Mautrix", "typing: %@", String(data: try! JSONEncoder().encode(message), encoding: .utf8)!)
                         send(.typing(.init(chat_guid: message.imChat.guid, typing: !message.isCancelTypingMessage)))
                         return
                     }
                     
-                    if message.fromMe {
-                        guard let lastSentMessageGUIDs = BLMetricStore.shared.get(typedValue: [String].self, forKey: .lastSentMessageGUIDs), !lastSentMessageGUIDs.contains(message.id) else {
+                    if message.fromMe, let lastSentMessageGUIDs = BLMetricStore.shared.get(typedValue: [String].self, forKey: .lastSentMessageGUIDs) {
+                        guard !lastSentMessageGUIDs.contains(message.id) else {
                             return
                         }
                     }
                     
-                    BLInfo("received message: %@", String(data: try! JSONEncoder().encode(message), encoding: .utf8)!)
+                    CLInfo("Mautrix", "received message: %@", String(data: try! JSONEncoder().encode(message), encoding: .utf8)!)
                     send(.message(BLMessage(message: message)))
                 }
                 

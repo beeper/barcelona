@@ -11,17 +11,13 @@ import IMCore
 
 extension IMChat {
     /// Returns already-loaded chat, or queries for the chat if it is not loaded.
-    public static func chat(forMessage guid: String) -> Promise<IMChat?, Error> {
+    public static func chat(forMessage guid: String) -> Promise<IMChat?> {
         if let chat = resolve(withMessageGUID: guid) {
             return .success(chat)
         }
         
-        return DBReader.shared.chatIdentifier(forMessageGUID: guid).map { chatIdentifier in
-            guard let chatIdentifier = chatIdentifier else {
-                return nil
-            }
-            
-            return IMChat.resolve(withIdentifier: chatIdentifier)
+        return DBReader.shared.chatIdentifier(forMessageGUID: guid).maybeMap { chatIdentifier in
+            IMChat.resolve(withIdentifier: chatIdentifier)
         }
     }
 }

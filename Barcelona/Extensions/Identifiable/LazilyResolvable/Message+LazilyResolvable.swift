@@ -9,11 +9,11 @@
 import Foundation
 
 extension Message: LazilyResolvable, ConcreteLazilyBasicResolvable {
-    public static func lazyResolve(withIdentifiers identifiers: [String]) -> Promise<[Message], Error> {
+    public static func lazyResolve(withIdentifiers identifiers: [String]) -> Promise<[Message]> {
         lazyResolve(withIdentifiers: identifiers.compactMap { $0 }, inChat: nil)
     }
     
-    public static func lazyResolve(withIdentifiers identifiers: [String], inChat chat: String?) -> Promise<[Message], Error> {
+    public static func lazyResolve(withIdentifiers identifiers: [String], inChat chat: String?) -> Promise<[Message]> {
         messages(withGUIDs: identifiers, in: chat)
     }
 }

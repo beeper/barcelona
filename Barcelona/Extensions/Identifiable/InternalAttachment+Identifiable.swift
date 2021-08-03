@@ -8,7 +8,7 @@
 
 import Foundation
 
-extension InternalAttachment: Identifiable {
+extension BarcelonaAttachment: Identifiable {
     public var id: String {
         guid
     }

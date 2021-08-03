@@ -8,6 +8,7 @@
 
 import Foundation
 import IMSharedUtilities
+import IMCore
 
 private func flagsForCreation(_ creation: CreateMessage, transfers: [String]) -> FullFlagsFromMe {
     if let _ = creation.ballonBundleID { return .richLink }
@@ -17,7 +18,7 @@ private func flagsForCreation(_ creation: CreateMessage, transfers: [String]) ->
 }
 
 public struct CreateMessage: Codable, CreateMessageBase {
-    public init(subject: String? = nil, parts: [MessagePart], isAudioMessage: Bool? = nil, flags: CLongLong? = nil, ballonBundleID: String? = nil, payloadData: String? = nil, expressiveSendStyleID: String? = nil, threadIdentifier: String? = nil, replyToPart: String? = nil) {
+    public init(subject: String? = nil, parts: [MessagePart], isAudioMessage: Bool? = nil, flags: CLongLong? = nil, ballonBundleID: String? = nil, payloadData: String? = nil, expressiveSendStyleID: String? = nil, threadIdentifier: String? = nil, replyToPart: Int? = nil, replyToGUID: String? = nil) {
         self.subject = subject
         self.parts = parts
         self.isAudioMessage = isAudioMessage
@@ -27,6 +28,7 @@ public struct CreateMessage: Codable, CreateMessageBase {
         self.expressiveSendStyleID = expressiveSendStyleID
         self.threadIdentifier = threadIdentifier
         self.replyToPart = replyToPart
+        self.replyToGUID = replyToGUID
     }
     
     public var subject: String?
@@ -37,7 +39,8 @@ public struct CreateMessage: Codable, CreateMessageBase {
     public var payloadData: String?
     public var expressiveSendStyleID: String?
     public var threadIdentifier: String?
-    public var replyToPart: String?
+    public var replyToGUID: String?
+    public var replyToPart: Int?
     
     public func parseToAttributed() -> MessagePartParseResult {
         ERAttributedString(from: self.parts)

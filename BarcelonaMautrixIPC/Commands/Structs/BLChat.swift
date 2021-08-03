@@ -12,7 +12,7 @@ import IMCore
 
 public extension IMChat {
     var blChat: BLChat {
-        BLChat(chat_guid: id, title: displayName, members: participants.map { $0.id })
+        BLChat(chat_guid: id, title: displayName, members: participants.map(\.id))
     }
 }
 

@@ -8,19 +8,14 @@
 
 import Foundation
 import os.log
-import Combine
 
 public let HandleQueue = DispatchQueue.init(label: "HandleIDS")
 
-private func OSLog(_ category: String) -> OSLog {
-    OSLog(subsystem: Bundle.main.bundleIdentifier!, category: category)
-}
-
 internal struct Logging {
-    static let Registry = OSLog("Registry")
-    static let Database = OSLog("Database")
-    static let Ingestor = OSLog("BLIndeterminateIngestor")
-    static let Shared = OSLog("Barcelona")
+    static let Registry = Logger(category: "Registry")
+    static let Database = Logger(category: "Database")
+    static let Ingestor = Logger(category: "BLIndeterminateIngestor")
+    static let Shared = Logger(category: "Barcelona")
 }
 
 /**
@@ -39,13 +34,10 @@ public enum MessageModifiers: UInt64 {
 
 public let ERChatMessageReceivedNotification = NSNotification.Name(rawValue: "ERChatMessageReceivedNotification")
 public let ERChatMessagesReceivedNotification = NSNotification.Name(rawValue: "ERChatMessagesReceivedNotification")
-public let ERChatMessageSentNotification = NSNotification.Name(rawValue: "ERChatMessageSentNotification")
+public let BLChatMessageSentNotification = NSNotification.Name(rawValue: "BLChatMessageSentNotification")
 public let ERChatMessagesUpdatedNotification = NSNotification.Name(rawValue: "ERChatMessagesUpdatedNotification")
 public let ERChatMessageUpdatedNotification = NSNotification.Name(rawValue: "ERChatMessageUpdatedNotification")
 public let ERChatMessagesDeletedNotification = NSNotification.Name(rawValue: "ERChatMessagesDeletedNotification")
-
-internal let ERChatRegistryDidLoadSubject = PassthroughSubject<Void, Never>()
-internal let ERChatRegistryDidLoadPublisher = ERChatRegistryDidLoadSubject.share()
 
 public let ERDefaultMessageQueryLimit: Int = 75
 

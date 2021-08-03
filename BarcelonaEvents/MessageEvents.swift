@@ -20,7 +20,7 @@ private let IMChatItemsOldItems = "__kIMChatItemsOldItems";
 
 private let IMChatValueKey = AnyHashable("__kIMChatValueKey");
 
-private let log_messageEvents = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "MessageEvents")
+private let log_messageEvents = Logger(category: "MessageEvents")
 
 let ChangedItemsExclusion = [
 //    IMTextMessagePartChatItem.self,
@@ -78,7 +78,7 @@ class MessageEvents: EventDispatcher {
     }
     
     private func messageUpdated(_ message: IMMessage, chat: IMChat) {
-        BLIngestObject(message, inChat: chat.id).whenSuccess { item in
+        BLIngestObject(message, inChat: chat.id).then { item in
             if message.isFromMe && message.isSent {
                 self.bus.dispatch(.itemsUpdated([item.eraseToAnyChatItem()]))
             } else {
@@ -120,7 +120,7 @@ class MessageEvents: EventDispatcher {
         if messageGUIDs.count > 0 {
             let pendingMessages = Array(messageGUIDs).er_chatItems(in: chat.id)
             
-            pendingMessages.whenSuccess { chatItems in
+            pendingMessages.then { chatItems in
                 if chatItems.count == 0 {
                     return
                 }
@@ -149,17 +149,11 @@ class MessageEvents: EventDispatcher {
             return
         }
         
-        BLIngestObjects(statusChanges, inChat: chat.id).then { items in
-            items.compactMap { $0 as? StatusChatItem }
-        }.whenSuccess { items in
-            guard items.count > 0 else {
-                return
-            }
-            
-            items.forEach { status in
-                self.debouncer.submit(status.itemID, category: .statusChanged) {
-                    self.bus.dispatch(.itemStatusChanged(status))
-                }
+        BLIngestObjects(statusChanges, inChat: chat.id).compactMap { item in
+            item as? StatusChatItem
+        }.forEach { status in
+            self.debouncer.submit(status.itemID, category: .statusChanged) {
+                self.bus.dispatch(.itemStatusChanged(status))
             }
         }
     }
@@ -176,9 +170,9 @@ class MessageEvents: EventDispatcher {
             
             switch ($0.key) {
             case IMChatItemsRegenerate:
-                fallthrough;
+                fallthrough
             case IMChatItemsReload:
-                fallthrough;
+                fallthrough
             case IMChatItemsInserted:
                 let key = $0.key
                 

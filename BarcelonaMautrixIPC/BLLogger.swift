@@ -7,35 +7,33 @@
 //
 
 import Foundation
+import BarcelonaFoundation
 
 private let BLDefaultModule = ""
 
-public func BLLog(_ str: String, level: IPCLoggingLevel = .info, module: String? = nil, _ fmt: CVarArg...) {
-    let message = String(format: str, fmt)
-    BLJujitsuClient.shared.sendEvent(named: "log", payload: [
-        "level": level.rawValue,
-        "message": message
-    ])
+private extension LoggingLevel {
+    var ipcLevel: IPCLoggingLevel {
+        switch self {
+        case .info:
+            return .info
+        case .warn:
+            return .warn
+        case .debug:
+            return .debug
+        case .fault:
+            return .fatal
+        case .error:
+            return .error
+        }
+    }
+}
+
+public class BLMautrixSTDOutDriver: LoggingDriver {
+    public static let shared = BLMautrixSTDOutDriver()
     
-    BLWritePayload(.init(id: -1, command: .log(LogCommand(time: .init(), level: level, module: module ?? BLDefaultModule, message: message))))
-}
-
-public func BLDebug(_ str: String, module: String? = nil, _ fmt: CVarArg...) {
-    BLLog(str, level: .debug, module: module, fmt)
-}
-
-public func BLInfo(_ str: String, module: String? = nil, _ fmt: CVarArg...) {
-    BLLog(str, level: .info, module: module, fmt)
-}
-
-public func BLWarn(_ str: String, module: String? = nil, _ fmt: CVarArg...) {
-    BLLog(str, level: .warn, module: module, fmt)
-}
-
-public func BLError(_ str: String, module: String? = nil, _ fmt: CVarArg...) {
-    BLLog(str, level: .error, module: module, fmt)
-}
-
-public func BLFatal(_ str: String, module: String? = nil, _ fmt: CVarArg...) {
-    BLLog(str, level: .fatal, module: module, fmt)
+    private init() {}
+    
+    public func log(level: LoggingLevel, fileID: StaticString, line: Int, function: StaticString, dso: UnsafeRawPointer, category: StaticString, message: StaticString, args: [CVarArg]) {
+        BLWritePayload(.init(id: nil, command: .log(LogCommand(time: .init(), level: level.ipcLevel, module: String(category), message: String(format: String(message), arguments: args)))))
+    }
 }

@@ -8,10 +8,10 @@
 
 import Foundation
 
-extension InternalAttachment: Resolvable, _ConcreteBasicResolvable {
-    public static func resolve(withIdentifiers identifiers: [String]) -> [InternalAttachment] {
+extension BarcelonaAttachment: Resolvable, _ConcreteBasicResolvable {
+    public static func resolve(withIdentifiers identifiers: [String]) -> [BarcelonaAttachment] {
         identifiers.compactMap {
-            InternalAttachment(guid: $0)
+            BarcelonaAttachment(guid: $0)
         }
     }
 }

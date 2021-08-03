@@ -123,12 +123,10 @@ extension Contact: Searchable {
             return []
         }
         
-        return IMContactStore.sharedInstance()!.allContacts.filter(parameters.test).map {
-            Contact($0)
-        }
+        return IMContactStore.sharedInstance()!.allContacts.filter(parameters.test).map(Contact.init)
     }
     
-    public static func resolve(withParameters rawParameters: ContactSearchParameters) -> Promise<[Contact], Error> {
+    public static func resolve(withParameters rawParameters: ContactSearchParameters) -> Promise<[Contact]> {
         .success(resolveSync(withParameters: rawParameters))
     }
 }

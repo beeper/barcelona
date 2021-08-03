@@ -8,9 +8,3 @@
 
 import Foundation
 import IMCore
-
-public extension IMFileTransfer {
-    func saveToDatabase(atPath path: String) -> Promise<Void, Error> {
-        DBReader().insert(fileTransfer: self, path: path)
-    }
-}

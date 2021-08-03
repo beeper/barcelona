@@ -24,9 +24,7 @@ private extension Message {
             $0.item as? TextChatItem
         }
         
-        return items.reduce(into: "") { acc, item in
-            acc += item.text
-        }
+        return items.map(\.text).joined()
     }
 }
 

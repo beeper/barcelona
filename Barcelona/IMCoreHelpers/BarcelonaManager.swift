@@ -12,7 +12,7 @@ import BarcelonaFoundation
 import OSLog
 import IMCore
 
-private let log = OSLog(subsystem: "com.ericrabil.barcelona", category: "BarcelonaManager")
+private let log = Logger(category: "BarcelonaManager")
 
 public let BLListenerIdentifier = "com.ericrabil.imessage-rest"
 public let BLIsSimulation = IMCoreSimulatedEnvironmentEnabled()
@@ -78,7 +78,7 @@ public func BLBootstrapController() -> Bool {
     /** Registers with imagent */
     controller.listener.addHandler(ERDaemonListener.shared)
     
-    DispatchQueue.main.schedule {
+    RunLoop.main.schedule {
         log("Connecting to daemon...")
         
         controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
@@ -98,7 +98,7 @@ public func BLBootstrapController() -> Bool {
 
 @_cdecl("BLExecuteOnceLoaded")
 public func BLExecuteOnceLoaded(_ cb: @escaping () -> ()) {
-    Promise(backing: ERChatRegistryDidLoadPublisher).whenSuccess(cb)
+    
 }
 
 public class BarcelonaManager {
@@ -116,18 +116,12 @@ public class BarcelonaManager {
         BLBootstrapController()
     }
     
-    public func bootstrap() -> Promise<Bool, Never> {
-        NotificationCenter.default.addObserver(forName: .IMChatRegistryDidLoad) {
-            print($0)
-        }
-        
+    public func bootstrap() -> Promise<Bool> {
         guard BLBootstrapController() else {
             return .success(false)
         }
         
-        
-        
-        return Promise(backing: NotificationCenter.default.publisher(for: .IMChatRegistryDidLoad)).then { _ in
+        return NotificationCenter.default.once(notificationNamed: .IMChatRegistryDidLoad).resolve(on: RunLoop.main).then { _ in
             return true
         }
     }

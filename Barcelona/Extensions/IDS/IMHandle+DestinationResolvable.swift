@@ -61,7 +61,7 @@ public extension Array where Element == IMHandle {
     }
     
     /// Computes IDS statuses for handles that have not been loaded yet, otherwise returning the cached values
-    func lazyIDStatuses(onService service: String? = nil) -> Promise<[String: IDSState], Error> {
+    func lazyIDStatuses(onService service: String? = nil) -> Promise<[String: IDSState]> {
         let unresolved = filter {
             if let service = service {
                 return $0.cachedIdStatusOverridden(withIDSService: service) == 0
@@ -129,7 +129,7 @@ public extension IMHandle {
     }
     
     /// Returns cached ID status if available, otherwise queries IDS.
-    func lazyIDStatus() -> Promise<Int64, Error> {
+    func lazyIDStatus() -> Promise<Int64> {
         let cachedIdStatus = self.cachedIdStatus
         
         /// 0 means it hasn't been loaded, 1 means it is available, 2 means it is unavailable. if it is not 0, return the value
@@ -142,7 +142,7 @@ public extension IMHandle {
     }
     
     /// unconditionally queries IDS for the status of this handle
-    func refreshIDStatus() -> Promise<Int64, Error> {
+    func refreshIDStatus() -> Promise<Int64> {
         /// ensure this handle can actually be queried against IDS
         guard let destination = destination, let serviceName = idsServiceName, let queryController = IDSIDQueryController.sharedInstance() else {
             return .success(IMHandleUnknownIDStatus)

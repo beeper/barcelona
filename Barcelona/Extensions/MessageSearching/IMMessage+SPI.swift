@@ -11,10 +11,8 @@ import IMCore
 import os.log
 
 extension Array where Element == IMMessage {
-    func bulkRepresentation(in chat: String) -> Promise<[Message], Error> {
-        BLIngestObjects(self, inChat: chat).then {
-            $0.compactMap { $0 as? Message }
-        }
+    func bulkRepresentation(in chat: String) -> Promise<[Message]> {
+        BLIngestObjects(self, inChat: chat).compactMap { $0 as? Message }
     }
 }
 
@@ -39,25 +37,23 @@ public extension IMMessage {
         return IMMessage(fromIMMessageItem: item, sender: sender, subject: subject)!
     }
     
-    static func message(withGUID guid: String) -> Promise<ChatItem?, Error> {
-        return messages(withGUIDs: [guid]).map(\.first)
+    static func message(withGUID guid: String, in chat: String? = nil) -> Promise<ChatItem?> {
+        return messages(withGUIDs: [guid], in: chat).then(\.first)
     }
     
-    static func messages(withGUIDs guids: [String], in chat: String? = nil) -> Promise<[ChatItem], Error> {
+    static func messages(withGUIDs guids: [String], in chat: String? = nil) -> Promise<[ChatItem]> {
         if guids.count == 0 {
             return .success([])
         }
         
         if BLIsSimulation {
-            return IMChatHistoryController.sharedInstance()!.loadMessages(withGUIDs: guids).map { message -> [IMItem] in
-                return message.compactMap {
-                    $0._imMessageItem
-                }
-            }.flatMap { items -> Promise<[ChatItem], Error> in
-                BLIngestObjects(items, inChat: chat)
-            }
+            return IMChatHistoryController.sharedInstance()!.loadMessages(withGUIDs: guids)
+                    .compactMap(\._imMessageItem)
+                    .then { items -> Promise<[ChatItem]> in
+                        BLIngestObjects(items, inChat: chat)
+                    }
         } else {
-            return ERLoadAndParseIMDMessageRecordRefsWithGUIDs(guids, in: chat)
+            return BLLoadChatItems(withGUIDs: guids, chatID: chat)
         }
     }
 }

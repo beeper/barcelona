@@ -9,7 +9,7 @@
 import Foundation
 import OSLog
 
-private let log = OSLog(subsystem: "com.barcelona.foundation", category: "ExpiringCollection")
+private let log = Logger(category: "ExpiringCollection")
 
 public class ExpiringCollection<Element: Hashable>: Collection {
     public private(set) var inner = Set<Element>()

@@ -25,7 +25,7 @@ class ERIMSimulationTools {
     }
     
     static func bootstrap() {
-        print("ERIMSimulationTools initialized with chat GUID \(sharedInstance)")
+        CLInfo("ERIMSimulationTools", "initialized with chat GUID %@", SIMULATION_OUTGOING_ID)
     }
     
     private let iMessageAccount: IMSimulatedAccount

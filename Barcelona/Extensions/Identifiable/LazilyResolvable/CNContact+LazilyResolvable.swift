@@ -10,7 +10,7 @@ import Foundation
 import Contacts
 
 extension CNContact: LazilyResolvable, ConcreteLazilyBasicResolvable {
-    public static func lazyResolve(withIdentifiers identifiers: [String]) -> Promise<[CNContact], Error> {
+    public static func lazyResolve(withIdentifiers identifiers: [String]) -> Promise<[CNContact]> {
         .success(CNContact.resolve(withIdentifiers: identifiers))
     }
 }

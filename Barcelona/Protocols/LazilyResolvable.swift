@@ -10,17 +10,15 @@ import Foundation
 
 public protocol LazilyResolvable: Identifiable {
     associatedtype instancetype
-    typealias BulkResult = Promise<[instancetype], Error>
+    typealias BulkResult = Promise<[instancetype]>
     
-    static func lazyResolve(withIdentifier identifier: ID) -> Promise<instancetype?, Error>
+    static func lazyResolve(withIdentifier identifier: ID) -> Promise<instancetype?>
     static func lazyResolve(withIdentifiers identifiers: [ID]) -> BulkResult
 }
 
 internal protocol ConcreteLazilyBasicResolvable: LazilyResolvable {}
 extension ConcreteLazilyBasicResolvable {
-    public static func lazyResolve(withIdentifier identifier: ID) -> Promise<instancetype?, Error> {
-        lazyResolve(withIdentifiers: [identifier]).then {
-            $0.first
-        }
+    public static func lazyResolve(withIdentifier identifier: ID) -> Promise<instancetype?> {
+        lazyResolve(withIdentifiers: [identifier]).first
     }
 }

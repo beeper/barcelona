@@ -15,7 +15,7 @@ protocol RichLinkAttachment {
 }
 
 struct RichLinkImage: Codable, Hashable, RichLinkAttachment {
-    init?(_ image: LPImage, _ presentationProperties: LPImagePresentationProperties? = nil, attachments: [InternalAttachment]) {
+    init?(_ image: LPImage, _ presentationProperties: LPImagePresentationProperties? = nil, attachments: [BarcelonaAttachment]) {
         calculateAttachmentIndex(forAsset: image, attachments: attachments)
 
         if let properties = presentationProperties {

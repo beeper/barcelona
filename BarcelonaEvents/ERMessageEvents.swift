@@ -41,14 +41,12 @@ public class ERMessageEvents: EventDispatcher {
         }
         
         /// Tapbacks that are sent from me, on other devices, do not get received by other handlers. This handler receives tapbacks on all devices.
-        addObserver(forName: ERChatMessageSentNotification) {
-            guard let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
+        addObserver(forName: BLChatMessageSentNotification) {
+            guard let userInfo = $0.userInfo as? [String: Any], let chat = userInfo["chat"] as? String, let item = userInfo["item"] as? IMMessageItem else {
                 return
             }
             
-            if let associated = $0.object as? IMAssociatedMessageItem {
-                self.messagesReceived([associated], inChat: chat, overrideFromMe: true)
-            }
+            self.messagesReceived([item], inChat: chat, overrideFromMe: true)
         }
         
         addObserver(forName: ERChatMessagesUpdatedNotification) {
@@ -95,23 +93,9 @@ public class ERMessageEvents: EventDispatcher {
      No typing items come here, no status items come here, no group items come here
      */
     private func messagesReceived(_ items: [IMItem], inChat chatIdentifier: String, overrideFromMe: Bool = false) {
-        let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!
-        
-        Promise.whenAllSucceed(items.compactMap { item -> Promise<ChatItem?, Error>? in
-            if !ChangedItemsExclusion.contains(where: {
-                item.isKind(of: $0)
-            }) {
-                return nil
-            }
-            
-            if item is IMAssociatedMessageItem, item.isFromMe, !overrideFromMe {
-                return nil
-            }
-            
-            return itemGUIDAsChatItem(item.guid, in: chat.id)
-        }).then {
-            $0.compactMap { $0?.eraseToAnyChatItem() }
-        }.whenSuccess {
+        BLLoadChatItems(withGUIDs: items.map(\.guid), chatID: chatIdentifier).map {
+            $0.eraseToAnyChatItem()
+        }.then {
             if $0.count == 0 { return }
             self.bus.dispatch(.itemsReceived($0))
         }
@@ -119,13 +103,9 @@ public class ERMessageEvents: EventDispatcher {
     
     /** Counts as an update */
     private func messagesUpdated(_ items: [IMItem], inChat chatIdentifier: String) {
-        let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)!
-        
-        Promise.whenAllSucceed(items.map { item -> Promise<ChatItem?, Error> in
-            return itemGUIDAsChatItem(item.guid, in: chat.id)
-        }).map {
-            $0.compactMap { $0?.eraseToAnyChatItem() }
-        }.whenSuccess {
+        BLLoadChatItems(withGUIDs: items.map(\.guid), chatID: chatIdentifier).map {
+            $0.eraseToAnyChatItem()
+        }.then {
             if $0.count == 0 { return }
             self.bus.dispatch(.itemsUpdated($0))
         }
@@ -134,9 +114,5 @@ public class ERMessageEvents: EventDispatcher {
     /** Counts as an update */
     private func messageUpdated(_ item: IMItem, inChat chatIdentifier: String) {
         messagesUpdated([item], inChat: chatIdentifier)
-    }
-    
-    private func itemGUIDAsChatItem(_ guid: String, in chatID: String) -> Promise<ChatItem?, Error> {
-        IMMessage.message(withGUID: guid)
     }
 }

@@ -12,7 +12,7 @@ import os.log
 
 public extension IMChat {
     func scheduleForReview() {
-        DispatchQueue.main.async {
+        RunLoop.main.schedule {
             self._updateChatItems()
             os_log("Updated chat items for ChatID %@", type: .debug, self.id, log_IMChat)
         }

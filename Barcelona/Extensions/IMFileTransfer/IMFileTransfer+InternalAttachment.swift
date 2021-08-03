@@ -10,7 +10,7 @@ import Foundation
 import IMCore
 
 extension IMFileTransfer {
-    var internalAttachment: InternalAttachment {
-        InternalAttachment(guid: guid, originalGUID: originalGUID, path: localPath, bytes: totalBytes, incoming: isIncoming, mime: mimeType)
+    var internalAttachment: BarcelonaAttachment {
+        BarcelonaAttachment(guid: guid, originalGUID: originalGUID, path: localPath, bytes: totalBytes, incoming: isIncoming, mime: mimeType)
     }
 }

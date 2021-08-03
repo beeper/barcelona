@@ -11,7 +11,7 @@ import LinkPresentation
 import CoreGraphics
 
 struct RichLinkCaption: Codable, Hashable {
-    init(_ properties: LPCaptionBarPresentationProperties, attachments: [InternalAttachment] = []) {
+    init(_ properties: LPCaptionBarPresentationProperties, attachments: [BarcelonaAttachment] = []) {
         if let aboveTop = properties.aboveTop, aboveTop.hasAnyContent {
             self.aboveTop = .init(aboveTop)
         }
@@ -37,11 +37,11 @@ struct RichLinkCaption: Codable, Hashable {
         }
         
         if let additionalLeadingIcons = properties.additionalLeadingIcons, additionalLeadingIcons.count > 0 {
-            print(additionalLeadingIcons)
+            CLDebug("LinkPresentation", "Found additional leading icons %@", additionalLeadingIcons as CVarArg)
         }
         
         if let additionalTrailingIcons = properties.additionalTrailingIcons, additionalTrailingIcons.count > 0 {
-            print(additionalTrailingIcons)
+            CLDebug("LinkPresentation", "Found additional trailing icons %@", additionalTrailingIcons as CVarArg)
         }
         
         if !properties.leadingIconSize.height.isZero, !properties.leadingIconSize.width.isZero {

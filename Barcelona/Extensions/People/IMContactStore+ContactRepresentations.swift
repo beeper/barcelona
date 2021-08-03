@@ -24,9 +24,7 @@ public extension IMContactStore {
      Helper function for searching the contact store
      */
     func representations(matching search: String? = nil, limit: Int? = nil) -> BulkContactRepresentation {
-        var registry: [String: Contact] = allContacts.reduce(into: [String: Contact]()) { registry, contact in
-            registry[contact.identifier] = .init(contact)
-        }
+        var registry: [String: Contact] = allContacts.map(Contact.init).dictionary(keyedBy: \.id)
         
         var strangers: [Handle] = []
         
@@ -50,8 +48,7 @@ public extension IMContactStore {
             registry[contactID] = contact
         }
         
-        var contacts = Array(registry.values)
-        contacts.sort()
+        let contacts = registry.values.sorted()
         
         return BulkContactRepresentation(contacts: contacts, strangers: strangers)
     }

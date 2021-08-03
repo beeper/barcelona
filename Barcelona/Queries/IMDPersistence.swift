@@ -9,75 +9,134 @@
 import Foundation
 import IMDPersistence
 import IMCore
-import os.log
 
-internal func ERCreateIMItemFromIMDMessageRecordRefsSynchronously(_ refs: NSArray) -> [IMItem] {
+private let IMDLog = Logger(category: "IMDPersistenceQueries")
+
+private let IMDQueue = DispatchQueue(label: "com.barcelona.IMDPersistence")
+
+private extension DispatchQueue {
+    func sync<R>(_ exp: @autoclosure () -> R) -> R {
+        var ret: R!
+        
+        sync {
+            ret = exp()
+        }
+        
+        return ret
+    }
+}
+
+// MARK: - IMDPersistence
+private func BLCreateIMItemFromIMDMessageRecordRefs(_ refs: NSArray) -> [IMItem] {
+    let operation = IMDLog.operation(named: "ERCreateIMItemFromIMDMessageRecordRefs").begin("converting %d refs", refs.count)
+    
+    if refs.count == 0 {
+        operation.end("early-exit, zero refs")
+        return []
+    }
+    
+    defer {
+        operation.end()
+    }
+    
     return refs.compactMap {
         IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve($0, nil, nil, nil, nil)
     }
 }
 
-internal func ERCreateIMItemFromIMDMessageRecordRefs(_ refs: NSArray) -> Promise<[IMItem], Error> {
-    return Promise { resolve in
-        resolve(ERCreateIMItemFromIMDMessageRecordRefsSynchronously(refs))
+/// Loads an array of IMDMessageRecordRefs from IMDPersistence
+/// - Parameter guids: guids of the messages to load
+/// - Returns: an array of the IMDMessageRecordRefs
+private func BLLoadIMDMessageRecordRefsWithGUIDs(_ guids: [String]) -> NSArray {
+    let operation = IMDLog.operation(named: "ERLoadIMDMessageRecordRefsWithGUIDs")
+    operation.begin("loading %d guids", guids.count)
+    
+    if guids.count == 0 {
+        operation.end("early-exit: 0 guids provided")
+        return []
     }
+    
+    guard let results = IMDQueue.sync(IMDMessageRecordCopyMessagesForGUIDs(guids)) else {
+        operation.end("could not copy messages from IMDPersistance. guids: %@", guids)
+        return []
+    }
+    
+    operation.end("loaded %d guids", guids.count)
+    
+    return results as NSArray
 }
 
-internal func ERConvertIMDMessageRecordRefsToIMMessage(_ refs: NSArray) -> Promise<[IMMessage], Error> {
-    return ERCreateIMItemFromIMDMessageRecordRefs(refs).then {
-        $0.compactMap {
-            $0 as? IMMessageItem
-        }.compactMap {
-            IMMessage.message(fromUnloadedItem: $0)
-        }
+// MARK: - Helpers
+private func ERCreateIMMessageFromIMItem(_ items: [IMItem]) -> [IMMessage] {
+    let operation = IMDLog.operation(named: "ERConvertIMDMessageRecordRefsToIMMessage").begin("converting %d IMItems to IMMessage", items.count)
+    
+    let items = items.compactMap {
+        $0 as? IMMessageItem
     }
+    
+    guard items.count > 0 else {
+        operation.end("early-exit: no IMMessageItem found")
+        return []
+    }
+    
+    let messages = items.compactMap {
+        IMMessage.message(fromUnloadedItem: $0)
+    }
+    
+    operation.end("loaded %d IMMessages from %d items", messages.count, items.count)
+    
+    return messages
 }
+
+private func BLCreateIMMessageFromIMDMessageRecordRefs(_ refs: NSArray) -> [IMMessage] {
+    ERCreateIMMessageFromIMItem(BLCreateIMItemFromIMDMessageRecordRefs(refs))
+}
+
+// MARK: - Private API
 
 /// Parses an array of IMDMessageRecordRef
 /// - Parameters:
 ///   - refs: the refs to parse
 ///   - chat: the ID of the chat the messages reside in. if omitted, the chat ID will be resolved at ingestion
 /// - Returns: An NIO future of ChatItems
-internal func ERParseIMDMessageRecordRefs(_ refs: NSArray, in chat: String? = nil) -> Promise<[ChatItem], Error> {
-    return ERCreateIMItemFromIMDMessageRecordRefs(refs).then { items -> Promise<[ChatItem], Error> in
-        os_log("Ingesting chat items")
-        
-        return BLIngestObjects(items, inChat: chat)
+private func BLIngestIMDMessageRecordRefs(_ refs: NSArray, in chat: String? = nil) -> Promise<[ChatItem]> {
+    if refs.count == 0 {
+        return .success([])
+    }
+    
+    let items = BLCreateIMItemFromIMDMessageRecordRefs(refs)
+    
+    return BLIngestObjects(items, inChat: chat)
+}
+
+private func ERResolveGUIDsForChat(withChatIdentifier chatIdentifier: String, afterDate: Date? = nil, beforeDate: Date? = nil, afterGUID: String? = nil, beforeGUID: String? = nil, limit: Int? = nil) -> Promise<[String]> {
+    let operation = IMDLog.operation(named: "ERResolveGUIDsForChat")
+    operation.begin("Resolving GUIDs for chat %@ before time %f before guid %@ limit %d", chatIdentifier, beforeDate?.timeIntervalSince1970 ?? 0, beforeGUID ?? "(nil)", limit ?? -1)
+    
+    return DBReader.shared.rowIDs(forIdentifier: chatIdentifier).observeOutput { ROWIDs in
+        operation.event("Using chat ROWIDs %@", ROWIDs.map(\.description).joined(separator: ", "))
+    }.then { ROWIDs in
+        DBReader.shared.newestMessageGUIDs(inChatROWIDs: ROWIDs, beforeDate: beforeDate, afterDate: afterDate, beforeMessageGUID: beforeGUID, afterMessageGUID: afterGUID, limit: limit)
+    }.observeAlways { result in
+        switch result {
+        case .success(let GUIDs):
+            operation.end("Got %d GUIDs", GUIDs.count)
+        case .failure(let error):
+            operation.end("Failed to load newest GUIDs: %@", error as NSError)
+        }
     }
 }
 
-internal func ERResolveGUIDsForChat(withChatIdentifier chatIdentifier: String, beforeDate date: Date? = nil, beforeGUID: String? = nil, limit: Int? = nil) -> Promise<[String], Error> {
-    DBReader.shared.rowIDs(forIdentifier: chatIdentifier).flatMap { ROWIDs in
-        DBReader.shared.newestMessageGUIDs(inChatROWIDs: ROWIDs, beforeDate: date, beforeMessageGUID: beforeGUID, limit: limit)
-    }
-}
+// MARK: - API
 
-
-/// Loads an array of IMDMessageRecordRefs from IMDPersistence
-/// - Parameter guids: guids of the messages to load
-/// - Returns: an array of the IMDMessageRecordRefs
-internal func ERLoadIMDMessageRecordRefsWithGUIDs(_ guids: [String]) -> NSArray {
-    guard let results = IMDMessageRecordCopyMessagesForGUIDs(guids) else {
-        return []
-    }
+public func BLLoadIMMessages(withGUIDs guids: [String]) -> [IMMessage] {
+    let refs = BLLoadIMDMessageRecordRefsWithGUIDs(guids)
     
-    return results as NSArray
+    return BLCreateIMMessageFromIMDMessageRecordRefs(refs)
 }
 
-internal func ERLoadIMItemsWithGUIDs(_ guids: [String]) -> [IMItem] {
-    let refs = ERLoadIMDMessageRecordRefsWithGUIDs(guids)
-    
-    return ERCreateIMItemFromIMDMessageRecordRefsSynchronously(refs)
-}
-
-internal func ERLoadIMItemWithGUID(_ guid: String) -> IMItem? {
-    ERLoadIMItemsWithGUIDs([guid]).first
-}
-
-internal func ERLoadIMMessagesWithGUIDs(_ guids: [String]) -> Promise<[IMMessage], Error> {
-    let refs = ERLoadIMDMessageRecordRefsWithGUIDs(guids)
-    
-    return ERConvertIMDMessageRecordRefsToIMMessage(refs)
+public func BLLoadIMMessage(withGUID guid: String) -> IMMessage? {
+    BLLoadIMMessages(withGUIDs: [guid]).first
 }
 
 /// Resolves ChatItems with the given GUIDs
@@ -85,16 +144,10 @@ internal func ERLoadIMMessagesWithGUIDs(_ guids: [String]) -> Promise<[IMMessage
 ///   - guids: GUIDs of messages to load
 ///   - chat: ID of the chat to load. if omitted, it will be resolved at ingestion.
 /// - Returns: NIO futuer of ChatItems
-internal func ERLoadAndParseIMDMessageRecordRefsWithGUIDs(_ guids: [String], in chat: String? = nil) -> Promise<[ChatItem], Error> {
-    let refs = ERLoadIMDMessageRecordRefsWithGUIDs(guids)
+public func BLLoadChatItems(withGUIDs guids: [String], chatID: String? = nil) -> Promise<[ChatItem]> {
+    let refs = BLLoadIMDMessageRecordRefsWithGUIDs(guids)
     
-    return ERParseIMDMessageRecordRefs(refs, in: chat)
-}
-
-internal func ERLoadIMMessages(withChatIdentifier chatIdentifier: String, onServices services: [IMServiceStyle] = [], beforeGUID: String? = nil, limit: Int? = nil) -> Promise<[IMMessage], Error> {
-    ERResolveGUIDsForChat(withChatIdentifier: chatIdentifier, beforeGUID: beforeGUID, limit: limit).then {
-        ERLoadIMMessagesWithGUIDs($0)
-    }
+    return BLIngestIMDMessageRecordRefs(refs, in: chatID)
 }
 
 /// Resolves ChatItems with the given parameters
@@ -104,10 +157,23 @@ internal func ERLoadIMMessages(withChatIdentifier chatIdentifier: String, onServ
 ///   - beforeGUID: GUID of the message all messages must precede
 ///   - limit: max number of messages to return
 /// - Returns: NIO future of ChatItems
-public func CBLoadChatItems(withChatIdentifier chatIdentifier: String, onServices services: [IMServiceStyle] = [], beforeDate date: Date? = nil, beforeGUID: String? = nil, limit: Int? = nil) -> Promise<[ChatItem], Error> {
-    ERResolveGUIDsForChat(withChatIdentifier: chatIdentifier, beforeDate: date, beforeGUID: beforeGUID, limit: limit).then {
-        ERLoadAndParseIMDMessageRecordRefsWithGUIDs($0, in: chatIdentifier)
+public func BLLoadChatItems(withChatIdentifier chatIdentifier: String, onServices services: [IMServiceStyle] = [], afterDate: Date? = nil, beforeDate: Date? = nil, afterGUID: String? = nil, beforeGUID: String? = nil, limit: Int? = nil) -> Promise<[ChatItem]> {
+    ERResolveGUIDsForChat(withChatIdentifier: chatIdentifier, afterDate: afterDate, beforeDate: beforeDate, afterGUID: afterGUID, beforeGUID: beforeGUID, limit: limit).then {
+        BLLoadChatItems(withGUIDs: $0, chatID: chatIdentifier)
     }
+}
+
+public func BLLoadChatItems(_ items: [(chatID: String, messageID: String)]) -> Promise<[ChatItem]> {
+    let ledger = items.dictionary(keyedBy: \.messageID, valuedBy: \.chatID)
+    let records = BLCreateIMMessageFromIMDMessageRecordRefs(BLLoadIMDMessageRecordRefsWithGUIDs(items.map(\.messageID)))
+    
+    let groups = records.map {
+        (chatID: ledger[$0.guid]!, message: $0)
+    }.collectedDictionary(keyedBy: \.chatID, valuedBy: \.message)
+    
+    return Promise.all(groups.map { chatID, messages in
+        BLIngestObjects(messages, inChat: chatID)
+    }).flatten()
 }
 
 typealias IMFileTransferFromIMDAttachmentRecordRefType = @convention(c) (_ record: Any) -> IMFileTransfer?
@@ -120,7 +186,7 @@ private let _IMFileTransferFromIMDAttachmentRecordRef = "IMFileTransferFromIMDAt
 
 internal let IMFileTransferFromIMDAttachmentRecordRef = unsafeBitCast(_IMFileTransferFromIMDAttachmentRecordRef, to: IMFileTransferFromIMDAttachmentRecordRefType.self)
 
-public func CBLoadAttachmentPathForTransfer(withGUID guid: String) -> String? {
+public func BLLoadAttachmentPathForTransfer(withGUID guid: String) -> String? {
     guard let attachment = IMDAttachmentRecordCopyAttachmentForGUID(guid as CFString) else {
         return nil
     }

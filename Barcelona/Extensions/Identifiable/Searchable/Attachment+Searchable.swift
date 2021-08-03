@@ -23,11 +23,7 @@ public struct AttachmentSearchParameters: QueryParameters, QueryParametersChatNa
 }
 
 extension Attachment: Searchable {
-    public static func resolve(withParameters parameters: AttachmentSearchParameters) -> Promise<[Attachment], Error> {
-        DBReader.shared.attachments(matchingParameters: parameters).map {
-            $0.map {
-                $0.attachment
-            }
-        }
+    public static func resolve(withParameters parameters: AttachmentSearchParameters) -> Promise<[Attachment]> {
+        DBReader.shared.attachments(matchingParameters: parameters).map(\.attachment)
     }
 }

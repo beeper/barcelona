@@ -14,7 +14,7 @@ public protocol TargetResolvable {
 }
 
 public extension TargetResolvable {
-    func resolveTarget() -> Promise<Message?, Error> {
+    func resolveTarget() -> Promise<Message?> {
         Message.lazyResolve(withIdentifier: target_guid)
     }
 }

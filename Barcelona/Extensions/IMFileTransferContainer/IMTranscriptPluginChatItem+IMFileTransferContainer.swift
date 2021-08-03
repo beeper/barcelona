@@ -10,6 +10,7 @@ import Foundation
 import IMCore
 
 extension IMTranscriptPluginChatItem: IMFileTransferContainer {
+    @usableFromInline
     var fileTransferGUIDs: [String] {
         if let rawAttachments = dataSource.pluginPayload?.value(forKey: "attachments") as? [URL] {
             return rawAttachments.map {

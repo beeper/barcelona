@@ -10,18 +10,21 @@ import Foundation
 import IMCore
 
 extension Array: IMFileTransferContainer where Element: IMFileTransferContainer {
+    @usableFromInline
     var fileTransferGUIDs: [String] {
         flatMap(\.fileTransferGUIDs)
     }
 }
 
 extension IMMessage: IMFileTransferContainer {
+    @usableFromInline
     var fileTransferGUIDs: [String] {
         value(forKey: "_fileTransferGUIDs") as? [String] ?? []
     }
 }
 
 extension IMMessageItem: IMFileTransferContainer {
+    @usableFromInline
     var fileTransferGUIDs: [String] {
         value(forKey: "_fileTransferGUIDs") as? [String] ?? []
     }

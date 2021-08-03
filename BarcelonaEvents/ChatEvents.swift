@@ -65,10 +65,7 @@ public class ChatEvents: EventDispatcher {
         }
         
         addObserver(forName: .init("__k_IMHandleCommandReceivedNotification")) { notification in
-//            let handle = notification.object as! IMHandle
-//            let userInfo = notification.userInfo!
-//            
-            print(notification)
+            CLDebug("ChatEvents", "Received IMHandleCommandReceivedNotification %@", notification)
         }
     }
     
@@ -101,7 +98,7 @@ public class ChatEvents: EventDispatcher {
             return
         }
         
-        ERTimeSortedParticipantsManager.sharedInstance.bootstrap(chat: chat).whenSuccess {
+        ERTimeSortedParticipantsManager.sharedInstance.bootstrap(chat: chat).then {
             self.bus.dispatch(.conversationCreated(chat.representation))
         }
     }
@@ -155,6 +152,6 @@ public class ChatEvents: EventDispatcher {
     }
     
     private func chatDidRefresh(_ notification: Notification) {
-        print(notification)
+        CLDebug("ChatEvents", "chat did refresh %@", notification)
     }
 }

@@ -132,7 +132,7 @@ public class ERTimeSortedParticipantsManager {
     private func ingest(bootstrapNotification notification: Notification) {
         if let chat = notification.chat {
             os_log("Recomputing sorted participants with chat ID %@ per notification %@", log: ManagerLog, chat.id, notification.name.rawValue)
-            self.bootstrap(chat: chat).whenSuccess {
+            self.bootstrap(chat: chat).then {
                 os_log("Finished recomputing sorted participants with chat ID %@ per notification %@", log: ManagerLog, chat.id, notification.name.rawValue)
             }
         }
@@ -141,7 +141,7 @@ public class ERTimeSortedParticipantsManager {
     var chatToParticipantSortRules: [String: [ParticipantSortRule]] = [:]
     
     public func sortedParticipants(forChat chat: String) -> [String] {
-        chatToParticipantSortRules[chat]?.map { $0.handleID } ?? []
+        chatToParticipantSortRules[chat]?.map(\.handleID) ?? []
     }
     
     public func ingest(item: IMItem, inChat chat: String) {
@@ -165,9 +165,7 @@ public class ERTimeSortedParticipantsManager {
     }
     
     func ingest(items: [ERTimeSortedParticipantsManagerIngestible], inChat chat: String) {
-        var rules = items.compactMap {
-            $0.sortRule
-        }
+        var rules = items.compactMap(\.sortRule)
         
         rules.sort { r1, r2 in
             r1.lastSentMessageTime > r2.lastSentMessageTime
@@ -202,23 +200,17 @@ public class ERTimeSortedParticipantsManager {
         self.chatToParticipantSortRules[chatID] = nil
     }
     
-    public func bootstrap(chat: IMChat) -> Promise<Void, Error> {
+    public func bootstrap(chat: IMChat) -> Promise<Void> {
         bootstrap(chats: [chat])
     }
     
-    public func bootstrap(chats: [IMChat]) -> Promise<Void, Error> {
+    public func bootstrap(chats: [IMChat]) -> Promise<Void> {
         DBReader.shared.handleTimestampRecords(forChatIdentifiers: chats.compactMap { $0.chatIdentifier }).then { records in
-            self.chatToParticipantSortRules = records.reduce(into: [String: [ParticipantSortRule]]()) { ledger, record in
-                if ledger[record.chat_id] == nil {
-                    ledger[record.chat_id] = []
-                }
-                
-                ledger[record.chat_id]!.append(ParticipantSortRule(handleID: record.handle_id, lastSentMessageTime: Date.timeIntervalSince1970FromIMDBDateValue(date: Double(record.date))))
-            }
+            self.chatToParticipantSortRules = records.map { record in
+                (record.chat_id, ParticipantSortRule(handleID: record.handle_id, lastSentMessageTime: Date.timeIntervalSince1970FromIMDBDateValue(date: Double(record.date))))
+            }.collectedDictionary(keyedBy: \.0, valuedBy: \.1)
             
-            self.chatToParticipantSortRules.keys.forEach { key in
-                self.sortParticipants(forChat: key)
-            }
+            self.chatToParticipantSortRules.keys.forEach(self.sortParticipants(forChat:))
         }
     }
 }

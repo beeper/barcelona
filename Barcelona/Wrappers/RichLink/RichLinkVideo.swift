@@ -10,7 +10,7 @@ import Foundation
 import LinkPresentation
 
 struct RichLinkVideo: Codable, Hashable, RichLinkAttachment {
-    init(_ video: LPVideo, attachments: [InternalAttachment]) {
+    init(_ video: LPVideo, attachments: [BarcelonaAttachment]) {
         calculateAttachmentIndex(forAsset: video, attachments: attachments)
         hasAudio = video.properties?.hasAudio
         accessibilityText = video.properties?.accessibilityText

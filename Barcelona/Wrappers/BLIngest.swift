@@ -8,131 +8,58 @@
 
 import Foundation
 import BarcelonaFoundation
-import IMCore
 
-// MARK: - IMFileTransfer Preload
-private func BLLoadFileTransfers(forObjects objects: [NSObject]) -> Promise<Void, Error> {
-    let unloadedFileTransferGUIDs = objects.compactMap {
-        $0 as? IMFileTransferContainer
-    }.flatMap(\.unloadedFileTransferGUIDs)
-    
-    guard unloadedFileTransferGUIDs.count > 0 else {
-        return .success(())
-    }
-    
-    return DBReader.shared.attachments(withGUIDs: unloadedFileTransferGUIDs).then {
-        $0.forEach {
-            $0.registerFileTransferIfNeeded()
-        }
-    }
-}
-
-// MARK: - Associated Resolution
-private func BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -> Promise<[ChatItem], Error> {
-    let messages = items.compactMap { $0 as? Message }.dictionary(keyedBy: \.id)
-    
-    let associatedLedger = messages.values.flatMap { message in
-        message.associableItemIDs.map {
-            (itemID: $0, messageID: message.id)
-        }
-    }.dictionary(keyedBy: \.itemID, valuedBy: \.messageID)
-    
-    guard associatedLedger.count > 0 else {
-        return .success(items)
-    }
-    
-    return DBReader.shared.associatedMessages(with: messages.values.flatMap(\.associableItemIDs), in: chat).then { associations in
-        associations.forEach { itemID, associatedMessages in
-            guard let messageID = associatedLedger[itemID], let message = messages[messageID] else {
-                return
-            }
-            
-            guard let item = message.items.first(where: { $0.id == itemID }), item.isAcknowledgable else {
-                return
-            }
-            
-            item.acknowledgments = associatedMessages.flatMap(\.items).compactMap { item in
-                item.item as? AcknowledgmentChatItem
-            }
-        }
-    }.then {
-        Array(messages.values) + items.filter { $0.type != .message }
-    }
-}
-
-// MARK: - Translation
-private func BLParseObjects(_ objects: [NSObject], inChat chat: String) -> [ChatItem] {
-    objects.map {
-        ChatItemType.ingest(object: $0, context: IngestionContext(chatID: chat))
-    }
-}
-
-// MARK: - Chat ID resolution
-private func BLResolveChatID(forObject object: NSObject) -> Promise<String, Error> {
-    if let object = object as? IMItemIDResolvable, let guid = object.itemGUID {
-        return DBReader.shared.chatIdentifier(forMessageGUID: guid)
-            .assert(BarcelonaError(code: 500, message: "Failed to resolve item IDs during ingestion"))
-    } else {
-        return .failure(BarcelonaError(code: 500, message: "Failed to resolve item IDs during ingestion"))
-    }
-}
-
-private func BLResolveChatIDs(forObjects objects: [NSObject]) -> Promise<[String], Error> {
-    let ids = objects.compactMap {
-        ($0 as? IMItemIDResolvable)?.itemGUID
-    }
-    
-    guard ids.count == objects.count else {
-        return .failure(BarcelonaError(code: 500, message: "Failed to resolve item IDs during ingestion"))
-    }
-    
-    return DBReader.shared.chatIdentifiers(forMessageGUIDs: ids)
-}
-
-private protocol IMItemIDResolvable {
-    var itemGUID: String? { get }
-}
-
-extension IMItem: IMItemIDResolvable {
-    var itemGUID: String? { guid }
-}
-
-extension IMChatItem: IMItemIDResolvable {
-    var itemGUID: String? { _item()?.guid }
-}
-
-extension IMMessage: IMItemIDResolvable {
-    var itemGUID: String? { guid }
-}
+private let BLIngestObjectsLog = Logger(category: "BLIngestObjects")
 
 // MARK: - Public API
-public func BLIngestObjects(_ objects: [NSObject], inChat chat: String? = nil) -> Promise<[ChatItem], Error> {
+public func BLIngestObjects(_ objects: [NSObject], inChat chat: String? = nil) -> Promise<[ChatItem]> {
+    guard objects.count > 0 else {
+        BLIngestObjectsLog.debug("Early-exit BLIngest because objects is empty")
+        return .success([])
+    }
+    
     guard let chat = chat else {
-        return BLResolveChatIDs(forObjects: objects)
-            .then { chatIDs -> Promise<[ChatItem], Error> in
+        BLIngestObjectsLog.debug("inferring chat ids before ingestion because chat id was not provided")
+        
+        return _BLResolveChatIDs(forObjects: objects)
+            .then { chatIDs -> Promise<[ChatItem]> in
+                BLIngestObjectsLog.debug("got %d chat IDs from database", chatIDs.count)
+                
                 if _fastPath(chatIDs.allSatisfy { $0 == chatIDs.first }) {
+                    BLIngestObjectsLog.debug("taking fast-path for inferred chat IDs because they're all the same (%@)", chatIDs.first!)
+                    
                     return BLIngestObjects(objects, inChat: chatIDs.first!)
                 }
                 
+                BLIngestObjectsLog.debug("found mismatched identifiers, ingesting them in chunks (%@)", chatIDs.joined(separator: ", "))
+                
                 // Loads file transfers in one batch to reduce database calls
-                return BLLoadFileTransfers(forObjects: objects).then {
-                    Promise.whenAllSucceed(objects.enumerated().map { index, object in
+                return _BLLoadFileTransfers(forObjects: objects).observeFailure { error in
+                    BLIngestObjectsLog.error("failed to load file transfers: %@", error as NSError)
+                }.then {
+                    Promise.all(objects.enumerated().map { index, object in
                         BLIngestObject(object, inChat: chatIDs[index])
                     })
+                }.observeOutput { items in
+                    BLIngestObjectsLog.info("aggregated ingestion got %d items", items.count)
                 }
             }
     }
     
-    return BLLoadFileTransfers(forObjects: objects).then {
-        BLParseObjects(objects, inChat: chat)
-    }.then {
-        BLLoadTapbacks(forItems: $0, inChat: chat)
-    }.receive(on: DispatchQueue.main)
+    return _BLLoadFileTransfers(forObjects: objects).then { () -> [ChatItem] in
+        BLIngestObjectsLog.debug("file transfers loaded. parsing objects")
+        return _BLParseObjects(objects, inChat: chat)
+    }.then { items -> Promise<[ChatItem]> in
+        BLIngestObjectsLog.debug("objects parsed. loading tapbacks")
+        return _BLLoadTapbacks(forItems: items, inChat: chat)
+    }.observeOutput { items in
+        BLIngestObjectsLog.info("ingested %d items", items.count)
+    }
 }
 
-public func BLIngestObject(_ object: NSObject, inChat chat: String? = nil) -> Promise<ChatItem, Error> {
+public func BLIngestObject(_ object: NSObject, inChat chat: String? = nil) -> Promise<ChatItem> {
     guard let chat = chat else {
-        return BLResolveChatID(forObject: object)
+        return _BLResolveChatID(forObject: object)
             .then { chat in
                 BLIngestObject(object, inChat: chat)
             }

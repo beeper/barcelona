@@ -11,9 +11,7 @@ import IMCore
 
 extension Chat: Resolvable, _ConcreteBasicResolvable {
     public static func resolve(withIdentifiers identifiers: [String]) -> [Chat] {
-        IMChat.resolve(withIdentifiers: identifiers).map { imChat in
-            imChat.representation
-        }
+        IMChat.resolve(withIdentifiers: identifiers).map(\.representation)
     }
 
     public static func resolve(withMessageGUID guid: String) -> Chat? {

@@ -37,6 +37,6 @@ public extension IMChatRegistry {
             chats = Array(chats.prefix(limit))
         }
         
-        return chats.map { Chat($0) }
+        return chats.map(Chat.init)
     }
 }

@@ -20,9 +20,7 @@ public enum HandleIDStyle: String, Codable {
 
 public struct BulkHandleRepresentation: Codable {
     public init(_ handles: [IMHandle]) {
-        self.handles = handles.map {
-            Handle($0)
-        }
+        self.handles = handles.map(Handle.init)
     }
     
     public var handles: [Handle]

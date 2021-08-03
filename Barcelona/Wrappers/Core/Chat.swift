@@ -9,7 +9,6 @@
 import Foundation
 import IMSharedUtilities
 import IMCore
-import os.log
 
 public enum ChatStyle: UInt8 {
     case group = 0x2b
@@ -18,26 +17,6 @@ public enum ChatStyle: UInt8 {
 
 public protocol BulkChatRepresentatable {
     var chats: [Chat] { get set }
-}
-
-public struct BulkChatRepresentation: Codable, BulkChatRepresentatable {
-    public init(_ chats: [IMChat]) {
-        self.chats = chats.map {
-            Chat($0)
-        }
-    }
-    
-    public init(_ chats: ArraySlice<IMChat>) {
-        self.chats = chats.map {
-            Chat($0)
-        }
-    }
-    
-    public init(_ chats: [Chat]) {
-        self.chats = chats
-    }
-    
-    public var chats: [Chat]
 }
 
 public enum MessagePartType: String, Codable {
@@ -86,7 +65,7 @@ public struct DeleteMessage: Codable, MessageIdentifiable {
 }
 
 extension MessageIdentifiable {
-    public func chat() -> Promise<Chat?, Error> {
+    public func chat() -> Promise<Chat?> {
         Chat.chat(forMessage: id)
     }
 }
@@ -111,7 +90,7 @@ public struct TapbackCreation: Codable {
     }
 }
 
-private let log = OSLog(subsystem: "CoreBarcelona", category: "Chat")
+private let log = Logger(category: "Chat")
 
 public protocol ChatDelegate {
     func chat(_ chat: Chat, willSendMessages messages: [IMMessage], fromCreateMessage createMessage: CreateMessage) -> Void
@@ -136,13 +115,9 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
         groupPhotoID = backing.groupPhotoID
     }
     
-    public static func chat(forMessage id: String) -> Promise<Chat?, Error> {
-        IMChat.chat(forMessage: id).map {
-            if let chat = $0 {
-                return Chat(chat)
-            } else {
-                return nil
-            }
+    public static func chat(forMessage id: String) -> Promise<Chat?> {
+        IMChat.chat(forMessage: id).maybeMap { chat in
+            Chat(chat)
         }
     }
     
@@ -168,9 +143,9 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     }
     
     mutating func setTimeSortedParticipants(participants: [HandleTimestampRecord]) {
-        self.participants = participants.map {
-            $0.handle_id
-        }.including(array: self.participants)
+        self.participants = participants
+            .map(\.handle_id)
+            .filter(self.participants.contains)
     }
     
     public var imChat: IMChat {
@@ -191,7 +166,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
         imChat.localUserIsTyping = typing
     }
     
-    public func messages(before: String? = nil, limit: Int? = nil, beforeDate: Date? = nil) -> Promise<[Message], Error> {
+    public func messages(before: String? = nil, limit: Int? = nil, beforeDate: Date? = nil) -> Promise<[Message]> {
         if BLIsSimulation {
             let guids: [String] = imChat.chatItemRules._items().compactMap { item in
                 if let chatItem = item as? IMChatItem {
@@ -203,34 +178,25 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
                 return nil
             }
             
-            return IMMessage.messages(withGUIDs: guids, in: self.id).then { messages -> [Message] in
-                messages.compactMap {
-                    $0 as? Message
-                }.sorted {
-                    return $0.time > $1.time
-                }
+            return IMMessage.messages(withGUIDs: guids, in: self.id).compactMap { message -> Message? in
+                message as? Message
+            }.sorted {
+                return $0.time > $1.time
             }
         }
         
-        #if DEBUG
-        let signpostID = OSSignpostID(log: log)
-        os_signpost(.begin, log: .default, name: "Chat.messages():IMDCopy", signpostID: signpostID)
-        #endif
+        log("Querying IMD for recent messages using chat fast-path")
         
-        os_log("Querying IMD for recent messages using chat fast-path", log: log)
-        
-        return CBLoadChatItems(withChatIdentifier: self.id, onServices: [.iMessage], beforeGUID: before, limit: limit).then {
-            $0.compactMap {
-                $0 as? Message
-            }
+        return BLLoadChatItems(withChatIdentifier: self.id, onServices: [.iMessage], beforeGUID: before, limit: limit).compactMap {
+            $0 as? Message
         }
     }
     
-    public func delete(message: DeleteMessage) -> Promise<Void, Error> {
+    public func delete(message: DeleteMessage) -> Promise<Void> {
         let guid = message.id, parts = message.parts ?? []
         let fullMessage = parts.count == 0
         
-        return IMMessage.lazyResolve(withIdentifier: guid).map { message -> Void in
+        return IMMessage.lazyResolve(withIdentifier: guid).then { message -> Void in
             guard let message = message else {
                 return
             }
@@ -252,42 +218,38 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
         }
     }
     
-    public func send(message options: CreatePluginMessage) -> Promise<[Message], Error> {
-        options.imMessage(inChat: self.id).then { message -> Promise<Message?, Error> in
-            Chat.delegate?.chat(self, willSendMessages: [message], fromCreatePluginMessage: options)
-            
-            DispatchQueue.main.async {
-                self.imChat._sendMessage(message, adjustingSender: true, shouldQueue: true)
+    public func send(message options: CreatePluginMessage) throws -> [Message] {
+        let message = try options.imMessage(inChat: self.id)
+        
+        Chat.delegate?.chat(self, willSendMessages: [message], fromCreatePluginMessage: options)
+        
+        RunLoop.main.schedule {
+            self.imChat._sendMessage(message, adjustingSender: true, shouldQueue: true)
+        }
+        
+        return _BLParseObjects([message], inChat: self.id)
+            .compactMap {
+                $0 as? Message
             }
+    }
+    
+    public func send(message createMessage: CreateMessage) throws -> [Message] {
+        let message = try createMessage.imMessage(inChat: self.id)
             
-            return BLIngestObject(message, inChat: self.id)
-                .map { $0 as? Message }
-        }.then { message -> Promise<[Message], Error> in
-            guard let message = message else {
-                return .failure(BarcelonaError(code: 500, message: "Failed to construct represented message"))
-            }
-
-            return .success([message])
+        let messages = message.messagesBySeparatingRichLinks() as? [IMMessage] ?? [message]
+        
+        Chat.delegate?.chat(self, willSendMessages: messages, fromCreateMessage: createMessage)
+        
+        messages.forEach {
+            self.imChat.sendMessage($0)
+        }
+        
+        return _BLParseObjects(messages, inChat: self.id).compactMap {
+            $0 as? Message
         }
     }
     
-    public func send(message createMessage: CreateMessage) -> Promise<[Message], Error> {
-        createMessage.imMessage(inChat: self.id).receive(on: DispatchQueue.main).then { message -> Promise<[Message], Error> in
-            guard let messages = message.messagesBySeparatingRichLinks() as? [IMMessage] else {
-                return .failure(BarcelonaError(code: 500, message: "Failed to construct rich-link-separated IMMessages"))
-            }
-            
-            Chat.delegate?.chat(self, willSendMessages: messages, fromCreateMessage: createMessage)
-            
-            messages.forEach {
-                self.imChat.sendMessage($0)
-            }
-            
-            return messages.bulkRepresentation(in: self.id)
-        }
-    }
-    
-    public func tapback(_ creation: TapbackCreation) -> Promise<Message?, Error> {
+    public func tapback(_ creation: TapbackCreation) -> Promise<Message?> {
         imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil).then {
             BLIngestObject($0, inChat: id)
         }.then {

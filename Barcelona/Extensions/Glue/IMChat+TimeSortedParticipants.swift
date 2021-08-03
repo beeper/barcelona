@@ -25,13 +25,15 @@ extension Array where Element: Hashable {
 
 public extension IMChat {
     fileprivate var cachedRecentParticipantHandleIDs: [String] {
-        ERTimeSortedParticipantsManager.sharedInstance.sortedParticipants(forChat: self.id).including(array: self.participantHandleIDs()).removingDuplicates()
+        ERTimeSortedParticipantsManager.sharedInstance.sortedParticipants(forChat: self.id)
+            .filter(self.participantHandleIDs().contains)
+            .removingDuplicates()
     }
     
     var recentParticipantHandleIDs: [String] {
         var cachedRecent = cachedRecentParticipantHandleIDs
         
-        cachedRecent.append(contentsOf: participantHandleIDs().excluding(array: cachedRecent))
+        cachedRecent.append(contentsOf: participantHandleIDs().filter { !cachedRecent.contains($0) })
         
         return cachedRecent
     }

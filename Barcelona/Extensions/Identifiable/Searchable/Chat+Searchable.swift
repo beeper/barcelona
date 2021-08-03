@@ -109,9 +109,7 @@ public struct ChatSearchParameters: QueryParameters {
 
 private extension IMChat {
     var handleIDs: [String] {
-        participants.map {
-            $0.id
-        }
+        participants.map(\.id)
     }
 }
 
@@ -203,7 +201,7 @@ extension Array where Element : Equatable {
 }
 
 extension Chat: Searchable {
-    public static func resolve(withParameters rawParameters: ChatSearchParameters) -> Promise<[Chat], Error> {
+    public static func resolve(withParameters rawParameters: ChatSearchParameters) -> Promise<[Chat]> {
         let parameters = rawParameters.parameters
         
         if parameters.count == 0 {
@@ -216,9 +214,7 @@ extension Chat: Searchable {
         
         var chats = IMChatRegistry.shared.allChats.filter {
             parameters.test($0)
-        }.map {
-            $0.representation
-        }
+        }.map(\.representation)
         
         chats.sort { chat1, chat2 in
             chat1.lastMessageTime > chat2.lastMessageTime

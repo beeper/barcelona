@@ -11,7 +11,7 @@ import InterposeKit
 import IMCore
 import OSLog
 
-private let log = OSLog(subsystem: "com.barcelona", category: "Hooks")
+private let log = Logger(category: "Hooks")
 
 internal struct BLMessageStatusChange {
     let message: IMMessage

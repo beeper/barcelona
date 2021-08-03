@@ -7,9 +7,3 @@
 //
 
 import Foundation
-
-extension ChatItemAcknowledgable {
-    func tapbacks() -> Promise<[Message], Error> {
-        return DBReader(pool: databasePool).associatedMessages(with: id)
-    }
-}

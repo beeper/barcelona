@@ -18,24 +18,20 @@ public protocol Searchable: Identifiable {
     associatedtype BulkSearch = BulkSearchRequest<QueryParametersImplementation>
     
     /// Perform a single query
-    static func resolve(withParameters: QueryParametersImplementation) -> Promise<[instancetype], Error>
+    static func resolve(withParameters: QueryParametersImplementation) -> Promise<[instancetype]>
     /// Perform multiple concurrent queries
-    static func bulkResolve(withParameters: BulkSearch) -> Promise<[String: [instancetype]], Error>
+    static func bulkResolve(withParameters: BulkSearch) -> Promise<[String: [instancetype]]>
 }
 
 /// Implementation for concurrent bulk searches
 extension Searchable {
     /// Concurrently executes all provided queries, returning a dictionary keyed identical to the parameters, with the result values replacing the query values
-    public static func bulkResolve(withParameters parameters: [String: QueryParametersImplementation]) -> Promise<[String: [instancetype]], Error> {
-        Promise.whenAllSucceed(parameters.map { entry in
+    public static func bulkResolve(withParameters parameters: [String: QueryParametersImplementation]) -> Promise<[String: [instancetype]]> {
+        Promise.all(parameters.map { entry in
             self.resolve(withParameters: entry.value).then {
                 (entry.key, $0)
             }
-        }).then {
-            $0.reduce(into: [String: [instancetype]]()) { ledger, results in
-                ledger[results.0] = results.1
-            }
-        }
+        }).dictionary(keyedBy: \.0, valuedBy: \.1)
     }
 }
 
@@ -74,16 +70,3 @@ public protocol QueryParametersChatNarrowable: QueryParameters {
     var chats: [String]? { get }
 }
 
-extension QueryParametersChatNarrowable {
-    func chatROWIDs() -> Promise<[Int64], Error> {
-        if let chats = chats, chats.count > 0 {
-            return DBReader.shared.rowIDs(forIdentifiers: chats).then {
-                $0.values.flatMap {
-                    $0
-                }
-            }
-        } else {
-            return .success([])
-        }
-    }
-}

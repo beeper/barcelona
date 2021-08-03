@@ -17,11 +17,7 @@ public struct MessagePartParseResult {
 
 private extension NSMutableAttributedString {
     func addAttributes(_ attributes: [TextPartAttribute]? = nil) {
-        guard let attributes = attributes else {
-            return
-        }
-        
-        attributes.forEach {
+        attributes?.forEach {
             self.addAttribute($0.attributedKey, value: $0.attributedValue, range: wholeRange)
         }
     }
@@ -31,11 +27,9 @@ private extension NSMutableAttributedString {
  Parses an array of MessageParts and returns a single NSAttributedString representing the contents
  */
 public func ERAttributedString(from parts: [MessagePart]) -> MessagePartParseResult {
-    let results = parts.map { ERAttributedString(from: $0) }
-    let strings = results.map { $0.string }
-    let transferGUIDs = results.reduce(into: [String]()) { (accumulator, result) in
-        accumulator.append(contentsOf: result.transferGUIDs)
-    }
+    let results = parts.map(ERAttributedString(from:))
+    let strings = results.map (\.string)
+    let transferGUIDs = results.flatMap(\.transferGUIDs)
     
     return MessagePartParseResult(string: ERInsertMessageParts(into: strings.reduce(into: NSMutableAttributedString()) { (accumulator, current) in
         accumulator.append(current)

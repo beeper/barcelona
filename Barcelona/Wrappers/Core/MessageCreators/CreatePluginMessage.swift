@@ -30,12 +30,13 @@ private extension NSAttributedString {
 }
 
 public struct CreatePluginMessage: Codable, CreateMessageBase {
-    public init(extensionData: MessageExtensionsData, attachmentID: String? = nil, bundleID: String, expressiveSendStyleID: String? = nil, threadIdentifier: String? = nil, replyToPart: String? = nil) {
+    public init(extensionData: MessageExtensionsData, attachmentID: String? = nil, bundleID: String, expressiveSendStyleID: String? = nil, threadIdentifier: String? = nil, replyToGUID: String? = nil, replyToPart: Int? = nil) {
         self.extensionData = extensionData
         self.attachmentID = attachmentID
         self.bundleID = bundleID
         self.expressiveSendStyleID = expressiveSendStyleID
         self.threadIdentifier = threadIdentifier
+        self.replyToGUID = replyToGUID
         self.replyToPart = replyToPart
     }
     
@@ -44,7 +45,8 @@ public struct CreatePluginMessage: Codable, CreateMessageBase {
     public var bundleID: String
     public var expressiveSendStyleID: String?
     public var threadIdentifier: String?
-    public var replyToPart: String?
+    public var replyToPart: Int?
+    public var replyToGUID: String?
     
     public func parseToAttributed() -> MessagePartParseResult {
         ERAttributedString(forExtensionOptions: self)

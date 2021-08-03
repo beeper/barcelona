@@ -13,14 +13,14 @@ import BarcelonaEvents
 import OSLog
 import SwiftCLI
 
-
-
 @main
 class Grapple {
     static let shared = Grapple()
     
     static func main() {
-        BarcelonaManager.shared.bootstrap().whenSuccess { success in
+        BLLoggingDrivers.append(BLConsoleDriver.shared)
+        
+        BarcelonaManager.shared.bootstrap().then { success in
             let exitCode = CLI(name: "grapple", commands: [
                 SendMessageCommand(), ChatCommands(), DebugCommands()
             ]).go()

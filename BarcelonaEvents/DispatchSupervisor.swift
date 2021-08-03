@@ -7,9 +7,7 @@
 //
 
 import Foundation
-import os.log
-
-private let log_dispatchSupervisor = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "DispatchSupervisor")
+import BarcelonaFoundation
 
 /**
  Tracks an array of dispatchers and wakes/sleeps them on command.
@@ -18,9 +16,9 @@ public class DispatchSupervisor: EventDispatcher {
     var awake: Bool = false {
         didSet {
             if awake {
-                os_log("😳 Dispatch supervisor is awake", log_dispatchSupervisor)
+                CLInfo("DispatchSupervisor", "supervisor is awake")
             } else {
-                os_log("😴 Dispatch supervisor is asleep.", log_dispatchSupervisor)
+                CLInfo("DispatchSupervisor", "supervisor is asleep")
             }
         }
     }
@@ -42,8 +40,6 @@ public class DispatchSupervisor: EventDispatcher {
         }
         
         dispatchers.forEach { $0.wake() }
-        
-        print("woke")
         
         awake = true
     }

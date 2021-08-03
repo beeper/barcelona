@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>com.apple.security.cs.disable-library-validation</key>
+	<true/>
 	<key>com.apple.private.memorystatus</key>
 	<true/>
 	<key>com.apple.accounts.inactive.fullaccess</key>
@@ -102,5 +104,14 @@
 	<true/>
 	<key>com.apple.private.skip-library-validation</key>
 	<true/>
+	<key>com.apple.private.tcc.allow</key>
+	<array>
+		<string>kTCCServiceAddressBook</string>
+		<string>kTCCServicePhotosAdd </string>
+		<string>kTCCServicePhotos</string>
+		<string>kTCCServiceMediaLibrary</string>
+		<string>kTCCServiceMicrophone</string>
+		<string>kTCCServiceCamera</string>
+	</array>
 </dict>
 </plist>

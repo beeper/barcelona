@@ -24,17 +24,13 @@ public extension Contact {
     var phoneNumbers: [String] {
         handles.filter {
             $0.format == .phoneNumber
-        }.map {
-            $0.id
-        }
+        }.map(\.id)
     }
     
     var emailAddresses: [String] {
         handles.filter {
             $0.format == .email
-        }.map {
-            $0.id
-        }
+        }.map(\.id)
     }
 }
 

@@ -10,7 +10,8 @@ import Foundation
 import Barcelona
 import BarcelonaMautrixIPC
 import IMCore
-import Combine
+
+LoggingDrivers.append(BLMautrixSTDOutDriver.shared)
 
 CFPreferencesSetAppValue("Log" as CFString, true as CFBoolean, kCFPreferencesCurrentApplication)
 CFPreferencesSetAppValue("Log.All" as CFString, true as CFBoolean, kCFPreferencesCurrentApplication)
@@ -62,14 +63,20 @@ extension Array where Element == ChatItem {
     }
 }
 
+private let IPCLog = Logger(category: "MautrixIPC")
+
 func BLHandlePayload(_ payload: IPCPayload) {
-    BLInfo("Got a payload with type \(payload.command.name)")
-    
     switch payload.command {
-    case .get_chats(_):
-        payload.reply(withCommand: .response(.chats_resolved(IMChatRegistry.shared.allChats.map { $0.guid })))
+    case .get_chats(let req):
+        payload.reply(withCommand: .response(.chats_resolved(IMChatRegistry.shared.allChats.filter { chat in
+            guard let lastMessage = chat.lastMessage else {
+                return false
+            }
+            
+            return lastMessage.time.timeIntervalSince1970 > req.min_timestamp
+        }.map { $0.guid })))
     case .get_chat(let req):
-        BLInfo("Getting chat with id \(req.chat_guid)")
+        CLInfo("MautrixIPC", "Getting chat with id %@", req.chat_guid)
         
         guard let chat = req.blChat else {
             payload.fail(strategy: .chat_not_found)
@@ -90,22 +97,29 @@ func BLHandlePayload(_ payload: IPCPayload) {
             break
         }
         
-        CBLoadChatItems(withChatIdentifier: chat.id, onServices: .CBMessageServices, limit: req.limit).map {
+        BLLoadChatItems(withChatIdentifier: chat.id, onServices: .CBMessageServices, limit: req.limit).then {
             $0.blMessages
-        }.whenSuccess {
+        }.then {
             payload.respond(.messages($0))
         }
     case .get_messages_after(let req):
-        BLInfo("Getting messages after time \(req.timestamp)")
+        IPCLog("Getting messages for chat guid %@ after time %f", req.chat_guid, req.timestamp)
         
         guard let chat = req.chat else {
+            IPCLog.debug("Unknown chat with guid %@", req.chat_guid)
             payload.fail(strategy: .chat_not_found)
             break
         }
         
-        CBLoadChatItems(withChatIdentifier: chat.id, onServices: .CBMessageServices, beforeDate: req.date, limit: req.limit).map {
+        if let lastMessage = chat.lastMessage, lastMessage.time!.timeIntervalSince1970 < req.timestamp {
+            IPCLog.debug("Not processing get_messages_after because chats last message timestamp %f is before req.timestamp %f", lastMessage.time!.timeIntervalSince1970, req.timestamp)
+            return payload.respond(.messages([]))
+        }
+        
+        IPCLog.debug("Loading %d messages in chat %@ before %f", req.limit ?? -1, chat.id, req.timestamp)
+        BLLoadChatItems(withChatIdentifier: chat.id, onServices: .CBMessageServices, afterDate: req.date, limit: req.limit).then {
             $0.blMessages
-        }.whenSuccess {
+        }.then {
             payload.respond(.messages($0))
         }
     case .get_chat_avatar(let req):
@@ -121,18 +135,23 @@ func BLHandlePayload(_ payload: IPCPayload) {
             break
         }
         
-        let messageCreation = CreateMessage(parts: [
+        var messageCreation = CreateMessage(parts: [
             .init(type: .text, details: req.text)
         ])
         
-        chat.send(message: messageCreation).then {
-            $0.map(\.partialMessage)
-        }.whenSuccess { messages in
+        messageCreation.replyToGUID = req.reply_to
+        messageCreation.replyToPart = req.reply_to_part
+        
+        do {
+            let messages = try chat.send(message: messageCreation).map(\.partialMessage)
             BLMetricStore.shared.set(messages.map(\.guid), forKey: .lastSentMessageGUIDs)
             
-            messages.forEach {
-                payload.respond(.message_receipt($0))
+            messages.forEach { message in
+                payload.respond(.message_receipt(message))
             }
+        } catch {
+            // girl fuck
+            CLFault("BLMautrix", "failed to send text message: %@", error as NSError)
         }
     case .send_media(let req):
         guard let chat = req.cbChat else {
@@ -144,18 +163,20 @@ func BLHandlePayload(_ payload: IPCPayload) {
         let messageCreation = CreateMessage(parts: [
             .init(type: .attachment, details: transfer.guid)
         ])
-            
-            
-        chat.send(message: messageCreation).then {
-            $0.map(\.partialMessage)
-        }.whenSuccess { messages in
+        
+        do {
+            let messages = try chat.send(message: messageCreation).map(\.partialMessage)
             BLMetricStore.shared.set(messages.map(\.guid), forKey: .lastSentMessageGUIDs)
             
-            messages.forEach {
-                payload.respond(.message_receipt($0))
+            NotificationCenter.default.once(notificationNamed: BLChatMessageSentNotification, object: messages.first!.guid).then { _ in
+                messages.forEach { message in
+                    payload.respond(.message_receipt(message))
+                }
             }
+        } catch {
+            // girl fuck
+            CLFault("BLMautrix", "failed to send media message: %@", error as NSError)
         }
-        break
     case .send_tapback(let req):
         guard let chat = req.cbChat else {
             payload.fail(strategy: .chat_not_found)
@@ -169,7 +190,7 @@ func BLHandlePayload(_ payload: IPCPayload) {
         
         chat.tapback(creation).then {
             $0?.partialMessage
-        }.whenComplete { result in
+        }.always { result in
             switch result {
             case .success(let message):
                 guard let message = message else {
@@ -178,7 +199,7 @@ func BLHandlePayload(_ payload: IPCPayload) {
                 
                 payload.respond(.message_receipt(message))
             case .failure(let error):
-                BLError("Failed to send tapback with error", error.localizedDescription)
+                CLError("MautrixIPC", "Failed to send tapback with error", error.localizedDescription)
             }
         }
     case .send_read_receipt(let req):
@@ -211,21 +232,21 @@ BLCreatePayloadReader { payload in
     }
 }
 
-BLInfo("Bootstrapping", module: "ERBarcelonaManager")
+CLInfo("ERBarcelonaManager", "Bootstrapping")
 
-BarcelonaManager.shared.bootstrap().whenSuccess { success in
+BarcelonaManager.shared.bootstrap().then { success in
     guard success else {
-        BLError("Failed to bootstrap")
+        CLError("ERBarcelonaManager", "Failed to bootstrap")
         exit(-1)
     }
     
     ready = true
-    BLInfo("BLMautrix is ready", module: "ERBarcelonaManager")
+    CLInfo("ERBarcelonaManager", "BLMautrix is ready")
     NotificationCenter.default.post(name: .barcelonaReady, object: nil)
     
     BLEventHandler.shared.run()
     
-    BLInfo("BLMautrix event handler is running", module: "ERBarcelonaManager")
+    CLInfo("ERBarcelonaManager", "BLMautrix event handler is running")
 }
 
 RunLoop.main.run()

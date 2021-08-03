@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import BarcelonaFoundation
 
 public struct _IPCCommand: Codable {
     public var hello: Bool
@@ -52,7 +53,7 @@ public enum IPCCommand: Codable {
         case data
     }
     
-    public enum CommandName: String, Codable {
+    public enum CommandName: String, Codable, CustomStringConvertible {
         case send_message
         case send_media
         case send_tapback
@@ -73,6 +74,10 @@ public enum IPCCommand: Codable {
         case error
         case log
         case response
+        
+        public var description: String {
+            rawValue
+        }
     }
 
     public var name: CommandName {
@@ -233,7 +238,7 @@ public struct IPCPayload: Codable {
     
     public func reply(withCommand command: IPCCommand) {
         guard let id = id else {
-            return BLDebug("Reply issued for a command that had no ID. Inbound name: %@ Outbound name: %@", self.command.name.rawValue, self.command.name.rawValue)
+            return CLDebug("Mautrix", "Reply issued for a command that had no ID. Inbound name: %@ Outbound name: %@", self.command.name.rawValue, self.command.name.rawValue)
         }
         
         BLWritePayload(IPCPayload(id: id, command: command))
