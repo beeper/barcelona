@@ -180,9 +180,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
             
             return IMMessage.messages(withGUIDs: guids, in: self.id).compactMap { message -> Message? in
                 message as? Message
-            }.sorted {
-                return $0.time > $1.time
-            }
+            }.sorted(usingKey: \.time, by: >)
         }
         
         log("Querying IMD for recent messages using chat fast-path")
