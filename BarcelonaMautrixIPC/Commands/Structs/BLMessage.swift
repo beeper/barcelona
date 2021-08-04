@@ -69,6 +69,15 @@ public struct BLMessage: Codable, ChatResolvable {
                 }
                 
                 self.associated_message = BLTapback(chat_guid: chat_guid, target_guid: acknowledgment.associatedID, target_part: part, type: Int(acknowledgment.acknowledgmentType))
+            case let plugin as PluginChatItem:
+                if let fallback = plugin.fallback {
+                    text = fallback.text
+                    attachments = message.fileTransferIDs.filter { id in
+                        !plugin.attachments.map(\.id).contains(id)
+                    }.compactMap {
+                        BLAttachment(guid: $0)
+                    }
+                }
             default:
                 continue
             }

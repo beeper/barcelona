@@ -39,11 +39,13 @@ public struct PluginChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
             break
         case "com.apple.messages.URLBalloonProvider":
             if let dataSource = item.dataSource {
-                if let metadata = dataSource.value(forKey: "richLinkMetadata") as? LPLinkMetadata, let richLink = RichLinkRepresentation(metadata: metadata, attachments: item.internalAttachments) {
+                if let metadata = dataSource.richLinkMetadata, let richLink = RichLinkRepresentation(metadata: metadata, attachments: item.internalAttachments) {
                     self.richLink = richLink
-                } else if let url = dataSource.value(forKey: "url") as? URL {
+                }
+                
+                if let url = dataSource.url {
                     let urlString = url.absoluteString
-                    self.fallback = TextChatItem(item, text: urlString, parts: [.init(type: .link, string: urlString, data: .init(urlString), attributes: [])], chatID: chatID).eraseToAnyChatItem()
+                    self.fallback = TextChatItem(item, text: urlString, parts: [.init(type: .link, string: urlString, data: .init(urlString), attributes: [])], chatID: chatID)
                 }
                 
                 insertPayload = false
@@ -71,7 +73,7 @@ public struct PluginChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
     public var threadOriginator: String?
     public var digitalTouch: DigitalTouchMessage?
     public var richLink: RichLinkRepresentation?
-    public var fallback: AnyChatItem?
+    public var fallback: TextChatItem?
     public var `extension`: MessageExtensionsData?
     public var payload: String?
     public var bundleID: String
