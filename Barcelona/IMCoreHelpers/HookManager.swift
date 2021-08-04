@@ -32,7 +32,7 @@ private func IMChatHooks() throws -> Interpose {
 //                return store.original(`self`, store.selector, item)
 //            }
 //        }
-        try $0.prepareHook("_handleIncomingItem:") { (store: TypedHook<@convention(c) (AnyObject, Selector, AnyObject) -> Bool, @convention(block) (IMChat, IMItem) -> Bool>) in
+        try $0.prepareHook(#selector(IMChat._handleIncomingItem(_:))) { (store: TypedHook<@convention(c) (AnyObject, Selector, AnyObject) -> Bool, @convention(block) (IMChat, IMItem) -> Bool>) in
             { chat, item in
                 let index = chat._index(of: item)
                 
