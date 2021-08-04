@@ -21,9 +21,7 @@ class SendMessageCommand: Command {
             fatalError("Unknown chat")
         }
         
-        chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: message)])).then { messages in
-            print(messages)
-            exit(0)
-        }
+        print(try chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: message)])))
+        exit(0)
     }
 }

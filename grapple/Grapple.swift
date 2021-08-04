@@ -18,7 +18,7 @@ class Grapple {
     static let shared = Grapple()
     
     static func main() {
-        BLLoggingDrivers.append(BLConsoleDriver.shared)
+        LoggingDrivers.append(ConsoleDriver.shared)
         
         BarcelonaManager.shared.bootstrap().then { success in
             let exitCode = CLI(name: "grapple", commands: [
