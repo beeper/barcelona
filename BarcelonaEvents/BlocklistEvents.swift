@@ -10,6 +10,7 @@ import Foundation
 import Barcelona
 
 private let CMFBlockListUpdatedNotification = Notification.Name(rawValue: "CMFBlockListUpdatedNotification")
+private let Log = Logger(category: "BlocklistEvents")
 
 /**
  Tracks events related to CommunicationsFilter.framework
@@ -22,6 +23,7 @@ public class BlocklistEvents: EventDispatcher {
     }
     
     private func blockListUpdated(_ notification: Notification) {
+        Log.debug("Blocklist updated!")
         bus.dispatch(.blockListUpdated(CBLoadBlocklist()))
     }
 }

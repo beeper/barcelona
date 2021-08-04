@@ -9,8 +9,6 @@
 import Foundation
 import OSLog
 
-private let log = Logger(category: "ExpiringCollection")
-
 public class ExpiringCollection<Element: Hashable>: Collection {
     public private(set) var inner = Set<Element>()
     
@@ -35,7 +33,6 @@ public class ExpiringCollection<Element: Hashable>: Collection {
         runLoop.schedule {
             self.expirationTimers[item] = Timer.scheduledTimer(withTimeInterval: self.threshold, repeats: false) { timer in
                 self.expirationTimers[item] = nil
-                log("expiring item %@", String(describing: item))
                 self.inner.remove(item)
             }
         }

@@ -17,8 +17,8 @@ public enum IPCLoggingLevel: String, Codable {
 }
 
 public struct LogCommand: Codable {
-    public var time: Date
     public var level: IPCLoggingLevel
     public var module: String
     public var message: String
+    public var metadata: [String: String]
 }

@@ -49,7 +49,6 @@ public class BLEventHandler {
                         }
                     }
                     
-                    CLInfo("Mautrix", "received message: %@", String(data: try! JSONEncoder().encode(message), encoding: .utf8)!)
                     send(.message(BLMessage(message: message)))
                 }
                 

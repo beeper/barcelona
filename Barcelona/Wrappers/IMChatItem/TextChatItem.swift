@@ -336,6 +336,6 @@ public struct TextChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
     }
     
     public var debugDescription: String {
-        "\(type) { id=\(id) fromMe=\(fromMe) text=\(text) }"
+        "\(type) { id=\(id) fromMe=\(fromMe) }"
     }
 }

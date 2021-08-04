@@ -7,6 +7,9 @@
 //
 
 import Foundation
+import BarcelonaFoundation
+
+private let Log = Logger(category: "EventDispatcher")
 
 private extension OperationQueue {
     convenience init(underlyingQueue: DispatchQueue) {
@@ -47,6 +50,9 @@ public class EventDispatcher {
     }
     
     internal func addObserver(forName name: Notification.Name, using block: @escaping (Notification) -> Void) {
-        observers.append(center.addObserver(forName: name, object: nil, queue: OperationQueue(underlyingQueue: bus.queue), using: block))
+        observers.append(center.addObserver(forName: name, object: nil, queue: OperationQueue(underlyingQueue: bus.queue), using: {
+            Log.debug("Receive notification: %@", name.rawValue)
+            block($0)
+        }))
     }
 }

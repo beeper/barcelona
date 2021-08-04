@@ -34,6 +34,10 @@ public class BLMautrixSTDOutDriver: LoggingDriver {
     private init() {}
     
     public func log(level: LoggingLevel, fileID: StaticString, line: Int, function: StaticString, dso: UnsafeRawPointer, category: StaticString, message: StaticString, args: [CVarArg]) {
-        BLWritePayload(.init(id: nil, command: .log(LogCommand(time: .init(), level: level.ipcLevel, module: String(category), message: String(format: String(message), arguments: args)))))
+        BLWritePayload(.init(id: nil, command: .log(LogCommand(level: level.ipcLevel, module: String(category), message: String(format: String(message), arguments: args), metadata: [
+            "fileID": fileID.description,
+            "function": function.description,
+            "line": line.description
+        ]))))
     }
 }
