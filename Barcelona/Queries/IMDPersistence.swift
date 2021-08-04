@@ -70,6 +70,11 @@ private func BLLoadIMDMessageRecordRefsWithGUIDs(_ guids: [String]) -> NSArray {
 private func ERCreateIMMessageFromIMItem(_ items: [IMItem]) -> [IMMessage] {
     let operation = IMDLog.operation(named: "ERConvertIMDMessageRecordRefsToIMMessage").begin("converting %d IMItems to IMMessage", items.count)
     
+    guard items.count > 0 else {
+        operation.end("early-exit: empty array passed for conversion")
+        return []
+    }
+    
     let items = items.compactMap {
         $0 as? IMMessageItem
     }
