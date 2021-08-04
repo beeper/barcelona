@@ -37,7 +37,7 @@ public struct StatusChatItem: ChatItemOwned, Hashable {
     public init(item: IMMessageStatusChatItem, chatID: String) {
         id = item.id
         self.chatID = chatID
-        fromMe = Registry.sharedInstance.uniqueMeHandleIDs.contains(item._item().handle!)
+        fromMe = !item.isFromMe
         time = item.effectiveTime
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
