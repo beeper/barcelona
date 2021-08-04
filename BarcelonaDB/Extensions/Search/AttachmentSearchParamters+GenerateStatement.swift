@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import BarcelonaFoundation
 import GRDB
 
 fileprivate extension AttachmentSearchParameters {

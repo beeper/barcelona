@@ -7,10 +7,12 @@
 //
 
 import Foundation
+import BarcelonaFoundation
 import GRDB
 
 public protocol IMCNHandleBridgingProvider {
     func handleIDs(forCNIdentifier arg1: String) -> [String]
+    var allLoginHandles: [String] { get }
 }
 
 #if canImport(IMCore)
@@ -19,6 +21,10 @@ import IMCore
 extension IMHandleRegistrar: IMCNHandleBridgingProvider {
     public func handleIDs(forCNIdentifier arg1: String) -> [String] {
         handles(forCNIdentifier: arg1).map(\.id)
+    }
+    
+    public var allLoginHandles: [String] {
+        IMAccountController.sharedInstance().accounts.flatMap(\.aliases)
     }
 }
 #endif
@@ -36,6 +42,10 @@ public extension DBReader {
         }
         
         var handles = params.handles ?? []
+        
+        #if canImport(IMCore)
+        let handleProvider = Optional(handleProvider ?? IMHandleRegistrar.sharedInstance())
+        #endif
         
         /// Resolves contact IDs to all handles associated
         if let contacts = params.contacts, let handleProvider = handleProvider {
@@ -70,7 +80,7 @@ public extension DBReader {
                         .fetchAll(db)
                 }
                 
-                let allLoginHandles = Registry.sharedInstance.uniqueMeHandleIDs
+                let allLoginHandles = handleProvider?.allLoginHandles ?? []
                 
                 let loginHandles = handles.filter { allLoginHandles.contains($0) }
                 let otherHandles = handles.filter { !allLoginHandles.contains($0) }

@@ -8,6 +8,7 @@
 
 import Foundation
 import IMCore
+import BarcelonaDB
 
 @usableFromInline
 internal let BLIngestLog = Logger(category: "BLIngest-Internal")

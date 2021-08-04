@@ -13,6 +13,7 @@ import ImageIO
 import CoreServices
 import Swime
 import IMDPersistence
+import BarcelonaDB
 
 public struct BulkAttachmentRepresentation: Codable {
     public init(attachments: [Attachment]) {

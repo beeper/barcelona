@@ -163,10 +163,37 @@
 		1D804D0F250EAE8A00F376CB /* RichLinkSpecializationFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D804D0E250EAE8A00F376CB /* RichLinkSpecializationFormat.swift */; };
 		1D804E12250ECEB300F376CB /* String+Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D804E11250ECEB300F376CB /* String+Service.swift */; };
 		1D81551B258ECC7C00870547 /* swizzleInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D81551A258ECC7C00870547 /* swizzleInstance.m */; };
-		1D8334432512CD3A005E0A43 /* ChatHandleJoin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8334422512CD3A005E0A43 /* ChatHandleJoin.swift */; };
 		1D87EC50258BF7290030D9C6 /* IMChatItem+ThreadIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D87EC4F258BF7290030D9C6 /* IMChatItem+ThreadIdentifier.swift */; };
 		1D87EC64258BF8170030D9C6 /* IMChatItem+LazilyResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D87EC63258BF8170030D9C6 /* IMChatItem+LazilyResolvable.swift */; };
 		1D87EC6C258BFB0D0030D9C6 /* IMChatItem+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D87EC6B258BFB0D0030D9C6 /* IMChatItem+Identifiable.swift */; };
+		1D884DA026BB4EAE003E60E7 /* ChatMessageJoin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7324E37D9E00303692 /* ChatMessageJoin.swift */; };
+		1D884DA126BB4EAE003E60E7 /* RawAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF63FA824E4DE410004527F /* RawAttachment.swift */; };
+		1D884DA226BB4EAE003E60E7 /* RawMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7224E37D9E00303692 /* RawMessage.swift */; };
+		1D884DA326BB4EAE003E60E7 /* RawHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7424E37D9E00303692 /* RawHandle.swift */; };
+		1D884DA426BB4EAE003E60E7 /* MessageAttachmentJoin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DCB8BDE2510468B0005A0EB /* MessageAttachmentJoin.swift */; };
+		1D884DA526BB4EAE003E60E7 /* DBReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC66B0924E488FF00CB0C5D /* DBReader.swift */; };
+		1D884DA626BB4EAE003E60E7 /* RawChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7124E37D9E00303692 /* RawChat.swift */; };
+		1D884DA726BB4EAE003E60E7 /* ChatHandleJoin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8334422512CD3A005E0A43 /* ChatHandleJoin.swift */; };
+		1D884DA826BB4ECD003E60E7 /* DBReader+SearchAttachments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DB226B4BB3400B4DC77 /* DBReader+SearchAttachments.swift */; };
+		1D884DA926BB4ECD003E60E7 /* DBReader+SearchMessages-Complex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DB426B4BB6100B4DC77 /* DBReader+SearchMessages-Complex.swift */; };
+		1D884DAA26BB4ECD003E60E7 /* DBReader+SearchMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DB626B4BB8400B4DC77 /* DBReader+SearchMessages.swift */; };
+		1D884DAB26BB4ECD003E60E7 /* Attachments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DB926B4BBD700B4DC77 /* Attachments.swift */; };
+		1D884DAC26BB4ECD003E60E7 /* ChatMessageJoins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DBD26B4BC2100B4DC77 /* ChatMessageJoins.swift */; };
+		1D884DAD26BB4ECD003E60E7 /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DC126B4C2B000B4DC77 /* Messages.swift */; };
+		1D884DAE26BB4ECD003E60E7 /* AssociatedMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7024E37D9E00303692 /* AssociatedMessages.swift */; };
+		1D884DAF26BB4ECD003E60E7 /* Chats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DC326B4C2DB00B4DC77 /* Chats.swift */; };
+		1D884DB026BB4ECD003E60E7 /* HandleTimestamps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DC526B4C49600B4DC77 /* HandleTimestamps.swift */; };
+		1D884DB126BB4ECD003E60E7 /* Date+IMDConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DAB26B4B8A400B4DC77 /* Date+IMDConversion.swift */; };
+		1D884DB226BB4ECD003E60E7 /* Array+TemplatedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DAD26B4B8C200B4DC77 /* Array+TemplatedString.swift */; };
+		1D884DB326BB4ECD003E60E7 /* AttachmentSearchParamters+GenerateStatement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DA626B4B84400B4DC77 /* AttachmentSearchParamters+GenerateStatement.swift */; };
+		1D884DB426BB4ECE003E60E7 /* QueryInterfaceRequest+RawMessageRefinement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DA826B4B88800B4DC77 /* QueryInterfaceRequest+RawMessageRefinement.swift */; };
+		1D884DB526BB4ECE003E60E7 /* QueryParametersChatNarrowable+ChatIDsResolving.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DAF26B4BA4800B4DC77 /* QueryParametersChatNarrowable+ChatIDsResolving.swift */; };
+		1D884DB826BB503A003E60E7 /* BarcelonaFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D79039126ACFF0300712CB3 /* BarcelonaFoundation.framework */; };
+		1D884DBC26BB5052003E60E7 /* BarcelonaDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D884DBB26BB5052003E60E7 /* BarcelonaDB.swift */; };
+		1D884DBE26BB50E0003E60E7 /* Structs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D884DBD26BB50E0003E60E7 /* Structs.swift */; };
+		1D884DBF26BB52A7003E60E7 /* BarcelonaDB.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DE06D8D26B43C4C00B4DC77 /* BarcelonaDB.framework */; };
+		1D884DC026BB52A7003E60E7 /* BarcelonaDB.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1DE06D8D26B43C4C00B4DC77 /* BarcelonaDB.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1D884DC326BB55D8003E60E7 /* IMCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD424E3744900303692 /* IMCore.framework */; };
 		1D9079F2250ED4DB00ED1EDC /* AttributedStringDeserializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5224E37D9E00303692 /* AttributedStringDeserializer.swift */; };
 		1D9079F3250ED4DB00ED1EDC /* AttributedStringSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB9520624F6B8BF004CC87B /* AttributedStringSerializer.swift */; };
 		1D91B49325C4786200DCBC3D /* IMDPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D91B49225C4786200DCBC3D /* IMDPersistence.swift */; };
@@ -251,15 +278,7 @@
 		1DCB0CE426B05E7F00242045 /* BarcelonaMautrixIPC.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D4AC05826AB7EC900ADD254 /* BarcelonaMautrixIPC.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1DCB8BDB2510439E0005A0EB /* Attachment+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DCB8BDA2510439E0005A0EB /* Attachment+Identifiable.swift */; };
 		1DCB8BDD251043D30005A0EB /* Attachment+Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DCB8BDC251043D30005A0EB /* Attachment+Searchable.swift */; };
-		1DCB8BDF2510468B0005A0EB /* MessageAttachmentJoin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DCB8BDE2510468B0005A0EB /* MessageAttachmentJoin.swift */; };
 		1DD32DCF2510258300D877CF /* AttachmentChatItem+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD32DCE2510258300D877CF /* AttachmentChatItem+Identifiable.swift */; };
-		1DD805B324E85CFD0076D717 /* AssociatedMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7024E37D9E00303692 /* AssociatedMessages.swift */; };
-		1DD805B424E85CFD0076D717 /* RawChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7124E37D9E00303692 /* RawChat.swift */; };
-		1DD805B524E85CFD0076D717 /* RawMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7224E37D9E00303692 /* RawMessage.swift */; };
-		1DD805B624E85CFD0076D717 /* ChatMessageJoin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7324E37D9E00303692 /* ChatMessageJoin.swift */; };
-		1DD805B724E85CFD0076D717 /* RawHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7424E37D9E00303692 /* RawHandle.swift */; };
-		1DD805B824E85CFD0076D717 /* DBReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC66B0924E488FF00CB0C5D /* DBReader.swift */; };
-		1DD805BA24E85CFD0076D717 /* RawAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF63FA824E4DE410004527F /* RawAttachment.swift */; };
 		1DD805BB24E85D070076D717 /* IMContactStore+ContactRepresentations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5A24E37D9E00303692 /* IMContactStore+ContactRepresentations.swift */; };
 		1DD805BC24E85D070076D717 /* IMChat+MessageQueries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5B24E37D9E00303692 /* IMChat+MessageQueries.swift */; };
 		1DD805BD24E85D070076D717 /* IMChatRegistry+SortedRepresentations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5C24E37D9E00303692 /* IMChatRegistry+SortedRepresentations.swift */; };
@@ -285,19 +304,6 @@
 		1DE06D9526B43C6D00B4DC77 /* BarcelonaFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D79039126ACFF0300712CB3 /* BarcelonaFoundation.framework */; };
 		1DE06D9626B43C6D00B4DC77 /* BarcelonaFoundation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D79039126ACFF0300712CB3 /* BarcelonaFoundation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1DE06D9B26B43C7300B4DC77 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 1DE06D9A26B43C7300B4DC77 /* GRDB */; };
-		1DE06DA726B4B84500B4DC77 /* AttachmentSearchParamters+GenerateStatement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DA626B4B84400B4DC77 /* AttachmentSearchParamters+GenerateStatement.swift */; };
-		1DE06DA926B4B88800B4DC77 /* QueryInterfaceRequest+RawMessageRefinement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DA826B4B88800B4DC77 /* QueryInterfaceRequest+RawMessageRefinement.swift */; };
-		1DE06DAC26B4B8A400B4DC77 /* Date+IMDConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DAB26B4B8A400B4DC77 /* Date+IMDConversion.swift */; };
-		1DE06DAE26B4B8C200B4DC77 /* Array+TemplatedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DAD26B4B8C200B4DC77 /* Array+TemplatedString.swift */; };
-		1DE06DB026B4BA4800B4DC77 /* QueryParametersChatNarrowable+ChatIDsResolving.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DAF26B4BA4800B4DC77 /* QueryParametersChatNarrowable+ChatIDsResolving.swift */; };
-		1DE06DB326B4BB3400B4DC77 /* DBReader+SearchAttachments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DB226B4BB3400B4DC77 /* DBReader+SearchAttachments.swift */; };
-		1DE06DB526B4BB6100B4DC77 /* DBReader+SearchMessages-Complex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DB426B4BB6100B4DC77 /* DBReader+SearchMessages-Complex.swift */; };
-		1DE06DB726B4BB8400B4DC77 /* DBReader+SearchMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DB626B4BB8400B4DC77 /* DBReader+SearchMessages.swift */; };
-		1DE06DBA26B4BBD700B4DC77 /* Attachments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DB926B4BBD700B4DC77 /* Attachments.swift */; };
-		1DE06DBE26B4BC2100B4DC77 /* ChatMessageJoins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DBD26B4BC2100B4DC77 /* ChatMessageJoins.swift */; };
-		1DE06DC226B4C2B000B4DC77 /* Messages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DC126B4C2B000B4DC77 /* Messages.swift */; };
-		1DE06DC426B4C2DB00B4DC77 /* Chats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DC326B4C2DB00B4DC77 /* Chats.swift */; };
-		1DE06DC626B4C49600B4DC77 /* HandleTimestamps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06DC526B4C49600B4DC77 /* HandleTimestamps.swift */; };
 		1DEE7EA1250FA4150009C74F /* Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA0250FA4150009C74F /* Searchable.swift */; };
 		1DEE7EA4250FA4B40009C74F /* Message+Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA3250FA4B40009C74F /* Message+Searchable.swift */; };
 		1DEE7EA6250FB2150009C74F /* IMHandle+Resolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA5250FB2150009C74F /* IMHandle+Resolvable.swift */; };
@@ -341,6 +347,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 1D79039026ACFF0300712CB3;
 			remoteInfo = BarcelonaFoundation;
+		};
+		1D884DB926BB503A003E60E7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D79039026ACFF0300712CB3;
+			remoteInfo = BarcelonaFoundation;
+		};
+		1D884DC126BB52A8003E60E7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1DE06D8C26B43C4C00B4DC77;
+			remoteInfo = BarcelonaDB;
 		};
 		1D9AE36326AE14A1007873E3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -419,6 +439,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				1D884DC026BB52A7003E60E7 /* BarcelonaDB.framework in Embed Frameworks */,
 				1D7903A226ACFFAC00712CB3 /* BarcelonaFoundation.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -694,6 +715,8 @@
 		1D87EC4F258BF7290030D9C6 /* IMChatItem+ThreadIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatItem+ThreadIdentifier.swift"; sourceTree = "<group>"; };
 		1D87EC63258BF8170030D9C6 /* IMChatItem+LazilyResolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatItem+LazilyResolvable.swift"; sourceTree = "<group>"; };
 		1D87EC6B258BFB0D0030D9C6 /* IMChatItem+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatItem+Identifiable.swift"; sourceTree = "<group>"; };
+		1D884DBB26BB5052003E60E7 /* BarcelonaDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcelonaDB.swift; sourceTree = "<group>"; };
+		1D884DBD26BB50E0003E60E7 /* Structs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Structs.swift; sourceTree = "<group>"; };
 		1D91B49225C4786200DCBC3D /* IMDPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IMDPersistence.swift; sourceTree = "<group>"; };
 		1D92963126B5D91800F576A9 /* BarcelonaFoundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcelonaFoundation.swift; sourceTree = "<group>"; };
 		1D9AE36626AE17B0007873E3 /* BLIngest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLIngest.swift; sourceTree = "<group>"; };
@@ -772,6 +795,7 @@
 				1D44865724E85C7400FF73F3 /* CommunicationsFilter.framework in Frameworks */,
 				1D7903A126ACFFAC00712CB3 /* BarcelonaFoundation.framework in Frameworks */,
 				1D797B4726AD015200B57208 /* AnyCodable in Frameworks */,
+				1D884DBF26BB52A7003E60E7 /* BarcelonaDB.framework in Frameworks */,
 				1D44866324E85C7400FF73F3 /* IMDPersistence.framework in Frameworks */,
 				1D441369250A0AE300720CCE /* IDS.framework in Frameworks */,
 				1DC4D7B426ADF30400281920 /* InterposeKit in Frameworks */,
@@ -851,6 +875,8 @@
 			files = (
 				1DE06D9526B43C6D00B4DC77 /* BarcelonaFoundation.framework in Frameworks */,
 				1DE06D9B26B43C7300B4DC77 /* GRDB in Frameworks */,
+				1D884DB826BB503A003E60E7 /* BarcelonaFoundation.framework in Frameworks */,
+				1D884DC326BB55D8003E60E7 /* IMCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1141,7 +1167,6 @@
 				1D91B49125C4785800DCBC3D /* Queries */,
 				1D5AEECB24E37F8A00303692 /* Constants.swift */,
 				1D44864724E85BBB00FF73F3 /* Barcelona.h */,
-				1D5AEE6F24E37D9E00303692 /* Database */,
 				1D3E3334250C20FD00EEA08B /* Enums */,
 				1DB9520224F6B874004CC87B /* AttributedString */,
 				1D5AEE5924E37D9E00303692 /* Extensions */,
@@ -1256,23 +1281,6 @@
 				1D14A1CC250C1D73001C5921 /* Tapbacks */,
 			);
 			path = Extensions;
-			sourceTree = "<group>";
-		};
-		1D5AEE6F24E37D9E00303692 /* Database */ = {
-			isa = PBXGroup;
-			children = (
-				1DE06DB826B4BBCC00B4DC77 /* Queries */,
-				1DE06DA426B4B83200B4DC77 /* Extensions */,
-				1D5AEE7124E37D9E00303692 /* RawChat.swift */,
-				1D5AEE7224E37D9E00303692 /* RawMessage.swift */,
-				1D8334422512CD3A005E0A43 /* ChatHandleJoin.swift */,
-				1D5AEE7324E37D9E00303692 /* ChatMessageJoin.swift */,
-				1D5AEE7424E37D9E00303692 /* RawHandle.swift */,
-				1DC66B0924E488FF00CB0C5D /* DBReader.swift */,
-				1DF63FA824E4DE410004527F /* RawAttachment.swift */,
-				1DCB8BDE2510468B0005A0EB /* MessageAttachmentJoin.swift */,
-			);
-			path = Database;
 			sourceTree = "<group>";
 		};
 		1D5AEE7524E37D9E00303692 /* Wrappers */ = {
@@ -1612,8 +1620,19 @@
 		1DE06D8E26B43C4C00B4DC77 /* BarcelonaDB */ = {
 			isa = PBXGroup;
 			children = (
+				1DE06DB826B4BBCC00B4DC77 /* Queries */,
+				1DE06DA426B4B83200B4DC77 /* Extensions */,
+				1D5AEE7124E37D9E00303692 /* RawChat.swift */,
+				1D5AEE7224E37D9E00303692 /* RawMessage.swift */,
+				1D8334422512CD3A005E0A43 /* ChatHandleJoin.swift */,
+				1D5AEE7324E37D9E00303692 /* ChatMessageJoin.swift */,
+				1D5AEE7424E37D9E00303692 /* RawHandle.swift */,
+				1DC66B0924E488FF00CB0C5D /* DBReader.swift */,
+				1DF63FA824E4DE410004527F /* RawAttachment.swift */,
+				1DCB8BDE2510468B0005A0EB /* MessageAttachmentJoin.swift */,
 				1DE06D8F26B43C4C00B4DC77 /* BarcelonaDB.h */,
 				1DE06D9026B43C4C00B4DC77 /* Info.plist */,
+				1D884DBB26BB5052003E60E7 /* BarcelonaDB.swift */,
 			);
 			path = BarcelonaDB;
 			sourceTree = "<group>";
@@ -1666,6 +1685,7 @@
 				1D5AEE7024E37D9E00303692 /* AssociatedMessages.swift */,
 				1DE06DC326B4C2DB00B4DC77 /* Chats.swift */,
 				1DE06DC526B4C49600B4DC77 /* HandleTimestamps.swift */,
+				1D884DBD26BB50E0003E60E7 /* Structs.swift */,
 			);
 			path = Queries;
 			sourceTree = "<group>";
@@ -1753,6 +1773,7 @@
 			);
 			dependencies = (
 				1D7903A426ACFFAC00712CB3 /* PBXTargetDependency */,
+				1D884DC226BB52A8003E60E7 /* PBXTargetDependency */,
 			);
 			name = Barcelona;
 			packageProductDependencies = (
@@ -1907,6 +1928,7 @@
 			);
 			dependencies = (
 				1DE06D9826B43C6D00B4DC77 /* PBXTargetDependency */,
+				1D884DBA26BB503A003E60E7 /* PBXTargetDependency */,
 			);
 			name = BarcelonaDB;
 			packageProductDependencies = (
@@ -2049,15 +2071,12 @@
 				1DC4D77C26AD093100281920 /* ChatItemRepresentation+SharedInit.swift in Sources */,
 				1DC4D77D26AD093200281920 /* ChatItem+Codable.swift in Sources */,
 				1DC4D77E26AD093200281920 /* DigitalTouchMessage+Codable.swift in Sources */,
-				1DE06DC426B4C2DB00B4DC77 /* Chats.swift in Sources */,
 				1DC4D77F26AD093200281920 /* Chat.swift in Sources */,
-				1DE06DA926B4B88800B4DC77 /* QueryInterfaceRequest+RawMessageRefinement.swift in Sources */,
 				1DC4D78026AD093200281920 /* Message.swift in Sources */,
 				1DC4D7A926AD096300281920 /* String+FormatIdentification.swift in Sources */,
 				1DC4D78226AD093200281920 /* ChatItem-Protocols.swift in Sources */,
 				1DC4D78326AD093200281920 /* DigitalTouchMessage.swift in Sources */,
 				1DC4D78426AD093200281920 /* Attachment.swift in Sources */,
-				1DE06DB026B4BA4800B4DC77 /* QueryParametersChatNarrowable+ChatIDsResolving.swift in Sources */,
 				1DC4D78526AD093200281920 /* RichLinkRepresentation.swift in Sources */,
 				1DC4D78626AD093200281920 /* RichLinkAttachment+LPAssetResolution.swift in Sources */,
 				1DC4D78726AD093200281920 /* LPAsset.swift in Sources */,
@@ -2065,7 +2084,6 @@
 				1DC4D78926AD093200281920 /* RichLinkCaptionButton.swift in Sources */,
 				1DC4D78A26AD093200281920 /* RichLinkCaptionRow.swift in Sources */,
 				1DC4D78B26AD093200281920 /* RichLinkImage.swift in Sources */,
-				1DE06DB326B4BB3400B4DC77 /* DBReader+SearchAttachments.swift in Sources */,
 				1DC4D78C26AD093200281920 /* RichLinkVideo.swift in Sources */,
 				1DC4D78D26AD093200281920 /* RichLinkAudio.swift in Sources */,
 				1DC4D78E26AD093200281920 /* RichLinkStyle.swift in Sources */,
@@ -2083,8 +2101,6 @@
 				1DC4D79826AD093200281920 /* ETAngerData.swift in Sources */,
 				1DC4D79926AD093200281920 /* ETKissData.swift in Sources */,
 				1DC4D79A26AD093200281920 /* AssociatedMessageItem.swift in Sources */,
-				1DE06DAC26B4B8A400B4DC77 /* Date+IMDConversion.swift in Sources */,
-				1DE06DB726B4BB8400B4DC77 /* DBReader+SearchMessages.swift in Sources */,
 				1DC4D79B26AD093200281920 /* SenderItem.swift in Sources */,
 				1DC4D79C26AD093200281920 /* DateItem.swift in Sources */,
 				1DC4D79D26AD093200281920 /* GroupTitleChangeItem.swift in Sources */,
@@ -2103,18 +2119,13 @@
 				1D5322C42677C15B005FF8D1 /* IMItem|IMMessage+TimeResolvers.swift in Sources */,
 				1DD805E824E85D100076D717 /* GroupActionItem.swift in Sources */,
 				1D3E3341250C264900EEA08B /* IMFileTransfer+Creatable.swift in Sources */,
-				1DD805BA24E85CFD0076D717 /* RawAttachment.swift in Sources */,
 				1D3B5AFD24EDA46700A65280 /* IMChat+HistoryLoadingPatch.m in Sources */,
 				1DCB8BDB2510439E0005A0EB /* Attachment+Identifiable.swift in Sources */,
 				1D3E333A250C22E400EEA08B /* CNContact+Identifiable.swift in Sources */,
 				1D804CFB250E96FB00F376CB /* InternalAttachment+Resolvable.swift in Sources */,
-				1DD805B824E85CFD0076D717 /* DBReader.swift in Sources */,
 				1D74D4A4250C091500A9F9A1 /* LazilyResolvable.swift in Sources */,
-				1DD805B524E85CFD0076D717 /* RawMessage.swift in Sources */,
 				1DD805C124E85D070076D717 /* IMMessage+Subpart.swift in Sources */,
 				1D3E3336250C210C00EEA08B /* IMServiceStyle.swift in Sources */,
-				1DD805B424E85CFD0076D717 /* RawChat.swift in Sources */,
-				1DE06DBA26B4BBD700B4DC77 /* Attachments.swift in Sources */,
 				1D1E23412501F4530069705D /* IMMessage+IMFileTransferContainer.swift in Sources */,
 				1D44864F24E85BD500FF73F3 /* IMCore-Shims.m in Sources */,
 				1D3E3333250C20CB00EEA08B /* IMServiceStyle+IDSIdentifier.swift in Sources */,
@@ -2125,7 +2136,6 @@
 				1D7D8951250D795400DA9909 /* IMChatHistoryController+FutureLoading.swift in Sources */,
 				1D7FB3B724FF0CCE00B7B956 /* IMContactStore+NoOverrides.m in Sources */,
 				1DD805C224E85D070076D717 /* CNContact+ResizableImage.swift in Sources */,
-				1DCB8BDF2510468B0005A0EB /* MessageAttachmentJoin.swift in Sources */,
 				1DD805D024E85D070076D717 /* IMChatRegistry+NerfedIntents.m in Sources */,
 				1D3B5AFF24EF912B00A65280 /* IMChat+Reviewable.swift in Sources */,
 				1D1E23452506CB7F0069705D /* IMChat+MessageResolvable.swift in Sources */,
@@ -2133,21 +2143,15 @@
 				1DFB1EAB251011F000D84361 /* Contact+Identifiable.swift in Sources */,
 				1D74D4B4250C104400A9F9A1 /* IMMessage+LazilyResolvable.swift in Sources */,
 				1DFB1EA7250FFE3F00D84361 /* Chat+Searchable.swift in Sources */,
-				1DD805B324E85CFD0076D717 /* AssociatedMessages.swift in Sources */,
-				1DE06DC226B4C2B000B4DC77 /* Messages.swift in Sources */,
-				1D8334432512CD3A005E0A43 /* ChatHandleJoin.swift in Sources */,
 				1D67C145250ACBCF000A4D58 /* IMHandle+DestinationResolvable.swift in Sources */,
 				1DD32DCF2510258300D877CF /* AttachmentChatItem+Identifiable.swift in Sources */,
 				1DD805CF24E85D070076D717 /* Image+resize.swift in Sources */,
 				1DD8067224E9A7330076D717 /* IMMessage+SPI.swift in Sources */,
 				1D9AE37426AF1C42007873E3 /* HookManager.swift in Sources */,
 				1D3E3338250C217C00EEA08B /* IMHandle+Identifiable.swift in Sources */,
-				1DE06DA726B4B84500B4DC77 /* AttachmentSearchParamters+GenerateStatement.swift in Sources */,
 				1D3B5AF224EB444300A65280 /* IMContactStore+AlwaysCache.m in Sources */,
 				1DEE7EA6250FB2150009C74F /* IMHandle+Resolvable.swift in Sources */,
 				1D91B49325C4786200DCBC3D /* IMDPersistence.swift in Sources */,
-				1DE06DC626B4C49600B4DC77 /* HandleTimestamps.swift in Sources */,
-				1DE06DAE26B4B8C200B4DC77 /* Array+TemplatedString.swift in Sources */,
 				1DD805BE24E85D070076D717 /* IMChatItem+AcknowledgmentSummaryInfo.swift in Sources */,
 				1D797B5B26AD06A100B57208 /* Registry.swift in Sources */,
 				1D3E333C250C230E00EEA08B /* CNContact+Resolvable.swift in Sources */,
@@ -2168,7 +2172,6 @@
 				1DFB1EA9251011DD00D84361 /* Contact+Searchable.swift in Sources */,
 				1D804E12250ECEB300F376CB /* String+Service.swift in Sources */,
 				1DEE7EA4250FA4B40009C74F /* Message+Searchable.swift in Sources */,
-				1DD805B724E85CFD0076D717 /* RawHandle.swift in Sources */,
 				1D3E3343250C269B00EEA08B /* InternalAttachment+Identifiable.swift in Sources */,
 				1DCB8BDD251043D30005A0EB /* Attachment+Searchable.swift in Sources */,
 				1DD805C324E85D070076D717 /* IMAttachmentMessagePartChatItem+TapbackType.swift in Sources */,
@@ -2187,7 +2190,6 @@
 				1D74D4AF250C0F1700A9F9A1 /* Chat+Identifiable.swift in Sources */,
 				1D74D4AB250C0E0C00A9F9A1 /* IMService+Resolvable.swift in Sources */,
 				1D3F0C482515192D00E1DBEB /* IMChat+TimeSortedParticipants.swift in Sources */,
-				1DE06DB526B4BB6100B4DC77 /* DBReader+SearchMessages-Complex.swift in Sources */,
 				1D804D0F250EAE8A00F376CB /* RichLinkSpecializationFormat.swift in Sources */,
 				1DD805CB24E85D070076D717 /* CNContactStore+AllContacts.swift in Sources */,
 				1D7D894C250D6AEC00DA9909 /* ERIMSimulationTools.swift in Sources */,
@@ -2201,10 +2203,8 @@
 				1DD805BB24E85D070076D717 /* IMContactStore+ContactRepresentations.swift in Sources */,
 				1DD805CA24E85D070076D717 /* CNContact+Serializable.swift in Sources */,
 				1DD805C424E85D070076D717 /* IMChatItem+CountFix.m in Sources */,
-				1DD805B624E85CFD0076D717 /* ChatMessageJoin.swift in Sources */,
 				1D74D49A250C01CB00A9F9A1 /* Identifiable.swift in Sources */,
 				1D81551B258ECC7C00870547 /* swizzleInstance.m in Sources */,
-				1DE06DBE26B4BC2100B4DC77 /* ChatMessageJoins.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2332,6 +2332,30 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1D884DBE26BB50E0003E60E7 /* Structs.swift in Sources */,
+				1D884DA826BB4ECD003E60E7 /* DBReader+SearchAttachments.swift in Sources */,
+				1D884DA926BB4ECD003E60E7 /* DBReader+SearchMessages-Complex.swift in Sources */,
+				1D884DAA26BB4ECD003E60E7 /* DBReader+SearchMessages.swift in Sources */,
+				1D884DAB26BB4ECD003E60E7 /* Attachments.swift in Sources */,
+				1D884DAC26BB4ECD003E60E7 /* ChatMessageJoins.swift in Sources */,
+				1D884DAD26BB4ECD003E60E7 /* Messages.swift in Sources */,
+				1D884DAE26BB4ECD003E60E7 /* AssociatedMessages.swift in Sources */,
+				1D884DAF26BB4ECD003E60E7 /* Chats.swift in Sources */,
+				1D884DB026BB4ECD003E60E7 /* HandleTimestamps.swift in Sources */,
+				1D884DB126BB4ECD003E60E7 /* Date+IMDConversion.swift in Sources */,
+				1D884DB226BB4ECD003E60E7 /* Array+TemplatedString.swift in Sources */,
+				1D884DB326BB4ECD003E60E7 /* AttachmentSearchParamters+GenerateStatement.swift in Sources */,
+				1D884DBC26BB5052003E60E7 /* BarcelonaDB.swift in Sources */,
+				1D884DB426BB4ECE003E60E7 /* QueryInterfaceRequest+RawMessageRefinement.swift in Sources */,
+				1D884DB526BB4ECE003E60E7 /* QueryParametersChatNarrowable+ChatIDsResolving.swift in Sources */,
+				1D884DA326BB4EAE003E60E7 /* RawHandle.swift in Sources */,
+				1D884DA426BB4EAE003E60E7 /* MessageAttachmentJoin.swift in Sources */,
+				1D884DA526BB4EAE003E60E7 /* DBReader.swift in Sources */,
+				1D884DA726BB4EAE003E60E7 /* ChatHandleJoin.swift in Sources */,
+				1D884DA026BB4EAE003E60E7 /* ChatMessageJoin.swift in Sources */,
+				1D884DA626BB4EAE003E60E7 /* RawChat.swift in Sources */,
+				1D884DA226BB4EAE003E60E7 /* RawMessage.swift in Sources */,
+				1D884DA126BB4EAE003E60E7 /* RawAttachment.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2362,6 +2386,16 @@
 			isa = PBXTargetDependency;
 			target = 1D79039026ACFF0300712CB3 /* BarcelonaFoundation */;
 			targetProxy = 1D7903A326ACFFAC00712CB3 /* PBXContainerItemProxy */;
+		};
+		1D884DBA26BB503A003E60E7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D79039026ACFF0300712CB3 /* BarcelonaFoundation */;
+			targetProxy = 1D884DB926BB503A003E60E7 /* PBXContainerItemProxy */;
+		};
+		1D884DC226BB52A8003E60E7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1DE06D8C26B43C4C00B4DC77 /* BarcelonaDB */;
+			targetProxy = 1D884DC126BB52A8003E60E7 /* PBXContainerItemProxy */;
 		};
 		1D9AE36426AE14A1007873E3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2425,6 +2459,7 @@
 					"$(PROJECT_DIR)/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_CFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.apple.ericrabil.CoreBarcelona;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -2475,6 +2510,7 @@
 					"$(PROJECT_DIR)/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_CFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.apple.ericrabil.CoreBarcelona;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -2758,7 +2794,7 @@
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaSerialization;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -2788,7 +2824,7 @@
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaSerialization;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -2888,7 +2924,7 @@
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaFoundation;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -2920,7 +2956,7 @@
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaFoundation;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -2980,6 +3016,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
 				INFOPLIST_FILE = BarcelonaDB/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2988,7 +3028,7 @@
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
-				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaDB;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -3010,6 +3050,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
 				INFOPLIST_FILE = BarcelonaDB/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -3018,7 +3062,7 @@
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
-				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaDB;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;

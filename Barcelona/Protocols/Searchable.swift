@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import BarcelonaDB
 
 /// Represents an identifiable and searchable record/entity
 public protocol Searchable: Identifiable {
@@ -47,14 +48,8 @@ public struct BulkSearchRequest<T: QueryParameters>: BulkSearchRequestRepresenta
     public var searches: [String: T]
 }
 
-public protocol QueryParameters: Codable {
-    var limit: Int? { get set }
-    var page: Int? { get set }
-}
-
 public protocol SearchParameter {
     associatedtype Object
-    
     func test(_ object: Object) -> Bool
 }
 
@@ -65,8 +60,3 @@ public extension Array where Element : SearchParameter {
         }
     }
 }
-
-public protocol QueryParametersChatNarrowable: QueryParameters {
-    var chats: [String]? { get }
-}
-

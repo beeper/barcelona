@@ -7,19 +7,7 @@
 //
 
 import Foundation
-
-public struct MessageQueryParameters: QueryParameters {
-    public var search: String?
-    public var bundle_id: String?
-    
-    public var chats: [String]?
-    public var handles: [String]?
-    public var contacts: [String]?
-    public var from_me: Bool?
-    
-    public var limit: Int?
-    public var page: Int?
-}
+import BarcelonaDB
 
 extension Message: Searchable {
     public static func resolve(withParameters parameters: MessageQueryParameters) -> Promise<[Message]> {

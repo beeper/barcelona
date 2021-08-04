@@ -7,9 +7,10 @@
 //
 
 import Foundation
+import BarcelonaFoundation
 
 /// These extensions are used for the search APIs
-extension DBReader {
+public extension DBReader {
     func messages(matching text: String, limit: Int) -> Promise<[String]> {
         read { db in
             try RawMessage

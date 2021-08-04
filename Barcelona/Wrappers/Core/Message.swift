@@ -9,6 +9,7 @@
 import Foundation
 import IMCore
 import IMSharedUtilities
+import BarcelonaDB
 
 public extension Array where Element == String {
     func er_chatItems(in chat: String) -> Promise<[ChatItem]> {

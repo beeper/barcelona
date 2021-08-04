@@ -9,6 +9,22 @@
 import Foundation
 import GRDB
 
+public struct ResourceOrigin: Codable, Hashable {
+    public init?(chatID: String? = nil, handleID: String? = nil, date: Double? = nil) {
+        self.chatID = chatID
+        self.handleID = handleID
+        self.date = date
+        
+        if chatID == nil, handleID == nil, date == nil {
+            return nil
+        }
+    }
+    
+    public var chatID: String?
+    public var handleID: String?
+    public var date: Double?
+}
+
 public class RawAttachment: Record {
     public override class var databaseTableName: String { "attachment" }
     
@@ -94,5 +110,8 @@ public class RawAttachment: Record {
     public var sr_ck_sync_state: Int64?
     public var sr_ck_server_change_token_blob: Data?
     public var sr_ck_record_id: String?
+    
+    // MARK: - Overlay
+    public var origin: ResourceOrigin?
 }
 

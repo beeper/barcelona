@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import BarcelonaFoundation
 
 public extension DBReader {
     /// Returns the ROWiDs for a chat with the given identifier

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import BarcelonaFoundation
 
 internal extension QueryParametersChatNarrowable {
     func chatROWIDs() -> Promise<[Int64]> {

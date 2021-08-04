@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import BarcelonaFoundation
 import GRDB
 
 fileprivate extension DBReader {/// Returns a ledger of partial chats for the given message IDs
@@ -151,7 +152,7 @@ public extension DBReader {
                 
                 let messageROWIDs = try messageROWIDsQuery
                     .order(ChatMessageJoin.Columns.message_date.desc)
-                    .limit(limit ?? ERDefaultMessageQueryLimit)
+                    .limit(limit ?? 75)
                     .fetchAll(db)
                 
                 guard messageROWIDs.count > 0 else {

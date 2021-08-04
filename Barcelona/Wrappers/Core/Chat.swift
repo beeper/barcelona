@@ -8,6 +8,7 @@
 
 import Foundation
 import IMSharedUtilities
+import BarcelonaDB
 import IMCore
 
 public enum ChatStyle: UInt8 {

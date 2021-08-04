@@ -8,6 +8,7 @@
 
 import Foundation
 import GRDB
+import BarcelonaFoundation
 
 public extension DBReader {
     func attachment(for guid: String) -> Promise<RawAttachment?> {

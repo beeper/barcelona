@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import BarcelonaDB
 import Contacts
 import IMCore
 

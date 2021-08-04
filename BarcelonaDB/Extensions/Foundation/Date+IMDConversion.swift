@@ -8,7 +8,7 @@
 
 import Foundation
 
-internal extension Date {
+public extension Date {
     static func timeIntervalSince1970FromIMDBDateValue(date rawDate: Double) -> Double {
         let rawDateSmall: Double = Double(rawDate / 1000000000)
         

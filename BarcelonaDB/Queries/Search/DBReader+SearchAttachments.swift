@@ -7,25 +7,26 @@
 //
 
 import Foundation
+import BarcelonaFoundation
 
-public struct ResourceOrigin: Codable, Hashable {
-    public init?(chatID: String? = nil, handleID: String? = nil, date: Double? = nil) {
-        self.chatID = chatID
-        self.handleID = handleID
-        self.date = date
-        
-        if chatID == nil, handleID == nil, date == nil {
-            return nil
-        }
-    }
-    
-    public var chatID: String?
-    public var handleID: String?
-    public var date: Double?
+public protocol IMServiceRegistrationProvider {
+    func handle(forService service: String) -> String?
 }
 
+#if canImport(IMCore)
+import IMCore
+
+private class IMServiceRegistrationProviderImpl: IMServiceRegistrationProvider {
+    static let shared = IMServiceRegistrationProviderImpl()
+    
+    func handle(forService service: String) -> String? {
+        IMAccountController.sharedInstance().bestAccount(forService: service)?.loginIMHandle?.id
+    }
+}
+#endif
+
 public extension DBReader {
-    func attachments(matchingParameters parameters: AttachmentSearchParameters) -> Promise<[BarcelonaAttachment]> {
+    func attachments(matchingParameters parameters: AttachmentSearchParameters, serviceRegistrationProvider: IMServiceRegistrationProvider? = nil) -> Promise<[RawAttachment]> {
         parameters.loadRawAttachments().then { attachments in
             read { db -> ([RawAttachment], [Int64: RawMessage], [Int64: (RawMessage?, RawHandle?)]) in
                 let messageAttachmentJoins: [MessageAttachmentJoin] = try MessageAttachmentJoin
@@ -73,8 +74,12 @@ public extension DBReader {
             chatIdentifiers(forMessageRowIDs: Array(messagesLedger.keys)).then {
                 (attachments, messageAttachmentLedger, $0)
             }
-        }.then { (attachments, messageAttachmentLedger, chatIdentifierLdeger) -> [BarcelonaAttachment] in
-            attachments.compactMap { attachment -> BarcelonaAttachment? in
+        }.then { (attachments, messageAttachmentLedger, chatIdentifierLdeger) -> [RawAttachment] in
+            #if canImport(IMCore)
+            let serviceRegistrationProvider = Optional(serviceRegistrationProvider ?? IMServiceRegistrationProviderImpl.shared)
+            #endif
+            
+            return attachments.compactMap { attachment -> RawAttachment? in
                 guard let ROWID = attachment.ROWID else {
                     return nil
                 }
@@ -93,16 +98,15 @@ public extension DBReader {
                     if rawMessage.is_from_me == 0 {
                         sender = messageAttachmentLedger[ROWID]?.1?.id
                     } else {
-                        if let service = rawMessage.service, let handle = Registry.sharedInstance.suitableHandle(for: service) {
-                            sender = handle.id
+                        if let service = rawMessage.service {
+                            sender = serviceRegistrationProvider?.handle(forService: service)
                         }
                     }
                 }
                 
-                return attachment.internalAttachment(withOrigin: ResourceOrigin(chatID: chat, handleID: sender, date: date))
+                attachment.origin = ResourceOrigin(chatID: chat, handleID: sender, date: date)
+                return attachment
             }
-        }.sorted { attachment1, attachment2 in
-            (attachment1.origin?.date ?? 0) > (attachment2.origin?.date ?? 0)
-        }
+        }.sorted(usingKey: \.origin?.date, withDefaultValue: 0, by: >)
     }
 }

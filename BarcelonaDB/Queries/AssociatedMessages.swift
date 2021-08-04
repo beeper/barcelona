@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import BarcelonaFoundation
 
 public extension DBReader {
     /// Loads messages associated with the given GUIDs
