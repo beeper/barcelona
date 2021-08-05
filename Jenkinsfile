@@ -19,7 +19,7 @@ pipeline {
                 sh 'cp Build/macOS/Build/Products/Debug/barcelona-mautrix darwin-barcelona-mautrix'
                 sh 'cp Build/macOS/Build/Products/Debug/grapple darwin-grapple'
                 sh 'cp Build/iOS/Build/Products/Debug-iphoneos/barcelona-mautrix ios-barcelona-mautrix'
-                archiveArtifacts artifacts: '*barcelona-mautrix, grapple'
+                archiveArtifacts artifacts: '*barcelona-mautrix, darwin-grapple'
             }
         }
     }
