@@ -62,7 +62,6 @@
 		1D4AC06826AB7EF900ADD254 /* BLChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADC6265C5A240095EE7E /* BLChat.swift */; };
 		1D4AC06926AB7EF900ADD254 /* BLContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADCA265C5A8F0095EE7E /* BLContact.swift */; };
 		1D4AC06A26AB7EF900ADD254 /* BLStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADCE265C5B710095EE7E /* BLStruct.swift */; };
-		1D4AC06B26AB7EF900ADD254 /* BLStruct.codegen.js in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADD0265C5C5B0095EE7E /* BLStruct.codegen.js */; };
 		1D4AC06C26AB7EF900ADD254 /* ChatResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD9C265C4F530095EE7E /* ChatResolvable.swift */; };
 		1D4AC06D26AB7EF900ADD254 /* TargetResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADA0265C4FF30095EE7E /* TargetResolvable.swift */; };
 		1D4AC06E26AB7EF900ADD254 /* ContactResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADB1265C516F0095EE7E /* ContactResolvable.swift */; };
@@ -80,7 +79,6 @@
 		1D4AC07A26AB7EF900ADD254 /* ErrorCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5FA00B265D8C970076DE0D /* ErrorCommand.swift */; };
 		1D4AC07B26AB7EF900ADD254 /* LogCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0DC2CB26619F3400E4B6FF /* LogCommand.swift */; };
 		1D4AC07C26AB7EF900ADD254 /* IPCCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD94265C45D60095EE7E /* IPCCommand.swift */; };
-		1D4AC07D26AB7EF900ADD254 /* IPCCommand.codegen.js in Sources */ = {isa = PBXBuildFile; fileRef = 1D22ADB7265C56140095EE7E /* IPCCommand.codegen.js */; };
 		1D4AC08026AB7EF900ADD254 /* BLStandardIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D22AD8F265C41620095EE7E /* BLStandardIO.swift */; };
 		1D4AC08126AB7EF900ADD254 /* BLLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0DC2C9266190CB00E4B6FF /* BLLogger.swift */; };
 		1D4AC08226AB7EF900ADD254 /* BLEventHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5322D82677E950005FF8D1 /* BLEventHandler.swift */; };
@@ -301,7 +299,6 @@
 		1DD8067224E9A7330076D717 /* IMMessage+SPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD8067124E9A7330076D717 /* IMMessage+SPI.swift */; };
 		1DE06D5426B3028B00B4DC77 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE06D5326B3028B00B4DC77 /* Logger.swift */; };
 		1DE06D9126B43C4C00B4DC77 /* BarcelonaDB.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DE06D8F26B43C4C00B4DC77 /* BarcelonaDB.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		1DE06D9526B43C6D00B4DC77 /* BarcelonaFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D79039126ACFF0300712CB3 /* BarcelonaFoundation.framework */; };
 		1DE06D9626B43C6D00B4DC77 /* BarcelonaFoundation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D79039126ACFF0300712CB3 /* BarcelonaFoundation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1DE06D9B26B43C7300B4DC77 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 1DE06D9A26B43C7300B4DC77 /* GRDB */; };
 		1DEE7EA1250FA4150009C74F /* Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA0250FA4150009C74F /* Searchable.swift */; };
@@ -342,13 +339,6 @@
 			remoteInfo = BarcelonaFoundation;
 		};
 		1D7903A326ACFFAC00712CB3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 1D79039026ACFF0300712CB3;
-			remoteInfo = BarcelonaFoundation;
-		};
-		1D884DB926BB503A003E60E7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
 			proxyType = 1;
@@ -873,7 +863,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1DE06D9526B43C6D00B4DC77 /* BarcelonaFoundation.framework in Frameworks */,
 				1DE06D9B26B43C7300B4DC77 /* GRDB in Frameworks */,
 				1D884DB826BB503A003E60E7 /* BarcelonaFoundation.framework in Frameworks */,
 				1D884DC326BB55D8003E60E7 /* IMCore.framework in Frameworks */,
@@ -1883,6 +1872,9 @@
 			buildRules = (
 			);
 			dependencies = (
+				1DA5BF9926BC44420018E6B4 /* PBXTargetDependency */,
+				1DA5BF9726BC443E0018E6B4 /* PBXTargetDependency */,
+				1DA5BF9526BC443A0018E6B4 /* PBXTargetDependency */,
 			);
 			name = BarcelonaFoundation;
 			packageProductDependencies = (
@@ -1927,8 +1919,8 @@
 			buildRules = (
 			);
 			dependencies = (
+				1DA5BF9B26BC446B0018E6B4 /* PBXTargetDependency */,
 				1DE06D9826B43C6D00B4DC77 /* PBXTargetDependency */,
-				1D884DBA26BB503A003E60E7 /* PBXTargetDependency */,
 			);
 			name = BarcelonaDB;
 			packageProductDependencies = (
@@ -2234,7 +2226,6 @@
 				1D4AC06826AB7EF900ADD254 /* BLChat.swift in Sources */,
 				1D4AC06926AB7EF900ADD254 /* BLContact.swift in Sources */,
 				1D4AC06A26AB7EF900ADD254 /* BLStruct.swift in Sources */,
-				1D4AC06B26AB7EF900ADD254 /* BLStruct.codegen.js in Sources */,
 				1D4AC06C26AB7EF900ADD254 /* ChatResolvable.swift in Sources */,
 				1D4AC06D26AB7EF900ADD254 /* TargetResolvable.swift in Sources */,
 				1D4AC06E26AB7EF900ADD254 /* ContactResolvable.swift in Sources */,
@@ -2252,7 +2243,6 @@
 				1D4AC07A26AB7EF900ADD254 /* ErrorCommand.swift in Sources */,
 				1D4AC07B26AB7EF900ADD254 /* LogCommand.swift in Sources */,
 				1D4AC07C26AB7EF900ADD254 /* IPCCommand.swift in Sources */,
-				1D4AC07D26AB7EF900ADD254 /* IPCCommand.codegen.js in Sources */,
 				1D4AC08026AB7EF900ADD254 /* BLStandardIO.swift in Sources */,
 				1D4AC08126AB7EF900ADD254 /* BLLogger.swift in Sources */,
 				1D4AC08226AB7EF900ADD254 /* BLEventHandler.swift in Sources */,
@@ -2387,11 +2377,6 @@
 			target = 1D79039026ACFF0300712CB3 /* BarcelonaFoundation */;
 			targetProxy = 1D7903A326ACFFAC00712CB3 /* PBXContainerItemProxy */;
 		};
-		1D884DBA26BB503A003E60E7 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 1D79039026ACFF0300712CB3 /* BarcelonaFoundation */;
-			targetProxy = 1D884DB926BB503A003E60E7 /* PBXContainerItemProxy */;
-		};
 		1D884DC226BB52A8003E60E7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1DE06D8C26B43C4C00B4DC77 /* BarcelonaDB */;
@@ -2406,6 +2391,22 @@
 			isa = PBXTargetDependency;
 			target = 1D79037326ACFE6B00712CB3 /* BarcelonaEvents */;
 			targetProxy = 1D9AE3A226AF6347007873E3 /* PBXContainerItemProxy */;
+		};
+		1DA5BF9526BC443A0018E6B4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 1DA5BF9426BC443A0018E6B4 /* Pwomise */;
+		};
+		1DA5BF9726BC443E0018E6B4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 1DA5BF9626BC443E0018E6B4 /* Swog */;
+		};
+		1DA5BF9926BC44420018E6B4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 1DA5BF9826BC44420018E6B4 /* Swexy */;
+		};
+		1DA5BF9B26BC446B0018E6B4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 1DA5BF9A26BC446B0018E6B4 /* GRDB */;
 		};
 		1DCB0CE126B05E7B00242045 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3287,6 +3288,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1D9AE39726AF5DA6007873E3 /* XCRemoteSwiftPackageReference "SwiftyTextTable" */;
 			productName = SwiftyTextTable;
+		};
+		1DA5BF9426BC443A0018E6B4 /* Pwomise */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D1C951C26B99E52005848A4 /* XCRemoteSwiftPackageReference "Pwomise" */;
+			productName = Pwomise;
+		};
+		1DA5BF9626BC443E0018E6B4 /* Swog */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D92962826B5D8DF00F576A9 /* XCRemoteSwiftPackageReference "Swog" */;
+			productName = Swog;
+		};
+		1DA5BF9826BC44420018E6B4 /* Swexy */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D92962B26B5D8F100F576A9 /* XCRemoteSwiftPackageReference "Swexy" */;
+			productName = Swexy;
+		};
+		1DA5BF9A26BC446B0018E6B4 /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D5AEE4524E37CDF00303692 /* XCRemoteSwiftPackageReference "GRDB" */;
+			productName = GRDB;
 		};
 		1DC4D7B326ADF30400281920 /* InterposeKit */ = {
 			isa = XCSwiftPackageProductDependency;
