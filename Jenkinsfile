@@ -1,11 +1,26 @@
 pipeline {
-  agent any
-  stages {
-    stage('Build') {
-      steps {
-        sh 'make mautrix-macos'
-      }
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                parallel(
+                    macos: {
+                        sh 'make mautrix-macos'
+                        sh 'make grapple-macos'
+                    },
+                    ios: {
+                        sh 'make mautrix-ios'
+                    }
+                )
+            }
+        }
+        stage('Archive') {
+            steps {
+                sh 'cp Build/macOS/Build/Products/Debug/barcelona-mautrix darwin-barcelona-mautrix'
+                sh 'cp Build/macOS/Build/Products/Debug/grapple darwin-grapple'
+                sh 'cp Build/iOS/Build/Products/Debug-iphoneos/barcelona-mautrix ios-barcelona-mautrix'
+                archiveArtifacts artifacts: '*barcelona-mautrix, Build/macOS/Build/Products/Debug/grapple'
+            }
+        }
     }
-
-  }
 }
