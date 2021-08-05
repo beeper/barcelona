@@ -9,6 +9,18 @@
 import Foundation
 import IMCore
 
+#if os(iOS)
+private extension NSObject {
+    static var className: String {
+        NSStringFromClass(self)
+    }
+    
+    var className: String {
+        NSStringFromClass(object_getClass(self)!)
+    }
+}
+#endif
+
 public enum ChatItemType: String, Codable, CaseIterable {
     case date
     case sender
@@ -29,7 +41,7 @@ public enum ChatItemType: String, Codable, CaseIterable {
     
     static let ingestionMapping: [String: ChatItem.Type] = allCases.flatMap { type in
         type.decodingClass.self.ingestionClasses.map { ingestionClass in
-            (ingestionClass.className(), type.decodingClass)
+            (ingestionClass.className, type.decodingClass)
         }
     }.dictionary(keyedBy: \.0, valuedBy: \.1)
     

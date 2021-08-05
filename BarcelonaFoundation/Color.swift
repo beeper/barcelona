@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CoreGraphics
 
 public struct Color: Codable, Hashable {
     let red: CGFloat
