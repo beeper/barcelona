@@ -16,6 +16,6 @@ extension IMChatItem {
             return nil
         }
         
-        return IMCreateThreadIdentifierForMessagePartChatItem(subpart)
+        return subpart.threadIdentifier() ?? IMCreateThreadIdentifierForMessagePartChatItem(subpart)
     }
 }
