@@ -62,6 +62,7 @@ public enum Event: Encodable {
     case contactRemoved(String)
     case contactUpdated(Contact)
     case blockListUpdated(BulkHandleIDRepresentation)
+    case healthChanged(HealthState)
     
     public var label: String {
         let mirror = Mirror(reflecting: self)
@@ -110,6 +111,8 @@ public enum Event: Encodable {
             return _AnyEncodable(data)
         case .blockListUpdated(let data):
             return _AnyEncodable(data)
+        case .healthChanged(let data):
+            return _AnyEncodable(data)
         }
     }
     
@@ -152,4 +155,9 @@ public struct BootstrapData: Codable, Hashable, BulkChatRepresentatable {
 public struct ParticipantChangeRecord: Codable, Hashable, BulkHandleIDRepresentable {
     public var chat: String
     public var handles: [String]
+}
+
+public struct HealthState: Codable, Hashable {
+    public var authenticationState: HealthChecker.AuthenticationState
+    public var connectionState: HealthChecker.ConnectionState
 }

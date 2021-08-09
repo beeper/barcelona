@@ -345,7 +345,7 @@ public class ERDaemonListener: IMDaemonListenerProtocol {
         ])
     }
     
-    @objc public func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, groupID arg5: String!, chatPersonCentricID arg6: String!, messageSent arg7: IMMessageItem!) {
+    @objc public func account(_ arg1: String!, chat arg2: String!, style arg3: UInt8, chatProperties arg4: [AnyHashable : Any]!, groupID arg5: String!, chatPersonCentricID arg6: String!, messageSent arg7: IMMessageItem) {
         guard let arg2 = arg2 else { return }
         NotificationCenter.default.post(name: BLChatMessageSentNotification, object: arg7.guid, userInfo: [
             "chat": arg2,

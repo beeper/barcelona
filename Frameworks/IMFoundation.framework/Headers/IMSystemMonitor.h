@@ -41,7 +41,7 @@
     struct _opaque_pthread_mutex_t _ivarLock;
 }
 
-+ (id)sharedInstance;
++ (instancetype _Nonnull)sharedInstance;
 @property(nonatomic) long long resignActiveCount; // @synthesize resignActiveCount=_resignActiveCount;
 @property(nonatomic) struct _opaque_pthread_mutex_t ivarLock; // @synthesize ivarLock=_ivarLock;
 @property(nonatomic) int userIdleToken; // @synthesize userIdleToken=_userIdleToken;

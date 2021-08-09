@@ -127,7 +127,6 @@
 		1D79036C26ACFBFA00712CB3 /* xpc.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DC28BD3251FEFF700A9A50E /* xpc.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1D79036D26ACFBFA00712CB3 /* activity.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DC28BD6251FEFF700A9A50E /* activity.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1D79036E26ACFBFA00712CB3 /* base.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DC28BD7251FEFF700A9A50E /* base.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		1D79037826ACFE6B00712CB3 /* BarcelonaEvents.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D79037626ACFE6B00712CB3 /* BarcelonaEvents.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1D79038126ACFE7F00712CB3 /* EventBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5322D62677C8AF005FF8D1 /* EventBus.swift */; };
 		1D79038226ACFE7F00712CB3 /* ChatEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5322DA2677ED4B005FF8D1 /* ChatEvents.swift */; };
 		1D79038326ACFE7F00712CB3 /* BlocklistEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5322DC2677ED4B005FF8D1 /* BlocklistEvents.swift */; };
@@ -269,6 +268,12 @@
 		1DC4D7B126AD0B2F00281920 /* BarcelonaManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC4D7B026AD0B2F00281920 /* BarcelonaManager.swift */; };
 		1DC4D7B426ADF30400281920 /* InterposeKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1DC4D7B326ADF30400281920 /* InterposeKit */; };
 		1DC4D7B726AE02D600281920 /* OSLog+Nice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC4D7B626AE02D600281920 /* OSLog+Nice.swift */; };
+		1DC9E84F26BDA1B8007E463F /* BridgeStatusCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC9E84E26BDA1B8007E463F /* BridgeStatusCommand.swift */; };
+		1DC9E85126C19437007E463F /* HealthChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC9E85026C19437007E463F /* HealthChecker.swift */; };
+		1DC9E85926C19C22007E463F /* IMAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC9E85826C19C22007E463F /* IMAccount.swift */; };
+		1DC9E85B26C19D1A007E463F /* ListCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC9E85A26C19D1A007E463F /* ListCommand.swift */; };
+		1DC9E85D26C1AA7E007E463F /* HealthEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC9E85C26C1AA7E007E463F /* HealthEvents.swift */; };
+		1DC9E86026C1D6AC007E463F /* IPCCommand+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC9E85E26C1D641007E463F /* IPCCommand+Codable.swift */; };
 		1DCB0CDD26B05E6B00242045 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0DC2B626618E5800E4B6FF /* main.swift */; };
 		1DCB0CDE26B05E7B00242045 /* Barcelona.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; };
 		1DCB0CDF26B05E7B00242045 /* Barcelona.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -672,7 +677,6 @@
 		1D79034A26ACFA2200712CB3 /* BarcelonaSerialization.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BarcelonaSerialization.h; sourceTree = "<group>"; };
 		1D79034B26ACFA2200712CB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1D79037426ACFE6B00712CB3 /* BarcelonaEvents.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaEvents.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		1D79037626ACFE6B00712CB3 /* BarcelonaEvents.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BarcelonaEvents.h; sourceTree = "<group>"; };
 		1D79037726ACFE6B00712CB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1D79039126ACFF0300712CB3 /* BarcelonaFoundation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaFoundation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D79039426ACFF0300712CB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -740,6 +744,12 @@
 		1DC66B0024E4756400CB0C5D /* TypingItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypingItem.swift; sourceTree = "<group>"; };
 		1DC66B0524E4875700CB0C5D /* Contact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
 		1DC66B0924E488FF00CB0C5D /* DBReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DBReader.swift; sourceTree = "<group>"; };
+		1DC9E84E26BDA1B8007E463F /* BridgeStatusCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeStatusCommand.swift; sourceTree = "<group>"; };
+		1DC9E85026C19437007E463F /* HealthChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthChecker.swift; sourceTree = "<group>"; };
+		1DC9E85826C19C22007E463F /* IMAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IMAccount.swift; sourceTree = "<group>"; };
+		1DC9E85A26C19D1A007E463F /* ListCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListCommand.swift; sourceTree = "<group>"; };
+		1DC9E85C26C1AA7E007E463F /* HealthEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthEvents.swift; sourceTree = "<group>"; };
+		1DC9E85E26C1D641007E463F /* IPCCommand+Codable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IPCCommand+Codable.swift"; sourceTree = "<group>"; };
 		1DCB0CD326B05E1C00242045 /* barcelona-mautrix */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "barcelona-mautrix"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DCB8BDA2510439E0005A0EB /* Attachment+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Attachment+Identifiable.swift"; sourceTree = "<group>"; };
 		1DCB8BDC251043D30005A0EB /* Attachment+Searchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Attachment+Searchable.swift"; sourceTree = "<group>"; };
@@ -1005,6 +1015,7 @@
 				1D22AD96265C4EEF0095EE7E /* Requests */,
 				1D22AD94265C45D60095EE7E /* IPCCommand.swift */,
 				1D22ADB7265C56140095EE7E /* IPCCommand.codegen.js */,
+				1DC9E85E26C1D641007E463F /* IPCCommand+Codable.swift */,
 			);
 			path = Commands;
 			sourceTree = "<group>";
@@ -1025,6 +1036,7 @@
 				1D22ADB5265C52650095EE7E /* GetRecentMessagesCommand.swift */,
 				1D5FA00B265D8C970076DE0D /* ErrorCommand.swift */,
 				1D0DC2CB26619F3400E4B6FF /* LogCommand.swift */,
+				1DC9E84E26BDA1B8007E463F /* BridgeStatusCommand.swift */,
 			);
 			path = Requests;
 			sourceTree = "<group>";
@@ -1171,6 +1183,7 @@
 		1D4AC03626AB7CE300ADD254 /* grapple */ = {
 			isa = PBXGroup;
 			children = (
+				1DC9E85726C19C1B007E463F /* TextTableRepresentable */,
 				1D9AE38C26AF4A23007873E3 /* Commands */,
 				1D4AC03726AB7CE300ADD254 /* Grapple.swift */,
 				1DC4D7B526AE028100281920 /* grapple.entitlements */,
@@ -1196,6 +1209,7 @@
 				1D3F0C452515032300E1DBEB /* ERTimeSortedParticipantsManager.swift */,
 				1DC4D7B026AD0B2F00281920 /* BarcelonaManager.swift */,
 				1D9AE37326AF1C42007873E3 /* HookManager.swift */,
+				1DC9E85026C19437007E463F /* HealthChecker.swift */,
 			);
 			path = IMCoreHelpers;
 			sourceTree = "<group>";
@@ -1372,8 +1386,8 @@
 				1D5322E02677ED4B005FF8D1 /* EventDispatcher.swift */,
 				1D5322DE2677ED4B005FF8D1 /* MessageEvents.swift */,
 				1D5322D62677C8AF005FF8D1 /* EventBus.swift */,
-				1D79037626ACFE6B00712CB3 /* BarcelonaEvents.h */,
 				1D79037726ACFE6B00712CB3 /* Info.plist */,
+				1DC9E85C26C1AA7E007E463F /* HealthEvents.swift */,
 			);
 			path = BarcelonaEvents;
 			sourceTree = "<group>";
@@ -1483,6 +1497,7 @@
 				1D9AE38D26AF4A29007873E3 /* SendMessageCommand.swift */,
 				1D9AE39526AF5D0F007873E3 /* ChatCommands.swift */,
 				1D9AE39A26AF5FD7007873E3 /* DebugCommands.swift */,
+				1DC9E85A26C19D1A007E463F /* ListCommand.swift */,
 			);
 			path = Commands;
 			sourceTree = "<group>";
@@ -1516,6 +1531,14 @@
 				1DC28BD7251FEFF700A9A50E /* base.h */,
 			);
 			path = xpc;
+			sourceTree = "<group>";
+		};
+		1DC9E85726C19C1B007E463F /* TextTableRepresentable */ = {
+			isa = PBXGroup;
+			children = (
+				1DC9E85826C19C22007E463F /* IMAccount.swift */,
+			);
+			path = TextTableRepresentable;
 			sourceTree = "<group>";
 		};
 		1DCB0CD426B05E1C00242045 /* barcelona-mautrix */ = {
@@ -1726,7 +1749,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1D79037826ACFE6B00712CB3 /* BarcelonaEvents.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2191,6 +2213,7 @@
 				1D74D4A0250C04A900A9F9A1 /* IMService+Identifiable.swift in Sources */,
 				1D74D4A8250C0D7A00A9F9A1 /* Resolvable.swift in Sources */,
 				1D3E333E250C252100EEA08B /* CNContact+LazilyResolvable.swift in Sources */,
+				1DC9E85126C19437007E463F /* HealthChecker.swift in Sources */,
 				1D3E3347250C279F00EEA08B /* InternalAttachment+LazilyResolvable.swift in Sources */,
 				1DD805BB24E85D070076D717 /* IMContactStore+ContactRepresentations.swift in Sources */,
 				1DD805CA24E85D070076D717 /* CNContact+Serializable.swift in Sources */,
@@ -2204,10 +2227,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1DC9E85926C19C22007E463F /* IMAccount.swift in Sources */,
 				1D9AE39626AF5D0F007873E3 /* ChatCommands.swift in Sources */,
 				1D4AC03826AB7CE300ADD254 /* Grapple.swift in Sources */,
 				1D9AE38E26AF4A29007873E3 /* SendMessageCommand.swift in Sources */,
 				1D9AE39B26AF5FD7007873E3 /* DebugCommands.swift in Sources */,
+				1DC9E85B26C19D1A007E463F /* ListCommand.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2225,6 +2250,7 @@
 				1D4AC06726AB7EF900ADD254 /* BLTypingNotification.swift in Sources */,
 				1D4AC06826AB7EF900ADD254 /* BLChat.swift in Sources */,
 				1D4AC06926AB7EF900ADD254 /* BLContact.swift in Sources */,
+				1DC9E84F26BDA1B8007E463F /* BridgeStatusCommand.swift in Sources */,
 				1D4AC06A26AB7EF900ADD254 /* BLStruct.swift in Sources */,
 				1D4AC06C26AB7EF900ADD254 /* ChatResolvable.swift in Sources */,
 				1D4AC06D26AB7EF900ADD254 /* TargetResolvable.swift in Sources */,
@@ -2237,6 +2263,7 @@
 				1D4AC07426AB7EF900ADD254 /* GetChatsCommand.swift in Sources */,
 				1D4AC07526AB7EF900ADD254 /* GetGroupChatInfoCommand.swift in Sources */,
 				1D4AC07626AB7EF900ADD254 /* GetGroupChatAvatarCommand.swift in Sources */,
+				1DC9E86026C1D6AC007E463F /* IPCCommand+Codable.swift in Sources */,
 				1D4AC07726AB7EF900ADD254 /* GetContactCommand.swift in Sources */,
 				1D4AC07826AB7EF900ADD254 /* GetMessagesAfterCommand.swift in Sources */,
 				1D4AC07926AB7EF900ADD254 /* GetRecentMessagesCommand.swift in Sources */,
@@ -2284,6 +2311,7 @@
 			files = (
 				1D79038826ACFE7F00712CB3 /* Event.swift in Sources */,
 				1D79038926ACFE7F00712CB3 /* EventDispatcher.swift in Sources */,
+				1DC9E85D26C1AA7E007E463F /* HealthEvents.swift in Sources */,
 				1D79038726ACFE7F00712CB3 /* DispatchSupervisor.swift in Sources */,
 				1D79038226ACFE7F00712CB3 /* ChatEvents.swift in Sources */,
 				1D9AE37226AF0C5A007873E3 /* Event+Hashable.swift in Sources */,

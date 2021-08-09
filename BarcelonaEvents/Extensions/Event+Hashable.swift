@@ -46,6 +46,8 @@ extension Event: Hashable {
             return AnyHashable(item)
         case .blockListUpdated(let item):
             return AnyHashable(item)
+        case .healthChanged(let item):
+            return AnyHashable(item)
         }
     }
     

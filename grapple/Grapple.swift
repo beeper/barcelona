@@ -22,7 +22,7 @@ class Grapple {
         
         BarcelonaManager.shared.bootstrap().then { success in
             let exitCode = CLI(name: "grapple", commands: [
-                SendMessageCommand(), ChatCommands(), DebugCommands()
+                SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand()
             ]).go()
             
             guard exitCode == 0 else {

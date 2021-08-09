@@ -19,6 +19,8 @@ public let BLIsSimulation = IMCoreSimulatedEnvironmentEnabled()
 
 @_cdecl("BLTeardownController")
 public func BLTeardownController() {
+    HealthChecker.shared.shutdown()
+    
     let controller = IMDaemonController.sharedInstance()
     
     controller.disconnectFromDaemon()
@@ -94,11 +96,6 @@ public func BLBootstrapController() -> Bool {
     }
     
     return true
-}
-
-@_cdecl("BLExecuteOnceLoaded")
-public func BLExecuteOnceLoaded(_ cb: @escaping () -> ()) {
-    
 }
 
 public class BarcelonaManager {
