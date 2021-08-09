@@ -27,6 +27,7 @@ public class EventBus {
         supervisor.register(ChatEvents.self)
         supervisor.register(BlocklistEvents.self)
         supervisor.register(ContactsEvents.self)
+        supervisor.register(HealthEvents.self)
     }
     
     public func resume() {
