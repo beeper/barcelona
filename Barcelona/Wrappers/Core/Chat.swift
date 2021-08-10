@@ -249,7 +249,9 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     }
     
     public func tapback(_ creation: TapbackCreation) -> Promise<Message?> {
-        imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil).then {
+        RunLoop.main.promise {
+            try imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil)
+        }.then {
             BLIngestObject($0, inChat: id)
         }.then {
             $0 as? Message

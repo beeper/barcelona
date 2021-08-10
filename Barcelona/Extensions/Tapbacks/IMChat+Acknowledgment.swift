@@ -13,22 +13,26 @@ private let chatItemGUIDExtractor = try! NSRegularExpression(pattern: "(?:\\w+:\
 
 public extension IMChat {
     /**
-     Sends a tapback for a given message, calling back with a Vapor abort if the operation fails
+     Sends a tapback for a given message, calling back with a Vapor abort if the operation fails. This must be invoked on the main thread.
      */
-    func tapback(message: IMMessage, itemGUID: String, type: Int, overridingItemType: UInt8?) -> Promise<IMMessage> {
+    func tapback(message: IMMessage, itemGUID: String, type: Int, overridingItemType: UInt8?) throws -> IMMessage {
+        guard Thread.isMainThread else {
+            preconditionFailure("IMChat.tapback() must be invoked on the main thread")
+        }
+        
         if itemGUID == message.id, let subpart = message.subpart(at: 0) {
-            return tapback(message: message, itemGUID: subpart.id, type: type, overridingItemType: overridingItemType)
+            return try tapback(message: message, itemGUID: subpart.id, type: type, overridingItemType: overridingItemType)
         }
         
         guard let subpart = message.subpart(with: itemGUID) as? IMMessagePartChatItem else {
-            return .failure(BarcelonaError(code: 404, message: "Not found"))
+            throw BarcelonaError(code: 404, message: "Not found")
         }
         
         let rawType = Int64(type)
         
 //        sendMessageAcknowledgment(Int64(type), forChatItem: subpart, withMessageSummaryInfo: )
         guard let summaryInfo = subpart.summaryInfo(for: message, in: self, itemTypeOverride: overridingItemType), let compatibilityString = IMMessageAcknowledgmentStringHelper.generateBackwardCompatibilityString(forMessageAcknowledgmentType: rawType, messageSummaryInfo: summaryInfo), let superFormat = IMCreateSuperFormatStringFromPlainTextString(compatibilityString) else {
-            return .failure(BarcelonaError(code: 500, message: "Internal server error"))
+            throw BarcelonaError(code: 500, message: "Internal server error")
         }
         
         let adjustedSummaryInfo = IMChat.__im_adjustMessageSummaryInfo(forSending: summaryInfo)
@@ -44,24 +48,22 @@ public extension IMChat {
         }
         
         guard message != nil else {
-            return .failure(BarcelonaError(code: 500, message: "Couldn't create tapback message"))
+            throw BarcelonaError(code: 500, message: "Couldn't create tapback message")
         }
         
-        return RunLoop.main.promise {
-            self.sendMessage(message)
-            
-            return message
-        }
+        self.sendMessage(message)
+        
+        return message
     }
     
     /**
      Sends a tapback for a given message, calling back with a Vapor abort if the operation fails
      */
-    func tapback(guid: String, itemGUID: String, type: Int, overridingItemType: UInt8?) -> Promise<IMMessage> {
-        return IMMessage.lazyResolve(withIdentifier: guid)
-            .assert(BarcelonaError(code: 404, message: "Unknown message"))
-            .then { message -> Promise<IMMessage> in
-                self.tapback(message: message, itemGUID: itemGUID, type: type, overridingItemType: overridingItemType)
-            }
+    func tapback(guid: String, itemGUID: String, type: Int, overridingItemType: UInt8?) throws -> IMMessage {
+        guard let message = BLLoadIMMessage(withGUID: guid) else {
+            throw BarcelonaError(code: 404, message: "Unknown message")
+        }
+        
+        return try self.tapback(message: message, itemGUID: itemGUID, type: type, overridingItemType: overridingItemType)
     }
 }
