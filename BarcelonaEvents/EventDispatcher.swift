@@ -9,8 +9,6 @@
 import Foundation
 import BarcelonaFoundation
 
-private let Log = Logger(category: "EventDispatcher")
-
 private extension OperationQueue {
     convenience init(underlyingQueue: DispatchQueue) {
         self.init()
@@ -30,6 +28,7 @@ public class EventDispatcher {
     internal var center: NotificationCenter
     public let bus: EventBus
     private var observers: [NSObjectProtocol] = []
+    internal var log: Logger { Logger(category: "EventDispatcher") }
     
     /**
      Called when the process is going to sleep. Unbinds from notifications.
@@ -51,7 +50,7 @@ public class EventDispatcher {
     
     internal func addObserver(forName name: Notification.Name, using block: @escaping (Notification) -> Void) {
         observers.append(center.addObserver(forName: name, object: nil, queue: OperationQueue(underlyingQueue: bus.queue), using: {
-            Log.debug("Receive notification: %@", name.rawValue)
+            self.log.debug("Receive notification: %@", name.rawValue)
             block($0)
         }))
     }

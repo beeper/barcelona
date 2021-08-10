@@ -9,7 +9,6 @@
 import Foundation
 import Barcelona
 import IMCore
-import os.log
 
 private let messageKey = "__kIMChatValueKey";
 private let IMChatItemsRemoved = "__kIMChatItemsRemoved";
@@ -19,8 +18,6 @@ private let IMChatItemsReload = "__kIMChatItemsReload";
 private let IMChatItemsOldItems = "__kIMChatItemsOldItems";
 
 private let IMChatValueKey = AnyHashable("__kIMChatValueKey");
-
-private let log_messageEvents = Logger(category: "MessageEvents")
 
 let ChangedItemsExclusion = [
 //    IMTextMessagePartChatItem.self,
@@ -40,6 +37,8 @@ enum MessageDebounceCategory {
  Tracks events related to IMMessage
  */
 class MessageEvents: EventDispatcher {
+    override var log: Logger { Logger(category: "MessageEvents") }
+    
     private let debouncer = CategorizedDebounceManager<MessageDebounceCategory>([
         .statusChanged: Double(1 / 10)
     ])
@@ -95,7 +94,7 @@ class MessageEvents: EventDispatcher {
         var statusChanges: [IMMessageStatusChatItem] = []
         
         for item in items {
-            log_messageEvents.debug("👨🏻‍💻 Processing inserted IMItem %@", item)
+            log.debug("👨🏻‍💻 Processing inserted IMItem %@", item)
             
             switch (item) {
             case _ as IMDateChatItem:
@@ -139,7 +138,7 @@ class MessageEvents: EventDispatcher {
                     return
                 }
                 
-                log_messageEvents.debug("dispatching items with type %@: %@", toDispatch.label, chatItems)
+                self.log.debug("dispatching items with type %@: %@", toDispatch.label, chatItems)
                 
                 self.bus.dispatch(toDispatch)
             }
@@ -178,7 +177,7 @@ class MessageEvents: EventDispatcher {
                 
                 self.process(inserted: set.compactMap { index -> NSObject? in
                     guard chat.chatItems.count > index else {
-                        log_messageEvents.error("⁉️ Bad index when parsing chat items!")
+                        log.error("⁉️ Bad index when parsing chat items!")
                         return nil
                     }
 

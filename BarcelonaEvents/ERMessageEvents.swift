@@ -10,11 +10,10 @@ import Foundation
 import Barcelona
 import BarcelonaFoundation
 import IMCore
-import os.log
-
-private let log_messageEvents = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ERMessageEvents")
 
 public class ERMessageEvents: EventDispatcher {
+    override var log: Logger { Logger(category: "ERMessageEvents") }
+    
     public override func wake() {
         addObserver(forName: ERChatMessageReceivedNotification) {
             guard let item = $0.object as? IMItem, let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
@@ -96,7 +95,15 @@ public class ERMessageEvents: EventDispatcher {
         BLLoadChatItems(withGUIDs: items.map(\.guid), chatID: chatIdentifier).map {
             $0.eraseToAnyChatItem()
         }.then {
-            if $0.count == 0 { return }
+            if $0.count != items.count {
+                self.log.warn("started with %d items, but ended with 0 items!", items.count)
+            }
+            
+            if $0.count == 0 {
+                self.log.warn("no-op for no loaded items")
+                return
+            }
+            
             self.bus.dispatch(.itemsReceived($0))
         }
     }

@@ -10,9 +10,6 @@ import Foundation
 import BarcelonaFoundation
 import Barcelona
 import IMCore
-import os.log
-
-private let Log = Logger(category: "ChatEvents")
 
 private let IMChatUnreadCountChangedNotification = Notification.Name(rawValue: "__kIMChatUnreadCountChangedNotification")
 
@@ -30,6 +27,8 @@ private enum ChatDebounceCategory {
  Events related to IMChat
  */
 public class ChatEvents: EventDispatcher {
+    override var log: Logger { Logger(category: "ChatEvents") }
+    
     private let debouncer = CategorizedDebounceManager<ChatDebounceCategory>([
         .chatProperties: Double(1 / 10),
         .unreadCount: Double(1 / 5)
@@ -71,7 +70,7 @@ public class ChatEvents: EventDispatcher {
     
     private func chatPropertiesChanged(_ notification: Notification) {
         guard let chat = notification.object as? IMChat else {
-            Log.error("⁉️ got chat properties notification but didn't receive IMChat in notification object")
+            log.error("⁉️ got chat properties notification but didn't receive IMChat in notification object")
             return
         }
         
@@ -82,7 +81,7 @@ public class ChatEvents: EventDispatcher {
     
     private func unreadCountChanged(_ notification: Notification) {
         guard let chat = notification.object as? IMChat else {
-            Log.error("⁉️ got chat unread notification but didn't receive IMChat in notification object")
+            log.error("⁉️ got chat unread notification but didn't receive IMChat in notification object")
             return
         }
         
@@ -94,7 +93,7 @@ public class ChatEvents: EventDispatcher {
     // MARK: - IMChat created
     private func chatWasCreated(_ notification: Notification) {
         guard let chat = notification.object as? IMChat else {
-            Log.error("⁉️ got chat created notification but didn't receive IMChat in notification object")
+            log.error("⁉️ got chat created notification but didn't receive IMChat in notification object")
             return
         }
         
@@ -106,7 +105,7 @@ public class ChatEvents: EventDispatcher {
     // MARK: - IMChat deleted
     private func chatWasRemoved(_ notification: Notification) {
         guard let chatID = notification.object as? String else {
-            Log.error("⁉️ got chat removed notification but didn't receive NSString in notification object")
+            log.error("⁉️ got chat removed notification but didn't receive NSString in notification object")
             return
         }
         
@@ -118,7 +117,7 @@ public class ChatEvents: EventDispatcher {
     // MARK: - IMChat Participants changed
     private func participantsChanged(_ notification: Notification) {
         guard let chat = notification.object as? IMChat else {
-            Log.error("⁉️ got participants changed notification but didn't receive IMChat in notification object")
+            log.error("⁉️ got participants changed notification but didn't receive IMChat in notification object")
             return
         }
         
@@ -130,7 +129,7 @@ public class ChatEvents: EventDispatcher {
     // MARK: - IMChat Displayname changed
     private func chatDisplayNameChanged(_ notification: Notification) {
         guard let chat = notification.object as? IMChat else {
-            Log.error("⁉️ got chat display name changed notification but didn't receive IMChat in notification object")
+            log.error("⁉️ got chat display name changed notification but didn't receive IMChat in notification object")
             return
         }
         
@@ -142,7 +141,7 @@ public class ChatEvents: EventDispatcher {
     // MARK: - IMChat join state changed
     private func chatJoinStateChanged(_ notification: Notification) {
         guard let chat = notification.object as? IMChat else {
-            Log.error("⁉️ got chat join state changed notification but didn't receive IMChat in notification object")
+            log.error("⁉️ got chat join state changed notification but didn't receive IMChat in notification object")
             return
         }
         
