@@ -87,6 +87,8 @@ public func BLBootstrapController() -> Bool {
         controller.blockUntilConnected()
         
         log("Connected!")
+        
+        HealthChecker.shared.dispatch()
     }
     
     if BLIsSimulation {

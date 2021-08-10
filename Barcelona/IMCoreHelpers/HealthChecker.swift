@@ -17,7 +17,9 @@ public extension Notification.Name {
 
 public class HealthChecker {
     public enum AuthenticationState: String, Codable, Hashable {
-        public static let notifications: [NSNotification.Name] = [.IMAccountActivated, .IMAccountDeactivated, .IMAccountLoggedIn, .IMAccountLoggedOut, .IMAccountStatusChanged, .IMAccountLoginStatusChanged, .IMAccountRegistrationStatusChanged, .IMAccountProfileValidationStatusChanged, .IMServiceDidDisconnect, .IMServiceDidConnect]
+        public static let notifications: [NSNotification.Name] = [
+            .IMAccountActivated, .IMAccountDeactivated, .IMAccountLoggedIn, .IMAccountLoggedOut, .IMAccountStatusChanged, .IMAccountLoginStatusChanged, .IMAccountRegistrationStatusChanged, .IMAccountProfileValidationStatusChanged, .IMServiceDidDisconnect, .IMServiceDidConnect
+        ]
         
         case none
         case authenticated
@@ -98,7 +100,7 @@ public class HealthChecker {
     private var lastHash: Int = 0 {
         didSet {
             if oldValue != lastHash {
-                NotificationCenter.default.post(name: .HealthCheckerStatusDidChange, object: nil)
+                dispatch()
             }
         }
     }
@@ -121,11 +123,11 @@ public class HealthChecker {
             return .none
         }
         
-        if account.registrationFailureReason != 0 {
+        if account.registrationFailureReason != -1 {
             return .registrationFailure
         }
         
-        if account.profileValidationErrorReason() != 0 {
+        if account.profileValidationErrorReason() != -1 {
             return .validationFaliure
         }
         
@@ -162,7 +164,11 @@ public class HealthChecker {
     }
     
     public func observeHealth(_ cb: @escaping (HealthChecker) -> ()) -> NotificationSubscription {
-        NotificationCenter.default.subscribe(toNotificationNamed: .HealthCheckerStatusDidChange) { _ in cb(self) }
+        return NotificationCenter.default.subscribe(toNotificationNamed: .HealthCheckerStatusDidChange) { _ in cb(self) }
+    }
+    
+    internal func dispatch() {
+        NotificationCenter.default.post(name: .HealthCheckerStatusDidChange, object: nil)
     }
     
     public func shutdown() {
