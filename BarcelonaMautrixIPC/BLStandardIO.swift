@@ -88,13 +88,6 @@ public func BLWritePayload(_ payload: IPCPayload) {
     let encoder = JSONEncoder()
     encoder.dateEncodingStrategy = .iso8601withFractionalSeconds
     
-    if payload.command.name != .log {
-        BLJujitsuClient.shared.sendEvent(named: "ipc", payload: [
-            "direction": "toMautrix",
-            "json": String(data: try! jujitsuEncoder.encode(payload), encoding: .utf8)!
-        ])
-    }
-    
     if !BL_IS_WRITING_META_PAYLOAD, payload.command.name != .log {
         BL_IS_WRITING_META_PAYLOAD = true
         CLInfo(
@@ -121,11 +114,6 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
         for chunk in chunks {
             do {
                 let payload = try JSONDecoder().decode(IPCPayload.self, from: chunk)
-                
-                BLJujitsuClient.shared.sendEvent(named: "ipc", payload: [
-                    "direction": "toBarcelona",
-                    "json": String(data: try! jujitsuEncoder.encode(payload), encoding: .utf8)!
-                ])
                 
                 CLInfo("BLStandardIO", "Incoming! %@ %d", payload.command.name.rawValue, payload.id ?? -1)
                 

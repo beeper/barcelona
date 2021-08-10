@@ -83,7 +83,6 @@
 		1D4AC08126AB7EF900ADD254 /* BLLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0DC2C9266190CB00E4B6FF /* BLLogger.swift */; };
 		1D4AC08226AB7EF900ADD254 /* BLEventHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5322D82677E950005FF8D1 /* BLEventHandler.swift */; };
 		1D4AC08326AB7EF900ADD254 /* BLMetricStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA8BE9E267A67B100636231 /* BLMetricStore.swift */; };
-		1D4AC08426AB7EF900ADD254 /* BLJujitsuClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D75780326938D2900719317 /* BLJujitsuClient.swift */; };
 		1D4AC08526AB7F3C00ADD254 /* Barcelona.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; };
 		1D4AC08626AB7F3C00ADD254 /* Barcelona.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1D5322C22677C0F7005FF8D1 /* IMItem|IMMessage+SenderServiceResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5322C12677C0F7005FF8D1 /* IMItem|IMMessage+SenderServiceResolvable.swift */; };
@@ -672,7 +671,6 @@
 		1D74D4AE250C0F1700A9F9A1 /* Chat+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Chat+Identifiable.swift"; sourceTree = "<group>"; };
 		1D74D4B0250C100600A9F9A1 /* Chat+Resolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Chat+Resolvable.swift"; sourceTree = "<group>"; };
 		1D74D4B3250C104400A9F9A1 /* IMMessage+LazilyResolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMMessage+LazilyResolvable.swift"; sourceTree = "<group>"; };
-		1D75780326938D2900719317 /* BLJujitsuClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLJujitsuClient.swift; sourceTree = "<group>"; };
 		1D75D4D624F197B2008F053C /* CoreUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreUI.framework; path = Frameworks/CoreUI.framework; sourceTree = "<group>"; };
 		1D75D4E024F58AEA008F053C /* StickerChatItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerChatItem.swift; sourceTree = "<group>"; };
 		1D79034826ACFA2200712CB3 /* BarcelonaSerialization.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaSerialization.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1006,7 +1004,6 @@
 				1D0DC2C9266190CB00E4B6FF /* BLLogger.swift */,
 				1D5322D82677E950005FF8D1 /* BLEventHandler.swift */,
 				1DA8BE9E267A67B100636231 /* BLMetricStore.swift */,
-				1D75780326938D2900719317 /* BLJujitsuClient.swift */,
 			);
 			path = BarcelonaMautrixIPC;
 			sourceTree = "<group>";
@@ -2281,7 +2278,6 @@
 				1D4AC08126AB7EF900ADD254 /* BLLogger.swift in Sources */,
 				1D4AC08226AB7EF900ADD254 /* BLEventHandler.swift in Sources */,
 				1D4AC08326AB7EF900ADD254 /* BLMetricStore.swift in Sources */,
-				1D4AC08426AB7EF900ADD254 /* BLJujitsuClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
