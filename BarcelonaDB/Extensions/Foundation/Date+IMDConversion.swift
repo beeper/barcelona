@@ -14,4 +14,8 @@ public extension Date {
         
         return Date(timeIntervalSinceReferenceDate: TimeInterval(rawDateSmall)).timeIntervalSince1970 * 1000
     }
+    
+    var timeIntervalSinceReferenceDateForDatabase: Int {
+        Int(timeIntervalSinceReferenceDate) * 1000000000
+    }
 }

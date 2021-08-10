@@ -142,12 +142,12 @@ public extension DBReader {
                 
                 if let beforeDate = beforeDate {
                     messageROWIDsQuery = messageROWIDsQuery
-                        .filter(ChatMessageJoin.Columns.message_date < beforeDate.timeIntervalSinceReferenceDate)
+                        .filter(ChatMessageJoin.Columns.message_date < beforeDate.timeIntervalSinceReferenceDateForDatabase)
                 }
                 
                 if let afterDate = afterDate {
                     messageROWIDsQuery = messageROWIDsQuery
-                        .filter(ChatMessageJoin.Columns.message_date > afterDate.timeIntervalSinceReferenceDate)
+                        .filter(ChatMessageJoin.Columns.message_date > afterDate.timeIntervalSinceReferenceDateForDatabase)
                 }
                 
                 let messageROWIDs = try messageROWIDsQuery
