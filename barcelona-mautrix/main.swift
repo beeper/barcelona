@@ -169,7 +169,7 @@ func BLHandlePayload(_ payload: IPCPayload) {
             BLMetricStore.shared.set(messages.map(\.guid), forKey: .lastSentMessageGUIDs)
             
             NotificationCenter.default.subscribe(toNotificationsNamed: [.IMFileTransferUpdated, .IMFileTransferFinished]) { notif, sub in
-                guard let transfer = notif.object as? IMFileTransfer else {
+                guard let transfer = notif.object as? IMFileTransfer, transfer.guid == transferGUID else {
                     return
                 }
                 
