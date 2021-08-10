@@ -21,6 +21,14 @@ private extension NSObject {
 }
 #endif
 
+private extension ChatItem {
+    static var ingestionPairs: [(String, ChatItem.Type)] {
+        ingestionClasses.map {
+            ($0.className(), self)
+        }
+    }
+}
+
 public enum ChatItemType: String, Codable, CaseIterable {
     case date
     case sender
@@ -38,11 +46,7 @@ public enum ChatItemType: String, Codable, CaseIterable {
     case sticker
     case action
     
-    static let ingestionMapping: [String: ChatItem.Type] = allCases.flatMap { type in
-        type.decodingClass.self.ingestionClasses.map { ingestionClass in
-            (ingestionClass.className, type.decodingClass)
-        }
-    }.dictionary(keyedBy: \.0, valuedBy: \.1)
+    static let ingestionMapping: [String: ChatItem.Type] = allCases.flatMap { $0.decodingClass.ingestionPairs }.dictionary(keyedBy: \.0, valuedBy: \.1)
     
     @usableFromInline
     static func ingest(object: NSObject, context: IngestionContext) -> ChatItem {
