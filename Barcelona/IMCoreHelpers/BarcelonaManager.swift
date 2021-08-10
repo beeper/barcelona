@@ -120,7 +120,7 @@ public class BarcelonaManager {
             return .success(false)
         }
         
-        return NotificationCenter.default.once(notificationNamed: .IMChatRegistryDidLoad).resolve(on: RunLoop.main).then { _ in
+        return NotificationCenter.default.once(notificationNamed: .IMChatRegistryDidLoad).resolve(on: DispatchQueue.main).then { _ in
             return true
         }
     }
