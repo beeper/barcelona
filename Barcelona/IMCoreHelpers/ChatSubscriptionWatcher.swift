@@ -9,7 +9,6 @@
 import UserNotifications
 import Foundation
 import IMCore
-import os.log
 
 private let IMChatRegistryDidLoadNotification = NSNotification.Name(rawValue: "__kIMChatRegistryDidLoadNotification")
 private let IMChatRegistryDidRegisterChatNotification = NSNotification.Name(rawValue: "__kIMChatRegistryDidRegisterChatNotification")

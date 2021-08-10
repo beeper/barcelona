@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import os.log
 
 public let HandleQueue = DispatchQueue.init(label: "HandleIDS")
 
