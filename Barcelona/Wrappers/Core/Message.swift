@@ -66,7 +66,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
             .compactMap { $0 as? Message }
     }
     
-    public static let ingestionClasses: [NSObject.Type] = [IMItem.self, IMMessage.self, IMMessageItem.self]
+    public static let ingestionClasses: [NSObject.Type] = [IMItem.self, IMMessage.self, IMMessageItem.self, IMAssociatedMessageItem.self]
     
     public init?(ingesting item: NSObject, context: IngestionContext) {
         switch item {

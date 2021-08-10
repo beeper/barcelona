@@ -248,7 +248,6 @@
 		1DC4D79726AD093200281920 /* ETHeartbeatData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1E23592506E0D10069705D /* ETHeartbeatData.swift */; };
 		1DC4D79826AD093200281920 /* ETAngerData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1E235B2506E0D60069705D /* ETAngerData.swift */; };
 		1DC4D79926AD093200281920 /* ETKissData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1E235D2506E0DE0069705D /* ETKissData.swift */; };
-		1DC4D79A26AD093200281920 /* AssociatedMessageItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7624E37D9E00303692 /* AssociatedMessageItem.swift */; };
 		1DC4D79B26AD093200281920 /* SenderItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7B24E37D9E00303692 /* SenderItem.swift */; };
 		1DC4D79C26AD093200281920 /* DateItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7C24E37D9E00303692 /* DateItem.swift */; };
 		1DC4D79D26AD093200281920 /* GroupTitleChangeItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE7E24E37D9E00303692 /* GroupTitleChangeItem.swift */; };
@@ -638,7 +637,6 @@
 		1D5AEE7224E37D9E00303692 /* RawMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RawMessage.swift; sourceTree = "<group>"; };
 		1D5AEE7324E37D9E00303692 /* ChatMessageJoin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatMessageJoin.swift; sourceTree = "<group>"; };
 		1D5AEE7424E37D9E00303692 /* RawHandle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RawHandle.swift; sourceTree = "<group>"; };
-		1D5AEE7624E37D9E00303692 /* AssociatedMessageItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AssociatedMessageItem.swift; sourceTree = "<group>"; };
 		1D5AEE7724E37D9E00303692 /* AttachmentChatItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttachmentChatItem.swift; sourceTree = "<group>"; };
 		1D5AEE7824E37D9E00303692 /* Chat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Chat.swift; sourceTree = "<group>"; };
 		1D5AEE7924E37D9E00303692 /* PhantomChatItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhantomChatItem.swift; sourceTree = "<group>"; };
@@ -1298,7 +1296,6 @@
 				1DD8068024EAE2F40076D717 /* People */,
 				1DD8067E24EAE2C70076D717 /* Generic */,
 				1D1E23522506E0150069705D /* DigitalTouch */,
-				1DD8067D24EAE2B40076D717 /* IMMessageItem */,
 				1DD8067C24EAE2970076D717 /* IMTranscriptItem */,
 				1DD8067B24EAE25F0076D717 /* IMChatItem */,
 				1D5AEE8024E37D9F00303692 /* Registry.swift */,
@@ -1579,14 +1576,6 @@
 				1DC66B0024E4756400CB0C5D /* TypingItem.swift */,
 			);
 			path = IMTranscriptItem;
-			sourceTree = "<group>";
-		};
-		1DD8067D24EAE2B40076D717 /* IMMessageItem */ = {
-			isa = PBXGroup;
-			children = (
-				1D5AEE7624E37D9E00303692 /* AssociatedMessageItem.swift */,
-			);
-			path = IMMessageItem;
 			sourceTree = "<group>";
 		};
 		1DD8067E24EAE2C70076D717 /* Generic */ = {
@@ -2118,7 +2107,6 @@
 				1DC4D79726AD093200281920 /* ETHeartbeatData.swift in Sources */,
 				1DC4D79826AD093200281920 /* ETAngerData.swift in Sources */,
 				1DC4D79926AD093200281920 /* ETKissData.swift in Sources */,
-				1DC4D79A26AD093200281920 /* AssociatedMessageItem.swift in Sources */,
 				1DC4D79B26AD093200281920 /* SenderItem.swift in Sources */,
 				1DC4D79C26AD093200281920 /* DateItem.swift in Sources */,
 				1DC4D79D26AD093200281920 /* GroupTitleChangeItem.swift in Sources */,

@@ -31,7 +31,6 @@ public enum ChatItemType: String, Codable, CaseIterable {
     case plugin
     case text
     case acknowledgment
-    case associated
     case message
     case phantom
     case groupTitle
@@ -56,7 +55,7 @@ public enum ChatItemType: String, Codable, CaseIterable {
     
     static let chatItems: [ChatItemType] = [
         .action, .attachment, .plugin,
-        .text, .acknowledgment, .associated,
+        .text, .acknowledgment,
         .sticker, .message
     ]
     
@@ -80,8 +79,6 @@ public enum ChatItemType: String, Codable, CaseIterable {
             return TextChatItem.self
         case .acknowledgment:
             return AcknowledgmentChatItem.self
-        case .associated:
-            return AssociatedMessageItem.self
         case .message:
             return Message.self
         case .phantom:
