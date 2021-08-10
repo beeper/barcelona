@@ -155,6 +155,8 @@
 		1D7D8951250D795400DA9909 /* IMChatHistoryController+FutureLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7D8950250D795400DA9909 /* IMChatHistoryController+FutureLoading.swift */; };
 		1D7D8953250D829C00DA9909 /* IMFileTransfer+InternalAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7D8952250D829C00DA9909 /* IMFileTransfer+InternalAttachment.swift */; };
 		1D7D8955250D987900DA9909 /* LinkPresentation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D7D8954250D987900DA9909 /* LinkPresentation.framework */; };
+		1D7F3DDF26C2FF090086F32C /* IMFileTransfer+StateBound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7F3DDE26C2FF090086F32C /* IMFileTransfer+StateBound.swift */; };
+		1D7F3DE126C307280086F32C /* NotificationCenter+Subscriptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7F3DE026C307280086F32C /* NotificationCenter+Subscriptions.swift */; };
 		1D7FB3B724FF0CCE00B7B956 /* IMContactStore+NoOverrides.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D7FB3B524FF0CCE00B7B956 /* IMContactStore+NoOverrides.m */; };
 		1D804CFB250E96FB00F376CB /* InternalAttachment+Resolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D804CFA250E96FB00F376CB /* InternalAttachment+Resolvable.swift */; };
 		1D804D0F250EAE8A00F376CB /* RichLinkSpecializationFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D804D0E250EAE8A00F376CB /* RichLinkSpecializationFormat.swift */; };
@@ -687,6 +689,8 @@
 		1D7D8952250D829C00DA9909 /* IMFileTransfer+InternalAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMFileTransfer+InternalAttachment.swift"; sourceTree = "<group>"; };
 		1D7D8954250D987900DA9909 /* LinkPresentation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LinkPresentation.framework; path = Frameworks/LinkPresentation.framework; sourceTree = "<group>"; };
 		1D7D8958250DB43400DA9909 /* RichLinkRepresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichLinkRepresentation.swift; sourceTree = "<group>"; };
+		1D7F3DDE26C2FF090086F32C /* IMFileTransfer+StateBound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMFileTransfer+StateBound.swift"; sourceTree = "<group>"; };
+		1D7F3DE026C307280086F32C /* NotificationCenter+Subscriptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NotificationCenter+Subscriptions.swift"; sourceTree = "<group>"; };
 		1D7FB3B524FF0CCE00B7B956 /* IMContactStore+NoOverrides.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "IMContactStore+NoOverrides.m"; sourceTree = "<group>"; };
 		1D804CFA250E96FB00F376CB /* InternalAttachment+Resolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InternalAttachment+Resolvable.swift"; sourceTree = "<group>"; };
 		1D804D00250EADBA00F376CB /* RichLinkCaptionText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichLinkCaptionText.swift; sourceTree = "<group>"; };
@@ -897,6 +901,7 @@
 			children = (
 				1D5AEE6424E37D9E00303692 /* Data+Compression.swift */,
 				1DC4D7B626AE02D600281920 /* OSLog+Nice.swift */,
+				1D7F3DE026C307280086F32C /* NotificationCenter+Subscriptions.swift */,
 			);
 			path = Foundation;
 			sourceTree = "<group>";
@@ -1155,6 +1160,7 @@
 				1D3E3340250C264900EEA08B /* IMFileTransfer+Creatable.swift */,
 				1D7D8952250D829C00DA9909 /* IMFileTransfer+InternalAttachment.swift */,
 				1DB9058F25E58E120087D014 /* Image+AsPNG.swift */,
+				1D7F3DDE26C2FF090086F32C /* IMFileTransfer+StateBound.swift */,
 			);
 			path = IMFileTransfer;
 			sourceTree = "<group>";
@@ -2085,6 +2091,7 @@
 				1DC4D77C26AD093100281920 /* ChatItemRepresentation+SharedInit.swift in Sources */,
 				1DC4D77D26AD093200281920 /* ChatItem+Codable.swift in Sources */,
 				1DC4D77E26AD093200281920 /* DigitalTouchMessage+Codable.swift in Sources */,
+				1D7F3DDF26C2FF090086F32C /* IMFileTransfer+StateBound.swift in Sources */,
 				1DC4D77F26AD093200281920 /* Chat.swift in Sources */,
 				1DC4D78026AD093200281920 /* Message.swift in Sources */,
 				1DC4D7A926AD096300281920 /* String+FormatIdentification.swift in Sources */,
@@ -2333,6 +2340,7 @@
 				1DC4D7B726AE02D600281920 /* OSLog+Nice.swift in Sources */,
 				1D797B9A26AD075200B57208 /* Color.swift in Sources */,
 				1D1C94DA26B866CD005848A4 /* Promise+CollectionAddition.swift in Sources */,
+				1D7F3DE126C307280086F32C /* NotificationCenter+Subscriptions.swift in Sources */,
 				1D9AE36F26AF0835007873E3 /* ExpiringCollection.swift in Sources */,
 				1D92963226B5D91800F576A9 /* BarcelonaFoundation.swift in Sources */,
 			);

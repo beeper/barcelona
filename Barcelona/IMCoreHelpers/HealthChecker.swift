@@ -106,7 +106,7 @@ public class HealthChecker {
     }
     
     private init() {
-        subscription = NotificationCenter.default.subscribe(toNotificationsNamed: ConnectionState.notifications) { _ in
+        subscription = NotificationCenter.default.subscribe(toNotificationsNamed: ConnectionState.notifications) { _,_ in
             self.recomputeHash()
         }
     }
@@ -164,7 +164,7 @@ public class HealthChecker {
     }
     
     public func observeHealth(_ cb: @escaping (HealthChecker) -> ()) -> NotificationSubscription {
-        return NotificationCenter.default.subscribe(toNotificationNamed: .HealthCheckerStatusDidChange) { _ in cb(self) }
+        return NotificationCenter.default.subscribe(toNotificationNamed: .HealthCheckerStatusDidChange) { _,_ in cb(self) }
     }
     
     internal func dispatch() {
@@ -173,74 +173,5 @@ public class HealthChecker {
     
     public func shutdown() {
         subscription.unsubscribe()
-    }
-}
-
-public protocol NotificationSubscription {
-    func unsubscribe() -> Void
-}
-
-public class SingleNotificationSubscription: NotificationSubscription {
-    private let observer: NSObjectProtocol
-    public let center: NotificationCenter
-    
-    private var unsubscribed = false
-    
-    public init(center: NotificationCenter, name: NSNotification.Name?, object: Any?, queue: OperationQueue?, handler: @escaping (Notification) -> ()) {
-        self.center = center
-        observer = center.addObserver(forName: name, object: object, queue: queue, using: handler)
-    }
-    
-    deinit {
-        if !unsubscribed {
-            unsubscribe()
-        }
-    }
-    
-    public func unsubscribe() {
-        unsubscribed = true
-        center.removeObserver(observer)
-    }
-}
-
-public class ManyNotificationSubscription: NotificationSubscription {
-    private let subscriptions: [NotificationSubscription]
-    public let center: NotificationCenter
-    
-    public typealias PackedNotification = (name: NSNotification.Name?, object: Any?, queue: OperationQueue?)
-    
-    public init(center: NotificationCenter, notifications: [PackedNotification], handler: @escaping (Notification) -> ()) {
-        self.subscriptions = notifications.map { name, object, queue in
-            center.subscribe(toNotificationNamed: name, object: object, queue: queue, using: handler)
-        }
-        self.center = center
-    }
-    
-    deinit {
-        unsubscribe()
-    }
-    
-    public func unsubscribe() {
-        subscriptions.forEach {
-            $0.unsubscribe()
-        }
-    }
-}
-
-private extension NotificationCenter {
-    func subscribe(toNotificationNamed name: NSNotification.Name? = nil, object: Any? = nil, queue: OperationQueue? = nil, using block: @escaping (Notification) -> ()) -> NotificationSubscription {
-        SingleNotificationSubscription(center: self, name: name, object: object, queue: queue, handler: block)
-    }
-    
-    func subscribe(toNotificationsNamed names: [NSNotification.Name], using block: @escaping (Notification) -> ()) -> NotificationSubscription {
-        ManyNotificationSubscription(center: self, notifications: names.map { (name: $0, object: nil, queue: nil) }, handler: block)
-    }
-    
-    func subscribe(toNotificationsNamed names: [String], using block: @escaping (Notification) -> ()) -> NotificationSubscription {
-        ManyNotificationSubscription(center: self, notifications: names.map { (name: .init($0), object: nil, queue: nil) }, handler: block)
-    }
-    
-    func subscribe(toNotifications notifications: [ManyNotificationSubscription.PackedNotification], using block: @escaping (Notification) -> ()) -> NotificationSubscription {
-        ManyNotificationSubscription(center: self, notifications: notifications, handler: block)
     }
 }
