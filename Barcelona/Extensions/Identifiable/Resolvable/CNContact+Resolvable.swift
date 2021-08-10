@@ -20,7 +20,7 @@ extension CNContact: Resolvable, _ConcreteBasicResolvable {
                 try store.unifiedContact(withIdentifier: $0, keysToFetch: CNContactStore.defaultKeysToFetch)
             }
         } catch {
-            os_log("Failed to load contacts with identifiers %{private}@ with error %{public}@", type: .error, identifiers, error.localizedDescription)
+            os_log("Failed to load contacts with identifiers %{private}@ with error %@", type: .error, identifiers, error.localizedDescription)
             
             return []
         }
