@@ -159,7 +159,7 @@ func BLHandlePayload(_ payload: IPCPayload) {
             break
         }
         
-        let transfer = CBInitializeFileTransfer(filename: req.file_name, path: URL(fileURLWithPath: req.path_on_disk))
+        let transfer = CBInitializeFileTransfer(filename: req.file_name, path: URL(fileURLWithPath: req.path_on_disk)), transferGUID = transfer.guid
         let messageCreation = CreateMessage(parts: [
             .init(type: .attachment, details: transfer.guid)
         ])
@@ -168,9 +168,35 @@ func BLHandlePayload(_ payload: IPCPayload) {
             let messages = try chat.send(message: messageCreation).map(\.partialMessage)
             BLMetricStore.shared.set(messages.map(\.guid), forKey: .lastSentMessageGUIDs)
             
-            NotificationCenter.default.once(notificationNamed: BLChatMessageSentNotification, object: messages.first!.guid).then { _ in
-                messages.forEach { message in
-                    payload.respond(.message_receipt(message))
+            NotificationCenter.default.subscribe(toNotificationsNamed: [.IMFileTransferUpdated, .IMFileTransferFinished]) { notif, sub in
+                guard let transfer = notif.object as? IMFileTransfer else {
+                    return
+                }
+                
+                switch transfer.state {
+                case .archiving:
+                    break
+                case .waitingForAccept:
+                    break
+                case .accepted:
+                    break
+                case .preparing:
+                    break
+                case .transferring:
+                    break
+                case .finalizing:
+                    sub.unsubscribe()
+                    messages.forEach { message in
+                        payload.respond(.message_receipt(message))
+                    }
+                case .finished:
+                    break
+                case .error:
+                    break
+                case .recoverableError:
+                    break
+                case .unknown:
+                    break
                 }
             }
         } catch {
