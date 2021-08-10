@@ -2493,7 +2493,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.apple.ericrabil.CoreBarcelona;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG IMCORE_UNMANAGED";
 				SWIFT_INSTALL_OBJC_HEADER = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = Barcelona/Barcelona.h;
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "$(SWIFT_MODULE_NAME).h";
@@ -2563,7 +2562,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.grapple;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -2613,7 +2611,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaMautrixIPC;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
 				VERSION_INFO_PREFIX = "";
 			};
@@ -2700,6 +2697,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
+					"DEBUG_SIGNPOSTS=1",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -2715,7 +2713,7 @@
 				OTHER_SWIFT_FLAGS = "-Xcc -Wno-nullability-completeness -Xcc -Wno-visibility -Xcc -Wno-objc-protocol-method-implementation -Xcc -Wno-arc-performSelector-leaks -Xcc -Wno-nonnull -Xcc -Wno-strict-prototypes -Xcc -Wno-property-attribute-mismatch -Xcc -Wno-incomplete-umbrella";
 				SDKROOT = "";
 				SUPPORTED_PLATFORMS = "macosx iphonesimulator iphoneos";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG_DEDUPLICATE_EVENTS DEBUG";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG_DEDUPLICATE_EVENTS DEBUG DEBUG_SIGNPOSTS";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = (
@@ -2831,7 +2829,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaSerialization;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
 				VERSION_INFO_PREFIX = "";
 			};
@@ -2961,7 +2958,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaFoundation;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSION_INFO_PREFIX = "";
@@ -3013,7 +3009,6 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -3065,7 +3060,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaDB;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
 				VERSION_INFO_PREFIX = "";
 			};
