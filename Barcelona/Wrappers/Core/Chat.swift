@@ -248,14 +248,12 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
         }
     }
     
-    public func tapback(_ creation: TapbackCreation) -> Promise<Message?> {
-        RunLoop.main.promise {
-            try imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil)
-        }.then {
-            BLIngestObject($0, inChat: id)
-        }.then {
+    public func tapback(_ creation: TapbackCreation) throws -> Message? {
+        let message = try imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil)
+        
+        return _BLParseObjects([message], inChat: id).compactMap {
             $0 as? Message
-        }
+        }.first
     }
 }
 

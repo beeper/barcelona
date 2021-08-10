@@ -214,19 +214,17 @@ func BLHandlePayload(_ payload: IPCPayload) {
             break
         }
         
-        chat.tapback(creation).then {
-            $0?.partialMessage
-        }.always { result in
-            switch result {
-            case .success(let message):
-                guard let message = message else {
-                    return
-                }
-                
-                payload.respond(.message_receipt(message))
-            case .failure(let error):
-                CLError("MautrixIPC", "Failed to send tapback with error", error.localizedDescription)
+        do {
+            guard let message = try chat.tapback(creation)?.partialMessage else {
+                // girl fuck
+                CLFault("BLMautrix", "failed to get sent tapback")
+                break
             }
+            
+            payload.respond(.message_receipt(message))
+        } catch {
+            // girl fuck
+            CLFault("BLMautrix", "failed to send media message: %@", error as NSError)
         }
     case .send_read_receipt(let req):
         guard let chat = req.chat else {
