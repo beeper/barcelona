@@ -10,6 +10,7 @@ import Foundation
 import Barcelona
 import BarcelonaMautrixIPC
 import IMCore
+import BarcelonaJS
 
 LoggingDrivers.append(BLMautrixSTDOutDriver.shared)
 
@@ -271,6 +272,15 @@ BarcelonaManager.shared.bootstrap().then { success in
     BLEventHandler.shared.run()
     
     CLInfo("ERBarcelonaManager", "BLMautrix event handler is running")
+}
+
+RunLoop.main.schedule {
+    Thread {
+        let thread = JSThread()
+        let server = BarcelonaJSIPCServer(context: thread)
+        
+        RunLoop.current.run()
+    }.start()
 }
 
 RunLoop.main.run()

@@ -57,11 +57,16 @@ extension JSValue {
     }
     
     subscript(key: String) -> JSValue? {
-        guard isObject, !isNull() else {
-            return nil
+        get {
+            guard isObject, !isNull() else {
+                return nil
+            }
+            
+            return JSValue(jsValueRef: JSObjectGetProperty(context.jsGlobalContextRef, jsValueRef, JSStringCreateWithCFString(key as CFString), nil), in: context)
         }
-        
-        return JSValue(jsValueRef: JSObjectGetProperty(context.jsGlobalContextRef, jsValueRef, JSStringCreateWithCFString(key as CFString), nil), in: context)
+        set {
+            JSObjectSetProperty(context.jsGlobalContextRef, jsValueRef, JSStringCreateWithCFString(key as CFString), newValue?.jsValueRef ?? JSValueMakeNull(context.jsGlobalContextRef), JSPropertyAttributes(kJSPropertyAttributeNone), nil)
+        }
     }
 }
 

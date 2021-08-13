@@ -195,6 +195,8 @@
 		1D9079F2250ED4DB00ED1EDC /* AttributedStringDeserializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5224E37D9E00303692 /* AttributedStringDeserializer.swift */; };
 		1D9079F3250ED4DB00ED1EDC /* AttributedStringSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB9520624F6B8BF004CC87B /* AttributedStringSerializer.swift */; };
 		1D91AAFD26C5EF8400115584 /* JSContext+Completion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D91AAFC26C5EF8400115584 /* JSContext+Completion.swift */; };
+		1D91AAFE26C6531A00115584 /* BarcelonaJS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF2F2F126C44CAD0078E549 /* BarcelonaJS.framework */; };
+		1D91AAFF26C6531A00115584 /* BarcelonaJS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF2F2F126C44CAD0078E549 /* BarcelonaJS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1D91B49325C4786200DCBC3D /* IMDPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D91B49225C4786200DCBC3D /* IMDPersistence.swift */; };
 		1D92962A26B5D8DF00F576A9 /* Swog in Frameworks */ = {isa = PBXBuildFile; productRef = 1D92962926B5D8DF00F576A9 /* Swog */; };
 		1D92962D26B5D8F100F576A9 /* Swexy in Frameworks */ = {isa = PBXBuildFile; productRef = 1D92962C26B5D8F100F576A9 /* Swexy */; };
@@ -392,6 +394,13 @@
 			remoteGlobalIDString = 1DE06D8C26B43C4C00B4DC77;
 			remoteInfo = BarcelonaDB;
 		};
+		1D91AB0026C6531A00115584 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1DF2F2F026C44CAD0078E549;
+			remoteInfo = BarcelonaJS;
+		};
 		1D9AE36326AE14A1007873E3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
@@ -537,6 +546,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				1D91AAFF26C6531A00115584 /* BarcelonaJS.framework in Embed Frameworks */,
 				1DCB0CE426B05E7F00242045 /* BarcelonaMautrixIPC.framework in Embed Frameworks */,
 				1DCB0CDF26B05E7B00242045 /* Barcelona.framework in Embed Frameworks */,
 			);
@@ -988,6 +998,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1DCB0CE326B05E7F00242045 /* BarcelonaMautrixIPC.framework in Frameworks */,
+				1D91AAFE26C6531A00115584 /* BarcelonaJS.framework in Frameworks */,
 				1DC3927326B05F1D00A9B6D3 /* IMCore.framework in Frameworks */,
 				1DCB0CDE26B05E7B00242045 /* Barcelona.framework in Frameworks */,
 			);
@@ -2133,6 +2144,7 @@
 			dependencies = (
 				1DCB0CE126B05E7B00242045 /* PBXTargetDependency */,
 				1DCB0CE626B05E7F00242045 /* PBXTargetDependency */,
+				1D91AB0126C6531A00115584 /* PBXTargetDependency */,
 			);
 			name = "barcelona-mautrix";
 			productName = "barcelona-mautrix";
@@ -2723,6 +2735,11 @@
 			isa = PBXTargetDependency;
 			target = 1DE06D8C26B43C4C00B4DC77 /* BarcelonaDB */;
 			targetProxy = 1D884DC126BB52A8003E60E7 /* PBXContainerItemProxy */;
+		};
+		1D91AB0126C6531A00115584 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1DF2F2F026C44CAD0078E549 /* BarcelonaJS */;
+			targetProxy = 1D91AB0026C6531A00115584 /* PBXContainerItemProxy */;
 		};
 		1D9AE36426AE14A1007873E3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

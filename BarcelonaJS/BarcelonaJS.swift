@@ -46,7 +46,13 @@ public class JSThread {
     
     public func execute(_ code: String) -> String {
         queue.sync {
-            context.evaluateScript(code).description
+            let result = context.evaluateScript(code)!
+            
+            if result.isFunction {
+                return result.description
+            } else {
+                return JSStringCopyCFString(kCFAllocatorDefault, JSValueCreateJSONString(context.jsGlobalContextRef, context.evaluateScript(code).jsValueRef, 4, nil)) as String
+            }
         }
     }
 }
@@ -72,9 +78,54 @@ public func JBLCreateJSContext() -> JSContext {
         JBLContact.self
     ]
     
+    let getDescriptor = context.evaluateScript("(proto, prop) => Object.getOwnPropertyDescriptor(proto, prop)")!
+    let setDescriptor = context.evaluateScript("(proto, prop, desc) => Object.defineProperty(proto, prop, desc)")!
+    
+    let toJSONRef = JSObjectMakeFunctionWithCallback(context.jsGlobalContextRef, JSStringCreateWithCFString("toJSON" as CFString)) { ctx, fn, this, argCount, args, exception in
+        let context = JSContext(jsGlobalContextRef: ctx)!
+        let this = JSValue(jsValueRef: this, in: context)!
+
+        if let prototype = this["constructor"]?["prototype"] {
+            let object = JSValue(newObjectIn: context)!
+            
+            let names = JSObjectCopyPropertyNames(ctx, prototype.jsValueRef)
+            
+            for i in 0..<JSPropertyNameArrayGetCount(names) {
+                let name = JSStringCopyCFString(kCFAllocatorDefault, JSPropertyNameArrayGetNameAtIndex(names, i)!) as String
+                object[name] = this[name]
+            }
+            
+            return object.jsValueRef
+        }
+        
+        return JSObjectMake(ctx, nil, nil)
+    }
+    
+    let toJSON = JSValue(jsValueRef: toJSONRef, in: context)
+    
     for api in JBLExposedAPIs {
         let name = api is AnyClass ? String(describing: api) : String(describing: type(of: api))
         context.setObject(api, forKeyedSubscript: name as NSString)
+        
+        if api is AnyClass {
+            let prototype = context.evaluateScript("\(name).prototype")!
+            
+            for property in prototype.propertyNames.filter({ $0 != "constructor" }).map({ JSValue(object: $0, in: context)! }) {
+                guard let descriptor = getDescriptor.call(withArguments: [prototype, property]) else {
+                    continue
+                }
+                
+                guard let enumerable = descriptor[JSPropertyDescriptorEnumerableKey], enumerable.toBool() == false else {
+                    continue
+                }
+                
+                descriptor.setObject(true, forKeyedSubscript: JSPropertyDescriptorEnumerableKey)
+                
+                setDescriptor.call(withArguments: [prototype, property, descriptor])
+            }
+            
+            prototype["toJSON"] = toJSON
+        }
     }
     
     return context

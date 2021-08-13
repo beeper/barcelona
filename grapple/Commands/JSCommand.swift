@@ -25,7 +25,6 @@ public class JSCommand: CommandGroup {
             Thread {
                 let thread = JSThread()
                 let server = BarcelonaJSIPCServer(context: thread)
-                thread.context.evaluateScript("")!.
                 
                 RunLoop.current.run()
             }.start()
@@ -59,6 +58,8 @@ public class JSCommand: CommandGroup {
                         client.disableLogging()
                     case ".exit":
                         exit(0)
+                    case ".apis":
+                        print("\r\n" + client.autocomplete(text: "JBL").joined(separator: ", "))
                     default:
                         print("\r\n" + client.execute(code).replacingOccurrences(of: "\n", with: "\r\n"), terminator: "\r\n")
                     }

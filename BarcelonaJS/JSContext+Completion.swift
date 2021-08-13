@@ -38,24 +38,26 @@ private extension Collection where Element == [String] {
 }
 
 private extension String {
-    func match(_ expression: String) -> String? {
+    func match(_ expression: String) -> (String, String) {
         guard let range = range(of: expression, options: .regularExpression) else {
-            return nil
+            return ("", expression)
         }
         
-        return String(self[range])
+        return (String(self[range]), String(self[..<range.lowerBound]))
     }
 }
 
 public extension JSContext {
     func completion(forLine line: String) -> [String] {
-        let match = line.match(#"(?:[a-zA-Z_$](?:\w|\$)*\??\.)*[a-zA-Z_$](?:\w|\$)*\??\.?$"#) ?? ""
+        let (match, base) = line.match(#"(?:[a-zA-Z_$](?:\w|\$)*\??\.)*[a-zA-Z_$](?:\w|\$)*\??\.?$"#)
         
         if line.count > 0, match.count == 0 {
             return []
         }
         
-        return completionGroups(forExpression: match)
+        return completionGroups(forExpression: match).map { entry in
+            base + entry
+        }
     }
 }
 

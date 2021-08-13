@@ -17,6 +17,13 @@ func bootstrap_look_up(_ bootstrap: mach_port_t, _ name: UnsafePointer<CChar>, _
 internal let decoder = JSONDecoder()
 internal let encoder = JSONEncoder()
 
+internal func IPCWrapPort(_ port: mach_port_t) -> NSMachPort {
+    let port = NSMachPort(machPort: port)
+    RunLoop.main.add(port, forMode: .default)
+    
+    return port
+}
+
 internal func IPCReceivePort() -> NSMachPort {
     var rcv_port: mach_port_name_t = 0
     
@@ -28,8 +35,5 @@ internal func IPCReceivePort() -> NSMachPort {
         fatalError("failed to add send right")
     }
     
-    let port = NSMachPort(machPort: rcv_port)
-    RunLoop.main.add(port, forMode: .default)
-    
-    return port
+    return IPCWrapPort(rcv_port)
 }
