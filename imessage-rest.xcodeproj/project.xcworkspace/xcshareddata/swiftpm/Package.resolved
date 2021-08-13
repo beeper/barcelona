@@ -38,12 +38,12 @@
         }
       },
       {
-        "package": "Nimble",
-        "repositoryURL": "https://github.com/Quick/Nimble",
+        "package": "LineNoise",
+        "repositoryURL": "https://github.com/andybest/linenoise-swift",
         "state": {
           "branch": null,
-          "revision": "e9d769113660769a4d9dd3afb855562c0b7ae7b0",
-          "version": "7.3.4"
+          "revision": "afc897c02b030af7333105c4fedcd843a8339238",
+          "version": "0.0.3"
         }
       },
       {
@@ -51,7 +51,7 @@
         "repositoryURL": "https://github.com/EricRabil/Pwomise",
         "state": {
           "branch": "main",
-          "revision": "bdcc5a8a398d01c20fe6be06849ef40cf0552ffe",
+          "revision": "fc82bb0890742c678cf1270a7fd6b23ec7a30189",
           "version": null
         }
       },
@@ -114,7 +114,7 @@
         "repositoryURL": "https://github.com/EricRabil/Swog",
         "state": {
           "branch": "main",
-          "revision": "2002a4317ab2d5dcd07a99a7543efeee0fcc8860",
+          "revision": "6e60c30ba2eeb9cd10dae1d585c70f20118ac759",
           "version": null
         }
       }

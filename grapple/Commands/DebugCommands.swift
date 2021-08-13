@@ -35,7 +35,7 @@ class DebugCommands: CommandGroup {
             bus.resume()
 
             bus.publisher.receiveEvent { event in
-                CLInfo("BLEvents", "receiveEvent(%@): %@", event.label, String(debugDescribing: event.value))
+                CLInfo("BLEvents", "receiveEvent(%@): %@", event.name.rawValue, String(debugDescribing: event))
             }
         }
     }

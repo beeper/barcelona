@@ -26,3 +26,15 @@ public extension Promise where Output: Collection {
         }
     }
 }
+
+public extension Promise {
+    static func catching(_ block: @escaping (@escaping Resolve, @escaping Reject) throws -> ()) -> Promise {
+        Promise { resolve, reject in
+            do {
+                try block(resolve, reject)
+            } catch {
+                reject(error)
+            }
+        }
+    }
+}

@@ -41,7 +41,7 @@ public class _AnyEncodable: Encodable, CustomStringConvertible, CustomDebugStrin
 }
 
 // MARK: - Event structure
-public enum Event: Encodable {
+public enum Event {
     case bootstrap(BootstrapData)
     case itemsReceived([AnyChatItem])
     case itemsUpdated([AnyChatItem])
@@ -63,69 +63,6 @@ public enum Event: Encodable {
     case contactUpdated(Contact)
     case blockListUpdated(BulkHandleIDRepresentation)
     case healthChanged(HealthState)
-    
-    public var label: String {
-        let mirror = Mirror(reflecting: self)
-        
-        if let label = mirror.children.first?.label {
-            return label
-        } else {
-            return String(describing: self)
-        }
-    }
-    
-    // look swift, i get it, you wanna save people from whatever. but this is stupid. deadass
-    public var value: _AnyEncodable {
-        switch self {
-        case .bootstrap(let data):
-            return _AnyEncodable(data)
-        case .itemsReceived(let data):
-            return _AnyEncodable(data)
-        case .itemsUpdated(let data):
-            return _AnyEncodable(data)
-        case .itemStatusChanged(let data):
-            return _AnyEncodable(data)
-        case .itemsRemoved(let data):
-            return _AnyEncodable(data)
-        case .participantsChanged(let data):
-            return _AnyEncodable(data)
-        case .conversationRemoved(let data):
-            return _AnyEncodable(data)
-        case .conversationCreated(let data):
-            return _AnyEncodable(data)
-        case .conversationChanged(let data):
-            return _AnyEncodable(data)
-        case .conversationDisplayNameChanged(let data):
-            return _AnyEncodable(data)
-        case .conversationJoinStateChanged(let data):
-            return _AnyEncodable(data)
-        case .conversationUnreadCountChanged(let data):
-            return _AnyEncodable(data)
-        case .conversationPropertiesChanged(let data):
-            return _AnyEncodable(data)
-        case .contactCreated(let data):
-            return _AnyEncodable(data)
-        case .contactRemoved(let data):
-            return _AnyEncodable(data)
-        case .contactUpdated(let data):
-            return _AnyEncodable(data)
-        case .blockListUpdated(let data):
-            return _AnyEncodable(data)
-        case .healthChanged(let data):
-            return _AnyEncodable(data)
-        }
-    }
-    
-    private enum CodingKeys: CodingKey {
-        case type, payload
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        
-        try container.encode(label, forKey: .type)
-        try container.encode(value, forKey: .payload)
-    }
 }
 
 public struct BootstrapData: Codable, Hashable, BulkChatRepresentatable {

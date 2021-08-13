@@ -194,6 +194,7 @@
 		1D884DC326BB55D8003E60E7 /* IMCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD424E3744900303692 /* IMCore.framework */; };
 		1D9079F2250ED4DB00ED1EDC /* AttributedStringDeserializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5224E37D9E00303692 /* AttributedStringDeserializer.swift */; };
 		1D9079F3250ED4DB00ED1EDC /* AttributedStringSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB9520624F6B8BF004CC87B /* AttributedStringSerializer.swift */; };
+		1D91AAFD26C5EF8400115584 /* JSContext+Completion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D91AAFC26C5EF8400115584 /* JSContext+Completion.swift */; };
 		1D91B49325C4786200DCBC3D /* IMDPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D91B49225C4786200DCBC3D /* IMDPersistence.swift */; };
 		1D92962A26B5D8DF00F576A9 /* Swog in Frameworks */ = {isa = PBXBuildFile; productRef = 1D92962926B5D8DF00F576A9 /* Swog */; };
 		1D92962D26B5D8F100F576A9 /* Swexy in Frameworks */ = {isa = PBXBuildFile; productRef = 1D92962C26B5D8F100F576A9 /* Swexy */; };
@@ -309,6 +310,40 @@
 		1DEE7EA1250FA4150009C74F /* Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA0250FA4150009C74F /* Searchable.swift */; };
 		1DEE7EA4250FA4B40009C74F /* Message+Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA3250FA4B40009C74F /* Message+Searchable.swift */; };
 		1DEE7EA6250FB2150009C74F /* IMHandle+Resolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA5250FB2150009C74F /* IMHandle+Resolvable.swift */; };
+		1DF2F2EB26C43D550078E549 /* JSCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F2EA26C43D550078E549 /* JSCommand.swift */; };
+		1DF2F2F926C44CBB0078E549 /* Barcelona.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; };
+		1DF2F2FA26C44CBB0078E549 /* Barcelona.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1DF2F2FE26C44CDE0078E549 /* IMCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD424E3744900303692 /* IMCore.framework */; };
+		1DF2F30226C44CF80078E549 /* JBLChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F30126C44CF80078E549 /* JBLChat.swift */; };
+		1DF2F30426C44D060078E549 /* JBLChatItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F30326C44D060078E549 /* JBLChatItem.swift */; };
+		1DF2F30626C44D1D0078E549 /* JBLAcknowledgmentChatItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F30526C44D1D0078E549 /* JBLAcknowledgmentChatItem.swift */; };
+		1DF2F30826C44D370078E549 /* JBLAttachmentChatItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F30726C44D370078E549 /* JBLAttachmentChatItem.swift */; };
+		1DF2F30A26C44D490078E549 /* JBLTextChatItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F30926C44D490078E549 /* JBLTextChatItem.swift */; };
+		1DF2F30C26C44DB00078E549 /* JBLMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F30B26C44DB00078E549 /* JBLMessage.swift */; };
+		1DF2F30D26C44DF00078E549 /* BarcelonaJS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF2F2F126C44CAD0078E549 /* BarcelonaJS.framework */; };
+		1DF2F30E26C44DF00078E549 /* BarcelonaJS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF2F2F126C44CAD0078E549 /* BarcelonaJS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1DF2F31226C44E1E0078E549 /* JBLAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F31126C44E1E0078E549 /* JBLAttachment.swift */; };
+		1DF2F31426C44EFE0078E549 /* JBLStatusChatItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F31326C44EFE0078E549 /* JBLStatusChatItem.swift */; };
+		1DF2F31626C44F6D0078E549 /* BarcelonaJS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F31526C44F6D0078E549 /* BarcelonaJS.swift */; };
+		1DF2F31726C4523F0078E549 /* BarcelonaEvents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D79037426ACFE6B00712CB3 /* BarcelonaEvents.framework */; };
+		1DF2F31826C4523F0078E549 /* BarcelonaEvents.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D79037426ACFE6B00712CB3 /* BarcelonaEvents.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1DF2F31C26C452490078E549 /* JBLEventBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F31B26C452490078E549 /* JBLEventBus.swift */; };
+		1DF2F31E26C45FD30078E549 /* Event+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F31D26C45FD20078E549 /* Event+Codable.swift */; };
+		1DF2F32226C47E9C0078E549 /* JBLDebugUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F32126C47E9C0078E549 /* JBLDebugUtils.swift */; };
+		1DF2F32C26C55C690078E549 /* BarcelonaIPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DF2F32A26C55C690078E549 /* BarcelonaIPC.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		1DF2F33026C55C7D0078E549 /* BarcelonaFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D79039126ACFF0300712CB3 /* BarcelonaFoundation.framework */; };
+		1DF2F33126C55C7D0078E549 /* BarcelonaFoundation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D79039126ACFF0300712CB3 /* BarcelonaFoundation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1DF2F33926C55C8A0078E549 /* BarcelonaIPC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF2F32826C55C690078E549 /* BarcelonaIPC.framework */; };
+		1DF2F33A26C55C8A0078E549 /* BarcelonaIPC.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF2F32826C55C690078E549 /* BarcelonaIPC.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1DF2F33F26C55CA00078E549 /* IPCUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F33E26C55CA00078E549 /* IPCUtils.swift */; };
+		1DF2F34126C56E0C0078E549 /* IPCWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34026C56E0C0078E549 /* IPCWrapper.swift */; };
+		1DF2F34326C56E2B0078E549 /* IPCSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34226C56E2B0078E549 /* IPCSender.swift */; };
+		1DF2F34526C56E5F0078E549 /* IPCReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34426C56E5F0078E549 /* IPCReceiver.swift */; };
+		1DF2F34726C56E7F0078E549 /* IPCPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34626C56E7F0078E549 /* IPCPayload.swift */; };
+		1DF2F34926C56F040078E549 /* IPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34826C56F040078E549 /* IPC.swift */; };
+		1DF2F34B26C597260078E549 /* JBLHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34A26C597260078E549 /* JBLHandle.swift */; };
+		1DF2F34D26C5B64B0078E549 /* JSPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34C26C5B64B0078E549 /* JSPromise.swift */; };
+		1DF2F35026C5B9580078E549 /* LineNoise in Frameworks */ = {isa = PBXBuildFile; productRef = 1DF2F34F26C5B9580078E549 /* LineNoise */; };
 		1DFB1EA7250FFE3F00D84361 /* Chat+Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFB1EA6250FFE3F00D84361 /* Chat+Searchable.swift */; };
 		1DFB1EA9251011DD00D84361 /* Contact+Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFB1EA8251011DD00D84361 /* Contact+Searchable.swift */; };
 		1DFB1EAB251011F000D84361 /* Contact+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFB1EAA251011F000D84361 /* Contact+Identifiable.swift */; };
@@ -392,6 +427,41 @@
 			remoteGlobalIDString = 1D79039026ACFF0300712CB3;
 			remoteInfo = BarcelonaFoundation;
 		};
+		1DF2F2FB26C44CBB0078E549 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D44864424E85BBB00FF73F3;
+			remoteInfo = Barcelona;
+		};
+		1DF2F30F26C44DF00078E549 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1DF2F2F026C44CAD0078E549;
+			remoteInfo = BarcelonaJS;
+		};
+		1DF2F31926C4523F0078E549 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D79037326ACFE6B00712CB3;
+			remoteInfo = BarcelonaEvents;
+		};
+		1DF2F33226C55C7D0078E549 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D79039026ACFF0300712CB3;
+			remoteInfo = BarcelonaFoundation;
+		};
+		1DF2F33B26C55C8A0078E549 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1DF2F32726C55C690078E549;
+			remoteInfo = BarcelonaIPC;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -410,6 +480,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				1DF2F30E26C44DF00078E549 /* BarcelonaJS.framework in Embed Frameworks */,
 				1D4AC03D26AB7CEF00ADD254 /* Barcelona.framework in Embed Frameworks */,
 				1D9AE36226AE14A1007873E3 /* BarcelonaEvents.framework in Embed Frameworks */,
 			);
@@ -479,6 +550,30 @@
 			dstSubfolderSpec = 10;
 			files = (
 				1DE06D9626B43C6D00B4DC77 /* BarcelonaFoundation.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1DF2F2FD26C44CBB0078E549 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				1DF2F33A26C55C8A0078E549 /* BarcelonaIPC.framework in Embed Frameworks */,
+				1DF2F2FA26C44CBB0078E549 /* Barcelona.framework in Embed Frameworks */,
+				1DF2F31826C4523F0078E549 /* BarcelonaEvents.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1DF2F33426C55C7D0078E549 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				1DF2F33126C55C7D0078E549 /* BarcelonaFoundation.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -711,6 +806,7 @@
 		1D87EC6B258BFB0D0030D9C6 /* IMChatItem+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatItem+Identifiable.swift"; sourceTree = "<group>"; };
 		1D884DBB26BB5052003E60E7 /* BarcelonaDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcelonaDB.swift; sourceTree = "<group>"; };
 		1D884DBD26BB50E0003E60E7 /* Structs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Structs.swift; sourceTree = "<group>"; };
+		1D91AAFC26C5EF8400115584 /* JSContext+Completion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSContext+Completion.swift"; sourceTree = "<group>"; };
 		1D91B49225C4786200DCBC3D /* IMDPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IMDPersistence.swift; sourceTree = "<group>"; };
 		1D92963126B5D91800F576A9 /* BarcelonaFoundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcelonaFoundation.swift; sourceTree = "<group>"; };
 		1D9AE36626AE17B0007873E3 /* BLIngest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLIngest.swift; sourceTree = "<group>"; };
@@ -779,6 +875,32 @@
 		1DEE7EA0250FA4150009C74F /* Searchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Searchable.swift; sourceTree = "<group>"; };
 		1DEE7EA3250FA4B40009C74F /* Message+Searchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message+Searchable.swift"; sourceTree = "<group>"; };
 		1DEE7EA5250FB2150009C74F /* IMHandle+Resolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMHandle+Resolvable.swift"; sourceTree = "<group>"; };
+		1DF2F2EA26C43D550078E549 /* JSCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSCommand.swift; sourceTree = "<group>"; };
+		1DF2F2F126C44CAD0078E549 /* BarcelonaJS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaJS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1DF2F2F426C44CAD0078E549 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1DF2F30126C44CF80078E549 /* JBLChat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JBLChat.swift; sourceTree = "<group>"; };
+		1DF2F30326C44D060078E549 /* JBLChatItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JBLChatItem.swift; sourceTree = "<group>"; };
+		1DF2F30526C44D1D0078E549 /* JBLAcknowledgmentChatItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JBLAcknowledgmentChatItem.swift; sourceTree = "<group>"; };
+		1DF2F30726C44D370078E549 /* JBLAttachmentChatItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JBLAttachmentChatItem.swift; sourceTree = "<group>"; };
+		1DF2F30926C44D490078E549 /* JBLTextChatItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JBLTextChatItem.swift; sourceTree = "<group>"; };
+		1DF2F30B26C44DB00078E549 /* JBLMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JBLMessage.swift; sourceTree = "<group>"; };
+		1DF2F31126C44E1E0078E549 /* JBLAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JBLAttachment.swift; sourceTree = "<group>"; };
+		1DF2F31326C44EFE0078E549 /* JBLStatusChatItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JBLStatusChatItem.swift; sourceTree = "<group>"; };
+		1DF2F31526C44F6D0078E549 /* BarcelonaJS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcelonaJS.swift; sourceTree = "<group>"; };
+		1DF2F31B26C452490078E549 /* JBLEventBus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JBLEventBus.swift; sourceTree = "<group>"; };
+		1DF2F31D26C45FD20078E549 /* Event+Codable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Event+Codable.swift"; sourceTree = "<group>"; };
+		1DF2F32126C47E9C0078E549 /* JBLDebugUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JBLDebugUtils.swift; sourceTree = "<group>"; };
+		1DF2F32826C55C690078E549 /* BarcelonaIPC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaIPC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1DF2F32A26C55C690078E549 /* BarcelonaIPC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BarcelonaIPC.h; sourceTree = "<group>"; };
+		1DF2F32B26C55C690078E549 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1DF2F33E26C55CA00078E549 /* IPCUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPCUtils.swift; sourceTree = "<group>"; };
+		1DF2F34026C56E0C0078E549 /* IPCWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPCWrapper.swift; sourceTree = "<group>"; };
+		1DF2F34226C56E2B0078E549 /* IPCSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPCSender.swift; sourceTree = "<group>"; };
+		1DF2F34426C56E5F0078E549 /* IPCReceiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPCReceiver.swift; sourceTree = "<group>"; };
+		1DF2F34626C56E7F0078E549 /* IPCPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPCPayload.swift; sourceTree = "<group>"; };
+		1DF2F34826C56F040078E549 /* IPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPC.swift; sourceTree = "<group>"; };
+		1DF2F34A26C597260078E549 /* JBLHandle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JBLHandle.swift; sourceTree = "<group>"; };
+		1DF2F34C26C5B64B0078E549 /* JSPromise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSPromise.swift; sourceTree = "<group>"; };
 		1DF63FA824E4DE410004527F /* RawAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawAttachment.swift; sourceTree = "<group>"; };
 		1DFB1EA6250FFE3F00D84361 /* Chat+Searchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Chat+Searchable.swift"; sourceTree = "<group>"; };
 		1DFB1EA8251011DD00D84361 /* Contact+Searchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Contact+Searchable.swift"; sourceTree = "<group>"; };
@@ -819,7 +941,9 @@
 				1D9AE39426AF5BD0007873E3 /* SwiftCLI in Frameworks */,
 				1D4AC03C26AB7CEF00ADD254 /* Barcelona.framework in Frameworks */,
 				1D9AE39926AF5DA6007873E3 /* SwiftyTextTable in Frameworks */,
+				1DF2F35026C5B9580078E549 /* LineNoise in Frameworks */,
 				1D9AE36126AE14A1007873E3 /* BarcelonaEvents.framework in Frameworks */,
+				1DF2F30D26C44DF00078E549 /* BarcelonaJS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -876,6 +1000,25 @@
 				1DE06D9B26B43C7300B4DC77 /* GRDB in Frameworks */,
 				1D884DB826BB503A003E60E7 /* BarcelonaFoundation.framework in Frameworks */,
 				1D884DC326BB55D8003E60E7 /* IMCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1DF2F2EE26C44CAD0078E549 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1DF2F2F926C44CBB0078E549 /* Barcelona.framework in Frameworks */,
+				1DF2F33926C55C8A0078E549 /* BarcelonaIPC.framework in Frameworks */,
+				1DF2F2FE26C44CDE0078E549 /* IMCore.framework in Frameworks */,
+				1DF2F31726C4523F0078E549 /* BarcelonaEvents.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1DF2F32526C55C690078E549 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1DF2F33026C55C7D0078E549 /* BarcelonaFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1225,6 +1368,8 @@
 				1D79039226ACFF0300712CB3 /* BarcelonaFoundation */,
 				1D79034926ACFA2200712CB3 /* BarcelonaSerialization */,
 				1D4AC03626AB7CE300ADD254 /* grapple */,
+				1DF2F2F226C44CAD0078E549 /* BarcelonaJS */,
+				1DF2F32926C55C690078E549 /* BarcelonaIPC */,
 				1D5AEDAF24E3725200303692 /* Products */,
 				1D5AEDBE24E373ED00303692 /* Frameworks */,
 			);
@@ -1241,6 +1386,8 @@
 				1D79039126ACFF0300712CB3 /* BarcelonaFoundation.framework */,
 				1DCB0CD326B05E1C00242045 /* barcelona-mautrix */,
 				1DE06D8D26B43C4C00B4DC77 /* BarcelonaDB.framework */,
+				1DF2F2F126C44CAD0078E549 /* BarcelonaJS.framework */,
+				1DF2F32826C55C690078E549 /* BarcelonaIPC.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1383,6 +1530,7 @@
 				1D5322DB2677ED4B005FF8D1 /* DispatchSupervisor.swift */,
 				1D5322E12677ED4B005FF8D1 /* ERMessageEvents.swift */,
 				1D5322DD2677ED4B005FF8D1 /* Event.swift */,
+				1DF2F31D26C45FD20078E549 /* Event+Codable.swift */,
 				1D5322E02677ED4B005FF8D1 /* EventDispatcher.swift */,
 				1D5322DE2677ED4B005FF8D1 /* MessageEvents.swift */,
 				1D5322D62677C8AF005FF8D1 /* EventBus.swift */,
@@ -1498,6 +1646,7 @@
 				1D9AE39526AF5D0F007873E3 /* ChatCommands.swift */,
 				1D9AE39A26AF5FD7007873E3 /* DebugCommands.swift */,
 				1DC9E85A26C19D1A007E463F /* ListCommand.swift */,
+				1DF2F2EA26C43D550078E549 /* JSCommand.swift */,
 			);
 			path = Commands;
 			sourceTree = "<group>";
@@ -1705,6 +1854,59 @@
 			path = Searchable;
 			sourceTree = "<group>";
 		};
+		1DF2F2F226C44CAD0078E549 /* BarcelonaJS */ = {
+			isa = PBXGroup;
+			children = (
+				1DF2F30026C44CE90078E549 /* Exports */,
+				1DF2F2F426C44CAD0078E549 /* Info.plist */,
+				1DF2F31526C44F6D0078E549 /* BarcelonaJS.swift */,
+				1DF2F34826C56F040078E549 /* IPC.swift */,
+				1D91AAFC26C5EF8400115584 /* JSContext+Completion.swift */,
+			);
+			path = BarcelonaJS;
+			sourceTree = "<group>";
+		};
+		1DF2F30026C44CE90078E549 /* Exports */ = {
+			isa = PBXGroup;
+			children = (
+				1DF2F30126C44CF80078E549 /* JBLChat.swift */,
+				1DF2F30326C44D060078E549 /* JBLChatItem.swift */,
+				1DF2F30526C44D1D0078E549 /* JBLAcknowledgmentChatItem.swift */,
+				1DF2F30726C44D370078E549 /* JBLAttachmentChatItem.swift */,
+				1DF2F30926C44D490078E549 /* JBLTextChatItem.swift */,
+				1DF2F30B26C44DB00078E549 /* JBLMessage.swift */,
+				1DF2F31126C44E1E0078E549 /* JBLAttachment.swift */,
+				1DF2F31326C44EFE0078E549 /* JBLStatusChatItem.swift */,
+				1DF2F31B26C452490078E549 /* JBLEventBus.swift */,
+				1DF2F32126C47E9C0078E549 /* JBLDebugUtils.swift */,
+				1DF2F34A26C597260078E549 /* JBLHandle.swift */,
+				1DF2F34C26C5B64B0078E549 /* JSPromise.swift */,
+			);
+			path = Exports;
+			sourceTree = "<group>";
+		};
+		1DF2F32926C55C690078E549 /* BarcelonaIPC */ = {
+			isa = PBXGroup;
+			children = (
+				1DF2F33D26C55C960078E549 /* Foundation */,
+				1DF2F32A26C55C690078E549 /* BarcelonaIPC.h */,
+				1DF2F32B26C55C690078E549 /* Info.plist */,
+			);
+			path = BarcelonaIPC;
+			sourceTree = "<group>";
+		};
+		1DF2F33D26C55C960078E549 /* Foundation */ = {
+			isa = PBXGroup;
+			children = (
+				1DF2F33E26C55CA00078E549 /* IPCUtils.swift */,
+				1DF2F34026C56E0C0078E549 /* IPCWrapper.swift */,
+				1DF2F34226C56E2B0078E549 /* IPCSender.swift */,
+				1DF2F34426C56E5F0078E549 /* IPCReceiver.swift */,
+				1DF2F34626C56E7F0078E549 /* IPCPayload.swift */,
+			);
+			path = Foundation;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1759,6 +1961,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		1DF2F2EC26C44CAD0078E549 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1DF2F32326C55C690078E549 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1DF2F32C26C55C690078E549 /* BarcelonaIPC.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
@@ -1804,11 +2021,13 @@
 			dependencies = (
 				1D4AC03F26AB7CEF00ADD254 /* PBXTargetDependency */,
 				1D9AE36426AE14A1007873E3 /* PBXTargetDependency */,
+				1DF2F31026C44DF00078E549 /* PBXTargetDependency */,
 			);
 			name = grapple;
 			packageProductDependencies = (
 				1D9AE39326AF5BD0007873E3 /* SwiftCLI */,
 				1D9AE39826AF5DA6007873E3 /* SwiftyTextTable */,
+				1DF2F34F26C5B9580078E549 /* LineNoise */,
 			);
 			productName = grapple;
 			productReference = 1D4AC03526AB7CE300ADD254 /* grapple */;
@@ -1944,6 +2163,48 @@
 			productReference = 1DE06D8D26B43C4C00B4DC77 /* BarcelonaDB.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		1DF2F2F026C44CAD0078E549 /* BarcelonaJS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DF2F2F626C44CAD0078E549 /* Build configuration list for PBXNativeTarget "BarcelonaJS" */;
+			buildPhases = (
+				1DF2F2EC26C44CAD0078E549 /* Headers */,
+				1DF2F2ED26C44CAD0078E549 /* Sources */,
+				1DF2F2EE26C44CAD0078E549 /* Frameworks */,
+				1DF2F2EF26C44CAD0078E549 /* Resources */,
+				1DF2F2FD26C44CBB0078E549 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1DF2F2FC26C44CBB0078E549 /* PBXTargetDependency */,
+				1DF2F31A26C4523F0078E549 /* PBXTargetDependency */,
+				1DF2F33C26C55C8A0078E549 /* PBXTargetDependency */,
+			);
+			name = BarcelonaJS;
+			productName = BarcelonaJS;
+			productReference = 1DF2F2F126C44CAD0078E549 /* BarcelonaJS.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		1DF2F32726C55C690078E549 /* BarcelonaIPC */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DF2F32D26C55C690078E549 /* Build configuration list for PBXNativeTarget "BarcelonaIPC" */;
+			buildPhases = (
+				1DF2F32326C55C690078E549 /* Headers */,
+				1DF2F32426C55C690078E549 /* Sources */,
+				1DF2F32526C55C690078E549 /* Frameworks */,
+				1DF2F32626C55C690078E549 /* Resources */,
+				1DF2F33426C55C7D0078E549 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1DF2F33326C55C7D0078E549 /* PBXTargetDependency */,
+			);
+			name = BarcelonaIPC;
+			productName = BarcelonaIPC;
+			productReference = 1DF2F32826C55C690078E549 /* BarcelonaIPC.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1979,6 +2240,14 @@
 					1DE06D8C26B43C4C00B4DC77 = {
 						CreatedOnToolsVersion = 12.5;
 					};
+					1DF2F2F026C44CAD0078E549 = {
+						CreatedOnToolsVersion = 12.5;
+						LastSwiftMigration = 1250;
+					};
+					1DF2F32726C55C690078E549 = {
+						CreatedOnToolsVersion = 12.5;
+						LastSwiftMigration = 1250;
+					};
 				};
 			};
 			buildConfigurationList = 1D5AEDA924E3725200303692 /* Build configuration list for PBXProject "imessage-rest" */;
@@ -2001,6 +2270,7 @@
 				1D92962826B5D8DF00F576A9 /* XCRemoteSwiftPackageReference "Swog" */,
 				1D92962B26B5D8F100F576A9 /* XCRemoteSwiftPackageReference "Swexy" */,
 				1D1C951C26B99E52005848A4 /* XCRemoteSwiftPackageReference "Pwomise" */,
+				1DF2F34E26C5B9580078E549 /* XCRemoteSwiftPackageReference "linenoise-swift" */,
 			);
 			productRefGroup = 1D5AEDAF24E3725200303692 /* Products */;
 			projectDirPath = "";
@@ -2014,6 +2284,8 @@
 				1D79037326ACFE6B00712CB3 /* BarcelonaEvents */,
 				1D4AC03426AB7CE300ADD254 /* grapple */,
 				1DCB0CD226B05E1C00242045 /* barcelona-mautrix */,
+				1DF2F2F026C44CAD0078E549 /* BarcelonaJS */,
+				1DF2F32726C55C690078E549 /* BarcelonaIPC */,
 			);
 		};
 /* End PBXProject section */
@@ -2055,6 +2327,20 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		1DE06D8B26B43C4C00B4DC77 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1DF2F2EF26C44CAD0078E549 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1DF2F32626C55C690078E549 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2224,6 +2510,7 @@
 				1D4AC03826AB7CE300ADD254 /* Grapple.swift in Sources */,
 				1D9AE38E26AF4A29007873E3 /* SendMessageCommand.swift in Sources */,
 				1D9AE39B26AF5FD7007873E3 /* DebugCommands.swift in Sources */,
+				1DF2F2EB26C43D550078E549 /* JSCommand.swift in Sources */,
 				1DC9E85B26C19D1A007E463F /* ListCommand.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2301,6 +2588,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1D79038826ACFE7F00712CB3 /* Event.swift in Sources */,
+				1DF2F31E26C45FD30078E549 /* Event+Codable.swift in Sources */,
 				1D79038926ACFE7F00712CB3 /* EventDispatcher.swift in Sources */,
 				1DC9E85D26C1AA7E007E463F /* HealthEvents.swift in Sources */,
 				1D79038726ACFE7F00712CB3 /* DispatchSupervisor.swift in Sources */,
@@ -2366,6 +2654,40 @@
 				1D884DA626BB4EAE003E60E7 /* RawChat.swift in Sources */,
 				1D884DA226BB4EAE003E60E7 /* RawMessage.swift in Sources */,
 				1D884DA126BB4EAE003E60E7 /* RawAttachment.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1DF2F2ED26C44CAD0078E549 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1DF2F34D26C5B64B0078E549 /* JSPromise.swift in Sources */,
+				1DF2F31626C44F6D0078E549 /* BarcelonaJS.swift in Sources */,
+				1DF2F30C26C44DB00078E549 /* JBLMessage.swift in Sources */,
+				1DF2F31226C44E1E0078E549 /* JBLAttachment.swift in Sources */,
+				1D91AAFD26C5EF8400115584 /* JSContext+Completion.swift in Sources */,
+				1DF2F30626C44D1D0078E549 /* JBLAcknowledgmentChatItem.swift in Sources */,
+				1DF2F30A26C44D490078E549 /* JBLTextChatItem.swift in Sources */,
+				1DF2F30226C44CF80078E549 /* JBLChat.swift in Sources */,
+				1DF2F34926C56F040078E549 /* IPC.swift in Sources */,
+				1DF2F31426C44EFE0078E549 /* JBLStatusChatItem.swift in Sources */,
+				1DF2F30826C44D370078E549 /* JBLAttachmentChatItem.swift in Sources */,
+				1DF2F34B26C597260078E549 /* JBLHandle.swift in Sources */,
+				1DF2F30426C44D060078E549 /* JBLChatItem.swift in Sources */,
+				1DF2F32226C47E9C0078E549 /* JBLDebugUtils.swift in Sources */,
+				1DF2F31C26C452490078E549 /* JBLEventBus.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1DF2F32426C55C690078E549 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1DF2F34326C56E2B0078E549 /* IPCSender.swift in Sources */,
+				1DF2F34526C56E5F0078E549 /* IPCReceiver.swift in Sources */,
+				1DF2F34126C56E0C0078E549 /* IPCWrapper.swift in Sources */,
+				1DF2F34726C56E7F0078E549 /* IPCPayload.swift in Sources */,
+				1DF2F33F26C55CA00078E549 /* IPCUtils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2442,6 +2764,31 @@
 			isa = PBXTargetDependency;
 			target = 1D79039026ACFF0300712CB3 /* BarcelonaFoundation */;
 			targetProxy = 1DE06D9726B43C6D00B4DC77 /* PBXContainerItemProxy */;
+		};
+		1DF2F2FC26C44CBB0078E549 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D44864424E85BBB00FF73F3 /* Barcelona */;
+			targetProxy = 1DF2F2FB26C44CBB0078E549 /* PBXContainerItemProxy */;
+		};
+		1DF2F31026C44DF00078E549 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1DF2F2F026C44CAD0078E549 /* BarcelonaJS */;
+			targetProxy = 1DF2F30F26C44DF00078E549 /* PBXContainerItemProxy */;
+		};
+		1DF2F31A26C4523F0078E549 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D79037326ACFE6B00712CB3 /* BarcelonaEvents */;
+			targetProxy = 1DF2F31926C4523F0078E549 /* PBXContainerItemProxy */;
+		};
+		1DF2F33326C55C7D0078E549 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D79039026ACFF0300712CB3 /* BarcelonaFoundation */;
+			targetProxy = 1DF2F33226C55C7D0078E549 /* PBXContainerItemProxy */;
+		};
+		1DF2F33C26C55C8A0078E549 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1DF2F32726C55C690078E549 /* BarcelonaIPC */;
+			targetProxy = 1DF2F33B26C55C8A0078E549 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -3088,6 +3435,154 @@
 			};
 			name = Release;
 		};
+		1DF2F2F726C44CAD0078E549 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 6UW2D7F2RU;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = BarcelonaJS/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaJS;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		1DF2F2F826C44CAD0078E549 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 6UW2D7F2RU;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
+				INFOPLIST_FILE = BarcelonaJS/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaJS;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		1DF2F32E26C55C690078E549 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 6UW2D7F2RU;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = BarcelonaIPC/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaIPC;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		1DF2F32F26C55C690078E549 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 6UW2D7F2RU;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = BarcelonaIPC/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaIPC;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -3168,6 +3663,24 @@
 			buildConfigurations = (
 				1DE06D9326B43C4C00B4DC77 /* Debug */,
 				1DE06D9426B43C4C00B4DC77 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DF2F2F626C44CAD0078E549 /* Build configuration list for PBXNativeTarget "BarcelonaJS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DF2F2F726C44CAD0078E549 /* Debug */,
+				1DF2F2F826C44CAD0078E549 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DF2F32D26C55C690078E549 /* Build configuration list for PBXNativeTarget "BarcelonaIPC" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DF2F32E26C55C690078E549 /* Debug */,
+				1DF2F32F26C55C690078E549 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -3255,6 +3768,14 @@
 				kind = branch;
 			};
 		};
+		1DF2F34E26C5B9580078E549 /* XCRemoteSwiftPackageReference "linenoise-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/andybest/linenoise-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.0.3;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -3332,6 +3853,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1D5AEE4524E37CDF00303692 /* XCRemoteSwiftPackageReference "GRDB" */;
 			productName = GRDB;
+		};
+		1DF2F34F26C5B9580078E549 /* LineNoise */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1DF2F34E26C5B9580078E549 /* XCRemoteSwiftPackageReference "linenoise-swift" */;
+			productName = LineNoise;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

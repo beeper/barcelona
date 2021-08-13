@@ -20,13 +20,21 @@ class Grapple {
     static func main() {
         LoggingDrivers.append(ConsoleDriver.shared)
         
-        BarcelonaManager.shared.bootstrap().then { success in
+        func run() {
             let exitCode = CLI(name: "grapple", commands: [
-                SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand()
+                SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand()
             ]).go()
             
             guard exitCode == 0 else {
                 exit(exitCode)
+            }
+        }
+        
+        if let jsIndex = ProcessInfo.processInfo.arguments.firstIndex(of: "js"), ProcessInfo.processInfo.arguments[ProcessInfo.processInfo.arguments.index(after: jsIndex)] == "remote" {
+            run()
+        } else {
+            BarcelonaManager.shared.bootstrap().then { success in
+                run()
             }
         }
 

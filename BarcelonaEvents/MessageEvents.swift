@@ -138,7 +138,7 @@ class MessageEvents: EventDispatcher {
                     return
                 }
                 
-                self.log.debug("dispatching items with type %@: %@", toDispatch.label, chatItems)
+                self.log.debug("dispatching items with type %@: %@", toDispatch.name.rawValue, chatItems)
                 
                 self.bus.dispatch(toDispatch)
             }
