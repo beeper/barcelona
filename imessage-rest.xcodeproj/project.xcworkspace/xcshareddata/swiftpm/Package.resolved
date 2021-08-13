@@ -47,11 +47,20 @@
         }
       },
       {
+        "package": "Nimble",
+        "repositoryURL": "https://github.com/Quick/Nimble",
+        "state": {
+          "branch": null,
+          "revision": "e9d769113660769a4d9dd3afb855562c0b7ae7b0",
+          "version": "7.3.4"
+        }
+      },
+      {
         "package": "Pwomise",
         "repositoryURL": "https://github.com/EricRabil/Pwomise",
         "state": {
           "branch": "main",
-          "revision": "fc82bb0890742c678cf1270a7fd6b23ec7a30189",
+          "revision": "a22b171b9ad622363b9346712c297bc13b101a6c",
           "version": null
         }
       },

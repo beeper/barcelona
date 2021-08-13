@@ -323,6 +323,7 @@
 		1DEC458226C6D6BF00D5AC08 /* ToJSONSynthesis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC456226C6D09500D5AC08 /* ToJSONSynthesis.swift */; };
 		1DEC458426C6D70C00D5AC08 /* BarcelonaJSFoundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC458326C6D70C00D5AC08 /* BarcelonaJSFoundation.swift */; };
 		1DEC458526C6D89700D5AC08 /* JSPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34C26C5B64B0078E549 /* JSPromise.swift */; };
+		1DEC458726C7036F00D5AC08 /* Swog in Frameworks */ = {isa = PBXBuildFile; productRef = 1DEC458626C7036F00D5AC08 /* Swog */; };
 		1DEE7EA1250FA4150009C74F /* Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA0250FA4150009C74F /* Searchable.swift */; };
 		1DEE7EA4250FA4B40009C74F /* Message+Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA3250FA4B40009C74F /* Message+Searchable.swift */; };
 		1DEE7EA6250FB2150009C74F /* IMHandle+Resolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA5250FB2150009C74F /* IMHandle+Resolvable.swift */; };
@@ -1050,6 +1051,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1DEC458726C7036F00D5AC08 /* Swog in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2289,6 +2291,9 @@
 			dependencies = (
 			);
 			name = BarcelonaJSFoundation;
+			packageProductDependencies = (
+				1DEC458626C7036F00D5AC08 /* Swog */,
+			);
 			productName = BarcelonaJSFoundation;
 			productReference = 1DEC456F26C6D65F00D5AC08 /* BarcelonaJSFoundation.framework */;
 			productType = "com.apple.product-type.framework";
@@ -4097,6 +4102,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1D5AEE4524E37CDF00303692 /* XCRemoteSwiftPackageReference "GRDB" */;
 			productName = GRDB;
+		};
+		1DEC458626C7036F00D5AC08 /* Swog */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D92962826B5D8DF00F576A9 /* XCRemoteSwiftPackageReference "Swog" */;
+			productName = Swog;
 		};
 		1DF2F34F26C5B9580078E549 /* LineNoise */ = {
 			isa = XCSwiftPackageProductDependency;
