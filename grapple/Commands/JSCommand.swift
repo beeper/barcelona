@@ -23,8 +23,7 @@ public class JSCommand: CommandGroup {
         
         public func execute() throws {
             Thread {
-                let thread = JSThread()
-                let server = BarcelonaJSIPCServer(context: thread)
+                let server = BarcelonaJSIPCServer(context: JBLCreateJSContext())
                 
                 RunLoop.current.run()
             }.start()
@@ -72,13 +71,13 @@ public class JSCommand: CommandGroup {
         public let name = "repl"
         
         public func execute() throws {
-            let thread = JSThread()
+            let context = JBLCreateJSContext()
             
             LoggingDrivers = [OSLogDriver.shared]
             
             Thread {
                 while let js = readLine() {
-                    print(thread.execute(js))
+                    print(context.evaluateScript(atomically: js).inspectionString ?? "undefined")
                 }
             }.start()
         }

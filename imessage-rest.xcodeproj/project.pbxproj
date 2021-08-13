@@ -194,7 +194,6 @@
 		1D884DC326BB55D8003E60E7 /* IMCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD424E3744900303692 /* IMCore.framework */; };
 		1D9079F2250ED4DB00ED1EDC /* AttributedStringDeserializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE5224E37D9E00303692 /* AttributedStringDeserializer.swift */; };
 		1D9079F3250ED4DB00ED1EDC /* AttributedStringSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB9520624F6B8BF004CC87B /* AttributedStringSerializer.swift */; };
-		1D91AAFD26C5EF8400115584 /* JSContext+Completion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D91AAFC26C5EF8400115584 /* JSContext+Completion.swift */; };
 		1D91AAFE26C6531A00115584 /* BarcelonaJS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF2F2F126C44CAD0078E549 /* BarcelonaJS.framework */; };
 		1D91AAFF26C6531A00115584 /* BarcelonaJS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF2F2F126C44CAD0078E549 /* BarcelonaJS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1D91B49325C4786200DCBC3D /* IMDPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D91B49225C4786200DCBC3D /* IMDPersistence.swift */; };
@@ -309,6 +308,21 @@
 		1DE06D9126B43C4C00B4DC77 /* BarcelonaDB.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DE06D8F26B43C4C00B4DC77 /* BarcelonaDB.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1DE06D9626B43C6D00B4DC77 /* BarcelonaFoundation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D79039126ACFF0300712CB3 /* BarcelonaFoundation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1DE06D9B26B43C7300B4DC77 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 1DE06D9A26B43C7300B4DC77 /* GRDB */; };
+		1DEC455626C6CF1F00D5AC08 /* BarcelonaJSIPCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC455526C6CF1F00D5AC08 /* BarcelonaJSIPCClient.swift */; };
+		1DEC455826C6CF5700D5AC08 /* BarcelonaJSIPCServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC455726C6CF5700D5AC08 /* BarcelonaJSIPCServer.swift */; };
+		1DEC457326C6D65F00D5AC08 /* BarcelonaJSFoundation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DEC457126C6D65F00D5AC08 /* BarcelonaJSFoundation.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		1DEC457726C6D67400D5AC08 /* BarcelonaJSFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DEC456F26C6D65F00D5AC08 /* BarcelonaJSFoundation.framework */; };
+		1DEC457826C6D67400D5AC08 /* BarcelonaJSFoundation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1DEC456F26C6D65F00D5AC08 /* BarcelonaJSFoundation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1DEC457B26C6D6BF00D5AC08 /* JSConsole.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC455F26C6D04A00D5AC08 /* JSConsole.swift */; };
+		1DEC457C26C6D6BF00D5AC08 /* JSValue+SaneBridging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC455A26C6CF8500D5AC08 /* JSValue+SaneBridging.swift */; };
+		1DEC457D26C6D6BF00D5AC08 /* JSContext+Subscript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC455C26C6D02E00D5AC08 /* JSContext+Subscript.swift */; };
+		1DEC457E26C6D6BF00D5AC08 /* JSValue+DescriptorManipulation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC456426C6D1A200D5AC08 /* JSValue+DescriptorManipulation.swift */; };
+		1DEC457F26C6D6BF00D5AC08 /* JSContext+Atomic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC456626C6D30400D5AC08 /* JSContext+Atomic.swift */; };
+		1DEC458026C6D6BF00D5AC08 /* JSContext+Completion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D91AAFC26C5EF8400115584 /* JSContext+Completion.swift */; };
+		1DEC458126C6D6BF00D5AC08 /* JSValue+Inspection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC456826C6D47F00D5AC08 /* JSValue+Inspection.swift */; };
+		1DEC458226C6D6BF00D5AC08 /* ToJSONSynthesis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC456226C6D09500D5AC08 /* ToJSONSynthesis.swift */; };
+		1DEC458426C6D70C00D5AC08 /* BarcelonaJSFoundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC458326C6D70C00D5AC08 /* BarcelonaJSFoundation.swift */; };
+		1DEC458526C6D89700D5AC08 /* JSPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34C26C5B64B0078E549 /* JSPromise.swift */; };
 		1DEE7EA1250FA4150009C74F /* Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA0250FA4150009C74F /* Searchable.swift */; };
 		1DEE7EA4250FA4B40009C74F /* Message+Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA3250FA4B40009C74F /* Message+Searchable.swift */; };
 		1DEE7EA6250FB2150009C74F /* IMHandle+Resolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA5250FB2150009C74F /* IMHandle+Resolvable.swift */; };
@@ -331,7 +345,6 @@
 		1DF2F31826C4523F0078E549 /* BarcelonaEvents.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D79037426ACFE6B00712CB3 /* BarcelonaEvents.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1DF2F31C26C452490078E549 /* JBLEventBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F31B26C452490078E549 /* JBLEventBus.swift */; };
 		1DF2F31E26C45FD30078E549 /* Event+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F31D26C45FD20078E549 /* Event+Codable.swift */; };
-		1DF2F32226C47E9C0078E549 /* JBLDebugUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F32126C47E9C0078E549 /* JBLDebugUtils.swift */; };
 		1DF2F32C26C55C690078E549 /* BarcelonaIPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DF2F32A26C55C690078E549 /* BarcelonaIPC.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1DF2F33026C55C7D0078E549 /* BarcelonaFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D79039126ACFF0300712CB3 /* BarcelonaFoundation.framework */; };
 		1DF2F33126C55C7D0078E549 /* BarcelonaFoundation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D79039126ACFF0300712CB3 /* BarcelonaFoundation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -342,9 +355,8 @@
 		1DF2F34326C56E2B0078E549 /* IPCSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34226C56E2B0078E549 /* IPCSender.swift */; };
 		1DF2F34526C56E5F0078E549 /* IPCReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34426C56E5F0078E549 /* IPCReceiver.swift */; };
 		1DF2F34726C56E7F0078E549 /* IPCPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34626C56E7F0078E549 /* IPCPayload.swift */; };
-		1DF2F34926C56F040078E549 /* IPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34826C56F040078E549 /* IPC.swift */; };
+		1DF2F34926C56F040078E549 /* BarcelonaJSIPCTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34826C56F040078E549 /* BarcelonaJSIPCTypes.swift */; };
 		1DF2F34B26C597260078E549 /* JBLHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34A26C597260078E549 /* JBLHandle.swift */; };
-		1DF2F34D26C5B64B0078E549 /* JSPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F34C26C5B64B0078E549 /* JSPromise.swift */; };
 		1DF2F35026C5B9580078E549 /* LineNoise in Frameworks */ = {isa = PBXBuildFile; productRef = 1DF2F34F26C5B9580078E549 /* LineNoise */; };
 		1DFB1EA7250FFE3F00D84361 /* Chat+Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFB1EA6250FFE3F00D84361 /* Chat+Searchable.swift */; };
 		1DFB1EA9251011DD00D84361 /* Contact+Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFB1EA8251011DD00D84361 /* Contact+Searchable.swift */; };
@@ -435,6 +447,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 1D79039026ACFF0300712CB3;
 			remoteInfo = BarcelonaFoundation;
+		};
+		1DEC457926C6D67400D5AC08 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1DEC456E26C6D65F00D5AC08;
+			remoteInfo = BarcelonaJSFoundation;
 		};
 		1DF2F2FB26C44CBB0078E549 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -572,6 +591,7 @@
 			files = (
 				1DF2F33A26C55C8A0078E549 /* BarcelonaIPC.framework in Embed Frameworks */,
 				1DF2F2FA26C44CBB0078E549 /* Barcelona.framework in Embed Frameworks */,
+				1DEC457826C6D67400D5AC08 /* BarcelonaJSFoundation.framework in Embed Frameworks */,
 				1DF2F31826C4523F0078E549 /* BarcelonaEvents.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -882,6 +902,19 @@
 		1DE06DC126B4C2B000B4DC77 /* Messages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Messages.swift; sourceTree = "<group>"; };
 		1DE06DC326B4C2DB00B4DC77 /* Chats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chats.swift; sourceTree = "<group>"; };
 		1DE06DC526B4C49600B4DC77 /* HandleTimestamps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandleTimestamps.swift; sourceTree = "<group>"; };
+		1DEC455526C6CF1F00D5AC08 /* BarcelonaJSIPCClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcelonaJSIPCClient.swift; sourceTree = "<group>"; };
+		1DEC455726C6CF5700D5AC08 /* BarcelonaJSIPCServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcelonaJSIPCServer.swift; sourceTree = "<group>"; };
+		1DEC455A26C6CF8500D5AC08 /* JSValue+SaneBridging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSValue+SaneBridging.swift"; sourceTree = "<group>"; };
+		1DEC455C26C6D02E00D5AC08 /* JSContext+Subscript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSContext+Subscript.swift"; sourceTree = "<group>"; };
+		1DEC455F26C6D04A00D5AC08 /* JSConsole.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSConsole.swift; sourceTree = "<group>"; };
+		1DEC456226C6D09500D5AC08 /* ToJSONSynthesis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToJSONSynthesis.swift; sourceTree = "<group>"; };
+		1DEC456426C6D1A200D5AC08 /* JSValue+DescriptorManipulation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSValue+DescriptorManipulation.swift"; sourceTree = "<group>"; };
+		1DEC456626C6D30400D5AC08 /* JSContext+Atomic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSContext+Atomic.swift"; sourceTree = "<group>"; };
+		1DEC456826C6D47F00D5AC08 /* JSValue+Inspection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSValue+Inspection.swift"; sourceTree = "<group>"; };
+		1DEC456F26C6D65F00D5AC08 /* BarcelonaJSFoundation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaJSFoundation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1DEC457126C6D65F00D5AC08 /* BarcelonaJSFoundation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BarcelonaJSFoundation.h; sourceTree = "<group>"; };
+		1DEC457226C6D65F00D5AC08 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1DEC458326C6D70C00D5AC08 /* BarcelonaJSFoundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcelonaJSFoundation.swift; sourceTree = "<group>"; };
 		1DEE7EA0250FA4150009C74F /* Searchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Searchable.swift; sourceTree = "<group>"; };
 		1DEE7EA3250FA4B40009C74F /* Message+Searchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message+Searchable.swift"; sourceTree = "<group>"; };
 		1DEE7EA5250FB2150009C74F /* IMHandle+Resolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMHandle+Resolvable.swift"; sourceTree = "<group>"; };
@@ -899,7 +932,6 @@
 		1DF2F31526C44F6D0078E549 /* BarcelonaJS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcelonaJS.swift; sourceTree = "<group>"; };
 		1DF2F31B26C452490078E549 /* JBLEventBus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JBLEventBus.swift; sourceTree = "<group>"; };
 		1DF2F31D26C45FD20078E549 /* Event+Codable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Event+Codable.swift"; sourceTree = "<group>"; };
-		1DF2F32126C47E9C0078E549 /* JBLDebugUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JBLDebugUtils.swift; sourceTree = "<group>"; };
 		1DF2F32826C55C690078E549 /* BarcelonaIPC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaIPC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF2F32A26C55C690078E549 /* BarcelonaIPC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BarcelonaIPC.h; sourceTree = "<group>"; };
 		1DF2F32B26C55C690078E549 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -908,7 +940,7 @@
 		1DF2F34226C56E2B0078E549 /* IPCSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPCSender.swift; sourceTree = "<group>"; };
 		1DF2F34426C56E5F0078E549 /* IPCReceiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPCReceiver.swift; sourceTree = "<group>"; };
 		1DF2F34626C56E7F0078E549 /* IPCPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPCPayload.swift; sourceTree = "<group>"; };
-		1DF2F34826C56F040078E549 /* IPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPC.swift; sourceTree = "<group>"; };
+		1DF2F34826C56F040078E549 /* BarcelonaJSIPCTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcelonaJSIPCTypes.swift; sourceTree = "<group>"; };
 		1DF2F34A26C597260078E549 /* JBLHandle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JBLHandle.swift; sourceTree = "<group>"; };
 		1DF2F34C26C5B64B0078E549 /* JSPromise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSPromise.swift; sourceTree = "<group>"; };
 		1DF63FA824E4DE410004527F /* RawAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawAttachment.swift; sourceTree = "<group>"; };
@@ -1014,12 +1046,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		1DEC456C26C6D65F00D5AC08 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1DF2F2EE26C44CAD0078E549 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				1DF2F2F926C44CBB0078E549 /* Barcelona.framework in Frameworks */,
 				1DF2F33926C55C8A0078E549 /* BarcelonaIPC.framework in Frameworks */,
+				1DEC457726C6D67400D5AC08 /* BarcelonaJSFoundation.framework in Frameworks */,
 				1DF2F2FE26C44CDE0078E549 /* IMCore.framework in Frameworks */,
 				1DF2F31726C4523F0078E549 /* BarcelonaEvents.framework in Frameworks */,
 			);
@@ -1381,6 +1421,7 @@
 				1D4AC03626AB7CE300ADD254 /* grapple */,
 				1DF2F2F226C44CAD0078E549 /* BarcelonaJS */,
 				1DF2F32926C55C690078E549 /* BarcelonaIPC */,
+				1DEC457026C6D65F00D5AC08 /* BarcelonaJSFoundation */,
 				1D5AEDAF24E3725200303692 /* Products */,
 				1D5AEDBE24E373ED00303692 /* Frameworks */,
 			);
@@ -1399,6 +1440,7 @@
 				1DE06D8D26B43C4C00B4DC77 /* BarcelonaDB.framework */,
 				1DF2F2F126C44CAD0078E549 /* BarcelonaJS.framework */,
 				1DF2F32826C55C690078E549 /* BarcelonaIPC.framework */,
+				1DEC456F26C6D65F00D5AC08 /* BarcelonaJSFoundation.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1854,6 +1896,59 @@
 			path = Queries;
 			sourceTree = "<group>";
 		};
+		1DEC455426C6CF0400D5AC08 /* IPC */ = {
+			isa = PBXGroup;
+			children = (
+				1DF2F34826C56F040078E549 /* BarcelonaJSIPCTypes.swift */,
+				1DEC455526C6CF1F00D5AC08 /* BarcelonaJSIPCClient.swift */,
+				1DEC455726C6CF5700D5AC08 /* BarcelonaJSIPCServer.swift */,
+			);
+			path = IPC;
+			sourceTree = "<group>";
+		};
+		1DEC455926C6CF7C00D5AC08 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				1DEC455A26C6CF8500D5AC08 /* JSValue+SaneBridging.swift */,
+				1DEC455C26C6D02E00D5AC08 /* JSContext+Subscript.swift */,
+				1DEC456426C6D1A200D5AC08 /* JSValue+DescriptorManipulation.swift */,
+				1DEC456626C6D30400D5AC08 /* JSContext+Atomic.swift */,
+				1D91AAFC26C5EF8400115584 /* JSContext+Completion.swift */,
+				1DEC456826C6D47F00D5AC08 /* JSValue+Inspection.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		1DEC455E26C6D04000D5AC08 /* Exports */ = {
+			isa = PBXGroup;
+			children = (
+				1DEC455F26C6D04A00D5AC08 /* JSConsole.swift */,
+				1DF2F34C26C5B64B0078E549 /* JSPromise.swift */,
+			);
+			path = Exports;
+			sourceTree = "<group>";
+		};
+		1DEC456126C6D08700D5AC08 /* Runtime */ = {
+			isa = PBXGroup;
+			children = (
+				1DEC456226C6D09500D5AC08 /* ToJSONSynthesis.swift */,
+			);
+			path = Runtime;
+			sourceTree = "<group>";
+		};
+		1DEC457026C6D65F00D5AC08 /* BarcelonaJSFoundation */ = {
+			isa = PBXGroup;
+			children = (
+				1DEC455E26C6D04000D5AC08 /* Exports */,
+				1DEC455926C6CF7C00D5AC08 /* Extensions */,
+				1DEC456126C6D08700D5AC08 /* Runtime */,
+				1DEC457126C6D65F00D5AC08 /* BarcelonaJSFoundation.h */,
+				1DEC457226C6D65F00D5AC08 /* Info.plist */,
+				1DEC458326C6D70C00D5AC08 /* BarcelonaJSFoundation.swift */,
+			);
+			path = BarcelonaJSFoundation;
+			sourceTree = "<group>";
+		};
 		1DEE7EA2250FA4AA0009C74F /* Searchable */ = {
 			isa = PBXGroup;
 			children = (
@@ -1868,11 +1963,10 @@
 		1DF2F2F226C44CAD0078E549 /* BarcelonaJS */ = {
 			isa = PBXGroup;
 			children = (
+				1DEC455426C6CF0400D5AC08 /* IPC */,
 				1DF2F30026C44CE90078E549 /* Exports */,
 				1DF2F2F426C44CAD0078E549 /* Info.plist */,
 				1DF2F31526C44F6D0078E549 /* BarcelonaJS.swift */,
-				1DF2F34826C56F040078E549 /* IPC.swift */,
-				1D91AAFC26C5EF8400115584 /* JSContext+Completion.swift */,
 			);
 			path = BarcelonaJS;
 			sourceTree = "<group>";
@@ -1889,9 +1983,7 @@
 				1DF2F31126C44E1E0078E549 /* JBLAttachment.swift */,
 				1DF2F31326C44EFE0078E549 /* JBLStatusChatItem.swift */,
 				1DF2F31B26C452490078E549 /* JBLEventBus.swift */,
-				1DF2F32126C47E9C0078E549 /* JBLDebugUtils.swift */,
 				1DF2F34A26C597260078E549 /* JBLHandle.swift */,
-				1DF2F34C26C5B64B0078E549 /* JSPromise.swift */,
 			);
 			path = Exports;
 			sourceTree = "<group>";
@@ -1969,6 +2061,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				1DE06D9126B43C4C00B4DC77 /* BarcelonaDB.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1DEC456A26C6D65F00D5AC08 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1DEC457326C6D65F00D5AC08 /* BarcelonaJSFoundation.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2175,6 +2275,24 @@
 			productReference = 1DE06D8D26B43C4C00B4DC77 /* BarcelonaDB.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		1DEC456E26C6D65F00D5AC08 /* BarcelonaJSFoundation */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEC457426C6D65F00D5AC08 /* Build configuration list for PBXNativeTarget "BarcelonaJSFoundation" */;
+			buildPhases = (
+				1DEC456A26C6D65F00D5AC08 /* Headers */,
+				1DEC456B26C6D65F00D5AC08 /* Sources */,
+				1DEC456C26C6D65F00D5AC08 /* Frameworks */,
+				1DEC456D26C6D65F00D5AC08 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BarcelonaJSFoundation;
+			productName = BarcelonaJSFoundation;
+			productReference = 1DEC456F26C6D65F00D5AC08 /* BarcelonaJSFoundation.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		1DF2F2F026C44CAD0078E549 /* BarcelonaJS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1DF2F2F626C44CAD0078E549 /* Build configuration list for PBXNativeTarget "BarcelonaJS" */;
@@ -2191,6 +2309,7 @@
 				1DF2F2FC26C44CBB0078E549 /* PBXTargetDependency */,
 				1DF2F31A26C4523F0078E549 /* PBXTargetDependency */,
 				1DF2F33C26C55C8A0078E549 /* PBXTargetDependency */,
+				1DEC457A26C6D67400D5AC08 /* PBXTargetDependency */,
 			);
 			name = BarcelonaJS;
 			productName = BarcelonaJS;
@@ -2252,6 +2371,9 @@
 					1DE06D8C26B43C4C00B4DC77 = {
 						CreatedOnToolsVersion = 12.5;
 					};
+					1DEC456E26C6D65F00D5AC08 = {
+						CreatedOnToolsVersion = 12.5;
+					};
 					1DF2F2F026C44CAD0078E549 = {
 						CreatedOnToolsVersion = 12.5;
 						LastSwiftMigration = 1250;
@@ -2298,6 +2420,7 @@
 				1DCB0CD226B05E1C00242045 /* barcelona-mautrix */,
 				1DF2F2F026C44CAD0078E549 /* BarcelonaJS */,
 				1DF2F32726C55C690078E549 /* BarcelonaIPC */,
+				1DEC456E26C6D65F00D5AC08 /* BarcelonaJSFoundation */,
 			);
 		};
 /* End PBXProject section */
@@ -2339,6 +2462,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		1DE06D8B26B43C4C00B4DC77 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1DEC456D26C6D65F00D5AC08 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2669,24 +2799,40 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		1DEC456B26C6D65F00D5AC08 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1DEC457B26C6D6BF00D5AC08 /* JSConsole.swift in Sources */,
+				1DEC458426C6D70C00D5AC08 /* BarcelonaJSFoundation.swift in Sources */,
+				1DEC457C26C6D6BF00D5AC08 /* JSValue+SaneBridging.swift in Sources */,
+				1DEC457D26C6D6BF00D5AC08 /* JSContext+Subscript.swift in Sources */,
+				1DEC457E26C6D6BF00D5AC08 /* JSValue+DescriptorManipulation.swift in Sources */,
+				1DEC457F26C6D6BF00D5AC08 /* JSContext+Atomic.swift in Sources */,
+				1DEC458526C6D89700D5AC08 /* JSPromise.swift in Sources */,
+				1DEC458026C6D6BF00D5AC08 /* JSContext+Completion.swift in Sources */,
+				1DEC458126C6D6BF00D5AC08 /* JSValue+Inspection.swift in Sources */,
+				1DEC458226C6D6BF00D5AC08 /* ToJSONSynthesis.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1DF2F2ED26C44CAD0078E549 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1DF2F34D26C5B64B0078E549 /* JSPromise.swift in Sources */,
+				1DEC455826C6CF5700D5AC08 /* BarcelonaJSIPCServer.swift in Sources */,
 				1DF2F31626C44F6D0078E549 /* BarcelonaJS.swift in Sources */,
 				1DF2F30C26C44DB00078E549 /* JBLMessage.swift in Sources */,
 				1DF2F31226C44E1E0078E549 /* JBLAttachment.swift in Sources */,
-				1D91AAFD26C5EF8400115584 /* JSContext+Completion.swift in Sources */,
+				1DEC455626C6CF1F00D5AC08 /* BarcelonaJSIPCClient.swift in Sources */,
 				1DF2F30626C44D1D0078E549 /* JBLAcknowledgmentChatItem.swift in Sources */,
 				1DF2F30A26C44D490078E549 /* JBLTextChatItem.swift in Sources */,
 				1DF2F30226C44CF80078E549 /* JBLChat.swift in Sources */,
-				1DF2F34926C56F040078E549 /* IPC.swift in Sources */,
+				1DF2F34926C56F040078E549 /* BarcelonaJSIPCTypes.swift in Sources */,
 				1DF2F31426C44EFE0078E549 /* JBLStatusChatItem.swift in Sources */,
 				1DF2F30826C44D370078E549 /* JBLAttachmentChatItem.swift in Sources */,
 				1DF2F34B26C597260078E549 /* JBLHandle.swift in Sources */,
 				1DF2F30426C44D060078E549 /* JBLChatItem.swift in Sources */,
-				1DF2F32226C47E9C0078E549 /* JBLDebugUtils.swift in Sources */,
 				1DF2F31C26C452490078E549 /* JBLEventBus.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2781,6 +2927,11 @@
 			isa = PBXTargetDependency;
 			target = 1D79039026ACFF0300712CB3 /* BarcelonaFoundation */;
 			targetProxy = 1DE06D9726B43C6D00B4DC77 /* PBXContainerItemProxy */;
+		};
+		1DEC457A26C6D67400D5AC08 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1DEC456E26C6D65F00D5AC08 /* BarcelonaJSFoundation */;
+			targetProxy = 1DEC457926C6D67400D5AC08 /* PBXContainerItemProxy */;
 		};
 		1DF2F2FC26C44CBB0078E549 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3452,6 +3603,73 @@
 			};
 			name = Release;
 		};
+		1DEC457526C6D65F00D5AC08 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 6UW2D7F2RU;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = BarcelonaJSFoundation/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaJSFoundation;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 5.0;
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		1DEC457626C6D65F00D5AC08 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 6UW2D7F2RU;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = BarcelonaJSFoundation/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ericrabil.BarcelonaJSFoundation;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 		1DF2F2F726C44CAD0078E549 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -3680,6 +3898,15 @@
 			buildConfigurations = (
 				1DE06D9326B43C4C00B4DC77 /* Debug */,
 				1DE06D9426B43C4C00B4DC77 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEC457426C6D65F00D5AC08 /* Build configuration list for PBXNativeTarget "BarcelonaJSFoundation" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEC457526C6D65F00D5AC08 /* Debug */,
+				1DEC457626C6D65F00D5AC08 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

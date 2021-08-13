@@ -42,7 +42,7 @@ public class JSPromise: NSObject, JSPromiseExports {
         }
     }
     
-    func success(value: Any?) {
+    public func success(value: Any?) {
         guard let resolve = resolve else { return }
         var result:JSValue?
         if let value = value  {
