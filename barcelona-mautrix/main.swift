@@ -276,7 +276,7 @@ BarcelonaManager.shared.bootstrap().then { success in
 
 RunLoop.main.schedule {
     Thread {
-        let thread = JSThread()
+        let thread = JBLCreateJSContext()
         let server = BarcelonaJSIPCServer(context: thread)
         
         RunLoop.current.run()

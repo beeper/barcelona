@@ -24,7 +24,11 @@ private extension NSObject {
 private extension ChatItem {
     static var ingestionPairs: [(String, ChatItem.Type)] {
         ingestionClasses.map {
+            #if os(iOS)
+            ($0.className, self)
+            #else
             ($0.className(), self)
+            #endif
         }
     }
 }
