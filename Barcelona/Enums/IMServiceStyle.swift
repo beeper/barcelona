@@ -9,6 +9,7 @@
 import Foundation
 import IMCore
 
+// (bl-api-exposed)
 /// Different styles of IMCore services
 public enum IMServiceStyle: String, CaseIterable, Codable, Hashable {
     case iMessage

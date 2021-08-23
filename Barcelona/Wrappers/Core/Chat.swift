@@ -98,6 +98,7 @@ public protocol ChatDelegate {
     func chat(_ chat: Chat, willSendMessages messages: [IMMessage], fromCreatePluginMessage createPluginMessage: CreatePluginMessage) -> Void
 }
 
+// (bl-api-exposed)
 public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     public init(_ backing: IMChat) {
         joinState = backing.joinState

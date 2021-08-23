@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "BarcelonaIPC",
+        "repositoryURL": "https://github.com/open-imcore/BarcelonaIPC",
+        "state": {
+          "branch": null,
+          "revision": "b69abb86d1e1f6bb468d18863f2898636fdcdd8b",
+          "version": "1.0.1"
+        }
+      },
+      {
         "package": "GRDB",
         "repositoryURL": "https://github.com/groue/GRDB.swift",
         "state": {
@@ -92,12 +101,39 @@
         }
       },
       {
+        "package": "SwiftSyntax",
+        "repositoryURL": "https://github.com/apple/swift-syntax.git",
+        "state": {
+          "branch": "release/5.4",
+          "revision": "d81b6a6dc2698a93dcc04304fb15a5446b5278a4",
+          "version": null
+        }
+      },
+      {
         "package": "SwiftCLI",
         "repositoryURL": "https://github.com/jakeheis/SwiftCLI",
         "state": {
           "branch": null,
           "revision": "2816678bcc37f4833d32abeddbdf5e757fa891d8",
           "version": "6.0.2"
+        }
+      },
+      {
+        "package": "Swifter",
+        "repositoryURL": "https://github.com/httpswift/swifter",
+        "state": {
+          "branch": null,
+          "revision": "9483a5d459b45c3ffd059f7b55f9638e268632fd",
+          "version": "1.5.0"
+        }
+      },
+      {
+        "package": "SwiftSemantics",
+        "repositoryURL": "https://github.com/SwiftDocOrg/SwiftSemantics",
+        "state": {
+          "branch": "main",
+          "revision": "0541303c42f4ad92cb3b22618f3de4b6a1a836d2",
+          "version": null
         }
       },
       {
