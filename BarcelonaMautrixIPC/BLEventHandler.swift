@@ -19,50 +19,6 @@ private extension ChatItemOwned {
     }
 }
 
-private extension HealthChecker.AuthenticationState {
-    var abnormalState: BridgeState? {
-        switch self {
-        case .authenticated:
-            return nil
-        case .none:
-            return .unconfigured
-        case .registrationFailure:
-            return .badCredentials
-        case .validationFaliure:
-            return .unknownError
-        case .signedOut:
-            return .loggedOut
-        }
-    }
-}
-
-private extension HealthChecker.ConnectionState {
-    var abnormalState: BridgeState? {
-        switch self {
-        case .connected:
-            return nil
-        case .errored:
-            return .unknownError
-        case .offline:
-            return .transientDisconnect
-        case .transientDisconnect:
-            return .transientDisconnect
-        }
-    }
-}
-
-private extension HealthState {
-    var statusCommand: BridgeStatusCommand {
-        BridgeStatusCommand(
-            state_event: authenticationState.abnormalState ?? connectionState.abnormalState ?? .connected,
-            error: authenticationState.error ?? connectionState.error,
-            message: authenticationState.message ?? connectionState.message,
-            remote_id: nil,
-            remote_name: nil
-        )
-    }
-}
-
 public class BLEventHandler {
     public static let shared = BLEventHandler()
     
@@ -104,8 +60,8 @@ public class BLEventHandler {
                 default:
                     break
                 }
-            case .healthChanged(let state):
-                send(.bridge_status(state.statusCommand))
+            case .healthChanged:
+                send(.bridge_status(.current))
             default:
                 break
             }

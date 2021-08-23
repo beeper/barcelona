@@ -73,16 +73,8 @@ extension JSONDecoder.DateDecodingStrategy {
     }
 }
 
-private let jujitsuEncoder: JSONEncoder = {
-    let encoder = JSONEncoder()
-    
-    encoder.dateEncodingStrategy = .iso8601withFractionalSeconds
-    encoder.outputFormatting = .prettyPrinted
-    
-    return encoder
-}()
-
 private var BL_IS_WRITING_META_PAYLOAD = false
+private let TERMINATOR = Data("\n".utf8)
 
 public func BLWritePayload(_ payload: IPCPayload) {
     let encoder = JSONEncoder()
@@ -98,6 +90,12 @@ public func BLWritePayload(_ payload: IPCPayload) {
     }
     
     FileHandle.standardOutput.write(try! encoder.encode(payload))
+    
+    #if DEBUG
+    if BLMetricStore.shared.get(key: .shouldDebugPayloads) ?? false {
+        FileHandle.standardOutput.write(TERMINATOR)
+    }
+    #endif
 }
 
 public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {

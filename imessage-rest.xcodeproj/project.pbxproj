@@ -88,6 +88,9 @@
 		1D5322C22677C0F7005FF8D1 /* IMItem|IMMessage+SenderServiceResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5322C12677C0F7005FF8D1 /* IMItem|IMMessage+SenderServiceResolvable.swift */; };
 		1D5322C42677C15B005FF8D1 /* IMItem|IMMessage+TimeResolvers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5322C32677C15B005FF8D1 /* IMItem|IMMessage+TimeResolvers.swift */; };
 		1D5A4A1926D3D44F0001EED1 /* BarcelonaIPC in Frameworks */ = {isa = PBXBuildFile; productRef = 1D5A4A1826D3D44F0001EED1 /* BarcelonaIPC */; };
+		1D5A4A1B26D3D59D0001EED1 /* BLRuntimeConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A1A26D3D59D0001EED1 /* BLRuntimeConfiguration.swift */; };
+		1D5A4A1D26D3D9570001EED1 /* BLHealthTicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A1C26D3D9570001EED1 /* BLHealthTicker.swift */; };
+		1D5A4A1F26D3DE160001EED1 /* SubjectStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A1E26D3DE160001EED1 /* SubjectStream.swift */; };
 		1D67C145250ACBCF000A4D58 /* IMHandle+DestinationResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D67C144250ACBCF000A4D58 /* IMHandle+DestinationResolvable.swift */; };
 		1D74D49A250C01CB00A9F9A1 /* Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D74D499250C01CB00A9F9A1 /* Identifiable.swift */; };
 		1D74D4A0250C04A900A9F9A1 /* IMService+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D74D49F250C04A900A9F9A1 /* IMService+Identifiable.swift */; };
@@ -765,6 +768,9 @@
 		1D5A4A1426D3D40B0001EED1 /* LICENSE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = LICENSE.md; sourceTree = "<group>"; };
 		1D5A4A1526D3D40C0001EED1 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		1D5A4A1626D3D4120001EED1 /* CONTRIBUTING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CONTRIBUTING.md; sourceTree = "<group>"; };
+		1D5A4A1A26D3D59D0001EED1 /* BLRuntimeConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLRuntimeConfiguration.swift; sourceTree = "<group>"; };
+		1D5A4A1C26D3D9570001EED1 /* BLHealthTicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLHealthTicker.swift; sourceTree = "<group>"; };
+		1D5A4A1E26D3DE160001EED1 /* SubjectStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubjectStream.swift; sourceTree = "<group>"; };
 		1D5AEDBF24E373ED00303692 /* IMCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IMCore.framework; path = Frameworks/IMCore.framework; sourceTree = "<group>"; };
 		1D5AEDC024E373ED00303692 /* ContactsFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ContactsFoundation.framework; path = Frameworks/ContactsFoundation.framework; sourceTree = "<group>"; };
 		1D5AEDC224E373ED00303692 /* ContactsAutocomplete.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ContactsAutocomplete.framework; path = Frameworks/ContactsAutocomplete.framework; sourceTree = "<group>"; };
@@ -1266,6 +1272,8 @@
 				1D0DC2C9266190CB00E4B6FF /* BLLogger.swift */,
 				1D5322D82677E950005FF8D1 /* BLEventHandler.swift */,
 				1DA8BE9E267A67B100636231 /* BLMetricStore.swift */,
+				1D5A4A1A26D3D59D0001EED1 /* BLRuntimeConfiguration.swift */,
+				1D5A4A1C26D3D9570001EED1 /* BLHealthTicker.swift */,
 			);
 			path = BarcelonaMautrixIPC;
 			sourceTree = "<group>";
@@ -1682,6 +1690,7 @@
 				1D9AE36E26AF0835007873E3 /* ExpiringCollection.swift */,
 				1DE06D5326B3028B00B4DC77 /* Logger.swift */,
 				1D92963126B5D91800F576A9 /* BarcelonaFoundation.swift */,
+				1D5A4A1E26D3DE160001EED1 /* SubjectStream.swift */,
 			);
 			path = BarcelonaFoundation;
 			sourceTree = "<group>";
@@ -2829,12 +2838,14 @@
 				1D4AC06326AB7EF900ADD254 /* BLPartialMessage.swift in Sources */,
 				1D4AC06426AB7EF900ADD254 /* BLAttachment.swift in Sources */,
 				1D4AC06526AB7EF900ADD254 /* BLAssociatedMessage.swift in Sources */,
+				1D5A4A1B26D3D59D0001EED1 /* BLRuntimeConfiguration.swift in Sources */,
 				1D4AC06626AB7EF900ADD254 /* BLReadReceipt.swift in Sources */,
 				1D4AC06726AB7EF900ADD254 /* BLTypingNotification.swift in Sources */,
 				1D4AC06826AB7EF900ADD254 /* BLChat.swift in Sources */,
 				1D4AC06926AB7EF900ADD254 /* BLContact.swift in Sources */,
 				1DC9E84F26BDA1B8007E463F /* BridgeStatusCommand.swift in Sources */,
 				1D4AC06A26AB7EF900ADD254 /* BLStruct.swift in Sources */,
+				1D5A4A1D26D3D9570001EED1 /* BLHealthTicker.swift in Sources */,
 				1D4AC06C26AB7EF900ADD254 /* ChatResolvable.swift in Sources */,
 				1D4AC06D26AB7EF900ADD254 /* TargetResolvable.swift in Sources */,
 				1D4AC06E26AB7EF900ADD254 /* ContactResolvable.swift in Sources */,
@@ -2916,6 +2927,7 @@
 				1DC4D7B726AE02D600281920 /* OSLog+Nice.swift in Sources */,
 				1D797B9A26AD075200B57208 /* Color.swift in Sources */,
 				1D1C94DA26B866CD005848A4 /* Promise+CollectionAddition.swift in Sources */,
+				1D5A4A1F26D3DE160001EED1 /* SubjectStream.swift in Sources */,
 				1D7F3DE126C307280086F32C /* NotificationCenter+Subscriptions.swift in Sources */,
 				1D9AE36F26AF0835007873E3 /* ExpiringCollection.swift in Sources */,
 				1D92963226B5D91800F576A9 /* BarcelonaFoundation.swift in Sources */,

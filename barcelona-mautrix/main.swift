@@ -283,4 +283,17 @@ RunLoop.main.schedule {
     }.start()
 }
 
+RunLoop.main.schedule {
+    BLHealthTicker.shared.run(schedulingNext: true)
+}
+
+BLHealthTicker.shared.stream.subscribe { command in
+    BLWritePayload(IPCPayload(command: .bridge_status(command)))
+}
+
+if ProcessInfo.processInfo.arguments.contains("-d") {
+    LoggingDrivers = [OSLogDriver.shared, ConsoleDriver.shared]
+    BLMetricStore.shared.set(true, forKey: .shouldDebugPayloads)
+}
+
 RunLoop.main.run()

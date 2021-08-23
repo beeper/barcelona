@@ -15,6 +15,7 @@ public class BLMetricStore {
     
     public enum BLMetricKey: String, Codable {
         case lastSentMessageGUIDs
+        case shouldDebugPayloads
     }
     
     public private(set) var metrics = [BLMetricKey: Any]()
@@ -28,6 +29,10 @@ public class BLMetricStore {
     }
     
     public func get<P: Codable>(typedValue type: P.Type, forKey key: BLMetricKey) -> P? {
+        metrics[key] as? P
+    }
+    
+    public func get<P>(key: BLMetricKey) -> P? {
         metrics[key] as? P
     }
 }
