@@ -91,6 +91,16 @@
 		1D5A4A1B26D3D59D0001EED1 /* BLRuntimeConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A1A26D3D59D0001EED1 /* BLRuntimeConfiguration.swift */; };
 		1D5A4A1D26D3D9570001EED1 /* BLHealthTicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A1C26D3D9570001EED1 /* BLHealthTicker.swift */; };
 		1D5A4A1F26D3DE160001EED1 /* SubjectStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A1E26D3DE160001EED1 /* SubjectStream.swift */; };
+		1D5A4A2226D3EF4A0001EED1 /* BLHandlePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A2026D3EF290001EED1 /* BLHandlePayload.swift */; };
+		1D5A4A2626D3F0470001EED1 /* SendMediaMessageCommand+Handler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A2426D3F0170001EED1 /* SendMediaMessageCommand+Handler.swift */; };
+		1D5A4A2826D3F0A30001EED1 /* SendTapbackCommand+Handler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A2726D3F0A30001EED1 /* SendTapbackCommand+Handler.swift */; };
+		1D5A4A2A26D3F0E10001EED1 /* SendMessageCommand+Handler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A2926D3F0E10001EED1 /* SendMessageCommand+Handler.swift */; };
+		1D5A4A2C26D3F1290001EED1 /* MessageQueries+Handler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A2B26D3F1290001EED1 /* MessageQueries+Handler.swift */; };
+		1D5A4A2E26D3F1B00001EED1 /* ChatOperations+Handler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A2D26D3F1B00001EED1 /* ChatOperations+Handler.swift */; };
+		1D5A4A3026D3F26B0001EED1 /* GetContact+Handler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A2F26D3F26B0001EED1 /* GetContact+Handler.swift */; };
+		1D5A4A3326D3F2BF0001EED1 /* Array+ChatItemHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A3226D3F2BF0001EED1 /* Array+ChatItemHelpers.swift */; };
+		1D5A4A3726D3F3490001EED1 /* BLPayloadReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A3626D3F3490001EED1 /* BLPayloadReader.swift */; };
+		1D5A4A3A26D3F4D80001EED1 /* BarcelonaMautrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A3826D3F4A20001EED1 /* BarcelonaMautrix.swift */; };
 		1D67C145250ACBCF000A4D58 /* IMHandle+DestinationResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D67C144250ACBCF000A4D58 /* IMHandle+DestinationResolvable.swift */; };
 		1D74D49A250C01CB00A9F9A1 /* Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D74D499250C01CB00A9F9A1 /* Identifiable.swift */; };
 		1D74D4A0250C04A900A9F9A1 /* IMService+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D74D49F250C04A900A9F9A1 /* IMService+Identifiable.swift */; };
@@ -280,7 +290,6 @@
 		1DC9E85B26C19D1A007E463F /* ListCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC9E85A26C19D1A007E463F /* ListCommand.swift */; };
 		1DC9E85D26C1AA7E007E463F /* HealthEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC9E85C26C1AA7E007E463F /* HealthEvents.swift */; };
 		1DC9E86026C1D6AC007E463F /* IPCCommand+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC9E85E26C1D641007E463F /* IPCCommand+Codable.swift */; };
-		1DCB0CDD26B05E6B00242045 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D0DC2B626618E5800E4B6FF /* main.swift */; };
 		1DCB0CDE26B05E7B00242045 /* Barcelona.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; };
 		1DCB0CDF26B05E7B00242045 /* Barcelona.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1DCB0CE326B05E7F00242045 /* BarcelonaMautrixIPC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D4AC05826AB7EC900ADD254 /* BarcelonaMautrixIPC.framework */; };
@@ -651,7 +660,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1D0DC2B626618E5800E4B6FF /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = main.swift; path = "barcelona-mautrix/main.swift"; sourceTree = SOURCE_ROOT; };
 		1D0DC2C9266190CB00E4B6FF /* BLLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLLogger.swift; sourceTree = "<group>"; };
 		1D0DC2CB26619F3400E4B6FF /* LogCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogCommand.swift; sourceTree = "<group>"; };
 		1D14A1C0250C170F001C5921 /* Message+LazilyResolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message+LazilyResolvable.swift"; sourceTree = "<group>"; };
@@ -771,6 +779,16 @@
 		1D5A4A1A26D3D59D0001EED1 /* BLRuntimeConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLRuntimeConfiguration.swift; sourceTree = "<group>"; };
 		1D5A4A1C26D3D9570001EED1 /* BLHealthTicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLHealthTicker.swift; sourceTree = "<group>"; };
 		1D5A4A1E26D3DE160001EED1 /* SubjectStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubjectStream.swift; sourceTree = "<group>"; };
+		1D5A4A2026D3EF290001EED1 /* BLHandlePayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLHandlePayload.swift; sourceTree = "<group>"; };
+		1D5A4A2426D3F0170001EED1 /* SendMediaMessageCommand+Handler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SendMediaMessageCommand+Handler.swift"; sourceTree = "<group>"; };
+		1D5A4A2726D3F0A30001EED1 /* SendTapbackCommand+Handler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SendTapbackCommand+Handler.swift"; sourceTree = "<group>"; };
+		1D5A4A2926D3F0E10001EED1 /* SendMessageCommand+Handler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SendMessageCommand+Handler.swift"; sourceTree = "<group>"; };
+		1D5A4A2B26D3F1290001EED1 /* MessageQueries+Handler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MessageQueries+Handler.swift"; sourceTree = "<group>"; };
+		1D5A4A2D26D3F1B00001EED1 /* ChatOperations+Handler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatOperations+Handler.swift"; sourceTree = "<group>"; };
+		1D5A4A2F26D3F26B0001EED1 /* GetContact+Handler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GetContact+Handler.swift"; sourceTree = "<group>"; };
+		1D5A4A3226D3F2BF0001EED1 /* Array+ChatItemHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+ChatItemHelpers.swift"; sourceTree = "<group>"; };
+		1D5A4A3626D3F3490001EED1 /* BLPayloadReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLPayloadReader.swift; sourceTree = "<group>"; };
+		1D5A4A3826D3F4A20001EED1 /* BarcelonaMautrix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcelonaMautrix.swift; sourceTree = "<group>"; };
 		1D5AEDBF24E373ED00303692 /* IMCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IMCore.framework; path = Frameworks/IMCore.framework; sourceTree = "<group>"; };
 		1D5AEDC024E373ED00303692 /* ContactsFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ContactsFoundation.framework; path = Frameworks/ContactsFoundation.framework; sourceTree = "<group>"; };
 		1D5AEDC224E373ED00303692 /* ContactsAutocomplete.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ContactsAutocomplete.framework; path = Frameworks/ContactsAutocomplete.framework; sourceTree = "<group>"; };
@@ -1265,14 +1283,13 @@
 		1D22AD5F265C3CCA0095EE7E /* BarcelonaMautrixIPC */ = {
 			isa = PBXGroup;
 			children = (
+				1D5A4A3526D3F3070001EED1 /* IPCHandlers */,
+				1D5A4A3426D3F2FA0001EED1 /* Runtime */,
+				1D5A4A3126D3F2AF0001EED1 /* Extensions */,
 				1D22AD93265C45BB0095EE7E /* Commands */,
 				1D22AD60265C3CCA0095EE7E /* BarcelonaMautrixIPC.h */,
 				1D22AD61265C3CCA0095EE7E /* Info.plist */,
-				1D22AD8F265C41620095EE7E /* BLStandardIO.swift */,
 				1D0DC2C9266190CB00E4B6FF /* BLLogger.swift */,
-				1D5322D82677E950005FF8D1 /* BLEventHandler.swift */,
-				1DA8BE9E267A67B100636231 /* BLMetricStore.swift */,
-				1D5A4A1A26D3D59D0001EED1 /* BLRuntimeConfiguration.swift */,
 				1D5A4A1C26D3D9570001EED1 /* BLHealthTicker.swift */,
 			);
 			path = BarcelonaMautrixIPC;
@@ -1486,6 +1503,48 @@
 				1DC9E85026C19437007E463F /* HealthChecker.swift */,
 			);
 			path = IMCoreHelpers;
+			sourceTree = "<group>";
+		};
+		1D5A4A2326D3F0010001EED1 /* CommandHandlers */ = {
+			isa = PBXGroup;
+			children = (
+				1D5A4A2426D3F0170001EED1 /* SendMediaMessageCommand+Handler.swift */,
+				1D5A4A2726D3F0A30001EED1 /* SendTapbackCommand+Handler.swift */,
+				1D5A4A2926D3F0E10001EED1 /* SendMessageCommand+Handler.swift */,
+				1D5A4A2B26D3F1290001EED1 /* MessageQueries+Handler.swift */,
+				1D5A4A2D26D3F1B00001EED1 /* ChatOperations+Handler.swift */,
+				1D5A4A2F26D3F26B0001EED1 /* GetContact+Handler.swift */,
+			);
+			path = CommandHandlers;
+			sourceTree = "<group>";
+		};
+		1D5A4A3126D3F2AF0001EED1 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				1D5A4A3226D3F2BF0001EED1 /* Array+ChatItemHelpers.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		1D5A4A3426D3F2FA0001EED1 /* Runtime */ = {
+			isa = PBXGroup;
+			children = (
+				1DA8BE9E267A67B100636231 /* BLMetricStore.swift */,
+				1D5A4A1A26D3D59D0001EED1 /* BLRuntimeConfiguration.swift */,
+				1D22AD8F265C41620095EE7E /* BLStandardIO.swift */,
+				1D5A4A3626D3F3490001EED1 /* BLPayloadReader.swift */,
+			);
+			path = Runtime;
+			sourceTree = "<group>";
+		};
+		1D5A4A3526D3F3070001EED1 /* IPCHandlers */ = {
+			isa = PBXGroup;
+			children = (
+				1D5A4A2326D3F0010001EED1 /* CommandHandlers */,
+				1D5322D82677E950005FF8D1 /* BLEventHandler.swift */,
+				1D5A4A2026D3EF290001EED1 /* BLHandlePayload.swift */,
+			);
+			path = IPCHandlers;
 			sourceTree = "<group>";
 		};
 		1D5AEDA524E3725200303692 = {
@@ -1834,8 +1893,8 @@
 		1DCB0CD426B05E1C00242045 /* barcelona-mautrix */ = {
 			isa = PBXGroup;
 			children = (
-				1D0DC2B626618E5800E4B6FF /* main.swift */,
 				1DC05C542666D962004DD35D /* barcelona-mautrix.entitlements */,
+				1D5A4A3826D3F4A20001EED1 /* BarcelonaMautrix.swift */,
 			);
 			path = "barcelona-mautrix";
 			sourceTree = "<group>";
@@ -2834,15 +2893,19 @@
 			files = (
 				1D4AC06026AB7EF900ADD254 /* IPCResponse.swift in Sources */,
 				1D4AC06126AB7EF900ADD254 /* BLMessage.swift in Sources */,
+				1D5A4A3326D3F2BF0001EED1 /* Array+ChatItemHelpers.swift in Sources */,
 				1D4AC06226AB7EF900ADD254 /* BLMessageStatus.swift in Sources */,
 				1D4AC06326AB7EF900ADD254 /* BLPartialMessage.swift in Sources */,
+				1D5A4A2E26D3F1B00001EED1 /* ChatOperations+Handler.swift in Sources */,
 				1D4AC06426AB7EF900ADD254 /* BLAttachment.swift in Sources */,
 				1D4AC06526AB7EF900ADD254 /* BLAssociatedMessage.swift in Sources */,
 				1D5A4A1B26D3D59D0001EED1 /* BLRuntimeConfiguration.swift in Sources */,
 				1D4AC06626AB7EF900ADD254 /* BLReadReceipt.swift in Sources */,
 				1D4AC06726AB7EF900ADD254 /* BLTypingNotification.swift in Sources */,
+				1D5A4A3026D3F26B0001EED1 /* GetContact+Handler.swift in Sources */,
 				1D4AC06826AB7EF900ADD254 /* BLChat.swift in Sources */,
 				1D4AC06926AB7EF900ADD254 /* BLContact.swift in Sources */,
+				1D5A4A3726D3F3490001EED1 /* BLPayloadReader.swift in Sources */,
 				1DC9E84F26BDA1B8007E463F /* BridgeStatusCommand.swift in Sources */,
 				1D4AC06A26AB7EF900ADD254 /* BLStruct.swift in Sources */,
 				1D5A4A1D26D3D9570001EED1 /* BLHealthTicker.swift in Sources */,
@@ -2850,23 +2913,28 @@
 				1D4AC06D26AB7EF900ADD254 /* TargetResolvable.swift in Sources */,
 				1D4AC06E26AB7EF900ADD254 /* ContactResolvable.swift in Sources */,
 				1D4AC06F26AB7EF900ADD254 /* SendMessageCommand.swift in Sources */,
+				1D5A4A2826D3F0A30001EED1 /* SendTapbackCommand+Handler.swift in Sources */,
 				1D4AC07026AB7EF900ADD254 /* SendMediaMessageCommand.swift in Sources */,
 				1D4AC07126AB7EF900ADD254 /* TapbackCommand.swift in Sources */,
 				1D4AC07226AB7EF900ADD254 /* SendReadReceiptCommand.swift in Sources */,
 				1D4AC07326AB7EF900ADD254 /* SendTypingCommand.swift in Sources */,
 				1D4AC07426AB7EF900ADD254 /* GetChatsCommand.swift in Sources */,
 				1D4AC07526AB7EF900ADD254 /* GetGroupChatInfoCommand.swift in Sources */,
+				1D5A4A2A26D3F0E10001EED1 /* SendMessageCommand+Handler.swift in Sources */,
 				1D4AC07626AB7EF900ADD254 /* GetGroupChatAvatarCommand.swift in Sources */,
 				1DC9E86026C1D6AC007E463F /* IPCCommand+Codable.swift in Sources */,
 				1D4AC07726AB7EF900ADD254 /* GetContactCommand.swift in Sources */,
 				1D4AC07826AB7EF900ADD254 /* GetMessagesAfterCommand.swift in Sources */,
 				1D4AC07926AB7EF900ADD254 /* GetRecentMessagesCommand.swift in Sources */,
+				1D5A4A2626D3F0470001EED1 /* SendMediaMessageCommand+Handler.swift in Sources */,
 				1D4AC07A26AB7EF900ADD254 /* ErrorCommand.swift in Sources */,
 				1D4AC07B26AB7EF900ADD254 /* LogCommand.swift in Sources */,
 				1D4AC07C26AB7EF900ADD254 /* IPCCommand.swift in Sources */,
+				1D5A4A2C26D3F1290001EED1 /* MessageQueries+Handler.swift in Sources */,
 				1D4AC08026AB7EF900ADD254 /* BLStandardIO.swift in Sources */,
 				1D4AC08126AB7EF900ADD254 /* BLLogger.swift in Sources */,
 				1D4AC08226AB7EF900ADD254 /* BLEventHandler.swift in Sources */,
+				1D5A4A2226D3EF4A0001EED1 /* BLHandlePayload.swift in Sources */,
 				1D4AC08326AB7EF900ADD254 /* BLMetricStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2938,7 +3006,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1DCB0CDD26B05E6B00242045 /* main.swift in Sources */,
+				1D5A4A3A26D3F4D80001EED1 /* BarcelonaMautrix.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
