@@ -34,3 +34,9 @@ mautrix-ios:
 
 grapple-ios:
 	$(MAKE) scheme-ios SCHEME=grapple
+
+ios:
+	$(MAKE) scheme-ios SCHEME=Tools
+	
+macos:
+	$(MAKE) scheme-macos SCHEME=Tools

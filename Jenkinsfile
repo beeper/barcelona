@@ -5,12 +5,10 @@ pipeline {
             steps {
                 parallel(
                     macos: {
-                        sh 'make mautrix-macos'
-                        sh 'make grapple-macos'
+                        sh 'make macos'
                     },
                     ios: {
-                        sh 'make mautrix-ios'
-                        sh 'make grapple-ios'
+                        sh 'make ios'
                     }
                 )
             }
