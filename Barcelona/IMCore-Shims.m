@@ -17,11 +17,15 @@
 #import "Extensions/Overrides/IMContactStore+NoOverrides.m"
 #import "Extensions/Overrides/IMContactStore+AlwaysCache.m"
 
+#ifndef TARGET_OS_IPHONE
+
 @interface CNGeminiManager: NSObject
 @end
 
 @implementation CNGeminiManager: NSObject
 @end
+
+#endif
 
 CommunicationsFilterBlockList* ERSharedBlockList() {
     return [NSClassFromString(@"CommunicationsFilterBlockList") sharedInstance];
