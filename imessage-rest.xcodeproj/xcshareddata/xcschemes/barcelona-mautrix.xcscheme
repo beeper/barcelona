@@ -22,22 +22,6 @@
                </EnvironmentBuildable>
             </ActionContent>
          </ExecutionAction>
-         <ExecutionAction
-            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
-            <ActionContent
-               title = "Run Script"
-               scriptText = "# Type a script or drag a script file from your workspace to insert its path.&#10;cp &quot;${TARGET_BUILD_DIR}/barcelona-mautrix&quot; /usr/local/bin/barcelona-mautrix&#10;&#10;codesign --deep --entitlements &quot;${PROJECT_DIR}/barcelona-mautrix/barcelona-mautrix.entitlements&quot; &quot;/usr/local/bin/barcelona-mautrix&quot; -f -s &quot;-&quot;&#10;">
-               <EnvironmentBuildable>
-                  <BuildableReference
-                     BuildableIdentifier = "primary"
-                     BlueprintIdentifier = "1DCB0CD226B05E1C00242045"
-                     BuildableName = "barcelona-mautrix"
-                     BlueprintName = "barcelona-mautrix"
-                     ReferencedContainer = "container:imessage-rest.xcodeproj">
-                  </BuildableReference>
-               </EnvironmentBuildable>
-            </ActionContent>
-         </ExecutionAction>
       </PostActions>
       <BuildActionEntries>
          <BuildActionEntry

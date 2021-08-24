@@ -10,7 +10,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Run Script"
-               scriptText = "# Type a script or drag a script file from your workspace to insert its path.&#10;codesign --deep --entitlements &quot;${PROJECT_DIR}/grapple/grapple.entitlements&quot; &quot;${TARGET_BUILD_DIR}/grapple&quot; -f -s &quot;-&quot;&#10;cp &quot;${TARGET_BUILD_DIR}/grapple&quot; /usr/local/bin/grapple&#10;">
+               scriptText = "# Type a script or drag a script file from your workspace to insert its path.&#10;codesign --deep --entitlements &quot;${PROJECT_DIR}/grapple/grapple.entitlements&quot; &quot;${TARGET_BUILD_DIR}/grapple&quot; -f -s &quot;-&quot;&#10;">
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"
