@@ -10,29 +10,31 @@ These are not strict requirements – this project is simply only ensured to bu
 
 - Xcode 12.4
 - macOS Big Sur
-- Theos (when compiling for iOS)
 
 ### Building
 
-#### Development
-You should be able to just fire up the project and build what you please. Running the `imessage-rest.xpc` service from Xcode requires a bit of fenagling to trick Xcode into running an XPC service, but once you are able to select is as an executable debugging it should be a breeze.
+| Host  | Grapple            | Mautrix            |
+|-------|--------------------|--------------------|
+| macOS | make grapple-macos | make mautrix-macos |
+| iOS   | make grapple-ios   | make mautrix-ios   |
 
-#### Custom Distribution
-If you're trying to make a custom distribution, running `make all` should suffice. You can also run `make ios` or `make macos` if you just want one platform to build.
+### Running
 
-### Installing
-For iOS, a `.deb` file is generated and can be installed to automate the installation process.
+Barcelona has three requirements to run correctly:
 
-For macOS, there is no automated installation process. The only piece of manual installation is installing `Staging/Library/Preferences/com.apple.security.xpc.plist` to `/Library/Preferences`. This file is also included in archives targeting macOS.
+- SIP must be disabled (`csrutil disable` from recovery mode)
+- AMFI must be disabled (`nvram boot-args=amfi_get_out_of_my_way=0x1`)
+- [This file](com.apple.security.xpc.plist) must be placed at `/Library/Preferences/com.apple.security.xpc.plist`
 
-## Documentation
+#### Grapple
 
-Documentation for the REST API provided by this software is available [here](https://www.notion.so/MyMessage-API-Documentation-6b50937acef44341aa177999a28f0c3c).
+Grapple is a debugging tool used to inspect the iMessage environment. A help page is displayed by just running `./grapple`
 
-Client libraries are available for different environments, wrapping most functionality with a simple, familiar API.
+#### Mautrix
+
+`barcelona-mautrix` is a driver for connecting to matrix, via [matrix-imessage](https://github.com/mautrix/imessage). **This driver is in heavy development and stability is not guaranteed. You will find bugs! Please open issues as you find them so we can improve the driver.**
 
 ## Built With
-- [Vapor](https://github.com/vapor/vapor) – The REST framework
 - [Swift Package Manager](https://github.com/apple/swift-package-manager) – Dependency management
 - [GRDB](https://github.com/groue/GRDB.swift) – Used for SQLite
 - [AnyCodable](https://github.com/Flight-School/AnyCodable) – To make my life easier
@@ -50,7 +52,7 @@ We use [SemVer](http://semver.org/) for versioning.
 - [Other Contributors](https://github.com/open-imcore/imessage-rest/contributors)
 
 ## License
-This project is licensed under the GNU Affero General Public License (with the following amendments) – see the [LICENSE.md](LICENSE.md) for details.
+This project is licensed under the Apache 2 license – see the [LICENSE.md](LICENSE.md) for details.
 
 ## Acknowledgments
 - I could not have done this without [Hopper](https://www.hopperapp.com/) – It is an excellent tool for reverse-engineering and I have spent countless hours using it for this project.
