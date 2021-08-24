@@ -13,11 +13,41 @@ import Swog
 
 internal let IPCLog = Logger(category: "BLIPC")
 
-public func BLHandlePayload(_ payload: IPCPayload) {
-    switch payload.command {
-    case let runnable as Runnable:
-        runnable.run(payload: payload)
-    default:
-        IPCLog.warn("Received unhandleable payload type %@", payload.command.name.rawValue)
+private extension IPCPayload {
+    var runnable: Runnable? {
+        switch command {
+        case .send_message(let req):
+            return req
+        case .send_media(let req):
+            return req
+        case .send_tapback(let req):
+            return req
+        case .send_read_receipt(let req):
+            return req
+        case .set_typing(let req):
+            return req
+        case .get_chats(let req):
+            return req
+        case .get_chat(let req):
+            return req
+        case .get_chat_avatar(let req):
+            return req
+        case .get_contact(let req):
+            return req
+        case .get_messages_after(let req):
+            return req
+        case .get_recent_messages(let req):
+            return req
+        default:
+            return nil
+        }
     }
+}
+
+public func BLHandlePayload(_ payload: IPCPayload) {
+    guard let runnable = payload.runnable else {
+        return IPCLog.warn("Received unhandleable payload type %@", payload.command.name.rawValue)
+    }
+    
+    runnable.run(payload: payload)
 }

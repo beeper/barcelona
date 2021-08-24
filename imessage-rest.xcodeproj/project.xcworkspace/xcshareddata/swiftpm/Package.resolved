@@ -68,9 +68,9 @@
         "package": "Pwomise",
         "repositoryURL": "https://github.com/EricRabil/Pwomise",
         "state": {
-          "branch": "main",
-          "revision": "a22b171b9ad622363b9346712c297bc13b101a6c",
-          "version": null
+          "branch": null,
+          "revision": "4b6245d410d8a2e0fc20de4890ae345a37bca962",
+          "version": "1.0.3"
         }
       },
       {
@@ -95,9 +95,9 @@
         "package": "Swexy",
         "repositoryURL": "https://github.com/EricRabil/Swexy",
         "state": {
-          "branch": "main",
-          "revision": "4dfc6d674ef41a9e7b8d6deff55f56082a3040e8",
-          "version": null
+          "branch": null,
+          "revision": "a9d808e3f53c57ddab99c1d1643778d3b6a36187",
+          "version": "1.0.1"
         }
       },
       {

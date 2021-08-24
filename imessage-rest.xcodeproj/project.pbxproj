@@ -90,7 +90,6 @@
 		1D5A4A1926D3D44F0001EED1 /* BarcelonaIPC in Frameworks */ = {isa = PBXBuildFile; productRef = 1D5A4A1826D3D44F0001EED1 /* BarcelonaIPC */; };
 		1D5A4A1B26D3D59D0001EED1 /* BLRuntimeConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A1A26D3D59D0001EED1 /* BLRuntimeConfiguration.swift */; };
 		1D5A4A1D26D3D9570001EED1 /* BLHealthTicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A1C26D3D9570001EED1 /* BLHealthTicker.swift */; };
-		1D5A4A1F26D3DE160001EED1 /* SubjectStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A1E26D3DE160001EED1 /* SubjectStream.swift */; };
 		1D5A4A2226D3EF4A0001EED1 /* BLHandlePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A2026D3EF290001EED1 /* BLHandlePayload.swift */; };
 		1D5A4A2626D3F0470001EED1 /* SendMediaMessageCommand+Handler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A2426D3F0170001EED1 /* SendMediaMessageCommand+Handler.swift */; };
 		1D5A4A2826D3F0A30001EED1 /* SendTapbackCommand+Handler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A2726D3F0A30001EED1 /* SendTapbackCommand+Handler.swift */; };
@@ -778,7 +777,6 @@
 		1D5A4A1626D3D4120001EED1 /* CONTRIBUTING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CONTRIBUTING.md; sourceTree = "<group>"; };
 		1D5A4A1A26D3D59D0001EED1 /* BLRuntimeConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLRuntimeConfiguration.swift; sourceTree = "<group>"; };
 		1D5A4A1C26D3D9570001EED1 /* BLHealthTicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLHealthTicker.swift; sourceTree = "<group>"; };
-		1D5A4A1E26D3DE160001EED1 /* SubjectStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubjectStream.swift; sourceTree = "<group>"; };
 		1D5A4A2026D3EF290001EED1 /* BLHandlePayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLHandlePayload.swift; sourceTree = "<group>"; };
 		1D5A4A2426D3F0170001EED1 /* SendMediaMessageCommand+Handler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SendMediaMessageCommand+Handler.swift"; sourceTree = "<group>"; };
 		1D5A4A2726D3F0A30001EED1 /* SendTapbackCommand+Handler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SendTapbackCommand+Handler.swift"; sourceTree = "<group>"; };
@@ -1749,7 +1747,6 @@
 				1D9AE36E26AF0835007873E3 /* ExpiringCollection.swift */,
 				1DE06D5326B3028B00B4DC77 /* Logger.swift */,
 				1D92963126B5D91800F576A9 /* BarcelonaFoundation.swift */,
-				1D5A4A1E26D3DE160001EED1 /* SubjectStream.swift */,
 			);
 			path = BarcelonaFoundation;
 			sourceTree = "<group>";
@@ -2995,7 +2992,6 @@
 				1DC4D7B726AE02D600281920 /* OSLog+Nice.swift in Sources */,
 				1D797B9A26AD075200B57208 /* Color.swift in Sources */,
 				1D1C94DA26B866CD005848A4 /* Promise+CollectionAddition.swift in Sources */,
-				1D5A4A1F26D3DE160001EED1 /* SubjectStream.swift in Sources */,
 				1D7F3DE126C307280086F32C /* NotificationCenter+Subscriptions.swift in Sources */,
 				1D9AE36F26AF0835007873E3 /* ExpiringCollection.swift in Sources */,
 				1D92963226B5D91800F576A9 /* BarcelonaFoundation.swift in Sources */,
@@ -4241,8 +4237,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/EricRabil/Pwomise";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.3;
 			};
 		};
 		1D5A4A1726D3D44F0001EED1 /* XCRemoteSwiftPackageReference "BarcelonaIPC" */ = {
@@ -4289,8 +4285,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/EricRabil/Swexy";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.1;
 			};
 		};
 		1D9AE39226AF5BD0007873E3 /* XCRemoteSwiftPackageReference "SwiftCLI" */ = {
