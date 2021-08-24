@@ -11,6 +11,8 @@ These are not strict requirements – this project is simply only ensured to bu
 
 ### Building
 
+> Heads up! Barcelona requires `xcpretty` to build using the Makefiles. Install it using `sudo gem install xcpretty`
+
 | Host  | Grapple            | Mautrix            |
 |-------|--------------------|--------------------|
 | macOS | make grapple-macos | make mautrix-macos |
