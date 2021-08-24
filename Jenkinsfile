@@ -10,7 +10,6 @@ pipeline {
                     },
                     ios: {
                         sh 'make mautrix-ios'
-			sh 'make grapple-ios'
                     }
                 )
             }

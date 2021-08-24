@@ -3480,7 +3480,7 @@
 			repositoryURL = "https://github.com/EricRabil/Pwomise";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.3;
+				minimumVersion = 1.0.5;
 			};
 		};
 		1D40FF9426D57AFA00596988 /* XCRemoteSwiftPackageReference "SwiftyJavaScriptCore" */ = {
@@ -3496,7 +3496,7 @@
 			repositoryURL = "https://github.com/open-imcore/BarcelonaIPC";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.1;
+				minimumVersion = 1.0.3;
 			};
 		};
 		1D5AEE4524E37CDF00303692 /* XCRemoteSwiftPackageReference "GRDB" */ = {

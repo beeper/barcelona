@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/open-imcore/BarcelonaIPC",
         "state": {
           "branch": null,
-          "revision": "b69abb86d1e1f6bb468d18863f2898636fdcdd8b",
-          "version": "1.0.1"
+          "revision": "9b841dccdf54c5fcc6bfca10738ed918714b4580",
+          "version": "1.0.3"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/EricRabil/Pwomise",
         "state": {
           "branch": null,
-          "revision": "4b6245d410d8a2e0fc20de4890ae345a37bca962",
-          "version": "1.0.3"
+          "revision": "1649e4056f4729cd314c1bf474f65ca816d612ea",
+          "version": "1.0.5"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/EricRabil/Swexy",
         "state": {
           "branch": null,
-          "revision": "a9d808e3f53c57ddab99c1d1643778d3b6a36187",
-          "version": "1.0.1"
+          "revision": "e8f656e5f1d1cad30f99b259d4d50e1e05c8a9f8",
+          "version": "1.0.4"
         }
       },
       {

@@ -15,7 +15,7 @@ scheme:
 		-destination "$(DESTINATION)" \
 		-configuration Debug \
 		-derivedDataPath $(DERIVED_DIR) \
-		-ONLY_ACTIVE_ARCH=NO
+		-ONLY_ACTIVE_ARCH=NO | xcpretty
 
 scheme-macos:
 	$(MAKE) scheme DESTINATION=$(MACOS_DESTINATION) DERIVED_DIR=$(MACOS_DERIVED_DIR)
