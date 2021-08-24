@@ -120,11 +120,11 @@
       },
       {
         "package": "SwiftCLI",
-        "repositoryURL": "https://github.com/jakeheis/SwiftCLI",
+        "repositoryURL": "https://github.com/EricRabil/SwiftCLI",
         "state": {
           "branch": null,
-          "revision": "2816678bcc37f4833d32abeddbdf5e757fa891d8",
-          "version": "6.0.2"
+          "revision": "953c96a5c0c76e73c0d928577ca3d5183a3f09ef",
+          "version": "6.0.3"
         }
       },
       {

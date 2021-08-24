@@ -32,6 +32,8 @@
 		1D3F0C462515032300E1DBEB /* ERTimeSortedParticipantsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3F0C452515032300E1DBEB /* ERTimeSortedParticipantsManager.swift */; };
 		1D3F0C482515192D00E1DBEB /* IMChat+TimeSortedParticipants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3F0C472515192D00E1DBEB /* IMChat+TimeSortedParticipants.swift */; };
 		1D40FF9626D57AFA00596988 /* SwiftyJavaScriptCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1D40FF9526D57AFA00596988 /* SwiftyJavaScriptCore */; };
+		1D40FF9B26D58E6800596988 /* SwiftCLI in Frameworks */ = {isa = PBXBuildFile; productRef = 1D40FF9A26D58E6800596988 /* SwiftCLI */; };
+		1D40FF9D26D58E6E00596988 /* SwiftCLI in Frameworks */ = {isa = PBXBuildFile; productRef = 1D40FF9C26D58E6E00596988 /* SwiftCLI */; };
 		1D441369250A0AE300720CCE /* IDS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D441365250A0AE300720CCE /* IDS.framework */; };
 		1D44864924E85BBB00FF73F3 /* Barcelona.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D44864724E85BBB00FF73F3 /* Barcelona.h */; };
 		1D44864E24E85BD500FF73F3 /* ERDaemonListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5AEE4024E378F500303692 /* ERDaemonListener.swift */; };
@@ -185,7 +187,6 @@
 		1D9AE37226AF0C5A007873E3 /* Event+Hashable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9AE37126AF0C5A007873E3 /* Event+Hashable.swift */; };
 		1D9AE37426AF1C42007873E3 /* HookManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9AE37326AF1C42007873E3 /* HookManager.swift */; };
 		1D9AE38E26AF4A29007873E3 /* SendMessageCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9AE38D26AF4A29007873E3 /* SendMessageCommand.swift */; };
-		1D9AE39426AF5BD0007873E3 /* SwiftCLI in Frameworks */ = {isa = PBXBuildFile; productRef = 1D9AE39326AF5BD0007873E3 /* SwiftCLI */; };
 		1D9AE39626AF5D0F007873E3 /* ChatCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9AE39526AF5D0F007873E3 /* ChatCommands.swift */; };
 		1D9AE39926AF5DA6007873E3 /* SwiftyTextTable in Frameworks */ = {isa = PBXBuildFile; productRef = 1D9AE39826AF5DA6007873E3 /* SwiftyTextTable */; };
 		1D9AE39B26AF5FD7007873E3 /* DebugCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9AE39A26AF5FD7007873E3 /* DebugCommands.swift */; };
@@ -290,7 +291,6 @@
 		1DEC45A426CAD84600D5AC08 /* SwiftSemantics in Frameworks */ = {isa = PBXBuildFile; productRef = 1DEC45A326CAD84600D5AC08 /* SwiftSemantics */; };
 		1DEC45AA26CAD86200D5AC08 /* BarcelonaDocs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC45A926CAD86200D5AC08 /* BarcelonaDocs.swift */; };
 		1DEC45F826CB02FF00D5AC08 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC45F726CB02FF00D5AC08 /* main.swift */; };
-		1DEC45FA26CB045300D5AC08 /* SwiftCLI in Frameworks */ = {isa = PBXBuildFile; productRef = 1DEC45F926CB045300D5AC08 /* SwiftCLI */; };
 		1DEC45FC26CB045700D5AC08 /* SwiftSemantics in Frameworks */ = {isa = PBXBuildFile; productRef = 1DEC45FB26CB045700D5AC08 /* SwiftSemantics */; };
 		1DEC45FD26CB045D00D5AC08 /* BarcelonaDocs.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DEC459626CAD83600D5AC08 /* BarcelonaDocs.framework */; };
 		1DEC45FE26CB045D00D5AC08 /* BarcelonaDocs.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1DEC459626CAD83600D5AC08 /* BarcelonaDocs.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -912,10 +912,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				1DEC458D26CAD2F000D5AC08 /* Swifter in Frameworks */,
-				1D9AE39426AF5BD0007873E3 /* SwiftCLI in Frameworks */,
 				1D4AC03C26AB7CEF00ADD254 /* Barcelona.framework in Frameworks */,
 				1D9AE39926AF5DA6007873E3 /* SwiftyTextTable in Frameworks */,
 				1DF2F35026C5B9580078E549 /* LineNoise in Frameworks */,
+				1D40FF9B26D58E6800596988 /* SwiftCLI in Frameworks */,
 				1D9AE36126AE14A1007873E3 /* BarcelonaEvents.framework in Frameworks */,
 				1DF2F30D26C44DF00078E549 /* BarcelonaJS.framework in Frameworks */,
 			);
@@ -974,9 +974,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1D40FF9D26D58E6E00596988 /* SwiftCLI in Frameworks */,
 				1DEC45FD26CB045D00D5AC08 /* BarcelonaDocs.framework in Frameworks */,
 				1DEC45FC26CB045700D5AC08 /* SwiftSemantics in Frameworks */,
-				1DEC45FA26CB045300D5AC08 /* SwiftCLI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1973,10 +1973,10 @@
 			);
 			name = grapple;
 			packageProductDependencies = (
-				1D9AE39326AF5BD0007873E3 /* SwiftCLI */,
 				1D9AE39826AF5DA6007873E3 /* SwiftyTextTable */,
 				1DF2F34F26C5B9580078E549 /* LineNoise */,
 				1DEC458C26CAD2F000D5AC08 /* Swifter */,
+				1D40FF9A26D58E6800596988 /* SwiftCLI */,
 			);
 			productName = grapple;
 			productReference = 1D4AC03526AB7CE300ADD254 /* grapple */;
@@ -2112,8 +2112,8 @@
 			);
 			name = docgen;
 			packageProductDependencies = (
-				1DEC45F926CB045300D5AC08 /* SwiftCLI */,
 				1DEC45FB26CB045700D5AC08 /* SwiftSemantics */,
+				1D40FF9C26D58E6E00596988 /* SwiftCLI */,
 			);
 			productName = docgen;
 			productReference = 1DEC45EF26CB02DB00D5AC08 /* docgen */;
@@ -2201,7 +2201,6 @@
 				1DB9520824F6CF26004CC87B /* XCRemoteSwiftPackageReference "AnyCodable" */,
 				1D83343D25128BD0005E0A43 /* XCRemoteSwiftPackageReference "GzipSwift" */,
 				1DC4D7B226ADF30400281920 /* XCRemoteSwiftPackageReference "InterposeKit" */,
-				1D9AE39226AF5BD0007873E3 /* XCRemoteSwiftPackageReference "SwiftCLI" */,
 				1D9AE39726AF5DA6007873E3 /* XCRemoteSwiftPackageReference "SwiftyTextTable" */,
 				1D92962826B5D8DF00F576A9 /* XCRemoteSwiftPackageReference "Swog" */,
 				1D92962B26B5D8F100F576A9 /* XCRemoteSwiftPackageReference "Swexy" */,
@@ -2212,6 +2211,7 @@
 				1D5A4A1726D3D44F0001EED1 /* XCRemoteSwiftPackageReference "BarcelonaIPC" */,
 				1D82FF3126D578F000EB5CEE /* XCRemoteSwiftPackageReference "BarcelonaFoundation" */,
 				1D40FF9426D57AFA00596988 /* XCRemoteSwiftPackageReference "SwiftyJavaScriptCore" */,
+				1D40FF9726D58E5600596988 /* XCRemoteSwiftPackageReference "SwiftCLI" */,
 			);
 			productRefGroup = 1D5AEDAF24E3725200303692 /* Products */;
 			projectDirPath = "";
@@ -3491,6 +3491,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		1D40FF9726D58E5600596988 /* XCRemoteSwiftPackageReference "SwiftCLI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/EricRabil/SwiftCLI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.0.3;
+			};
+		};
 		1D5A4A1726D3D44F0001EED1 /* XCRemoteSwiftPackageReference "BarcelonaIPC" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/open-imcore/BarcelonaIPC";
@@ -3545,14 +3553,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.0.1;
-			};
-		};
-		1D9AE39226AF5BD0007873E3 /* XCRemoteSwiftPackageReference "SwiftCLI" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/jakeheis/SwiftCLI";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 6.0.2;
 			};
 		};
 		1D9AE39726AF5DA6007873E3 /* XCRemoteSwiftPackageReference "SwiftyTextTable" */ = {
@@ -3611,6 +3611,16 @@
 			package = 1D40FF9426D57AFA00596988 /* XCRemoteSwiftPackageReference "SwiftyJavaScriptCore" */;
 			productName = SwiftyJavaScriptCore;
 		};
+		1D40FF9A26D58E6800596988 /* SwiftCLI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D40FF9726D58E5600596988 /* XCRemoteSwiftPackageReference "SwiftCLI" */;
+			productName = SwiftCLI;
+		};
+		1D40FF9C26D58E6E00596988 /* SwiftCLI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D40FF9726D58E5600596988 /* XCRemoteSwiftPackageReference "SwiftCLI" */;
+			productName = SwiftCLI;
+		};
 		1D5A4A1826D3D44F0001EED1 /* BarcelonaIPC */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 1D5A4A1726D3D44F0001EED1 /* XCRemoteSwiftPackageReference "BarcelonaIPC" */;
@@ -3661,11 +3671,6 @@
 			package = 1D82FF3126D578F000EB5CEE /* XCRemoteSwiftPackageReference "BarcelonaFoundation" */;
 			productName = BarcelonaFoundation;
 		};
-		1D9AE39326AF5BD0007873E3 /* SwiftCLI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1D9AE39226AF5BD0007873E3 /* XCRemoteSwiftPackageReference "SwiftCLI" */;
-			productName = SwiftCLI;
-		};
 		1D9AE39826AF5DA6007873E3 /* SwiftyTextTable */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 1D9AE39726AF5DA6007873E3 /* XCRemoteSwiftPackageReference "SwiftyTextTable" */;
@@ -3700,11 +3705,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1DEC458E26CAD36900D5AC08 /* XCRemoteSwiftPackageReference "SwiftSemantics" */;
 			productName = SwiftSemantics;
-		};
-		1DEC45F926CB045300D5AC08 /* SwiftCLI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1D9AE39226AF5BD0007873E3 /* XCRemoteSwiftPackageReference "SwiftCLI" */;
-			productName = SwiftCLI;
 		};
 		1DEC45FB26CB045700D5AC08 /* SwiftSemantics */ = {
 			isa = XCSwiftPackageProductDependency;
