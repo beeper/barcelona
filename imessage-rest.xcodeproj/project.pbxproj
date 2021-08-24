@@ -124,7 +124,6 @@
 		1D79038926ACFE7F00712CB3 /* EventDispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5322E02677ED4B005FF8D1 /* EventDispatcher.swift */; };
 		1D79038A26ACFEA400712CB3 /* IMCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD424E3744900303692 /* IMCore.framework */; };
 		1D7903A026ACFF5B00712CB3 /* Barcelona.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D79039F26ACFF5B00712CB3 /* Barcelona.swift */; };
-		1D797B4326AD010B00B57208 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 1D797B4226AD010B00B57208 /* GRDB */; };
 		1D797B4526AD014F00B57208 /* Swime in Frameworks */ = {isa = PBXBuildFile; productRef = 1D797B4426AD014F00B57208 /* Swime */; };
 		1D797B4726AD015200B57208 /* AnyCodable in Frameworks */ = {isa = PBXBuildFile; productRef = 1D797B4626AD015200B57208 /* AnyCodable */; };
 		1D797B4926AD016800B57208 /* Gzip in Frameworks */ = {isa = PBXBuildFile; productRef = 1D797B4826AD016800B57208 /* Gzip */; };
@@ -285,8 +284,6 @@
 		1DEC455626C6CF1F00D5AC08 /* BarcelonaJSIPCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC455526C6CF1F00D5AC08 /* BarcelonaJSIPCClient.swift */; };
 		1DEC455826C6CF5700D5AC08 /* BarcelonaJSIPCServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC455726C6CF5700D5AC08 /* BarcelonaJSIPCServer.swift */; };
 		1DEC458A26C7054700D5AC08 /* grapple.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DEC458826C7051000D5AC08 /* grapple.h */; };
-		1DEC458D26CAD2F000D5AC08 /* Swifter in Frameworks */ = {isa = PBXBuildFile; productRef = 1DEC458C26CAD2F000D5AC08 /* Swifter */; };
-		1DEC459026CAD36900D5AC08 /* SwiftSemantics in Frameworks */ = {isa = PBXBuildFile; productRef = 1DEC458F26CAD36900D5AC08 /* SwiftSemantics */; };
 		1DEC459A26CAD83600D5AC08 /* BarcelonaDocs.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DEC459826CAD83600D5AC08 /* BarcelonaDocs.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1DEC45A426CAD84600D5AC08 /* SwiftSemantics in Frameworks */ = {isa = PBXBuildFile; productRef = 1DEC45A326CAD84600D5AC08 /* SwiftSemantics */; };
 		1DEC45AA26CAD86200D5AC08 /* BarcelonaDocs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEC45A926CAD86200D5AC08 /* BarcelonaDocs.swift */; };
@@ -898,8 +895,6 @@
 				1D44866124E85C7400FF73F3 /* IMCore.framework in Frameworks */,
 				1D797B4926AD016800B57208 /* Gzip in Frameworks */,
 				1D82FF3326D578F000EB5CEE /* BarcelonaFoundation in Frameworks */,
-				1DEC459026CAD36900D5AC08 /* SwiftSemantics in Frameworks */,
-				1D797B4326AD010B00B57208 /* GRDB in Frameworks */,
 				1D44865F24E85C7400FF73F3 /* DataDetectorsCore.framework in Frameworks */,
 				1D44866F24E85C7500FF73F3 /* IMFoundation.framework in Frameworks */,
 				1D44866D24E85C7500FF73F3 /* IMCore.framework in Frameworks */,
@@ -911,7 +906,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1DEC458D26CAD2F000D5AC08 /* Swifter in Frameworks */,
 				1D4AC03C26AB7CEF00ADD254 /* Barcelona.framework in Frameworks */,
 				1D9AE39926AF5DA6007873E3 /* SwiftyTextTable in Frameworks */,
 				1DF2F35026C5B9580078E549 /* LineNoise in Frameworks */,
@@ -1942,12 +1936,10 @@
 			);
 			name = Barcelona;
 			packageProductDependencies = (
-				1D797B4226AD010B00B57208 /* GRDB */,
 				1D797B4426AD014F00B57208 /* Swime */,
 				1D797B4626AD015200B57208 /* AnyCodable */,
 				1D797B4826AD016800B57208 /* Gzip */,
 				1DC4D7B326ADF30400281920 /* InterposeKit */,
-				1DEC458F26CAD36900D5AC08 /* SwiftSemantics */,
 				1D82FF3226D578F000EB5CEE /* BarcelonaFoundation */,
 			);
 			productName = CoreBarcelona;
@@ -1975,7 +1967,6 @@
 			packageProductDependencies = (
 				1D9AE39826AF5DA6007873E3 /* SwiftyTextTable */,
 				1DF2F34F26C5B9580078E549 /* LineNoise */,
-				1DEC458C26CAD2F000D5AC08 /* Swifter */,
 				1D40FF9A26D58E6800596988 /* SwiftCLI */,
 			);
 			productName = grapple;
@@ -3626,11 +3617,6 @@
 			package = 1D5A4A1726D3D44F0001EED1 /* XCRemoteSwiftPackageReference "BarcelonaIPC" */;
 			productName = BarcelonaIPC;
 		};
-		1D797B4226AD010B00B57208 /* GRDB */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1D5AEE4524E37CDF00303692 /* XCRemoteSwiftPackageReference "GRDB" */;
-			productName = GRDB;
-		};
 		1D797B4426AD014F00B57208 /* Swime */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 1D5AEE4824E37D1700303692 /* XCRemoteSwiftPackageReference "Swime" */;
@@ -3690,16 +3676,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1D5AEE4524E37CDF00303692 /* XCRemoteSwiftPackageReference "GRDB" */;
 			productName = GRDB;
-		};
-		1DEC458C26CAD2F000D5AC08 /* Swifter */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1DEC458B26CAD2EF00D5AC08 /* XCRemoteSwiftPackageReference "swifter" */;
-			productName = Swifter;
-		};
-		1DEC458F26CAD36900D5AC08 /* SwiftSemantics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1DEC458E26CAD36900D5AC08 /* XCRemoteSwiftPackageReference "SwiftSemantics" */;
-			productName = SwiftSemantics;
 		};
 		1DEC45A326CAD84600D5AC08 /* SwiftSemantics */ = {
 			isa = XCSwiftPackageProductDependency;
