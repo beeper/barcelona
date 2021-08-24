@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "BarcelonaFoundation",
+        "repositoryURL": "https://github.com/open-imcore/BarcelonaFoundation",
+        "state": {
+          "branch": null,
+          "revision": "4457e83276d85faad7f611494e29a5182c775f2f",
+          "version": "1.0.1"
+        }
+      },
+      {
         "package": "BarcelonaIPC",
         "repositoryURL": "https://github.com/open-imcore/BarcelonaIPC",
         "state": {
@@ -137,6 +146,15 @@
         }
       },
       {
+        "package": "SwiftyJavaScriptCore",
+        "repositoryURL": "https://github.com/EricRabil/SwiftyJavaScriptCore",
+        "state": {
+          "branch": null,
+          "revision": "1872bfa0a22d04af9b7db1d3cbf6c8109546cd66",
+          "version": "1.0.0"
+        }
+      },
+      {
         "package": "SwiftyTextTable",
         "repositoryURL": "https://github.com/scottrhoyt/SwiftyTextTable",
         "state": {
@@ -158,9 +176,9 @@
         "package": "Swog",
         "repositoryURL": "https://github.com/EricRabil/Swog",
         "state": {
-          "branch": "main",
+          "branch": null,
           "revision": "6e60c30ba2eeb9cd10dae1d585c70f20118ac759",
-          "version": null
+          "version": "1.0.0"
         }
       }
     ]

@@ -7,7 +7,7 @@
 //
 
 import Foundation
-@_exported import BarcelonaJSFoundation
+@_exported import SwiftyJavaScriptCore
 import Swog
 
 @_cdecl("JBLCreateJSContext")
