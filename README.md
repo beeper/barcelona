@@ -1,7 +1,5 @@
-# imessage-rest
-A high-performance, fully-featured REST API for iMessage.
-
-Wanna chat? Hop on [Discord](https://discord.gg/ck26FwFJun).
+# Barcelona
+A Swift framework for interacting with iMessage.
 
 ## Getting Started
 
