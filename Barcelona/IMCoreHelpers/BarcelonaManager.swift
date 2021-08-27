@@ -11,6 +11,7 @@ import InterposeKit
 import BarcelonaFoundation
 import OSLog
 import IMCore
+import IMDPersistence
 
 private let log = Logger(category: "BarcelonaManager")
 
@@ -63,6 +64,11 @@ public func BLBootstrapController() -> Bool {
     guard BLSwizzleDaemonController() else {
         return false
     }
+    
+    // As long as we do single-threaded, READ-ONLY access to IMDPersistence, this is not an issue.
+    // Again, please, I am BEGGING you, never use IMDPersistence for write operations.
+    // Even if we were properly using it, we should only perform mutating operations using the IMCore apis to prevent corrupted state
+    IMDSetIsRunningInDatabaseServerProcess(0x1)
     
     do {
         try HookManager.shared.apply()
