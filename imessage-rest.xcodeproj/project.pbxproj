@@ -769,7 +769,6 @@
 		1D804E11250ECEB300F376CB /* String+Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Service.swift"; sourceTree = "<group>"; };
 		1D81551A258ECC7C00870547 /* swizzleInstance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = swizzleInstance.m; sourceTree = "<group>"; };
 		1D815522258ECC9400870547 /* swizzleInstance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = swizzleInstance.h; sourceTree = "<group>"; };
-		1D82FF3026D572FD00EB5CEE /* com.apple.security.xpc.plist */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; path = com.apple.security.xpc.plist; sourceTree = "<group>"; };
 		1D83343B251282E1005E0A43 /* MessageExtensionsQuirkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageExtensionsQuirkManager.swift; sourceTree = "<group>"; };
 		1D8334422512CD3A005E0A43 /* ChatHandleJoin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHandleJoin.swift; sourceTree = "<group>"; };
 		1D87EC4F258BF7290030D9C6 /* IMChatItem+ThreadIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatItem+ThreadIdentifier.swift"; sourceTree = "<group>"; };
@@ -1326,7 +1325,6 @@
 				1D5A4A1326D3D40B0001EED1 /* Makefile */,
 				1D5A4A1526D3D40C0001EED1 /* README.md */,
 				1D5A4A1626D3D4120001EED1 /* CONTRIBUTING.md */,
-				1D82FF3026D572FD00EB5CEE /* com.apple.security.xpc.plist */,
 				1D9AE38826AF49F4007873E3 /* Beeper */,
 				1D44864624E85BBB00FF73F3 /* Barcelona */,
 				1DF2F2F226C44CAD0078E549 /* BarcelonaJS */,

@@ -24,7 +24,6 @@ Barcelona has three requirements to run correctly:
 
 - SIP must be disabled (`csrutil disable` from recovery mode)
 - AMFI must be disabled (`nvram boot-args=amfi_get_out_of_my_way=0x1`)
-- [This file](com.apple.security.xpc.plist) must be placed at `/Library/Preferences/com.apple.security.xpc.plist`
 
 #### Grapple
 
