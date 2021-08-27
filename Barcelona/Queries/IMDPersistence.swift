@@ -13,18 +13,35 @@ import IMCore
 
 private let IMDLog = Logger(category: "IMDPersistenceQueries")
 
-private let IMDQueue = DispatchQueue(label: "com.barcelona.IMDPersistence")
+#if DEBUG
+private var IMDWithinBlock = false
 
-private extension DispatchQueue {
-    func sync<R>(_ exp: @autoclosure () -> R) -> R {
-        var ret: R!
-        
-        sync {
-            ret = exp()
+private let IMDQueue: DispatchQueue = {
+    atexit {
+        if IMDWithinBlock {
+            print("IMDPersistence tried to exit! Let's talk about that.")
         }
-        
-        return ret
     }
+    
+    return DispatchQueue(label: "com.barcelona.IMDPersistence")
+}()
+#else
+private let IMDQueue: DispatchQueue = DispatchQueue(label: "com.barcelona.IMDPersistence")
+#endif
+
+@_transparent
+private func withinIMDQueue<R>(_ exp: @autoclosure() -> R) -> R {
+    #if DEBUG
+    IMDQueue.sync {
+        IMDWithinBlock = true
+        
+        defer { IMDWithinBlock = false }
+        
+        return exp()
+    }
+    #else
+    IMDQueue.sync(execute: exp)
+    #endif
 }
 
 // MARK: - IMDPersistence
@@ -41,7 +58,7 @@ private func BLCreateIMItemFromIMDMessageRecordRefs(_ refs: NSArray) -> [IMItem]
     }
     
     return refs.compactMap {
-        IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve($0, nil, nil, nil, nil)
+        withinIMDQueue(IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve($0, nil, nil, nil, nil))
     }
 }
 
@@ -57,7 +74,7 @@ private func BLLoadIMDMessageRecordRefsWithGUIDs(_ guids: [String]) -> NSArray {
         return []
     }
     
-    guard let results = IMDQueue.sync(IMDMessageRecordCopyMessagesForGUIDs(guids)) else {
+    guard let results = withinIMDQueue(IMDMessageRecordCopyMessagesForGUIDs(guids)) else {
         operation.end("could not copy messages from IMDPersistance. guids: %@", guids)
         return []
     }
@@ -136,6 +153,10 @@ private func ERResolveGUIDsForChat(withChatIdentifier chatIdentifier: String, af
 // MARK: - API
 
 public func BLLoadIMMessages(withGUIDs guids: [String]) -> [IMMessage] {
+    if guids.count == 0 {
+        return []
+    }
+    
     let refs = BLLoadIMDMessageRecordRefsWithGUIDs(guids)
     
     return BLCreateIMMessageFromIMDMessageRecordRefs(refs)
@@ -151,9 +172,19 @@ public func BLLoadIMMessage(withGUID guid: String) -> IMMessage? {
 ///   - chat: ID of the chat to load. if omitted, it will be resolved at ingestion.
 /// - Returns: NIO futuer of ChatItems
 public func BLLoadChatItems(withGUIDs guids: [String], chatID: String? = nil) -> Promise<[ChatItem]> {
+    if guids.count == 0 {
+        return .success([])
+    }
+    
+    let (buffer, remaining) = IMDPersistenceMarshal.partialBuffer(guids)
+
+    guard let guids = remaining else {
+        return buffer
+    }
+    
     let refs = BLLoadIMDMessageRecordRefsWithGUIDs(guids)
     
-    return BLIngestIMDMessageRecordRefs(refs, in: chatID)
+    return IMDPersistenceMarshal.putBuffers(guids, BLIngestIMDMessageRecordRefs(refs, in: chatID)) + buffer
 }
 
 /// Resolves ChatItems with the given parameters
@@ -171,7 +202,7 @@ public func BLLoadChatItems(withChatIdentifier chatIdentifier: String, onService
 
 public func BLLoadChatItems(_ items: [(chatID: String, messageID: String)]) -> Promise<[ChatItem]> {
     let ledger = items.dictionary(keyedBy: \.messageID, valuedBy: \.chatID)
-    let records = BLCreateIMMessageFromIMDMessageRecordRefs(BLLoadIMDMessageRecordRefsWithGUIDs(items.map(\.messageID)))
+    let records = BLLoadIMMessages(withGUIDs: items.map(\.messageID))
     
     let groups = records.map {
         (chatID: ledger[$0.guid]!, message: $0)
