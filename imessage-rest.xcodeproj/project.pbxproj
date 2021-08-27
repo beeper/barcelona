@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1D00B7F726D9606400724B28 /* IMDPersistenceMarshal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D00B7F626D9606400724B28 /* IMDPersistenceMarshal.swift */; };
 		1D14A1C1250C170F001C5921 /* Message+LazilyResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D14A1C0250C170F001C5921 /* Message+LazilyResolvable.swift */; };
 		1D1ACAA125DD879100A04BB6 /* IMChat+ChatStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1ACAA025DD879100A04BB6 /* IMChat+ChatStyle.swift */; };
 		1D1C94DC26B98CD9005848A4 /* BLIngest-Internal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1C94DB26B98CD9005848A4 /* BLIngest-Internal.swift */; };
@@ -562,6 +563,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1D00B7F626D9606400724B28 /* IMDPersistenceMarshal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IMDPersistenceMarshal.swift; sourceTree = "<group>"; };
 		1D0DC2C9266190CB00E4B6FF /* BLLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLLogger.swift; sourceTree = "<group>"; };
 		1D0DC2CB26619F3400E4B6FF /* LogCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogCommand.swift; sourceTree = "<group>"; };
 		1D14A1C0250C170F001C5921 /* Message+LazilyResolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message+LazilyResolvable.swift"; sourceTree = "<group>"; };
@@ -1537,6 +1539,7 @@
 			isa = PBXGroup;
 			children = (
 				1D91B49225C4786200DCBC3D /* IMDPersistence.swift */,
+				1D00B7F626D9606400724B28 /* IMDPersistenceMarshal.swift */,
 			);
 			path = Queries;
 			sourceTree = "<group>";
@@ -2364,6 +2367,7 @@
 				1D797B5B26AD06A100B57208 /* Registry.swift in Sources */,
 				1D3E333C250C230E00EEA08B /* CNContact+Resolvable.swift in Sources */,
 				1DC4D7B126AD0B2F00281920 /* BarcelonaManager.swift in Sources */,
+				1D00B7F726D9606400724B28 /* IMDPersistenceMarshal.swift in Sources */,
 				1D5322C22677C0F7005FF8D1 /* IMItem|IMMessage+SenderServiceResolvable.swift in Sources */,
 				1DC4D7AF26AD0AAA00281920 /* MessageAttributes.swift in Sources */,
 				1D74D4B1250C100600A9F9A1 /* Chat+Resolvable.swift in Sources */,
