@@ -68,6 +68,10 @@ internal func _BLLoadAcknowledgmentChatItems(withMessageGUIDs messageGUIDs: [Str
 // MARK: - Associated Resolution
 @inlinable
 internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -> Promise<[ChatItem]> {
+    guard items.count > 0 else {
+        return .success([])
+    }
+    
     var operation = BLIngestLog.operation(named: "BLLoadTapbacks (db)").begin("querying tapbacks for %d items in chat %@", items.count, chat)
     
     let messages = items.compactMap { $0 as? Message }.dictionary(keyedBy: \.id)
@@ -86,6 +90,10 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -
     return DBReader.shared.associatedMessageGUIDs(with: messages.values.flatMap(\.associableItemIDs)).then { associations -> [String: [AcknowledgmentChatItem]] in
         operation.end("loaded %d associated items from db", associations.flatMap(\.value).count)
         
+        if associations.count == 0 {
+            return [:]
+        }
+        
         operation = BLIngestLog.operation(named: "BLLoadTapbacks (IMDPersistence)").begin("loading items from IMDPersistenceAgent")
         
         return _BLLoadAcknowledgmentChatItems(withMessageGUIDs: associations.flatMap(\.value), inChat: chat)
@@ -97,25 +105,27 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -
             operation.end("loaded %d items", items.flatMap(\.value).count)
         }
     }.then { ledger -> [ChatItem] in
-        operation = BLIngestLog.operation(named: "BLLoadTapbacks (organize)").begin()
-        
-        ledger.forEach { itemID, tapbacks -> Void in
-            guard let messageID = associatedLedger[itemID], let message = messages[messageID] else {
-                return
+        if ledger.values.flatten().count > 0 {
+            operation = BLIngestLog.operation(named: "BLLoadTapbacks (organize)").begin()
+            
+            ledger.forEach { itemID, tapbacks -> Void in
+                guard let messageID = associatedLedger[itemID], let message = messages[messageID] else {
+                    return
+                }
+                
+                guard let item = message.items.first(where: { $0.id == itemID }), item.isAcknowledgable else {
+                    return
+                }
+                
+                item.acknowledgments = tapbacks
             }
             
-            guard let item = message.items.first(where: { $0.id == itemID }), item.isAcknowledgable else {
-                return
-            }
-            
-            item.acknowledgments = tapbacks
-        }
-        
-        defer {
             operation.end()
+            
+            return Array(messages.values) + items.filter { $0.type != .message }
+        } else {
+            return items
         }
-        
-        return Array(messages.values) + items.filter { $0.type != .message }
     }
 }
 
