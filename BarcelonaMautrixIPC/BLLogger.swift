@@ -40,4 +40,12 @@ public class BLMautrixSTDOutDriver: LoggingDriver {
             "line": line.description
         ]))))
     }
+    
+    public func log(level: LoggingLevel, fileID: StaticString, line: Int, function: StaticString, dso: UnsafeRawPointer, category: StaticString, message: BackportedOSLogMessage) {
+        BLWritePayload(.init(id: nil, command: .log(LogCommand(level: level.ipcLevel, module: String(category), message: message.render(level: BLRuntimeConfiguration.privacyLevel), metadata: [
+            "fileID": fileID.description,
+            "function": function.description,
+            "line": line.description
+        ]))))
+    }
 }

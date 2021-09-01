@@ -33,6 +33,12 @@ public class BarcelonaJSIPCServer {
                 outlet.send(content: LoggingPayload(level: level, message: String(format: String(message), arguments: args), category: String(category)), type: .log)
             }
         }
+        
+        public func log(level: LoggingLevel, fileID: StaticString, line: Int, function: StaticString, dso: UnsafeRawPointer, category: StaticString, message: BackportedOSLogMessage) {
+            self.outlets.forEach { outlet in
+                outlet.send(content: LoggingPayload(level: level, message: message.render(level: .auto), category: String(category)), type: .log)
+            }
+        }
     }
     
     private let logPipe = BarcelonaJSIPCLogPipe()

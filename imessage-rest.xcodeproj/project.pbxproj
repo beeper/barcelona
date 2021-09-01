@@ -102,6 +102,7 @@
 		1D5A4A3326D3F2BF0001EED1 /* Array+ChatItemHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A3226D3F2BF0001EED1 /* Array+ChatItemHelpers.swift */; };
 		1D5A4A3726D3F3490001EED1 /* BLPayloadReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A3626D3F3490001EED1 /* BLPayloadReader.swift */; };
 		1D5A4A3A26D3F4D80001EED1 /* BarcelonaMautrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5A4A3826D3F4A20001EED1 /* BarcelonaMautrix.swift */; };
+		1D5B7E4426DF0FA5002CE91E /* Swog in Frameworks */ = {isa = PBXBuildFile; productRef = 1D5B7E4326DF0FA5002CE91E /* Swog */; };
 		1D67C145250ACBCF000A4D58 /* IMHandle+DestinationResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D67C144250ACBCF000A4D58 /* IMHandle+DestinationResolvable.swift */; };
 		1D74D49A250C01CB00A9F9A1 /* Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D74D499250C01CB00A9F9A1 /* Identifiable.swift */; };
 		1D74D4A0250C04A900A9F9A1 /* IMService+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D74D49F250C04A900A9F9A1 /* IMService+Identifiable.swift */; };
@@ -898,6 +899,7 @@
 				1D82FF3326D578F000EB5CEE /* BarcelonaFoundation in Frameworks */,
 				1D44865F24E85C7400FF73F3 /* DataDetectorsCore.framework in Frameworks */,
 				1D44866F24E85C7500FF73F3 /* IMFoundation.framework in Frameworks */,
+				1D5B7E4426DF0FA5002CE91E /* Swog in Frameworks */,
 				1D44866D24E85C7500FF73F3 /* IMCore.framework in Frameworks */,
 				1D44866524E85C7400FF73F3 /* IMFoundation.framework in Frameworks */,
 			);
@@ -1942,6 +1944,7 @@
 				1D797B4826AD016800B57208 /* Gzip */,
 				1DC4D7B326ADF30400281920 /* InterposeKit */,
 				1D82FF3226D578F000EB5CEE /* BarcelonaFoundation */,
+				1D5B7E4326DF0FA5002CE91E /* Swog */,
 			);
 			productName = CoreBarcelona;
 			productReference = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */;
@@ -2194,7 +2197,6 @@
 				1D83343D25128BD0005E0A43 /* XCRemoteSwiftPackageReference "GzipSwift" */,
 				1DC4D7B226ADF30400281920 /* XCRemoteSwiftPackageReference "InterposeKit" */,
 				1D9AE39726AF5DA6007873E3 /* XCRemoteSwiftPackageReference "SwiftyTextTable" */,
-				1D92962826B5D8DF00F576A9 /* XCRemoteSwiftPackageReference "Swog" */,
 				1D92962B26B5D8F100F576A9 /* XCRemoteSwiftPackageReference "Swexy" */,
 				1D1C951C26B99E52005848A4 /* XCRemoteSwiftPackageReference "Pwomise" */,
 				1DF2F34E26C5B9580078E549 /* XCRemoteSwiftPackageReference "linenoise-swift" */,
@@ -2204,6 +2206,7 @@
 				1D82FF3126D578F000EB5CEE /* XCRemoteSwiftPackageReference "BarcelonaFoundation" */,
 				1D40FF9426D57AFA00596988 /* XCRemoteSwiftPackageReference "SwiftyJavaScriptCore" */,
 				1D40FF9726D58E5600596988 /* XCRemoteSwiftPackageReference "SwiftCLI" */,
+				1D5B7E4226DF0FA5002CE91E /* XCRemoteSwiftPackageReference "Swog" */,
 			);
 			productRefGroup = 1D5AEDAF24E3725200303692 /* Products */;
 			projectDirPath = "";
@@ -3516,6 +3519,14 @@
 				minimumVersion = 3.0.7;
 			};
 		};
+		1D5B7E4226DF0FA5002CE91E /* XCRemoteSwiftPackageReference "Swog" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/EricRabil/Swog";
+			requirement = {
+				branch = interpolation;
+				kind = branch;
+			};
+		};
 		1D82FF3126D578F000EB5CEE /* XCRemoteSwiftPackageReference "BarcelonaFoundation" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/open-imcore/BarcelonaFoundation";
@@ -3530,14 +3541,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 5.1.1;
-			};
-		};
-		1D92962826B5D8DF00F576A9 /* XCRemoteSwiftPackageReference "Swog" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/EricRabil/Swog";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
 			};
 		};
 		1D92962B26B5D8F100F576A9 /* XCRemoteSwiftPackageReference "Swexy" */ = {
@@ -3618,6 +3621,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1D5A4A1726D3D44F0001EED1 /* XCRemoteSwiftPackageReference "BarcelonaIPC" */;
 			productName = BarcelonaIPC;
+		};
+		1D5B7E4326DF0FA5002CE91E /* Swog */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D5B7E4226DF0FA5002CE91E /* XCRemoteSwiftPackageReference "Swog" */;
+			productName = Swog;
 		};
 		1D797B4426AD014F00B57208 /* Swime */ = {
 			isa = XCSwiftPackageProductDependency;
