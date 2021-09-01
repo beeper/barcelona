@@ -19,10 +19,10 @@ class BarcelonaMautrix {
     let reader = BLPayloadReader()
     
     static func main() {
-        LoggingDrivers.append(BLMautrixSTDOutDriver.shared)
-
-        CFPreferencesSetAppValue("Log" as CFString, true as CFBoolean, kCFPreferencesCurrentApplication)
-        CFPreferencesSetAppValue("Log.All" as CFString, true as CFBoolean, kCFPreferencesCurrentApplication)
+        LoggingDrivers = [BLMautrixSTDOutDriver.shared, OSLogDriver.shared]
+        
+        CFPreferencesSetAppValue("Log" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
+        CFPreferencesSetAppValue("Log.All" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
         
         shared.run()
     }
