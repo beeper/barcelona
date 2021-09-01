@@ -90,12 +90,12 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -
     return DBReader.shared.associatedMessageGUIDs(with: messages.values.flatMap(\.associableItemIDs)).then { associations -> [String: [AcknowledgmentChatItem]] in
         operation.end("loaded %d associated items from db", associations.flatMap(\.value).count)
         
+        operation = BLIngestLog.operation(named: "BLLoadTapbacks (IMDPersistence)").begin("loading items from IMDPersistenceAgent")
+        
         if associations.count == 0 {
             return [:]
         }
-        
-        operation = BLIngestLog.operation(named: "BLLoadTapbacks (IMDPersistence)").begin("loading items from IMDPersistenceAgent")
-        
+                
         return _BLLoadAcknowledgmentChatItems(withMessageGUIDs: associations.flatMap(\.value), inChat: chat)
     }.observeAlways { completion in
         switch completion {
