@@ -11,6 +11,28 @@ import Barcelona
 import BarcelonaFoundation
 import IMCore
 
+internal class ThinDebouncer {
+    fileprivate var timers: [Int: DispatchWorkItem] = [:]
+    
+    static let shared = ThinDebouncer()
+}
+
+internal extension ThinDebouncer {
+    @_optimize(speed)
+    @_transparent
+    func submit(hash: Int, delay: DispatchTimeInterval, cb: @escaping () -> ()) {
+        timers[hash]?.cancel()
+        timers[hash] = DispatchWorkItem(block: cb)
+        EventBus.queue.asyncAfter(deadline: .now().advanced(by: delay), execute: timers[hash]!)
+    }
+    
+    @_optimize(speed)
+    @_transparent
+    func submit<P: RawRepresentable>(space: P, tag: String, delay: DispatchTimeInterval, cb: @escaping () -> ()) where P.RawValue == String {
+        submit(hash: (space.rawValue + tag).hash, delay: delay, cb: cb)
+    }
+}
+
 public class ERMessageEvents: EventDispatcher {
     override var log: Logger { Logger(category: "ERMessageEvents") }
     
@@ -20,7 +42,9 @@ public class ERMessageEvents: EventDispatcher {
                 return
             }
 
-            self.messageReceived(item, inChat: chat)
+            ThinDebouncer.shared.submit(space: $0.name, tag: item.id, delay: .milliseconds(2)) {
+                self.messageReceived(item, inChat: chat)
+            }
         }
         
         addObserver(forName: ERChatMessagesDeletedNotification) {
@@ -45,7 +69,9 @@ public class ERMessageEvents: EventDispatcher {
                 return
             }
             
-            self.messagesReceived([item], inChat: chat, overrideFromMe: true)
+            ThinDebouncer.shared.submit(space: $0.name, tag: item.id, delay: .milliseconds(2)) {
+                self.messagesReceived([item], inChat: chat, overrideFromMe: true)
+            }
         }
         
         addObserver(forName: ERChatMessagesUpdatedNotification) {
@@ -61,7 +87,9 @@ public class ERMessageEvents: EventDispatcher {
                 return
             }
             
-            self.messageUpdated(item, inChat: chat)
+            ThinDebouncer.shared.submit(space: $0.name, tag: item.id, delay: .milliseconds(2)) {
+                self.messageUpdated(item, inChat: chat)
+            }
         }
         
         addObserver(forName: BLMessageStatusChangedNotification) {

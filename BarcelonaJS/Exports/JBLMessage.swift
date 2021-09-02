@@ -16,6 +16,7 @@ public protocol JBLMessageExports: JSExport {
     var summary: String { get set }
     var fromMe: Bool { get set }
     var chatID: String { get set }
+    var textualRepresentation: String? { get set }
     var time: Double { get set }
     var items: [JBLChatItemExports] { get set }
     var isTyping: Bool { get set }
@@ -30,6 +31,7 @@ public class JBLMessage: NSObject, JBLMessageExports {
     public dynamic var summary: String
     public dynamic var fromMe: Bool
     public dynamic var chatID: String
+    public dynamic var textualRepresentation: String?
     public dynamic var time: Double
     public dynamic var items: [JBLChatItemExports]
     public dynamic var isTyping: Bool
@@ -42,6 +44,7 @@ public class JBLMessage: NSObject, JBLMessageExports {
         summary = message.description ?? ""
         fromMe = message.fromMe
         chatID = message.chatID
+        textualRepresentation = message.description
         time = message.time
         items = message.items.map { item in
             switch item.item {

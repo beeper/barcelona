@@ -72,7 +72,9 @@ public struct CreatePluginMessage: Codable, CreateMessageBase {
         messageItem.payloadData = payloadData.archive
         messageItem.flags = 5
         
+        #if false
         ERApplyMessageExtensionQuirks(toMessageItem: messageItem, inChatID: chatIdentifier, forOptions: self)
+        #endif
         
         return (messageItem, nil)
     }

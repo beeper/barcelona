@@ -83,7 +83,37 @@ public class JSCommand: CommandGroup {
         }
     }
     
+    public class RunCommand: Command {
+        public let name  = "run"
+        
+        @Param(completion: .filename)
+        public var path: String
+        
+        public func execute() throws {
+            let script = try Data(contentsOf: URL(fileURLWithPath: path))
+            
+            let context = JBLCreateJSContext()
+            
+            context["exit"] = JSValue(jsValueRef: JSObjectMakeFunctionWithCallback(context.jsGlobalContextRef, "exit".js) { ctx, function, this, argumentCount, arguments, exception in
+                if argumentCount == 1, let exitRef = arguments?.pointee, JSValueIsNumber(ctx, exitRef) {
+                    exit(Int32(JSValueToNumber(ctx, exitRef, exception)))
+                } else {
+                    exit(0)
+                }
+            }, in: context)
+            
+            context.evaluateScript(String(decoding: script, as: UTF8.self))
+        }
+    }
+    
     public let children: [Routable] = [
-        ServeCommand(), RemoteREPLCommand(), REPLCommand()
+        ServeCommand(), RemoteREPLCommand(), REPLCommand(), RunCommand()
     ]
+}
+
+extension String {
+    @_transparent
+    var js: JSStringRef {
+        JSStringCreateWithCFString(self as CFString)
+    }
 }

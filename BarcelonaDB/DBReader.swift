@@ -6,6 +6,7 @@
 //  Copyright © 2020 Eric Rabil. All rights reserved.
 //
 
+import Foundation
 import BarcelonaFoundation
 import GRDB
 

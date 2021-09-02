@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/EricRabil/Pwomise",
         "state": {
           "branch": null,
-          "revision": "1649e4056f4729cd314c1bf474f65ca816d612ea",
-          "version": "1.0.5"
+          "revision": "2b004b1e78f27fe0d3d38a2a10d1b4a69b46fb6c",
+          "version": "1.0.6"
         }
       },
       {
@@ -150,8 +150,8 @@
         "repositoryURL": "https://github.com/EricRabil/SwiftyJavaScriptCore",
         "state": {
           "branch": null,
-          "revision": "1872bfa0a22d04af9b7db1d3cbf6c8109546cd66",
-          "version": "1.0.0"
+          "revision": "d049554acbf9f5d2c2c90cf95e1c91479804ea13",
+          "version": "1.0.2"
         }
       },
       {
@@ -177,7 +177,7 @@
         "repositoryURL": "https://github.com/EricRabil/Swog",
         "state": {
           "branch": "interpolation",
-          "revision": "7c406ae9d852877c187ee616edf568d7c218974c",
+          "revision": "0be9823f1891ee606dfb5cc7ec28800a98d0631e",
           "version": null
         }
       }

@@ -74,7 +74,7 @@ private func BLLoadIMDMessageRecordRefsWithGUIDs(_ guids: [String]) -> NSArray {
         return []
     }
     
-    guard let results = withinIMDQueue(IMDMessageRecordCopyMessagesForGUIDs(guids)) else {
+    guard let results = withinIMDQueue(IMDMessageRecordCopyMessagesForGUIDs(guids as CFArray)) else {
         operation.end("could not copy messages from IMDPersistance. guids: %@", guids)
         return []
     }

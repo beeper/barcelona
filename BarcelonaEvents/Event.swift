@@ -10,36 +10,6 @@ import Foundation
 import Barcelona
 import IMCore
 
-public class _AnyEncodable: Encodable, CustomStringConvertible, CustomDebugStringConvertible {
-    public let value: Any
-    private let _encode: (Encoder) throws -> ()
-    
-    fileprivate init<T: Encodable>(_ encodable: T) {
-        _encode = encodable.encode
-        value = encodable
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        try _encode(encoder)
-    }
-    
-    public var description: String {
-        guard let convertible = value as? CustomStringConvertible else {
-            return "AnyEncodable"
-        }
-        
-        return convertible.description
-    }
-    
-    public var debugDescription: String {
-        guard let convertible = value as? CustomDebugStringConvertible else {
-            return "AnyEncodable { \(String(describing: value)) }"
-        }
-        
-        return convertible.debugDescription
-    }
-}
-
 // MARK: - Event structure
 public enum Event {
     case bootstrap(BootstrapData)

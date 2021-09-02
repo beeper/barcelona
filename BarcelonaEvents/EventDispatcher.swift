@@ -50,7 +50,7 @@ public class EventDispatcher {
     
     internal func addObserver(forName name: Notification.Name, using block: @escaping (Notification) -> Void) {
         observers.append(center.addObserver(forName: name, object: nil, queue: OperationQueue(underlyingQueue: bus.queue), using: {
-            self.log.debug("Receive notification: %@", name.rawValue)
+            self.log.debug("Receive notification: \(name) \((CFAbsoluteTimeGetCurrent() + kCFAbsoluteTimeIntervalSince1970) * 1000)")
             block($0)
         }))
     }

@@ -18,8 +18,6 @@ class Grapple {
     static let shared = Grapple()
     
     static func main() {
-        LoggingDrivers.append(ConsoleDriver.shared)
-        
         func run() {
             let exitCode = CLI(name: "grapple", commands: [
                 SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand()

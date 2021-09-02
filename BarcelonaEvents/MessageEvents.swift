@@ -27,21 +27,11 @@ let ChangedItemsExclusion = [
 //    IMMessageStatusChatItem.self,
 ]
 
-//private let ChangedItemsExclusion = [AnyClass.Type]()
-
-enum MessageDebounceCategory {
-    case statusChanged
-}
-
 /**
  Tracks events related to IMMessage
  */
 class MessageEvents: EventDispatcher {
     override var log: Logger { Logger(category: "MessageEvents") }
-    
-    private let debouncer = CategorizedDebounceManager<MessageDebounceCategory>([
-        .statusChanged: Double(1 / 10)
-    ])
     
     override func wake() {
         addObserver(forName: .IMChatItemsDidChange) {
@@ -69,10 +59,10 @@ class MessageEvents: EventDispatcher {
             guard let chat = $0.object as? IMChat, let message = $0.userInfo?[IMChatValueKey] as? IMMessage else {
                 return
             }
-//
-//            self.debouncer.receive(guid: message.guid) {
-            self.messageUpdated(message, chat: chat)
-//            }
+
+            ThinDebouncer.shared.submit(space: $0.name, tag: message.id, delay: .milliseconds(2)) {
+                self.messageUpdated(message, chat: chat)
+            }
         }
     }
     
@@ -151,7 +141,7 @@ class MessageEvents: EventDispatcher {
         BLIngestObjects(statusChanges, inChat: chat.id).compactMap { item in
             item as? StatusChatItem
         }.forEach { status in
-            self.debouncer.submit(status.itemID, category: .statusChanged) {
+            ThinDebouncer.shared.submit(space: event.name, tag: status.itemID, delay: .milliseconds(2)) {
                 self.bus.dispatch(.itemStatusChanged(status))
             }
         }

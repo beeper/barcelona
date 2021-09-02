@@ -15,8 +15,9 @@ public class EventBus {
     public lazy private(set) var supervisor: DispatchSupervisor = DispatchSupervisor(center: NotificationCenter.default, bus: self)
     private let subject = PassthroughSubject<Event, Never>()
     public let publisher: AnyPublisher<Event, Never>
-    public let queue = DispatchQueue(label: "com.ericrabil.barcelona.events")
-
+    public static let queue = DispatchQueue(label: "com.ericrabil.barcelona.events")
+    public var queue: DispatchQueue { Self.queue }
+    
     private let slidingEventFilter = ExpiringCollection<Int>()
     
     public init() {

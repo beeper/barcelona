@@ -49,6 +49,10 @@ struct CSDBSqliteDatabase {
     
 };
 
+typedef CFTypeRef IMDMessageRecordRef;
+
+CFStringRef IMDMessageRecordCopyGUID(CFAllocatorRef, IMDMessageRecordRef);
+
 struct CSDBSqliteDatabase *IMDSharedSqliteDatabase();
 void IMDEnsureSharedRecordStoreInitialized();
 //NSArray *_IMDSqlOperationGetRowsWithBindingBlock(IMDSqlOperation *, CFStringRef, dispatch_block_t);

@@ -9,6 +9,19 @@
 import Foundation
 import SwiftCLI
 import Barcelona
+import IMCore
+
+func createDM(toHandle handle: String) -> Chat {
+    let handle = Registry.sharedInstance.imHandle(withID: handle)!
+    
+    let chat = IMChat()!._init(withGUID: NSString.stringGUID(), account: handle.account, style: ChatStyle.single.rawValue, roomName: nil, displayName: nil, lastAddressedHandle: nil, lastAddressedSIMID: nil, items: nil, participants: [handle], isFiltered: true, hasHadSuccessfulQuery: true)!
+    
+    chat._setupObservation()
+    
+    IMChatRegistry.shared._registerChat(chat, isIncoming: false, guid: chat.guid)
+    
+    return Chat(chat)
+}
 
 class SendMessageCommand: Command {
     let name = "send-message"
@@ -17,9 +30,7 @@ class SendMessageCommand: Command {
     @Param var message: String
     
     func execute() throws {
-        guard let chat = Chat.resolve(withIdentifier: chatID) else {
-            fatalError("Unknown chat")
-        }
+        let chat = Chat.resolve(withIdentifier: chatID) ?? createDM(toHandle: chatID)
         
         print(try chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: message)])))
         exit(0)

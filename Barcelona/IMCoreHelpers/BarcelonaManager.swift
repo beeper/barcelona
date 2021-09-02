@@ -60,15 +60,17 @@ func BLSwizzleDaemonController() -> Bool {
 }
 
 @_cdecl("BLBootstrapController")
-public func BLBootstrapController() -> Bool {
+public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = nil, _ callbackSwift: ((Bool) -> ())? = nil) -> Bool {
     guard BLSwizzleDaemonController() else {
+        callbackC?(false)
+        callbackSwift?(false)
         return false
     }
     
     // As long as we do single-threaded, READ-ONLY access to IMDPersistence, this is not an issue.
     // Again, please, I am BEGGING you, never use IMDPersistence for write operations.
     // Even if we were properly using it, we should only perform mutating operations using the IMCore apis to prevent corrupted state
-    IMDSetIsRunningInDatabaseServerProcess(0x1)
+    IMDSetIsRunningInDatabaseServerProcess(ProcessInfo.processInfo.arguments.contains("-imdaemon") ? 0x1 : 0x0)
     
     do {
         try HookManager.shared.apply()
@@ -92,7 +94,7 @@ public func BLBootstrapController() -> Bool {
         controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
         controller.blockUntilConnected()
         
-        log("Connected!")
+        log("Connected.")
         
         HealthChecker.shared.dispatch()
     }
@@ -101,6 +103,11 @@ public func BLBootstrapController() -> Bool {
         ERIMSimulationTools.bootstrap()
         
         IMSimulatedDaemonController.beginSimulatingDaemon()
+    }
+    
+    NotificationCenter.default.once(notificationNamed: .IMChatRegistryDidLoad).resolve(on: DispatchQueue.main).then { _ in
+        callbackC?(true)
+        callbackSwift?(true)
     }
     
     return true
@@ -122,12 +129,10 @@ public class BarcelonaManager {
     }
     
     public func bootstrap() -> Promise<Bool> {
-        guard BLBootstrapController() else {
-            return .success(false)
-        }
-        
-        return NotificationCenter.default.once(notificationNamed: .IMChatRegistryDidLoad).resolve(on: DispatchQueue.main).then { _ in
-            return true
+        Promise { resolve in
+            guard BLBootstrapController(nil, resolve) else {
+                return resolve(false)
+            }
         }
     }
 }

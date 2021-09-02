@@ -9,6 +9,7 @@
 import Foundation
 import IMCore
 
+#if false
 func ERApplyMessageExtensionQuirks(toMessageItem messageItem: IMMessageItem, inChatID chatID: String, forOptions options: CreatePluginMessage) {
     switch options.bundleID {
     case IMBalloonBundleIdentifierBusiness:
@@ -19,6 +20,7 @@ func ERApplyMessageExtensionQuirks(toMessageItem messageItem: IMMessageItem, inC
         break
     }
 }
+#endif
 
 func ERAttributedString(forExtensionOptions options: CreatePluginMessage) -> MessagePartParseResult {
     var parts: [MessagePart] = []

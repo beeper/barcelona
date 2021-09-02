@@ -22,6 +22,16 @@ private extension Collection where Element: Hashable {
     }
 }
 
+internal extension OperationBuffer {
+    @_transparent
+    @usableFromInline
+    func performLocked<P>(_ cb: () throws -> P) rethrows -> P {
+        lock.lock()
+        defer { lock.unlock() }
+        return try cb()
+    }
+}
+
 public class OperationBuffer<Output, Discriminator: Hashable> {
     @usableFromInline
     typealias RawBuffer = Promise<[Output]>
@@ -34,6 +44,8 @@ public class OperationBuffer<Output, Discriminator: Hashable> {
     private var lazyBuffers = [[Discriminator]: LazyBuffer]()
     
     private var discriminatorKeyPath: KeyPath<Output, Discriminator>
+    @usableFromInline
+    internal var lock = NSRecursiveLock()
     
     public init(discriminatorKeyPath: KeyPath<Output, Discriminator>) {
         self.discriminatorKeyPath = discriminatorKeyPath
@@ -50,8 +62,12 @@ public class OperationBuffer<Output, Discriminator: Hashable> {
         
         let lazyBuffer = rawBuffer.dictionary(keyedBy: discriminatorKeyPath)
         
-        self.lazyBuffers[ids] = lazyBuffer.observeAlways { _ in
-            self.lazyBuffers[ids] = nil
+        self.performLocked {
+            self.lazyBuffers[ids] = lazyBuffer.observeAlways { _ in
+                self.performLocked {
+                    self.lazyBuffers[ids] = nil
+                }
+            }
         }
         
         return lazyBuffer
@@ -64,8 +80,12 @@ public class OperationBuffer<Output, Discriminator: Hashable> {
     @discardableResult
     @inlinable
     func putBuffers(_ ids: [Discriminator], _ pending: Promise<[Output]>) -> Promise<[Output]> {
-        rawBuffers[ids] = pending.observeAlways { _ in
-            self.rawBuffers[ids] = nil
+        performLocked {
+            rawBuffers[ids] = pending.observeAlways { _ in
+                self.performLocked {
+                    self.rawBuffers[ids] = nil
+                }
+            }
         }
         
         return pending

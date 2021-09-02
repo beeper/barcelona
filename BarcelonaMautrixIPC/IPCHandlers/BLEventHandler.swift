@@ -22,7 +22,7 @@ private extension ChatItemOwned {
 public class BLEventHandler {
     public static let shared = BLEventHandler()
     
-    let bus = EventBus()
+    public let bus = EventBus()
     
     public func run() {
         let send: (IPCCommand) -> () = {

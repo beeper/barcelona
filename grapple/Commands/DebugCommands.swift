@@ -11,6 +11,8 @@ import Barcelona
 import SwiftCLI
 import BarcelonaEvents
 import OSLog
+import IMDPersistence
+import IMCore
 
 private extension String {
     init(debugDescribing value: Any) {
@@ -20,6 +22,11 @@ private extension String {
             self.init(describing: value)
         }
     }
+}
+
+@_cdecl("_CSDBCheckResultWithStatement")
+func _CSDBCheckResultWithStatement(_ a: UnsafeRawPointer, _ b: UnsafeRawPointer, _ c: UnsafeRawPointer, _ d: UnsafeRawPointer, _ e: UnsafeRawPointer) {
+    
 }
 
 class DebugCommands: CommandGroup {
@@ -40,5 +47,24 @@ class DebugCommands: CommandGroup {
         }
     }
     
-    var children: [Routable] = [DebugEventsCommand()]
+    class IMDTest: Command {
+        let name = "imd"
+        
+        func execute() throws {
+            
+            guard let _chat = IMChatRegistry.shared.allChats.first else {
+                return
+            }
+            
+            typealias XYZ = @convention(c) (UnsafeRawPointer, UnsafeRawPointer, UnsafeRawPointer, UnsafeRawPointer, UnsafeRawPointer) -> ()
+            
+            let chat = Chat(_chat)
+            
+            chat.messages().then {
+                print($0)
+            }
+        }
+    }
+    
+    var children: [Routable] = [DebugEventsCommand(), IMDTest()]
 }
