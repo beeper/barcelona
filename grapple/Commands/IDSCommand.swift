@@ -45,11 +45,22 @@ public class IDSCommand: EphemeralCommand {
     @CollectedParam
     var handles: [String]
     
+    @Flag("-i", "--ignore-cache", description: "contact IDS API regardless of cached state")
+    var ignoreCache: Bool
+    
+    var idsOptions: BLIDSResolutionOptions {
+        if ignoreCache {
+            return .ignoringCache
+        } else {
+            return .none
+        }
+    }
+    
     public func execute() throws {
         guard let service = IMServiceStyle(rawValue: service) else {
             fatalError("Invalid service name")
         }
         
-        print(try BLResolveIDStatusForIDs(handles, onService: service).map(IDSResult.init(id:state:)).renderTextTable())
+        print(try BLResolveIDStatusForIDs(handles, onService: service, options: idsOptions).map(IDSResult.init(id:state:)).renderTextTable())
     }
 }

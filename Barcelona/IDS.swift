@@ -44,8 +44,21 @@ public enum IDSState: Int, Codable {
     }
 }
 
+public struct BLIDSResolutionOptions: OptionSet {
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
+    }
+    
+    public var rawValue: Int
+    
+    public typealias RawValue = Int
+    
+    public static let ignoringCache = BLIDSResolutionOptions(rawValue: 1 << 0)
+    public static let none: BLIDSResolutionOptions = []
+}
+
 /// Asynchronously resolves the latest IDS status for a set of handles on a given service, defaulting to iMessage.
-public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServiceStyle = IMServiceStyle.iMessage, _ callback: @escaping ([String: IDSState]) -> ()) throws {
+public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServiceStyle = IMServiceStyle.iMessage, options: BLIDSResolutionOptions = .none, _ callback: @escaping ([String: IDSState]) -> ()) throws {
     var allUnavailable: [String: IDSState] {
         ids.map {
             ($0, IDSState.unavailable)
@@ -88,36 +101,52 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
         throw IDStatusError.malformedID
     }
     
-    // optimization: first check the local cache so we dont consume the IDS rate-limit bucket (its pretty forgiving but still)
-    IDSIDQueryController.sharedInstance()!.currentIDStatus(forDestinations: destinations, service: service.idsIdentifier!, listenerID: IDSListenerID, queue: HandleQueue) { cachedResults in
-        let cachedResults = cachedResults.mapValues { IDSState(rawValue: $0.intValue) }
-        let (needed, resolved) = cachedResults.splitFilter {
-            $0.value == .unknown
+    func FetchLatest(_ destinations: [String], _ callback: @escaping ([String: IDSState]) -> ()) {
+        guard destinations.count > 0 else {
+            return callback([:])
         }
         
-        // all are cached, just return now
-        if needed.count == 0 {
-            return callback(cachedResults.mapKeys(\.idsURIStripped))
+        IDSIDQueryController.sharedInstance()!.forceRefreshIDStatus(forDestinations: destinations, service: service.idsIdentifier!, listenerID: IDSListenerID, queue: HandleQueue) {
+            callback($0.mapValues { IDSState(rawValue: $0.intValue) })
+        }
+    }
+    
+    func FetchCached(_ destinations: [String], _ callback: @escaping (_ cached: [String: IDSState], _ needed: [String]) -> ()) {
+        guard destinations.count > 0 else {
+            return callback([:], [])
         }
         
-        // force IDS to update the remaining destinations
-        IDSIDQueryController.sharedInstance()!.forceRefreshIDStatus(forDestinations: Array(needed.keys), service: service.idsIdentifier!, listenerID: IDSListenerID, queue: HandleQueue) {
-            let result = $0.mapValues { IDSState(rawValue: $0.intValue) }
+        IDSIDQueryController.sharedInstance()!.currentIDStatus(forDestinations: destinations, service: service.idsIdentifier!, listenerID: IDSListenerID, queue: HandleQueue) { cachedResults in
+            let cachedResults = cachedResults.mapValues { IDSState(rawValue: $0.intValue) }
+            let (needed, resolved) = cachedResults.splitFilter {
+                $0.value == .unknown
+            }
             
-            // merge new values into the resolved dictionary and return
-            callback(result.reduce(into: resolved) { masterResult, pair in
-                masterResult[pair.key] = pair.value
-            }.mapKeys(\.idsURIStripped))
+            callback(resolved, Array(needed.keys))
+        }
+    }
+    
+    if options.contains(.ignoringCache) {
+        FetchLatest(destinations) { resolved in
+            callback(resolved.mapKeys(\.idsURIStripped))
+        }
+    } else {
+        FetchCached(destinations) { cached, needed in
+            FetchLatest(needed) { resolved in
+                callback(resolved.reduce(into: cached) { masterResult, pair in
+                    masterResult[pair.key] = pair.value
+                }.mapKeys(\.idsURIStripped))
+            }
         }
     }
 }
 
 /// Synchronously resolves the latest IDS status for a set of handles on a given service, defaulting to iMessage.
-public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServiceStyle = IMServiceStyle.iMessage) throws -> [String: IDSState] {
+public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServiceStyle = IMServiceStyle.iMessage, options: BLIDSResolutionOptions = .none) throws -> [String: IDSState] {
     let semaphore = DispatchSemaphore(value: 0)
     var results: [String: IDSState] = [:]
     
-    try BLResolveIDStatusForIDs(ids, onService: service) {
+    try BLResolveIDStatusForIDs(ids, onService: service, options: options) {
         results = $0
         semaphore.signal()
     }
