@@ -79,10 +79,18 @@ private func IMChatHooks() throws -> Interpose {
     }
 }
 
+private func IMIDSHooks() throws -> Interpose {
+    try Interpose(NSClassFromString("IDSIDQueryController")!) {
+        try $0.prepareHook(Selector("_hasCacheForService:")) { (store: TypedHook<@convention(c) (AnyObject, Selector, AnyObject) -> Bool, @convention(block) (AnyObject) -> CChar>) in { _ in
+            0
+        }}
+    }
+}
+
 class HookManager {
     static let shared = HookManager()
     
-    let hooks = [IMChatHooks]
+    let hooks = [IMChatHooks, IMIDSHooks]
     private var appliedHooks: [Interpose]?
     
     func apply() throws {

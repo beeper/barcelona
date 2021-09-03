@@ -310,6 +310,8 @@
 		1DEE7EA1250FA4150009C74F /* Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA0250FA4150009C74F /* Searchable.swift */; };
 		1DEE7EA4250FA4B40009C74F /* Message+Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA3250FA4B40009C74F /* Message+Searchable.swift */; };
 		1DEE7EA6250FB2150009C74F /* IMHandle+Resolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA5250FB2150009C74F /* IMHandle+Resolvable.swift */; };
+		1DF257BE26E27EC400B39C8E /* IDS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF257BD26E27EC400B39C8E /* IDS.swift */; };
+		1DF257C026E280FB00B39C8E /* IDSCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF257BF26E280FB00B39C8E /* IDSCommand.swift */; };
 		1DF2F2EB26C43D550078E549 /* JSCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F2EA26C43D550078E549 /* JSCommand.swift */; };
 		1DF2F2F926C44CBB0078E549 /* Barcelona.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; };
 		1DF2F2FA26C44CBB0078E549 /* Barcelona.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -857,6 +859,8 @@
 		1DEE7EA0250FA4150009C74F /* Searchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Searchable.swift; sourceTree = "<group>"; };
 		1DEE7EA3250FA4B40009C74F /* Message+Searchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message+Searchable.swift"; sourceTree = "<group>"; };
 		1DEE7EA5250FB2150009C74F /* IMHandle+Resolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMHandle+Resolvable.swift"; sourceTree = "<group>"; };
+		1DF257BD26E27EC400B39C8E /* IDS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDS.swift; sourceTree = "<group>"; };
+		1DF257BF26E280FB00B39C8E /* IDSCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDSCommand.swift; sourceTree = "<group>"; };
 		1DF2F2EA26C43D550078E549 /* JSCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSCommand.swift; sourceTree = "<group>"; };
 		1DF2F2F126C44CAD0078E549 /* BarcelonaJS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaJS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF2F2F426C44CAD0078E549 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -1240,6 +1244,7 @@
 				1D1E233B2501F14F0069705D /* Protocols */,
 				1D5AEE7524E37D9E00303692 /* Wrappers */,
 				1D79039F26ACFF5B00712CB3 /* Barcelona.swift */,
+				1DF257BD26E27EC400B39C8E /* IDS.swift */,
 			);
 			path = Barcelona;
 			sourceTree = "<group>";
@@ -1578,6 +1583,7 @@
 				1D9AE39A26AF5FD7007873E3 /* DebugCommands.swift */,
 				1DC9E85A26C19D1A007E463F /* ListCommand.swift */,
 				1DF2F2EA26C43D550078E549 /* JSCommand.swift */,
+				1DF257BF26E280FB00B39C8E /* IDSCommand.swift */,
 			);
 			path = Commands;
 			sourceTree = "<group>";
@@ -2341,6 +2347,7 @@
 				1D804CFB250E96FB00F376CB /* InternalAttachment+Resolvable.swift in Sources */,
 				1D74D4A4250C091500A9F9A1 /* LazilyResolvable.swift in Sources */,
 				1DD805C124E85D070076D717 /* IMMessage+Subpart.swift in Sources */,
+				1DF257BE26E27EC400B39C8E /* IDS.swift in Sources */,
 				1D3E3336250C210C00EEA08B /* IMServiceStyle.swift in Sources */,
 				1D1E23412501F4530069705D /* IMMessage+IMFileTransferContainer.swift in Sources */,
 				1D44864F24E85BD500FF73F3 /* IMCore-Shims.m in Sources */,
@@ -2431,6 +2438,7 @@
 			files = (
 				1DC9E85926C19C22007E463F /* IMAccount.swift in Sources */,
 				1D9AE39626AF5D0F007873E3 /* ChatCommands.swift in Sources */,
+				1DF257C026E280FB00B39C8E /* IDSCommand.swift in Sources */,
 				1D4AC03826AB7CE300ADD254 /* Grapple.swift in Sources */,
 				1D9AE38E26AF4A29007873E3 /* SendMessageCommand.swift in Sources */,
 				1D9AE39B26AF5FD7007873E3 /* DebugCommands.swift in Sources */,

@@ -156,9 +156,9 @@
 - (id)chatForIMHandles:(id)arg1 displayName:(id)arg2 joinedChatsOnly:(BOOL)arg3 lastAddressedHandle:(id)arg4 lastAddressedSIMID:(id)arg5;
 - (id)chatForIMHandles:(id)arg1 displayName:(id)arg2 joinedChatsOnly:(BOOL)arg3;
 - (id)chatForIMHandles:(id)arg1 lastAddressedHandle:(id)arg2 lastAddressedSIMID:(id)arg3;
-- (id)chatForIMHandles:(id)arg1;
+- (IMChat* _Nonnull)chatForIMHandles:(NSArray<IMHandle*>*)arg1;
 - (id)chatForIMHandle:(id)arg1 lastAddressedHandle:(id)arg2 lastAddressedSIMID:(id)arg3;
-- (id)chatForIMHandle:(id)arg1;
+- (IMChat* _Nonnull)chatForIMHandle:(IMHandle*)arg1;
 - (void)_unregisterChatWithGUID:(id)arg1;
 - (void)_unregisterChat:(id)arg1;
 - (void)unregisterChatWithGUID:(id)arg1;

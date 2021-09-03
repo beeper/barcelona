@@ -4,8 +4,16 @@
 //     class-dump is Copyright (C) 1997-1998, 2000-2001, 2004-2013 by Steve Nygard.
 //
 
+@interface IDSURI: NSObject
++ (instancetype _Nonnull) URIWithPrefixedURI:(NSString*)uri;
+- (NSString* _Nonnull) unprefixedURI;
+- (NSString* _Nonnull) prefixedURI;
+@end
+
 @interface IDSDestination
 + (id)destinationWithRapportPublicIdentifier:(id)arg1;
 + (id)destinationWithDevice:(id)arg1;
++ (instancetype _Nonnull) destinationWithURI:(NSString*)uri;
+- (IDSURI* _Nonnull) uri;
 @end
 

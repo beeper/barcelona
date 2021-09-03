@@ -13,29 +13,67 @@ import BarcelonaEvents
 import OSLog
 import SwiftCLI
 
+protocol BarcelonaCommand: Command {}
+protocol EphemeralCommand: Command {}
+protocol EphemeralBarcelonaCommand: BarcelonaCommand, EphemeralCommand {}
+
+extension Command {
+    func connect() -> Promise<Void> {
+        BarcelonaManager.shared.bootstrap().then { success in
+            guard success else {
+                print("Failed to connect to imagent")
+                exit(0)
+            }
+        }
+    }
+}
+
 @main
 class Grapple {
     static let shared = Grapple()
     
-    static func main() {
-        func run() {
-            let exitCode = CLI(name: "grapple", commands: [
-                SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand()
-            ]).go()
-            
-            guard exitCode == 0 else {
-                exit(exitCode)
-            }
-        }
+    static func main() throws {
+        let cli = CLI(name: "grapple", commands: [
+            SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand(), IDSCommand()
+        ])
         
-        if let jsIndex = ProcessInfo.processInfo.arguments.firstIndex(of: "js"), ProcessInfo.processInfo.arguments[ProcessInfo.processInfo.arguments.index(after: jsIndex)] == "remote" {
-            run()
-        } else {
-            BarcelonaManager.shared.bootstrap().then { success in
-                run()
+        do {
+            let path = try cli.parser.parse(cli: cli, arguments: ArgumentList(arguments: Array(CommandLine.arguments.dropFirst())))
+            
+            switch path.command {
+            case let command as BarcelonaCommand:
+                BarcelonaManager.shared.bootstrap().then { success in
+                    try command.execute()
+                    
+                    if command is EphemeralCommand {
+                        exit(0)
+                    }
+                }
+            case let command as JSCommand.RemoteREPLCommand:
+                try command.execute()
+            case let command:
+                try command.execute()
+                
+                if command is EphemeralCommand {
+                    exit(0)
+                }
             }
-        }
 
-        RunLoop.main.run()
+            RunLoop.main.run()
+        } catch let error as RouteError {
+            cli.helpMessageGenerator.writeRouteErrorMessage(for: error, to: Term.stderr)
+        } catch let error as OptionError {
+            if let command = error.command, command.command is HelpCommand {
+                try! command.command.execute()
+            }
+            
+            cli.helpMessageGenerator.writeMisusedOptionsStatement(for: error, to: Term.stderr)
+        } catch let error as ParameterError {
+            if error.command.command is HelpCommand || cli.helpFlag?.wrappedValue == true {
+                try! error.command.command.execute()
+            }
+            
+            cli.helpMessageGenerator.writeParameterErrorMessage(for: error, to: Term.stderr)
+        }
     }
 }

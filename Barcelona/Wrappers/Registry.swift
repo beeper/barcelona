@@ -120,11 +120,21 @@ public class Registry {
         return IMAccountController.sharedInstance().activeSMSAccount
     }
     
+    private func _connect() {
+        if _fastPath(IMDaemonController.shared().isConnected) {
+            return
+        }
+        
+        IMDaemonController.shared().connectToDaemon(withLaunch: true, capabilities: FZListenerCapabilities.defaults_, blockUntilConnected: true)
+    }
+    
     public var smsServiceEnabled: Bool {
-        ((IMService.sms() as? IMServiceImpl)?.isEnabled()) ?? false
+        _connect()
+        return ((IMService.sms() as? IMServiceImpl)?.isEnabled()) ?? false
     }
     
     public var callServiceEnabled: Bool {
-        ((IMService.call() as? IMServiceImpl)?.isEnabled()) ?? false
+        _connect()
+        return ((IMService.call() as? IMServiceImpl)?.isEnabled()) ?? false
     }
 }

@@ -220,7 +220,7 @@
 - (id)personSibsForIMHandle:(id)arg1;
 - (id)personForIMHandle:(id)arg1 identifier:(int *)arg2;
 - (id)personForIMHandle:(id)arg1;
-- (IMHandle*)imHandleWithID:(NSString*)arg1;
+- (IMHandle* _Nonnull)imHandleWithID:(NSString*)arg1;
 - (id)existingIMHandleWithID:(id)arg1 countryCode:(id)arg2;
 - (id)imHandleWithID:(id)arg1 countryCode:(id)arg2;
 - (id)_imHandleWithID:(id)arg1 alreadyCanonical:(BOOL)arg2 originalID:(id)arg3 countryCode:(id)arg4;

@@ -18,7 +18,7 @@ public class JSCommand: CommandGroup {
     public let shortDescription: String = "commands for the js apis"
     public let name = "js"
     
-    public class ServeCommand: Command {
+    public class ServeCommand: BarcelonaCommand {
         public let name = "srv"
         
         public func execute() throws {
@@ -67,7 +67,7 @@ public class JSCommand: CommandGroup {
         }
     }
     
-    public class REPLCommand: Command {
+    public class REPLCommand: BarcelonaCommand {
         public let name = "repl"
         
         public func execute() throws {
@@ -83,7 +83,7 @@ public class JSCommand: CommandGroup {
         }
     }
     
-    public class RunCommand: Command {
+    public class RunCommand: BarcelonaCommand {
         public let name  = "run"
         
         @Param(completion: .filename)

@@ -15,7 +15,7 @@ class ChatCommands: CommandGroup {
     let name = "chat"
     let shortDescription = "commands for interacting with chats"
     
-    class ListChats: Command {
+    class ListChats: EphemeralBarcelonaCommand {
         let name = "list"
         
         func execute() throws {
@@ -32,7 +32,7 @@ class ChatCommands: CommandGroup {
         }
     }
     
-    class RecentMessages: Command {
+    class RecentMessages: BarcelonaCommand {
         let name = "recent-messages"
         
         @Param var id: String

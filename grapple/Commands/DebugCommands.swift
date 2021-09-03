@@ -33,7 +33,7 @@ class DebugCommands: CommandGroup {
     let name = "debug"
     let shortDescription = "commands useful when debugging barcelona"
     
-    class DebugEventsCommand: Command {
+    class DebugEventsCommand: BarcelonaCommand {
         let name = "events"
         
         func execute() throws {
@@ -47,7 +47,7 @@ class DebugCommands: CommandGroup {
         }
     }
     
-    class IMDTest: Command {
+    class IMDTest: BarcelonaCommand {
         let name = "imd"
         
         func execute() throws {

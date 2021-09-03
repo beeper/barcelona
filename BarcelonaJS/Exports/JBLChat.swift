@@ -19,6 +19,10 @@ public protocol JBLChatJSExports: JSExport {
     var service: String { get set }
     
     static func chatWith(id: String) -> JBLChat?
+    
+    static func chatWithHandleID(_ handleID: String) -> JBLChat
+    static func chatWithHandleIDs(_ handleIDs: [String]) -> JBLChat
+    
     static func allChats() -> [JBLChat]
     func sendText(_ text: String) -> JBLMessageExports?
     func sendTapbackToMessage(_ item: String, _ message: String, _ type: Int) -> JBLMessageExports?
@@ -53,6 +57,14 @@ public class JBLChat: NSObject, JBLChatJSExports {
         }
         
         return JBLChat(chat: chat)
+    }
+    
+    public class func chatWithHandleID(_ handleID: String) -> JBLChat {
+        JBLChat(chat: Chat.chat(withHandleIDs: [handleID]))
+    }
+    
+    public class func chatWithHandleIDs(_ handleIDs: [String]) -> JBLChat {
+        JBLChat(chat: Chat.chat(withHandleIDs: handleIDs))
     }
     
     public func sendText(_ text: String) -> JBLMessageExports? {

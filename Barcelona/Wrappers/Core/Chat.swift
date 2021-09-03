@@ -140,10 +140,6 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     
     public static var delegate: ChatDelegate?
     
-    public static var allChats: [Chat] {
-        IMChatRegistry.shared.allChats.lazy.map(Chat.init(_:))
-    }
-    
     mutating func setTimeSortedParticipants(participants: [HandleTimestampRecord]) {
         self.participants = participants
             .map(\.handle_id)
@@ -153,8 +149,69 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     public var imChat: IMChat {
         IMChat.resolve(withIdentifier: id)!
     }
+}
+
+// MARK: - Utilities
+fileprivate extension Chat {
+    static func handle(_ handle: String, isEligibleForService service: IMServiceStyle) -> Bool {
+        IMIDStatusController.sharedInstance().status(forID: handle, onService: service.idsIdentifier!) == IDSState.available.rawValue
+    }
     
-    public var isTyping: Bool {
+    static func handlesAreiMessageEligible(_ handles: [String]) -> Bool {
+        guard let statuses = try? BLResolveIDStatusForIDs(handles, onService: .iMessage) else {
+            return false
+        }
+        
+        return statuses.values.allSatisfy {
+            $0 == .available
+        }
+    }
+    
+    static func iMessageHandle(forID id: String) -> IMHandle {
+        IMAccountController.sharedInstance().activeIMessageAccount.imHandle(withID: id)
+    }
+    
+    static func homogenousHandles(forIDs ids: [String]) -> [IMHandle] {
+        if handlesAreiMessageEligible(ids) {
+            return ids.compactMap(iMessageHandle(forID:))
+        }
+        
+        let account = IMAccountController.sharedInstance().activeSMSAccount ?? IMAccount(service: IMServiceStyle.SMS.service!)!
+        
+        return ids.map(account.imHandle(withID:))
+    }
+    
+    static func bestHandle(forID id: String) -> IMHandle {
+        homogenousHandles(forIDs: [id]).first!
+    }
+}
+
+// MARK: - Querying
+public extension Chat {
+    static var allChats: [Chat] {
+        IMChatRegistry.shared.allChats.lazy.map(Chat.init(_:))
+    }
+    
+    static func directMessage(withHandleID handleID: String) -> Chat {
+        Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID)))
+    }
+    
+    static func chat(withHandleIDs handleIDs: [String]) -> Chat {
+        guard handleIDs.count > 0 else {
+            preconditionFailure("chat(withHandleIDs) requires at least one handle ID to be non-null return type")
+        }
+        
+        if handleIDs.count == 1 {
+            return directMessage(withHandleID: handleIDs.first!)
+        } else {
+            return Chat(IMChatRegistry.shared.chat(for: homogenousHandles(forIDs: handleIDs)))
+        }
+    }
+}
+
+// MARK: - Message Sending
+public extension Chat {
+    var isTyping: Bool {
         get {
             imChat.localUserIsTyping
         }
@@ -164,11 +221,11 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     }
     
     
-    public func setTyping(_ typing: Bool) {
+    func setTyping(_ typing: Bool) {
         imChat.localUserIsTyping = typing
     }
     
-    public func messages(before: String? = nil, limit: Int? = nil, beforeDate: Date? = nil) -> Promise<[Message]> {
+    func messages(before: String? = nil, limit: Int? = nil, beforeDate: Date? = nil) -> Promise<[Message]> {
         if BLIsSimulation {
             let guids: [String] = imChat.chatItemRules._items().compactMap { item in
                 if let chatItem = item as? IMChatItem {
@@ -192,7 +249,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
         }
     }
     
-    public func delete(message: DeleteMessage) -> Promise<Void> {
+    func delete(message: DeleteMessage) -> Promise<Void> {
         let guid = message.id, parts = message.parts ?? []
         let fullMessage = parts.count == 0
         
@@ -218,7 +275,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
         }
     }
     
-    public func send(message options: CreatePluginMessage) throws -> [Message] {
+    func send(message options: CreatePluginMessage) throws -> [Message] {
         let message = try options.imMessage(inChat: self.id)
         
         Chat.delegate?.chat(self, willSendMessages: [message], fromCreatePluginMessage: options)
@@ -233,7 +290,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
             }
     }
     
-    public func send(message createMessage: CreateMessage) throws -> [Message] {
+    func send(message createMessage: CreateMessage) throws -> [Message] {
         let message = try createMessage.imMessage(inChat: self.id)
             
         let messages = message.messagesBySeparatingRichLinks() as? [IMMessage] ?? [message]
@@ -249,7 +306,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
         }
     }
     
-    public func tapback(_ creation: TapbackCreation) throws -> Message? {
+    func tapback(_ creation: TapbackCreation) throws -> Message? {
         let message = try imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil)
         
         return _BLParseObjects([message], inChat: id).compactMap {

@@ -11,28 +11,29 @@ import SwiftCLI
 import Barcelona
 import IMCore
 
-func createDM(toHandle handle: String) -> Chat {
-    let handle = Registry.sharedInstance.imHandle(withID: handle)!
-    
-    let chat = IMChat()!._init(withGUID: NSString.stringGUID(), account: handle.account, style: ChatStyle.single.rawValue, roomName: nil, displayName: nil, lastAddressedHandle: nil, lastAddressedSIMID: nil, items: nil, participants: [handle], isFiltered: true, hasHadSuccessfulQuery: true)!
-    
-    chat._setupObservation()
-    
-    IMChatRegistry.shared._registerChat(chat, isIncoming: false, guid: chat.guid)
-    
-    return Chat(chat)
-}
-
-class SendMessageCommand: Command {
+class SendMessageCommand: BarcelonaCommand {
     let name = "send-message"
+    let shortDescription = "send a textual message to a chat with either a comma-delimited set of recipients or a chat identifier"
     
-    @Param var chatID: String
+    @Param var destination: String
     @Param var message: String
     
-    func execute() throws {
-        let chat = Chat.resolve(withIdentifier: chatID) ?? createDM(toHandle: chatID)
+    @Flag("-i", "--id", description: "treat the destination as a chat ID")
+    var isID: Bool
+    
+    var chat: Chat {
+        if isID {
+            guard let chat = Chat.resolve(withIdentifier: destination) else {
+                fatalError("Unknown chat with identifier \(destination)")
+            }
+            
+            return chat
+        }
         
+        return Chat.chat(withHandleIDs: destination.split(separator: ",").map(String.init))
+    }
+    
+    func execute() throws {
         print(try chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: message)])))
-        exit(0)
     }
 }

@@ -29,7 +29,7 @@
 - (id)getIDsForAllIMHandles;
 - (id)getIDsForFinalBatch;
 - (id)getIDsForInitialBatch;
-- (id)getIMHandlesForID:(id)arg1;
+- (NSArray<IMHandle*>*)getIMHandlesForID:(NSString*)arg1;
 - (NSArray<IMHandle*>*)allIMHandles;
 - (id)siblingsForIMHandle:(id)arg1;
 - (void)clearSiblingCacheForIMHandle:(id)arg1;

@@ -122,9 +122,9 @@
 #import <IDS/_IDSService.h>
 #import <IDS/_IDSSession.h>
 
-IDSDestination* IDSCopyIDForPhoneNumber(CFStringRef);
-IDSDestination* IDSCopyIDForEmailAddress(CFStringRef);
-IDSDestination* IDSCopyIDForBusinessID(CFStringRef);
+NSString* IDSCopyIDForPhoneNumber(CFStringRef);
+NSString* IDSCopyIDForEmailAddress(CFStringRef);
+NSString* IDSCopyIDForBusinessID(CFStringRef);
 extern NSString* IDSServiceNameiMessage;
 extern NSString* IDSServiceNameSMSRelay;
 extern NSString* IDSServiceNameFaceTime;

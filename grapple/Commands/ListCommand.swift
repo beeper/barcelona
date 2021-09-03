@@ -17,7 +17,7 @@ class ListCommand: CommandGroup {
     
     let children: [Routable] = [ListAccountsCommand()]
     
-    class ListAccountsCommand: Command {
+    class ListAccountsCommand: EphemeralBarcelonaCommand {
         let name = "accounts"
         
         func execute() throws {
