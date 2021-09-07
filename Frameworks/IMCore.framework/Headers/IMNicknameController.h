@@ -8,6 +8,7 @@
 
 @class IMNickname, NSDictionary, NSMutableArray, NSMutableDictionary, NSMutableSet, NSSet;
 
+API_AVAILABLE(ios(13), macosx(10.15))
 @interface IMNicknameController : NSObject
 {
     BOOL _isInitialLoad;
@@ -23,13 +24,13 @@
 
 + (BOOL)multiplePhoneNumbersTiedToAppleID;
 + (BOOL)accountsMatchUpToUseNicknames;
-+ (id)sharedInstance;
++ (instancetype _Nonnull)sharedInstance;
 @property(nonatomic) BOOL isInitialLoad; // @synthesize isInitialLoad=_isInitialLoad;
 @property(retain, nonatomic) NSMutableSet *scrutinyNicknameHandles; // @synthesize scrutinyNicknameHandles=_scrutinyNicknameHandles;
 @property(retain, nonatomic) NSSet *blacklistedHandlesForSharing; // @synthesize blacklistedHandlesForSharing=_blacklistedHandlesForSharing;
 @property(retain, nonatomic) NSSet *whitelistedHandlesForSharing; // @synthesize whitelistedHandlesForSharing=_whitelistedHandlesForSharing;
-@property(retain, nonatomic) NSDictionary *pendingNicknameUpdates; // @synthesize pendingNicknameUpdates=_pendingNicknameUpdates;
-@property(retain, nonatomic) NSDictionary *handledNicknames; // @synthesize handledNicknames=_handledNicknames;
+@property(retain, nonatomic, nonnull) NSDictionary<NSString*,IMNickname*> *pendingNicknameUpdates; // @synthesize pendingNicknameUpdates=_pendingNicknameUpdates;
+@property(retain, nonatomic, nonnull) NSDictionary<NSString*,IMNickname*> *handledNicknames; // @synthesize handledNicknames=_handledNicknames;
 @property(retain, nonatomic) NSMutableArray *fetchPersonalNicknameCompletionBlocks; // @synthesize fetchPersonalNicknameCompletionBlocks=_fetchPersonalNicknameCompletionBlocks;
 @property(retain, nonatomic) IMNickname *personalNickname; // @synthesize personalNickname=_personalNickname;
 @property(retain, nonatomic) NSMutableDictionary *responseHandlers; // @synthesize responseHandlers=_responseHandlers;
@@ -62,7 +63,7 @@
 - (void)clearPendingNicknameUpdatesForHandle:(id)arg1;
 - (id)IMSharedHelperMD5Helper:(id)arg1;
 - (unsigned long long)nicknameUpdateForHandle:(id)arg1 nicknameIfAvailable:(id )arg2;
-- (id)nicknameForHandle:(id)arg1;
+- (IMNickname*)nicknameForHandle:(IMHandle*)arg1;
 - (void)_broadcastNicknamePreferencesDidChange:(id)arg1;
 - (BOOL)_canUpdatePersonalNickname;
 - (BOOL)_nicknameFeatureEnabled;

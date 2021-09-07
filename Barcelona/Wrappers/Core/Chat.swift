@@ -152,7 +152,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
 }
 
 // MARK: - Utilities
-fileprivate extension Chat {
+internal extension Chat {
     static func handle(_ handle: String, isEligibleForService service: IMServiceStyle) -> Bool {
         IMIDStatusController.sharedInstance().status(forID: handle, onService: service.idsIdentifier!) == IDSState.available.rawValue
     }

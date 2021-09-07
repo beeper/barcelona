@@ -14,7 +14,7 @@ extension IMChatItem {
      Creates summary info relevant for a tapback message
      */
     func summaryInfo(for message: IMMessage, in chat: IMChat, itemTypeOverride: UInt8? = nil) -> Any? {
-        let description = message.description(forPurpose: 0x1, inChat: chat)
+        let description = message.description(forPurpose: IMMessageDescriptionType.acknowledgment.rawValue, inChat: chat)
         
         var summary: Any? = nil
         var itemType: TapBackSpecificItemType = .text

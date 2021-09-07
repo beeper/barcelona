@@ -125,12 +125,12 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         isDelivered = backing.isDelivered
         isAudioMessage = backing.isAudioMessage
         items = chatItems.map { $0.eraseToAnyChatItem() }
-        flags = backing.flags
+        flags = IMMessageFlags(rawValue: backing.flags)
         associatedMessageID = message.associatedMessageGUID ?? backing.associatedMessageGUID() as? String
         fileTransferIDs = message.fileTransferGUIDs
         
         if let chat = IMChat.resolve(withIdentifier: chatID) {
-            description = try? message.description(forPurpose: 0x2, inChat: chat)
+            description = try? message.description(forPurpose: IMMessageDescriptionType.conversationList.rawValue, inChat: chat)
         }
         
         // load timestamps
@@ -176,7 +176,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     public var isDelivered: Bool
     public var isAudioMessage: Bool
     public var description: String?
-    public var flags: UInt64
+    public var flags: IMMessageFlags
     public var items: [AnyChatItem]
     public var service: IMServiceStyle
     public var fileTransferIDs: [String]

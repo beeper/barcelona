@@ -8,34 +8,51 @@
 
 import Foundation
 
-/**
- flag <<= MessageFlags
- */
-public enum IMMessageFlags: UInt64 {
-    case emote = 0x1
-    case fromMe = 0x2
-    case typingData = 0x3
-    case delayed = 0x5
-    case autoReply = 0x6
-    case alert = 0x9
-    case addressedToMe = 0xb
-    case delivered = 0xc
-    case read = 0xd
-    case systemMessage = 0xe
-    case audioMessage = 0x15
-    case externalAudio = 0x2000000
-    case isPlayed = 0x16
-    case isLocating = 0x17
+public struct IMMessageFlags: OptionSet, ExpressibleByIntegerLiteral, Codable, Hashable {
+    public init(integerLiteral value: UInt64) {
+        self.rawValue = value
+    }
+    
+    public typealias IntegerLiteralType = UInt64
+    
+    public let rawValue: UInt64
+    
+    public init(rawValue: UInt64) {
+        self.rawValue = rawValue
+    }
+    
+    public static let finished:        IMMessageFlags = 0x1
+    public static let emote:           IMMessageFlags = 0x2
+    public static let fromMe:          IMMessageFlags = 0x4
+    public static let empty:           IMMessageFlags = 0x8
+    public static let delayed:         IMMessageFlags = 0x20
+    public static let autoReply:       IMMessageFlags = 0x40
+    public static let alert:           IMMessageFlags = 0x200
+    public static let addressedToMe:   IMMessageFlags = 0x800
+    public static let delivered:       IMMessageFlags = 0x1000
+    public static let read:            IMMessageFlags = 0x2000
+    public static let systemMessage:   IMMessageFlags = 0x4000
+    public static let sent:            IMMessageFlags = 0x8000
+    public static let hasDDResults:    IMMessageFlags = 0x10000
+    
+    public static let serviceMessage:  IMMessageFlags = 0x20000
+    public static let forward:         IMMessageFlags = 0x40000
+    public static let downgraded:      IMMessageFlags = 0x80000
+    public static let dataDetected:    IMMessageFlags = 0x100000
+    public static let audioMessage:    IMMessageFlags = 0x200000
+    public static let played:          IMMessageFlags = 0x400000
+    public static let locating:        IMMessageFlags = 0x800000
+    public static let expirable:       IMMessageFlags = 0x1000000
+    public static let fromExtSource:   IMMessageFlags = 0x2000000
+    
+    public static let legacyBits:      IMMessageFlags = 0xee000000
 }
 
-public enum FullFlagsFromMe: UInt64 {
-    case audioMessage = 19968005
-    case digitalTouch = 17862661
-    /**
-     Plugin message
-     */
-    case textOrPluginOrStickerOrImage = 1085445
-    case attachments = 1093637
-    case richLink = 1150981
-    case incomplete = 1048581
+public enum IMMessageDescriptionType: Int64 {
+    case accessibility
+    case acknowledgment
+    case conversationList
+    case notification
+    case siri
+    case spi
 }

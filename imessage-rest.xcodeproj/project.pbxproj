@@ -312,6 +312,7 @@
 		1DEE7EA6250FB2150009C74F /* IMHandle+Resolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DEE7EA5250FB2150009C74F /* IMHandle+Resolvable.swift */; };
 		1DF257BE26E27EC400B39C8E /* IDS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF257BD26E27EC400B39C8E /* IDS.swift */; };
 		1DF257C026E280FB00B39C8E /* IDSCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF257BF26E280FB00B39C8E /* IDSCommand.swift */; };
+		1DF257C826E2F08C00B39C8E /* NicknameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF257C726E2F08C00B39C8E /* NicknameController.swift */; };
 		1DF2F2EB26C43D550078E549 /* JSCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2F2EA26C43D550078E549 /* JSCommand.swift */; };
 		1DF2F2F926C44CBB0078E549 /* Barcelona.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; };
 		1DF2F2FA26C44CBB0078E549 /* Barcelona.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -861,6 +862,7 @@
 		1DEE7EA5250FB2150009C74F /* IMHandle+Resolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMHandle+Resolvable.swift"; sourceTree = "<group>"; };
 		1DF257BD26E27EC400B39C8E /* IDS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDS.swift; sourceTree = "<group>"; };
 		1DF257BF26E280FB00B39C8E /* IDSCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDSCommand.swift; sourceTree = "<group>"; };
+		1DF257C726E2F08C00B39C8E /* NicknameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NicknameController.swift; sourceTree = "<group>"; };
 		1DF2F2EA26C43D550078E549 /* JSCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSCommand.swift; sourceTree = "<group>"; };
 		1DF2F2F126C44CAD0078E549 /* BarcelonaJS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BarcelonaJS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF2F2F426C44CAD0078E549 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -1669,6 +1671,7 @@
 				1D1E234A2506D76E0069705D /* DigitalTouchMessage.swift */,
 				1D3E3344250C270700EEA08B /* Attachment.swift */,
 				1D7D8958250DB43400DA9909 /* RichLinkRepresentation.swift */,
+				1DF257C726E2F08C00B39C8E /* NicknameController.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -2307,6 +2310,7 @@
 				1DC4D78926AD093200281920 /* RichLinkCaptionButton.swift in Sources */,
 				1DC4D78A26AD093200281920 /* RichLinkCaptionRow.swift in Sources */,
 				1DC4D78B26AD093200281920 /* RichLinkImage.swift in Sources */,
+				1DF257C826E2F08C00B39C8E /* NicknameController.swift in Sources */,
 				1DC4D78C26AD093200281920 /* RichLinkVideo.swift in Sources */,
 				1DC4D78D26AD093200281920 /* RichLinkAudio.swift in Sources */,
 				1DC4D78E26AD093200281920 /* RichLinkStyle.swift in Sources */,

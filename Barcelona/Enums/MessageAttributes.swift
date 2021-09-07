@@ -30,3 +30,9 @@ public struct MessageAttributes {
     @available(iOS 14, macOS 10.16, watchOS 7, *)
     static let mentionName = NSAttributedString.Key(rawValue: IMMentionConfirmedMention)
 }
+
+public enum IMBaseWritingDirection: NSInteger {
+    case natural = -1
+    case lefttoRight = 0
+    case rightToLeft = 1
+}

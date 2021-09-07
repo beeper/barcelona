@@ -17,8 +17,12 @@ public extension CNContact {
 }
 
 public extension Contact {
-    func blContact(withGUID guid: String, avatar: String? = nil) -> BLContact {
-        BLContact(first_name: firstName, last_name: lastName, nickname: nickname, avatar: avatar, phones: phoneNumbers, emails: emailAddresses, user_guid: guid, contact_id: id)
+    func blContact(withGUID guid: String, avatar: String? = nil) -> BLContact? {
+        if firstName == nil, lastName == nil, nickname == nil, avatar == nil {
+            return nil
+        }
+        
+        return BLContact(first_name: firstName, last_name: lastName, nickname: nickname, avatar: avatar, phones: phoneNumbers, emails: emailAddresses, user_guid: guid, contact_id: id)
     }
     
     var phoneNumbers: [String] {
@@ -43,4 +47,27 @@ public struct BLContact: Codable {
     public var emails: [String]
     public var user_guid: String
     public var contact_id: String
+}
+
+private extension BLContactSuggestionData {
+    var imageData: String? {
+        guard let image = image else {
+            return nil
+        }
+        
+        return try? Data(contentsOf: image).base64EncodedString()
+    }
+}
+
+public extension BLContact {
+    init(suggestion: BLContactSuggestionData, phoneHandles: [String], emailHandles: [String], handleID: String) {
+        first_name = suggestion.firstName
+        last_name = suggestion.lastName
+        nickname = suggestion.displayName
+        avatar = suggestion.imageData
+        phones = phoneHandles
+        emails = emailHandles
+        user_guid = handleID
+        contact_id = suggestion.syntheticContactID
+    }
 }

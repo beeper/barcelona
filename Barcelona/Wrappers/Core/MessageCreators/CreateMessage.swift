@@ -10,11 +10,10 @@ import Foundation
 import IMSharedUtilities
 import IMCore
 
-private func flagsForCreation(_ creation: CreateMessage, transfers: [String]) -> FullFlagsFromMe {
-    if let _ = creation.ballonBundleID { return .richLink }
-    if let audio = creation.isAudioMessage { if audio { return .audioMessage } }
-    if transfers.count > 0 || creation.parts.contains(where: { $0.type == .attachment }) { return .attachments }
-    return .textOrPluginOrStickerOrImage
+private func additionalFlags(forCreation creation: CreateMessage) -> IMMessageFlags {
+    if let _ = creation.ballonBundleID { return .hasDDResults }
+    if let audio = creation.isAudioMessage { if audio { return [.expirable, .audioMessage] } }
+    return []
 }
 
 public struct CreateMessage: Codable, CreateMessageBase {
@@ -46,6 +45,10 @@ public struct CreateMessage: Codable, CreateMessageBase {
         ERAttributedString(from: self.parts)
     }
     
+    static let baseFlags: IMMessageFlags = [
+        .finished, .fromMe, .delivered, .sent, .dataDetected
+    ]
+    
     public func createIMMessageItem(withThreadIdentifier threadIdentifier: String?, withChatIdentifier chatIdentifier: String, withParseResult parseResult: MessagePartParseResult) throws -> (IMMessageItem, NSMutableAttributedString?) {
         let text = parseResult.string
         let fileTransferGUIDs = parseResult.transferGUIDs
@@ -64,7 +67,7 @@ public struct CreateMessage: Codable, CreateMessageBase {
         
         let messageItem = IMMessageItem.init(sender: nil, time: nil, guid: nil, type: 0)!
         messageItem.body = text
-        messageItem.flags = flagsForCreation(self, transfers: fileTransferGUIDs).rawValue
+        messageItem.flags = Self.baseFlags.union(additionalFlags(forCreation: self)).rawValue
         
         return (messageItem, subject)
     }

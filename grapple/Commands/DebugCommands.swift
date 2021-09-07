@@ -12,6 +12,7 @@ import SwiftCLI
 import BarcelonaEvents
 import OSLog
 import IMDPersistence
+import SwiftyTextTable
 import IMCore
 
 private extension String {
@@ -27,6 +28,16 @@ private extension String {
 @_cdecl("_CSDBCheckResultWithStatement")
 func _CSDBCheckResultWithStatement(_ a: UnsafeRawPointer, _ b: UnsafeRawPointer, _ c: UnsafeRawPointer, _ d: UnsafeRawPointer, _ e: UnsafeRawPointer) {
     
+}
+
+extension BLContactSuggestionData: TextTableRepresentable {
+    public var tableValues: [CustomStringConvertible] {
+        [firstName ?? "nil", lastName ?? "nil", image != nil]
+    }
+    
+    public static var columnHeaders: [String] {
+        ["firstName", "lastName", "hasAvatar"]
+    }
 }
 
 class DebugCommands: CommandGroup {
@@ -66,5 +77,29 @@ class DebugCommands: CommandGroup {
         }
     }
     
-    var children: [Routable] = [DebugEventsCommand(), IMDTest()]
+    class NicknameTest: EphemeralBarcelonaCommand {
+        let name = "nickname-test"
+        
+        @Param
+        var handleID: String
+        
+        var normalizedHandleID: String {
+            guard handleID.contains(";") else {
+                return handleID
+            }
+            
+            return String(handleID.split(separator: ";").last!)
+        }
+        
+        func execute() throws {
+            guard let suggestion = BLResolveContactSuggestionData(forHandleID: normalizedHandleID) else {
+                print("nil")
+                return
+            }
+            
+            print(TextTable(objects: [suggestion]).render())
+        }
+    }
+    
+    var children: [Routable] = [DebugEventsCommand(), IMDTest(), NicknameTest()]
 }
