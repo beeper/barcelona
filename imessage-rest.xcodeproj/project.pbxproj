@@ -2211,7 +2211,6 @@
 				1D9AE39726AF5DA6007873E3 /* XCRemoteSwiftPackageReference "SwiftyTextTable" */,
 				1D92962B26B5D8F100F576A9 /* XCRemoteSwiftPackageReference "Swexy" */,
 				1DF2F34E26C5B9580078E549 /* XCRemoteSwiftPackageReference "linenoise-swift" */,
-				1DEC458B26CAD2EF00D5AC08 /* XCRemoteSwiftPackageReference "swifter" */,
 				1DEC458E26CAD36900D5AC08 /* XCRemoteSwiftPackageReference "SwiftSemantics" */,
 				1D5A4A1726D3D44F0001EED1 /* XCRemoteSwiftPackageReference "BarcelonaIPC" */,
 				1D82FF3126D578F000EB5CEE /* XCRemoteSwiftPackageReference "BarcelonaFoundation" */,
@@ -3588,14 +3587,6 @@
 			requirement = {
 				branch = master;
 				kind = branch;
-			};
-		};
-		1DEC458B26CAD2EF00D5AC08 /* XCRemoteSwiftPackageReference "swifter" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/httpswift/swifter";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.5.0;
 			};
 		};
 		1DEC458E26CAD36900D5AC08 /* XCRemoteSwiftPackageReference "SwiftSemantics" */ = {

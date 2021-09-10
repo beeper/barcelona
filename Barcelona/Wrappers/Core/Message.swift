@@ -10,6 +10,7 @@ import Foundation
 import IMCore
 import IMSharedUtilities
 import BarcelonaDB
+import Swog
 
 public extension Array where Element == String {
     func er_chatItems(in chat: String) -> Promise<[ChatItem]> {
@@ -41,7 +42,9 @@ private func CBExtractThreadOriginatorAndPartFromIdentifier(_ identifier: String
 
 private extension IngestionContext {
     func ingest(_ items: [NSObject]) -> [ChatItem] {
-        items.map {
+        CLDebug("IngestionContext", "Ingesting items: \(items, privacy: .private)")
+        
+        return items.map {
             ChatItemType.ingest(object: $0, context: self)
         }
     }
@@ -50,16 +53,22 @@ private extension IngestionContext {
 private extension IngestionContext {
     func items(forMessageItem item: IMMessageItem) -> [ChatItem] {
         guard let chat = IMChat.resolve(withIdentifier: chatID) else {
+            CLDebug("IngestionContext", "chat not found")
             return []
         }
+        
+        _assertTranscriptItemRules(chat)
         
         return ingest(chat.chatItems(for: [item]))
     }
     
     func items(forMessage message: IMMessage) -> [ChatItem] {
         guard let chat = IMChat.resolve(withIdentifier: chatID), let item = message._imMessageItem else {
+            CLDebug("IngestionContext", "chat not found")
             return []
         }
+        
+        _assertTranscriptItemRules(chat)
         
         return ingest(chat.chatItems(for: [item]))
     }
