@@ -47,6 +47,24 @@ private extension IngestionContext {
     }
 }
 
+private extension IngestionContext {
+    func items(forMessageItem item: IMMessageItem) -> [ChatItem] {
+        guard let chat = IMChat.resolve(withIdentifier: chatID) else {
+            return []
+        }
+        
+        return ingest(chat.chatItems(for: [item]))
+    }
+    
+    func items(forMessage message: IMMessage) -> [ChatItem] {
+        guard let chat = IMChat.resolve(withIdentifier: chatID), let item = message._imMessageItem else {
+            return []
+        }
+        
+        return ingest(chat.chatItems(for: [item]))
+    }
+}
+
 public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     static func message(withGUID guid: String, in chatID: String? = nil) -> Promise<Message?> {
         IMMessage.message(withGUID: guid, in: chatID).then {
@@ -72,14 +90,17 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         switch item {
         case let item as IMMessageItem:
             if let message = context.message {
-                self.init(item, message: message, items: context.ingest(item._newChatItems()), chatID: context.chatID)
-            } else if let items = item._newChatItems() {
-                self.init(item, items: context.ingest(items), chatID: context.chatID)
+                self.init(item, message: message, items: context.items(forMessageItem: item), chatID: context.chatID)
             } else {
-                return nil
+                self.init(item, items: context.items(forMessageItem: item), chatID: context.chatID)
             }
-        case let item as IMMessage:
-            self.init(item, items: context.ingest(item._imMessageItem._newChatItems()), chatID: context.chatID)
+        case let message as IMMessage:
+            print(message)
+            print(context)
+            print(context.chatID)
+            
+            
+            self.init(message, items: context.items(forMessage: message), chatID: context.chatID)
         default:
             return nil
         }
@@ -107,26 +128,26 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         item.bareReceipt.assign(toMessage: &self)
     }
     
-    init(_ backing: IMMessageItem, message: IMMessage, items chatItems: [ChatItem], chatID: String) {
+    init(_ backing: IMMessageItem?, message: IMMessage, items chatItems: [ChatItem], chatID: String) {
         id = message.id
         self.chatID = chatID
         fromMe = message.isFromMe
         time = message.effectiveTime
-        service = backing.resolveServiceStyle(inChat: chatID)
+        service = backing?.resolveServiceStyle(inChat: chatID) ?? message.resolveServiceStyle(inChat: chatID)
         sender = message.resolveSenderID(inService: service)
         subject = message.subject?.id
-        messageSubject = backing.subject ?? message.messageSubject?.string
-        isSOS = backing.isSOS
-        isTypingMessage = backing.isTypingMessage || chatItems.contains {
+        messageSubject = backing?.subject ?? message.messageSubject?.string
+        isSOS = backing?.isSOS ?? message.isSOS
+        isTypingMessage = backing?.isTypingMessage ?? message.isTypingMessage ?? chatItems.contains {
             $0 is TypingItem
         }
         
-        isCancelTypingMessage = backing.isCancelTypingMessage()
-        isDelivered = backing.isDelivered
-        isAudioMessage = backing.isAudioMessage
+        isCancelTypingMessage = backing?.isCancelTypingMessage() ?? false
+        isDelivered = backing?.isDelivered ?? message.isDelivered
+        isAudioMessage = backing?.isAudioMessage ?? message.isAudioMessage
         items = chatItems.map { $0.eraseToAnyChatItem() }
-        flags = IMMessageFlags(rawValue: backing.flags)
-        associatedMessageID = message.associatedMessageGUID ?? backing.associatedMessageGUID() as? String
+        flags = IMMessageFlags(rawValue: backing?.flags ?? message.flags)
+        associatedMessageID = backing?.associatedMessageGUID() ?? message.associatedMessageGUID
         fileTransferIDs = message.fileTransferGUIDs
         
         if let chat = IMChat.resolve(withIdentifier: chatID) {
@@ -134,7 +155,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         }
         
         // load timestamps
-        message.receipt.merging(receipt: backing.receipt).assign(toMessage: &self)
+        message.receipt.merging(receipt: backing?.receipt ?? message.receipt).assign(toMessage: &self)
         self.load(message: message, backing: backing)
     }
     
@@ -146,9 +167,9 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         self.init(message._imMessageItem, message: message, items: items, chatID: chatID)
     }
     
-    private mutating func load(message: IMMessage, backing: IMMessageItem) {
+    private mutating func load(message: IMMessage, backing: IMMessageItem?) {
         if #available(iOS 14, macOS 10.16, watchOS 7, *) {
-            if let rawThreadIdentifier = message.threadIdentifier() ?? backing.threadIdentifier {
+            if let rawThreadIdentifier = message.threadIdentifier() ?? backing?.threadIdentifier {
                 guard let (threadIdentifier, threadOriginatorPart) = CBExtractThreadOriginatorAndPartFromIdentifier(rawThreadIdentifier) else {
                     return
                 }

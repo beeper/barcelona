@@ -21,20 +21,20 @@ public protocol CreateMessageBase: Codable {
 }
 
 extension CreateMessageBase {
-    var resolvedThreadIdentifier: String? {
+    func resolvedThreadIdentifier(chat: IMChat) -> String? {
         if #available(iOS 14, macOS 10.16, watchOS 7, *) {
             if let threadIdentifier = threadIdentifier {
                 return threadIdentifier
             } else if let replyToGUID = replyToGUID {
-                return IMChatItem.resolveThreadIdentifier(forMessageWithGUID: replyToGUID, part: replyToPart ?? 0)
+                return IMChatItem.resolveThreadIdentifier(forMessageWithGUID: replyToGUID, part: replyToPart ?? 0, chat: chat)
             }
         }
         return nil
     }
     
-    func finalize(imMessageItem: IMMessageItem, withSubject subject: NSMutableAttributedString?) throws -> IMMessage {
+    func finalize(imMessageItem: IMMessageItem, chat: IMChat, withSubject subject: NSMutableAttributedString?) throws -> IMMessage {
         if #available(iOS 14, macOS 10.16, watchOS 7, *) {
-            imMessageItem.setThreadIdentifier(resolvedThreadIdentifier)
+            imMessageItem.setThreadIdentifier(resolvedThreadIdentifier(chat: chat))
         }
         
         guard let message = IMMessage.message(fromUnloadedItem: imMessageItem, withSubject: subject) else {
@@ -50,9 +50,10 @@ extension CreateMessageBase {
         let (imMessageItem, subject) = try createIMMessageItem(withThreadIdentifier: nil, withChatIdentifier: chatIdentifier, withParseResult: parseResult)
         
         imMessageItem.setValue(parseResult.transferGUIDs, forKey: "fileTransferGUIDs")
-        imMessageItem.service = IMChat.resolve(withIdentifier: chatIdentifier)!.account.service.name
+        let chat = IMChat.resolve(withIdentifier: chatIdentifier)!
+        imMessageItem.service = chat.account.service.name
         
-        return try finalize(imMessageItem: imMessageItem, withSubject: subject)
+        return try finalize(imMessageItem: imMessageItem, chat: chat, withSubject: subject)
     }
 }
 

@@ -153,10 +153,6 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
 
 // MARK: - Utilities
 internal extension Chat {
-    static func handle(_ handle: String, isEligibleForService service: IMServiceStyle) -> Bool {
-        IMIDStatusController.sharedInstance().status(forID: handle, onService: service.idsIdentifier!) == IDSState.available.rawValue
-    }
-    
     static func handlesAreiMessageEligible(_ handles: [String]) -> Bool {
         guard let statuses = try? BLResolveIDStatusForIDs(handles, onService: .iMessage) else {
             return false
@@ -261,7 +257,7 @@ public extension Chat {
             if fullMessage {
                 IMDaemonController.shared().deleteMessage(withGUIDs: [guid], queryID: NSString.stringGUID())
             } else {
-                let chatItems = message._imMessageItem._newChatItems()!
+                let chatItems = self.imChat.chatItems(for: [message._imMessageItem]) ?? []
                 
                 let items: [IMChatItem] = parts.compactMap {
                     if chatItems.count <= $0 { return nil }

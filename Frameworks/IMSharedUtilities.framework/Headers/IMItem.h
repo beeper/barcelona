@@ -101,7 +101,7 @@
 - (BOOL)isBreadcrumb;
 - (BOOL)isMessageAcknowledgment;
 - (long long)associatedMessageType;
-- (id)associatedMessageGUID;
+- (NSString*)associatedMessageGUID;
 - (BOOL)isAssociatedMessageItem;
 - (id)pluginSessionGUID;
 - (id)consumedSessionPayloads;

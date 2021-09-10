@@ -356,8 +356,8 @@
 @property(nonatomic) unsigned long long numberOfMessagesToKeepLoaded;
 - (id)messagesToReportAsSpamFromChatItems:(id)arg1;
 - (id)allMessagesToReportAsSpam;
-- (id)chatItemsForItems:(id)arg1;
-- (id)chatItemsForMessages:(id)arg1;
+- (NSArray<IMChatItem*>*)chatItemsForItems:(NSArray<IMMessageItem*>*)arg1;
+//- (NSArray<IMChatItem*>*)chatItemsForMessages:(NSArray<IMMessage*>*)arg1; unavailable on iOS?
 - (void)_setRenderingDataDictionary:(id)arg1;
 - (id)_renderingDataDictionary;
 - (void)markChatItemAsPlayedExpressiveSend:(id)arg1;

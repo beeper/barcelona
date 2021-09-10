@@ -20,11 +20,11 @@ public extension IMChat {
             preconditionFailure("IMChat.tapback() must be invoked on the main thread")
         }
         
-        if itemGUID == message.id, let subpart = message.subpart(at: 0) {
+        if itemGUID == message.id, let subpart = message.subpart(at: 0, inChat: self) {
             return try tapback(message: message, itemGUID: subpart.id, type: type, overridingItemType: overridingItemType)
         }
         
-        guard let subpart = message.subpart(with: itemGUID) as? IMMessagePartChatItem else {
+        guard let subpart = message.subpart(with: itemGUID, inChat: self) as? IMMessagePartChatItem else {
             throw BarcelonaError(code: 404, message: "Not found")
         }
         

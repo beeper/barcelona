@@ -11,8 +11,8 @@ import IMCore
 
 extension IMChatItem {    
     @available(iOS 14, macOS 10.16, watchOS 7, *)
-    public static func resolveThreadIdentifier(forMessageWithGUID guid: String, part: Int) -> String? {
-        guard let subpart = BLLoadIMMessage(withGUID: guid)?.subpart(at: part) as? IMMessagePartChatItem else {
+    public static func resolveThreadIdentifier(forMessageWithGUID guid: String, part: Int, chat: IMChat) -> String? {
+        guard let subpart = BLLoadIMMessage(withGUID: guid)?.subpart(at: part, inChat: chat) as? IMMessagePartChatItem else {
             return nil
         }
         

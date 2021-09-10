@@ -13,15 +13,15 @@ extension IMMessage {
     /**
      Returns a single subpart from a message
      */
-    func subpart(at index: Int) -> IMChatItem? {
-        guard let parts = self._imMessageItem?._newChatItems() else { return nil }
+    func subpart(at index: Int, inChat chat: IMChat) -> IMChatItem? {
+        guard let _imMessageItem = _imMessageItem, let parts = chat.chatItems(for: [_imMessageItem]) else { return nil }
         if (parts.count - 1) < index { return nil }
         
         return parts[index]
     }
     
-    func subpart(with guid: String) -> IMChatItem? {
-        guard let parts = self._imMessageItem?._newChatItems() else { return nil }
+    func subpart(with guid: String, inChat chat: IMChat) -> IMChatItem? {
+        guard let _imMessageItem = _imMessageItem, let parts = chat.chatItems(for: [_imMessageItem]) else { return nil }
         return parts.first(where: {
             guard let part = $0 as? IMMessagePartChatItem else {
                 return false
