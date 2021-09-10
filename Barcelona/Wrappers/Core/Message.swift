@@ -95,11 +95,6 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
                 self.init(item, items: context.items(forMessageItem: item), chatID: context.chatID)
             }
         case let message as IMMessage:
-            print(message)
-            print(context)
-            print(context.chatID)
-            
-            
             self.init(message, items: context.items(forMessage: message), chatID: context.chatID)
         default:
             return nil
