@@ -13,7 +13,7 @@
     IMHandle *_handle;
 }
 
-@property(readonly, nonatomic) IMHandle *handle; // @synthesize handle=_handle;
+@property(readonly, nonatomic, nullable) IMHandle *handle; // @synthesize handle=_handle;
 - (id)_initWithItem:(id)arg1 handle:(id)arg2;
 - (id)copyWithZone:(struct _NSZone *)arg1;
 

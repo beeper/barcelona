@@ -21,7 +21,7 @@ public struct SenderItem: ChatItem, Hashable {
         chatID = chat
         fromMe = item.isFromMe
         time = item.effectiveTime
-        handleID = item.handle.id
+        handleID = item.handle?.id
     }
     
     public var id: String
@@ -30,7 +30,7 @@ public struct SenderItem: ChatItem, Hashable {
     public var time: Double
     public var threadIdentifier: String?
     public var threadOriginator: String?
-    public var handleID: String
+    public var handleID: String?
     
     public var type: ChatItemType {
         .sender
