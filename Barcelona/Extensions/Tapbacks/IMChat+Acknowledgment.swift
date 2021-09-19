@@ -20,12 +20,12 @@ public extension IMChat {
             preconditionFailure("IMChat.tapback() must be invoked on the main thread")
         }
         
-        if itemGUID == message.id, let subpart = message.subpart(at: 0, inChat: self) {
+        if itemGUID == message.id, let subpart = message.subpart(at: 0) {
             return try tapback(message: message, itemGUID: subpart.id, type: type, overridingItemType: overridingItemType)
         }
         
-        guard let subpart = message.subpart(with: itemGUID, inChat: self) as? IMMessagePartChatItem else {
-            throw BarcelonaError(code: 404, message: "Not found")
+        guard let subpart = message.subpart(with: itemGUID) as? IMMessagePartChatItem else {
+            throw BarcelonaError(code: 404, message: "Unknown subpart")
         }
         
         let rawType = Int64(type)
@@ -61,7 +61,7 @@ public extension IMChat {
      */
     func tapback(guid: String, itemGUID: String, type: Int, overridingItemType: UInt8?) throws -> IMMessage {
         guard let message = BLLoadIMMessage(withGUID: guid) else {
-            throw BarcelonaError(code: 404, message: "Unknown message")
+            throw BarcelonaError(code: 404, message: "Unknown message: \(guid)")
         }
         
         return try self.tapback(message: message, itemGUID: itemGUID, type: type, overridingItemType: overridingItemType)

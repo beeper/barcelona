@@ -52,25 +52,11 @@ private extension IngestionContext {
 
 private extension IngestionContext {
     func items(forMessageItem item: IMMessageItem) -> [ChatItem] {
-        guard let chat = IMChat.resolve(withIdentifier: chatID) else {
-            CLDebug("IngestionContext", "chat not found")
-            return []
-        }
-        
-        _assertTranscriptItemRules(chat)
-        
-        return ingest(chat.chatItems(for: [item]))
+        ingest(item._newChatItems())
     }
     
     func items(forMessage message: IMMessage) -> [ChatItem] {
-        guard let chat = IMChat.resolve(withIdentifier: chatID), let item = message._imMessageItem else {
-            CLDebug("IngestionContext", "chat not found")
-            return []
-        }
-        
-        _assertTranscriptItemRules(chat)
-        
-        return ingest(chat.chatItems(for: [item]))
+        ingest(message._imMessageItem._newChatItems())
     }
 }
 

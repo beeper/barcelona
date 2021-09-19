@@ -28,7 +28,7 @@ extension TapbackCommand: Runnable {
             payload.respond(.message_receipt(message))
         } catch {
             // girl fuck
-            CLFault("BLMautrix", "failed to send media message: %@", error as NSError)
+            CLFault("BLMautrix", "failed to send tapback: %@", error as NSError)
         }
     }
 }

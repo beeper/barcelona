@@ -26,9 +26,9 @@ public func BLIngestObjects(_ objects: [NSObject], inChat chat: String? = nil) -
                 BLIngestObjectsLog.debug("got %d chat IDs from database", chatIDs.count)
                 
                 if _fastPath(chatIDs.allSatisfy { $0 == chatIDs.first }) {
-                    BLIngestObjectsLog.debug("taking fast-path for inferred chat IDs because they're all the same (%@)", chatIDs.first!)
+                    BLIngestObjectsLog.debug("taking fast-path for inferred chat IDs because they're all the same (%@)", chatIDs.first ?? "")
                     
-                    return BLIngestObjects(objects, inChat: chatIDs.first!)
+                    return BLIngestObjects(objects, inChat: chatIDs.first)
                 }
                 
                 BLIngestObjectsLog.debug("found mismatched identifiers, ingesting them in chunks (%@)", chatIDs.joined(separator: ", "))

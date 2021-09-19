@@ -22,7 +22,7 @@ public extension Contact {
             return nil
         }
         
-        return BLContact(first_name: firstName, last_name: lastName, nickname: nickname, avatar: avatar, phones: phoneNumbers, emails: emailAddresses, user_guid: guid, contact_id: id)
+        return BLContact(first_name: firstName, last_name: lastName, nickname: nickname, avatar: avatar, phones: phoneNumbers, emails: emailAddresses, user_guid: guid/*, contact_id: id*/)
     }
     
     var phoneNumbers: [String] {
@@ -46,7 +46,7 @@ public struct BLContact: Codable {
     public var phones: [String]
     public var emails: [String]
     public var user_guid: String
-    public var contact_id: String
+//    public var contact_id: String
 }
 
 private extension BLContactSuggestionData {
@@ -68,6 +68,6 @@ public extension BLContact {
         phones = phoneHandles
         emails = emailHandles
         user_guid = handleID
-        contact_id = suggestion.syntheticContactID
+//        contact_id = suggestion.syntheticContactID
     }
 }
