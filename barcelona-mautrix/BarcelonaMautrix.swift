@@ -30,7 +30,9 @@ class BarcelonaMautrix {
     func run() {
         checkArguments()
         bootstrap()
-        startJSContext()
+        if BLRuntimeConfiguration.jsIPC {
+            startJSContext()
+        }
         
         RunLoop.main.run()
     }

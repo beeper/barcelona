@@ -119,7 +119,7 @@ public class HealthChecker {
     }
     
     public var authenticationState: AuthenticationState {
-        guard let account = IMAccountController.sharedInstance().activeIMessageAccount else {
+        guard let account = IMAccountController.sharedInstance().accounts.first(where: { $0.service.id == .iMessage }) else {
             return .none
         }
         
