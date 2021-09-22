@@ -21,7 +21,7 @@ class ListCommand: CommandGroup {
         let name = "accounts"
         
         func execute() throws {
-            print(IMAccountController.sharedInstance().accounts.renderTextTable())
+            print(IMAccountController.__sharedInstance().accounts.renderTextTable())
         }
     }
 }

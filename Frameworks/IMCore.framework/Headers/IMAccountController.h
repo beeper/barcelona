@@ -23,7 +23,7 @@
 }
 
 + (id)bestAccountFromAccounts:(id)arg1;
-+ (IMAccountController* _Nonnull)sharedInstance;
++ (IMAccountController* _Nonnull)sharedInstance NS_REFINED_FOR_SWIFT;
 @property(nonatomic) BOOL networkDataAvailable; // @synthesize networkDataAvailable=_networkDataAvailable;
 @property(copy, nonnull) NSArray<IMAccount*> *accounts; // @synthesize accounts=_accounts;
 - (void)_rebuildOperationalAccountsCache:(BOOL)arg1;
@@ -95,7 +95,7 @@
 - (id)init;
 - (void)autoLogin;
 @property(readonly, nonatomic) IMAccount *activeSMSAccount;
-@property(readonly, nonatomic) IMAccount *activeIMessageAccount;
+@property(readonly, nonatomic) IMAccount *activeIMessageAccount NS_REFINED_FOR_SWIFT;
 - (id)_bestOperationalAccountForSendingForService:(id)arg1;
 - (id)__iCloudSystemAccountForService:(id)arg1;
 - (id)_bestAccountForAddresses:(id)arg1;

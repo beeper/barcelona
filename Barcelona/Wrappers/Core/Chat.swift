@@ -151,6 +151,19 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     }
 }
 
+internal extension IMAccountController {
+    static var shared: IMAccountController {
+        __sharedInstance()
+    }
+    
+    /// Returns an iMessage account, active or not.
+    var iMessageAccount: IMAccount {
+        __activeIMessageAccount ?? accounts.first(where: {
+            $0.service.id == .iMessage
+        }) ?? IMAccount(service: IMServiceStyle.iMessage.service)
+    }
+}
+
 // MARK: - Utilities
 internal extension Chat {
     static func handlesAreiMessageEligible(_ handles: [String]) -> Bool {
@@ -164,7 +177,7 @@ internal extension Chat {
     }
     
     static func iMessageHandle(forID id: String) -> IMHandle {
-        IMAccountController.sharedInstance().activeIMessageAccount.imHandle(withID: id)
+        IMAccountController.shared.iMessageAccount.imHandle(withID: id)
     }
     
     static func homogenousHandles(forIDs ids: [String]) -> [IMHandle] {
@@ -172,7 +185,7 @@ internal extension Chat {
             return ids.compactMap(iMessageHandle(forID:))
         }
         
-        let account = IMAccountController.sharedInstance().activeSMSAccount ?? IMAccount(service: IMServiceStyle.SMS.service!)!
+        let account = IMAccountController.shared.activeSMSAccount ?? IMAccount(service: IMServiceStyle.SMS.service!)!
         
         return ids.map(account.imHandle(withID:))
     }

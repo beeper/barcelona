@@ -56,7 +56,7 @@ public enum IMServiceStyle: String, CaseIterable, Codable, Hashable {
     
     public var account: IMAccount? {
         guard let service = service else { return nil }
-        return IMAccountController.sharedInstance().bestAccount(forService: service)
+        return IMAccountController.shared.bestAccount(forService: service)
     }
     
     public var handle: IMHandle? {

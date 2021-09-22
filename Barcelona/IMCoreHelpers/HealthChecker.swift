@@ -119,9 +119,7 @@ public class HealthChecker {
     }
     
     public var authenticationState: AuthenticationState {
-        guard let account = IMAccountController.sharedInstance().accounts.first(where: { $0.service.id == .iMessage }) else {
-            return .none
-        }
+        let account = IMAccountController.shared.iMessageAccount
         
         if account.registrationFailureReason != -1 {
             return .registrationFailure
@@ -153,9 +151,7 @@ public class HealthChecker {
         case .validationFaliure:
             return .errored
         case .authenticated:
-            let account = IMAccountController.sharedInstance().activeIMessageAccount!
-            
-            if !account.isConnected {
+            if !IMAccountController.shared.iMessageAccount.isConnected {
                 return .offline
             }
             

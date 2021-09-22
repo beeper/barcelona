@@ -20,7 +20,7 @@ private class IMServiceRegistrationProviderImpl: IMServiceRegistrationProvider {
     static let shared = IMServiceRegistrationProviderImpl()
     
     func handle(forService service: String) -> String? {
-        IMAccountController.sharedInstance().bestAccount(forService: service)?.loginIMHandle?.id
+        IMAccountController.__sharedInstance().bestAccount(forService: service)?.loginIMHandle?.id
     }
 }
 #endif

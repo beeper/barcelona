@@ -24,7 +24,7 @@ extension IMHandleRegistrar: IMCNHandleBridgingProvider {
     }
     
     public var allLoginHandles: [String] {
-        IMAccountController.sharedInstance().accounts.flatMap(\.aliases)
+        IMAccountController.__sharedInstance().accounts.flatMap(\.aliases)
     }
 }
 #endif

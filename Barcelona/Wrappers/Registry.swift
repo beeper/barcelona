@@ -19,13 +19,13 @@ public class Registry {
     public static let sharedInstance = Registry()
     
     public func account(withUniqueID uniqueID: String) -> IMAccount {
-        return IMAccountController.sharedInstance().account(forUniqueID: uniqueID)
+        return IMAccountController.shared.account(forUniqueID: uniqueID)
     }
     
     public func imHandle(withID id: String) -> IMHandle? {
-        if let iMessageAccount = IMAccountController.sharedInstance().activeIMessageAccount, let handle = imHandle(withID: id, onAccount: iMessageAccount) {
+        if let handle = imHandle(withID: id, onAccount: IMAccountController.shared.iMessageAccount) {
             return handle
-        } else if let SMSAccount = IMAccountController.sharedInstance().activeSMSAccount, let handle = imHandle(withID: id, onAccount: SMSAccount) {
+        } else if let SMSAccount = IMAccountController.shared.activeSMSAccount, let handle = imHandle(withID: id, onAccount: SMSAccount) {
             return handle
         } else {
             return nil
@@ -51,7 +51,7 @@ public class Registry {
     }
 
     public var allAccounts: [IMAccount] {
-        IMAccountController.sharedInstance().accounts
+        IMAccountController.shared.accounts
     }
     
     public func imHandle(withID id: String, onService service: String) -> IMHandle? {
@@ -103,7 +103,7 @@ public class Registry {
             return account
         }
         
-        return IMAccountController.sharedInstance().bestAccount(forService: service)
+        return IMAccountController.shared.bestAccount(forService: service)
     }
     
     public func resolve(service: String) -> IMService? {
@@ -113,11 +113,11 @@ public class Registry {
     }
     
     public func iMessageAccount() -> IMAccount? {
-        return IMAccountController.sharedInstance().activeIMessageAccount
+        return IMAccountController.shared.iMessageAccount
     }
     
     public func SMSAccount() -> IMAccount? {
-        return IMAccountController.sharedInstance().activeSMSAccount
+        return IMAccountController.shared.activeSMSAccount
     }
     
     private func _connect() {
