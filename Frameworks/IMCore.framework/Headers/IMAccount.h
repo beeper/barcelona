@@ -90,7 +90,7 @@
 + (id)passwordForAccount:(id)arg1 forServiceName:(id)arg2;
 @property(readonly, nonatomic) BOOL justLoggedIn; // @synthesize justLoggedIn=_justLoggedIn;
 @property(readonly, nonatomic) IMPeople *buddyList; // @synthesize buddyList=_buddyList;
-@property(readonly, nonatomic) Presentity *loginIMHandle; // @synthesize loginIMHandle=_loginIMHandle;
+@property(readonly, nonatomic, nullable) Presentity *loginIMHandle; // @synthesize loginIMHandle=_loginIMHandle;
 @property(readonly, nonatomic) NSDictionary *accountSubtypeInfo; // @synthesize accountSubtypeInfo=_subtypeInfo;
 @property(readonly, nonatomic) BOOL isActive; // @synthesize isActive=_isActive;
 @property(nonatomic) unsigned int blockingMode; // @synthesize blockingMode=_cachedBlockingMode;
@@ -103,7 +103,7 @@
 @property(readonly, nonatomic) unsigned long long myStatus; // @synthesize myStatus=_myStatus;
 @property(readonly, nonatomic) NSAttributedString *myProfile; // @synthesize myProfile=_myProfile;
 @property(readonly, nonatomic) NSDictionary *myStatusDictionary; // @synthesize myStatusDictionary=_currentAccountStatus;
-@property(readonly, nonatomic) __weak IMServiceImpl *service; // @synthesize service=_service;
+@property(readonly, nonatomic, nullable) __weak IMServiceImpl *service; // @synthesize service=_service;
 @property(readonly, nonatomic) NSString *strippedLogin; // @synthesize strippedLogin=_strippedLogin;
 @property(retain, nonatomic) NSString *login; // @synthesize login=_loginID;
 - (void)_handleIncomingCommand:(id)arg1 withProperties:(id)arg2 fromBuddyInfo:(id)arg3;
@@ -364,7 +364,7 @@
 @property(readonly, nonatomic) NSString *internalName;
 @property(readonly, nonatomic) NSString *shortName;
 - (void)setUniqueID:(id)arg1;
-@property(readonly, nonatomic) NSString *uniqueID;
+@property(readonly, nonatomic, nullable) NSString *uniqueID;
 @property(readonly, nonatomic) NSString *myNowPlayingString;
 - (void)setCurrentAccountStatus:(id)arg1;
 - (void)_updateMyStatus:(unsigned long long)arg1 message:(id)arg2;

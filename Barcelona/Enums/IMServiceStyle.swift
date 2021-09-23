@@ -32,7 +32,11 @@ public enum IMServiceStyle: String, CaseIterable, Codable, Hashable {
     }
     
     public init?(account: IMAccount) {
-        self.init(service: account.service)
+        guard let service = account.service else {
+            return nil
+        }
+        
+        self.init(service: service)
     }
     
     public var service: IMServiceImpl? {

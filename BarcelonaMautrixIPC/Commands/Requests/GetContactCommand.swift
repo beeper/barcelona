@@ -11,3 +11,5 @@ import Foundation
 public struct GetContactCommand: Codable, ContactResolvable {
     public var user_guid: String
 }
+
+

@@ -54,17 +54,17 @@
 		<key>BarcelonaDB.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>9</integer>
+			<integer>11</integer>
 		</dict>
 		<key>BarcelonaDocs.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>8</integer>
+			<integer>10</integer>
 		</dict>
 		<key>BarcelonaEvents.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>7</integer>
+			<integer>9</integer>
 		</dict>
 		<key>BarcelonaFoundation.xcscheme_^#shared#^_</key>
 		<dict>
@@ -79,12 +79,12 @@
 		<key>BarcelonaJS.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>11</integer>
+			<integer>8</integer>
 		</dict>
 		<key>BarcelonaMautrixIPC.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>10</integer>
+			<integer>7</integer>
 		</dict>
 		<key>BarcelonaPlayground (Playground) 1.xcscheme</key>
 		<dict>

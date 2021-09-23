@@ -16,6 +16,16 @@ extension IMAccount: TextTableRepresentable {
     }
     
     public var tableValues: [CustomStringConvertible] {
-        [service.id.rawValue, uniqueID, login, loginIMHandle.id, isConnected, isActive, isRegistered, isOperational, isAsleep]
+        [
+            service?.id.rawValue ?? "nil",
+            uniqueID ?? "nil",
+            login ?? "nil",
+            loginIMHandle?.id ?? "nil",
+            isConnected,
+            isActive,
+            isRegistered,
+            isOperational,
+            isAsleep
+        ]
     }
 }

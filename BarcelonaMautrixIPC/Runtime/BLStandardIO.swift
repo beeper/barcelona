@@ -114,6 +114,7 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
                 let payload = try JSONDecoder().decode(IPCPayload.self, from: chunk)
                 
                 CLInfo("BLStandardIO", "Incoming! %@ %d", payload.command.name.rawValue, payload.id ?? -1)
+                CLInfo("BLStandardIO", "raw: %@", String(decoding: try! JSONEncoder().encode(payload.command), as: UTF8.self))
                 
                 cb(payload)
             } catch {

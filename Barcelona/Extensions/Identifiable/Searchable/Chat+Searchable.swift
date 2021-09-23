@@ -180,7 +180,7 @@ extension ChatSearchParameter: SearchParameter {
                 return false
             }
         case .services(let services):
-            if !services.contains(chat.account.service.id) {
+            if let id = chat.account.service?.id, !services.contains(id) {
                 return false
             }
         case .displayName(let displayName):

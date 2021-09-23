@@ -51,7 +51,7 @@ extension CreateMessageBase {
         
         imMessageItem.setValue(parseResult.transferGUIDs, forKey: "fileTransferGUIDs")
         let chat = IMChat.resolve(withIdentifier: chatIdentifier)!
-        imMessageItem.service = chat.account.service.name
+        imMessageItem.service = chat.account.service?.name
         
         return try finalize(imMessageItem: imMessageItem, chat: chat, withSubject: subject)
     }

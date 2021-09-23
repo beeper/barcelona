@@ -94,8 +94,8 @@
 - (void)dealloc;
 - (id)init;
 - (void)autoLogin;
-@property(readonly, nonatomic) IMAccount *activeSMSAccount;
-@property(readonly, nonatomic) IMAccount *activeIMessageAccount NS_REFINED_FOR_SWIFT;
+@property(readonly, nonatomic, nullable) IMAccount *activeSMSAccount;
+@property(readonly, nonatomic, nullable) IMAccount *activeIMessageAccount NS_REFINED_FOR_SWIFT;
 - (id)_bestOperationalAccountForSendingForService:(id)arg1;
 - (id)__iCloudSystemAccountForService:(id)arg1;
 - (id)_bestAccountForAddresses:(id)arg1;

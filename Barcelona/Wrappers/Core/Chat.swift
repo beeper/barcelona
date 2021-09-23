@@ -159,7 +159,7 @@ internal extension IMAccountController {
     /// Returns an iMessage account, active or not.
     var iMessageAccount: IMAccount {
         __activeIMessageAccount ?? accounts.first(where: {
-            $0.service.id == .iMessage
+            $0.service?.id == .iMessage
         }) ?? IMAccount(service: IMServiceStyle.iMessage.service)
     }
 }
