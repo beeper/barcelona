@@ -31,7 +31,7 @@ public class JBLAccount: NSObject, JBLAccountJSExports {
     }
     
     public init(account: IMAccount) {
-        id = account.uniqueID
+        id = account.uniqueID ?? "nil"
     }
     
     internal var account: IMAccount { Registry.sharedInstance.account(withUniqueID: id) }
