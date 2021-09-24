@@ -60,8 +60,6 @@ public class BLEventHandler {
                 default:
                     break
                 }
-            case .healthChanged:
-                send(.bridge_status(.current))
             default:
                 break
             }

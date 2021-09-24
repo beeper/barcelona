@@ -177,6 +177,10 @@
 #import <IMCore/_IMBalloonExtensionApp.h>
 #import <DataDetectorsCore/DDScannerResult.h>
 
+#ifndef IMCORE_TYPES
+
+#define IMCORE_TYPES
+
 NSString* IMNormalizedPhoneNumberForPhoneNumber(NSString*, NSString*, BOOL);
 BOOL IMSPIQueryIMMessageItemsWithGUIDsAndQOS(NSArray<NSString *> *__strong, dispatch_qos_class_t, __strong dispatch_queue_t, __strong void (^)(NSArray*));
 BOOL IMSPIQueryMessagesWithGUIDsAndQOS(NSArray<NSString *> *__strong, dispatch_qos_class_t, __strong dispatch_queue_t, __strong void (^)(NSArray*));
@@ -340,3 +344,5 @@ extern NSString* kFZDaemonLaunchedDistNotification;
 
 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0))
 NSString* IMCreateThreadIdentifierForMessagePartChatItem(IMMessagePartChatItem* chatItem);
+
+#endif

@@ -108,6 +108,14 @@ BOOL IMStringIsEmail(CFStringRef);
 CFStringRef IMCountryCodeForNumber(CFStringRef);
 NSString * IMFormatPhoneNumber(NSString *inputNumber, BOOL allowSpecialCharacters);
 NSString * IMFormattedDisplayStringForID(NSString * ID, NSInteger *outType);
+
+#ifndef IMFOUNDATION_CONST
+
+#define IMFOUNDATION_CONST
+
+NSString* const kFZPersonFirstName;    // Optional (AIM won't support this)
+NSString* const kFZPersonLastName;    // Optional (AIM won't support this)
+
 extern NSString* IMAttachmentCharacterString;
 extern NSString* IMBreadcrumbCharacterString;
 extern NSString* IMNonBreakingSpaceString;
@@ -150,3 +158,4 @@ extern NSString* IMPluginPayloadAttributeName;
 extern NSString* IMOneTimeCodeAttributeName;
 extern NSString* IMPhotoSharingAttributeName;
 
+#endif

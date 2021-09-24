@@ -19,6 +19,10 @@ public class BLHealthTicker {
     
     public init() {
         stream = SubjectStream<BridgeStatusCommand>(publish: &publish)
+        
+        NotificationCenter.default.subscribe(toNotificationsNamed: [.IMAccountLoginStatusChanged, .IMAccountRegistrationStatusChanged]) { notification, subscription in
+            self.run(schedulingNext: true)
+        }
     }
     
     /// The current bridge status
@@ -41,6 +45,7 @@ public class BLHealthTicker {
      - Parameter schedulingNext whether to schedule the next status update
      */
     public func run(schedulingNext scheduleNext: Bool = true) {
+        timer?.invalidate()
         self.publish(self.status)
         
         if scheduleNext {

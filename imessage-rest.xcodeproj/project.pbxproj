@@ -19,7 +19,6 @@
 		1D1E23452506CB7F0069705D /* IMChat+MessageResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1E23442506CB7F0069705D /* IMChat+MessageResolvable.swift */; };
 		1D1E23472506D63B0069705D /* DigitalTouchShared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D1E23462506D63B0069705D /* DigitalTouchShared.framework */; };
 		1D3B5AF224EB444300A65280 /* IMContactStore+AlwaysCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3B5AF024EB444300A65280 /* IMContactStore+AlwaysCache.m */; };
-		1D3B5AFD24EDA46700A65280 /* IMChat+HistoryLoadingPatch.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3B5AFB24EDA46700A65280 /* IMChat+HistoryLoadingPatch.m */; };
 		1D3B5AFF24EF912B00A65280 /* IMChat+Reviewable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3B5AFE24EF912B00A65280 /* IMChat+Reviewable.swift */; };
 		1D3E3333250C20CB00EEA08B /* IMServiceStyle+IDSIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3E3332250C20CB00EEA08B /* IMServiceStyle+IDSIdentifier.swift */; };
 		1D3E3336250C210C00EEA08B /* IMServiceStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3E3335250C210C00EEA08B /* IMServiceStyle.swift */; };
@@ -251,10 +250,8 @@
 		1DC4D7B126AD0B2F00281920 /* BarcelonaManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC4D7B026AD0B2F00281920 /* BarcelonaManager.swift */; };
 		1DC4D7B426ADF30400281920 /* InterposeKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1DC4D7B326ADF30400281920 /* InterposeKit */; };
 		1DC9E84F26BDA1B8007E463F /* BridgeStatusCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC9E84E26BDA1B8007E463F /* BridgeStatusCommand.swift */; };
-		1DC9E85126C19437007E463F /* HealthChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC9E85026C19437007E463F /* HealthChecker.swift */; };
 		1DC9E85926C19C22007E463F /* IMAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC9E85826C19C22007E463F /* IMAccount.swift */; };
 		1DC9E85B26C19D1A007E463F /* ListCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC9E85A26C19D1A007E463F /* ListCommand.swift */; };
-		1DC9E85D26C1AA7E007E463F /* HealthEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC9E85C26C1AA7E007E463F /* HealthEvents.swift */; };
 		1DC9E86026C1D6AC007E463F /* IPCCommand+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC9E85E26C1D641007E463F /* IPCCommand+Codable.swift */; };
 		1DCB0CDE26B05E7B00242045 /* Barcelona.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; };
 		1DCB0CDF26B05E7B00242045 /* Barcelona.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -625,7 +622,6 @@
 		1D22ADCE265C5B710095EE7E /* BLStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLStruct.swift; sourceTree = "<group>"; };
 		1D22ADD0265C5C5B0095EE7E /* BLStruct.codegen.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = BLStruct.codegen.js; sourceTree = "<group>"; };
 		1D3B5AF024EB444300A65280 /* IMContactStore+AlwaysCache.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "IMContactStore+AlwaysCache.m"; sourceTree = "<group>"; };
-		1D3B5AFB24EDA46700A65280 /* IMChat+HistoryLoadingPatch.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "IMChat+HistoryLoadingPatch.m"; sourceTree = "<group>"; };
 		1D3B5AFE24EF912B00A65280 /* IMChat+Reviewable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChat+Reviewable.swift"; sourceTree = "<group>"; };
 		1D3E3332250C20CB00EEA08B /* IMServiceStyle+IDSIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMServiceStyle+IDSIdentifier.swift"; sourceTree = "<group>"; };
 		1D3E3335250C210C00EEA08B /* IMServiceStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IMServiceStyle.swift; sourceTree = "<group>"; };
@@ -803,10 +799,8 @@
 		1DC66B0524E4875700CB0C5D /* Contact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
 		1DC66B0924E488FF00CB0C5D /* DBReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DBReader.swift; sourceTree = "<group>"; };
 		1DC9E84E26BDA1B8007E463F /* BridgeStatusCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeStatusCommand.swift; sourceTree = "<group>"; };
-		1DC9E85026C19437007E463F /* HealthChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthChecker.swift; sourceTree = "<group>"; };
 		1DC9E85826C19C22007E463F /* IMAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IMAccount.swift; sourceTree = "<group>"; };
 		1DC9E85A26C19D1A007E463F /* ListCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListCommand.swift; sourceTree = "<group>"; };
-		1DC9E85C26C1AA7E007E463F /* HealthEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthEvents.swift; sourceTree = "<group>"; };
 		1DC9E85E26C1D641007E463F /* IPCCommand+Codable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IPCCommand+Codable.swift"; sourceTree = "<group>"; };
 		1DCB0CD326B05E1C00242045 /* barcelona-mautrix */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "barcelona-mautrix"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DCB8BDA2510439E0005A0EB /* Attachment+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Attachment+Identifiable.swift"; sourceTree = "<group>"; };
@@ -1017,7 +1011,6 @@
 				1D5AEE5F24E37D9E00303692 /* IMBalloonPluginManager+IMBalloonPluginManager_GetOutOfMyWay.m */,
 				1D5AEE6324E37D9E00303692 /* IMChatItem+CountFix.m */,
 				1D3F36FD24E4B47A005E95B8 /* IMChatRegistry+NerfedIntents.m */,
-				1D3B5AFB24EDA46700A65280 /* IMChat+HistoryLoadingPatch.m */,
 				1D7FB3B524FF0CCE00B7B956 /* IMContactStore+NoOverrides.m */,
 				1D3B5AF024EB444300A65280 /* IMContactStore+AlwaysCache.m */,
 			);
@@ -1281,7 +1274,6 @@
 				1D3F0C452515032300E1DBEB /* ERTimeSortedParticipantsManager.swift */,
 				1DC4D7B026AD0B2F00281920 /* BarcelonaManager.swift */,
 				1D9AE37326AF1C42007873E3 /* HookManager.swift */,
-				1DC9E85026C19437007E463F /* HealthChecker.swift */,
 			);
 			path = IMCoreHelpers;
 			sourceTree = "<group>";
@@ -1496,7 +1488,6 @@
 				1D5322DE2677ED4B005FF8D1 /* MessageEvents.swift */,
 				1D5322D62677C8AF005FF8D1 /* EventBus.swift */,
 				1D79037726ACFE6B00712CB3 /* Info.plist */,
-				1DC9E85C26C1AA7E007E463F /* HealthEvents.swift */,
 			);
 			path = BarcelonaEvents;
 			sourceTree = "<group>";
@@ -2344,7 +2335,6 @@
 				1D5322C42677C15B005FF8D1 /* IMItem|IMMessage+TimeResolvers.swift in Sources */,
 				1DD805E824E85D100076D717 /* GroupActionItem.swift in Sources */,
 				1D3E3341250C264900EEA08B /* IMFileTransfer+Creatable.swift in Sources */,
-				1D3B5AFD24EDA46700A65280 /* IMChat+HistoryLoadingPatch.m in Sources */,
 				1DCB8BDB2510439E0005A0EB /* Attachment+Identifiable.swift in Sources */,
 				1D3E333A250C22E400EEA08B /* CNContact+Identifiable.swift in Sources */,
 				1D804CFB250E96FB00F376CB /* InternalAttachment+Resolvable.swift in Sources */,
@@ -2425,7 +2415,6 @@
 				1D74D4A0250C04A900A9F9A1 /* IMService+Identifiable.swift in Sources */,
 				1D74D4A8250C0D7A00A9F9A1 /* Resolvable.swift in Sources */,
 				1D3E333E250C252100EEA08B /* CNContact+LazilyResolvable.swift in Sources */,
-				1DC9E85126C19437007E463F /* HealthChecker.swift in Sources */,
 				1D3E3347250C279F00EEA08B /* InternalAttachment+LazilyResolvable.swift in Sources */,
 				1DD805BB24E85D070076D717 /* IMContactStore+ContactRepresentations.swift in Sources */,
 				1DD805CA24E85D070076D717 /* CNContact+Serializable.swift in Sources */,
@@ -2509,7 +2498,6 @@
 				1D79038826ACFE7F00712CB3 /* Event.swift in Sources */,
 				1DF2F31E26C45FD30078E549 /* Event+Codable.swift in Sources */,
 				1D79038926ACFE7F00712CB3 /* EventDispatcher.swift in Sources */,
-				1DC9E85D26C1AA7E007E463F /* HealthEvents.swift in Sources */,
 				1D79038726ACFE7F00712CB3 /* DispatchSupervisor.swift in Sources */,
 				1D79038226ACFE7F00712CB3 /* ChatEvents.swift in Sources */,
 				1D9AE37226AF0C5A007873E3 /* Event+Hashable.swift in Sources */,

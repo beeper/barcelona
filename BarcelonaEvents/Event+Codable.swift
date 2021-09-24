@@ -20,7 +20,6 @@ extension Event: Codable {
     	case contactRemoved
     	case contactUpdated
     	case blockListUpdated
-    	case healthChanged
     }
     
     private enum CodingKeys: CodingKey, CaseIterable {
@@ -64,8 +63,6 @@ extension Event: Codable {
 			return .contactUpdated
     	case .blockListUpdated:
 			return .blockListUpdated
-    	case .healthChanged:
-			return .healthChanged
         }
     }
 
@@ -108,8 +105,6 @@ extension Event: Codable {
     	case .contactUpdated(let payload):
 			try container.encode(payload, forKey: .payload)
     	case .blockListUpdated(let payload):
-			try container.encode(payload, forKey: .payload)
-    	case .healthChanged(let payload):
 			try container.encode(payload, forKey: .payload)
         }
     }
@@ -154,8 +149,6 @@ extension Event: Codable {
 			self = .contactUpdated(try container.decode(Contact.self, forKey: .payload))
     	case .blockListUpdated:
 			self = .blockListUpdated(try container.decode(BulkHandleIDRepresentation.self, forKey: .payload))
-    	case .healthChanged:
-			self = .healthChanged(try container.decode(HealthState.self, forKey: .payload))
         }
     }
 }

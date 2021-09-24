@@ -11,6 +11,54 @@
 
 @class IMHandle, IMPeople, IMServiceImpl, NSArray, NSAttributedString, NSData, NSDate, NSDictionary, NSMapTable, NSMutableDictionary, NSRecursiveLock, NSString;
 
+typedef NS_ENUM(NSUInteger, IMAccountLoginStatus) {
+    IMAccountStatusLoggedOut,
+    IMAccountStatusDisconnected,
+    IMAccountStatusLoggingOut,
+    IMAccountStatusLoggingIn,
+    IMAccountStatusLoggedIn
+};
+
+NSString* const IMAccountRegistrationFailedAlertMessageKey;
+
+typedef NS_ENUM(NSInteger, IMAccountRegistrationFailureReason) {
+    IMAccountRegistrationFailureNoError            = -1,
+    IMAccountRegistrationFailureUnknownError        = 0,
+    IMAccountRegistrationFailureInvalidLogin,
+    IMAccountRegistrationFailureInvalidPassword,
+    IMAccountRegistrationFailureLoginFailed,
+    IMAccountRegistrationFailureCannotConnect,
+    IMAccountRegistrationFailureBadDeviceID,
+    IMAccountRegistrationFailureBadPushToken,
+    IMAccountRegistrationFailureServerDenied,
+    IMAccountRegistrationFailureTooManyAttempts,
+
+    IMAccountRegistrationFailureAccountUpdateNeeded,
+    IMAccountRegistrationFailureAccountNotAuthorized,
+    IMAccountRegistrationFailureNewPasswordNeeded,
+    IMAccountRegistrationFailurePermanentlyBlocked,
+    IMAccountRegistrationFailureTemporarilyBlocked,
+
+    IMAccountRegistrationFailureCancelled,
+    IMAccountRegistrationFailureNotSupported,
+    IMAccountRegistrationFailureBadDeviceCredentials,
+    IMAccountRegistrationFailureExpiredDeviceCredentials,
+    IMAccountRegistrationFailureServerError,
+
+    IMAccountRegistrationFailureUnconfirmedAlias,
+
+    IMAccountRegistrationFailureRegistrationUnsupported,
+    IMAccountRegistrationFailureRegistrationNoAliasesSpecified,
+    
+    IMAccountRegistrationFailureUnsupportedManagedID,
+    IMAccountRegistrationFailureDisabledSMSAuthentication,
+    
+    IMAccountRegistrationFailureDeniedByServer,
+    IMAccountRegistrationFailureBadCredentials,
+    
+    IMAccountRegistrationFailureIrreparableFailure,
+};
+
 @interface IMAccount : NSObject
 {
     IMServiceImpl *_service;
@@ -57,7 +105,7 @@
     BOOL _hasCheckedDefaultHandleCapabilities;
     NSAttributedString *_myProfile;
     long long _registrationStatus;
-    long long _registrationFailureReason;
+    IMAccountRegistrationFailureReason _registrationFailureReason;
     NSDictionary *_registrationAlertInfo;
     unsigned long long _loginStatus;
     BOOL _isActive;
@@ -95,7 +143,7 @@
 @property(readonly, nonatomic) BOOL isActive; // @synthesize isActive=_isActive;
 @property(nonatomic) unsigned int blockingMode; // @synthesize blockingMode=_cachedBlockingMode;
 @property(nonatomic) BOOL blockIdleStatus; // @synthesize blockIdleStatus=_blockIdleStatus;
-@property(readonly, nonatomic) unsigned long long loginStatus; // @synthesize loginStatus=_loginStatus;
+@property(readonly, nonatomic) IMAccountLoginStatus loginStatus; // @synthesize loginStatus=_loginStatus;
 @property(readonly, nonatomic) unsigned long long capabilities; // @synthesize capabilities=_capabilities;
 @property(readonly, nonatomic) NSDate *myIdleSince; // @synthesize myIdleSince=_myIdleSince;
 @property(readonly, nonatomic) NSData *myPictureData; // @synthesize myPictureData=_myPictureData;
@@ -250,7 +298,7 @@
 - (void)_notJustLoggedIn;
 - (BOOL)unregisterAccount;
 - (BOOL)registerAccount;
-@property(readonly, nonatomic) long long registrationFailureReason;
+@property(readonly, nonatomic) IMAccountRegistrationFailureReason registrationFailureReason;
 @property(readonly, nonatomic) long long registrationStatus;
 - (void)_updateRegistrationStatus:(int)arg1 error:(int)arg2 info:(id)arg3;
 @property(readonly, nonatomic) BOOL supportsRegistration;

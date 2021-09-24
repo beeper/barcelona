@@ -32,7 +32,6 @@ public enum Event {
     case contactRemoved(String)
     case contactUpdated(Contact)
     case blockListUpdated(BulkHandleIDRepresentation)
-    case healthChanged(HealthState)
 }
 
 public struct BootstrapData: Codable, Hashable, BulkChatRepresentatable {
@@ -62,9 +61,4 @@ public struct BootstrapData: Codable, Hashable, BulkChatRepresentatable {
 public struct ParticipantChangeRecord: Codable, Hashable, BulkHandleIDRepresentable {
     public var chat: String
     public var handles: [String]
-}
-
-public struct HealthState: Codable, Hashable {
-    public var authenticationState: HealthChecker.AuthenticationState
-    public var connectionState: HealthChecker.ConnectionState
 }

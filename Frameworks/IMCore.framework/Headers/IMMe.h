@@ -22,7 +22,7 @@
 }
 
 + (id)imHandleForService:(id)arg1;
-+ (IMMe* _Nonnull)me;
++ (IMMe* _Nonnull)me NS_SWIFT_NAME( me() );
 + (id)lastNameFromFallbackUserName;
 + (id)firstNameFromFallbackUserName;
 + (id)fallbackUserName;
@@ -31,7 +31,7 @@
 - (void)myPictureChanged;
 @property(readonly, nonatomic, nonnull) NSArray<IMHandle*>* imHandles;
 @property(readonly, nonatomic) IMHandle *bestIMHandle;
-@property(readonly, nonatomic) NSString *fullName;
+@property(readonly, nonatomic, nullable) NSString *fullName;
 @property(readonly, nonatomic) NSString *lastName;
 @property(readonly, nonatomic) NSString *email;
 @property(readonly, nonatomic) NSArray *emails;

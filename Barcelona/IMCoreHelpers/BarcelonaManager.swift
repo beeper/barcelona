@@ -20,8 +20,6 @@ public let BLIsSimulation = IMCoreSimulatedEnvironmentEnabled()
 
 @_cdecl("BLTeardownController")
 public func BLTeardownController() {
-    HealthChecker.shared.shutdown()
-    
     let controller = IMDaemonController.sharedInstance()
     
     controller.disconnectFromDaemon()
@@ -95,8 +93,6 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
         controller.blockUntilConnected()
         
         log("Connected.")
-        
-        HealthChecker.shared.dispatch()
     }
     
     if BLIsSimulation {
