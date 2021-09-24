@@ -30,7 +30,7 @@
 - (BOOL)isExtensibleMessageWithPluginPayload:(id )arg1;
 - (id)_service;
 - (id)_newChatItemsWithFilteredChat:(BOOL)arg1 isBusiness:(BOOL)arg2 parentChatIsSpam:(BOOL)arg3 hasKnownParticipants:(BOOL)arg4;
-- (NSArray<IMChatItem*>*)_newChatItems;
+- (NSObject*)_newChatItems;
 - (BOOL)_hasMessageChatItem;
 @end
 

@@ -81,9 +81,7 @@ public extension String {
 
 extension IMChatItem: LazilyResolvable, ConcreteLazilyBasicResolvable {
     public static func lazyResolve(withIdentifiers identifiers: [String]) -> Promise<[IMChatItem]> {
-        IMMessage.lazyResolve(withIdentifiers: identifiers.map(\.cb_messageIDExtracted)).flatMap {
-            $0._imMessageItem._newChatItems()
-        }.filter {
+        IMMessage.lazyResolve(withIdentifiers: identifiers.map(\.cb_messageIDExtracted)).flatMap(\._imMessageItem.chatItems).filter {
             guard let transcriptChatItem = $0 as? IMTranscriptChatItem, identifiers.contains(transcriptChatItem.guid) else {
                 return false
             }

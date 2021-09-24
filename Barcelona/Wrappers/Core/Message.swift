@@ -52,11 +52,11 @@ private extension IngestionContext {
 
 private extension IngestionContext {
     func items(forMessageItem item: IMMessageItem) -> [ChatItem] {
-        ingest(item._newChatItems())
+        ingest(item.chatItems)
     }
     
     func items(forMessage message: IMMessage) -> [ChatItem] {
-        ingest(message._imMessageItem._newChatItems())
+        ingest(message._imMessageItem?.chatItems ?? [])
     }
 }
 

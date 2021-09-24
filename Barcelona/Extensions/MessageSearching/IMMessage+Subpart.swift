@@ -9,20 +9,35 @@
 import Foundation
 import IMCore
 
+extension IMMessageItem {
+    var chatItems: [IMChatItem] {
+        let items = _newChatItems()
+        
+        switch items {
+        case let items as [IMChatItem]:
+            return items
+        case let item as IMChatItem:
+            return [item]
+        default:
+            print(items.debugDescription)
+            return []
+        }
+    }
+}
+
 extension IMMessage {
     /**
      Returns a single subpart from a message
      */
     func subpart(at index: Int) -> IMChatItem? {
-        guard let _imMessageItem = _imMessageItem, let parts = _imMessageItem._newChatItems() else { return nil }
+        guard let parts = _imMessageItem?.chatItems else { return nil }
         if (parts.count - 1) < index { return nil }
         
         return parts[index]
     }
     
     func subpart(with guid: String) -> IMChatItem? {
-        guard let _imMessageItem = _imMessageItem else { return nil }
-        return _imMessageItem._newChatItems().first(where: {
+        _imMessageItem?.chatItems.first(where: {
             guard let part = $0 as? IMMessagePartChatItem else {
                 return false
             }
