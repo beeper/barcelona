@@ -53,8 +53,10 @@ private extension IMAccountController {
             return .unconfigured
         }
         
-        guard account.registrationFailureReason == .noError else {
-            return .badCredentials
+        if account.validLogin {
+            guard account.registrationFailureReason == .noError else {
+                return .badCredentials
+            }
         }
         
         switch account.loginStatus {
