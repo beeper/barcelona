@@ -53,7 +53,20 @@ private extension IMAccountController {
             return .unconfigured
         }
         
-        if account.validLogin {
+        var isProcessing: Bool {
+            switch account.registrationStatus {
+            case .authenticating:
+                return true
+            case .authenticated:
+                return true
+            case .registering:
+                return true
+            default:
+                return false
+            }
+        }
+        
+        if account.validLogin, account.uniqueID != "PlaceholderAccount" {
             guard account.registrationFailureReason == .noError else {
                 return .badCredentials
             }
@@ -61,7 +74,13 @@ private extension IMAccountController {
         
         switch account.loginStatus {
         case .statusLoggedOut:
-            return .loggedOut
+            if isProcessing {
+                return .connecting
+            } else if account.uniqueID == "PlaceholderAccount" {
+                return .unconfigured
+            } else {
+                return .loggedOut
+            }
         case .statusDisconnected:
             return .transientDisconnect
         case .statusLoggingOut:
@@ -69,7 +88,24 @@ private extension IMAccountController {
         case .statusLoggingIn:
             return .connecting
         case .statusLoggedIn:
-            return .connected
+            switch account.registrationStatus {
+            case .failed:
+                return .badCredentials
+            case .unknown:
+                return .unknownError
+            case .unregistered:
+                return .unconfigured
+            case .authenticating:
+                return .connecting
+            case .authenticated:
+                return .connecting
+            case .registering:
+                return .connecting
+            case .registered:
+                return .connected
+            @unknown default:
+                return .unknownError
+            }
         @unknown default:
             return .unknownError
         }

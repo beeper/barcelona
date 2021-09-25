@@ -19,6 +19,16 @@ typedef NS_ENUM(NSUInteger, IMAccountLoginStatus) {
     IMAccountStatusLoggedIn
 };
 
+typedef NS_ENUM(NSInteger, IMAccountRegistrationStatus) {
+    IMAccountRegistrationStatusFailed       = -1,
+    IMAccountRegistrationStatusUnknown      =  0,
+    IMAccountRegistrationStatusUnregistered,
+    IMAccountRegistrationStatusAuthenticating,
+    IMAccountRegistrationStatusAuthenticated,
+    IMAccountRegistrationStatusRegistering,
+    IMAccountRegistrationStatusRegistered,
+};
+
 NSString* const IMAccountRegistrationFailedAlertMessageKey;
 
 typedef NS_ENUM(NSInteger, IMAccountRegistrationFailureReason) {
@@ -299,7 +309,7 @@ typedef NS_ENUM(NSInteger, IMAccountRegistrationFailureReason) {
 - (BOOL)unregisterAccount;
 - (BOOL)registerAccount;
 @property(readonly, nonatomic) IMAccountRegistrationFailureReason registrationFailureReason;
-@property(readonly, nonatomic) long long registrationStatus;
+@property(readonly, nonatomic) IMAccountRegistrationStatus registrationStatus;
 - (void)_updateRegistrationStatus:(int)arg1 error:(int)arg2 info:(id)arg3;
 @property(readonly, nonatomic) BOOL supportsRegistration;
 @property(readonly, nonatomic) NSDictionary *registrationFailureAlertInfo;

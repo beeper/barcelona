@@ -20,7 +20,7 @@ public class BLHealthTicker {
     public init() {
         stream = SubjectStream<BridgeStatusCommand>(publish: &publish)
         
-        NotificationCenter.default.subscribe(toNotificationsNamed: [.IMAccountLoginStatusChanged, .IMAccountRegistrationStatusChanged]) { notification, subscription in
+        NotificationCenter.default.subscribe(toNotificationsNamed: [.IMAccountLoginStatusChanged, .IMAccountRegistrationStatusChanged, .IMAccountNoLongerJustLoggedIn, .IMAccountLoggedIn, .IMAccountLoggedOut, .IMAccountActivated, .IMAccountDeactivated, .IMAccountAuthorizationIDChanged, .IMAccountControllerOperationalAccountsChanged]) { notification, subscription in
             self.run(schedulingNext: true)
         }
     }
@@ -44,12 +44,12 @@ public class BLHealthTicker {
      
      - Parameter schedulingNext whether to schedule the next status update
      */
-    public func run(schedulingNext scheduleNext: Bool = true) {
+    public func run(schedulingNext shouldScheduleNext: Bool = true) {
         timer?.invalidate()
-        self.publish(self.status)
+        publish(status)
         
-        if scheduleNext {
-            self.scheduleNext()
+        if shouldScheduleNext {
+            scheduleNext()
         }
     }
     
