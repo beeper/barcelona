@@ -46,10 +46,16 @@ internal extension IMAccountController {
     }
 }
 
+private extension IMAccount {
+    var isPlaceholder: Bool {
+        uniqueID == "PlaceholderAccount"
+    }
+}
+
 private extension IMAccountController {
     /// Returns an interpretation of login status, or bad credentials if a registration failure is present
     var state: BridgeState {
-        guard let account = iMessageAccount else {
+        guard let account = iMessageAccount, !account.isPlaceholder else {
             return .unconfigured
         }
         
@@ -63,12 +69,6 @@ private extension IMAccountController {
                 return true
             default:
                 return false
-            }
-        }
-        
-        if account.validLogin, account.uniqueID != "PlaceholderAccount" {
-            guard account.registrationFailureReason == .noError else {
-                return .badCredentials
             }
         }
         
@@ -90,7 +90,11 @@ private extension IMAccountController {
         case .statusLoggedIn:
             switch account.registrationStatus {
             case .failed:
-                return .badCredentials
+                if account.registrationFailureReason == .unknownError {
+                    return .unconfigured
+                } else {
+                    return .badCredentials
+                }
             case .unknown:
                 return .unknownError
             case .unregistered:
