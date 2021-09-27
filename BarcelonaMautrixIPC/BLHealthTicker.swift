@@ -39,6 +39,16 @@ public class BLHealthTicker {
         }
     }
     
+    private var latestStatus: BridgeStatusCommand? {
+        didSet {
+            guard let latestStatus = latestStatus, latestStatus != oldValue else {
+                return
+            }
+            
+            publish(latestStatus)
+        }
+    }
+    
     /**
      Publishes the current bridge status and optionally schedules the next update
      
@@ -46,7 +56,7 @@ public class BLHealthTicker {
      */
     public func run(schedulingNext shouldScheduleNext: Bool = true) {
         timer?.invalidate()
-        publish(status)
+        latestStatus = .current
         
         if shouldScheduleNext {
             scheduleNext()

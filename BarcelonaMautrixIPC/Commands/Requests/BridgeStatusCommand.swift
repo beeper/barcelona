@@ -24,7 +24,7 @@ public enum BridgeState: String, Codable {
     case loggedOut = "LOGGED_OUT"
 }
 
-public struct BridgeStatusCommand: Codable {
+public struct BridgeStatusCommand: Codable, Equatable {
     public var state_event: BridgeState
     public var ttl: TimeInterval
     public var error: String?
