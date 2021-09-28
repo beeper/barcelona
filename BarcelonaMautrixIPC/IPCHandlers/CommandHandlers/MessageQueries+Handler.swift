@@ -23,7 +23,7 @@ extension GetMessagesAfterCommand: Runnable {
             return payload.respond(.messages([]))
         }
         
-        IPCLog.debug("Loading %d messages in chat %@ before %f", limit ?? -1, chat.id, timestamp)
+        IPCLog.debug("Loading %ld messages in chat %@ before %f", limit ?? -1, chat.id, timestamp)
         BLLoadChatItems(withChatIdentifier: chat.id, onServices: .CBMessageServices, afterDate: date, limit: limit).then {
             $0.blMessages
         }.then {

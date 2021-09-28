@@ -59,7 +59,7 @@ public extension DBReader {
             /// Get database handle
             self.read { db in
                 #if DEBUG
-                DBLog("Performing message query with chat identifiers %@ handles %@ text %@ limit %d", params.chats ?? [], handles, params.search ?? "<<no search>>", params.limit ?? 20)
+                DBLog("Performing message query with chat identifiers %@ handles %@ text %@ limit %ld", params.chats ?? [], handles, params.search ?? "<<no search>>", params.limit ?? 20)
                 #endif
                 
                 /// Performs a query for either me or not me (IMCore handle that are associated with an account function differently)

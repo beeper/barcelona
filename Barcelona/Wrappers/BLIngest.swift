@@ -23,7 +23,7 @@ public func BLIngestObjects(_ objects: [NSObject], inChat chat: String? = nil) -
         
         return _BLResolveChatIDs(forObjects: objects)
             .then { chatIDs -> Promise<[ChatItem]> in
-                BLIngestObjectsLog.debug("got %d chat IDs from database", chatIDs.count)
+                BLIngestObjectsLog.debug("got %ld chat IDs from database", chatIDs.count)
                 
                 if _fastPath(chatIDs.allSatisfy { $0 == chatIDs.first }) {
                     BLIngestObjectsLog.debug("taking fast-path for inferred chat IDs because they're all the same (%@)", chatIDs.first ?? "")
@@ -41,7 +41,7 @@ public func BLIngestObjects(_ objects: [NSObject], inChat chat: String? = nil) -
                         BLIngestObject(object, inChat: chatIDs[index])
                     })
                 }.observeOutput { items in
-                    BLIngestObjectsLog.info("aggregated ingestion got %d items", items.count)
+                    BLIngestObjectsLog.info("aggregated ingestion got %ld items", items.count)
                 }
             }
     }
@@ -53,7 +53,7 @@ public func BLIngestObjects(_ objects: [NSObject], inChat chat: String? = nil) -
         BLIngestObjectsLog.debug("objects parsed. loading tapbacks")
         return _BLLoadTapbacks(forItems: items, inChat: chat)
     }.observeOutput { items in
-        BLIngestObjectsLog.info("ingested %d items", items.count)
+        BLIngestObjectsLog.info("ingested %ld items", items.count)
     }
 }
 

@@ -84,7 +84,7 @@ public func BLWritePayload(_ payload: IPCPayload) {
         BL_IS_WRITING_META_PAYLOAD = true
         CLInfo(
             "BLStandardIO",
-            "Outgoing! %@ %d", payload.command.name.rawValue, payload.id ?? -1
+            "Outgoing! %@ %ld", payload.command.name.rawValue, payload.id ?? -1
         )
         BL_IS_WRITING_META_PAYLOAD = false
     }
@@ -113,7 +113,7 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
             do {
                 let payload = try JSONDecoder().decode(IPCPayload.self, from: chunk)
                 
-                CLInfo("BLStandardIO", "Incoming! %@ %d", payload.command.name.rawValue, payload.id ?? -1)
+                CLInfo("BLStandardIO", "Incoming! %@ %ld", payload.command.name.rawValue, payload.id ?? -1)
                 CLInfo("BLStandardIO", "raw: %@", String(decoding: try! JSONEncoder().encode(payload.command), as: UTF8.self))
                 
                 cb(payload)

@@ -101,7 +101,7 @@ class HookManager {
         appliedHooks = []
         
         for (index, hook) in hooks.enumerated() {
-            log.debug("Applying hook %d of %d", index + 1, hooks.count)
+            log.debug("Applying hook %ld of %ld", index + 1, hooks.count)
             
             appliedHooks!.append(try hook())
         }
@@ -117,7 +117,7 @@ class HookManager {
         log.debug("Reverting hooks")
         
         for (index, hook) in appliedHooks.enumerated() {
-            log.debug("Reverting hook %d of %d", index + 1, hooks.count)
+            log.debug("Reverting hook %ld of %ld", index + 1, hooks.count)
             
             try hook.revert()
         }

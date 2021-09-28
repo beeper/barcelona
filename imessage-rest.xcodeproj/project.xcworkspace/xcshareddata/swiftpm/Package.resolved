@@ -167,9 +167,9 @@
         "package": "Swog",
         "repositoryURL": "https://github.com/EricRabil/Swog",
         "state": {
-          "branch": "interpolation",
-          "revision": "0be9823f1891ee606dfb5cc7ec28800a98d0631e",
-          "version": null
+          "branch": null,
+          "revision": "a9b0442e31f1d1d434b83358f437e4420a05439a",
+          "version": "1.0.1"
         }
       }
     ]

@@ -36,7 +36,7 @@ extension IMMessage: IMItemIDResolvable {
 // MARK: - IMFileTransfer Preload
 @inlinable
 internal func _BLLoadFileTransfers(forObjects objects: [NSObject]) -> Promise<Void> {
-    let operation = BLIngestLog.operation(named: "BLLoadFileTransfers").begin("loading file transfers for %d objects", objects.count)
+    let operation = BLIngestLog.operation(named: "BLLoadFileTransfers").begin("loading file transfers for %ld objects", objects.count)
     
     let unloadedFileTransferGUIDs = objects.compactMap {
         $0 as? IMFileTransferContainer
@@ -47,10 +47,10 @@ internal func _BLLoadFileTransfers(forObjects objects: [NSObject]) -> Promise<Vo
         return .success(())
     }
     
-    operation.event("loading %d transfers", unloadedFileTransferGUIDs.count)
+    operation.event("loading %ld transfers", unloadedFileTransferGUIDs.count)
     
     return DBReader.shared.attachments(withGUIDs: unloadedFileTransferGUIDs).endingOperation(operation) { attachments in
-        operation.end("loaded %d attachments", attachments.count)
+        operation.end("loaded %ld attachments", attachments.count)
     }.compactMap(\.internalAttachment).forEach {
         $0.registerFileTransferIfNeeded()
     }
@@ -72,7 +72,7 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -
         return .success([])
     }
     
-    var operation = BLIngestLog.operation(named: "BLLoadTapbacks (db)").begin("querying tapbacks for %d items in chat %@", items.count, chat)
+    var operation = BLIngestLog.operation(named: "BLLoadTapbacks (db)").begin("querying tapbacks for %ld items in chat %@", items.count, chat)
     
     let messages = items.compactMap { $0 as? Message }.dictionary(keyedBy: \.id)
     
@@ -88,7 +88,7 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -
     }
     
     return DBReader.shared.associatedMessageGUIDs(with: messages.values.flatMap(\.associableItemIDs)).then { associations -> [String: [AcknowledgmentChatItem]] in
-        operation.end("loaded %d associated items from db", associations.flatMap(\.value).count)
+        operation.end("loaded %ld associated items from db", associations.flatMap(\.value).count)
         
         operation = BLIngestLog.operation(named: "BLLoadTapbacks (IMDPersistence)").begin("loading items from IMDPersistenceAgent")
         
@@ -102,7 +102,7 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -
         case .failure(let error):
             operation.end("failed to load with error %@", error as NSError)
         case .success(let items):
-            operation.end("loaded %d items", items.flatMap(\.value).count)
+            operation.end("loaded %ld items", items.flatMap(\.value).count)
         }
     }.then { ledger -> [ChatItem] in
         if ledger.values.flatten().count > 0 {
@@ -132,7 +132,7 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -
 // MARK: - Translation
 @inlinable
 internal func _BLParseObjects(_ objects: [NSObject], inChat chat: String) -> [ChatItem] {
-    let operation = BLIngestLog.operation(named: "BLParseObjects").begin("parsing %d objects in chat %@", objects.count, chat)
+    let operation = BLIngestLog.operation(named: "BLParseObjects").begin("parsing %ld objects in chat %@", objects.count, chat)
     
     defer { operation.end() }
     

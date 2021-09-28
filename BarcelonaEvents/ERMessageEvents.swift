@@ -29,7 +29,7 @@ internal extension ThinDebouncer {
     @_optimize(speed)
     @_transparent
     func submit<P: RawRepresentable>(space: P, tag: String, delay: DispatchTimeInterval, cb: @escaping () -> ()) where P.RawValue == String {
-        submit(hash: (space.rawValue + tag).hash, delay: delay, cb: cb)
+        submit(hash: (space.rawValue + tag).hashValue, delay: delay, cb: cb)
     }
 }
 
@@ -37,12 +37,12 @@ public class ERMessageEvents: EventDispatcher {
     override var log: Logger { Logger(category: "ERMessageEvents") }
     
     public override func wake() {
-        addObserver(forName: ERChatMessageReceivedNotification) {
-            guard let item = $0.object as? IMItem, let chat = ($0.userInfo as? [String: Any])?["chat"] as? String else {
+        addObserver(forName: ERChatMessageReceivedNotification) { notification in
+            guard let item = notification.object as? IMItem, let chat = (notification.userInfo as? [String: Any])?["chat"] as? String else {
                 return
             }
-
-            ThinDebouncer.shared.submit(space: $0.name, tag: item.id, delay: .milliseconds(2)) {
+            
+            ThinDebouncer.shared.submit(space: notification.name, tag: item.id, delay: .milliseconds(2)) {
                 self.messageReceived(item, inChat: chat)
             }
         }
@@ -120,11 +120,13 @@ public class ERMessageEvents: EventDispatcher {
      No typing items come here, no status items come here, no group items come here
      */
     private func messagesReceived(_ items: [IMItem], inChat chatIdentifier: String, overrideFromMe: Bool = false) {
+        log.info("received %ld messages in chat %@", items.count, chatIdentifier)
+        
         BLLoadChatItems(withGUIDs: items.map(\.guid), chatID: chatIdentifier).map {
             $0.eraseToAnyChatItem()
         }.then {
             if $0.count != items.count {
-                self.log.warn("started with %d items, but ended with 0 items!", items.count)
+                self.log.warn("started with %ld items, but ended with 0 items!", items.count)
             }
             
             if $0.count == 0 {

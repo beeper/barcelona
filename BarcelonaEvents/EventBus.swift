@@ -18,7 +18,7 @@ public class EventBus {
     public static let queue = DispatchQueue(label: "com.ericrabil.barcelona.events")
     public var queue: DispatchQueue { Self.queue }
     
-    private let slidingEventFilter = ExpiringCollection<Int>()
+    private let slidingEventFilter = ExpiringCollection<Event>()
     
     public init() {
         publisher = subject.share().receive(on: RunLoop.main).eraseToAnyPublisher()
@@ -39,13 +39,11 @@ public class EventBus {
     }
     
     public func dispatch(_ event: Event) {
-        let hash = event.hashValue
-        
-        guard !slidingEventFilter.contains(hash) else {
+        guard !slidingEventFilter.contains(event) else {
             return
         }
         
-        slidingEventFilter.insert(hash)
+        slidingEventFilter.insert(event)
         subject.send(event)
     }
 }

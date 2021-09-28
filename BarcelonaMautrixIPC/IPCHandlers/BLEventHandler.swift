@@ -45,6 +45,7 @@ public class BLEventHandler {
                     
                     if message.fromMe, let lastSentMessageGUIDs = BLMetricStore.shared.get(typedValue: [String].self, forKey: .lastSentMessageGUIDs) {
                         guard !lastSentMessageGUIDs.contains(message.id) else {
+                            CLInfo("Mautrix", "Dropping last-sent message \(message.id)")
                             return
                         }
                     }

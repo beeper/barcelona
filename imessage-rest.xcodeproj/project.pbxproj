@@ -3517,8 +3517,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/EricRabil/Swog";
 			requirement = {
-				branch = interpolation;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.1;
 			};
 		};
 		1D5B7F6126E15920002CE91E /* XCRemoteSwiftPackageReference "Pwomise" */ = {
