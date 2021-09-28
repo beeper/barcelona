@@ -10,7 +10,7 @@ import Foundation
 import Barcelona
 
 extension Event: Hashable {
-    public var hashableValue: AnyHashable {
+    private var hashableValue: AnyHashable {
         switch self {
         case .bootstrap(let item):
             return AnyHashable(item)
@@ -50,10 +50,11 @@ extension Event: Hashable {
     }
     
     public static func == (lhs: Event, rhs: Event) -> Bool {
-        lhs.hashableValue == rhs.hashableValue
+        lhs.hashValue == rhs.hashValue
     }
     
     public func hash(into hasher: inout Hasher) {
         hashableValue.hash(into: &hasher)
+        name.hash(into: &hasher)
     }
 }
