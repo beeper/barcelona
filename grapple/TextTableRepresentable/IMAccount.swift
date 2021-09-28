@@ -12,7 +12,7 @@ import IMCore
 
 extension IMAccount: TextTableRepresentable {
     public static var columnHeaders: [String] {
-        ["service", "uniqueID", "loginID", "loginHandleID", "connected", "active", "registered", "operational", "asleep"]
+        ["service", "uniqueID", "loginID", "loginHandleID", "connected", "active", "registered", "operational", "asleep", "allowsSMSRelay", "isSMSRelayCapable"]
     }
     
     public var tableValues: [CustomStringConvertible] {
@@ -25,7 +25,9 @@ extension IMAccount: TextTableRepresentable {
             isActive,
             isRegistered,
             isOperational,
-            isAsleep
+            isAsleep,
+            allowsSMSRelay,
+            isSMSRelayCapable
         ]
     }
 }

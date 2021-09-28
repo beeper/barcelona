@@ -33,19 +33,6 @@ public struct BridgeStatusCommand: Codable, Equatable {
     public var remote_name: String?
 }
 
-internal extension IMAccountController {
-    static var shared: IMAccountController {
-        __sharedInstance()
-    }
-    
-    /// Returns an iMessage account, active or not.
-    var iMessageAccount: IMAccount? {
-        __activeIMessageAccount ?? accounts.first(where: {
-            $0.service?.id == .iMessage
-        })
-    }
-}
-
 private extension IMAccount {
     var isPlaceholder: Bool {
         uniqueID == "PlaceholderAccount"

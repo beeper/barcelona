@@ -34,7 +34,7 @@ class Grapple {
     
     static func main() throws {
         let cli = CLI(name: "grapple", commands: [
-            SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand(), IDSCommand()
+            SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand(), IDSCommand(), AccountManagement()
         ])
         
         do {

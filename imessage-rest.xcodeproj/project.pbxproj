@@ -193,6 +193,7 @@
 		1D9AE39B26AF5FD7007873E3 /* DebugCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9AE39A26AF5FD7007873E3 /* DebugCommands.swift */; };
 		1D9AE3A026AF6347007873E3 /* BarcelonaEvents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D79037426ACFE6B00712CB3 /* BarcelonaEvents.framework */; };
 		1D9AE3A126AF6347007873E3 /* BarcelonaEvents.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D79037426ACFE6B00712CB3 /* BarcelonaEvents.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1D9D5E552702B97D001114AB /* AccountManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9D5E542702B97D001114AB /* AccountManagement.swift */; };
 		1DB9059025E58E120087D014 /* Image+AsPNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB9058F25E58E120087D014 /* Image+AsPNG.swift */; };
 		1DC3927326B05F1D00A9B6D3 /* IMCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5AEDD424E3744900303692 /* IMCore.framework */; };
 		1DC4D77626AD093100281920 /* MessageExtensionsData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D74074E25116CFC007250F8 /* MessageExtensionsData.swift */; };
@@ -784,6 +785,7 @@
 		1D9AE38D26AF4A29007873E3 /* SendMessageCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendMessageCommand.swift; sourceTree = "<group>"; };
 		1D9AE39526AF5D0F007873E3 /* ChatCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCommands.swift; sourceTree = "<group>"; };
 		1D9AE39A26AF5FD7007873E3 /* DebugCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugCommands.swift; sourceTree = "<group>"; };
+		1D9D5E542702B97D001114AB /* AccountManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagement.swift; sourceTree = "<group>"; };
 		1DA8BE9E267A67B100636231 /* BLMetricStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLMetricStore.swift; sourceTree = "<group>"; };
 		1DB9058F25E58E120087D014 /* Image+AsPNG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Image+AsPNG.swift"; sourceTree = "<group>"; };
 		1DB9520624F6B8BF004CC87B /* AttributedStringSerializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributedStringSerializer.swift; sourceTree = "<group>"; };
@@ -1577,6 +1579,7 @@
 				1DC9E85A26C19D1A007E463F /* ListCommand.swift */,
 				1DF2F2EA26C43D550078E549 /* JSCommand.swift */,
 				1DF257BF26E280FB00B39C8E /* IDSCommand.swift */,
+				1D9D5E542702B97D001114AB /* AccountManagement.swift */,
 			);
 			path = Commands;
 			sourceTree = "<group>";
@@ -2430,6 +2433,7 @@
 			files = (
 				1DC9E85926C19C22007E463F /* IMAccount.swift in Sources */,
 				1D9AE39626AF5D0F007873E3 /* ChatCommands.swift in Sources */,
+				1D9D5E552702B97D001114AB /* AccountManagement.swift in Sources */,
 				1DF257C026E280FB00B39C8E /* IDSCommand.swift in Sources */,
 				1D4AC03826AB7CE300ADD254 /* Grapple.swift in Sources */,
 				1D9AE38E26AF4A29007873E3 /* SendMessageCommand.swift in Sources */,

@@ -23,7 +23,7 @@ public class Registry {
     }
     
     public func imHandle(withID id: String) -> IMHandle? {
-        if let handle = imHandle(withID: id, onAccount: IMAccountController.shared.iMessageAccount) {
+        if let account = IMAccountController.shared.iMessageAccount, let handle = imHandle(withID: id, onAccount: account) {
             return handle
         } else if let SMSAccount = IMAccountController.shared.activeSMSAccount, let handle = imHandle(withID: id, onAccount: SMSAccount) {
             return handle

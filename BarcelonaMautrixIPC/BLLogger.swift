@@ -38,7 +38,7 @@ public class BLMautrixSTDOutDriver: LoggingDriver {
             "fileID": fileID.description,
             "function": function.description,
             "line": line.description
-        ]))))
+        ]))), log: false)
     }
     
     public func log(level: LoggingLevel, fileID: StaticString, line: Int, function: StaticString, dso: UnsafeRawPointer, category: StaticString, message: BackportedOSLogMessage) {
@@ -46,6 +46,6 @@ public class BLMautrixSTDOutDriver: LoggingDriver {
             "fileID": fileID.description,
             "function": function.description,
             "line": line.description
-        ]))))
+        ]))), log: false)
     }
 }

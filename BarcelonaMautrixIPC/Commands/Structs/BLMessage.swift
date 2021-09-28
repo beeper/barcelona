@@ -78,6 +78,13 @@ public struct BLMessage: Codable, ChatResolvable {
                         BLAttachment(guid: $0)
                     }
                 }
+                
+                switch plugin.bundleID {
+                case "com.apple.messages.URLBalloonProvider":
+                    attachments = []
+                default:
+                    break
+                }
             default:
                 continue
             }

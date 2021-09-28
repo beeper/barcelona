@@ -76,26 +76,38 @@ extension JSONDecoder.DateDecodingStrategy {
 private var BL_IS_WRITING_META_PAYLOAD = false
 private let TERMINATOR = Data("\n".utf8)
 
-public func BLWritePayload(_ payload: IPCPayload) {
+private let encoder: JSONEncoder = {
     let encoder = JSONEncoder()
     encoder.dateEncodingStrategy = .iso8601withFractionalSeconds
     
-    if !BL_IS_WRITING_META_PAYLOAD, payload.command.name != .log {
-        BL_IS_WRITING_META_PAYLOAD = true
-        CLInfo(
-            "BLStandardIO",
-            "Outgoing! %@ %ld", payload.command.name.rawValue, payload.id ?? -1
-        )
-        BL_IS_WRITING_META_PAYLOAD = false
+    return encoder
+}()
+
+public func BLWritePayloads(_ payloads: [IPCPayload], log: Bool = true) {
+    var data = Data()
+    
+    for payload in payloads {
+        if log {
+            CLInfo(
+                "BLStandardIO",
+                "Outgoing! %@ %ld", payload.command.name.rawValue, payload.id ?? -1
+            )
+        }
+        
+        data += try! encoder.encode(payload)
     }
     
-    FileHandle.standardOutput.write(try! encoder.encode(payload))
+    FileHandle.standardOutput.write(data)
     
     #if DEBUG
     if BLMetricStore.shared.get(key: .shouldDebugPayloads) ?? false {
         FileHandle.standardOutput.write(TERMINATOR)
     }
     #endif
+}
+
+public func BLWritePayload(_ payload: IPCPayload, log: Bool = true) {
+    BLWritePayloads([payload], log: log)
 }
 
 public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {

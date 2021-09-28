@@ -151,16 +151,16 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     }
 }
 
-internal extension IMAccountController {
+public extension IMAccountController {
     static var shared: IMAccountController {
         __sharedInstance()
     }
     
-    /// Returns an iMessage account, active or not.
-    var iMessageAccount: IMAccount {
+    /// Returns an iMessage account
+    var iMessageAccount: IMAccount? {
         __activeIMessageAccount ?? accounts.first(where: {
             $0.service?.id == .iMessage
-        }) ?? IMAccount(service: IMServiceStyle.iMessage.service)
+        })
     }
 }
 
@@ -176,8 +176,8 @@ internal extension Chat {
         }
     }
     
-    static func iMessageHandle(forID id: String) -> IMHandle {
-        IMAccountController.shared.iMessageAccount.imHandle(withID: id)
+    static func iMessageHandle(forID id: String) -> IMHandle? {
+        IMAccountController.shared.iMessageAccount?.imHandle(withID: id)
     }
     
     static func homogenousHandles(forIDs ids: [String]) -> [IMHandle] {

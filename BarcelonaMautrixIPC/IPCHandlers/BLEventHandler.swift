@@ -54,6 +54,16 @@ public class BLEventHandler {
                 }
                 
                 break
+            case .contactUpdated(let contact):
+                BLWritePayloads(contact.handles.flatMap { handle -> [BLContact?] in
+                    switch handle.format {
+                    case .phoneNumber:
+                        return [contact.blContact(withGUID: "iMessage;-;\(handle.id)"), contact.blContact(withGUID: "SMS;-;\(handle.id)")]
+                    default:
+                        return [contact.blContact(withGUID: "iMessage;-;\(handle.id)")]
+                    }
+                }.compactMap { $0 }.map { .init(command: .contact($0)) })
+                
             case .itemStatusChanged(let item):
                 switch item.statusType {
                 case .read:
