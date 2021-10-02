@@ -19,6 +19,16 @@ private extension ChatItemOwned {
     }
 }
 
+private extension CBMessageStatusChange {
+    var mautrixFriendlyGUID: String? {
+        guard let sender = sender else {
+            return nil
+        }
+        
+        return "\(message.service ?? "iMessage");\(chat.isGroup ? "+" : "-");\(sender)"
+    }
+}
+
 public class BLEventHandler {
     public static let shared = BLEventHandler()
     
@@ -28,32 +38,45 @@ public class BLEventHandler {
         let send: (IPCCommand) -> () = {
             BLWritePayload(.init(command: $0))
         }
+        
+        CBDaemonListener.shared.chatParticipantsPipeline.pipe { chat, participants in
+            
+        }
+        
+        CBDaemonListener.shared.unreadCountPipeline.pipe { chat, name in
+            
+        }
+        
+        CBDaemonListener.shared.chatNamePipeline.pipe { chat, name in
+            
+        }
+        
+        CBDaemonListener.shared.typingPipeline.pipe { chat, typing in
+            send(.typing(.init(chat_guid: Chat.resolve(withIdentifier: chat)!.imChat.guid, typing: typing)))
+        }
+        
+        CBDaemonListener.shared.messagePipeline.pipe { message in
+            if message.fromMe, let lastSentMessageGUIDs = BLMetricStore.shared.get(typedValue: [String].self, forKey: .lastSentMessageGUIDs) {
+                guard !lastSentMessageGUIDs.contains(message.id) else {
+                    CLInfo("Mautrix", "Dropping last-sent message \(message.id)")
+                    return
+                }
+            }
+            
+            send(.message(BLMessage(message: message)))
+        }
+        
+        CBDaemonListener.shared.messageStatusPipeline.pipe { change in
+            switch change.type {
+            case .read:
+                send(.read_receipt(BLReadReceipt(sender_guid: change.mautrixFriendlyGUID, is_from_me: change.fromMe, chat_guid: change.chat.guid, read_up_to: change.messageID)))
+            default:
+                break
+            }
+        }
 
         bus.publisher.receiveEvent { event in
             switch event {
-            case .itemsReceived(let items):
-                items.compactMap { $0.item as? Message }.forEach { message in
-                    if message.isTypingMessage {
-                        guard !message.fromMe else {
-                            return
-                        }
-                        
-                        CLInfo("Mautrix", "typing: %@", String(data: try! JSONEncoder().encode(message), encoding: .utf8)!)
-                        send(.typing(.init(chat_guid: message.imChat.guid, typing: !message.isCancelTypingMessage)))
-                        return
-                    }
-                    
-                    if message.fromMe, let lastSentMessageGUIDs = BLMetricStore.shared.get(typedValue: [String].self, forKey: .lastSentMessageGUIDs) {
-                        guard !lastSentMessageGUIDs.contains(message.id) else {
-                            CLInfo("Mautrix", "Dropping last-sent message \(message.id)")
-                            return
-                        }
-                    }
-                    
-                    send(.message(BLMessage(message: message)))
-                }
-                
-                break
             case .contactUpdated(let contact):
                 BLWritePayloads(contact.handles.flatMap { handle -> [BLContact?] in
                     switch handle.format {
@@ -63,14 +86,8 @@ public class BLEventHandler {
                         return [contact.blContact(withGUID: "iMessage;-;\(handle.id)")]
                     }
                 }.compactMap { $0 }.map { .init(command: .contact($0)) })
-                
-            case .itemStatusChanged(let item):
-                switch item.statusType {
-                case .read:
-                    send(.read_receipt(BLReadReceipt(sender_guid: item.mautrixFriendlyGUID, is_from_me: item.fromMe, chat_guid: Chat.resolve(withIdentifier: item.chatID)!.imChat.guid, read_up_to: item.itemID)))
-                default:
-                    break
-                }
+            case .conversationUnreadCountChanged(let chat):
+                CLInfo("Mautrix", "Read count for chat \(chat.id, privacy: .public): \(chat.unreadMessageCount, privacy: .public)")
             default:
                 break
             }

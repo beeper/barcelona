@@ -9,6 +9,10 @@
 import Foundation
 import IMCore
 
+extension IMGroupActionType: Codable {
+    
+}
+
 public struct GroupActionItem: ChatItemOwned, Hashable {
     public static let ingestionClasses: [NSObject.Type] = [IMGroupActionChatItem.self, IMGroupActionItem.self]
     
@@ -51,7 +55,7 @@ public struct GroupActionItem: ChatItemOwned, Hashable {
     public var time: Double
     public var threadIdentifier: String?
     public var threadOriginator: String?
-    public var actionType: Int64
+    public var actionType: IMGroupActionType
     public var sender: String?
     
     public var type: ChatItemType {

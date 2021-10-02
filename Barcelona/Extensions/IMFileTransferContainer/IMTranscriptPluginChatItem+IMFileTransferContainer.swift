@@ -12,7 +12,7 @@ import IMCore
 extension IMTranscriptPluginChatItem: IMFileTransferContainer {
     @usableFromInline
     var fileTransferGUIDs: [String] {
-        if let rawAttachments = dataSource.pluginPayload?.value(forKey: "attachments") as? [URL] {
+        if let rawAttachments = dataSource?.pluginPayload?.value(forKey: "attachments") as? [URL] {
             return rawAttachments.map {
                 let components = $0.pathComponents
                 return components[components.count - 2]

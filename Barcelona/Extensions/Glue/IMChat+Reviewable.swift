@@ -14,7 +14,7 @@ public extension IMChat {
     func scheduleForReview() {
         RunLoop.main.schedule {
             self._updateChatItems()
-            os_log("Updated chat items for ChatID %@", type: .debug, self.id, log_IMChat)
+            log_IMChat.debug("updated chat items for chatID \(self.id)")
         }
     }
 }

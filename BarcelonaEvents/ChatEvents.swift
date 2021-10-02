@@ -39,9 +39,9 @@ public class ChatEvents: EventDispatcher {
             self.participantsChanged($0)
         }
         
-        addObserver(forName: .IMChatDisplayNameChanged) {
-            self.chatDisplayNameChanged($0)
-        }
+//        addObserver(forName: .IMChatDisplayNameChanged) {
+//            self.chatDisplayNameChanged($0)
+//        }
         
         addObserver(forName: .IMChatJoinStateDidChange) {
             self.chatJoinStateChanged($0)

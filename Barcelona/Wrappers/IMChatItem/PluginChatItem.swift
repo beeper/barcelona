@@ -25,7 +25,7 @@ public struct PluginChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
         time = item.effectiveTime
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
-        bundleID = item.dataSource.bundleID
+        bundleID = item.balloonBundleID
         attachments = item.attachments
         
         var insertPayload: Bool = true
@@ -61,7 +61,7 @@ public struct PluginChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
         }
         
         if insertPayload {
-            payload = item.dataSource.payload?.base64EncodedString()
+            payload = item.dataSource?.payload?.base64EncodedString()
         }
     }
     

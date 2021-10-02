@@ -14,15 +14,22 @@ internal func CBResolveSenderHandle(originalHandle: String?, isFromMe: Bool, ser
         return originalHandle
     }
     
-    return Registry.sharedInstance.suitableHandle(for: service)?.idWithoutResource
+    switch service.id {
+    case .iMessage:
+        return nil
+    case .FaceTime:
+        return nil
+    default:
+        return Registry.sharedInstance.suitableHandle(for: service)?.idWithoutResource
+    }
 }
 
-internal func CBResolveService(originalService: IMServiceStyle?, type: Int64, chatID: String?) -> IMServiceStyle {
+internal func CBResolveService(originalService: IMServiceStyle?, type: IMItemType, chatID: String?) -> IMServiceStyle {
     if let service = originalService {
         return service
     }
     
-    if type > 0 {
+    if type != .message {
         return .iMessage
     } else {
         guard let chatID = chatID, let chat = IMChat.resolve(withIdentifier: chatID), let serviceStyle = chat.account?.service?.id else {
@@ -50,7 +57,7 @@ extension IMMessage: SenderServiceResolvable {
     }
     
     func resolveServiceStyle(inChat chat: String?) -> IMServiceStyle {
-        CBResolveService(originalService: _imMessageItem?.serviceStyle, type: _imMessageItem?.type ?? 0, chatID: chat)
+        CBResolveService(originalService: _imMessageItem?.serviceStyle, type: _imMessageItem?.type ?? .message, chatID: chat)
     }
 }
 

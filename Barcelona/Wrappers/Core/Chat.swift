@@ -109,7 +109,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
         unreadMessageCount = backing.unreadMessageCount
         messageFailureCount = backing.messageFailureCount
         service = backing.account?.service?.id
-        lastMessage = backing.lastFinishedMessage?.description(forPurpose: 0x2, inChat: backing, senderDisplayName: backing.lastMessage?.sender._displayNameWithAbbreviation)
+        lastMessage = backing.lastFinishedMessage?.description(forPurpose: .conversationList, in: backing, senderDisplayName: backing.lastMessage?.sender._displayNameWithAbbreviation)
         lastMessageTime = (backing.lastFinishedMessage?.time.timeIntervalSince1970 ?? 0) * 1000
         style = backing.chatStyle
         readReceipts = backing.readReceipts

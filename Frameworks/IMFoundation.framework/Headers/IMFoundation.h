@@ -113,8 +113,8 @@ NSString * IMFormattedDisplayStringForID(NSString * ID, NSInteger *outType);
 
 #define IMFOUNDATION_CONST
 
-NSString* const kFZPersonFirstName;    // Optional (AIM won't support this)
-NSString* const kFZPersonLastName;    // Optional (AIM won't support this)
+NSString* const kFZPersonFirstName;
+NSString* const kFZPersonLastName;
 
 extern NSString* IMAttachmentCharacterString;
 extern NSString* IMBreadcrumbCharacterString;
@@ -157,5 +157,35 @@ extern NSString* IMBreadcrumbTextOptionFlags;
 extern NSString* IMPluginPayloadAttributeName;
 extern NSString* IMOneTimeCodeAttributeName;
 extern NSString* IMPhotoSharingAttributeName;
+
+typedef uint32_t FZListenerCapabilities;
+const FZListenerCapabilities
+                kFZListenerCapManageStatus,
+                kFZListenerCapBlackholedChatRegistry,
+                kFZListenerCapNotifications,
+                kFZListenerCapChats,
+                kFZListenerCapAppleVC,
+                kFZListenerCapAVChatInfo,
+                kFZListenerCapAuxInput,
+                kFZListenerCapVCInvitations,
+                kFZListenerCapAppleLegacyVC,
+                kFZListenerCapFileTransfers,
+                kFZListenerCapAccounts,
+                kFZListenerCapBuddyList,
+                kFZListenerCapSendMessages,
+                kFZListenerCapMessageHistory,
+                kFZListenerCapIDQueries,
+                kFZListenerCapChatCountsObserver,
+                kFZListenerCapSentMessageObserver,
+                kFZListenerCapDatabaseUpdateObserver,
+                kFZListenerCapModifyReadState,
+                kFZListenerCapAppleAC,
+                kFZListenerCapAVObserver,
+                kFZListenerCapOnDemandChatRegistry,
+                kFZListenerCapTruncatedChatRegistry,
+                kFZListenerCapOneTimeCode,
+                kFZListenerCapSkipLastMessageLoad;
+
+NSString * JWUUIDPushObjectToString(NSData * data);
 
 #endif

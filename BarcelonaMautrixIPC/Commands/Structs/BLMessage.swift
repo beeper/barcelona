@@ -11,8 +11,12 @@ import Barcelona
 import IMCore
 
 private extension Message {
-    var blSenderGUID: String {
-        "\(service.rawValue);\(isGroup ? "+" : "-");\(sender!)"
+    var blSenderGUID: String? {
+        guard let sender = sender, !fromMe else {
+            return nil
+        }
+        
+        return "\(service.rawValue);\(isGroup ? "+" : "-");\(sender)"
     }
     
     var isGroup: Bool {
@@ -34,7 +38,7 @@ public struct BLMessage: Codable, ChatResolvable {
     public var subject: String?
     public var text: String
     public var chat_guid: String
-    public var sender_guid: String
+    public var sender_guid: String?
     public var is_from_me: Bool
     public var thread_originator_guid: String?
     public var thread_originator_part: Int
@@ -51,7 +55,7 @@ public struct BLMessage: Codable, ChatResolvable {
         chat_guid = IMChat.resolve(withIdentifier: message.chatID)!.guid!
         sender_guid = message.blSenderGUID
         is_from_me = message.fromMe
-        thread_originator_guid = message.threadIdentifier
+        thread_originator_guid = message.threadOriginator
         thread_originator_part = 0
         attachments = message.fileTransferIDs.compactMap {
             BLAttachment(guid: $0)
@@ -62,7 +66,7 @@ public struct BLMessage: Codable, ChatResolvable {
             case let changeItem as GroupTitleChangeItem:
                 self.new_group_title = changeItem.title
             case let action as GroupActionItem:
-                self.group_action_type = Int(action.actionType)
+                self.group_action_type = Int(action.actionType.rawValue)
             case let acknowledgment as AcknowledgmentChatItem:
                 guard let parsedID = CBMessageItemIdentifierData(rawValue: acknowledgment.associatedID), let part = parsedID.part else {
                     continue

@@ -23,8 +23,6 @@ public class EventBus {
     public init() {
         publisher = subject.share().receive(on: RunLoop.main).eraseToAnyPublisher()
         
-        supervisor.register(MessageEvents.self)
-        supervisor.register(ERMessageEvents.self)
         supervisor.register(ChatEvents.self)
         supervisor.register(BlocklistEvents.self)
         supervisor.register(ContactsEvents.self)

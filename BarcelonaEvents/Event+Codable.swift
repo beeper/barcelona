@@ -122,7 +122,7 @@ extension Event: Codable {
     	case .itemsUpdated:
 			self = .itemsUpdated(try container.decode([AnyChatItem].self, forKey: .payload))
     	case .itemStatusChanged:
-			self = .itemStatusChanged(try container.decode(StatusChatItem.self, forKey: .payload))
+			self = .itemStatusChanged(try container.decode(CBMessageStatusChange.self, forKey: .payload))
     	case .itemsRemoved:
 			self = .itemsRemoved(try container.decode([String].self, forKey: .payload))
     	case .participantsChanged:

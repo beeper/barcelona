@@ -12,9 +12,14 @@
 
 @class NSString;
 
+typedef NS_ENUM(int64_t, IMGroupActionType) {
+    IMGroupActionTypeLeave,
+    IMGroupActionTypeChangePhoto NS_AVAILABLE(11_0, 14_0)
+};
+
 @interface IMGroupActionItem : IMItem <NSSecureCoding, NSCopying, IMRemoteObjectCoding>
 {
-    long long _actionType;
+    IMGroupActionType _actionType;
     NSString *_otherCountryCode;
     NSString *_otherHandle;
     NSString *_otherUnformattedID;
@@ -24,7 +29,7 @@
 @property(retain, nonatomic) NSString *otherUnformattedID; // @synthesize otherUnformattedID=_otherUnformattedID;
 @property(retain, nonatomic) NSString *otherHandle; // @synthesize otherHandle=_otherHandle;
 @property(retain, nonatomic) NSString *otherCountryCode; // @synthesize otherCountryCode=_otherCountryCode;
-@property(nonatomic) long long actionType; // @synthesize actionType=_actionType;
+@property(nonatomic) IMGroupActionType actionType; // @synthesize actionType=_actionType;
 - (id)copyDictionaryRepresentation;
 - (BOOL)isEqual:(id)arg1;
 - (id)initWithDictionary:(id)arg1;

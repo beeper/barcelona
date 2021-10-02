@@ -20,7 +20,7 @@
     IMBalloonPluginDataSource *_dataSource;
 }
 
-@property(retain, nonatomic) IMBalloonPluginDataSource *dataSource; // @synthesize dataSource=_dataSource;
+@property(retain, nonatomic, nullable) IMBalloonPluginDataSource *dataSource; // @synthesize dataSource=_dataSource;
 @property(readonly, nonatomic) BOOL parentChatHasKnownParticipants; // @synthesize parentChatHasKnownParticipants=_parentChatHasKnownParticipants;
 @property(nonatomic) BOOL hasSetIsLastChatItemOfPluginType; // @synthesize hasSetIsLastChatItemOfPluginType=_hasSetIsLastChatItemOfPluginType;
 @property(nonatomic, setter=setLastChatItemOfPluginType:) BOOL isLastChatItemOfPluginType; // @synthesize isLastChatItemOfPluginType=_isLastChatItemOfPluginType;

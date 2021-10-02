@@ -8,6 +8,15 @@
 
 @class IMHandle, IMMessageItem, NSArray, NSAttributedString, NSData, NSDate, NSDictionary, NSError, NSString;
 
+typedef NS_ENUM(NSInteger, IMMessageDescriptionType) {
+    IMMessageDescriptionAccessibility,
+    IMMessageDescriptionAcknowledgement,
+    IMMessageDescriptionConversationList,
+    IMMessageDescriptionNotification,
+    IMMessageDescriptionSiri,
+    IMMessageDescriptionSPI,
+};
+
 @interface IMMessage : NSObject
 {
     IMHandle *_sender;
@@ -140,9 +149,9 @@
 - (id)_initWithSender:(id)arg1 time:(id)arg2 timeRead:(id)arg3 timeDelivered:(id)arg4 timePlayed:(id)arg5 plainText:(id)arg6 text:(id)arg7 messageSubject:(id)arg8 fileTransferGUIDs:(id)arg9 flags:(unsigned long long)arg10 error:(id)arg11 guid:(id)arg12 messageID:(long long)arg13 subject:(id)arg14 balloonBundleID:(id)arg15 payloadData:(id)arg16 expressiveSendStyleID:(id)arg17 timeExpressiveSendPlayed:(id)arg18 associatedMessageGUID:(id)arg19 associatedMessageType:(long long)arg20 associatedMessageRange:(struct _NSRange)arg21 messageSummaryInfo:(id)arg22;
 - (id)_copyWithFlags:(unsigned long long)arg1;
 - (id)copyWithZone:(struct _NSZone *)arg1;
-- (NSString*)descriptionForPurpose:(long long)arg1 inChat:(id)arg2 senderDisplayName:(id)arg3;
-- (NSString*)descriptionForPurpose:(long long)arg1 inChat:(id)arg2;
-- (NSString*)descriptionForPurpose:(long long)arg1;
+- (NSString*)descriptionForPurpose:(IMMessageDescriptionType)arg1 inChat:(IMChat*)arg2 senderDisplayName:(NSString*)arg3;
+- (NSString*)descriptionForPurpose:(IMMessageDescriptionType)arg1 inChat:(IMChat*)arg2;
+- (NSString*)descriptionForPurpose:(IMMessageDescriptionType)arg1;
 @property(readonly, nonatomic) BOOL isAssociatedMessage;
 - (id)initWithSender:(id)arg1 time:(id)arg2 text:(id)arg3 messageSubject:(id)arg4 fileTransferGUIDs:(id)arg5 flags:(unsigned long long)arg6 error:(id)arg7 guid:(id)arg8 subject:(id)arg9 associatedMessageGUID:(id)arg10 associatedMessageType:(long long)arg11 associatedMessageRange:(struct _NSRange)arg12 associatedMessageInfo:(id)arg13;
 - (NSString*) threadIdentifier API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));

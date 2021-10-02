@@ -76,7 +76,7 @@
 - (void)performGroupTask:(id)arg1;
 - (void)removeDelegate:(id)arg1;
 - (void)addDelegate:(id)arg1 withDelegateProperties:(id)arg2 queue:(id)arg3;
-- (void)addDelegate:(id)arg1 queue:(id)arg2;
+- (void)addDelegate:(id)arg1 queue:(dispatch_queue_t)arg2;
 @property(readonly, nonatomic) _IDSService *_internal;
 - (void)dealloc;
 - (id)initWithService:(id)arg1;

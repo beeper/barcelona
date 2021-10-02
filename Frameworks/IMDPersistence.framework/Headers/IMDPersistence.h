@@ -49,8 +49,6 @@ struct CSDBSqliteDatabase {
     
 };
 
-typedef CFTypeRef IMDMessageRecordRef;
-
 CFStringRef IMDMessageRecordCopyGUID(CFAllocatorRef, IMDMessageRecordRef);
 
 struct CSDBSqliteDatabase *IMDSharedSqliteDatabase();
@@ -59,10 +57,19 @@ void IMDEnsureSharedRecordStoreInitialized();
 //NSArray *_IMDSqlOperationGetRowsForQueryWithBindingBlock(CFStringRef, NSError **, void (^)(id));
 void IMDSetIsRunningInDatabaseServerProcess(char);
 NSArray* IMDMessageRecordCopyMessagesForRowIDs(NSArray*);
-id IMDMessageRecordCopyMessageForGUID(CFStringRef);
 IMItem* IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve(id, id, id, id, id) CF_RETURNS_RETAINED;
 _Nullable CFArrayRef IMDMessageRecordCopyMessagesForGUIDs(id) CF_RETURNS_RETAINED;
 id IMDAttachmentRecordCopyAttachmentForGUID(CFStringRef) CF_RETURNS_RETAINED;
+
+typedef struct _IMDChatRecordStruct *IMDChatRecordRef;
+typedef struct _IMDMessageRecordStruct *IMDMessageRecordRef;
+
+int64_t IMDMessageRecordGetIndentifierForMessageWithGUID(CFStringRef guid);
+IMDChatRecordRef IMDChatRecordCopyChatForMessageID(int64_t messageID) CF_RETURNS_RETAINED;
+int64_t IMDChatRecordCachedUnreadCount(IMDChatRecordRef chat);
+CFStringRef IMDChatRecordCopyGUID(CFAllocatorRef allocator, IMDChatRecordRef chat) CF_RETURNS_RETAINED;
+IMDMessageRecordRef IMDMessageRecordCopyMessageForGUID(CFStringRef guid) CF_RETURNS_RETAINED;
+int64_t IMDMessageRecordGetIdentifier(IMDMessageRecordRef message);
 
 //CFArrayRef IMDMessageRecordCopyArrayOfAssociatedMessagesForMessageGUIDFromSender(NSString *, NSString *, NSError **) CF_RETURNS_RETAINED;
 //CFArrayRef IMDMessageRecordCopyMessagesForAssociatedGUID(NSString *) CF_RETURNS_RETAINED;

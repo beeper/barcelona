@@ -95,10 +95,36 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
             return nil
         }
     }
-
-    init(_ item: IMItem, transcriptRepresentation: ChatItem, chatID: String) {
+    
+    // SPI for CBDaemonListener ONLY
+    init(messageItem item: IMMessageItem, chatID: String) {
         id = item.id
         self.chatID = chatID
+        fromMe = item.isFromMe()
+        time = item.effectiveTime
+        threadIdentifier = item.threadIdentifier()
+        threadOriginator = item.threadOriginatorID
+        subject = item.subject
+        isSOS = item.isSOS
+        isTypingMessage = item.isTypingMessage
+        isCancelTypingMessage = item.isCancelTypingMessage()
+        isDelivered = item.isDelivered
+        isAudioMessage = item.isAudioMessage
+        flags = .init(rawValue: item.flags)
+        items = IngestionContext(chatID: chatID).ingest(item.chatItems).map {
+            $0.eraseToAnyChatItem()
+        }
+        service = item.resolveServiceStyle(inChat: chatID)
+        sender = item.resolveSenderID(inService: service)
+        associatedMessageID = item.associatedMessageGUID()
+        fileTransferIDs = item.fileTransferGUIDs
+        description = item.message()?.description(forPurpose: .SPI, in: IMChat.resolve(withIdentifier: chatID), senderDisplayName: nil)
+        item.receipt.assign(toMessage: &self)
+    }
+
+    init(_ item: IMItem, transcriptRepresentation: ChatItem, chatID: String? = nil, additionalFileTransferGUIDs: [String] = []) {
+        id = item.id
+        self.chatID = chatID ?? transcriptRepresentation.chatID
         fromMe = item.isFromMe
         time = item.effectiveTime
         threadIdentifier = item.threadIdentifier
@@ -113,8 +139,8 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         items = [transcriptRepresentation.eraseToAnyChatItem()]
         service = item.resolveServiceStyle(inChat: chatID)
         sender = item.resolveSenderID(inService: service)
-        associatedMessageID = item.associatedMessageGUID() as? String
-        fileTransferIDs = []
+        associatedMessageID = item.associatedMessageGUID()
+        fileTransferIDs = additionalFileTransferGUIDs
         item.bareReceipt.assign(toMessage: &self)
     }
     
@@ -141,7 +167,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         fileTransferIDs = message.fileTransferGUIDs
         
         if let chat = IMChat.resolve(withIdentifier: chatID) {
-            description = try? message.description(forPurpose: IMMessageDescriptionType.conversationList.rawValue, inChat: chat)
+            description = try? message.description(forPurpose: .conversationList, in: chat)
         }
         
         // load timestamps
@@ -157,9 +183,9 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         self.init(message._imMessageItem, message: message, items: items, chatID: chatID)
     }
     
-    private mutating func load(message: IMMessage, backing: IMMessageItem?) {
+    private mutating func load(message: IMMessage?, backing: IMMessageItem?) {
         if #available(iOS 14, macOS 10.16, watchOS 7, *) {
-            if let rawThreadIdentifier = message.threadIdentifier() ?? backing?.threadIdentifier {
+            if let rawThreadIdentifier = message?.threadIdentifier() ?? backing?.threadIdentifier {
                 guard let (threadIdentifier, threadOriginatorPart) = CBExtractThreadOriginatorAndPartFromIdentifier(rawThreadIdentifier) else {
                     return
                 }

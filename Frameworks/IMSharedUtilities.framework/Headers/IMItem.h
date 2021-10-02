@@ -12,6 +12,16 @@
 
 @class NSData, NSDate, NSDictionary, NSString, IMMessage;
 
+typedef NS_ENUM(int64_t, IMItemType) {
+    IMItemTypeMessage,
+    IMItemTypeParticipantChange,
+    IMItemTypeGroupTitleChange,
+    IMItemTypeGroupAction,
+    IMItemTypeLocationShareStatusChange,
+    IMItemTypeMessageAction,
+    IMItemTypeTUConversation,
+};
+
 @interface IMItem : NSObject <NSSecureCoding, NSCopying, IMRemoteObjectCoding>
 {
     NSString *_handle;
@@ -26,7 +36,7 @@
     NSString *_countryCode;
     long long _messageID;
     id _context;
-    long long _type;
+    IMItemType _type;
     NSString *_balloonBundleID;
     unsigned long long _sortID;
     NSString *_destinationCallerID;
@@ -46,7 +56,7 @@
 + (BOOL)supportsSecureCoding;
 + (id)stringGUID;
 + (Class)classForMessageItemDictionary:(id)arg1;
-+ (Class)classForIMItemType:(long long)arg1;
++ (Class)classForIMItemType:(IMItemType)arg1;
 @property(copy, nonatomic) NSString *srCloudKitRecordChangeTag; // @synthesize srCloudKitRecordChangeTag=_srCloudKitRecordChangeTag;
 @property(copy, nonatomic) NSString *srCloudKitRecordID; // @synthesize srCloudKitRecordID=_srCloudKitRecordID;
 @property(nonatomic) long long srCloudKitSyncState; // @synthesize srCloudKitSyncState=_srCloudKitSyncState;
@@ -61,7 +71,7 @@
 @property(retain, nonatomic) NSString *destinationCallerID; // @synthesize destinationCallerID=_destinationCallerID;
 @property(nonatomic) unsigned long long sortID; // @synthesize sortID=_sortID;
 @property(retain, nonatomic) NSString *balloonBundleID; // @synthesize balloonBundleID=_balloonBundleID;
-@property(nonatomic) long long type; // @synthesize type=_type;
+@property(nonatomic) IMItemType type; // @synthesize type=_type;
 @property(retain, nonatomic) id context; // @synthesize context=_context;
 @property(nonatomic, setter=_setMessageID:) long long messageID; // @synthesize messageID=_messageID;
 @property(retain, nonatomic) NSString *countryCode; // @synthesize countryCode=_countryCode;

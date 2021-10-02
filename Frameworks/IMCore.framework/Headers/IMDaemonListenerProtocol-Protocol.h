@@ -4,128 +4,186 @@
 //     class-dump is Copyright (C) 1997-1998, 2000-2001, 2004-2015 by Steve Nygard.
 //
 
-#import "NSObject-Protocol.h"
+#import <IMFoundation/IMFoundation.h>
 
-@class IMItem, IMMessageItem, IMNickname, NSArray, NSData, NSDictionary, NSError, NSNumber, NSSet, NSString;
+@class IMItem;
+@class IMMessageItem;
 
-@protocol IMDaemonListenerProtocol
-- (void)lastMessageForAllChats:(NSDictionary *)arg1;
-- (void)screenTimeEnablementChanged:(BOOL)arg1;
-- (void)didFetchCloudKitSyncDebuggingInfo:(NSDictionary *)arg1;
-- (void)receivedUrgentRequestForMessages:(NSArray *)arg1;
-- (void)oneTimeCodesDidChange:(NSArray *)arg1;
-- (void)didAttemptToDisableiCloudBackups:(long long)arg1 error:(NSError *)arg2;
-- (void)didFetchRampState:(NSDictionary *)arg1;
-- (void)didFetchSyncStateStats:(NSDictionary *)arg1;
-- (void)didAttemptToDisableAllDevicesResult:(BOOL)arg1;
-- (void)didPerformAdditionalStorageRequiredCheckWithSuccess:(BOOL)arg1 additionalStorageRequired:(unsigned long long)arg2 forAccountId:(NSString *)arg3 error:(NSError *)arg4;
-- (void)didAttemptToSetEnabledTo:(BOOL)arg1 result:(BOOL)arg2;
-- (void)updateCloudKitStateWithDictionary:(NSDictionary *)arg1;
-- (void)updateCloudKitState;
-- (void)updatePersonalNickname:(IMNickname *)arg1;
-- (void)pendingNicknamesOrHandledNicknamesDidChange;
-- (void)handlesSharingNicknamesDidChange;
-- (void)updateNicknameHandlesSharing:(NSSet *)arg1 handlesBlocked:(NSSet *)arg2;
-- (void)updatePendingNicknameUpdates:(NSDictionary *)arg1 handledNicknameUpdates:(NSDictionary *)arg2;
-- (void)updateNicknameData:(NSData *)arg1;
-- (void)nicknameRequestResponse:(NSString *)arg1 encodedNicknameData:(NSData *)arg2;
-- (void)qosClassWhileServicingRequestsResponse:(unsigned int)arg1 identifier:(NSString *)arg2;
-- (void)stickerPackRemoved:(NSArray *)arg1;
-- (void)stickerPackUpdated:(NSDictionary *)arg1;
-- (void)pinCodeAlertCompleted:(NSString *)arg1 deviceName:(NSString *)arg2 deviceType:(NSString *)arg3 phoneNumber:(NSString *)arg4 responseFromDevice:(BOOL)arg5 wasCancelled:(BOOL)arg6;
-- (void)displayPinCodeForAccount:(NSString *)arg1 pinCode:(NSNumber *)arg2 deviceName:(NSString *)arg3 deviceType:(NSString *)arg4 phoneNumber:(NSString *)arg5;
-- (void)lastFailedMessageDateChanged:(long long)arg1;
-- (void)unreadCountChanged:(long long)arg1;
-- (void)databaseChatSpamUpdated:(NSString *)arg1;
-- (void)databaseUpdated:(NSString *)arg1;
-- (void)databaseUpdated;
-- (void)account:(NSString *)arg1 relay:(NSString *)arg2 handleCancel:(NSDictionary *)arg3 fromPerson:(NSDictionary *)arg4;
-- (void)account:(NSString *)arg1 relay:(NSString *)arg2 handleUpdate:(NSDictionary *)arg3 fromPerson:(NSDictionary *)arg4;
-- (void)account:(NSString *)arg1 relay:(NSString *)arg2 handleInitate:(NSDictionary *)arg3 fromPerson:(NSDictionary *)arg4;
-- (void)account:(NSString *)arg1 postedError:(NSError *)arg2;
-- (void)account:(NSString *)arg1 statusChanged:(NSDictionary *)arg2;
-- (void)persistentProperty:(NSString *)arg1 changedTo:(id)arg2 from:(id)arg3;
-- (void)property:(NSString *)arg1 changedTo:(id)arg2 from:(id)arg3;
-- (void)showForgotPasswordNotificationForAccount:(NSString *)arg1;
-- (void)showInvalidCertNotificationForAccount:(NSString *)arg1;
-- (void)account:(NSString *)arg1 avAction:(unsigned int)arg2 withArguments:(NSDictionary *)arg3 toAVChat:(NSString *)arg4 isVideo:(BOOL)arg5;
-- (void)account:(NSString *)arg1 conference:(NSString *)arg2 invitationSentSuccessfully:(BOOL)arg3;
-- (void)account:(NSString *)arg1 conference:(NSString *)arg2 peerID:(NSString *)arg3 propertiesUpdated:(NSDictionary *)arg4;
-- (void)account:(NSString *)arg1 conference:(NSString *)arg2 peerIDChangedFromID:(NSString *)arg3 toID:(NSString *)arg4;
-- (void)account:(NSString *)arg1 conference:(NSString *)arg2 changedToNewConferenceID:(NSString *)arg3;
-- (void)account:(NSString *)arg1 conference:(NSString *)arg2 receivedAVMessage:(unsigned int)arg3 from:(NSDictionary *)arg4 sessionID:(unsigned int)arg5 userInfo:(NSDictionary *)arg6;
-- (void)account:(NSString *)arg1 conference:(NSString *)arg2 receivedUpdateFrom:(NSDictionary *)arg3 data:(NSData *)arg4;
-- (void)account:(NSString *)arg1 conference:(NSString *)arg2 receivedCounterProposalFrom:(NSDictionary *)arg3 properties:(NSDictionary *)arg4;
-- (void)account:(NSString *)arg1 conference:(NSString *)arg2 receivedCancelInvitationFrom:(NSDictionary *)arg3 properties:(NSDictionary *)arg4;
-- (void)account:(NSString *)arg1 conference:(NSString *)arg2 receivedResponseToInvitationFrom:(NSDictionary *)arg3 properties:(NSDictionary *)arg4;
-- (void)account:(NSString *)arg1 conference:(NSString *)arg2 receivedInvitationFrom:(NSDictionary *)arg3 properties:(NSDictionary *)arg4;
-- (void)fileTransferHighQualityDownloadFailed:(NSString *)arg1;
-- (void)fileTransfer:(NSString *)arg1 highQualityDownloadSucceededWithPath:(NSString *)arg2;
-- (void)fileTransfer:(NSString *)arg1 updatedWithCurrentBytes:(unsigned long long)arg2 totalBytes:(unsigned long long)arg3 averageTransferRate:(unsigned long long)arg4;
-- (void)fileTransfers:(NSArray *)arg1 createdWithLocalPaths:(NSArray *)arg2;
-- (void)fileTransfer:(NSString *)arg1 updatedWithProperties:(NSDictionary *)arg2;
-- (void)fileTransfer:(NSString *)arg1 createdWithProperties:(NSDictionary *)arg2;
-- (void)blackholedChatsExist:(BOOL)arg1;
-- (void)previouslyBlackholedChatLoadedWithHandleIDs:(NSArray *)arg1 chat:(NSDictionary *)arg2;
-- (void)chatLoadedWithChatIdentifier:(NSString *)arg1 chats:(NSArray *)arg2;
-- (void)frequentRepliesQuery:(NSString *)arg1 chatID:(NSString *)arg2 services:(NSArray *)arg3 finishedWithResult:(NSArray *)arg4 limit:(unsigned long long)arg5;
-- (void)historicalMessageGUIDsDeleted:(NSArray *)arg1 chatGUIDs:(NSArray *)arg2 queryID:(NSString *)arg3;
-- (void)markAsSpamQuery:(NSString *)arg1 chatID:(NSString *)arg2 services:(NSArray *)arg3 finishedWithResult:(NSNumber *)arg4;
-- (void)finishedDownloadingPurgedAssetsForChatIDs:(NSArray *)arg1;
-- (void)downloadedPurgedAssetBatchForChatIDs:(NSArray *)arg1 completedTransferGUIDs:(NSArray *)arg2;
-- (void)isDownloadingQuery:(NSString *)arg1 chatID:(NSString *)arg2 services:(NSArray *)arg3 finishedWithResult:(BOOL)arg4;
-- (void)uncachedAttachmentCountQuery:(NSString *)arg1 chatID:(NSString *)arg2 services:(NSArray *)arg3 finishedWithResult:(NSNumber *)arg4;
-- (void)attachmentQuery:(NSString *)arg1 chatID:(NSString *)arg2 services:(NSArray *)arg3 finishedWithResult:(NSArray *)arg4;
-- (void)pagedHistoryQuery:(NSString *)arg1 chatID:(NSString *)arg2 services:(NSArray *)arg3 numberOfMessagesBefore:(unsigned long long)arg4 numberOfMessagesAfter:(unsigned long long)arg5 finishedWithResult:(NSArray *)arg6;
-- (void)historyQuery:(NSString *)arg1 chatID:(NSString *)arg2 services:(NSArray *)arg3 finishedWithResult:(NSArray *)arg4 limit:(unsigned long long)arg5;
-- (void)messageQuery:(NSString *)arg1 finishedWithResult:(IMMessageItem *)arg2 chatGUIDs:(NSArray *)arg3;
-- (void)account:(NSString *)arg1 chat:(NSString *)arg2 style:(unsigned char)arg3 chatProperties:(NSDictionary *)arg4 chatPersonCentricID:(NSString *)arg5 member:(NSDictionary *)arg6 statusChanged:(int)arg7;
-- (void)account:(NSString *)arg1 chat:(NSString *)arg2 style:(unsigned char)arg3 chatProperties:(NSDictionary *)arg4 groupID:(NSString *)arg5 chatPersonCentricID:(NSString *)arg6 statusChanged:(int)arg7 handleInfo:(NSArray *)arg8;
-- (void)account:(NSString *)arg1 chat:(NSString *)arg2 style:(unsigned char)arg3 chatProperties:(NSDictionary *)arg4 error:(NSError *)arg5;
-- (void)account:(NSString *)arg1 chat:(NSString *)arg2 style:(unsigned char)arg3 chatProperties:(NSDictionary *)arg4 messagesUpdated:(NSArray *)arg5;
-- (void)account:(NSString *)arg1 chat:(NSString *)arg2 style:(unsigned char)arg3 chatProperties:(NSDictionary *)arg4 notifySentMessage:(IMMessageItem *)arg5 sendTime:(NSNumber *)arg6;
-- (void)account:(NSString *)arg1 chat:(NSString *)arg2 style:(unsigned char)arg3 chatProperties:(NSDictionary *)arg4 messageUpdated:(IMItem *)arg5;
-- (void)account:(NSString *)arg1 chat:(NSString *)arg2 style:(unsigned char)arg3 chatProperties:(NSDictionary *)arg4 groupID:(NSString *)arg5 chatPersonCentricID:(NSString *)arg6 messagesReceived:(NSArray *)arg7 messagesComingFromStorage:(BOOL)arg8;
-- (void)account:(NSString *)arg1 chat:(NSString *)arg2 style:(unsigned char)arg3 chatProperties:(NSDictionary *)arg4 groupID:(NSString *)arg5 chatPersonCentricID:(NSString *)arg6 messageReceived:(IMItem *)arg7;
-- (void)account:(NSString *)arg1 chat:(NSString *)arg2 style:(unsigned char)arg3 chatProperties:(NSDictionary *)arg4 groupID:(NSString *)arg5 chatPersonCentricID:(NSString *)arg6 messageSent:(IMMessageItem* _Nonnull)arg7;
-- (void)account:(NSString *)arg1 chat:(NSString *)arg2 style:(unsigned char)arg3 chatProperties:(NSDictionary *)arg4 updateProperties:(NSDictionary *)arg5;
-- (void)account:(NSString *)arg1 chat:(NSString *)arg2 style:(unsigned char)arg3 chatProperties:(NSDictionary *)arg4 invitationReceived:(IMMessageItem *)arg5;
-- (void)chatsNeedRemerging:(NSArray *)arg1 groupedChats:(NSArray *)arg2;
-- (void)loadedChats:(NSArray *)arg1;
-- (void)engroupParticipantsUpdatedForChat:(NSString *)arg1;
-- (void)leftChat:(NSString *)arg1;
-- (void)chat:(NSString *)arg1 nicknamesUpdated:(NSDictionary *)arg2;
-- (void)chat:(NSString *)arg1 engramIDUpdated:(NSString *)arg2;
-- (void)chat:(NSString *)arg1 isFilteredUpdated:(BOOL)arg2;
-- (void)chat:(NSString *)arg1 lastAddressedSIMIDUpdated:(NSString *)arg2;
-- (void)chat:(NSString *)arg1 lastAddressedHandleUpdated:(NSString *)arg2;
-- (void)chat:(NSString *)arg1 displayNameUpdated:(NSString *)arg2;
-- (void)chat:(NSString *)arg1 propertiesUpdated:(NSDictionary *)arg2;
-- (void)chat:(NSString *)arg1 updated:(NSDictionary *)arg2;
-- (void)account:(NSString *)arg1 buddyInfo:(NSDictionary *)arg2 commandDelivered:(NSNumber *)arg3 properties:(NSDictionary *)arg4;
-- (void)account:(NSString *)arg1 buddyInfo:(NSDictionary *)arg2 commandReceived:(NSNumber *)arg3 properties:(NSDictionary *)arg4;
-- (void)networkDataAvailabilityChanged:(BOOL)arg1;
-- (void)account:(NSString *)arg1 handleSubscriptionRequestFrom:(NSDictionary *)arg2 withMessage:(NSString *)arg3;
-- (void)account:(NSString *)arg1 buddyProperties:(NSDictionary *)arg2 buddyPictures:(NSDictionary *)arg3;
-- (void)account:(NSString *)arg1 groupsChanged:(NSArray *)arg2 error:(NSError *)arg3;
-- (void)account:(NSString *)arg1 buddyPictureChanged:(NSString *)arg2 imageData:(NSData *)arg3 imageHash:(NSString *)arg4;
-- (void)account:(NSString *)arg1 blockIdleStatusChanged:(BOOL)arg2;
-- (void)account:(NSString *)arg1 blockingModeChanged:(unsigned int)arg2;
-- (void)account:(NSString *)arg1 allowListChanged:(NSArray *)arg2;
-- (void)account:(NSString *)arg1 blockListChanged:(NSArray *)arg2;
-- (void)account:(NSString *)arg1 buddyPropertiesChanged:(NSArray *)arg2;
-- (void)accountRemoved:(NSString *)arg1;
-- (void)accountAdded:(NSString *)arg1 defaults:(NSDictionary *)arg2 service:(NSString *)arg3;
-- (void)account:(NSString *)arg1 capabilitiesChanged:(unsigned long long)arg2;
-- (void)account:(NSString *)arg1 defaultsChanged:(NSDictionary *)arg2;
-- (void)account:(NSString *)arg1 loginStatusChanged:(unsigned int)arg2 message:(NSString *)arg3 reason:(int)arg4 properties:(NSDictionary *)arg5;
-- (void)account:(NSString *)arg1 defaults:(NSDictionary *)arg2 blockList:(NSArray *)arg3 allowList:(NSArray *)arg4 blockingMode:(unsigned int)arg5 blockIdleStatus:(BOOL)arg6 status:(NSDictionary *)arg7 capabilities:(unsigned long long)arg8 serviceLoginStatus:(unsigned int)arg9 loginStatusMessage:(NSString *)arg10;
-- (void)activeAccountsChanged:(NSArray *)arg1 forService:(NSString *)arg2;
-- (void)defaultsChanged:(NSDictionary *)arg1 forService:(NSString *)arg2;
-- (void)vcCapabilitiesChanged:(unsigned long long)arg1;
-- (void)pendingACRequestComplete;
-- (void)pendingVCRequestComplete;
-- (void)setupComplete;
-- (void)setupComplete:(BOOL)arg1 info:(NSDictionary *)arg2;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnullability-completeness"
+
+typedef NS_ENUM(uint32_t, FZBlockingMode) {
+    kFZBlockingAllowAll = 0,
+    kFZBlockingAllowBuddies,
+    kFZBlockingAllowListed,
+    kFZBlockingBlockListed,
+    kFZBlockingBlockAll,
+};
+
+typedef NS_ENUM(uint32_t, FZServiceStatus) {
+    kFZServiceLoggedOut,
+    kFZServiceDisconnected,
+    kFZServiceLoggingOut,
+    kFZServiceLoggingIn,
+    kFZServiceLoggedIn
+};
+
+typedef NS_ENUM(int32_t, FZDisconnectReason) {
+    kFZReasonNoReason = -1,
+    kFZReasonUnknown = 0,
+    kFZReasonBadUserOrPass,
+    kFZReasonTempOffline,
+    kFZReasonDisabled,
+    kFZReasonLoggedInElsewhere,
+    kFZReasonBadSSLCertificate,
+    kFZReasonSSLFailed,
+    kFZReasonRateLimited,
+    kFZReasonNetworkError,
+    kFZReasonNetworkDisconnectedError,
+    kFZReasonNetworkConnectionError,
+    kFZReasonBadOAuthToken,
+};
+
+typedef NS_ENUM(UInt8, IMChatStyle) {
+    IMInstantMessageChatStyle = '-',
+    IMGroupChatStyle          = '+',
+    IMRoomChatStyle           = '#',
+};
+
+typedef NS_ENUM(int32_t, FZChatMemberStatus) {
+    kFZChatMemberInviteFailed = -1,
+    kFZChatMemberDeciding,
+    kFZChatMemberDeclined,
+    kFZChatMemberJoined,
+    kFZChatMemberLeft,
+    kFZChatMemberKicked,
+    kFZChatMemberBanned
+};
+
+typedef NS_ENUM(int32_t, FZChatStatus) {
+    kFZChatCouldntJoin = -1,
+    kFZChatUnjoined,
+    kFZChatJoining,
+    kFZChatJoined,
+    kFZChatLeft,
+    kFZChatKicked,
+    kFZChatBanned,
+    kFZChatPasswordNeeded
+};
+
+@protocol IMDaemonListenerProtocol <NSObject>
+@optional
+- (void) setupComplete:(BOOL)success info:(NSDictionary *)info;
+- (void) setupComplete;
+- (void) pendingVCRequestComplete;
+- (void) pendingACRequestComplete;
+- (void) vcCapabilitiesChanged:(uint32_t)capabilities;
+- (void) defaultsChanged: (NSDictionary*)defaults forService:(NSString *)name;
+- (void) activeAccountsChanged: (NSArray*)accounts forService:(NSString *)name;
+- (void) account:(NSString *)account defaults:(NSDictionary *)defaults blockList:(NSArray *)blockList allowList:(NSArray *)allowList blockingMode:(FZBlockingMode)blockingMode blockIdleStatus:(BOOL)blockIdle status:(NSDictionary *)status capabilities:(uint32_t)capabilities serviceLoginStatus:(FZServiceStatus)serviceLoginStatus loginStatusMessage:(NSString *)message;
+- (void) account: (NSString *)account loginStatusChanged: (FZServiceStatus)status message: (NSString*)message reason: (FZDisconnectReason)reason properties: (NSDictionary*) props;
+- (void) account: (NSString *)account defaultsChanged:(NSDictionary *)defaults;
+- (void) account: (NSString *)account capabilitiesChanged: (uint32_t)capabilities;
+- (void) accountAdded:(NSString *)account defaults:(NSDictionary *)defaults service:(NSString *)internalName;
+- (void) accountRemoved:(NSString *)account;
+- (void) account: (NSString *)account buddyPropertiesChanged: (NSArray*)info;
+- (void) account:(NSString *)account blockListChanged:(NSArray *)blockList;
+- (void) account:(NSString *)account allowListChanged:(NSArray *)allowList;
+- (void) account:(NSString *)account blockingModeChanged:(FZBlockingMode)blockingMode;
+- (void) account:(NSString *)account blockIdleStatusChanged:(BOOL)blockIdle;
+- (void) account: (NSString *)account buddyPictureChanged: (NSString*)buddyID imageData:(NSData*)data imageHash:(NSString*)hash;
+- (void) account: (NSString *)account groupsChanged: (NSArray*)groups  error: (NSError*)error;
+- (void) account:(NSString *)account buddyProperties:(NSDictionary *) properties buddyPictures:(NSDictionary *)pictures;
+- (void) account: (NSString *)account handleSubscriptionRequestFrom: (NSDictionary *) buddyInfo withMessage: (NSString *) message;
+- (void) account:(NSString *)accountID buddyInfo:(NSDictionary *)buddyInfo commandReceived:(NSNumber *)command properties:(NSDictionary *)properties;
+- (void) account:(NSString *)accountID buddyInfo:(NSDictionary *)buddyInfo commandDelivered:(NSNumber *)command properties:(NSDictionary *)properties;
+- (void) chat:(NSString *)persistentIdentifier updated:(NSDictionary *)updateDictionary;
+- (void) chat:(NSString *)persistentIdentifier propertiesUpdated:(NSDictionary *)properties;
+- (void) chat:(NSString *)persistentIdentifier displayNameUpdated:(NSString *)displayName;
+- (void) chat:(NSString *)guid lastAddressedHandleUpdated:(NSString *)lastAddressedHandle;
+- (void) chat:(NSString *)guid lastAddressedSIMIDUpdated:(NSString *)lastAddressedSIMID;
+- (void) chat:(NSString *)persistentIdentifier isFilteredUpdated:(BOOL)isFiltered;
+- (void) chat:(NSString *)persistentIdentifier engramIDUpdated:(NSString *)engramID;
+- (void) leftChat:(NSString *)persistentIdentifier;
+- (void) engroupParticipantsUpdatedForChat:(NSString *)persistentIdentifier;
+- (void) loadedChats:(NSArray<NSDictionary *> *)chats;
+- (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties invitationReceived:(IMMessageItem *)msg;
+- (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties updateProperties:(NSDictionary *)update;
+- (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties groupID:(NSString *)groupID chatPersonCentricID:(NSString *) personCentricID messageSent:(IMMessageItem *)msg;
+- (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties groupID:(NSString *)groupID chatPersonCentricID:(NSString *) personCentricID messageReceived:(IMItem *)msg;
+- (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties groupID:(NSString *)groupID chatPersonCentricID:(NSString *) personCentricID messagesReceived:(NSArray<IMItem *> *)messages messagesComingFromStorage:(BOOL)fromStorage;
+- (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties messageUpdated:(IMItem *)msg;
+- (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties notifySentMessage:(IMMessageItem *)msg sendTime:(NSNumber *)sendTime;
+- (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties messagesUpdated:(NSArray<NSObject*> *)messages;
+- (void) service:(NSString *)serviceID chat:(NSString*)chatIdentifier style:(IMChatStyle)chatStyle messagesUpdated:(NSArray*)messages;
+- (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties error:(NSError *)error;
+- (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties groupID:(NSString *)groupID chatPersonCentricID:(NSString *) personCentricID statusChanged:(FZChatStatus)status handleInfo:(NSArray *)handleInfo;
+- (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties member:(NSDictionary *)memberInfo statusChanged:(FZChatMemberStatus)status;
+- (void) messageQuery:(NSString *)queryID finishedWithResult:(IMMessageItem *)message chatGUIDs:(NSArray *)chatGUIDs;
+- (void) historyQuery:(NSString *)queryID chatID:(NSString *)chatIdentifier services:(NSArray *)services finishedWithResult:(NSArray *)messages limit:(NSUInteger)limit;
+- (void) pagedHistoryQuery:(NSString *)queryID chatID:(NSString *)chatID services:(NSArray *)services numberOfMessagesBefore:(NSUInteger)numberOfMessagesBefore numberOfMessagesAfter:(NSUInteger)numberOfMessagesAfter finishedWithResult:(NSArray *)serializedItems;
+- (void) attachmentQuery:(NSString *)queryID chatID:(NSString *)chatIdentifier services:(NSArray *)services finishedWithResult:(NSArray *)filenames;
+- (void) uncachedAttachmentCountQuery:(NSString *)queryID chatID:(NSString *)chatIdentifier services:(NSArray *)services finishedWithResult:(NSNumber *)countOfAttachmentsNotCachedLocally;
+- (void) isDownloadingQuery:(NSString *)queryID chatID:(NSString *)chatIdentifier services:(NSArray *)services finishedWithResult:(BOOL)isCurrentlyDownloadingPurgedAssets;
+- (void) downloadedPurgedAssetBatchForChatIDs:(NSArray<NSString *> *)chatIdentifiers completedTransferGUIDs:(NSArray <NSString *> *)transferGUIDs;
+- (void) finishedDownloadingPurgedAssetsForChatIDs:(NSArray<NSString *> *)chatIdentifiers;
+- (void) markAsSpamQuery:(NSString *)queryID chatID:(NSString *)chatIdentifier services:(NSArray *)services finishedWithResult:(NSNumber *)countOfMessagesMarkedAsSpam;
+- (void) historicalMessageGUIDsDeleted:(NSArray<NSString*> *)deletedGUIDs chatGUIDs:(NSArray<NSString*> *)chatGUIDs queryID:(NSString *)queryID;
+- (void) frequentRepliesQuery:(NSString *)queryID chatID:(NSString *)chatIdentifier services:(NSArray *)queryServices finishedWithResult:(NSArray *)frequentReplies limit:(NSUInteger)limit;
+- (void) chatLoadedWithChatIdentifier:(NSString *)chatIdentifier chats:(NSArray *)chatDictionaries;
+- (void) standaloneFileTransferRegistered: (NSString *)guid;
+- (void) fileTransfer: (NSString *)guid createdWithProperties: (NSDictionary *)properties;
+- (void) fileTransfer: (NSString *)guid updatedWithProperties: (NSDictionary *)properties;
+- (void) fileTransfers:(NSArray *)guids createdWithLocalPaths:(NSArray *)paths;
+- (void) fileTransfer: (NSString *)guid updatedWithCurrentBytes: (uint64_t)currentBytes totalBytes: (uint64_t)totalBytes averageTransferRate: (uint64_t)averageTransferRate;
+- (void) fileTransfer:(NSString *)guid highQualityDownloadSucceededWithPath:(NSString *)path;
+- (void) fileTransferHighQualityDownloadFailed:(NSString *)guid;
+- (void) account: (NSString *)account conference:(NSString *)conference receivedInvitationFrom: (NSDictionary*)buddyInfo  properties: (NSDictionary*)props;
+- (void) account: (NSString *)account conference:(NSString *)conference receivedResponseToInvitationFrom: (NSDictionary*)buddyInfo properties: (NSDictionary*)props;
+- (void) account: (NSString *)account conference:(NSString *)conference receivedCancelInvitationFrom: (NSDictionary*)buddyInfo properties: (NSDictionary*)props;
+- (void) account: (NSString *)account conference:(NSString *)conference receivedCounterProposalFrom: (NSDictionary*)buddyInfo properties: (NSDictionary*)props;
+- (void) account: (NSString *)account conference:(NSString *)conference receivedUpdateFrom: (NSDictionary*)buddyInfo data: (NSData*)info;
+- (void) account: (NSString *)account conference: (NSString *)conference receivedAVMessage: (uint32_t) messageType from: (NSDictionary*)buddyInfo sessionID: (uint32_t) sessionID userInfo: (NSDictionary *) userInfo;
+- (void) account: (NSString *)account conference:(NSString *)conference changedToNewConferenceID:(NSString *)newConferenceID;
+- (void) account: (NSString *)account conference:(NSString *)conference peerIDChangedFromID:(NSString *)oldOld toID:(NSString *)newID;
+- (void) account: (NSString *)account conference:(NSString *)conference peerID:(NSString *)peer propertiesUpdated:(NSDictionary *)properties;
+- (void) account: (NSString *)account conference:(NSString *)conference invitationSentSuccessfully:(BOOL)success;
+- (void) account:(NSString *)account avAction:(unsigned int)action withArguments:(NSDictionary *)arguments toAVChat:(NSString *)avChat isVideo:(BOOL)isVideo;
+- (void) showInvalidCertNotificationForAccount: (NSString *) account;
+- (void) showForgotPasswordNotificationForAccount:(NSString *) account;
+- (void) property: (NSString*)propertyName changedTo:(id)value from:(id)oldValue;
+- (void) persistentProperty: (NSString*)propertyName changedTo:(id)value from:(id)oldValue;
+- (void) account:(NSString *)account statusChanged: (NSDictionary*)status;
+- (void) account:(NSString *)account postedError:(NSError *)error;
+- (void) account:(NSString *)account relay:(NSString *)relay handleInitate:(NSDictionary *)dictionary fromPerson:(NSDictionary *)personInfo;
+- (void) account:(NSString *)account relay:(NSString *)relay handleUpdate:(NSDictionary *)dictionary fromPerson:(NSDictionary *)personInfo;
+- (void) account:(NSString *)account relay:(NSString *)relay handleCancel:(NSDictionary *)dictionary fromPerson:(NSDictionary *)personInfo;
+- (void) databaseUpdated;
+- (void) databaseUpdated:(NSString *)stamp;
+- (void) databaseFull;
+- (void) databaseNoLongerFull;
+- (void) databaseChatSpamUpdated:(NSString *)chatGUID;
+- (void) unreadCountChanged:(NSInteger)unreadCount;
+- (void) lastFailedMessageDateChanged:(int64_t)failedDate;
+- (void) displayPinCodeForAccount:(NSString *)account pinCode:(NSNumber *)pinCode deviceName:(NSString *)deviceName deviceType:(NSString *)deviceType phoneNumber:(NSString*)phoneNumber;
+- (void) pinCodeAlertCompleted:(NSString *)account deviceName:(NSString *)deviceName deviceType:(NSString *)deviceType phoneNumber:(NSString*)phoneNumber responseFromDevice:(BOOL)responseFromDevice wasCancelled:(BOOL)wasCancelled;
+-(void) stickerPackUpdated:(NSDictionary *)stickerPackDictionary;
+-(void) stickerPackRemoved:(NSArray *)stickerPackGUID;
+- (void) updateCloudKitState;
+- (void) updateCloudKitStateWithDictionary:(NSDictionary*) stateDictionary;
+- (void) didAttemptToSetEnabledTo:(BOOL)targetEnabled result:(BOOL)didSucceed;
+- (void) didPerformAdditionalStorageRequiredCheckWithSuccess:(BOOL)didSucceed additionalStorageRequired:(uint64_t) additionalStorageRequired forAccountId: (NSString*) iCloudAccountId error:(NSError*) error;
+- (void) didAttemptToDisableAllDevicesResult:(BOOL)didSucceed;
+
+- (void) didFetchSyncStateStats:(NSDictionary*) stats;
+- (void) didAttemptToDisableiCloudBackups:(NSInteger) result error:(NSError* _Nullable) error;
+- (void)oneTimeCodesDidChange:(NSArray <NSDictionary *>*)validOneTimeCodes;
+- (void)receivedUrgentRequestForMessages:(NSArray<NSString *> *)messageGUIDs;
+- (void)didFetchCloudKitSyncDebuggingInfo:(NSDictionary*) info;
+- (void) lastMessageForAllChats:(NSDictionary *)chatIDToLastMessageDictionary;
+
+- (void) groupPhotoUpdatedForChatIdentifier:(NSString*)chatIdentifier style:(IMChatStyle)style account:(NSString*)account userInfo:(NSDictionary*)userInfo;
 @end
+
+typedef id<IMDaemonListenerProtocol> FZDaemonListenerRef;
 

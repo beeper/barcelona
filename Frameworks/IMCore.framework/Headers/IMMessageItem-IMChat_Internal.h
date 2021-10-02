@@ -9,6 +9,8 @@
 
 @class IMMessage;
 
+
+
 @interface IMMessageItem (IMChat_Internal)
 + (Class)contextClass;
 + (id)displayNameForAddress:(id)arg1;
@@ -20,8 +22,7 @@
 - (BOOL)_isInvitation;
 - (void)_setInivtation:(BOOL)arg1;
 - (IMMessage*)message;
-- (id)descriptionForPurpose:(long long)arg1 isGroupMessage:(BOOL)arg2 messageDataSource:(id)arg3 attachmentDataSource:(id)arg4;
-- (id)descriptionForPurpose:(long long)arg1 isGroupMessage:(BOOL)arg2 senderDisplayName:(id)arg3 messageDataSource:(id)arg4 attachmentDataSource:(id)arg5;
+- (NSString *)descriptionForPurpose:(IMMessageDescriptionType)descriptionType isGroupMessage:(BOOL)isGroupMessage senderDisplayName:(NSString*)senderDisplayName messageDataSource:(BOOL (^)(NSString *guid, IMMessageItem** associatedMessage, IMMessagePartChatItem** associatedMessagePart))messageDataSource attachmentDataSource:(BOOL (^)(NSString *guid, NSURL **url, NSString **utiType, BOOL *isSticker, BOOL *incoming))attachementInfoProvider;
 - (BOOL)isIncomingTypingOrCancelTypingMessage;
 - (BOOL)isTypingOrCancelTypingMessage;
 - (BOOL)isCancelTypingMessage;

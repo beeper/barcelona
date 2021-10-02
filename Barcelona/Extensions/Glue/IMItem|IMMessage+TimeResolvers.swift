@@ -54,7 +54,7 @@ public struct TimeReceipt {
 
 extension Optional where Wrapped == Date {
     var normalized: Double {
-        self?.timeIntervalSince1970 ?? 0
+        (self?.timeIntervalSince1970 ?? 0) * 1000
     }
 }
 

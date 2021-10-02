@@ -28,6 +28,18 @@ private extension Optional where Wrapped == StatusType {
 }
 
 public struct StatusChatItem: ChatItemOwned, Hashable {
+    public init(id: String, chatID: String, fromMe: Bool, time: Double, sender: String? = nil, threadIdentifier: String? = nil, threadOriginator: String? = nil, statusType: StatusType? = nil, itemID: String) {
+        self.id = id
+        self.chatID = chatID
+        self.fromMe = fromMe
+        self.time = time
+        self.sender = sender
+        self.threadIdentifier = threadIdentifier
+        self.threadOriginator = threadOriginator
+        self.statusType = statusType
+        self.itemID = itemID
+    }
+    
     public static let ingestionClasses: [NSObject.Type] = [IMMessageStatusChatItem.self]
     
     public init(ingesting item: NSObject, context: IngestionContext) {

@@ -23,7 +23,7 @@ public func BLTeardownController() {
     let controller = IMDaemonController.sharedInstance()
     
     controller.disconnectFromDaemon()
-    controller.listener.removeHandler(ERDaemonListener.shared)
+    controller.listener.removeHandler(CBDaemonListener.shared)
     controller.removeListenerID(BLListenerIdentifier)
     
     IMChatRegistry.shared.allChats
@@ -84,7 +84,7 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
     #endif
     
     /** Registers with imagent */
-    controller.listener.addHandler(ERDaemonListener.shared)
+    controller.listener.addHandler(CBDaemonListener.shared)
     
     RunLoop.main.schedule {
         log("Connecting to daemon...")

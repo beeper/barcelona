@@ -15,7 +15,7 @@ public enum Event {
     case bootstrap(BootstrapData)
     case itemsReceived([AnyChatItem])
     case itemsUpdated([AnyChatItem])
-    case itemStatusChanged(StatusChatItem)
+    case itemStatusChanged(CBMessageStatusChange)
     /// Contains the IDs of the removed items
     case itemsRemoved([String])
     case participantsChanged(ParticipantChangeRecord)

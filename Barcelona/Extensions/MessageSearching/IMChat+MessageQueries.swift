@@ -8,9 +8,9 @@
 
 import Foundation
 import IMCore
-import os.log
+import Swog
 
-let log_IMChat = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "IMChat+MessageQueries")
+let log_IMChat = Logger(category: "IMChat+Queries")
 
 @_transparent
 @_optimize(speed)

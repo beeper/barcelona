@@ -72,8 +72,17 @@ extension IMMessage: ERTimeSortedParticipantsManagerIngestible {
 }
 
 extension IMTranscriptChatItem {
+    private var reliableDate: Date? {
+        switch self {
+        case let item as IMMessageChatItem:
+            return item.time ?? _item()?.time
+        default:
+            return transcriptDate ?? _item()?.time
+        }
+    }
+    
     public var effectiveTime: Double {
-        (self.transcriptDate?.timeIntervalSince1970 ?? 0) * 1000
+        (reliableDate?.timeIntervalSince1970 ?? 0) * 1000
     }
 }
 

@@ -5,6 +5,7 @@
 //
 
 #import "IMTranscriptChatItem.h"
+#import <IMSharedUtilities/IMGroupActionItem.h>
 
 @class IMHandle;
 
@@ -15,7 +16,7 @@
 
 @property(readonly, nonatomic) IMHandle *sender; // @synthesize sender=_sender;
 - (id)_initWithItem:(id)arg1 sender:(id)arg2;
-@property(readonly, nonatomic) long long actionType;
+@property(readonly, nonatomic) IMGroupActionType actionType;
 - (id)copyWithZone:(struct _NSZone *)arg1;
 
 @end
