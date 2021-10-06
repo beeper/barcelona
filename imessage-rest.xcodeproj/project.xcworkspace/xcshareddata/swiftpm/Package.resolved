@@ -74,6 +74,15 @@
         }
       },
       {
+        "package": "NozeIO",
+        "repositoryURL": "https://github.com/NozeIO/Noze.io",
+        "state": {
+          "branch": null,
+          "revision": "d89b054f53d0f90498f4028fe6ae48bfa85f00dc",
+          "version": "0.6.7"
+        }
+      },
+      {
         "package": "Pwomise",
         "repositoryURL": "https://github.com/EricRabil/Pwomise",
         "state": {
@@ -170,6 +179,24 @@
           "branch": null,
           "revision": "a9b0442e31f1d1d434b83358f437e4420a05439a",
           "version": "1.0.1"
+        }
+      },
+      {
+        "package": "Yammit",
+        "repositoryURL": "https://github.com/EricRabil/Yammit",
+        "state": {
+          "branch": null,
+          "revision": "f751d232daef109e9b195b9a39f6b7a772a3edd3",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "Yams",
+        "repositoryURL": "https://github.com/jpsim/Yams.git",
+        "state": {
+          "branch": null,
+          "revision": "9ff1cc9327586db4e0c8f46f064b6a82ec1566fa",
+          "version": "4.0.6"
         }
       }
     ]

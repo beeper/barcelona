@@ -146,6 +146,13 @@
 		1D82FF3726D5793500EB5CEE /* BarcelonaFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 1D82FF3626D5793500EB5CEE /* BarcelonaFoundation */; };
 		1D82FF3926D5794000EB5CEE /* BarcelonaFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 1D82FF3826D5794000EB5CEE /* BarcelonaFoundation */; };
 		1D82FF3B26D5794800EB5CEE /* BarcelonaFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 1D82FF3A26D5794800EB5CEE /* BarcelonaFoundation */; };
+		1D860208270E1D0B00D60207 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D860207270E1D0B00D60207 /* main.swift */; };
+		1D86020C270E1D1500D60207 /* Barcelona.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; };
+		1D86020D270E1D1500D60207 /* Barcelona.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D44864524E85BBB00FF73F3 /* Barcelona.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1D860214270E1D2700D60207 /* SwiftCLI in Frameworks */ = {isa = PBXBuildFile; productRef = 1D860213270E1D2700D60207 /* SwiftCLI */; };
+		1D860219270E1F5300D60207 /* IDS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D860218270E1F5300D60207 /* IDS.framework */; };
+		1D86021C270E20D500D60207 /* http in Frameworks */ = {isa = PBXBuildFile; productRef = 1D86021B270E20D500D60207 /* http */; };
+		1D86021F270E27C900D60207 /* Yammit in Frameworks */ = {isa = PBXBuildFile; productRef = 1D86021E270E27C900D60207 /* Yammit */; };
 		1D87EC50258BF7290030D9C6 /* IMChatItem+ThreadIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D87EC4F258BF7290030D9C6 /* IMChatItem+ThreadIdentifier.swift */; };
 		1D87EC64258BF8170030D9C6 /* IMChatItem+LazilyResolvable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D87EC63258BF8170030D9C6 /* IMChatItem+LazilyResolvable.swift */; };
 		1D87EC6C258BFB0D0030D9C6 /* IMChatItem+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D87EC6B258BFB0D0030D9C6 /* IMChatItem+Identifiable.swift */; };
@@ -364,6 +371,13 @@
 			remoteGlobalIDString = 1D44864424E85BBB00FF73F3;
 			remoteInfo = Barcelona;
 		};
+		1D86020E270E1D1500D60207 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D44864424E85BBB00FF73F3;
+			remoteInfo = Barcelona;
+		};
 		1D884DC126BB52A8003E60E7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1D5AEDA624E3725200303692 /* Project object */;
@@ -489,6 +503,26 @@
 			dstSubfolderSpec = 10;
 			files = (
 				1D797B4B26AD034000B57208 /* Barcelona.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1D860203270E1D0B00D60207 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		1D860210270E1D1500D60207 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				1D86020D270E1D1500D60207 /* Barcelona.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -776,6 +810,9 @@
 		1D82F7F4270658F20069244A /* ERBaseDaemonListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ERBaseDaemonListener.swift; sourceTree = "<group>"; };
 		1D83343B251282E1005E0A43 /* MessageExtensionsQuirkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageExtensionsQuirkManager.swift; sourceTree = "<group>"; };
 		1D8334422512CD3A005E0A43 /* ChatHandleJoin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHandleJoin.swift; sourceTree = "<group>"; };
+		1D860205270E1D0B00D60207 /* imserver */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = imserver; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D860207270E1D0B00D60207 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		1D860218270E1F5300D60207 /* IDS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IDS.framework; path = System/Library/PrivateFrameworks/IDS.framework; sourceTree = SDKROOT; };
 		1D87EC4F258BF7290030D9C6 /* IMChatItem+ThreadIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatItem+ThreadIdentifier.swift"; sourceTree = "<group>"; };
 		1D87EC63258BF8170030D9C6 /* IMChatItem+LazilyResolvable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatItem+LazilyResolvable.swift"; sourceTree = "<group>"; };
 		1D87EC6B258BFB0D0030D9C6 /* IMChatItem+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IMChatItem+Identifiable.swift"; sourceTree = "<group>"; };
@@ -947,6 +984,18 @@
 				1D79038A26ACFEA400712CB3 /* IMCore.framework in Frameworks */,
 				1D797B4A26AD034000B57208 /* Barcelona.framework in Frameworks */,
 				1D82FF3926D5794000EB5CEE /* BarcelonaFoundation in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1D860202270E1D0B00D60207 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D86021F270E27C900D60207 /* Yammit in Frameworks */,
+				1D86021C270E20D500D60207 /* http in Frameworks */,
+				1D860219270E1F5300D60207 /* IDS.framework in Frameworks */,
+				1D860214270E1D2700D60207 /* SwiftCLI in Frameworks */,
+				1D86020C270E1D1500D60207 /* Barcelona.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1347,6 +1396,7 @@
 				1D4AC03626AB7CE300ADD254 /* grapple */,
 				1DEC459726CAD83600D5AC08 /* BarcelonaDocs */,
 				1DEC45B026CAD89700D5AC08 /* docgen */,
+				1D860206270E1D0B00D60207 /* imserver */,
 				1D5AEDAF24E3725200303692 /* Products */,
 				1D5AEDBE24E373ED00303692 /* Frameworks */,
 			);
@@ -1364,6 +1414,7 @@
 				1DF2F2F126C44CAD0078E549 /* BarcelonaJS.framework */,
 				1DEC459626CAD83600D5AC08 /* BarcelonaDocs.framework */,
 				1DEC45EF26CB02DB00D5AC08 /* docgen */,
+				1D860205270E1D0B00D60207 /* imserver */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1371,6 +1422,7 @@
 		1D5AEDBE24E373ED00303692 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1D860218270E1F5300D60207 /* IDS.framework */,
 				1DEC45E826CB02B800D5AC08 /* lib_InternalSwiftSyntaxParser.dylib */,
 				1D7D8954250D987900DA9909 /* LinkPresentation.framework */,
 				1D441365250A0AE300720CCE /* IDS.framework */,
@@ -1545,6 +1597,14 @@
 				1DE0A8F92707D82500B98603 /* CBPipeline.swift */,
 			);
 			path = CoreBarcelona;
+			sourceTree = "<group>";
+		};
+		1D860206270E1D0B00D60207 /* imserver */ = {
+			isa = PBXGroup;
+			children = (
+				1D860207270E1D0B00D60207 /* main.swift */,
+			);
+			path = imserver;
 			sourceTree = "<group>";
 		};
 		1D87EC4E258BF70F0030D9C6 /* Threads */ = {
@@ -2058,6 +2118,30 @@
 			productReference = 1D79037426ACFE6B00712CB3 /* BarcelonaEvents.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		1D860204270E1D0B00D60207 /* imserver */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1D860209270E1D0B00D60207 /* Build configuration list for PBXNativeTarget "imserver" */;
+			buildPhases = (
+				1D860201270E1D0B00D60207 /* Sources */,
+				1D860202270E1D0B00D60207 /* Frameworks */,
+				1D860203270E1D0B00D60207 /* CopyFiles */,
+				1D860210270E1D1500D60207 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1D86020F270E1D1500D60207 /* PBXTargetDependency */,
+			);
+			name = imserver;
+			packageProductDependencies = (
+				1D860213270E1D2700D60207 /* SwiftCLI */,
+				1D86021B270E20D500D60207 /* http */,
+				1D86021E270E27C900D60207 /* Yammit */,
+			);
+			productName = imserver;
+			productReference = 1D860205270E1D0B00D60207 /* imserver */;
+			productType = "com.apple.product-type.tool";
+		};
 		1DCB0CD226B05E1C00242045 /* barcelona-mautrix */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1DCB0CD926B05E1C00242045 /* Build configuration list for PBXNativeTarget "barcelona-mautrix" */;
@@ -2196,6 +2280,9 @@
 					1D79037326ACFE6B00712CB3 = {
 						CreatedOnToolsVersion = 12.5;
 					};
+					1D860204270E1D0B00D60207 = {
+						CreatedOnToolsVersion = 12.5;
+					};
 					1DCB0CD226B05E1C00242045 = {
 						CreatedOnToolsVersion = 12.5;
 					};
@@ -2240,6 +2327,8 @@
 				1D40FF9726D58E5600596988 /* XCRemoteSwiftPackageReference "SwiftCLI" */,
 				1D5B7E4226DF0FA5002CE91E /* XCRemoteSwiftPackageReference "Swog" */,
 				1D5B7F6126E15920002CE91E /* XCRemoteSwiftPackageReference "Pwomise" */,
+				1D86021A270E20D500D60207 /* XCRemoteSwiftPackageReference "Noze" */,
+				1D86021D270E27C900D60207 /* XCRemoteSwiftPackageReference "Yammit" */,
 			);
 			productRefGroup = 1D5AEDAF24E3725200303692 /* Products */;
 			projectDirPath = "";
@@ -2254,6 +2343,7 @@
 				1DF2F2F026C44CAD0078E549 /* BarcelonaJS */,
 				1DEC459526CAD83600D5AC08 /* BarcelonaDocs */,
 				1DEC45EE26CB02DB00D5AC08 /* docgen */,
+				1D860204270E1D0B00D60207 /* imserver */,
 			);
 		};
 /* End PBXProject section */
@@ -2545,6 +2635,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		1D860201270E1D0B00D60207 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D860208270E1D0B00D60207 /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1DCB0CCF26B05E1C00242045 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2651,6 +2749,11 @@
 			isa = PBXTargetDependency;
 			target = 1D44864424E85BBB00FF73F3 /* Barcelona */;
 			targetProxy = 1D79037E26ACFE7300712CB3 /* PBXContainerItemProxy */;
+		};
+		1D86020F270E1D1500D60207 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D44864424E85BBB00FF73F3 /* Barcelona */;
+			targetProxy = 1D86020E270E1D1500D60207 /* PBXContainerItemProxy */;
 		};
 		1D884DC226BB52A8003E60E7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3126,6 +3229,53 @@
 			};
 			name = Release;
 		};
+		1D86020A270E1D0B00D60207 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_ENTITLEMENTS = "barcelona-mautrix/barcelona-mautrix.entitlements";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.apple.imagent;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 5.0;
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
+				);
+			};
+			name = Debug;
+		};
+		1D86020B270E1D0B00D60207 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_ENTITLEMENTS = "barcelona-mautrix/barcelona-mautrix.entitlements";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.apple.imagent;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
+				);
+			};
+			name = Release;
+		};
 		1DCB0CD726B05E1C00242045 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -3461,6 +3611,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		1D860209270E1D0B00D60207 /* Build configuration list for PBXNativeTarget "imserver" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1D86020A270E1D0B00D60207 /* Debug */,
+				1D86020B270E1D0B00D60207 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		1DCB0CD926B05E1C00242045 /* Build configuration list for PBXNativeTarget "barcelona-mautrix" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -3579,6 +3738,22 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 5.1.1;
+			};
+		};
+		1D86021A270E20D500D60207 /* XCRemoteSwiftPackageReference "Noze" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/NozeIO/Noze.io";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.6.7;
+			};
+		};
+		1D86021D270E27C900D60207 /* XCRemoteSwiftPackageReference "Yammit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/EricRabil/Yammit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
 			};
 		};
 		1D92962B26B5D8F100F576A9 /* XCRemoteSwiftPackageReference "Swexy" */ = {
@@ -3701,6 +3876,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1D82FF3126D578F000EB5CEE /* XCRemoteSwiftPackageReference "BarcelonaFoundation" */;
 			productName = BarcelonaFoundation;
+		};
+		1D860213270E1D2700D60207 /* SwiftCLI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D40FF9726D58E5600596988 /* XCRemoteSwiftPackageReference "SwiftCLI" */;
+			productName = SwiftCLI;
+		};
+		1D86021B270E20D500D60207 /* http */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D86021A270E20D500D60207 /* XCRemoteSwiftPackageReference "Noze" */;
+			productName = http;
+		};
+		1D86021E270E27C900D60207 /* Yammit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1D86021D270E27C900D60207 /* XCRemoteSwiftPackageReference "Yammit" */;
+			productName = Yammit;
 		};
 		1D9AE39826AF5DA6007873E3 /* SwiftyTextTable */ = {
 			isa = XCSwiftPackageProductDependency;
