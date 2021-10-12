@@ -4,13 +4,15 @@
 //     class-dump is Copyright (C) 1997-1998, 2000-2001, 2004-2015 by Steve Nygard.
 //
 
+@class IMServiceImpl;
+
 @interface IMService: NSObject
-+ (IMService*)smsService;
-+ (IMService*)iMessageService;
-+ (IMService*)facetimeService;
-+ (IMService*)callService;
-+ (IMService*)jabberService;
-+ (IMService*)subnetService;
-+ (IMService*)aimService;
++ (IMServiceImpl*)smsService NS_SWIFT_NAME(sms());
++ (IMServiceImpl*)iMessageService NS_SWIFT_NAME(iMessage());
++ (IMServiceImpl*)facetimeService NS_SWIFT_NAME(facetime());
++ (IMServiceImpl*)callService NS_SWIFT_NAME(call());
++ (IMServiceImpl*)jabberService NS_SWIFT_NAME(jabber());
++ (IMServiceImpl*)subnetService NS_SWIFT_NAME(subnet());
++ (IMServiceImpl*)aimService NS_SWIFT_NAME(aim());
 @end
 

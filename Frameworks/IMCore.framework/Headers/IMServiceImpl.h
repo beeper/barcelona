@@ -6,6 +6,14 @@
 
 @class IMAccount, NSArray, NSData, NSDictionary, NSMutableDictionary, NSString, IMService;
 
+typedef NS_ENUM(NSUInteger, IMServiceStatus) {
+    IMServiceStatusLoggedOut,
+    IMServiceStatusDisconnected,
+    IMServiceStatusLoggingOut,
+    IMServiceStatusLoggingIn,
+    IMServiceStatusLoggedIn
+};
+
 @interface IMServiceImpl : IMService
 {
     NSString *_name;
@@ -51,26 +59,20 @@
 + (id)supportedCountryCodes;
 + (BOOL)iMessageEnabled;
 + (BOOL)mmsEnabled;
-+ (BOOL)_readMMSUserOverride;
 + (BOOL)smsEnabled;
 + (BOOL)iMessageEnabledForSenderLastAddressedHandle:(id)arg1 simID:(id)arg2 previousService:(id)arg3;
-+ (BOOL)_iMessageEnabledForMultipleSubscriptionsForSenderLastAddressedHandle:(id)arg1 simID:(id)arg2 previousService:(id)arg3;
-+ (BOOL)_shouldCheckIfLastAddressedHandleIsInSubscriptionsAnymoreButiMessageIsEnabledForAlias:(id)arg1 previousService:(id)arg2;
-+ (BOOL)_isiMessageEnabledIfLastAddressedHandleIsNotActiveAnymore:(id)arg1;
-+ (BOOL)_isSIMIdIDSRegisteredSIM:(id)arg1;
-+ (id)_phoneNumberOnSubscriptionWithSIMID:(id)arg1;
 + (BOOL)iMessageEnabledForSenderLastAddressedHandle:(id)arg1 simID:(id)arg2;
 + (BOOL)hasAlias:(id)arg1 onAccountForService:(id)arg2;
 + (BOOL)mmsEnabledforPhoneNumber:(id)arg1 simID:(id)arg2;
-+ (id)operationalServicesWithCapability:(unsigned long long)arg1;
-+ (id)connectedServicesWithCapability:(unsigned long long)arg1;
-+ (id)servicesWithCapability:(unsigned long long)arg1;
-+ (id)connectedServices;
-+ (id)activeServices;
-+ (id)serviceWithInternalName:(id)arg1;
-+ (id)serviceWithName:(id)arg1;
++ (NSArray<IMServiceImpl*>*)operationalServicesWithCapability:(unsigned long long)arg1;
++ (NSArray<IMServiceImpl*>*)connectedServicesWithCapability:(unsigned long long)arg1;
++ (NSArray<IMServiceImpl*>*)servicesWithCapability:(unsigned long long)arg1;
++ (NSArray<IMServiceImpl*>*)connectedServices;
++ (NSArray<IMServiceImpl*>*)activeServices;
++ (IMServiceImpl*)serviceWithInternalName:(NSString*)arg1;
++ (IMServiceImpl*)serviceWithName:(NSString*)arg1;
 + (id)allServicesNonBlocking;
-+ (id)allServices;
++ (NSArray<IMServiceImpl*>*)allServices;
 + (void)setServiceClass:(Class)arg1;
 + (Class)serviceClass;
 @property(readonly, nonatomic) NSString *shortName; // @synthesize shortName=_localizedShortName;
@@ -102,7 +104,6 @@
 - (void)defaultsChanged:(id)arg1;
 - (id)screenNamesForPerson:(id)arg1;
 - (id)screenNamesForIMPerson:(id)arg1;
-- (id)_personToIDMap;
 - (id)peopleWithScreenName:(id)arg1;
 - (id)imABPeopleWithScreenName:(id)arg1 options:(unsigned long long)arg2;
 - (id)imABPeopleWithScreenName:(id)arg1;
@@ -112,10 +113,6 @@
 - (void)clearIDToCardMap;
 @property(retain, nonatomic) NSString *countryCode;
 - (void)updateIDToCardMapWithNotification:(id)arg1;
-- (id)_newIDToCardMap;
-- (void)_dumpCardMap;
-- (void)_addAddressBookCards:(id)arg1 toMap:(id)arg2;
-- (id)_IDsToMapForIMPerson:(id)arg1;
 - (id)description;
 @property(readonly, nonatomic) NSArray *accountIDs;
 @property(readonly, nonatomic) long long buddyNotesMaxByteLength;
@@ -132,24 +129,19 @@
 @property(readonly, nonatomic) NSData *serviceImageData;
 - (id)subtypeInformationForAccount:(id)arg1;
 @property(retain, nonatomic) NSDictionary *serviceProperties;
-- (void)_loadPropertiesIfNeeded;
-- (id)_abPropertiesBySanitizingABProperties:(id)arg1;
 - (id)myScreenNames;
 - (id)infoForPreferredScreenNames;
-- (id)infoForAllScreenNames;
-- (id)infoForScreenName:(id)arg1;
-- (unsigned long long)status;
-- (void)_blockUntilInitialSyncPerformed;
+- (NSArray<NSDictionary*>*)infoForAllScreenNames;
+- (NSDictionary*)infoForScreenName:(NSString*)arg1;
+- (IMServiceStatus)status;
 - (long long)compareNames:(id)arg1;
 - (id)canonicalFormOfID:(id)arg1;
 - (id)normalizedFormOfID:(id)arg1;
 - (BOOL)equalID:(id)arg1 andID:(id)arg2;
-- (void)statusChangedForAccount:(id)arg1 from:(unsigned long long)arg2 to:(unsigned long long)arg3;
+- (void)statusChangedForAccount:(id)arg1 from:(IMServiceStatus)arg2 to:(IMServiceStatus)arg3;
 - (void)disconnect;
 - (void)doneSetup;
 - (BOOL)initialSyncPerformed;
-- (void)_calculateBestAccount;
-- (void)_syncWithRemoteBuddies;
 - (void)dealloc;
 - (id)initWithName:(id)arg1;
 @property(readonly, nonatomic, getter=isDiscontinued) BOOL discontinued;

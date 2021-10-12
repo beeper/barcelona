@@ -130,11 +130,11 @@ public class Registry {
     
     public var smsServiceEnabled: Bool {
         _connect()
-        return ((IMService.sms() as? IMServiceImpl)?.isEnabled()) ?? false
+        return IMService.sms()?.isEnabled() ?? false
     }
     
     public var callServiceEnabled: Bool {
         _connect()
-        return ((IMService.call() as? IMServiceImpl)?.isEnabled()) ?? false
+        return IMService.call()?.isEnabled() ?? false
     }
 }

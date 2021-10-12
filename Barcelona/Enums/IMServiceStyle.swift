@@ -46,13 +46,13 @@ public enum IMServiceStyle: String, CaseIterable, Codable, Hashable {
             fallthrough
         #endif
         case .iMessage:
-            return IMService.iMessage() as? IMServiceImpl
+            return IMService.iMessage()
         case .Phone:
-            return IMService.call() as? IMServiceImpl
+            return IMService.call()
         case .FaceTime:
-            return IMService.facetime() as? IMServiceImpl
+            return IMService.facetime()
         case .SMS:
-            return IMService.sms() as? IMServiceImpl
+            return IMService.sms()
         case .None:
             return nil
         }

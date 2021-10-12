@@ -33,7 +33,7 @@ class ERIMSimulationTools {
     private let loginHandle: IMHandle
     
     private init() {
-        iMessageService = IMServiceImpl.service(withInternalName: "iMessage") as! IMServiceImpl
+        iMessageService = IMServiceImpl.service(withInternalName: "iMessage")!
         iMessageAccount = IMSimulatedAccount.init(service: iMessageService)
         loginHandle = iMessageAccount.imHandle(withID: SIMULATION_OUTGOING_ID, alreadyCanonical: false) as! IMHandle
         

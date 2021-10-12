@@ -42,12 +42,22 @@ private extension IMAccount {
 private extension IMAccountController {
     /// Returns an interpretation of login status, or bad credentials if a registration failure is present
     var state: BridgeState {
-        guard let account = iMessageAccount, !account.isPlaceholder else {
+        guard let account = iMessageAccount else {
+            return .unconfigured
+        }
+        
+        guard !account.isPlaceholder else {
             return .unconfigured
         }
         
         var isProcessing: Bool {
+            if IMServiceImpl.iMessage().status() == .loggingIn {
+                return true
+            }
+            
             switch account.registrationStatus {
+            case .unregistered:
+                return true
             case .authenticating:
                 return true
             case .authenticated:
@@ -63,10 +73,8 @@ private extension IMAccountController {
         case .statusLoggedOut:
             if isProcessing {
                 return .connecting
-            } else if account.uniqueID == "PlaceholderAccount" {
-                return .unconfigured
             } else {
-                return .loggedOut
+                return .unconfigured
             }
         case .statusDisconnected:
             return .transientDisconnect
@@ -77,15 +85,18 @@ private extension IMAccountController {
         case .statusLoggedIn:
             switch account.registrationStatus {
             case .failed:
-                if account.registrationFailureReason == .unknownError {
-                    return .unconfigured
-                } else {
+                switch account.registrationFailureReason {
+                case .noError:
+                    fallthrough
+                case .unknownError:
+                    return .connecting
+                default:
                     return .badCredentials
                 }
             case .unknown:
                 return .connecting
             case .unregistered:
-                return .unconfigured
+                return .connecting
             case .authenticating:
                 return .connecting
             case .authenticated:
@@ -112,7 +123,7 @@ private extension IMAccountController {
         case .noError:
             return nil
         case .unknownError:
-            return "unknown_error"
+            return nil
         case .invalidLogin:
             return "invalid_login"
         case .invalidPassword:
