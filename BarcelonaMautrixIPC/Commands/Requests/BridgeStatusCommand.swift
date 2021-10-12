@@ -83,7 +83,7 @@ private extension IMAccountController {
                     return .badCredentials
                 }
             case .unknown:
-                return .unknownError
+                return .connecting
             case .unregistered:
                 return .unconfigured
             case .authenticating:
