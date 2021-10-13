@@ -179,7 +179,7 @@
 - (BOOL)authorizationToSendCurrentLocationMessageDetermined;
 - (BOOL)canSendCurrentLocationMessage;
 - (BOOL)canSendTransfer:(id)arg1;
-- (BOOL)canSendMessage:(id)arg1;
+- (BOOL)canSendMessage:(IMMessage*)arg1;
 @property(nonatomic) BOOL localUserIsRecording;
 @property(nonatomic) BOOL localUserIsTyping;
 @property(retain, nonatomic) NSString *localUserIsComposing;
@@ -189,9 +189,8 @@
 - (BOOL)_shouldSendCancelTypingIndicator;
 @property(readonly, nonatomic) NSString *localTypingMessageGUID;
 - (void)sendCurrentLocationMessage;
-- (void)sendMessage:(id)arg1;
+- (void)sendMessage:(IMMessage*)arg1;
 - (void)_fixItemForSendingMessageTime:(id)arg1;
-- (void)_sendMessage:(id)arg1 adjustingSender:(BOOL)arg2 shouldQueue:(BOOL)arg3;
 - (void)cancelMessage:(id)arg1;
 - (void)declineInvitation;
 - (void)acceptInvitation;

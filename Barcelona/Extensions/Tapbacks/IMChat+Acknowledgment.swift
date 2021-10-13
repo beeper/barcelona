@@ -51,7 +51,7 @@ public extension IMChat {
             throw BarcelonaError(code: 500, message: "Couldn't create tapback message")
         }
         
-        self.sendMessage(message)
+        send(message)
         
         return message
     }

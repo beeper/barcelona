@@ -36,22 +36,22 @@ class SendMessageCommand: BarcelonaCommand {
     func execute() throws {
         IMChatRegistry.shared._postMessageSentNotifications = true
         
-        var messages: [Message] = []
+        var message: Message! = nil
         
         NotificationCenter.default.addObserver(forName: .IMChatRegistryMessageSent, object: nil, queue: nil) { notification in
-            guard let message = notification.userInfo?["__kIMChatRegistryMessageSentMessageKey"] as? IMMessage else {
+            guard let sentMessage = notification.userInfo?["__kIMChatRegistryMessageSentMessageKey"] as? IMMessage else {
                 return
             }
             
-            guard messages.contains(where: { $0.id == message.id }) else {
+            guard message?.id == sentMessage.id else {
                 return
             }
             
-            print(message.debugDescription)
+            print(sentMessage.debugDescription)
             
             exit(0)
         }
         
-        messages = try chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: message)]))
+        message = try chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: self.message)]))
     }
 }

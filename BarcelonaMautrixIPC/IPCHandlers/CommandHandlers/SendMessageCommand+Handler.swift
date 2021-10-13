@@ -23,12 +23,10 @@ extension SendMessageCommand: Runnable {
         messageCreation.replyToPart = reply_to_part
         
         do {
-            let messages = try chat.send(message: messageCreation).map(\.partialMessage)
-            BLMetricStore.shared.set(messages.map(\.guid), forKey: .lastSentMessageGUIDs)
+            let message = try chat.send(message: messageCreation).partialMessage
+            BLMetricStore.shared.set([message.guid], forKey: .lastSentMessageGUIDs)
             
-            messages.forEach { message in
-                payload.respond(.message_receipt(message))
-            }
+            payload.respond(.message_receipt(message))
         } catch {
             // girl fuck
             CLFault("BLMautrix", "failed to send text message: %@", error as NSError)

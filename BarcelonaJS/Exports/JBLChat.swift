@@ -68,7 +68,7 @@ public class JBLChat: NSObject, JBLChatJSExports {
     }
     
     public func sendText(_ text: String) -> JBLMessageExports? {
-        guard let message = try? chat.send(message: .init(parts: [.init(type: .text, details: text)])).first else {
+        guard let message = try? chat.send(message: .init(parts: [.init(type: .text, details: text)])) else {
             return nil
         }
         
@@ -78,7 +78,7 @@ public class JBLChat: NSObject, JBLChatJSExports {
     public func sendAttachmentWithFilenameAndPath(_ filename: String, _ path: String) -> JBLMessageExports? {
         let attachment = CBInitializeFileTransfer(filename: filename, path: URL(fileURLWithPath: path))
         
-        guard let message = try? chat.send(message: .init(parts: [.init(type: .attachment, details: attachment.guid)])).first else {
+        guard let message = try? chat.send(message: .init(parts: [.init(type: .attachment, details: attachment.guid)])) else {
             return nil
         }
         

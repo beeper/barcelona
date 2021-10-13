@@ -20,12 +20,7 @@ extension TapbackCommand: Runnable {
         }
         
         do {
-            guard let message = try chat.tapback(creation)?.partialMessage else {
-                // girl fuck
-                return CLFault("BLMautrix", "failed to get sent tapback")
-            }
-            
-            payload.respond(.message_receipt(message))
+            payload.respond(.message_receipt(try chat.tapback(creation).partialMessage))
         } catch {
             // girl fuck
             CLFault("BLMautrix", "failed to send tapback: %@", error as NSError)

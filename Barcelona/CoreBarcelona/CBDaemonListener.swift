@@ -149,7 +149,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
     public override func setupComplete(_ success: Bool, info: [AnyHashable : Any]!) {
         log.debug("setup: \(success)")
         
-        if let dicts = (info["personMergedChats"] ?? info["chats"]) as? [[AnyHashable: Any]] {
+        if let info = info, let dicts = (info["personMergedChats"] ?? info["chats"]) as? [[AnyHashable: Any]] {
             for dict in dicts {
                 apply(serializedChat: dict, emitIfNeeded: false)
             }

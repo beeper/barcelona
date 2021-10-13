@@ -218,6 +218,12 @@ public extension Chat {
     }
 }
 
+extension Thread {
+    func sync(_ block: @convention(block) @escaping () -> ()) {
+        __im_performBlock(block, waitUntilDone: true)
+    }
+}
+
 // MARK: - Message Sending
 public extension Chat {
     var isTyping: Bool {
@@ -284,43 +290,34 @@ public extension Chat {
         }
     }
     
-    func send(message options: CreatePluginMessage) throws -> [Message] {
+    func send(message options: CreatePluginMessage) throws -> Message {
         let message = try options.imMessage(inChat: self.id)
         
         Chat.delegate?.chat(self, willSendMessages: [message], fromCreatePluginMessage: options)
         
-        RunLoop.main.schedule {
-            self.imChat._sendMessage(message, adjustingSender: true, shouldQueue: true)
+        Thread.main.sync {
+            imChat.send(message)
         }
         
-        return _BLParseObjects([message], inChat: self.id)
-            .compactMap {
-                $0 as? Message
-            }
+        return Message(messageItem: message._imMessageItem, chatID: imChat.id)
     }
     
-    func send(message createMessage: CreateMessage) throws -> [Message] {
+    func send(message createMessage: CreateMessage) throws -> Message {
         let message = try createMessage.imMessage(inChat: self.id)
             
-        let messages = message.messagesBySeparatingRichLinks() as? [IMMessage] ?? [message]
+        Chat.delegate?.chat(self, willSendMessages: [message], fromCreateMessage: createMessage)
         
-        Chat.delegate?.chat(self, willSendMessages: messages, fromCreateMessage: createMessage)
-        
-        messages.forEach {
-            self.imChat.sendMessage($0)
+        Thread.main.sync {
+            imChat.send(message)
         }
         
-        return _BLParseObjects(messages, inChat: self.id).compactMap {
-            $0 as? Message
-        }
+        return Message(messageItem: message._imMessageItem, chatID: imChat.id)
     }
     
-    func tapback(_ creation: TapbackCreation) throws -> Message? {
+    func tapback(_ creation: TapbackCreation) throws -> Message {
         let message = try imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil)
         
-        return _BLParseObjects([message], inChat: id).compactMap {
-            $0 as? Message
-        }.first
+        return Message(messageItem: message._imMessageItem, chatID: imChat.id)
     }
 }
 

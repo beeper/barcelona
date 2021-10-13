@@ -119,30 +119,12 @@
         }
       },
       {
-        "package": "SwiftSyntax",
-        "repositoryURL": "https://github.com/apple/swift-syntax.git",
-        "state": {
-          "branch": "release/5.4",
-          "revision": "d81b6a6dc2698a93dcc04304fb15a5446b5278a4",
-          "version": null
-        }
-      },
-      {
         "package": "SwiftCLI",
-        "repositoryURL": "https://github.com/EricRabil/SwiftCLI",
+        "repositoryURL": "https://github.com/jakeheis/SwiftCLI",
         "state": {
           "branch": null,
-          "revision": "953c96a5c0c76e73c0d928577ca3d5183a3f09ef",
+          "revision": "2e949055d9797c1a6bddcda0e58dada16cc8e970",
           "version": "6.0.3"
-        }
-      },
-      {
-        "package": "SwiftSemantics",
-        "repositoryURL": "https://github.com/SwiftDocOrg/SwiftSemantics",
-        "state": {
-          "branch": "main",
-          "revision": "0541303c42f4ad92cb3b22618f3de4b6a1a836d2",
-          "version": null
         }
       },
       {
