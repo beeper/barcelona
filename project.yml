@@ -1,4 +1,4 @@
-name: imessage-rest-test
+name: barcelona
 
 options:
   deploymentTarget:
@@ -237,6 +237,15 @@ targets:
       - target: BarcelonaJS
         embed: true
         link: true
+
+schemes:
+  tools:
+    build:
+      targets:
+        barcelona-mautrix: [running]
+        grapple: [running]
+    run:
+      executable: grapple
 
 targetTemplates:
   BLFramework:

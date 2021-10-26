@@ -3,6 +3,8 @@ pipeline {
     stages {
         stage('Build') {
             steps {
+                sh 'rm -rf barcelona.xcodeproj; xcodegen generate'
+
                 parallel(
                     macos: {
                         sh 'make macos'

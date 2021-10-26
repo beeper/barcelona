@@ -8,3 +8,4 @@ macos_staging
 archive
 imessage-rest-ios/layout/Applications
 SourcePackages
+*.xcodeproj

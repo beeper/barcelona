@@ -8,7 +8,7 @@ IOS_DESTINATION = "generic/platform=iOS,name=Any iOS Device"
 
 scheme:
 	xcodebuild \
-		-project imessage-rest.xcodeproj \
+		-project barcelona.xcodeproj \
 		-scheme "$(SCHEME)" \
 		-parallelizeTargets \
 		-jobs 16 \
@@ -36,7 +36,7 @@ grapple-ios:
 	$(MAKE) scheme-ios SCHEME=grapple
 
 ios:
-	$(MAKE) scheme-ios SCHEME=Tools
+	$(MAKE) scheme-ios SCHEME=tools
 	
 macos:
-	$(MAKE) scheme-macos SCHEME=Tools
+	$(MAKE) scheme-macos SCHEME=tools
