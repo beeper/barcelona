@@ -83,4 +83,10 @@ public struct PluginChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
     public var type: ChatItemType {
         .plugin
     }
+    
+    #if PRIVATE_LOGGING
+    public var debugDescription: String {
+        "\(type) { id=\(id) fromMe=\(fromMe) bundleID=\(bundleID) fallback=\(fallback?.text ?? "<none>") }"
+    }
+    #endif
 }

@@ -335,7 +335,13 @@ public struct TextChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
         .text
     }
     
+    #if PRIVATE_LOGGING
+    public var debugDescription: String {
+        "\(type) { id=\(id) text=\(text) fromMe=\(fromMe) }"
+    }
+    #else
     public var debugDescription: String {
         "\(type) { id=\(id) fromMe=\(fromMe) }"
     }
+    #endif
 }
