@@ -1,10 +1,12 @@
 pipeline {
     agent any
     stages {
+        stage('Prepare') {
+            sh 'rm -rf barcelona.xcodeproj'
+            sh 'xcodegen generate'
+        }
         stage('Build') {
             steps {
-                sh 'rm -rf barcelona.xcodeproj; xcodegen generate'
-
                 parallel(
                     macos: {
                         sh 'make macos'
