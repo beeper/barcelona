@@ -25,7 +25,7 @@ public struct PluginChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
         time = item.effectiveTime
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
-        bundleID = item.balloonBundleID ?? "com.apple.DigitalTouchBalloonProvider"
+        bundleID = item.balloonBundleID ?? "com.apple.messages.URLBalloonProvider"
         attachments = item.attachments
         
         var insertPayload: Bool = true
