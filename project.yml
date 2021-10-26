@@ -60,6 +60,7 @@ packages:
 
 settings:
   base:
+    AD_HOC_CODE_SIGNING_ALLOWED: YES
     FRAMEWORK_SEARCH_PATHS: $(PROJECT_DIR)/Frameworks
     CODE_SIGN_IDENTITY: "-"
     OTHER_SWIFT_FLAGS: "-Xcc -Wno-nullability-completeness -Xcc -Wno-incomplete-umbrella -Xcc -Wno-property-attribute-mismatch -Xcc -Wno-strict-prototypes -Xcc -Wno-arc-performSelector-leaks -Xcc -Wno-objc-protocol-method-implementation -Xcc -Wno-incomplete-umbrella -Xcc -Wno-visibility"
@@ -94,7 +95,7 @@ settings:
       - "$(inherited)"
       - "$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks"
     CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER: NO
-    CODE_SIGNING_ALLOWED: NO
+    CODE_SIGNING_ALLOWED: YES
   configs:
     Debug:
       ONLY_ACTIVE_ARCH: YES
