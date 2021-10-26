@@ -1,4 +1,7 @@
 name: barcelona
+fileGroups:
+  - Headers
+  - project.yml
 
 options:
   deploymentTarget:
