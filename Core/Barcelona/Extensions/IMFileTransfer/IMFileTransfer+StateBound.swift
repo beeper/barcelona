@@ -10,20 +10,20 @@ import Foundation
 import IMCore
 
 public extension IMFileTransfer {
-    enum IMFileTransferState: Int64 {
-        case archiving = 0
-        case waitingForAccept = 1
-        case accepted = 2
-        case preparing = 3
-        case transferring = 4
-        case finalizing = 5
-        case finished = 6
-        case error = 7
-        case recoverableError = 8
+    enum IMFileTransferState: NSInteger {
+        case archiving = -1
+        case waitingForAccept = 0
+        case accepted = 1
+        case preparing = 2
+        case transferring = 3
+        case finalizing = 4
+        case finished = 5
+        case error = 6
+        case recoverableError = 7
         case unknown
         
         fileprivate init(transfer: IMFileTransfer) {
-            self = .init(rawValue: transfer.value(forKey: "transferState") as! Int64) ?? .unknown
+            self = .init(rawValue: transfer.value(forKey: "transferState") as! NSInteger) ?? .unknown
         }
     }
     

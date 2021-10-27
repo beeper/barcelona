@@ -46,10 +46,10 @@ extension SendMediaMessageCommand: Runnable {
                 case .transferring:
                     break
                 case .finalizing:
+                    fallthrough
+                case .finished:
                     sub.unsubscribe()
                     payload.respond(.message_receipt(message))
-                case .finished:
-                    break
                 case .error:
                     break
                 case .recoverableError:
