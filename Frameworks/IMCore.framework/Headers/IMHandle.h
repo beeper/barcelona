@@ -155,7 +155,7 @@
 - (BOOL)_isChatSiblingOf:(id)arg1;
 - (BOOL)isSiblingOf:(id)arg1;
 - (BOOL)isAccountSiblingOf:(id)arg1;
-@property(readonly, retain, nonatomic) NSSet *siblings;
+@property(readonly, retain, nonatomic) NSSet<IMHandle*> *siblings;
 - (id)chatSiblingsArray;
 - (id)existingChatSiblingsArray;
 @property(readonly, retain, nonatomic) NSArray *accountSiblingsArray;

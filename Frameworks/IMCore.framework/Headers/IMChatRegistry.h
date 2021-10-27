@@ -88,7 +88,7 @@
 - (NSDictionary<NSString*, IMChat*>*)_chatGUIDToChatMap;
 - (NSArray<IMChat*>* _Nonnull)_chatsWithMessageGUID:(NSString*)arg1;
 - (id)_chatsWithMessage:(id)arg1;
-- (id)_allGUIDsForChat:(id)arg1;
+- (NSArray<NSString*>*)_allGUIDsForChat:(id)arg1;
 - (void)_handleAddressBookChange:(id)arg1;
 - (void)handleIMChatParticipantsDidChange:(id)arg1;
 - (id)unblackholeAndLoadChatWithIMHandles:(id)arg1;

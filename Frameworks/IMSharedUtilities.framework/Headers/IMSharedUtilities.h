@@ -215,3 +215,5 @@ API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0))
 NSString* IMMessageCreateAssociatedMessageGUIDFromThreadIdentifier(NSString* identifier);
 
 NSArray<IMItem*> * FZCreateIMMessageItemsFromSerializedArray(NSArray * serialized) NS_RETURNS_RETAINED;
+
+BOOL IMSharedHelperPersonCentricMergingEnabled(void);

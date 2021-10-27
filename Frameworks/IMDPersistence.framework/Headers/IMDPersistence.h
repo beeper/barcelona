@@ -49,6 +49,8 @@ struct CSDBSqliteDatabase {
     
 };
 
+CFArrayRef IMDAttachmentRecordCopyPurgedAttachmentsForChatIdentifiersOnServices(CFArrayRef chatIdentifiers, CFArrayRef services, NSInteger limit) CF_RETURNS_RETAINED;
+
 CFStringRef IMDMessageRecordCopyGUID(CFAllocatorRef, IMDMessageRecordRef);
 
 struct CSDBSqliteDatabase *IMDSharedSqliteDatabase();

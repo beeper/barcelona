@@ -8,21 +8,21 @@
 
 #import <Foundation/Foundation.h>
 
-@interface IMPair : NSObject
+@interface IMPair<A, B> : NSObject
 {
-    id _first;
-    id _second;
+    A _first;
+    B _second;
 }
 
-+ (id)pairWithFirst:(id)arg1 second:(id)arg2;
-@property(retain) id second; // @synthesize second=_second;
-@property(retain) id first; // @synthesize first=_first;
++ (id)pairWithFirst:(A)arg1 second:(B)arg2;
+@property(retain) B second; // @synthesize second=_second;
+@property(retain) A first; // @synthesize first=_first;
 - (id)description;
 - (BOOL)isEqual:(id)arg1;
 - (unsigned long long)hash;
 - (id)copyWithZone:(struct _NSZone *)arg1;
 - (void)dealloc;
-- (id)initWithFirst:(id)arg1 second:(id)arg2;
+- (id)initWithFirst:(A)arg1 second:(B)arg2;
 
 @end
 

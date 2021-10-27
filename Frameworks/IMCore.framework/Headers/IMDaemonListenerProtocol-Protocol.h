@@ -44,12 +44,6 @@ typedef NS_ENUM(int32_t, FZDisconnectReason) {
     kFZReasonBadOAuthToken,
 };
 
-typedef NS_ENUM(UInt8, IMChatStyle) {
-    IMInstantMessageChatStyle = '-',
-    IMGroupChatStyle          = '+',
-    IMRoomChatStyle           = '#',
-};
-
 typedef NS_ENUM(int32_t, FZChatMemberStatus) {
     kFZChatMemberInviteFailed = -1,
     kFZChatMemberDeciding,

@@ -61,7 +61,7 @@
 - (void)sendTransfer:(id)arg1;
 - (IMFileTransfer*)transferForGUID:(NSString*)arg1 includeRemoved:(BOOL)arg2;
 - (IMFileTransfer*)transferForGUID:(NSString*)arg1;
-- (id)chatForTransfer:(id)arg1;
+- (IMChat*)chatForTransfer:(id)arg1;
 - (void)registerTransferWithDaemon:(NSString*)arg1;
 - (void)assignTransfer:(id)arg1 toHandle:(id)arg2;
 - (void)assignTransfer:(id)arg1 toMessage:(id)arg2 account:(id)arg3;
