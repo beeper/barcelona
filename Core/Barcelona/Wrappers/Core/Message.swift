@@ -244,3 +244,14 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         .message
     }
 }
+
+public extension Message {
+    /// Returns a refreshed copy of the message
+    func refresh() -> Message {
+        guard let item = BLLoadIMMessageItem(withGUID: id) else {
+            return self
+        }
+        
+        return Message(messageItem: item, chatID: chatID)
+    }
+}

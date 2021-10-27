@@ -150,16 +150,24 @@ private func ERResolveGUIDsForChat(withChatIdentifier chatIdentifier: String, af
     }
 }
 
-// MARK: - API
-
-public func BLLoadIMMessages(withGUIDs guids: [String]) -> [IMMessage] {
+internal func BLLoadIMMessageItems(withGUIDs guids: [String]) -> [IMMessageItem] {
     if guids.count == 0 {
         return []
     }
     
-    let refs = BLLoadIMDMessageRecordRefsWithGUIDs(guids)
-    
-    return BLCreateIMMessageFromIMDMessageRecordRefs(refs)
+    return BLCreateIMItemFromIMDMessageRecordRefs(BLLoadIMDMessageRecordRefsWithGUIDs(guids)).compactMap {
+        $0 as? IMMessageItem
+    }
+}
+
+internal func BLLoadIMMessageItem(withGUID guid: String) -> IMMessageItem? {
+    BLLoadIMMessageItems(withGUIDs: [guid]).first
+}
+
+// MARK: - API
+
+public func BLLoadIMMessages(withGUIDs guids: [String]) -> [IMMessage] {
+    BLLoadIMMessageItems(withGUIDs: guids).compactMap(IMMessage.message(fromUnloadedItem:))
 }
 
 public func BLLoadIMMessage(withGUID guid: String) -> IMMessage? {
