@@ -249,6 +249,16 @@ public class CBDaemonListener: ERBaseDaemonListener {
             chatsDeletedPipeline.send(chatGUIDs)
         }
     }
+    
+    // MARK: - File Transfers
+    
+    public override func fileTransfer(_ guid: String!, createdWithProperties properties: [AnyHashable : Any]!) {
+        _ = CBPurgedAttachmentController.shared.process(transferIDs: [guid])
+    }
+    
+    public override func fileTransfer(_ guid: String!, updatedWithProperties properties: [AnyHashable : Any]!) {
+        _ = CBPurgedAttachmentController.shared.process(transferIDs: [guid])
+    }
 }
 
 // MARK: - Chat Logic
