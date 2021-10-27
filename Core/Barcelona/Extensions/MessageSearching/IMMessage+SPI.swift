@@ -22,7 +22,7 @@ public extension IMMessage {
     /**
      Takes an IMMessageItem that has no context object and resolves it into a fully formed IMMessage
      */
-    static func message(fromUnloadedItem item: IMMessageItem, withSubject subject: NSMutableAttributedString? = nil) -> IMMessage? {
+    static func message(fromUnloadedItem item: IMMessageItem, withSubject subject: NSMutableAttributedString?) -> IMMessage? {
         var rawSender: String? = item.sender()
         
         if item.sender() == nil, item.isFromMe(), let suitableHandle = Registry.sharedInstance.suitableHandle(for: item.service) {
@@ -35,6 +35,10 @@ public extension IMMessage {
         }
         
         return IMMessage(fromIMMessageItem: item, sender: sender, subject: subject)!
+    }
+    
+    static func message(fromUnloadedItem item: IMMessageItem) -> IMMessage? {
+        message(fromUnloadedItem: item, withSubject: nil)
     }
     
     static func message(withGUID guid: String, in chat: String? = nil) -> Promise<ChatItem?> {
