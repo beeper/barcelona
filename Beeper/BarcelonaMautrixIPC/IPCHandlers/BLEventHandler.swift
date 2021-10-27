@@ -67,17 +67,13 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
             }
             
             if CBPurgedAttachmentController.shared.enabled {
-                _ = self.fifoQueue.submit {
-                    if message.fileTransferIDs.count > 0 {
-                        return CBPurgedAttachmentController.shared.process(transferIDs: message.fileTransferIDs).then {
-                            send(.message(BLMessage(message: message.refresh())))
-                        }
-                    } else {
-                        send(.message(BLMessage(message: message)))
-                        return .success(())
+                if message.fileTransferIDs.count > 0 {
+                    CBPurgedAttachmentController.shared.process(transferIDs: message.fileTransferIDs).then {
+                        send(.message(BLMessage(message: message.refresh())))
                     }
+                    
+                    return
                 }
-                return
             }
             
             send(.message(BLMessage(message: message)))

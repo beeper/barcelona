@@ -39,7 +39,9 @@ public class CBPurgedAttachmentController {
     private var processingTransfers: [String: Promise<Void>] = [:] // used to mux together purged transfers, to prevent a race in which two operations are both fetching a transfer
     
     public func process(transferIDs: [String]) -> Promise<Void> {
-        var transfers = transferIDs.compactMap(IMFileTransferCenter.sharedInstance().transfer(forGUID:))
+        var transfers = transferIDs.compactMap(IMFileTransferCenter.sharedInstance().transfer(forGUID:)).filter { transfer in
+            transfer.state == .waitingForAccept
+        }
         
         guard transfers.count > 0 else {
             return .success(())
@@ -56,7 +58,7 @@ public class CBPurgedAttachmentController {
         
         guard transfers.count > 0 else {
             if supplemented.count > 0 {
-                return Promise.all(supplemented).replace(with: ()) // remote summative promise over all existing operations
+                return Promise.all(supplemented).replace(with: ()) // return summative promise over all existing operations
             }
             
             return .success(())
@@ -75,10 +77,12 @@ public class CBPurgedAttachmentController {
                     }
                 }
                 
-                observer = NotificationCenter.default.addObserver(forName: .IMFileTransferUpdated, object: transfer, queue: .main) { notification in
-                    guard let object = notification.object as? IMFileTransfer else {
+                observer = NotificationCenter.default.addObserver(forName: .IMFileTransferUpdated, object: nil, queue: .main) { notification in
+                    guard let object = notification.object as? IMFileTransfer, object.guid == transfer.guid else {
                         return
                     }
+                    
+                    self.log.debug("transfer \(transfer.guid) moved to state \(object.state)")
                     
                     switch object.state {
                     case .finished:
