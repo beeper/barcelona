@@ -54,6 +54,9 @@ class BarcelonaMautrix {
             // allow payloads to start flowing
             self.reader.ready = true
             
+            CBPurgedAttachmentController.shared.enabled = true
+            CBPurgedAttachmentController.shared.delegate = BLEventHandler.shared
+            
             CLInfo("ERBarcelonaManager", "BLMautrix is ready")
             
             // starts the imessage notification processor

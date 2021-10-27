@@ -8,6 +8,7 @@
 
 import Barcelona
 import BarcelonaEvents
+import IMCore
 
 private extension ChatItemOwned {
     var mautrixFriendlyGUID: String {
@@ -29,10 +30,12 @@ private extension CBMessageStatusChange {
     }
 }
 
-public class BLEventHandler {
+public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
     public static let shared = BLEventHandler()
     
     public let bus = EventBus()
+    
+    private let fifoQueue = FifoQueue<Void>()
     
     public func run() {
         let send: (IPCCommand) -> () = {
@@ -61,6 +64,20 @@ public class BLEventHandler {
                     CLInfo("Mautrix", "Dropping last-sent message \(message.id)")
                     return
                 }
+            }
+            
+            if CBPurgedAttachmentController.shared.enabled {
+                _ = self.fifoQueue.submit {
+                    if message.fileTransferIDs.count > 0 {
+                        return CBPurgedAttachmentController.shared.process(transferIDs: message.fileTransferIDs).then {
+                            send(.message(BLMessage(message: message.refresh())))
+                        }
+                    } else {
+                        send(.message(BLMessage(message: message)))
+                        return .success(())
+                    }
+                }
+                return
             }
             
             send(.message(BLMessage(message: message)))
@@ -94,5 +111,9 @@ public class BLEventHandler {
         }
         
         bus.resume()
+    }
+    
+    public func purgedTransferFailed(_ transfer: IMFileTransfer) {
+        BLWritePayload(.init(id: nil, command: .error(.init(code: "file-transfer-failure", message: "Failed to download file transfer: \(transfer.errorDescription ?? transfer.error.description) (\(transfer.error.description))"))))
     }
 }
