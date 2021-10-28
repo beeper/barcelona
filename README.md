@@ -18,6 +18,8 @@ These are not strict requirements – this project is simply only ensured to bu
 | macOS | make grapple-macos | make mautrix-macos |
 | iOS   | make grapple-ios   | make mautrix-ios   |
 
+Build products go to `./Build/(iOS|macOS)/Products/(Debug|Release)/(barcelona-mautrix|grapple)`
+
 ### Running
 
 Barcelona has three requirements to run correctly:
@@ -28,6 +30,33 @@ Barcelona has three requirements to run correctly:
 #### Grapple
 
 Grapple is a debugging tool used to inspect the iMessage environment. A help page is displayed by just running `./grapple`
+
+##### Grudge
+
+Grudge is a testing suite within Grapple. It is configured from a YML file, and is used to debug Barcelona.
+
+```bash
+grapple grudge ./grudge.yml
+```
+
+```yml
+# Example grudge.yml - everything optional unless stated required - no top level is required, you can mix and match
+
+# Alerts when two message events for the same ID are dispatched
+duplicateDetector: true
+
+# Routinely sends messages in a chat to test message processing and delivery
+automaticSending:
+    chat: "info@orders.apple.com" # chat ID to send to - required
+    messages: ["hey", "there", "darling!"] # messages to send, cycles through until stopped - required
+    delay: 1000 # milliseconds between messages, minimum 250ms unless count is below 100 - required
+    count: 100 # number of messages to send, -1 for infinite
+    waitForDelivery: true # whether to wait for delivery before waiting delay
+    trackNonAutomated: true # whether to report messages sent from current user that werent part of automaticSending
+    tapbacks:
+        interval: 10 # every ten messages, tapback the message
+        type: 2000 # tapback with a heart
+```
 
 #### Mautrix
 
