@@ -24,6 +24,22 @@ public class CBPipeline<Value> {
     }
     
     @discardableResult
+    public func pipe(_ callback: @escaping (Value) -> Void) -> CBPipeline<Void> {
+        let pipeline = CBPipeline<Void>()
+        
+        chains[ObjectIdentifier(pipeline)] = {
+            pipeline.send(callback($0))
+        }
+        
+        pipeline._cancel = {
+            self.chains[ObjectIdentifier(pipeline)] = nil
+            pipeline._cancel = { }
+        }
+        
+        return pipeline
+    }
+    
+    @discardableResult
     public func pipe<NewValue>(_ callback: @escaping (Value) -> NewValue) -> CBPipeline<NewValue> {
         let pipeline = CBPipeline<NewValue>()
         
