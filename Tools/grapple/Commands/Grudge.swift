@@ -15,6 +15,7 @@ struct GrudgeConfiguration: Codable, Configuration {
     
     var duplicateDetector: Bool?
     var automaticSending: AutomatedMessageSender.Configuration?
+    var readReceipts: ReadReceiptTester.Configuration?
     
     var debuggers: [GrappleDebugger] {
         var debuggers: [GrappleDebugger] = []
@@ -26,6 +27,11 @@ struct GrudgeConfiguration: Codable, Configuration {
         if let automaticSending = automaticSending {
             debuggers.append(AutomatedMessageSender.shared)
             AutomatedMessageSender.shared.configuration = automaticSending
+        }
+        
+        if let readReceipts = readReceipts {
+            debuggers.append(ReadReceiptTester.shared)
+            ReadReceiptTester.shared.config = readReceipts
         }
         
         return debuggers

@@ -170,7 +170,7 @@
 - (void)resortMessages;
 - (void)markAllMessagesAsRead;
 - (void)markMessagesAsRead:(NSArray<IMMessage*>*)arg1;
-- (void)markMessageAsRead:(id)arg1;
+- (void)markMessageAsRead:(IMMessage*)arg1;
 - (void)_setTimerForReadMessageCache;
 - (void)__clearReadMessageCache;
 - (void)updateMessage:(id)arg1 flags:(unsigned long long)arg2;
