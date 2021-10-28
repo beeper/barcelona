@@ -47,7 +47,14 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         }
         
         CBDaemonListener.shared.unreadCountPipeline.pipe { chat, name in
+            guard let chat = IMChat.resolve(withIdentifier: chat) else {
+                return
+            }
             
+            if chat.unreadMessageCount == 0, let lastMessageID = chat.lastMessage?.id {
+                CLInfo("Mautrix", "Read count for chat \(chat.id, privacy: .public): \(chat.unreadMessageCount, privacy: .public)")
+                BLWritePayload(.init(id: nil, command: .read_receipt(.init(sender_guid: nil, is_from_me: true, chat_guid: chat.guid, read_up_to: lastMessageID))))
+            }
         }
         
         CBDaemonListener.shared.chatNamePipeline.pipe { chat, name in
@@ -99,12 +106,6 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                         return [contact.blContact(withGUID: "iMessage;-;\(handle.id)")]
                     }
                 }.compactMap { $0 }.map { .init(command: .contact($0)) })
-            case .conversationUnreadCountChanged(let chat):
-                CLInfo("Mautrix", "Read count for chat \(chat.id, privacy: .public): \(chat.unreadMessageCount, privacy: .public)")
-                
-                if chat.unreadMessageCount == 0, let lastMessageGUID = chat.lastMessageID {
-                    BLWritePayload(.init(id: nil, command: .read_receipt(.init(sender_guid: nil, is_from_me: true, chat_guid: chat.id, read_up_to: lastMessageGUID))))
-                }
             default:
                 break
             }
