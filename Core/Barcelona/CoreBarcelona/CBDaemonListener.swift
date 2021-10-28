@@ -432,17 +432,22 @@ private extension IMMessageItem {
         
         var fromMe: Bool {
             if canBeFromOthers {
-                return isFromMe()
+                return !isFromMe()
             } else {
                 return true
             }
         }
         
+        /// Sender of the receipt, not sender of the message
         var sender: String? {
-            if canBeFromOthers {
+            if fromMe {
+                return nil
+            }
+            
+            if style == .groupChatStyle {
                 return resolveSenderID(inService: serviceStyle)
             } else {
-                return nil
+                return IMChat.resolve(withIdentifier: chat)?.recipient?.id
             }
         }
         
