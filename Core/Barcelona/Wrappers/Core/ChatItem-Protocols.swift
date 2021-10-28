@@ -49,6 +49,7 @@ public enum ChatItemType: String, Codable, CaseIterable {
     case typing
     case sticker
     case action
+    case error
     
     static let ingestionMapping: [String: ChatItem.Type] = allCases.flatMap { $0.decodingClass.ingestionPairs }.dictionary(keyedBy: \.0, valuedBy: \.1)
     
@@ -99,6 +100,8 @@ public enum ChatItemType: String, Codable, CaseIterable {
             return StickerChatItem.self
         case .action:
             return ActionChatItem.self
+        case .error:
+            return ErrorChatItem.self
         }
     }
 }
