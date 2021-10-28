@@ -46,6 +46,8 @@ public struct PluginChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
                 if let url = dataSource.url {
                     let urlString = url.absoluteString
                     self.fallback = TextChatItem(item, text: urlString, parts: [.init(type: .link, string: urlString, data: .init(urlString), attributes: [])], chatID: chatID)
+                } else if let text = item.text {
+                    self.fallback = TextChatItem(item, text: text.string, parts: [.init(type: .link, string: text.string, data: .init(text.string), attributes: [])], chatID: chatID)
                 }
                 
                 insertPayload = false
