@@ -101,6 +101,10 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 }.compactMap { $0 }.map { .init(command: .contact($0)) })
             case .conversationUnreadCountChanged(let chat):
                 CLInfo("Mautrix", "Read count for chat \(chat.id, privacy: .public): \(chat.unreadMessageCount, privacy: .public)")
+                
+                if chat.unreadMessageCount == 0, let lastMessageGUID = chat.lastMessageID {
+                    BLWritePayload(.init(id: nil, command: .read_receipt(.init(sender_guid: nil, is_from_me: true, chat_guid: chat.id, read_up_to: lastMessageGUID))))
+                }
             default:
                 break
             }
@@ -111,5 +115,11 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
     
     public func purgedTransferFailed(_ transfer: IMFileTransfer) {
         BLWritePayload(.init(id: nil, command: .error(.init(code: "file-transfer-failure", message: "Failed to download file transfer: \(transfer.errorDescription ?? transfer.error.description) (\(transfer.error.description))"))))
+    }
+}
+
+extension Chat {
+    var lastMessageID: String? {
+        imChat.lastMessage?.guid
     }
 }
