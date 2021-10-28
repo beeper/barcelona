@@ -24,11 +24,20 @@ private extension Message {
     }
     
     var textContent: String {
-        let items: [TextChatItem] = items.compactMap {
-            $0.item as? TextChatItem
-        }
-        
-        return items.map(\.text).joined()
+        items.map(\.item).reduce(into: [String]()) { text, item in
+            switch item {
+            case let item as TextChatItem:
+                text.append(item.text)
+            case let item as PluginChatItem:
+                if let fallbackText = item.fallback?.text {
+                    text.append(fallbackText)
+                }
+            case let item as PhantomChatItem:
+                text.append("`Unknown item \(item.className)`")
+            default:
+                break
+            }
+        }.joined(separator: " ")
     }
 }
 
