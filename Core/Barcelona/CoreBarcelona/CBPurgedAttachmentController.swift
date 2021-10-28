@@ -63,16 +63,7 @@ public class CBPurgedAttachmentController {
         
         return Promise.all(supplemented + transfers.map { transfer in
             let promise = Promise<Void> { resolve, reject in
-                var observer: NSObjectProtocol?
-                
-                func unsubscribe() {
-                    if observer != nil {
-                        NotificationCenter.default.removeObserver(observer!)
-                        observer = nil
-                    }
-                }
-                
-                observer = NotificationCenter.default.addObserver(forName: .IMFileTransferUpdated, object: nil, queue: .main) { notification in
+                NotificationCenter.default.addObserver(forName: .IMFileTransferUpdated, object: nil, queue: .main) { notification, unsubscribe in
                     guard let object = notification.object as? IMFileTransfer, object.guid == transfer.guid else {
                         return
                     }
