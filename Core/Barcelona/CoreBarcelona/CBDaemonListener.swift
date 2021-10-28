@@ -431,10 +431,25 @@ private extension IMMessageItem {
         }
         
         var fromMe: Bool {
-            if canBeFromOthers {
-                return !isFromMe()
+            if style == .groupChatStyle {
+                return payload.type != .played
             } else {
-                return true
+                switch payload.type {
+                case .read:
+                    if isFromMe() {
+                        return false // other user just read our message
+                    } else {
+                        return true // we just read the chat
+                    }
+                case .delivered:
+                    return false
+                case .played:
+                    return false
+                case .downgraded:
+                    return true
+                case .notDelivered:
+                    return true
+                }
             }
         }
         
@@ -447,7 +462,7 @@ private extension IMMessageItem {
             if style == .groupChatStyle {
                 return resolveSenderID(inService: serviceStyle)
             } else {
-                return IMChat.resolve(withIdentifier: chat)?.recipient?.id
+                return chat // chat identifier for DM is just the recipient
             }
         }
         
