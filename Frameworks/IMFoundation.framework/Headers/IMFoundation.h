@@ -195,5 +195,6 @@ typedef NS_ENUM(UInt8, IMChatStyle) {
 };
 
 void IMComponentsFromChatGUID(NSString *guid, NSString **chatIdentifier, NSString **service, IMChatStyle *style);
+size_t IMiMessageMaxFileSizeForUTI(NSString * UTI, BOOL *allowedLargerRepresentation);
 
 #endif

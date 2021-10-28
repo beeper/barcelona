@@ -39,22 +39,17 @@ public class CBPurgedAttachmentController {
     private var processingTransfers: [String: Promise<Void>] = [:] // used to mux together purged transfers, to prevent a race in which two operations are both fetching a transfer
     
     public func process(transferIDs: [String]) -> Promise<Void> {
-        var transfers = transferIDs.compactMap(IMFileTransferCenter.sharedInstance().transfer(forGUID:)).filter { transfer in
-            transfer.state == .waitingForAccept
-        }
-        
-        guard transfers.count > 0 else {
-            return .success(())
-        }
-        
-        var supplemented: [Promise<Void>] = []
-        
-        for transfer in transfers {
-            if let pendingPromise = processingTransfers[transfer.guid] {
-                supplemented.append(pendingPromise) // add pending promise, to be lumped together with the new operations
-                transfers.removeAll(where: { $0 == transfer }) // remove already-in-progress transfer so we dont process it
+        let (transfers, supplemented) = transferIDs
+            .compactMap(IMFileTransferCenter.sharedInstance().transfer(forGUID:))
+            .filter { transfer in
+                transfer.state == .waitingForAccept && !transfer.canAutoDownload && maxBytes > transfer.totalBytes
+            }.splitReduce(intoLeft: [IMFileTransfer](), intoRight: [Promise<Void>]()) { transfers, promises, transfer in
+                if let pendingPromise = processingTransfers[transfer.guid] {
+                    promises.append(pendingPromise) // existing download in progress, return that instead
+                } else {
+                    transfers.append(transfer) // clear for takeoff
+                }
             }
-        }
         
         guard transfers.count > 0 else {
             if supplemented.count > 0 {
