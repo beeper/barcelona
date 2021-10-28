@@ -177,6 +177,7 @@ targets:
       - package: SwiftyTextTable
       - package: LineNoise
       - package: SwiftCLI
+      - package: Yammit
       - target: Barcelona
         embed: true
         link: true

@@ -9,7 +9,7 @@
 import Foundation
 import IMCore
 
-extension IMMessageItem {
+public extension IMMessageItem {
     var chatItems: [IMChatItem] {
         let items = _newChatItems()
         
