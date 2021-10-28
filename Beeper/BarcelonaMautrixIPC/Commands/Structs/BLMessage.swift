@@ -32,8 +32,6 @@ private extension Message {
                 if let fallbackText = item.fallback?.text {
                     text.append(fallbackText)
                 }
-            case let item as PhantomChatItem:
-                text.append("`Unknown item \(item.className)`")
             default:
                 break
             }
@@ -90,6 +88,16 @@ public struct BLMessage: Codable, ChatResolvable {
                 }
             default:
                 continue
+            }
+        }
+    }
+    
+    public init(message: Message, phantoms: inout [PhantomChatItem]) {
+        self.init(message: message)
+        
+        for item in message.items {
+            if let phantom = item.item as? PhantomChatItem {
+                phantoms.append(phantom)
             }
         }
     }
