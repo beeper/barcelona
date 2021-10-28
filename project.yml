@@ -187,6 +187,9 @@ targets:
       - target: BarcelonaJS
         embed: true
         link: true
+      - target: BarcelonaMautrixIPC
+        embed: true
+        link: true
   imserver:
     group: Tools
     type: tool

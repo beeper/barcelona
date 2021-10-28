@@ -14,6 +14,7 @@ import OSLog
 import IMDPersistence
 import SwiftyTextTable
 import IMCore
+import BarcelonaMautrixIPC
 
 private extension String {
     init(debugDescribing value: Any) {
@@ -61,8 +62,10 @@ class DebugCommands: CommandGroup {
     let name = "debug"
     let shortDescription = "commands useful when debugging barcelona"
     
+    
     class DebugEventsCommand: BarcelonaCommand {
         let name = "events"
+        @Flag("--mautrix") var asMautrix: Bool
         
         init() {
             LoggingDrivers = []
@@ -80,6 +83,9 @@ class DebugCommands: CommandGroup {
             
             CBDaemonListener.shared.messagePipeline.pipe { message in
                 print(message.dump)
+                if self.asMautrix {
+                    print(BLMessage(message: message).dump)
+                }
             }
             
             CBDaemonListener.shared.messageStatusPipeline.pipe { status in
