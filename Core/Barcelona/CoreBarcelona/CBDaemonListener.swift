@@ -285,12 +285,13 @@ private extension CBDaemonListener {
             return
         }
         
-        let unreadCount = (dict["unreadCount"] as? NSNumber)?.intValue ?? 0
-        let previousUnreadCount = previousUnreadCount(forChatIdentifier: chatIdentifier)
-        unreadCounts[chatIdentifier] = unreadCount
-        
-        if emitIfNeeded && previousUnreadCount != unreadCount {
-            unreadCountPipeline.send((chatIdentifier, unreadCount))
+        if let unreadCount = (dict["unreadCount"] as? NSNumber)?.intValue {
+            let previousUnreadCount = previousUnreadCount(forChatIdentifier: chatIdentifier)
+            unreadCounts[chatIdentifier] = unreadCount
+            
+            if emitIfNeeded && previousUnreadCount != unreadCount {
+                unreadCountPipeline.send((chatIdentifier, unreadCount))
+            }
         }
         
         let displayName = dict["displayName"] as? String
