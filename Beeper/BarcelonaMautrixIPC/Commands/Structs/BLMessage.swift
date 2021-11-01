@@ -56,7 +56,7 @@ public struct BLMessage: Codable, ChatResolvable {
     
     public init(message: Message) {
         guid = message.id
-        timestamp = message.time
+        timestamp = message.time / 1000 // mautrix-imessage expects this to be seconds
         subject = message.subject
         text = message.textContent
         chat_guid = IMChat.resolve(withIdentifier: message.chatID)!.guid!
