@@ -16,6 +16,6 @@ public extension Date {
     }
     
     var timeIntervalSinceReferenceDateForDatabase: Int {
-        Int(timeIntervalSinceReferenceDate) * 1000000000
+        Int(timeIntervalSinceReferenceDate * 1000000000)
     }
 }
