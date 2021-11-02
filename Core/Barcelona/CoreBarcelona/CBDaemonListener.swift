@@ -423,16 +423,11 @@ private extension IMMessageItem {
         }
         
         var canBeFromOthers: Bool {
-            switch style {
-            case .groupChatStyle:
-                return false
-            default:
-                return true
-            }
+            style == .instantMessage
         }
         
         var fromMe: Bool {
-            if style == .groupChatStyle {
+            if style == .group {
                 return payload.type != .played
             } else {
                 switch payload.type {
@@ -460,7 +455,7 @@ private extension IMMessageItem {
                 return nil
             }
             
-            if style == .groupChatStyle {
+            if style == .group {
                 return resolveSenderID(inService: serviceStyle)
             } else {
                 return chat // chat identifier for DM is just the recipient

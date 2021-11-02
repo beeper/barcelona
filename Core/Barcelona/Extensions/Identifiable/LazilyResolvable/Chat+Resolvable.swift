@@ -11,10 +11,10 @@ import IMCore
 
 extension Chat: Resolvable, _ConcreteBasicResolvable {
     public static func resolve(withIdentifiers identifiers: [String]) -> [Chat] {
-        IMChat.resolve(withIdentifiers: identifiers).map(\.representation)
+        IMChat.resolve(withIdentifiers: identifiers).map(Chat.init(_:))
     }
 
     public static func resolve(withMessageGUID guid: String) -> Chat? {
-        IMChat.resolve(withMessageGUID: guid)?.representation
+        IMChat.resolve(withMessageGUID: guid).map(Chat.init(_:))
     }
 }

@@ -15,7 +15,7 @@ import os.log
 #endif
 
 public struct ChatSearchParameters: QueryParameters {
-    public init(identifiers: [String]? = nil, participants: [String]? = nil, display_name: String? = nil, read_receipts: Bool? = nil, ignore_alerts: Bool? = nil, style: Int? = nil, join_state: Int? = nil, services: [IMServiceStyle]? = nil, has_unread: Bool? = nil, has_failed: Bool? = nil, last_message_text: String? = nil, limit: Int? = nil, page: Int? = nil) {
+    public init(identifiers: [String]? = nil, participants: [String]? = nil, display_name: String? = nil, read_receipts: Bool? = nil, ignore_alerts: Bool? = nil, style: IMChatStyle? = nil, join_state: Int? = nil, services: [IMServiceStyle]? = nil, has_unread: Bool? = nil, has_failed: Bool? = nil, last_message_text: String? = nil, limit: Int? = nil, page: Int? = nil) {
         self.identifiers = identifiers
         self.participants = participants
         self.display_name = display_name
@@ -42,7 +42,7 @@ public struct ChatSearchParameters: QueryParameters {
     /// Narrow the results to chats with the given DND state
     public var ignore_alerts: Bool?
     /// Narrow the results to chats with the given style
-    public var style: Int?
+    public var style: IMChatStyle?
     /// Narrow the results to chats with the given join state
     public var join_state: Int?
     /// Narrow the results to chats with the given service
@@ -120,7 +120,7 @@ private enum ChatSearchParameter {
     case displayName(String)
     case readReceipts(Bool)
     case ignoreAlerts(Bool)
-    case style(Int)
+    case style(IMChatStyle)
     case joinState(Int)
     case services([IMServiceStyle])
     case hasUnread(Bool)
@@ -215,7 +215,7 @@ extension Chat: Searchable {
         
         var chats = IMChatRegistry.shared.allChats.filter {
             parameters.test($0)
-        }.map(\.representation)
+        }.map(Chat.init(_:))
         
         chats.sort { chat1, chat2 in
             chat1.lastMessageTime > chat2.lastMessageTime

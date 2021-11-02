@@ -42,7 +42,7 @@ public class JBLChat: NSObject, JBLChatJSExports {
     public init(chat: Chat) {
         id = chat.id
         name = chat.displayName
-        style = (ChatStyle(rawValue: chat.style) ?? .single).rawValue
+        style = chat.style.rawValue
         participants = chat.participants
         service = (chat.service ?? .SMS).rawValue
     }

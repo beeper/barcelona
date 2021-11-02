@@ -231,7 +231,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     }
     
     public var chat: Chat {
-        imChat.representation
+        Chat(imChat)
     }
     
     public var associableItemIDs: [String] {

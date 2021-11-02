@@ -19,7 +19,7 @@ public extension IMChat {
             let guids = IMChatRegistry.shared._allGUIDs(forChat: self)! // for a group chat, or for merging centrics, we can just use the GUIDs that the chat registry provides
             
             for guid in guids {
-                var chatIdentifier: NSString?, service: NSString?, style = IMChatStyle.instantMessageChatStyle
+                var chatIdentifier: NSString?, service: NSString?, style = IMChatStyle.instantMessage
                 
                 IMComponentsFromChatGUID(guid, &chatIdentifier, &service, &style) // extract the chat identifier and service from the GUID and insert into the pairs
                 

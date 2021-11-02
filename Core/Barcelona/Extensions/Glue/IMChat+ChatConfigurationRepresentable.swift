@@ -9,12 +9,8 @@
 import Foundation
 import IMCore
 
-public extension IMChat {
-    var representation: Chat {
-        Chat(self)
-    }
-    
-    var readReceipts: Bool {
+extension IMChat: ChatConfigurationRepresentable {
+    public var readReceipts: Bool {
         get {
             value(forChatProperty: "EnableReadReceiptForChat") as? Bool ?? false
         }
@@ -23,7 +19,7 @@ public extension IMChat {
         }
     }
     
-    var ignoreAlerts: Bool {
+    public var ignoreAlerts: Bool {
         get {
             value(forChatProperty: "ignoreAlertsFlag") as? Bool ?? false
         }
@@ -32,7 +28,7 @@ public extension IMChat {
         }
     }
     
-    var groupPhotoID: String? {
+    public var groupPhotoID: String? {
         get {
             if #available(iOS 14, macOS 10.16, watchOS 7, *) {
                 return value(forChatProperty: IMGroupPhotoGuidKey) as? String
@@ -46,13 +42,5 @@ public extension IMChat {
                 sendGroupPhotoUpdate(newValue)
             }
         }
-    }
-    
-    var properties: ChatConfigurationRepresentation {
-        ChatConfigurationRepresentation(id: id, readReceipts: readReceipts, ignoreAlerts: ignoreAlerts, groupPhotoID: groupPhotoID)
-    }
-    
-    var representableParticipantIDs: BulkHandleIDRepresentation {
-        BulkHandleIDRepresentation(handles: participantHandleIDs())
     }
 }

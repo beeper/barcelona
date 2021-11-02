@@ -75,7 +75,7 @@ public class ChatEvents: EventDispatcher {
         }
         
         debouncer.submit(chat.id, category: .chatProperties) {
-            self.bus.dispatch(.conversationPropertiesChanged(chat.properties))
+            self.bus.dispatch(.conversationPropertiesChanged(chat.configurationBits))
         }
     }
     
@@ -86,7 +86,7 @@ public class ChatEvents: EventDispatcher {
         }
         
         debouncer.submit(chat.id, category: .unreadCount) {
-            self.bus.dispatch(.conversationUnreadCountChanged(chat.representation))
+            self.bus.dispatch(.conversationUnreadCountChanged(Chat(chat)))
         }
     }
     
@@ -98,7 +98,7 @@ public class ChatEvents: EventDispatcher {
         }
         
         ERTimeSortedParticipantsManager.sharedInstance.bootstrap(chat: chat).then {
-            self.bus.dispatch(.conversationCreated(chat.representation))
+            self.bus.dispatch(.conversationCreated(Chat(chat)))
         }
     }
     
@@ -135,7 +135,7 @@ public class ChatEvents: EventDispatcher {
         
         chat.scheduleForReview()
         
-        bus.dispatch(.conversationDisplayNameChanged(chat.representation))
+        bus.dispatch(.conversationDisplayNameChanged(Chat(chat)))
     }
     
     // MARK: - IMChat join state changed
@@ -147,7 +147,7 @@ public class ChatEvents: EventDispatcher {
         
         chat.scheduleForReview()
         
-        bus.dispatch(.conversationJoinStateChanged(chat.representation))
+        bus.dispatch(.conversationJoinStateChanged(Chat(chat)))
     }
     
     private func chatDidRefresh(_ notification: Notification) {

@@ -189,9 +189,8 @@ const FZListenerCapabilities
 NSString * JWUUIDPushObjectToString(NSData * data);
 
 typedef NS_ENUM(UInt8, IMChatStyle) {
-    IMInstantMessageChatStyle = '-',
-    IMGroupChatStyle          = '+',
-    IMRoomChatStyle           = '#',
+    IMChatStyleInstantMessage = '-',
+    IMChatStyleGroup          = '+'
 };
 
 void IMComponentsFromChatGUID(NSString *guid, NSString **chatIdentifier, NSString **service, IMChatStyle *style);

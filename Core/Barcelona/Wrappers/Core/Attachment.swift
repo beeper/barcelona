@@ -7,13 +7,8 @@
 //
 
 import Foundation
-import IMCore
-import AVFoundation
-import ImageIO
-import CoreServices
-import Swime
-import IMDPersistence
 import BarcelonaDB
+import IMCore
 
 public struct Size: Codable, Hashable {
     public var width: Float

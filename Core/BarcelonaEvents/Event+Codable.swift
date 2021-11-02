@@ -140,7 +140,7 @@ extension Event: Codable {
     	case .conversationUnreadCountChanged:
 			self = .conversationUnreadCountChanged(try container.decode(Chat.self, forKey: .payload))
     	case .conversationPropertiesChanged:
-			self = .conversationPropertiesChanged(try container.decode(ChatConfigurationRepresentation.self, forKey: .payload))
+			self = .conversationPropertiesChanged(try container.decode(ChatConfiguration.self, forKey: .payload))
     	case .contactCreated:
 			self = .contactCreated(try container.decode(Contact.self, forKey: .payload))
     	case .contactRemoved:

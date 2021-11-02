@@ -26,7 +26,7 @@ public enum Event {
     case conversationDisplayNameChanged(Chat)
     case conversationJoinStateChanged(Chat)
     case conversationUnreadCountChanged(Chat)
-    case conversationPropertiesChanged(ChatConfigurationRepresentation)
+    case conversationPropertiesChanged(ChatConfiguration)
     case contactCreated(Contact)
     /// Contains the ID of the removed contact
     case contactRemoved(String)
@@ -34,7 +34,7 @@ public enum Event {
     case blockListUpdated(BulkHandleIDRepresentation)
 }
 
-public struct BootstrapData: Codable, Hashable, BulkChatRepresentatable {
+public struct BootstrapData: Codable, Hashable {
     public struct BootstrapOptions {
         var chatLimit: Int?
         var contactLimit: Int?

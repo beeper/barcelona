@@ -11,95 +11,58 @@ import IMSharedUtilities
 import BarcelonaDB
 import IMCore
 
-public enum ChatStyle: UInt8 {
-    case group = 0x2b
-    case single = 0x2d
-}
-
-public protocol BulkChatRepresentatable {
-    var chats: [Chat] { get set }
-}
-
-public enum MessagePartType: String, Codable {
-    case text
-    case attachment
-    case breadcrumb
-}
-
-public struct MessagePart: Codable {
-    public var type: MessagePartType
-    public var details: String
-    public var attributes: [TextPartAttribute]?
-    
-    public init(type: MessagePartType, details: String, attributes: [TextPartAttribute]? = nil) {
-        self.type = type
-        self.details = details
-        self.attributes = attributes
-    }
-}
-
-public protocol MessageIdentifiable {
-    var id: String { get set }
-}
+private let log = Logger(category: "Chat")
 
 public protocol ChatConfigurationRepresentable {
+    var id: String { get }
     var readReceipts: Bool { get set }
     var ignoreAlerts: Bool { get set }
     var groupPhotoID: String? { get set }
 }
 
-public struct ChatConfigurationRepresentation: Codable, Hashable, ChatConfigurationRepresentable {
+public extension ChatConfigurationRepresentable {
+    var configurationBits: ChatConfiguration {
+        ChatConfiguration(id: id, readReceipts: readReceipts, ignoreAlerts: ignoreAlerts, groupPhotoID: groupPhotoID)
+    }
+}
+
+public struct ChatConfiguration: Codable, Hashable, ChatConfigurationRepresentable {
     public var id: String
     public var readReceipts: Bool
     public var ignoreAlerts: Bool
     public var groupPhotoID: String?
 }
 
-public struct DeleteMessage: Codable, MessageIdentifiable {
-    public var id: String
-    public var parts: [Int]?
-    
-    public init(id: String, parts: [Int]? = nil) {
-        self.id = id
-        self.parts = parts
-    }
-}
-
-extension MessageIdentifiable {
-    public func chat() -> Promise<Chat?> {
-        Chat.chat(forMessage: id)
-    }
-}
-
-public struct DeleteMessageRequest: Codable {
-    public var messages: [DeleteMessage]
-    
-    public init(messages: [DeleteMessage]) {
-        self.messages = messages
-    }
-}
-
-public struct TapbackCreation: Codable {
-    public var item: String
-    public var message: String
-    public var type: Int
-    
-    public init(item: String, message: String, type: Int) {
-        self.item = item
-        self.message = message
-        self.type = type
-    }
-}
-
-private let log = Logger(category: "Chat")
-
 public protocol ChatDelegate {
     func chat(_ chat: Chat, willSendMessages messages: [IMMessage], fromCreateMessage createMessage: CreateMessage) -> Void
     func chat(_ chat: Chat, willSendMessages messages: [IMMessage], fromCreatePluginMessage createPluginMessage: CreatePluginMessage) -> Void
 }
 
+extension IMChatStyle: Codable {
+    public init(from decoder: Decoder) throws {
+        self.init(rawValue: try RawValue.init(from: decoder))!
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        try rawValue.encode(to: encoder)
+    }
+}
+
+extension IMChatStyle: Hashable {
+    public static func == (lhs: IMChatStyle, rhs: IMChatStyle) -> Bool {
+        lhs.rawValue == rhs.rawValue
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        rawValue.hash(into: &hasher)
+    }
+}
+
 // (bl-api-exposed)
 public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
+    /// Useful for adding application-specific behavior, allows you to hook into different APIs on Chat (like sending)
+    public static var delegate: ChatDelegate?
+    
     public init(_ backing: IMChat) {
         joinState = backing.joinState
         roomName = backing.roomName
@@ -117,6 +80,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
         groupPhotoID = backing.groupPhotoID
     }
     
+    /// Resolves the chat an IMMessage was sent from
     public static func chat(forMessage id: String) -> Promise<Chat?> {
         IMChat.chat(forMessage: id).maybeMap { chat in
             Chat(chat)
@@ -133,12 +97,10 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     public var service: IMServiceStyle?
     public var lastMessage: String?
     public var lastMessageTime: Double
-    public var style: UInt8
+    public var style: IMChatStyle
     public var readReceipts: Bool
     public var ignoreAlerts: Bool
     public var groupPhotoID: String?
-    
-    public static var delegate: ChatDelegate?
     
     mutating func setTimeSortedParticipants(participants: [HandleTimestampRecord]) {
         self.participants = participants
@@ -146,52 +108,9 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
             .filter(self.participants.contains)
     }
     
+    /// The underlying IMChat this Chat was created from
     public var imChat: IMChat {
         IMChat.resolve(withIdentifier: id)!
-    }
-}
-
-public extension IMAccountController {
-    static var shared: IMAccountController {
-        __sharedInstance()
-    }
-    
-    /// Returns an iMessage account
-    var iMessageAccount: IMAccount? {
-        __activeIMessageAccount ?? accounts.first(where: {
-            $0.service?.id == .iMessage
-        })
-    }
-}
-
-// MARK: - Utilities
-internal extension Chat {
-    static func handlesAreiMessageEligible(_ handles: [String]) -> Bool {
-        guard let statuses = try? BLResolveIDStatusForIDs(handles, onService: .iMessage) else {
-            return false
-        }
-        
-        return statuses.values.allSatisfy {
-            $0 == .available
-        }
-    }
-    
-    static func iMessageHandle(forID id: String) -> IMHandle? {
-        IMAccountController.shared.iMessageAccount?.imHandle(withID: id)
-    }
-    
-    static func homogenousHandles(forIDs ids: [String]) -> [IMHandle] {
-        if handlesAreiMessageEligible(ids) {
-            return ids.compactMap(iMessageHandle(forID:))
-        }
-        
-        let account = IMAccountController.shared.activeSMSAccount ?? IMAccount(service: IMServiceStyle.SMS.service!)!
-        
-        return ids.map(account.imHandle(withID:))
-    }
-    
-    static func bestHandle(forID id: String) -> IMHandle {
-        homogenousHandles(forIDs: [id]).first!
     }
 }
 
@@ -201,10 +120,12 @@ public extension Chat {
         IMChatRegistry.shared.allChats.lazy.map(Chat.init(_:))
     }
     
+    /// Returns a chat targeted at the appropriate service for a handleID
     static func directMessage(withHandleID handleID: String) -> Chat {
         Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID)))
     }
     
+    /// Returns a chat targeted at the appropriate service for a set of handleIDs
     static func chat(withHandleIDs handleIDs: [String]) -> Chat {
         guard handleIDs.count > 0 else {
             preconditionFailure("chat(withHandleIDs) requires at least one handle ID to be non-null return type")
@@ -226,20 +147,6 @@ extension Thread {
 
 // MARK: - Message Sending
 public extension Chat {
-    var isTyping: Bool {
-        get {
-            imChat.localUserIsTyping
-        }
-        set {
-            setTyping(newValue)
-        }
-    }
-    
-    
-    func setTyping(_ typing: Bool) {
-        imChat.localUserIsTyping = typing
-    }
-    
     func messages(before: String? = nil, limit: Int? = nil, beforeDate: Date? = nil) -> Promise<[Message]> {
         if BLIsSimulation {
             let guids: [String] = imChat.chatItemRules._items().compactMap { item in
@@ -263,78 +170,16 @@ public extension Chat {
             $0 as? Message
         }
     }
-    
-    func delete(message: DeleteMessage) -> Promise<Void> {
-        let guid = message.id, parts = message.parts ?? []
-        let fullMessage = parts.count == 0
-        
-        return IMMessage.lazyResolve(withIdentifier: guid).then { message -> Void in
-            guard let message = message else {
-                return
-            }
-            
-            if fullMessage {
-                IMDaemonController.shared().deleteMessage(withGUIDs: [guid], queryID: NSString.stringGUID())
-            } else {
-                let chatItems = self.imChat.chatItems(for: [message._imMessageItem]) ?? []
-                
-                let items: [IMChatItem] = parts.compactMap {
-                    if chatItems.count <= $0 { return nil }
-                    return chatItems[$0]
-                }
-                
-                let newItem = self.imChat.chatItemRules._item(withChatItemsDeleted: items, fromItem: message._imMessageItem)!
-                
-                IMDaemonController.shared().updateMessage(newItem)
-            }
-        }
-    }
-    
-    func send(message options: CreatePluginMessage) throws -> Message {
-        let message = try options.imMessage(inChat: self.id)
-        
-        Chat.delegate?.chat(self, willSendMessages: [message], fromCreatePluginMessage: options)
-        
-        Thread.main.sync {
-            imChat.send(message)
-        }
-        
-        return Message(messageItem: message._imMessageItem, chatID: imChat.id)
-    }
-    
-    func send(message createMessage: CreateMessage) throws -> Message {
-        let message = try createMessage.imMessage(inChat: self.id)
-            
-        Chat.delegate?.chat(self, willSendMessages: [message], fromCreateMessage: createMessage)
-        
-        Thread.main.sync {
-            imChat.send(message)
-        }
-        
-        return Message(messageItem: message._imMessageItem, chatID: imChat.id)
-    }
-    
-    func tapback(_ creation: TapbackCreation) throws -> Message {
-        let message = try imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil)
-        
-        return Message(messageItem: message._imMessageItem, chatID: imChat.id)
-    }
 }
 
 public extension Chat {
     var participantIDs: BulkHandleIDRepresentation {
         BulkHandleIDRepresentation(handles: participants)
     }
-}
 
-public extension Chat {
     var participantNames: [String] {
         participants.map {
             Registry.sharedInstance.imHandle(withID: $0)?.name ?? $0
         }
     }
-}
-
-func chatToRepresentation(_ backing: IMChat, skinny: Bool = false) -> Chat {
-    return .init(backing)
 }

@@ -16,6 +16,36 @@ private func additionalFlags(forCreation creation: CreateMessage) -> IMMessageFl
     return []
 }
 
+public enum MessagePartType: String, Codable {
+    case text
+    case attachment
+    case breadcrumb
+}
+
+public struct MessagePart: Codable {
+    public var type: MessagePartType
+    public var details: String
+    public var attributes: [TextPartAttribute]?
+    
+    public init(type: MessagePartType, details: String, attributes: [TextPartAttribute]? = nil) {
+        self.type = type
+        self.details = details
+        self.attributes = attributes
+    }
+}
+
+public struct TapbackCreation: Codable {
+    public var item: String
+    public var message: String
+    public var type: Int
+    
+    public init(item: String, message: String, type: Int) {
+        self.item = item
+        self.message = message
+        self.type = type
+    }
+}
+
 public struct CreateMessage: Codable, CreateMessageBase {
     public init(subject: String? = nil, parts: [MessagePart], isAudioMessage: Bool? = nil, flags: CLongLong? = nil, ballonBundleID: String? = nil, payloadData: String? = nil, expressiveSendStyleID: String? = nil, threadIdentifier: String? = nil, replyToPart: Int? = nil, replyToGUID: String? = nil) {
         self.subject = subject

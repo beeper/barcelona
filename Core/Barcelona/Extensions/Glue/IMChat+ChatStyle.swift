@@ -11,14 +11,10 @@ import IMCore
 
 public extension IMChat {
     var isGroup: Bool {
-        style == .group
+        chatStyle == .group
     }
     
     var isSingle: Bool {
-        style == .single
-    }
-    
-    var style: ChatStyle {
-        ChatStyle(rawValue: chatStyle)!
+        chatStyle == .instantMessage
     }
 }
