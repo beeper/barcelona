@@ -12,7 +12,7 @@ exports:
                        _IMDAreAllAliasesUnknown, _IMDAttachmentCopyAttachmentWithStickerPath, 
                        _IMDAttachmentCopyRecordIDsToDeleteWithLimit, _IMDAttachmentFindLargestAttachmentGUIDsForAttachmentClass, 
                        _IMDAttachmentFindLargestConversations, _IMDAttachmentFindLargestNonSyncedAttachmentGUIDs, 
-                       _IMDAttachmentMarkAllUnsuccessFullSyncAttachmentsAsNeedingSync, 
+                       _IMDAttachmentMarkAllUnsuccessFullSyncAttachmentsAsNeedingSync, _IMDCreateIMItemFromIMDMessageRecordRefWithAccountLookup,
                        _IMDAttachmentRecordAddAttachment, _IMDAttachmentRecordBulkCopy, 
                        _IMDAttachmentRecordBulkUpdate, _IMDAttachmentRecordClearDeleteTombStones, 
                        _IMDAttachmentRecordCopyAttachmentForGUID, _IMDAttachmentRecordCopyAttachmentForGUIDIsLegacyGUID, 

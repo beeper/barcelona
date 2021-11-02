@@ -24,6 +24,7 @@ exports:
                             _IMAddressBookPartialChangedPropertyKey,
                             _IMAddressBookPartialChangedUIDKey,
                             _IMGroupPhotoGuidKey,
+                            _IMChatPropertyGroupPhotoGUID,
                             _IMMessageCreateThreadIdentifierWithOriginatorGUID,
                             _IMAllowMessagesIniCloud, _IMAppBundleRootDirectory,
                             _IMAssociatedMessageDecodeGUID,

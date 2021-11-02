@@ -9,6 +9,15 @@
 import Foundation
 import IMCore
 
+@available(iOS 14, macOS 10.16, watchOS 7, *)
+private var guidKey: String {
+    if #available(iOS 15, macOS 10.17, watchOS 8, *) {
+        return IMChatPropertyGroupPhotoGUID
+    } else {
+        return IMGroupPhotoGuidKey
+    }
+}
+
 extension IMChat: ChatConfigurationRepresentable {
     public var readReceipts: Bool {
         get {
@@ -31,7 +40,7 @@ extension IMChat: ChatConfigurationRepresentable {
     public var groupPhotoID: String? {
         get {
             if #available(iOS 14, macOS 10.16, watchOS 7, *) {
-                return value(forChatProperty: IMGroupPhotoGuidKey) as? String
+                return value(forChatProperty: guidKey) as? String
             } else {
                 return nil
             }

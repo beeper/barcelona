@@ -58,13 +58,18 @@ void IMDEnsureSharedRecordStoreInitialized();
 //NSArray *_IMDSqlOperationGetRowsWithBindingBlock(IMDSqlOperation *, CFStringRef, dispatch_block_t);
 //NSArray *_IMDSqlOperationGetRowsForQueryWithBindingBlock(CFStringRef, NSError **, void (^)(id));
 void IMDSetIsRunningInDatabaseServerProcess(char);
-NSArray* IMDMessageRecordCopyMessagesForRowIDs(NSArray*);
-IMItem* IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve(id, id, id, id, id) CF_RETURNS_RETAINED;
-_Nullable CFArrayRef IMDMessageRecordCopyMessagesForGUIDs(id) CF_RETURNS_RETAINED;
-id IMDAttachmentRecordCopyAttachmentForGUID(CFStringRef) CF_RETURNS_RETAINED;
 
 typedef struct _IMDChatRecordStruct *IMDChatRecordRef;
 typedef struct _IMDMessageRecordStruct *IMDMessageRecordRef;
+
+NSArray* IMDMessageRecordCopyMessagesForRowIDs(NSArray*);
+
+IMItem * IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve(id messageRecord, NSString * inputHandleString, BOOL useAttachmentCache, NSString *(^serviceResolve)(NSString *account, NSString *serviceName)) NS_RETURNS_RETAINED API_DEPRECATED_WITH_REPLACEMENT("IMDCreateIMItemFromIMDMessageRecordRefWithAccountLookup", macos(10.0,10.16), ios(3.0, 14.0), watchos(1.0, 7.0));
+
+IMItem * IMDCreateIMItemFromIMDMessageRecordRefWithAccountLookup(id messageRecord, NSString * inputHandleString, BOOL useAttachmentCache, NSString *(^accountLookup)(NSString *account, NSString *serviceName)) NS_RETURNS_RETAINED API_AVAILABLE(macos(10.17), ios(15.0), watchos(8.0));
+
+_Nullable CFArrayRef IMDMessageRecordCopyMessagesForGUIDs(id) CF_RETURNS_RETAINED;
+id IMDAttachmentRecordCopyAttachmentForGUID(CFStringRef) CF_RETURNS_RETAINED;
 
 int64_t IMDMessageRecordGetIndentifierForMessageWithGUID(CFStringRef guid);
 IMDChatRecordRef IMDChatRecordCopyChatForMessageID(int64_t messageID) CF_RETURNS_RETAINED;
