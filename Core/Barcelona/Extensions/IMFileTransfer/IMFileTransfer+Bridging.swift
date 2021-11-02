@@ -9,6 +9,7 @@ import Foundation
 import IMSharedUtilities
 import CoreGraphics
 import AVFoundation
+import CoreServices
 
 internal extension IMFileTransfer {
     var ensuredUTI: CFString? {

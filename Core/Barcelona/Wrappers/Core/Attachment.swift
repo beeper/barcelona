@@ -8,6 +8,7 @@
 
 import Foundation
 import BarcelonaDB
+import CoreGraphics
 import IMCore
 
 public struct Size: Codable, Hashable {
