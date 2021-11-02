@@ -20,7 +20,7 @@ public struct BLAttachment: Codable {
         }
         
         mime_type = attachment.mime
-        file_name = attachment.filename ?? guid
-        path_on_disk = attachment.path!
+        file_name = attachment.name
+        path_on_disk = attachment.path
     }
 }

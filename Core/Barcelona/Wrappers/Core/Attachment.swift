@@ -15,94 +15,23 @@ import Swime
 import IMDPersistence
 import BarcelonaDB
 
-public struct BulkAttachmentRepresentation: Codable {
-    public init(attachments: [Attachment]) {
-        self.attachments = attachments
+public struct Size: Codable, Hashable {
+    public var width: Float
+    public var height: Float
+    
+    public init(cgSize: CGSize) {
+        width = abs(Float(cgSize.width))
+        height = abs(Float(cgSize.height))
     }
     
-    public var attachments: [Attachment]
-}
-
-
-
-internal extension IMFileTransfer {
-    var ensuredUTI: CFString? {
-        if let uti = type {
-            return uti as CFString
-        } else if let mime = mimeType {
-            return UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mime as CFString, nil)?.takeRetainedValue()
-        } else {
-            return nil
-        }
-    }
-    
-    var ensuredLocalPath: String? {
-        if let localPath = localPath {
-            return localPath
-        }
-        
-        if let path = BLLoadAttachmentPathForTransfer(withGUID: guid) {
-            self.localPath = path
-            return path
-        }
-        
-        return nil
-    }
-    
-    var ensuredLocalURL: URL! {
-        if let localURL = localURL {
-            return localURL
-        }
-        
-        if let localPath = ensuredLocalPath {
-            return URL(fileURLWithPath: localPath)
-        }
-        
-        return nil
-    }
-    
-    func ensureLocalPath() {
-        guard localPath != nil else {
-            self.localPath = self.ensuredLocalPath
-            return
-        }
-    }
-    
-    var mediaSize: Size? {
-        guard let uti = ensuredUTI else {
-            return nil
-        }
-        
-        if UTTypeConformsTo(uti, kUTTypeVideo) || UTTypeConformsTo(uti, kUTTypeMovie) {
-            guard let track = AVURLAsset(url: ensuredLocalURL).tracks(withMediaType: .video).first else {
-                return nil
-            }
-            
-            let size = track.naturalSize.applying(track.preferredTransform)
-            return .init(cgSize: size)
-        } else if UTTypeConformsTo(uti, kUTTypeImage) {
-            guard let source = CGImageSourceCreateWithURL(ensuredLocalURL as CFURL, nil) else {
-                return nil
-            }
-            
-            let propertiesOptions = [kCGImageSourceShouldCache: false] as CFDictionary
-            guard let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, propertiesOptions) as? [CFString: Any] else {
-                return nil
-            }
-            
-            if let width = properties[kCGImagePropertyWidth] as? CGFloat, let height = properties[kCGImagePropertyHeight] as? CGFloat {
-                return .init(width: width, height: height)
-            } else if let width = properties[kCGImagePropertyPixelWidth] as? CGFloat, let height = properties[kCGImagePropertyPixelHeight] as? CGFloat {
-                return .init(width: width, height: height)
-            }
-        }
-        
-        return nil
+    public init(width: CGFloat, height: CGFloat) {
+        self.width = abs(Float(width))
+        self.height = abs(Float(height))
     }
 }
 
 public struct Attachment: Codable, Hashable {
-    public init(mime: String? = nil, filename: String? = nil, id: String, uti: String? = nil, origin: ResourceOrigin? = nil, size: Size? = nil, sticker: StickerInformation? = nil) {
+    public init(mime: String? = nil, filename: String, id: String, uti: String? = nil, origin: ResourceOrigin? = nil, size: Size? = nil, sticker: StickerInformation? = nil) {
         self.mime = mime
         self.filename = filename
         self.id = id
@@ -137,99 +66,33 @@ public struct Attachment: Codable, Hashable {
     }
     
     public var mime: String?
-    public var filename: String?
+    public var filename: String
     public var id: String
+    public var originalGUID: String?
     public var uti: String?
     public var origin: ResourceOrigin?
     public var size: Size?
     public var sticker: StickerInformation?
     
-    public var path: String? {
-        IMFileTransferCenter.sharedInstance().transfer(forGUID: id, includeRemoved: false)?.localPath ?? BLLoadAttachmentPathForTransfer(withGUID: id)
-    }
-}
-
-public func CBInitializeFileTransfer(filename: String, path: URL) -> IMFileTransfer {
-    let guid = IMFileTransferCenter.sharedInstance().guidForNewOutgoingTransfer(withLocalURL: path)
-    
-    let transfer = IMFileTransferCenter.sharedInstance().transfer(forGUID: guid)!
-    transfer.transferredFilename = filename
-    
-    IMFileTransferCenter.sharedInstance().registerTransfer(withDaemon: guid)
-    
-    transfer.shouldForceArchive = true
-    IMFileTransferCenter.sharedInstance().sendTransfer(transfer)
-    
-    return transfer
-}
-
-public struct Size: Codable, Hashable {
-    public var width: Float
-    public var height: Float
-    
-    public init(cgSize: CGSize) {
-        width = abs(Float(cgSize.width))
-        height = abs(Float(cgSize.height))
+    public var url: URL {
+        URL(fileURLWithPath: filename)
     }
     
-    public init(width: CGFloat, height: CGFloat) {
-        self.width = abs(Float(width))
-        self.height = abs(Float(height))
-    }
-}
-
-public struct BarcelonaAttachment {
-    public var guid: String
-    public var originalGUID: String?
-    public var path: String
-    public var bytes: UInt64
-    public var incoming: Bool
-    public var mime: String?
-    public var uti: String?
-    public var origin: ResourceOrigin?
-    
-    private var account: IMAccount {
-        Registry.sharedInstance.iMessageAccount()!
-    }
-    
-    private var transferCenter: IMFileTransferCenter {
-        IMFileTransferCenter.sharedInstance()
-    }
-    
-    private var url: URL {
-        URL(fileURLWithPath: path)
-    }
-    
-    private var filename: String {
+    public var name: String {
         url.lastPathComponent
     }
     
-    var attachment: Attachment {
-        Attachment(mime: self.mime, filename: filename, id: guid, uti: uti, origin: origin, size: fileTransfer.mediaSize, sticker: fileTransfer.isSticker ? .init(fileTransfer.stickerUserInfo) : nil)
+    public var path: String {
+        url.path
     }
     
-    @usableFromInline
-    func registerFileTransferIfNeeded() {
-        let _ = fileTransfer
-    }
-    
-    var fileTransfer: IMFileTransfer {
-        if let transfer = transferCenter.transfer(forGUID: guid) {
-            guard let originalGUID = originalGUID, transferCenter.transfer(forGUID: originalGUID) == nil else {
-                return transfer
-            }
-        }
-        
-        return CBInitializeFileTransfer(filename: url.lastPathComponent, path: url)
+    public var fileTransfer: IMFileTransfer {
+        BLLoadFileTransfer(withGUID: id) ?? CBInitializeFileTransfer(filename: url.lastPathComponent, path: url)
     }
 }
 
-extension BarcelonaAttachment {
-    init?(guid: String) {
-        guard let transfer = IMFileTransferCenter.sharedInstance().transfer(forGUID: guid) else {
-            return nil
-        }
-        
-        self.init(guid: guid, originalGUID: transfer.originalGUID, path: transfer.localPath, bytes: transfer.totalBytes, incoming: transfer.isIncoming, mime: transfer.mimeType)
+internal extension Attachment {
+    @usableFromInline func registerFileTransferIfNeeded() {
+        _ = fileTransfer
     }
 }

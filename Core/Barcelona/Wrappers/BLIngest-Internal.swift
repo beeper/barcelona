@@ -51,7 +51,7 @@ internal func _BLLoadFileTransfers(forObjects objects: [NSObject]) -> Promise<Vo
     
     return DBReader.shared.attachments(withGUIDs: unloadedFileTransferGUIDs).endingOperation(operation) { attachments in
         operation.end("loaded %ld attachments", attachments.count)
-    }.compactMap(\.internalAttachment).forEach {
+    }.compactMap(\.attachment).forEach {
         $0.registerFileTransferIfNeeded()
     }
 }

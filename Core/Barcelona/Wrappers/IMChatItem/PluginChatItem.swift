@@ -39,7 +39,7 @@ public struct PluginChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
             break
         case "com.apple.messages.URLBalloonProvider":
             if let dataSource = item.dataSource {
-                if let metadata = dataSource.richLinkMetadata, let richLink = RichLinkRepresentation(metadata: metadata, attachments: item.internalAttachments) {
+                if let metadata = dataSource.richLinkMetadata, let richLink = RichLinkRepresentation(metadata: metadata, attachments: attachments) {
                     self.richLink = richLink
                 }
                 

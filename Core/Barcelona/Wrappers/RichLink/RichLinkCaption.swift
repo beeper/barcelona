@@ -11,7 +11,7 @@ import LinkPresentation
 import CoreGraphics
 
 struct RichLinkCaption: Codable, Hashable {
-    init(_ properties: LPCaptionBarPresentationProperties, attachments: [BarcelonaAttachment] = []) {
+    init(_ properties: LPCaptionBarPresentationProperties, attachments: [Attachment] = []) {
         if let aboveTop = properties.aboveTop, aboveTop.hasAnyContent {
             self.aboveTop = .init(aboveTop)
         }

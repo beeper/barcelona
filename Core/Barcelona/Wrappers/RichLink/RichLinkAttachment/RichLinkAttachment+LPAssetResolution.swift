@@ -17,7 +17,7 @@ private extension NSObject {
 
 extension RichLinkAttachment {
     /// Supports the RichLinkProvider substitution API
-    mutating func calculateAttachmentIndex(forAsset asset: LPAsset, attachments: [BarcelonaAttachment]) {
+    mutating func calculateAttachmentIndex(forAsset asset: LPAsset, attachments: [Attachment]) {
         switch asset.theClassName {
         case "RichLinkAudioAttachmentSubstitute":
             fallthrough
@@ -36,7 +36,7 @@ extension RichLinkAttachment {
             break
         default:
             if let url = asset.fileURL, let index = attachments.firstIndex(where: {
-                $0.path == url.absoluteString
+                $0.url == url
             }) {
                 self.attachmentIndex = UInt64(index)
             }

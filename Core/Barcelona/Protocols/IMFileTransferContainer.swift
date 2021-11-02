@@ -14,7 +14,6 @@ protocol IMFileTransferContainer {
     var fileTransferGUIDs: [String] { get }
     var attachments: [Attachment] { get }
     var unloadedFileTransferGUIDs: [String] { get }
-    var internalAttachments: [BarcelonaAttachment] { get }
 }
 
 extension IMFileTransferContainer {
@@ -30,10 +29,5 @@ extension IMFileTransferContainer {
         fileTransferGUIDs.compactMap {
             Attachment(guid: $0)
         }
-    }
-    
-    @usableFromInline
-    var internalAttachments: [BarcelonaAttachment] {
-        BarcelonaAttachment.resolve(withIdentifiers: fileTransferGUIDs)
     }
 }

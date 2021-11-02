@@ -10,7 +10,7 @@ import Foundation
 import LinkPresentation
 
 struct RichLinkAudio: Codable, Hashable, RichLinkAttachment {
-    init(_ audio: LPAudio, attachments: [BarcelonaAttachment]) {
+    init(_ audio: LPAudio, attachments: [Attachment]) {
         calculateAttachmentIndex(forAsset: audio, attachments: attachments)
         accessibilityText = audio.properties?.accessibilityText
         streamingURL = audio.streamingURL?.absoluteString

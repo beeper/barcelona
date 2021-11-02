@@ -231,10 +231,14 @@ private let _IMFileTransferFromIMDAttachmentRecordRef = "IMFileTransferFromIMDAt
 
 internal let IMFileTransferFromIMDAttachmentRecordRef = unsafeBitCast(_IMFileTransferFromIMDAttachmentRecordRef, to: IMFileTransferFromIMDAttachmentRecordRefType.self)
 
-public func BLLoadAttachmentPathForTransfer(withGUID guid: String) -> String? {
+internal func BLLoadFileTransfer(withGUID guid: String) -> IMFileTransfer? {
     guard let attachment = IMDAttachmentRecordCopyAttachmentForGUID(guid as CFString) else {
         return nil
     }
     
-    return IMFileTransferFromIMDAttachmentRecordRef(attachment)?.localPath
+    return IMFileTransferFromIMDAttachmentRecordRef(attachment)
+}
+
+public func BLLoadAttachmentPathForTransfer(withGUID guid: String) -> String? {
+    BLLoadFileTransfer(withGUID: guid)?.localPath
 }

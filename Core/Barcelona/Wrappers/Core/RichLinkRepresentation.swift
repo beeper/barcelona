@@ -49,7 +49,7 @@ private extension LPLinkMetadata {
 
 /// Codable representation of a rich link
 public struct RichLinkRepresentation: Codable, Hashable {
-    init?(metadata: LPLinkMetadata, attachments: [BarcelonaAttachment]) {
+    init?(metadata: LPLinkMetadata, attachments: [Attachment]) {
         guard let properties = metadata.presentationProperties else {
             return nil
         }

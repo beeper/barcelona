@@ -11,27 +11,13 @@ import BarcelonaDB
 
 // MARK: - Begin Deprecated
 internal extension RawAttachment {
-    /// Constructs an internal attachment representation centered around a resource origin
-    /// - Parameter origin: origin to pass to the internal attachment
-    /// - Returns: an internal attachment object
     @usableFromInline
-    var internalAttachment: BarcelonaAttachment? {
+    var attachment: Attachment? {
         guard let guid = guid, let path = filename as NSString? else {
             return nil
         }
         
-        return BarcelonaAttachment(guid: guid, originalGUID: original_guid, path: path.expandingTildeInPath, bytes: UInt64(total_bytes ?? 0), incoming: (is_outgoing ?? 0) == 0, mime: mime_type, uti: uti, origin: origin)
-    }
-    
-    @usableFromInline
-    var attachment: Attachment? {
-        internalAttachment?.attachment
+        return Attachment(mime: mime_type, filename: path.expandingTildeInPath, id: guid, uti: uti, origin: origin, size: nil, sticker: nil)
     }
 }
 // MARK: - End Deprecated
-
-extension BarcelonaAttachment: LazilyResolvable, ConcreteLazilyBasicResolvable {
-    public static func lazyResolve(withIdentifiers identifiers: [String]) -> Promise<[BarcelonaAttachment]> {
-        DBReader.shared.attachments(withGUIDs: identifiers).compactMap(\.internalAttachment)
-    }
-}

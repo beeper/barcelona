@@ -58,7 +58,7 @@
 - (void)stopTransfer:(id)arg1;
 - (void)acceptTransfer:(id)arg1;
 - (void)acceptTransfer:(id)arg1 withPath:(id)arg2 autoRename:(BOOL)arg3 overwrite:(BOOL)arg4;
-- (void)sendTransfer:(id)arg1;
+- (void)sendTransfer:(IMFileTransfer* _Nonnull)arg1;
 - (IMFileTransfer*)transferForGUID:(NSString*)arg1 includeRemoved:(BOOL)arg2;
 - (IMFileTransfer*)transferForGUID:(NSString*)arg1;
 - (IMChat*)chatForTransfer:(id)arg1;
