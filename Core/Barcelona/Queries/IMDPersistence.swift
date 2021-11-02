@@ -150,7 +150,9 @@ private func ERResolveGUIDsForChat(withChatIdentifier chatIdentifier: String, af
     }
 }
 
-internal func BLLoadIMMessageItems(withGUIDs guids: [String]) -> [IMMessageItem] {
+// MARK: - API
+
+public func BLLoadIMMessageItems(withGUIDs guids: [String]) -> [IMMessageItem] {
     if guids.count == 0 {
         return []
     }
@@ -160,11 +162,9 @@ internal func BLLoadIMMessageItems(withGUIDs guids: [String]) -> [IMMessageItem]
     }
 }
 
-internal func BLLoadIMMessageItem(withGUID guid: String) -> IMMessageItem? {
+public func BLLoadIMMessageItem(withGUID guid: String) -> IMMessageItem? {
     BLLoadIMMessageItems(withGUIDs: [guid]).first
 }
-
-// MARK: - API
 
 public func BLLoadIMMessages(withGUIDs guids: [String]) -> [IMMessage] {
     BLLoadIMMessageItems(withGUIDs: guids).compactMap(IMMessage.message(fromUnloadedItem:))
@@ -228,10 +228,9 @@ private let IMDaemonCore = "/System/Library/PrivateFrameworks/IMDaemonCore.frame
 })!
 
 private let _IMFileTransferFromIMDAttachmentRecordRef = "IMFileTransferFromIMDAttachmentRecordRef".withCString ({ dlsym(IMDaemonCore, $0) })
+private let IMFileTransferFromIMDAttachmentRecordRef = unsafeBitCast(_IMFileTransferFromIMDAttachmentRecordRef, to: IMFileTransferFromIMDAttachmentRecordRefType.self)
 
-internal let IMFileTransferFromIMDAttachmentRecordRef = unsafeBitCast(_IMFileTransferFromIMDAttachmentRecordRef, to: IMFileTransferFromIMDAttachmentRecordRefType.self)
-
-internal func BLLoadFileTransfer(withGUID guid: String) -> IMFileTransfer? {
+public func BLLoadFileTransfer(withGUID guid: String) -> IMFileTransfer? {
     guard let attachment = IMDAttachmentRecordCopyAttachmentForGUID(guid as CFString) else {
         return nil
     }
