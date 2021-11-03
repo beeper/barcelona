@@ -207,8 +207,7 @@ extern NSString* IMMentionOriginalTextMention API_AVAILABLE(macos(10.16), ios(14
 extern NSString* IMMentionPrefixCharacter API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 extern NSString* IMMentionUnconfirmedDirectMention API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 
-extern NSString* IMGroupPhotoGuidKey API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0)) API_DEPRECATED("use IMChatPropertyGroupPhotoGUID", macos(10.16, 10.16), ios(14.0, 14.0), watchos(7.0, 7.0));
-extern NSString* IMChatPropertyGroupPhotoGUID API_AVAILABLE(macos(12.0), ios(15.0), watchos(8.0));
+extern NSString* IMGroupPhotoGuidKey API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 
 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0))
 NSString* IMMessageCreateThreadIdentifierWithOriginatorGUID(long long index, long long end, long long start, NSString* guid);

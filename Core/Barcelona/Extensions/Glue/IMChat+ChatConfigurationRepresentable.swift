@@ -11,11 +11,7 @@ import IMCore
 
 @available(iOS 14, macOS 10.16, watchOS 7, *)
 private var guidKey: String {
-    if #available(iOS 15, macOS 12.0, watchOS 8, *) {
-        return IMChatPropertyGroupPhotoGUID
-    } else {
-        return IMGroupPhotoGuidKey
-    }
+    IMGroupPhotoGuidKey
 }
 
 extension IMChat: ChatConfigurationRepresentable {
