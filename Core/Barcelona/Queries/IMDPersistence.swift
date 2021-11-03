@@ -58,11 +58,7 @@ private func BLCreateIMItemFromIMDMessageRecordRefs(_ refs: NSArray) -> [IMItem]
     }
     
     return refs.compactMap {
-        if #available(iOS 15, macOS 12.0, watchOS 8, *) {
-            return withinIMDQueue(IMDCreateIMItemFromIMDMessageRecordRefWithAccountLookup($0, nil, false, nil))
-        } else {
-            return withinIMDQueue(IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve($0, nil, false, nil))
-        }
+        withinIMDQueue(IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve($0, nil, false, nil))
     }
 }
 
