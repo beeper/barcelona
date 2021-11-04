@@ -140,7 +140,6 @@
 - (id)_createdChatForIMHandles:(id)arg1 style:(unsigned char)arg2 groupID:(id)arg3 displayName:(id)arg4 joinedChatsOnly:(BOOL)arg5;
 - (id)_createdChatForIMHandle:(id)arg1;
 - (id)_createdChatWithIdentifier:(id)arg1 style:(unsigned char)arg2 account:(id)arg3;
-- (NSArray<IMChat*>* _Nullable)_allCreatedChats;
 - (void)setUserActivityForChat:(id)arg1 message:(id)arg2 orHandles:(id)arg3 title:(id)arg4;
 - (id)_inPersonFromIMHandle:(id)arg1 isMe:(BOOL)arg2;
 - (id)_inPersonNameForContact:(id)arg1 imHandle:(id)arg2;

@@ -18,7 +18,7 @@ public extension IMChatRegistry {
         if BLIsSimulation {
             return simulatedChats as! [IMChat]
         } else {
-            return _allCreatedChats() ?? []
+            return allExistingChats ?? []
         }
     }
     
