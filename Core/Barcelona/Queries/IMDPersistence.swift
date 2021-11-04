@@ -44,6 +44,11 @@ private func withinIMDQueue<R>(_ exp: @autoclosure() -> R) -> R {
     #endif
 }
 
+private let IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve_imp: @convention(c) (Any?, Any?, Bool, Any?) -> IMItem? = CBWeakLink(against: .privateFramework(name: "IMDPersistence"), options: [
+    .symbol("IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve").preMonterey,
+    .symbol("IMDCreateIMItemFromIMDMessageRecordRefWithAccountLookup").monterey
+]) ?? { _,_,_,_ in nil }
+
 // MARK: - IMDPersistence
 private func BLCreateIMItemFromIMDMessageRecordRefs(_ refs: NSArray) -> [IMItem] {
     let operation = IMDLog.operation(named: "ERCreateIMItemFromIMDMessageRecordRefs").begin("converting %ld refs", refs.count)
@@ -58,7 +63,7 @@ private func BLCreateIMItemFromIMDMessageRecordRefs(_ refs: NSArray) -> [IMItem]
     }
     
     return refs.compactMap {
-        withinIMDQueue(IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve($0, nil, false, nil))
+        withinIMDQueue(IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve_imp($0, nil, false, nil))
     }
 }
 

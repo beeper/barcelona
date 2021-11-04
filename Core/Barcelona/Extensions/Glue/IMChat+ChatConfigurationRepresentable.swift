@@ -9,10 +9,13 @@
 import Foundation
 import IMCore
 
-@available(iOS 14, macOS 10.16, watchOS 7, *)
-private var guidKey: String {
-    IMGroupPhotoGuidKey
-}
+private let IMChatPropertyGroupPhotoGUID: NSString? = CBWeakLink(
+    against: .privateFramework(name: "IMSharedUtilities"),
+    options: [
+        .symbol("IMGroupPhotoGuidKey").bigSur.preMonterey,
+        .symbol("IMChatPropertyGroupPhotoGUID").monterey
+    ]
+)
 
 extension IMChat: ChatConfigurationRepresentable {
     public var readReceipts: Bool {
@@ -35,17 +38,15 @@ extension IMChat: ChatConfigurationRepresentable {
     
     public var groupPhotoID: String? {
         get {
-            if #available(iOS 14, macOS 10.16, watchOS 7, *) {
-                return value(forChatProperty: guidKey) as? String
-            } else {
-                return nil
-            }
+            IMChatPropertyGroupPhotoGUID.map(value(forChatProperty:)) as? String
         }
         set {
-            if #available(iOS 14, macOS 10.16, watchOS 7, *) {
-                setValue(newValue, forChatProperty: IMGroupPhotoGuidKey)
-                sendGroupPhotoUpdate(newValue)
+            guard let IMChatPropertyGroupPhotoGUID = IMChatPropertyGroupPhotoGUID, #available(macOS 11.0, iOS 14.0, watchOS 7.0, *) else {
+                return
             }
+            
+            setValue(newValue, forChatProperty: IMChatPropertyGroupPhotoGUID)
+            sendGroupPhotoUpdate(newValue)
         }
     }
 }

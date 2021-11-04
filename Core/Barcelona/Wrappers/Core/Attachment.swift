@@ -70,25 +70,30 @@ public struct Attachment: Codable, Hashable {
     public var size: Size?
     public var sticker: StickerInformation?
     
-    public var url: URL {
-        URL(fileURLWithPath: filename)
-    }
-    
     public var name: String {
-        url.lastPathComponent
+        filename
     }
     
-    public var path: String {
-        url.path
+    public var existingFileTransfer: IMFileTransfer? {
+        BLLoadFileTransfer(withGUID: id)
     }
     
-    public var fileTransfer: IMFileTransfer {
-        BLLoadFileTransfer(withGUID: id) ?? CBInitializeFileTransfer(filename: url.lastPathComponent, path: url)
+    public var path: String? {
+        existingFileTransfer?.localPath
     }
-}
-
-internal extension Attachment {
-    @usableFromInline func registerFileTransferIfNeeded() {
-        _ = fileTransfer
+    
+    public var url: URL? {
+        path.map(URL.init(fileURLWithPath:))
+    }
+    
+    @discardableResult
+    public func initializeFileTransferIfNeeded() -> IMFileTransfer? {
+        if let transfer = existingFileTransfer {
+            return transfer
+        } else if let url = url {
+            return CBInitializeFileTransfer(filename: filename, path: url)
+        } else {
+            return nil
+        }
     }
 }

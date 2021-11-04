@@ -15,12 +15,12 @@ public struct BLAttachment: Codable {
     public var path_on_disk: String
     
     public init?(guid: String) {
-        guard let attachment = Attachment(guid: guid) else {
+        guard let attachment = Attachment(guid: guid), let path = attachment.path else {
             return nil
         }
         
         mime_type = attachment.mime
         file_name = attachment.name
-        path_on_disk = attachment.path
+        path_on_disk = path
     }
 }

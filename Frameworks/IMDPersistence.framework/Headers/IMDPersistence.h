@@ -64,7 +64,9 @@ typedef struct _IMDMessageRecordStruct *IMDMessageRecordRef;
 
 NSArray* IMDMessageRecordCopyMessagesForRowIDs(NSArray*);
 
-IMItem * IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve(id messageRecord, NSString * inputHandleString, BOOL useAttachmentCache, NSString *(^serviceResolve)(NSString *account, NSString *serviceName)) NS_RETURNS_RETAINED;
+IMItem * IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve(id messageRecord, NSString * inputHandleString, BOOL useAttachmentCache, NSString *(^serviceResolve)(NSString *account, NSString *serviceName)) API_DEPRECATED("", macos(10.0,12.0), ios(3.0,15.0),watchos(1.0,8.0)) NS_RETURNS_RETAINED;
+
+IMItem * IMDCreateIMItemFromIMDMessageRecordRefWithAccountLookup(id messageRecord, NSString * inputHandleString, BOOL useAttachmentCache, NSString *(^accountLookup)(NSString *account, NSString *serviceName)) NS_RETURNS_RETAINED API_AVAILABLE(macos(12.0), ios(15.0), watchos(8.0));
 
 _Nullable CFArrayRef IMDMessageRecordCopyMessagesForGUIDs(id) CF_RETURNS_RETAINED;
 id IMDAttachmentRecordCopyAttachmentForGUID(CFStringRef) CF_RETURNS_RETAINED;
