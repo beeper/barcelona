@@ -27,7 +27,7 @@ extension SendMediaMessageCommand: Runnable {
         
         do {
             let message = try chat.send(message: messageCreation).partialMessage
-            BLMetricStore.shared.set([message.guid], forKey: .lastSentMessageGUIDs)
+            SendMessageCommand.suppressedGUIDs.insert(message.guid)
             
             NotificationCenter.default.subscribe(toNotificationsNamed: [.IMFileTransferUpdated, .IMFileTransferFinished]) { notif, sub in
                 guard let transfer = notif.object as? IMFileTransfer, transfer.guid == transferGUID else {

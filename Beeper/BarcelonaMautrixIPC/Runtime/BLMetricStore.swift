@@ -14,7 +14,6 @@ public class BLMetricStore {
     private init() {}
     
     public enum BLMetricKey: String, Codable {
-        case lastSentMessageGUIDs
         case shouldDebugPayloads
     }
     

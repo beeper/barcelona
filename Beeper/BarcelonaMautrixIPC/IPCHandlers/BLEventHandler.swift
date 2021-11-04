@@ -66,11 +66,9 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         }
         
         CBDaemonListener.shared.messagePipeline.pipe { message in
-            if message.fromMe, let lastSentMessageGUIDs = BLMetricStore.shared.get(typedValue: [String].self, forKey: .lastSentMessageGUIDs) {
-                guard !lastSentMessageGUIDs.contains(message.id) else {
-                    CLInfo("Mautrix", "Dropping last-sent message \(message.id)")
-                    return
-                }
+            if message.fromMe, SendMessageCommand.messageSent(withGUID: message.id) == .suppress {
+                CLInfo("Mautrix", "Dropping last-sent message \(message.id)")
+                return
             }
             
             if CBPurgedAttachmentController.shared.enabled {
