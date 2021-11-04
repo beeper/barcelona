@@ -133,6 +133,7 @@ struct LinkingOption: CustomDebugStringConvertible {
     }
 }
 
+/// Calls the necessary stdlib function to cast a pointer to a type
 private func cast<T>(_ pointer: UnsafeMutableRawPointer) -> T {
     if T.self is AnyObject.Type {
         return pointer.assumingMemoryBound(to: T.self).pointee
