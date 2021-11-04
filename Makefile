@@ -6,6 +6,19 @@ MACOS_DESTINATION = "generic/platform=macOS,name=Any Mac"
 IOS_DERIVED_DIR = $(BUILD_DIR)/iOS
 IOS_DESTINATION = "generic/platform=iOS,name=Any iOS Device"
 
+clean:
+	rm -rf barcelona.xcodeproj Build
+
+soft-clean:
+	rm -rf barcelona.xcodeproj
+
+init:
+	xcodegen generate
+	
+refresh:
+	rm -rf barcelona.xcodeproj
+	xcodegen generate
+
 scheme:
 	xcodebuild \
 		-project barcelona.xcodeproj \

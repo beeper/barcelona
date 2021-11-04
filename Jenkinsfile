@@ -3,8 +3,7 @@ pipeline {
     stages {
         stage('Prepare') {
             steps {
-                sh 'rm -rf barcelona.xcodeproj'
-                sh 'xcodegen generate'
+                sh 'make refresh'
             }
         }
         stage('Build') {
