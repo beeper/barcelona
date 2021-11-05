@@ -2,6 +2,8 @@
 
 ## Preparing your environment
 
+> Heads up - Barcelona requires you to disable AMFI, SIP, and weaken security around what processes can communicate with system services. This is inheritently unsafe, and there's a reason this is not enabled by default. However, there is no other way at this time to cleanly and persistently get this level of access to the daemons. If you are uncomfortable with this, then Barcelona is not for you. Barcelona is designed from the start to run on weakened systems, and there are no plans to attempt to support factory-default macOS.
+
 ### AMFI & SIP
 Barcelona requires [AMFI](https://www.theiphonewiki.com/wiki/AppleMobileFileIntegrity) and [SIP](https://support.apple.com/en-us/HT204899) to be disabled so that it can communicate with IMDPersistenceAgent and imagent, among other AppleInternal daemons.
 
@@ -25,6 +27,9 @@ To disable AMFI on a Mac running Intel, run the following from your Terminal in 
 nvram boot-args='amfi_get_out_of_my_way=1'
 csrutil disable
 ```
+
+### XPC Security
+In order for Barcelona to communicate with IMDPersistenceAgent, you must install [com.apple.security.xpc.plist](com.apple.security.xpc.plist) to `/Library/Preferences/com.apple.security.xpc.plist`. This preference file instructs XPC services to allow non-Apple agents to connect to them. Obviously, this poses a security risk, as does disabling AMFI and SIP.
 
 After running these commands, restart your computer by either running `reboot` or clicking the Apple in the top left and clicking `Restart`.
 
