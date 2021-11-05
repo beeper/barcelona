@@ -11,21 +11,13 @@ These are not strict requirements – this project is simply only ensured to bu
 
 ### Building
 
-> Heads up! Barcelona requires `xcpretty` to build using the Makefiles. Install it using `sudo gem install xcpretty`
-
-| Host  | Grapple            | Mautrix            |
-|-------|--------------------|--------------------|
-| macOS | make grapple-macos | make mautrix-macos |
-| iOS   | make grapple-ios   | make mautrix-ios   |
+Prepare your system to build Barcelona by following the instructions at [BUILDING.md](BUILDING.md)
 
 Build products go to `./Build/(iOS|macOS)/Products/(Debug|Release)/(barcelona-mautrix|grapple)`
 
 ### Running
 
-Barcelona has three requirements to run correctly:
-
-- SIP must be disabled (`csrutil disable` from recovery mode)
-- AMFI must be disabled (`nvram boot-args=amfi_get_out_of_my_way=0x1`)
+Prepare your system to run Barcelona tools by following the instructions at [RUNNING.md](RUNNING.md)
 
 #### Grapple
 

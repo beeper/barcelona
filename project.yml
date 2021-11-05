@@ -5,6 +5,8 @@ fileGroups:
   - README.md
   - Makefile
   - Jenkinsfile
+  - BUILDING.md
+  - Scripts
 
 options:
   deploymentTarget:
