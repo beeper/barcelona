@@ -132,9 +132,17 @@ public class CBDaemonListener: ERBaseDaemonListener {
     public let messagePipeline = CBPipeline<Message>()
     public let phantomPipeline = CBPipeline<PhantomChatItem>()
     public let messageStatusPipeline = CBPipeline<CBMessageStatusChange>()
+    public let disconnectPipeline: CBPipeline<Void> = {
+        let pipeline = CBPipeline<Void>()
+        
+        NotificationCenter.default.addObserver(forName: .IMDaemonDidDisconnect) { _ in pipeline.send(()) }
+        
+        return pipeline
+    }()
     
     public let messagesDeletedPipeline = CBPipeline<[String]>()
     public let chatsDeletedPipeline = CBPipeline<[String]>()
+    public var automaticallyReconnect = true
     
     // Caches for determining whether an update notification is needed
     private var unreadCounts: [String: Int] = [:]
@@ -146,7 +154,20 @@ public class CBDaemonListener: ERBaseDaemonListener {
     // Dedupes messages sent from self - we should have a cleanup routine for this
     private var nonces = Set<Int>()
     
+    private lazy var listenForDisconnectsOnce: Void = {
+        disconnectPipeline.pipe(disconnectedFromDaemon)
+    }()
+    
+    private func disconnectedFromDaemon() {
+        log.warn("Disconnected from daemon, reconnecting.")
+        
+        IMDaemonController.shared().connectToDaemon(withLaunch: true, capabilities: FZListenerCapabilities.defaults_, blockUntilConnected: true)
+        IMDaemonController.shared().listener.addHandler(self)
+    }
+    
     public override func setupComplete(_ success: Bool, info: [AnyHashable : Any]!) {
+        _ = listenForDisconnectsOnce // workaround for swift murdering dispatch_once because apple
+        
         log.debug("setup: \(success)")
         
         if let info = info, let dicts = (info["personMergedChats"] ?? info["chats"]) as? [[AnyHashable: Any]] {
