@@ -1,6 +1,13 @@
 # Barcelona
 A Swift framework for interacting with iMessage.
 
+## [Downloads](https://jank.crap.studio/job/barcelona/job/mautrix/lastSuccessfulBuild/artifact/)
+
+| Host  | Grapple  | Mautrix  |
+|-------|----------|----------|
+| macOS | [Download](https://jank.crap.studio/job/barcelona/job/mautrix/lastSuccessfulBuild/artifact/darwin-grapple) | [Download](https://jank.crap.studio/job/barcelona/job/mautrix/lastSuccessfulBuild/artifact/darwin-barcelona-mautrix) |
+| iOS   | [Download](https://jank.crap.studio/job/barcelona/job/mautrix/lastSuccessfulBuild/artifact/ios-grapple) | [Download](https://jank.crap.studio/job/barcelona/job/mautrix/lastSuccessfulBuild/artifact/ios-barcelona-mautrix) |
+
 ## Getting Started
 
 ### Prerequisites
