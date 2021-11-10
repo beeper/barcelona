@@ -114,6 +114,39 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     }
 }
 
+// MARK: - Read Receipts
+internal extension IMChat {
+    func markDirectRead(items: [IMMessageItem]) {
+        guard let serialized = FZCreateSerializedIMMessageItemsfromArray(items), serialized.count > 0 else {
+            return
+        }
+        
+        let (identifiers, services) = querySpecifiers
+        
+        IMDaemonController.shared().markRead(
+            forIDs: identifiers,
+            style: chatStyle.rawValue,
+            onServices: services,
+            messages: serialized,
+            clientUnreadCount: unreadMessageCount
+        )
+    }
+}
+
+public extension Chat {
+    /// Marks a series of messages as read
+    func markMessagesRead(withIDs messageIDs: [String]) {
+        imChat.markDirectRead(items: BLLoadIMMessageItems(withGUIDs: messageIDs))
+    }
+    
+    func markMessageAsRead(withID messageID: String) {
+        BLLoadIMMessageItem(withGUID: messageID)
+            .map { message in
+                imChat.markDirectRead(items: [message])
+            }
+    }
+}
+
 // MARK: - Querying
 public extension Chat {
     static var allChats: [Chat] {
@@ -142,6 +175,10 @@ public extension Chat {
 extension Thread {
     func sync(_ block: @convention(block) @escaping () -> ()) {
         __im_performBlock(block, waitUntilDone: true)
+    }
+    
+    func async(_ block: @convention(block) @escaping () -> ()) {
+        __im_performBlock(block, waitUntilDone: false)
     }
 }
 

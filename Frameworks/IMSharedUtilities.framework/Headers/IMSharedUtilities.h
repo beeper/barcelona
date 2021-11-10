@@ -216,3 +216,5 @@ NSString* IMMessageCreateAssociatedMessageGUIDFromThreadIdentifier(NSString* ide
 NSArray<IMItem*> * FZCreateIMMessageItemsFromSerializedArray(NSArray * serialized) NS_RETURNS_RETAINED;
 
 BOOL IMSharedHelperPersonCentricMergingEnabled(void);
+
+NSArray * FZCreateSerializedIMMessageItemsfromArray(NSArray<IMMessageItem*> * imMessageItems) NS_RETURNS_RETAINED;
