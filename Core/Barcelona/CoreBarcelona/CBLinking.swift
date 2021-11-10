@@ -176,3 +176,13 @@ func CBWeakLink<T>(against target: CBLinkingTarget, _ symbol: LinkingOption) -> 
 func CBWeakLink<T>(against target: CBLinkingTarget, _ options: LinkingOption...) -> T? {
     CBWeakLink(against: target, options: options)
 }
+
+func CBSelectLinkingPath<Output>(_ paths: [[CBLinkerConstraint]: Output]) -> Output? {
+    for option in paths.keys {
+        if LinkingOption(constraints: option, symbol: "").safe {
+            return paths[option]!
+        }
+    }
+    
+    return nil
+}
