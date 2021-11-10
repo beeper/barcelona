@@ -36,11 +36,11 @@ extension GetGroupChatInfoCommand: Runnable {
 
 extension SendReadReceiptCommand: Runnable {
     public func run(payload: IPCPayload) {
-        guard let chat = chat else {
+        guard let chat = cbChat else {
             return payload.fail(strategy: .chat_not_found)
         }
         
-        chat.markAllMessagesAsRead()
+        chat.markMessageAsRead(withID: read_up_to)
     }
 }
 
