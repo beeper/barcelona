@@ -8,6 +8,25 @@
 import Foundation
 import IMCore
 
+private extension IMChatRegistry {
+    private static let allGUIDsWeakResolved: (IMChatRegistry) -> (IMChat) -> [String] = CBSelectLinkingPath([
+        [.monterey]: { registry in
+            return { chat in
+                registry.allGUIDs(forChat: chat)
+            }
+        },
+        [.preMonterey]: { registry in
+            return { chat in
+                registry._allGUIDs(forChat: chat)
+            }
+        }
+    ]) ?? { _ in { _ in [] } }
+    
+    func __cb_allGUIDs(forChat chat: IMChat) -> [String] {
+        IMChatRegistry.allGUIDsWeakResolved(self)(chat)
+    }
+}
+
 public extension IMChat {
     // Reconstruction of subroutine from IMCore that returns all chat identifiers and services to be used in IMDPersistence queries
     var querySpecifiers: (identifiers: [String], services: [String]) {
@@ -16,7 +35,7 @@ public extension IMChat {
         var pairs: Set<IMPair<NSString, NSString>> = Set() // IMPair produces a combinant hashable value suitable for deduping a pair of values
         
         if mergeCentrics || !isSingle {
-            let guids = IMChatRegistry.shared._allGUIDs(forChat: self)! // for a group chat, or for merging centrics, we can just use the GUIDs that the chat registry provides
+            let guids = IMChatRegistry.shared.__cb_allGUIDs(forChat: self) // for a group chat, or for merging centrics, we can just use the GUIDs that the chat registry provides
             
             for guid in guids {
                 var chatIdentifier: NSString?, service: NSString?, style = IMChatStyle.instantMessage
