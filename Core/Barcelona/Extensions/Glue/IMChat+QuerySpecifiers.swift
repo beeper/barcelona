@@ -9,21 +9,12 @@ import Foundation
 import IMCore
 
 private extension IMChatRegistry {
-    private static let allGUIDsWeakResolved: (IMChatRegistry) -> (IMChat) -> [String] = CBSelectLinkingPath([
-        [.monterey]: { registry in
-            return { chat in
-                registry.allGUIDs(forChat: chat)
-            }
-        },
-        [.preMonterey]: { registry in
-            return { chat in
-                registry._allGUIDs(forChat: chat)
-            }
-        }
-    ]) ?? { _ in { _ in [] } }
-    
     func __cb_allGUIDs(forChat chat: IMChat) -> [String] {
-        IMChatRegistry.allGUIDsWeakResolved(self)(chat)
+        if self.responds(to: #selector(allGUIDs(forChat:))) {
+            return allGUIDs(forChat: chat)
+        } else {
+            return _allGUIDs(forChat: chat)
+        }
     }
 }
 
