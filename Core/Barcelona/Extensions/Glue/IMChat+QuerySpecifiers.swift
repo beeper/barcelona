@@ -10,10 +10,28 @@ import IMCore
 
 private extension IMChatRegistry {
     func __cb_allGUIDs(forChat chat: IMChat) -> [String] {
-        if self.responds(to: #selector(allGUIDs(forChat:))) {
+        if self.responds(to: Selector("allGUIDsForChat:")) {
             return allGUIDs(forChat: chat)
-        } else {
+        } else if self.responds(to: Selector("_allGUIDsForChat:")) {
             return _allGUIDs(forChat: chat)
+        } else if self.responds(to: Selector("_chatGUIDToChatMap")) {
+            return _chatGUIDToChatMap().compactMap { id, chatCompare in
+                guard chat == chatCompare else {
+                    return nil
+                }
+                
+                return id
+            }
+        } else if self.responds(to: Selector("chatGUIDToChatMap")) {
+            return chatGUIDToChatMap().compactMap { id, chatCompare in
+                guard chat == chatCompare else {
+                    return nil
+                }
+                
+                return id
+            }
+        } else {
+            fatalError()
         }
     }
 }

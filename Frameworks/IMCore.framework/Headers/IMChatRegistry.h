@@ -85,7 +85,8 @@
 - (void)_chat:(id)arg1 handleCompletionOfQuery:(id)arg2 withUserInfo:(id)arg3 success:(BOOL)arg4 error:(id)arg5;
 - (void)_blockUntilQueriesComplete:(id)arg1;
 - (void)__blockUntilQueriesComplete;
-- (NSDictionary<NSString*, IMChat*>*)_chatGUIDToChatMap;
+- (NSDictionary<NSString*, IMChat*>*)_chatGUIDToChatMap; // removed in monterey
+- (NSDictionary<NSString*, IMChat*>*)chatGUIDToChatMap; // introduced in monterey
 - (NSArray<IMChat*>* _Nonnull)_chatsWithMessageGUID:(NSString*)arg1;
 - (id)_chatsWithMessage:(id)arg1;
 - (NSArray<NSString*>*)_allGUIDsForChat:(id)arg1; // removed in monterey
