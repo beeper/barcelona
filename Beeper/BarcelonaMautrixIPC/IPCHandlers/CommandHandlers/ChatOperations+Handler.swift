@@ -12,13 +12,9 @@ import IMCore
 
 extension GetChatsCommand: Runnable {
     public func run(payload: IPCPayload) {
-        payload.reply(withCommand: .response(.chats_resolved(IMChatRegistry.shared.allChats.filter { chat in
-            guard let lastMessage = chat.lastMessage else {
-                return false
-            }
-            
-            return lastMessage.time.timeIntervalSince1970 > self.min_timestamp
-        }.map { $0.guid })))
+        payload.reply(withResponse: .chats_resolved(IMChatRegistry.shared.allChats.filter { chat in
+            chat.lastFinishedMessageDate.timeIntervalSince1970 > min_timestamp
+        }.map(\.guid)))
     }
 }
 

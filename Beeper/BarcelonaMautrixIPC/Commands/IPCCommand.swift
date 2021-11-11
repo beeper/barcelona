@@ -88,6 +88,10 @@ public struct IPCPayload: Codable {
         BLWritePayload(IPCPayload(id: id, command: command))
     }
     
+    public func reply(withResponse response: IPCResponse) {
+        reply(withCommand: .response(response))
+    }
+    
     public func fail(code: String, message: String) {
         reply(withCommand: .error(.init(code: code, message: message)))
     }
