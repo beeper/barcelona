@@ -9,12 +9,23 @@
 import Foundation
 import Barcelona
 import IMCore
+import BarcelonaDB
 
 extension GetChatsCommand: Runnable {
     public func run(payload: IPCPayload) {
-        payload.reply(withResponse: .chats_resolved(IMChatRegistry.shared.allChats.filter { chat in
-            chat.lastFinishedMessageDate.timeIntervalSince1970 > min_timestamp
-        }.map(\.guid)))
+        if min_timestamp <= 0 {
+            return payload.reply(withResponse: .chats_resolved(IMChatRegistry.shared.allChats.map(\.guid)))
+        }
+        
+        DBReader.shared.latestMessageTimestamps().then { timestamps in
+            timestamps.mapValues { timestamp, guid in
+                (IMDPersistenceTimestampToUnixSeconds(timestamp: timestamp), guid)
+            }
+        }.filter { chatID, pair in
+            pair.0 > min_timestamp
+        }.map(\.value.1).then { guids in
+            payload.reply(withResponse: .chats_resolved(guids))
+        }
     }
 }
 
