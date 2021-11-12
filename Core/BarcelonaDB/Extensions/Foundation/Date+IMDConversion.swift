@@ -8,6 +8,17 @@
 
 import Foundation
 
+private let IMDPersistenceUnixOffset: Int64 = Int64(Date.timeIntervalBetween1970AndReferenceDate * 1000000000)
+private let NANOSECONDS_IN_SECOND: Double = 1e9
+
+public func IMDPersistenceTimestampToUnixEpoch(timestamp: Int64) -> Int64 {
+    timestamp + IMDPersistenceUnixOffset
+}
+
+public func IMDPersistenceTimestampToUnixSeconds(timestamp: Int64) -> Double {
+    Double(timestamp + IMDPersistenceUnixOffset) / NANOSECONDS_IN_SECOND
+}
+
 public extension Date {
     static func timeIntervalSince1970FromIMDBDateValue(date rawDate: Double) -> Double {
         let rawDateSmall: Double = Double(rawDate / 1000000000)
