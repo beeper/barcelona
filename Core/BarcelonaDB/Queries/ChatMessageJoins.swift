@@ -80,8 +80,6 @@ public extension DBReader {
         }
     }
     
-    
-    
     /// Resolves the identifiers for chats with the given identifiers
     /// - Parameter ROWIDs: message ROWIDs to resolve
     /// - Returns: ledger of message ROWID to chat identifier
@@ -165,6 +163,41 @@ public extension DBReader {
                     .order(RawMessage.Columns.ROWID.desc)
                     .fetchAll(db)
             }
+        }
+    }
+}
+
+private let latestTimestamps = """
+SELECT          chat_id, MAX(message_date), chat.guid
+FROM            chat_message_join
+LEFT JOIN       chat
+ON              chat.ROWID = chat_id
+GROUP BY        chat_id
+"""
+
+private class TimestampView: GRDB.Record {
+    required init(row: Row) {
+        chat_id = row["chat_id"]
+        message_date = row["message_date"]
+        guid = row["guid"]
+        super.init(row: row)
+    }
+    
+    var chat_id: Int64
+    var message_date: Int64
+    var guid: String
+}
+
+// MARK: - Latest timestamp API
+public extension DBReader {
+    typealias RawTimestampView = [Int64: (message_date: Int64, chat_guid: String)]
+    
+    @_optimize(speed) func latestMessageTimestamps() -> Promise<RawTimestampView> {
+        read { database in
+            try TimestampView.fetchCursor(database, sql: latestTimestamps)
+                .reduce(into: RawTimestampView()) { dictionary, join in
+                    dictionary[join.chat_id] = (join.message_date, join.guid)
+                }
         }
     }
 }
