@@ -168,11 +168,11 @@ public extension DBReader {
 }
 
 private let latestTimestamps = """
-SELECT          chat_id, MAX(message_date), chat.guid
+SELECT          chat_id, MAX(message_date) AS message_date, chat.guid
 FROM            chat_message_join
 LEFT JOIN       chat
 ON              chat.ROWID = chat_id
-GROUP BY        chat_id
+GROUP BY        chat_id;
 """
 
 private class TimestampView: GRDB.Record {
