@@ -9,32 +9,31 @@
 import Foundation
 import IMCore
 
-public struct CBMessageItemIdentifierData: Codable, CustomStringConvertible, RawRepresentable {
-    public init?(rawValue: String) {
-        switch rawValue.first {
-        case "t":
-            // we dont care about typing. we dont. we dont. we dont. we dont. we dont.
-            return nil
-        case "p":
-            // part
-            let rawParsed = rawValue[rawValue.index(after: rawValue.firstIndex(of: ":")!)...].split(separator: "/")
-            
-            id = String(rawParsed[1])
-            part = Int(String(rawParsed[0]))
-            type = "p"
-        default:
-            // transcript
-            type = String(rawValue[rawValue.startIndex ..< rawValue.firstIndex(of: ":")!])
-            
-            let components = rawValue[rawValue.index(after: rawValue.firstIndex(of: ":")!)...].split(separator: "/")
-            
-            guard let id = components.first else {
-                return nil
+private extension String {
+    var unpacked: (type: String?, part: Int?, id: String) {
+        guard let slashIndex = firstIndex(of: "/"), let colonIndex = firstIndex(of: ":") else {
+            guard let colonIndex = firstIndex(of: ":") else {
+                return (nil, nil, self)
             }
             
-            self.id = String(id)
-            additionalData = components[1...].map(String.init)
+            let type = self[..<colonIndex], id = self[index(after: colonIndex)...]
+            
+            return (String(type), nil, String(id))
         }
+        
+        let type = self[..<colonIndex], part = self[index(after: colonIndex)..<slashIndex], id = self[index(after: slashIndex)...]
+        
+        return (String(type), Int(part), String(id))
+    }
+}
+
+public struct CBMessageItemIdentifierData: Codable, CustomStringConvertible, RawRepresentable {
+    public init?(rawValue: String) {
+        guard let character = rawValue.first, character != "t" else {
+            return nil
+        }
+        
+        (type, part, id) = rawValue.unpacked
     }
     
     public var rawValue: String {
@@ -45,27 +44,18 @@ public struct CBMessageItemIdentifierData: Codable, CustomStringConvertible, Raw
     
     public var id: String
     public var part: Int?
-    public var additionalData: [String]?
     public var type: String?
     
-    private var partString: String {
-        guard let part = part else {
-            return ""
-        }
-        
-        return "\(part):"
-    }
-    
-    private var typeString: String {
-        guard let type = type else {
-            return ""
-        }
-        
-        return "\(type)/"
-    }
-    
     public var description: String {
-        partString + typeString + id
+        [
+            type.map {
+                $0.appending(":")
+            } ?? "",
+            part.map {
+                $0.description.appending("/")
+            } ?? "",
+            id
+        ].joined(separator: "")
     }
 }
 
