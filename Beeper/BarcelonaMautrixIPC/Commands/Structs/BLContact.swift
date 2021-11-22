@@ -10,12 +10,6 @@ import Foundation
 import Contacts
 import Barcelona
 
-public extension CNContact {
-    var barcelonaContact: Contact {
-        Contact(self)
-    }
-}
-
 public extension Contact {
     func blContact(withGUID guid: String, avatar: String? = nil) -> BLContact? {
         if firstName == nil, lastName == nil, nickname == nil, avatar == nil {
@@ -38,7 +32,25 @@ public extension Contact {
     }
 }
 
+private func ensuredPrefix(_ handleID: String, withService service: String) -> String {
+    if handleID.split(separator: ";").count == 3 {
+        return handleID
+    } else {
+        return service + ";-;" + (handleID.split(separator: ";").last ?? handleID[...])
+    }
+}
+
 public struct BLContact: Codable {
+    public init(first_name: String? = nil, last_name: String? = nil, nickname: String? = nil, avatar: String? = nil, phones: [String], emails: [String], user_guid: String, serviceHint: String = "iMessage") {
+        self.first_name = first_name
+        self.last_name = last_name
+        self.nickname = nickname
+        self.avatar = avatar
+        self.phones = phones
+        self.emails = emails
+        self.user_guid = ensuredPrefix(user_guid, withService: serviceHint)
+    }
+    
     public var first_name: String?
     public var last_name: String?
     public var nickname: String?

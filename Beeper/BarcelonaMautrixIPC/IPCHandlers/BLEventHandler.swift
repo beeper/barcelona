@@ -92,21 +92,23 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 break
             }
         }
-
-        bus.publisher.receiveEvent { event in
-            switch event {
-            case .contactUpdated(let contact):
-                BLWritePayloads(contact.handles.flatMap { handle -> [BLContact?] in
-                    switch handle.format {
-                    case .phoneNumber:
-                        return [contact.blContact(withGUID: "iMessage;-;\(handle.id)"), contact.blContact(withGUID: "SMS;-;\(handle.id)")]
-                    default:
-                        return [contact.blContact(withGUID: "iMessage;-;\(handle.id)")]
-                    }
-                }.compactMap { $0 }.map { .init(command: .contact($0)) })
-            default:
-                break
+        
+        NotificationCenter.default.addObserver(forName: .IMHandleInfoChanged, object: nil, queue: nil) { notification in
+            guard let handle = notification.object as? IMHandle else {
+                return
             }
+            
+            BLWritePayload(.init(command: .contact(BLContact.blContact(forHandleID: handle.id))))
+        }
+        
+        NotificationCenter.default.addObserver(forName: .IMNicknameDidChange, object: nil, queue: nil) { notification in
+            guard let dict = notification.object as? [AnyHashable: Any], let handleIDs = dict["handleIDs"] as? [String] else {
+                return
+            }
+            
+            BLWritePayloads(handleIDs.map(BLContact.blContact(forHandleID:)).map {
+                .init(command: .contact($0))
+            })
         }
         
         bus.resume()

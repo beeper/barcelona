@@ -25,7 +25,7 @@
 - (id)initWithCoder:(id)arg1;
 - (id)copyWithZone:(struct _NSZone *)arg1;
 @property(readonly, nonatomic) BOOL imageExists;
-- (id)imageData;
+- (NSData*)imageData;
 @property(readonly, nonatomic) BOOL hasImage;
 - (id)loadAndReturnImageData;
 - (id)publicDictionaryMetadataRepresentation;
