@@ -15,7 +15,7 @@
     NSMutableDictionary *_pendingRequests;
 }
 
-+ (id)sharedInstance;
++ (instancetype)sharedInstance;
 
 @property(retain) NSMutableDictionary *pendingRequests; // @synthesize pendingRequests=_pendingRequests;
 @property(retain) NSMutableDictionary *cache; // @synthesize cache=_cache;

@@ -176,6 +176,7 @@
 #import <IMCore/_IMBalloonBundleApp.h>
 #import <IMCore/_IMBalloonExtensionApp.h>
 #import <DataDetectorsCore/DDScannerResult.h>
+#import <IMCore/BusinessChat.h>
 
 #ifndef IMCORE_TYPES
 

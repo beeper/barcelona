@@ -18,7 +18,7 @@
 }
 
 + (IMHandleRegistrar* _Nonnull)sharedInstance;
-- (id)businessNameForUID:(id)arg1 updateHandler:(id)arg2;
+- (NSString*)businessNameForUID:(NSString*)arg1 updateHandler:(void (^)(NSString *name))completionBlock;
 - (id)_existingChatSiblingsForHandle:(id)arg1;
 - (BOOL)_addressBookIsEmpty;
 - (id)_chatSiblingsForHandle:(id)arg1;
