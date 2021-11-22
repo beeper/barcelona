@@ -19,7 +19,7 @@ private var IMDWithinBlock = false
 private let IMDQueue: DispatchQueue = {
     atexit {
         if IMDWithinBlock {
-            print("IMDPersistence tried to exit! Let's talk about that.")
+            IMDLog.warn("IMDPersistence tried to exit! Let's talk about that.")
         }
     }
     

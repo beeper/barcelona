@@ -19,7 +19,6 @@ public extension IMMessageItem {
         case let item as IMChatItem:
             return [item]
         default:
-            print(items.debugDescription)
             return []
         }
     }

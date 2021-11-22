@@ -60,7 +60,5 @@ public func BLResolveContactSuggestionData(forHandleID handleID: String) -> BLCo
         return nil
     }
     
-    print(nicknames.keys)
-    
     return nicknames[handleID]?.suggestionData
 }
