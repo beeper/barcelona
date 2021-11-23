@@ -23,6 +23,8 @@ extension IPCCommand: Codable {
     	case log
     	case response
     	case bridge_status
+        case ping
+        case pong
     }
     
     private enum CodingKeys: CodingKey, CaseIterable {
@@ -74,6 +76,10 @@ extension IPCCommand: Codable {
 			return .response
     	case .bridge_status:
 			return .bridge_status
+        case .ping:
+            return .ping
+        case .pong:
+            return .pong
         }
     }
 
@@ -125,6 +131,10 @@ extension IPCCommand: Codable {
 			try container.encode(data, forKey: .data)
     	case .bridge_status(let data):
 			try container.encode(data, forKey: .data)
+        case .ping:
+            break
+        case .pong:
+            break
         }
     }
 
@@ -170,6 +180,10 @@ extension IPCCommand: Codable {
 			self = .send_message_status(try container.decode(BLMessageStatus.self, forKey: .data))
     	case .error:
 			self = .error(try container.decode(ErrorCommand.self, forKey: .data))
+        case .ping:
+            self = .ping
+        case .pong:
+            self = .pong
     	case .log:
 			fatalError("log cannot be decoded (yet)")
     	case .response:

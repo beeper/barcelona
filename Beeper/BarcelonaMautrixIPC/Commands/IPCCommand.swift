@@ -44,6 +44,8 @@ public enum IPCCommand {
     case log(LogCommand)
     case response(IPCResponse) /* bmi-no-decode */
     case bridge_status(BridgeStatusCommand)
+    case ping
+    case pong
 }
 
 public struct IPCPayload: Codable {

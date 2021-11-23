@@ -49,5 +49,10 @@ public func BLHandlePayload(_ payload: IPCPayload) {
         return IPCLog.warn("Received unhandleable payload type \(payload.command.name)")
     }
     
+    if payload.command.name == .ping {
+        BLWritePayload(IPCPayload(command: .pong))
+        return
+    }
+    
     runnable.run(payload: payload)
 }
