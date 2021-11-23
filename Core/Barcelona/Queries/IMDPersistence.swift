@@ -145,11 +145,7 @@ private func ERResolveGUIDsForChat(withChatIdentifier chatIdentifier: String, af
     let operation = IMDLog.operation(named: "ERResolveGUIDsForChat")
     operation.begin("Resolving GUIDs for chat %@ before time %f before guid %@ limit %ld", chatIdentifier, beforeDate?.timeIntervalSince1970 ?? 0, beforeGUID ?? "(nil)", limit ?? -1)
     
-    return DBReader.shared.rowIDs(forIdentifier: chatIdentifier).observeOutput { ROWIDs in
-        operation.event("Using chat ROWIDs %@", ROWIDs.map(\.description).joined(separator: ", "))
-    }.then { ROWIDs in
-        DBReader.shared.newestMessageGUIDs(inChatROWIDs: ROWIDs, beforeDate: beforeDate, afterDate: afterDate, beforeMessageGUID: beforeGUID, afterMessageGUID: afterGUID, limit: limit)
-    }.observeAlways { result in
+    return DBReader.shared.newestMessageGUIDs(forChatIdentifier: chatIdentifier, beforeDate: beforeDate, afterDate: afterDate, beforeMessageGUID: beforeGUID, afterMessageGUID: afterGUID, limit: limit).observeAlways { result in
         switch result {
         case .success(let GUIDs):
             operation.end("Got %ld GUIDs", GUIDs.count)

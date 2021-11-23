@@ -16,6 +16,13 @@
 @class IMAccount, IMChatRegistry, IMHandle, IMMessage, IMMessageItem, IMOrderingTools, IMScheduledUpdater, IMSendProgress, IMTimingCollection, MKMapItem, NSArray, NSData, NSDate, NSDictionary, NSMutableArray, NSMutableDictionary, NSMutableSet, NSNumber, NSSet, NSString;
 @protocol IMChatItemRules;
 
+typedef NS_ENUM(NSInteger, IMChatJoinState) {
+    IMChatUnjoinedState = 0,
+    IMChatLeavingState,
+    IMChatJoiningState,
+    IMChatJoinedState
+};
+
 @interface IMChat : IMItemsController <INSpeakable, IMSendProgressDelegate>
 {
     NSString *_guid;
@@ -107,7 +114,7 @@
 @property(readonly, nonatomic) NSData *engramID; // @synthesize engramID=_engramID;
 @property(retain, nonatomic) NSString *personCentricID; // @synthesize personCentricID=_personCentricID;
 @property(retain, nonatomic) IMMessage *invitationForPendingParticipants; // @synthesize invitationForPendingParticipants=_invitationForPendingParticipants;
-@property(readonly, nonatomic) long long joinState; // @synthesize joinState=_joinState;
+@property(readonly, nonatomic) IMChatJoinState joinState; // @synthesize joinState=_joinState;
 @property(readonly, nonatomic) NSDate *dateModified; // @synthesize dateModified=_dateModified;
 @property(readonly, nonatomic) NSDate *dateCreated; // @synthesize dateCreated=_dateCreated;
 @property(retain, nonatomic) NSString *displayName; // @synthesize displayName=_displayName;

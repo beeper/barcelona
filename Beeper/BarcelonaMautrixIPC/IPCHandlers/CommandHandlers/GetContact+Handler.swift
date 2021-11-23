@@ -26,22 +26,6 @@ extension Sequence where Element: Hashable {
         return filter { set.insert($0).inserted }
     }
 }
-
-fileprivate extension IMHandle {
-    private static let lazy_businessPhotoData: (IMHandle) -> Data? = CBSelectLinkingPath([
-        [.preMonterey]: { handle in
-            handle.mapItemImageData
-        },
-        [.monterey]: { handle in
-            handle.brandSquareLogoImageData()
-        }
-    ]) ?? { _ in nil }
-    
-    var businessPhotoData: Data? {
-        IMHandle.lazy_businessPhotoData(self)
-    }
-}
-
 extension BLContact {
     static func blContact(forHandleID handleID: String) -> BLContact {
         if handleID.isBusinessID {
@@ -75,6 +59,10 @@ extension BLContact {
                 
                 if avatar == nil {
                     avatar = handle.pictureData
+                    
+                    if avatar == nil, let contact = handle.cnContact {
+                        avatar = contact.imageData
+                    }
                 }
                 
                 // the service hint is used to decide what goes in the <service>;-;+15555555555 component of the guids. if unchanged it will be SMS
@@ -96,7 +84,7 @@ extension BLContact {
                 } else {
                     // search every handle for an IMNickname, merge and break on first occurrence
                     for handle in handles {
-                        if let imNickname = IMNicknameController.sharedInstance().nickname(for: handle) {
+                        if let imNickname = IMNicknameController.sharedInstance().nickname(for: handle) ?? IMNicknameController.sharedInstance().pendingNicknameUpdates[handle.id] {
                             firstName = imNickname.firstName
                             lastName = imNickname.lastName
                             nickname = imNickname.displayName

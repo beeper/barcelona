@@ -141,17 +141,6 @@ targets:
     dependencies:
       - package: GRDB
       - package: BarcelonaFoundation
-  BarcelonaEvents:
-    group: Core
-    templates:
-      - BLFramework
-    sources:
-      - Core/BarcelonaEvents
-    dependencies:
-      - package: BarcelonaFoundation
-      - target: Barcelona
-        embed: true
-        link: true
   BarcelonaJS:
     group: Core
     templates:
@@ -163,9 +152,6 @@ targets:
       - package: BarcelonaFoundation
       - package: SwiftyJavaScriptCore
       - target: Barcelona
-        embed: true
-        link: true
-      - target: BarcelonaEvents
         embed: true
         link: true
   # Tools
@@ -187,9 +173,6 @@ targets:
       - package: SwiftCLI
       - package: Yammit
       - target: Barcelona
-        embed: true
-        link: true
-      - target: BarcelonaEvents
         embed: true
         link: true
       - target: BarcelonaJS
@@ -227,9 +210,6 @@ targets:
     dependencies:
       - package: BarcelonaFoundation
       - target: Barcelona
-        embed: true
-        link: true
-      - target: BarcelonaEvents
         embed: true
         link: true
   barcelona-mautrix:

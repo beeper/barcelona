@@ -96,7 +96,7 @@ public func JBLCreateJSContext() -> JSContext {
             JBLStatusChatItem.self,
             JBLAcknowledgmentChatItem.self,
             JBLAttachment.self,
-            JBLEventBus(context: context),
+//            JBLEventBus(context: context),
             JBLAccount.self,
             JBLContact.self
         ]

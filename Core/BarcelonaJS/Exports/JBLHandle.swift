@@ -47,9 +47,6 @@ public class JBLAccount: NSObject, JBLAccountJSExports {
 
 @objc
 public protocol JBLContactJSExports: JSExport {
-    static var contacts: [JBLContactJSExports] { get }
-    static func contactsWithHandleID(_ handleID: String) -> [JBLContactJSExports]
-    
     var id: String { get }
     var handles: [String] { get }
     var name: String { get }
@@ -57,15 +54,6 @@ public protocol JBLContactJSExports: JSExport {
 
 @objc
 public class JBLContact: NSObject, JBLContactJSExports {
-    public static var contacts: [JBLContactJSExports] {
-        IMContactStore.sharedInstance()!.allContacts.map(Contact.init).map(JBLContact.init)
-    }
-    
-    public static func contactsWithHandleID(_ handleID: String) -> [JBLContactJSExports] {
-        Contact.resolveSync(withParameters: .init(handles: [handleID]))
-            .map(JBLContact.init)
-    }
-    
     public init(_ contact: Contact) {
         self.contact = contact
     }

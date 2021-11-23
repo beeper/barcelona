@@ -14,8 +14,25 @@ import IMCore
 import os.log
 #endif
 
+extension IMChatJoinState: Codable {
+    public init(from decoder: Decoder) throws {
+        let rawValue = try decoder.singleValueContainer().decode(RawValue.self)
+        
+        guard let state = IMChatJoinState(rawValue: rawValue) else {
+            throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "Invalid IMChatJoinState", underlyingError: nil))
+        }
+        
+        self = state
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
+}
+
 public struct ChatSearchParameters: QueryParameters {
-    public init(identifiers: [String]? = nil, participants: [String]? = nil, display_name: String? = nil, read_receipts: Bool? = nil, ignore_alerts: Bool? = nil, style: IMChatStyle? = nil, join_state: Int? = nil, services: [IMServiceStyle]? = nil, has_unread: Bool? = nil, has_failed: Bool? = nil, last_message_text: String? = nil, limit: Int? = nil, page: Int? = nil) {
+    public init(identifiers: [String]? = nil, participants: [String]? = nil, display_name: String? = nil, read_receipts: Bool? = nil, ignore_alerts: Bool? = nil, style: IMChatStyle? = nil, join_state: IMChatJoinState? = nil, services: [IMServiceStyle]? = nil, has_unread: Bool? = nil, has_failed: Bool? = nil, last_message_text: String? = nil, limit: Int? = nil, page: Int? = nil) {
         self.identifiers = identifiers
         self.participants = participants
         self.display_name = display_name
@@ -44,7 +61,7 @@ public struct ChatSearchParameters: QueryParameters {
     /// Narrow the results to chats with the given style
     public var style: IMChatStyle?
     /// Narrow the results to chats with the given join state
-    public var join_state: Int?
+    public var join_state: IMChatJoinState?
     /// Narrow the results to chats with the given service
     public var services: [IMServiceStyle]?
     /// Narrow the results to chats with unread messages
@@ -121,7 +138,7 @@ private enum ChatSearchParameter {
     case readReceipts(Bool)
     case ignoreAlerts(Bool)
     case style(IMChatStyle)
-    case joinState(Int)
+    case joinState(IMChatJoinState)
     case services([IMServiceStyle])
     case hasUnread(Bool)
     case hasFailed(Bool)

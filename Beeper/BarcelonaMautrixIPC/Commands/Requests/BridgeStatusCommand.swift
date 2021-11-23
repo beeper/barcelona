@@ -8,7 +8,6 @@
 
 import Foundation
 import Barcelona
-import BarcelonaEvents
 import IMCore
 import IMFoundation
 

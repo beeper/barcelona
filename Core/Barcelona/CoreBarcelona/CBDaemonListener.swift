@@ -14,7 +14,7 @@ import Foundation
 import IMCore
 import Swexy
 import Swog
-import BarcelonaDB
+import CommunicationsFilter
 
 private let log = Logger(category: "ERDaemonListener")
 
@@ -121,17 +121,66 @@ public struct CBMessageStatusChange: Codable, Hashable {
     }
 }
 
+extension Notification.Name: ExpressibleByStringLiteral {
+    public init(stringLiteral value: StringLiteralType) {
+        self.init(rawValue: value)
+    }
+}
+
+internal extension CBDaemonListener {
+    static var didStartListening = false
+    func startListening() {
+        guard CBDaemonListener.didStartListening == false else {
+            return
+        }
+        
+        CBDaemonListener.didStartListening = true
+        
+        NotificationCenter.default.addObserver(forName: .IMAccountPrivacySettingsChanged, object: nil, queue: nil) { notification in
+            guard let account = notification.object as? IMAccount else {
+                return
+            }
+            
+            guard let blockList = account.blockList as? [String] else {
+                return log.debug("unexpected type for blockList: \(type(of: account.blockList))")
+            }
+            
+            self.blocklistPipeline.send(blockList)
+        }
+        
+        NotificationCenter.default.addObserver(forName: .IMChatJoinStateDidChange, object: nil, queue: nil) { notification in
+            guard let chat = notification.object as? IMChat else {
+                return
+            }
+            
+            self.chatJoinStatePipeline.send((chat.id, chat.joinState))
+        }
+        
+        NotificationCenter.default.addObserver(forName: .IMChatPropertiesChanged, object: nil, queue: nil) { notification in
+            guard let chat = notification.object as? IMChat else {
+                return
+            }
+            
+            self.chatConfigurationPipeline.send(chat.configurationBits)
+        }
+    }
+}
+
 public class CBDaemonListener: ERBaseDaemonListener {
     public static let shared = CBDaemonListener()
     
-    public let unreadCountPipeline = CBPipeline<(chat: String, count: Int)>()
-    public let typingPipeline = CBPipeline<(chat: String, typing: Bool)>()
-    public let chatNamePipeline = CBPipeline<(chat: String, name: String?)>()
-    public let chatParticipantsPipeline = CBPipeline<(chat: String, participants: [String])>()
-    
-    public let messagePipeline = CBPipeline<Message>()
-    public let phantomPipeline = CBPipeline<PhantomChatItem>()
-    public let messageStatusPipeline = CBPipeline<CBMessageStatusChange>()
+    public let unreadCountPipeline          = CBPipeline<(chat: String, count: Int)>()
+    public let typingPipeline               = CBPipeline<(chat: String, typing: Bool)>()
+    public let chatNamePipeline             = CBPipeline<(chat: String, name: String?)>()
+    public let chatParticipantsPipeline     = CBPipeline<(chat: String, participants: [String])>()
+    public let blocklistPipeline            = CBPipeline<[String]>()
+    public let messagesDeletedPipeline      = CBPipeline<[String]>()
+    public let chatsDeletedPipeline         = CBPipeline<[String]>()
+    public let chatJoinStatePipeline        = CBPipeline<(chat: String, joinState: IMChatJoinState)>()
+    public let messagePipeline              = CBPipeline<Message>()
+    public let phantomPipeline              = CBPipeline<PhantomChatItem>()
+    public let messageStatusPipeline        = CBPipeline<CBMessageStatusChange>()
+    public let chatConfigurationPipeline    = CBPipeline<ChatConfiguration>()
     public let disconnectPipeline: CBPipeline<Void> = {
         let pipeline = CBPipeline<Void>()
         
@@ -140,8 +189,10 @@ public class CBDaemonListener: ERBaseDaemonListener {
         return pipeline
     }()
     
-    public let messagesDeletedPipeline = CBPipeline<[String]>()
-    public let chatsDeletedPipeline = CBPipeline<[String]>()
+    private override init() {
+        super.init()
+    }
+    
     public var automaticallyReconnect = true
     
     // Caches for determining whether an update notification is needed

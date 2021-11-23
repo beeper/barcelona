@@ -88,7 +88,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     }
     
     public var id: String
-    public var joinState: Int64
+    public var joinState: IMChatJoinState
     public var roomName: String?
     public var displayName: String?
     public var participants: [String]

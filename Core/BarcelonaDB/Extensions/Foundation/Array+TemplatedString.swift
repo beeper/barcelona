@@ -7,11 +7,3 @@
 //
 
 import Foundation
-
-internal extension Array {
-    var templatedString: String {
-        map { _ in
-            "?"
-        }.joined(separator: ", ")
-    }
-}

@@ -4,3 +4,6 @@
 #import <CommunicationsFilter/CommunicationsFilterBlockListCache.h>
 
 CommunicationFilterItem* CreateCMFItemFromString(NSString*);
+
+NSString* CMFBlockListUpdatedNotification;
+void CMFBlockListCopyItemsForAllServicesService(CFArrayRef * items);

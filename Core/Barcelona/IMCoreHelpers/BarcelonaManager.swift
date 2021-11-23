@@ -79,10 +79,6 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
     
     let controller = IMDaemonController.sharedInstance()
     
-    #if canImport(UIKit)
-    IMContactStore.sharedInstance()!.setValue(CNContactStore(), forKey: "_contactStore")
-    #endif
-    
     /** Registers with imagent */
     controller.listener.addHandler(CBDaemonListener.shared)
     
@@ -91,6 +87,12 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
         
         controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
         controller.blockUntilConnected()
+        
+        controller.fetchNicknames()
+        IMContactStore.sharedInstance().checkForContactStoreChanges()
+        for handle in IMHandleRegistrar.sharedInstance().allIMHandles() {
+            _ = handle.name
+        }
         
         log("Connected.")
     }
@@ -102,6 +104,8 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
     }
     
     NotificationCenter.default.once(notificationNamed: .IMChatRegistryDidLoad).resolve(on: DispatchQueue.main).then { _ in
+        CBDaemonListener.shared.startListening()
+        
         callbackC?(true)
         callbackSwift?(true)
     }

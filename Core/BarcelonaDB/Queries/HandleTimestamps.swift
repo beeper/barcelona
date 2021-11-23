@@ -53,20 +53,19 @@ public extension DBReader {
         read { db in
             let operation = Logger(category: "Database").operation(named: "Query time-sorted participants").begin()
             
-            let stmt = try db.makeSelectStatement(sql:
-"""
-SELECT DISTINCT handle.id AS handle_id, MAX(message.date) AS date, chat.chat_identifier AS chat_id FROM message
-INNER JOIN handle ON message.handle_id = handle.ROWID
-INNER JOIN chat_message_join ON message.ROWID = chat_message_join.message_id
-INNER JOIN chat ON chat_message_join.chat_id = chat.ROWID AND chat.chat_identifier IN (\(chatIDs.templatedString))  GROUP BY handle_id, chat_identifier ORDER BY message.date DESC
-""")
+            let query: SQLRequest<HandleTimestampSynthesized> = """
+            SELECT DISTINCT handle.id AS handle_id, MAX(message.date) AS date, chat.chat_identifier AS chat_id FROM message
+            INNER JOIN handle ON message.handle_id = handle.ROWID
+            INNER JOIN chat_message_join ON message.ROWID = chat_message_join.message_id
+            INNER JOIN chat ON chat_message_join.chat_id = chat.ROWID AND chat.chat_identifier IN \(chatIDs)
+            GROUP BY handle_id, chat_identifier ORDER BY message.date DESC
+            """
             
-            try stmt.setArguments(StatementArguments(chatIDs))
-            let results = try HandleTimestampSynthesized.fetchCursor(stmt).map(\.record)
+            defer {
+                operation.end()
+            }
             
-            operation.end()
-            
-            return try Array(results)
+            return try query.fetchAll(db).map(\.record)
         }
     }
 }

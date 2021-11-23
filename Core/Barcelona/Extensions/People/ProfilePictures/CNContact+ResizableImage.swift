@@ -21,12 +21,12 @@ public struct ThumbnailImageData {
     public var mime: String;
 }
 
-public extension CNContact {
+extension Data {
     /**
      Generates a thumbnail image of the target size, and also returns the MIME type
      */
-    func thumbnailImage(size targetingSize: Int?) -> ThumbnailImageData? {
-        guard var imageData = thumbnailImageData else { return nil }
+    func resized(toSize targetingSize: Int?) -> ThumbnailImageData? {
+        var imageData = self
         
         if let targetingSize = targetingSize, targetingSize > 0 {
             #if canImport(UIKit)

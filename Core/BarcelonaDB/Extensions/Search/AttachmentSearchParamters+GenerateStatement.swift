@@ -12,51 +12,63 @@ import GRDB
 
 fileprivate extension AttachmentSearchParameters {
     func statement(forChatROWIDs ROWIDs: [Int64]) -> SQLLiteral {
-        var stmt = SQLLiteral(sql: """
-SELECT attachment.ROWID, attachment.guid, attachment.original_guid, attachment.filename, attachment.total_bytes, attachment.is_outgoing, attachment.mime_type, attachment.uti FROM attachment
-""", arguments: [])
+        var components: [SQLLiteral] = [
+            """
+            SELECT attachment.ROWID, attachment.guid, attachment.original_guid, attachment.filename, attachment.total_bytes, attachment.is_outgoing, attachment.mime_type, attachment.uti FROM attachment
+            """
+        ]
         
         var didAddFirstStatement = false
         
         if ROWIDs.count > 0 {
-            stmt.append(literal: SQLLiteral(sql:
-                                                """
-INNER JOIN message_attachment_join ON attachment.ROWID = message_attachment_join.attachment_id
-INNER JOIN message ON message_attachment_join.message_id = message.ROWID
-INNER JOIN chat_message_join ON message.ROWID = chat_message_join.message_id
-INNER JOIN chat ON chat_message_join.chat_id = chat.ROWID
-AND chat.ROWID IN (\(ROWIDs.templatedString))
-""", arguments: .init(ROWIDs)))
-            
+            components.append("""
+            INNER JOIN message_attachment_join ON attachment.ROWID = message_attachment_join.attachment_id
+            INNER JOIN message ON message_attachment_join.message_id = message.ROWID
+            INNER JOIN chat_message_join ON message.ROWID = chat_message_join.message_id
+            INNER JOIN chat ON chat_message_join.chat_id = chat.ROWID
+            WHERE chat.ROWID IN \(ROWIDs)
+            """)
             didAddFirstStatement = true
         }
         
-        stmt.append(sql: "\(didAddFirstStatement ? " AND" : " WHERE") attachment.hide_attachment == 0")
+        components.append("\(didAddFirstStatement ? " AND" : " WHERE") attachment.hide_attachment == 0")
         didAddFirstStatement = true
         
         if let mimes = mime, mimes.count > 0 {
-            stmt.append(literal: SQLLiteral(sql: " AND attachment.mime_type IN (\(mimes.templatedString))", arguments: .init(mimes)))
+            components.append("""
+            AND attachment.mime_type IN \(mimes)
+            """)
         } else if let likeMIME = likeMIME {
-            stmt.append(literal: SQLLiteral(sql: " AND attachment.mime_type LIKE ?", arguments: ["\(likeMIME)%"]))
+            components.append("""
+            AND attachment.mime_type LIKE \(likeMIME + "%")
+            """)
         }
         
         if let utis = uti, utis.count > 0 {
-            stmt.append(literal: SQLLiteral(sql: " AND attachment.uti IN (\(utis.templatedString))", arguments: .init(utis)))
+            components.append("""
+            AND attachment.uti IN \(utis)
+            """)
         } else if let likeUTI = likeUTI {
-            stmt.append(literal: SQLLiteral(sql: " AND attachment.uti LIKE ?", arguments: ["\(likeUTI)%"]))
+            components.append("""
+            AND attachment.uti LIKE \(likeUTI + "%")
+            """)
         }
         
         if let name = name {
-            stmt.append(literal: SQLLiteral(sql: " AND LOWER(attachment.filename) LIKE ?", arguments: ["%\(name)%"]))
+            components.append("""
+            AND LOWER(attachment.filename) LIKE \("%" + name + "%")
+            """)
         }
         
-        stmt.append(sql: " ORDER BY attachment.ROWID DESC")
+        components.append("""
+        ORDER BY attachment.ROWID DESC
+        """)
         
         if let limit = limit {
-            stmt.append(literal: SQLLiteral(sql: " LIMIT ?", arguments: [limit]))
+            components.append("LIMIT \(limit)")
         }
         
-        return stmt
+        return components.joined(separator: "\n")
     }
 }
 

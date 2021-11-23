@@ -10,64 +10,45 @@ import Foundation
 import BarcelonaFoundation
 import GRDB
 
-fileprivate extension DBReader {/// Returns a ledger of partial chats for the given message IDs
-    /// - Parameters:
-    ///   - ROWIDs: ROWIDs to resolve chats from
-    ///   - baseColumns: columns to return in the chat objects
-    /// - Returns: ledger of message ROWID to chat partials
-    func partialChats(forMessageRowIDs ROWIDs: [Int64], baseColumns: [RawChat.Columns]) -> Promise<[Int64: RawChat]> {
-        var columns = baseColumns
-        if !columns.contains(where: {
-            $0 == RawChat.Columns.ROWID
-        }) {
-            columns.append(RawChat.Columns.ROWID)
-        }
-        
-        return read { db in
-            let joins = try ChatMessageJoin
-                .filter(ROWIDs.contains(ChatMessageJoin.Columns.message_id))
-                .fetchAll(db)
-            
-            let chatRowIDs = joins.compactMap {
-                $0.chat_id
-            }
-            
-            let chatPartials = try RawChat
-                .select(columns)
-                .filter(chatRowIDs.contains(RawChat.Columns.ROWID))
-                .fetchAll(db)
-            
-            let chatLedger = chatPartials.dictionary(keyedBy: \.ROWID)
-            
-            return joins.reduce(into: [Int64: RawChat]()) { (ledger, join) in
-                guard let chatROWID = join.chat_id, let messageROWID = join.message_id, let chat = chatLedger[chatROWID] else {
-                    return
-                }
-                
-                ledger[messageROWID] = chat
-            }
-        }
-    }
-}
-
 // MARK: - ChatMessageJoins.swift
 public extension DBReader {
     func chatIdentifiers(forMessageGUIDs guids: [String]) -> Promise<[String]> {
-        chatRowIDs(forMessageGUIDs: guids).zip { ROWIDs in
-            chatIdentifiers(forMessageRowIDs: ROWIDs)
-        }.then { ROWIDs, identifiers in
-            ROWIDs.compactMap {
-                identifiers[$0]
-            }
+        let join: SQLRequest<ChatIdentifierCursor> = """
+        SELECT chat.chat_identifier
+        FROM message
+        LEFT JOIN chat_message_join ON message_id = message.ROWID
+        LEFT JOIN chat ON chat.ROWID = chat_message_join.chat_id
+        WHERE message.guid IN \(guids)
+        """
+        
+        return read { database in
+            try join.fetchAll(database).map(\.chat_identifier)
         }
+    }
+    
+    private class ChatIdentifierCursor: GRDB.Record {
+        required init(row: Row) {
+            chat_identifier = row["chat_identififer"]
+            super.init(row: row)
+        }
+        
+        var chat_identifier: String
     }
     
     /// Returns the chat id for a message with the given GUID
     /// - Parameter guid: guid of the message to query
     /// - Returns: identifier of the chat the message resides in
     func chatIdentifier(forMessageGUID guid: String) -> Promise<String?> {
-        chatRowID(forMessageGUID: guid).maybeMap { ROWID -> Promise<String?> in
-            self.chatIdentifier(forMessageRowID: ROWID)
+        let join: SQLRequest<ChatIdentifierCursor> = """
+        SELECT chat.chat_identifier from message
+        JOIN chat_message_join ON chat_message_join.message_id = message.ROWID
+        JOIN chat ON chat.ROWID = chat_message_join.chat_id
+        WHERE message.guid = \(guid)
+        LIMIT 1;
+        """
+        
+        return read { database in
+            try join.fetchOne(database)?.chat_identifier
         }
     }
     
@@ -75,42 +56,44 @@ public extension DBReader {
     /// - Parameter ROWID: ROWID of the message to query
     /// - Returns: identifier of the chat the message resides in
     func chatIdentifier(forMessageRowID ROWID: Int64) -> Promise<String?> {
-        self.chatIdentifiers(forMessageRowIDs: [ROWID]).then {
-            $0[ROWID]
+        let join: SQLRequest<ChatIdentifierCursor> = """
+        SELECT chat.chat_identifier from message
+        LEFT JOIN chat_message_join ON chat_message_join.message_id = message.ROWID
+        LEFT JOIN chat ON chat.ROWID = chat_message_join.chat_id
+        WHERE message.ROWID = \(ROWID)
+        LIMIT 1;
+        """
+        
+        return read { database in
+            try join.fetchOne(database)?.chat_identifier
         }
+    }
+    
+    private class MessageChatIdentifierCursor: GRDB.Record {
+        required init(row: Row) {
+            message_id = row["message_id"]
+            chat_identifier = row["chat_identififer"]
+            super.init(row: row)
+        }
+        
+        var message_id: Int64
+        var chat_identifier: String
     }
     
     /// Resolves the identifiers for chats with the given identifiers
     /// - Parameter ROWIDs: message ROWIDs to resolve
     /// - Returns: ledger of message ROWID to chat identifier
     func chatIdentifiers(forMessageRowIDs ROWIDs: [Int64]) -> Promise<[Int64: String]> {
-        partialChats(forMessageRowIDs: ROWIDs, baseColumns: [RawChat.Columns.chat_identifier])
-            .compactMapValues(\.chat_identifier)
-    }
-    
-    private func rowIDs(forBeforeMessageGUID beforeMessageGUID: String?, afterMessageGUID: String?) -> Promise<(Int64?, Int64?)> {
-        func resolveOne(_ id: String?) -> Promise<Int64?> {
-            guard let id = id else {
-                return .success(nil)
-            }
-            
-            return rowID(forMessageGUID: id)
-        }
+        let join: SQLRequest<MessageChatIdentifierCursor> = """
+        SELECT message.ROWID AS message_id, chat.chat_identifier from message
+        LEFT JOIN chat_message_join ON chat_message_join.message_id = message.ROWID
+        LEFT JOIN chat ON chat.ROWID = chat_message_join.chat_id
+        WHERE message.ROWID IN \(ROWIDs);
+        """
         
-        switch beforeMessageGUID {
-        case .none:
-            return resolveOne(afterMessageGUID).then { afterRowID in
-                (nil, afterRowID)
-            }
-        case .some(let beforeMessageGUID):
-            guard let afterMessageGUID = afterMessageGUID else {
-                return resolveOne(beforeMessageGUID).then { beforeRowID in
-                    (beforeRowID, nil)
-                }
-            }
-            
-            return rowIDs(forMessageGUIDs: [beforeMessageGUID, afterMessageGUID]).then { identifiers -> (Int64?, Int64?) in
-                (identifiers[beforeMessageGUID], identifiers[afterMessageGUID])
+        return read { database in
+            try join.fetchAll(database).reduce(into: [Int64: String]()) { dict, join in
+                dict[join.message_id] = join.chat_identifier
             }
         }
     }
@@ -121,48 +104,59 @@ public extension DBReader {
     ///   - beforeMessageGUID: message GUID to load messages before
     ///   - limit: max number of results to return
     /// - Returns: array of message GUIDs matching the query
-    func newestMessageGUIDs(inChatROWIDs ROWIDs: [Int64], beforeDate: Date? = nil, afterDate: Date? = nil, beforeMessageGUID: String? = nil, afterMessageGUID: String? = nil, limit: Int? = nil) -> Promise<[String]> {
-        rowIDs(forBeforeMessageGUID: beforeMessageGUID, afterMessageGUID: afterMessageGUID).then { beforeMessageROWID, afterMessageROWID in
-            read { db in
-                var messageROWIDsQuery = ChatMessageJoin
-                    .select(ChatMessageJoin.Columns.message_id, as: Int64.self)
-                    .filter(ROWIDs.contains(ChatMessageJoin.Columns.chat_id))
-                
-                if let beforeMessageROWID = beforeMessageROWID {
-                    messageROWIDsQuery = messageROWIDsQuery
-                        .filter(ChatMessageJoin.Columns.message_id < beforeMessageROWID)
+    func newestMessageGUIDs(forChatIdentifier chatIdentifier: String, beforeDate: Date? = nil, afterDate: Date? = nil, beforeMessageGUID: String? = nil, afterMessageGUID: String? = nil, limit: Int? = nil) -> Promise<[String]> {
+        read { db in
+            class MessageGUIDCursor: GRDB.Record {
+                required init(row: Row) {
+                    guid = row["guid"]
+                    super.init(row: row)
                 }
                 
-                if let afterMessageROWID = afterMessageROWID {
-                    messageROWIDsQuery = messageROWIDsQuery
-                        .filter(ChatMessageJoin.Columns.message_id > afterMessageROWID)
-                }
-                
-                if let beforeDate = beforeDate, beforeDate.timeIntervalSinceReferenceDate > 0 {
-                    messageROWIDsQuery = messageROWIDsQuery
-                        .filter(ChatMessageJoin.Columns.message_date < beforeDate.timeIntervalSinceReferenceDateForDatabase)
-                }
-                
-                if let afterDate = afterDate, afterDate.timeIntervalSinceReferenceDate > 0 {
-                    messageROWIDsQuery = messageROWIDsQuery
-                        .filter(ChatMessageJoin.Columns.message_date > afterDate.timeIntervalSinceReferenceDateForDatabase)
-                }
-                
-                let messageROWIDs = try messageROWIDsQuery
-                    .order(ChatMessageJoin.Columns.message_date.desc)
-                    .limit(limit ?? 75)
-                    .fetchAll(db)
-                
-                guard messageROWIDs.count > 0 else {
-                    return []
-                }
-                
-                return try RawMessage
-                    .select(RawMessage.Columns.guid, as: String.self)
-                    .filter(messageROWIDs.contains(RawMessage.Columns.ROWID))
-                    .order(RawMessage.Columns.ROWID.desc)
-                    .fetchAll(db)
+                var guid: String
             }
+            
+            var sql = """
+            SELECT message.guid
+            FROM message
+            INNER JOIN chat_message_join cmj ON cmj.message_id = message.ROWID
+            INNER JOIN chat ON cmj.chat_id = chat.ROWID
+            WHERE chat.chat_identifier = \(chatIdentifier)
+            """ as SQLLiteral
+            
+            if let beforeMessageGUID = beforeMessageGUID {
+                sql.append(literal: """
+                AND message.date < (
+                    SELECT date FROM message WHERE guid = \(beforeMessageGUID)
+                )
+                """)
+            }
+            
+            if let afterMessageGUID = afterMessageGUID {
+                sql.append(literal: """
+                AND message.date > (
+                    SELECT date FROM message WHERE guid = \(afterMessageGUID)
+                )
+                """)
+            }
+            
+            if let beforeDate = beforeDate, beforeDate.timeIntervalSinceReferenceDate > 0 {
+                sql.append(literal: """
+                AND message.date < \(beforeDate.timeIntervalSinceReferenceDateForDatabase)
+                """)
+            }
+            
+            if let afterDate = afterDate, afterDate.timeIntervalSinceReferenceDate > 0 {
+                sql.append(literal: """
+                AND message.date > \(afterDate.timeIntervalSinceReferenceDateForDatabase)
+                """)
+            }
+            
+            sql.append(literal: """
+            ORDER BY message.date DESC
+            LIMIT \(limit ?? 75)
+            """)
+            
+            return try SQLRequest<MessageGUIDCursor>(literal: sql).fetchAll(db).map(\.guid)
         }
     }
 }

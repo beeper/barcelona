@@ -7,7 +7,6 @@
 //
 
 import Barcelona
-import BarcelonaEvents
 import IMCore
 
 private extension ChatItemOwned {
@@ -32,8 +31,6 @@ private extension CBMessageStatusChange {
 
 public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
     public static let shared = BLEventHandler()
-    
-    public let bus = EventBus()
     
     private let fifoQueue = FifoQueue<Void>()
     
@@ -110,8 +107,6 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 .init(command: .contact($0))
             })
         }
-        
-        bus.resume()
     }
     
     public func purgedTransferFailed(_ transfer: IMFileTransfer) {
