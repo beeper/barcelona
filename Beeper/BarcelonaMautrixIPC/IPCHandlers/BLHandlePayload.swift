@@ -45,13 +45,13 @@ private extension IPCPayload {
 }
 
 public func BLHandlePayload(_ payload: IPCPayload) {
-    guard let runnable = payload.runnable else {
-        return IPCLog.warn("Received unhandleable payload type \(payload.command.name)")
-    }
-    
     if payload.command.name == .ping {
         BLWritePayload(IPCPayload(command: .pong))
         return
+    }
+    
+    guard let runnable = payload.runnable else {
+        return IPCLog.warn("Received unhandleable payload type \(payload.command.name)")
     }
     
     runnable.run(payload: payload)
