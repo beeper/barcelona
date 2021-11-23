@@ -49,6 +49,13 @@ private extension IMAccountController {
             return .unconfigured
         }
         
+        switch account.registrationFailureReason {
+        case .irreparableFailure, .expiredDeviceCredentials, .loginFailed, .badCredentials, .badDeviceCredentials, .badPushToken:
+            return .badCredentials
+        default:
+            break
+        }
+        
         var isProcessing: Bool {
             if IMServiceImpl.iMessage().status() == .loggingIn {
                 return true
