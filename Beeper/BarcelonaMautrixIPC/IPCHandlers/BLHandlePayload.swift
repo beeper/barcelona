@@ -45,9 +45,11 @@ private extension IPCPayload {
 }
 
 public func BLHandlePayload(_ payload: IPCPayload) {
-    if payload.command.name == .ping {
+    switch payload.command.name {
+    case .ping, .pre_startup_sync:
         payload.reply(withResponse: .ack)
-        return
+    default:
+        break
     }
     
     guard let runnable = payload.runnable else {
