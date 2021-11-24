@@ -46,7 +46,7 @@ private extension IPCPayload {
 
 public func BLHandlePayload(_ payload: IPCPayload) {
     if payload.command.name == .ping {
-        BLWritePayload(IPCPayload(command: .pong))
+        payload.reply(withResponse: .ack)
         return
     }
     

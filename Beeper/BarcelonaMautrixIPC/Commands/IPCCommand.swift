@@ -45,7 +45,6 @@ public enum IPCCommand {
     case response(IPCResponse) /* bmi-no-decode */
     case bridge_status(BridgeStatusCommand)
     case ping
-    case pong
 }
 
 public struct IPCPayload: Codable {
@@ -55,8 +54,6 @@ public struct IPCPayload: Codable {
     private enum CodingKeys: CodingKey, CaseIterable {
         case id
     }
-    
-    
     
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
