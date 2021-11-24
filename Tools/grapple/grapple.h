@@ -5,10 +5,10 @@
 //  Created by Eric Rabil on 8/13/21.
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
+#import <Foundation/Foundation.h>
 
 #if TARGET_OS_IPHONE
 
-#import <Foundation/Foundation.h>
 
 @class NSArray<ObjectType>, NSDictionary<KeyType, ObjectType>, NSString;
 
@@ -92,5 +92,8 @@ FOUNDATION_EXPORT NSNotificationName const NSTaskDidTerminateNotification;
 
 NS_ASSUME_NONNULL_END
 
-
 #endif
+
+@interface ObjC: NSObject
++ (id)catchException:(id(^)())tryBlock error:(__autoreleasing NSError **)error;
+@end

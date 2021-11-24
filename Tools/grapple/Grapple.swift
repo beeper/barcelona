@@ -9,7 +9,6 @@
 import Foundation
 import JavaScriptCore
 import Barcelona
-import BarcelonaEvents
 import OSLog
 import SwiftCLI
 
@@ -34,7 +33,7 @@ class Grapple {
     
     static func main() throws {
         let cli = CLI(name: "grapple", commands: [
-            SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand(), IDSCommand(), AccountManagement(), Grudge.shared
+            SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand(), IDSCommand(), AccountManagement(), Grudge.shared, QueryCommand()
         ])
         
         do {

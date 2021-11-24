@@ -9,7 +9,6 @@
 import Foundation
 import Barcelona
 import SwiftCLI
-import BarcelonaEvents
 import OSLog
 import IMDPersistence
 import SwiftyTextTable
