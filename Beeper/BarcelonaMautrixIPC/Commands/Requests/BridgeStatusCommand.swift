@@ -125,6 +125,14 @@ private extension IMAccountController {
             return nil
         }
         
+        if let alertInfo = account.registrationFailureAlertInfo, var body = alertInfo["body"] as? String {
+            if let action = alertInfo["action"] as? [AnyHashable: Any], let url = action["url"] as? String {
+                body += " " + url
+            }
+            
+            return body
+        }
+        
         switch account.registrationFailureReason {
         case .noError:
             return nil
