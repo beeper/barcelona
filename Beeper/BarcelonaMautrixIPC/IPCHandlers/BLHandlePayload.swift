@@ -48,6 +48,7 @@ public func BLHandlePayload(_ payload: IPCPayload) {
     switch payload.command.name {
     case .ping, .pre_startup_sync:
         payload.reply(withResponse: .ack)
+        return
     default:
         break
     }
