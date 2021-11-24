@@ -63,6 +63,14 @@ let nsInvocationGetReturnValue = unsafeBitCast(
 let invokeWithTargetSelector = NSSelectorFromString("invokeWithTarget:")
 var result: UnsafeMutableRawPointer = .allocate(byteCount: 0, alignment: 0)
 
+#if os(iOS)
+extension NSObject {
+    var className: String {
+        NSStringFromClass(Self.self)
+    }
+}
+#endif
+
 extension NSObject: Encodable {
     var propertyBlacklist: [String] {
         switch self {
