@@ -28,7 +28,7 @@ public extension DBReader {
     
     private class ChatIdentifierCursor: GRDB.Record {
         required init(row: Row) {
-            chat_identifier = row["chat_identififer"]
+            chat_identifier = row["chat_identifier"]
             super.init(row: row)
         }
         
@@ -72,7 +72,7 @@ public extension DBReader {
     private class MessageChatIdentifierCursor: GRDB.Record {
         required init(row: Row) {
             message_id = row["message_id"]
-            chat_identifier = row["chat_identififer"]
+            chat_identifier = row["chat_identifier"]
             super.init(row: row)
         }
         
