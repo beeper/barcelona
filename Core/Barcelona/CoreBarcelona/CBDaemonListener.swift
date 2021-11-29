@@ -15,6 +15,7 @@ import IMCore
 import Swexy
 import Swog
 import CommunicationsFilter
+import BarcelonaDB
 
 private let log = Logger(category: "ERDaemonListener")
 
@@ -135,6 +136,16 @@ internal extension CBDaemonListener {
         }
         
         CBDaemonListener.didStartListening = true
+        
+        _ = CBIDSListener.shared.reflectedReadReceiptPipeline.pipe { guid, time in
+            DBReader.shared.chatIdentifier(forMessageGUID: guid).then { chatIdentifier in
+                guard let chatIdentifier = chatIdentifier else {
+                    return
+                }
+                
+                self.messageStatusPipeline.send(CBMessageStatusChange(type: .read, time: time.timeIntervalSince1970, fromMe: true, chatID: chatIdentifier, messageID: guid))
+            }
+        }
         
         NotificationCenter.default.addObserver(forName: .IMAccountPrivacySettingsChanged, object: nil, queue: nil) { notification in
             guard let account = notification.object as? IMAccount else {

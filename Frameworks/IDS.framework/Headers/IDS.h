@@ -148,7 +148,28 @@ extern NSString* IDSServiceNameiMessageForBusiness;
 #import <Foundation/Foundation.h>
 
 @interface IDSMessageContext: NSObject
+- (instancetype) initWithDictionary: (NSDictionary*) dictionary boostContext: (id) boostContext;
+@property (nonatomic, readwrite, copy) NSString * outgoingResponseIdentifier;
+@property (nonatomic, readwrite, copy) NSString * incomingResponseIdentifier;
+@property (nonatomic, readwrite, copy) NSString * serviceIdentifier;
+@property (nonatomic, readwrite, copy) NSString * fromID;
+@property (nonatomic, readwrite, copy) NSString * originalGUID;
+@property (nonatomic, readwrite, copy) NSString * toID;
+@property (nonatomic, readwrite, copy) NSString * originalDestinationDevice;
+@property (nonatomic, readwrite, copy) NSData * engramGroupID;
+@property (nonatomic, readwrite, copy) NSNumber * originalCommand;
+@property (nonatomic, readwrite, copy) NSNumber * serverTimestamp;
+@property (nonatomic, readwrite, assign) BOOL expectsPeerResponse;
+@property (nonatomic, readwrite, assign) BOOL wantsManualAck;
+@property (nonatomic, readwrite, assign) BOOL fromServerStorage;
+@property (nonatomic, readonly) NSDate * serverReceivedTime;
+@property (nonatomic, readonly) NSTimeInterval averageLocalRTT;
+//@property (nonatomic, readonly) IDSLocalMessageState localMessageState;
+@property (nonatomic, readonly) BOOL deviceBlackedOut;
+@property (nonatomic, readonly) NSError * wpConnectionError;
+@property (nonatomic, readwrite, copy) NSString * senderCorrelationIdentifier;
 @end
+
 
 @protocol IDSServiceDelegate
 @optional
