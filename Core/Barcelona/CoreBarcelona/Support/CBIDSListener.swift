@@ -11,6 +11,12 @@ import IDS
 import IMFoundation
 import IMDPersistence
 
+extension IDSListenerCapabilities {
+    static func rawValue(for capabilities: IDSListenerCapabilities...) -> RawValue {
+        self.init(capabilities).rawValue
+    }
+}
+
 // Currently only used for monitoring read receipt reflection as fast as possible
 public class CBIDSListener: ERBaseIDSListener {
     public static let shared: CBIDSListener = {
@@ -18,9 +24,9 @@ public class CBIDSListener: ERBaseIDSListener {
         
         IDSDaemonController.default.listener.addHandler(listener)
 
-        IDSDaemonController.default.addListenerID("com.barcelona.imagent", services: Set(arrayLiteral: IDSServiceNameiMessage), commands: Set(IDSCommandID.allCases.map(\.rawValue)))
+        IDSDaemonController.default.addListenerID("com.barcelona.imagent", services: Set(arrayLiteral: IDSServiceNameiMessage, IDSServiceNameSMSRelay), commands: Set([IDSCommandID.readReceipt, IDSCommandID.smsReadReceipt].map(\.rawValue)))
 
-        IDSDaemonController.default.setCapabilities(IDSListenerCapabilities.consumesIncomingMessages.rawValue, forListenerID: "com.barcelona.imagent", shouldLog: true)
+        IDSDaemonController.default.setCapabilities(IDSListenerCapabilities.rawValue(for: .consumesIncomingMessages), forListenerID: "com.barcelona.imagent", shouldLog: true)
 
         IDSDaemonController.default.connectToDaemon()
 
@@ -36,10 +42,11 @@ public class CBIDSListener: ERBaseIDSListener {
     }
     
     public override func messageReceived(_ arg1: [AnyHashable : Any]!, withGUID arg2: String!, withPayload arg3: [AnyHashable : Any]!, forTopic arg4: String!, toIdentifier arg5: String!, fromID arg6: String!, context arg7: [AnyHashable : Any]!) {
-        let payload = arg1["IDSIncomingMessagePushPayload"] as! [String: Any]
-        guard let rawCommand = payload["c"] as? IDSCommandID.RawValue, let command = IDSCommandID(rawValue: rawCommand) else {
+        guard let payload = arg1["IDSIncomingMessagePushPayload"] as? [String: Any], let rawCommand = payload["c"] as? IDSCommandID.RawValue, let command = IDSCommandID(rawValue: rawCommand) else {
             return
         }
+        
+        print(payload)
         
         guard let idsContext = IDSMessageContext(dictionary: arg7, boostContext: nil) else {
             return
@@ -50,7 +57,7 @@ public class CBIDSListener: ERBaseIDSListener {
         }
         
         switch command {
-        case .readReceipt:
+        case .readReceipt, .smsReadReceipt:
             guard let sender = payload["sP"] as? String, let timestamp = payload["e"] as? Int64, myDestinationURIs.contains(items: [sender, arg5]) else {
                 return
             }

@@ -38,6 +38,7 @@
 	<true/>
 	<key>com.apple.private.ids.messaging</key>
 	<array>
+		<string>com.apple.private.alloy.sms</string>
 		<string>com.apple.madrid</string>
 		<string>com.apple.private.alloy.biz</string>
 	</array>

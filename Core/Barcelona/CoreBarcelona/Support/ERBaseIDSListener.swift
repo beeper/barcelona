@@ -18,10 +18,16 @@ extension DispatchQueue {
 class BLDaemon {
     static let shared = BLDaemon()
     
+    var services: [String: IDSService] = [:]
+    
     func initialize() {
-        let service = IDSService(service: IDSServiceNameiMessage)!
-        
-        service.addDelegate(BLServiceListener.shared, queue: .IDSProcessingQueue)
+        for name in [IDSServiceNameiMessage, IDSServiceNameSMSRelay] {
+            let service = IDSService(service: name)!
+            
+            service.addDelegate(BLServiceListener.shared, queue: .IDSProcessingQueue)
+            
+            services[name] = service
+        }
     }
 }
 
