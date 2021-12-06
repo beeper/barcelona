@@ -16,7 +16,20 @@ public protocol ChatResolvable {
 
 public extension ChatResolvable {
     var chat: IMChat? {
-        IMChatRegistry.shared.existingChat(withGUID: chat_guid)
+        if let chat = IMChatRegistry.shared.existingChat(withGUID: chat_guid) {
+            return chat
+        } else {
+            let parsed = ParsedGUID(rawValue: chat_guid)
+            
+            let service = parsed.service == "iMessage" ? IMServiceStyle.iMessage : .SMS
+            let id = parsed.last
+            
+            if id.isPhoneNumber || id.isEmail || id.isBusinessID {
+                return Chat.directMessage(withHandleID: id, service: service).imChat
+            } else {
+                return nil
+            }
+        }
     }
     
     var cbChat: Chat? {
