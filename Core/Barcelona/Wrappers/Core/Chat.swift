@@ -158,6 +158,11 @@ public extension Chat {
         Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID)))
     }
     
+    /// Returns a chat targeted at the appropriate service for a handleID
+    static func directMessage(withHandleID handleID: String, service: IMServiceStyle) -> Chat {
+        Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service)))
+    }
+    
     /// Returns a chat targeted at the appropriate service for a set of handleIDs
     static func chat(withHandleIDs handleIDs: [String]) -> Chat {
         guard handleIDs.count > 0 else {

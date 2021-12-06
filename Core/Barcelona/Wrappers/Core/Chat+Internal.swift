@@ -24,17 +24,32 @@ internal extension Chat {
         IMAccountController.shared.iMessageAccount?.imHandle(withID: id)
     }
     
+    static var smsAccount: IMAccount {
+        IMAccountController.shared.activeSMSAccount ?? IMAccount(service: IMServiceStyle.SMS.service!)!
+    }
+    
     static func homogenousHandles(forIDs ids: [String]) -> [IMHandle] {
         if handlesAreiMessageEligible(ids) {
             return ids.compactMap(iMessageHandle(forID:))
         }
         
-        let account = IMAccountController.shared.activeSMSAccount ?? IMAccount(service: IMServiceStyle.SMS.service!)!
-        
-        return ids.map(account.imHandle(withID:))
+        return ids.map(smsAccount.imHandle(withID:))
     }
     
     static func bestHandle(forID id: String) -> IMHandle {
         homogenousHandles(forIDs: [id]).first!
+    }
+    
+    static func bestHandle(forID id: String, service: IMServiceStyle) -> IMHandle {
+        switch service {
+        case .iMessage:
+            guard handlesAreiMessageEligible([id]) else {
+                fallthrough
+            }
+            
+            return iMessageHandle(forID: id)!
+        default:
+            return smsAccount.imHandle(withID: id)
+        }
     }
 }
