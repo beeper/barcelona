@@ -13,7 +13,7 @@ public class BLPayloadReader {
     public let stream: SubjectStream<IPCPayload>
     private let publish: (IPCPayload) -> ()
     
-    public var ready = false {
+    public var ready = ProcessInfo.processInfo.arguments.contains("-d") {
         didSet {
             if ready {
                 let queue = queue
