@@ -9,12 +9,20 @@ import Foundation
 import IMCore
 
 public extension Chat {
+    private func markAsRead() {
+        if ProcessInfo.processInfo.environment.keys.contains("BARCELONA_GHOST_REPLIES") {
+            return
+        }
+        imChat.markAllMessagesAsRead()
+    }
+    
     func send(message options: CreatePluginMessage) throws -> Message {
         let message = try options.imMessage(inChat: self.id)
         
         Chat.delegate?.chat(self, willSendMessages: [message], fromCreatePluginMessage: options)
         
         Thread.main.sync {
+            markAsRead()
             imChat.send(message)
         }
         
@@ -27,6 +35,7 @@ public extension Chat {
         Chat.delegate?.chat(self, willSendMessages: [message], fromCreateMessage: createMessage)
         
         Thread.main.sync {
+            markAsRead()
             imChat.send(message)
         }
         
@@ -34,6 +43,7 @@ public extension Chat {
     }
     
     func tapback(_ creation: TapbackCreation) throws -> Message {
+        markAsRead()
         let message = try imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil)
         
         return Message(messageItem: message._imMessageItem, chatID: imChat.id)
