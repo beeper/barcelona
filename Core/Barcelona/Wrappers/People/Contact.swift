@@ -41,7 +41,7 @@ public struct Contact: Codable, Hashable, Comparable {
         self.hasPicture = contact.thumbnailImageData != nil
         
         self.handles = contact.phoneNumbers.reduce(into: contact.emailAddresses.map { email in
-            Handle(id: email.value as String, isBusiness: false)
+            Handle(id: email.value as String)
         }) { (result, phoneNumber) in
             guard let countryCode = phoneNumber.value.value(forKey: "countryCode") as? String, let phoneNumber = phoneNumber.value.value(forKey: "digits") as? String else {
                 return
@@ -49,7 +49,7 @@ public struct Contact: Codable, Hashable, Comparable {
             guard let normalized = IMNormalizedPhoneNumberForPhoneNumber(phoneNumber, countryCode, true) else {
                 return
             }
-            result.append(Handle(id: "+\(normalized)", isBusiness: false))
+            result.append(Handle(id: "+\(normalized)"))
         }
     }
     

@@ -52,7 +52,7 @@ public struct Handle: Codable, Hashable, Equatable {
         format = id.style
     }
     
-    public init(id: String, isBusiness: Bool) {
+    public init(id: String) {
         self.id = id
         self.format = id.style
     }
