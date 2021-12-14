@@ -11,6 +11,7 @@ import JavaScriptCore
 import Barcelona
 import OSLog
 import SwiftCLI
+import Swog
 
 protocol BarcelonaCommand: Command {}
 protocol EphemeralCommand: Command {}
@@ -33,8 +34,9 @@ class Grapple {
     
     static func main() throws {
         let cli = CLI(name: "grapple", commands: [
-            SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand(), IDSCommand(), AccountManagement(), Grudge.shared, QueryCommand()
+            SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand(), IDSCommand(), AccountManagement(), Grudge.shared, QueryCommand(), DiagsCommand()
         ])
+        LoggingDrivers.append(OSLogDriver.shared)
         
         do {
             let path = try cli.parser.parse(cli: cli, arguments: ArgumentList(arguments: Array(CommandLine.arguments.dropFirst())))
