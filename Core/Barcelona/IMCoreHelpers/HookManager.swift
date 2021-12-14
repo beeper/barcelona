@@ -20,18 +20,18 @@ internal struct BLMessageStatusChange {
     let wasRead: Bool
 }
 
+private func CNLogSilencerHooks() throws -> Interpose {
+    try Interpose(object_getClass(NSClassFromString("CNCDPersistenceMetrics")!)!) {
+        try $0.prepareHook(Selector("sendDidCreatePSCWithCountOfStores:countOfAccounts:")) { (store: TypedHook<@convention(c) (AnyObject, Selector, Int, Int) -> Int, @convention(block) (AnyObject, Int, Int) -> Int>) in
+            { a,b,c in
+                1
+            }
+        }
+    }
+}
+
 private func IMChatHooks() throws -> Interpose {
     try Interpose(IMChat.self) {
-//        try $0.prepareHook(
-//            #selector(IMChat._handleIncomingItem(_:)),
-//            methodSignature: (@convention(c) (AnyObject, Selector, IMItem) -> Bool).self,
-//            hookSignature: (@convention(block) (AnyObject, IMItem) -> Bool).self
-//        ) {
-//            store in { `self`, item in
-//                print(item)
-//                return store.original(`self`, store.selector, item)
-//            }
-//        }
         try $0.prepareHook(#selector(IMChat._handleIncomingItem(_:))) { (store: TypedHook<@convention(c) (AnyObject, Selector, AnyObject) -> Bool, @convention(block) (IMChat, IMItem) -> Bool>) in
             { chat, item in
                 let index = chat._index(of: item)
@@ -90,7 +90,7 @@ private func IMIDSHooks() throws -> Interpose {
 class HookManager {
     static let shared = HookManager()
     
-    let hooks = [IMChatHooks, IMIDSHooks]
+    let hooks = [IMChatHooks, IMIDSHooks, CNLogSilencerHooks]
     private var appliedHooks: [Interpose]?
     
     func apply() throws {
