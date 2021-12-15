@@ -6,7 +6,7 @@
 
 #import <objc/NSObject.h>
 
-@class IMAccount, NSArray, NSMutableDictionary;
+@class IMAccount, IMService, NSArray, NSMutableDictionary;
 
 @interface IMAccountController : NSObject
 {
@@ -75,13 +75,13 @@
 - (BOOL)readOnly;
 - (BOOL)accountActive:(id)arg1;
 - (BOOL)canDeleteAccount:(id)arg1;
-- (id)connectedAccountsWithCapability:(unsigned long long)arg1;
-- (id)operationalAccountsWithCapability:(unsigned long long)arg1;
-- (id)accountsWithCapability:(unsigned long long)arg1;
-- (id)connectedAccountsForService:(id)arg1;
-- (id)operationalAccountsForService:(id)arg1;
-- (id)activeAccountsForService:(id)arg1;
-- (id)accountsForService:(id)arg1;
+- (NSArray<IMAccount*>*)connectedAccountsWithCapability:(unsigned long long)arg1;
+- (NSArray<IMAccount*>*)operationalAccountsWithCapability:(unsigned long long)arg1;
+- (NSArray<IMAccount*>*)accountsWithCapability:(unsigned long long)arg1;
+- (NSArray<IMAccount*>*)connectedAccountsForService:(IMService*)arg1;
+- (NSArray<IMAccount*>*)operationalAccountsForService:(IMService*)arg1;
+- (NSArray<IMAccount*>*)activeAccountsForService:(IMService*)arg1;
+- (NSArray<IMAccount*>*)accountsForService:(IMService*)arg1;
 @property(readonly, nonatomic) NSArray *operationalAccounts;
 @property(readonly, nonatomic) NSArray *connectedAccounts;
 @property(readonly, nonatomic) NSArray *activeAccounts;

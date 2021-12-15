@@ -217,10 +217,10 @@ typedef NS_ENUM(NSInteger, IMAccountRegistrationFailureReason) {
 - (long long)typeForAlias:(id)arg1;
 - (BOOL)removeAlias:(id)arg1 type:(long long)arg2;
 - (BOOL)removeAliases:(id)arg1;
-- (BOOL)removeAlias:(id)arg1;
+- (BOOL)removeAlias:(NSString*)arg1;
 - (BOOL)addAlias:(id)arg1 type:(long long)arg2;
 - (BOOL)addAliases:(id)arg1;
-- (BOOL)addAlias:(id)arg1;
+- (BOOL)addAlias:(NSString*)arg1;
 - (id)aliasesForType:(long long)arg1;
 - (BOOL)hasAlias:(id)arg1 type:(long long)arg2;
 - (BOOL)hasAlias:(id)arg1;
@@ -232,7 +232,7 @@ typedef NS_ENUM(NSInteger, IMAccountRegistrationFailureReason) {
 - (BOOL)_aliasIsVisible:(id)arg1;
 - (id)_aliases;
 @property(readonly, nonatomic) NSArray *aliasesToRegister;
-@property(readonly, nonatomic) NSArray *vettedAliases;
+@property(readonly, nonatomic) NSArray<NSString*> *vettedAliases;
 - (void)_updateProfileInfo:(id)arg1;
 - (long long)profileValidationErrorReason;
 - (long long)profileValidationStatus;
