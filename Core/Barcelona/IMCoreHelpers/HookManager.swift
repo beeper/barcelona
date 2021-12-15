@@ -20,11 +20,13 @@ internal struct BLMessageStatusChange {
     let wasRead: Bool
 }
 
-private func CNLogSilencerHooks() throws -> Interpose {
-    try Interpose(object_getClass(NSClassFromString("CNCDPersistenceMetrics")!)!) {
-        try $0.prepareHook(Selector("sendDidCreatePSCWithCountOfStores:countOfAccounts:")) { (store: TypedHook<@convention(c) (AnyObject, Selector, Int, Int) -> Int, @convention(block) (AnyObject, Int, Int) -> Int>) in
-            { a,b,c in
-                1
+private func CNLogSilencerHooks() throws -> Interpose? {
+    try NSClassFromString("CNCDPersistenceMetrics").flatMap(object_getClass(_:)).map { cls in
+        try Interpose(cls) {
+            try $0.prepareHook(Selector("sendDidCreatePSCWithCountOfStores:countOfAccounts:")) { (store: TypedHook<@convention(c) (AnyObject, Selector, Int, Int) -> Int, @convention(block) (AnyObject, Int, Int) -> Int>) in
+                { a,b,c in
+                    1
+                }
             }
         }
     }
@@ -103,7 +105,9 @@ class HookManager {
         for (index, hook) in hooks.enumerated() {
             log.debug("Applying hook %ld of %ld", index + 1, hooks.count)
             
-            appliedHooks!.append(try hook())
+            if let interpose = try hook() {
+                appliedHooks!.append(interpose)
+            }
         }
         
         log.debug("All hooks applied")
