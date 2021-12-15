@@ -27,7 +27,7 @@ extension Sequence where Element: Hashable {
     }
 }
 extension BLContact {
-    static func blContact(forHandleID handleID: String) -> BLContact {
+    public static func blContact(forHandleID handleID: String) -> BLContact {
         if handleID.isBusinessID {
             if let handle = IMHandle.resolve(withIdentifier: handleID) {
                 // mapItemImageData was replaced with a brandSquareLogoImageData in Monterey, in order to integrate with BusinessServices.framework. this can be removed once big sur support is dropped (if ever)
