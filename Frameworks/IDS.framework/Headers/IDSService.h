@@ -62,7 +62,7 @@
 - (BOOL)sendAccessoryData:(id)arg1 toAccessoryID:(id)arg2 accessToken:(id)arg3 options:(id)arg4 identifier:(id )arg5 error:(id )arg6;
 - (BOOL)sendData:(id)arg1 toDestinations:(id)arg2 priority:(long long)arg3 options:(id)arg4 identifier:(id )arg5 error:(id )arg6;
 - (BOOL)sendData:(id)arg1 fromAccount:(id)arg2 toDestinations:(id)arg3 priority:(long long)arg4 options:(id)arg5 identifier:(id )arg6 error:(id )arg7;
-- (BOOL)sendMessage:(id)arg1 toDestinations:(id)arg2 priority:(long long)arg3 options:(id)arg4 identifier:(id )arg5 error:(id )arg6;
+- (BOOL)sendMessage:(NSDictionary *)message toDestinations:(NSSet *)destinations priority:(NSInteger)priority options:(NSDictionary *)options identifier:(NSString **)identifier error:(NSError **)error;
 - (BOOL)sendMessage:(id)arg1 fromAccount:(id)arg2 toDestinations:(id)arg3 priority:(long long)arg4 options:(id)arg5 identifier:(id )arg6 error:(id )arg7;
 - (BOOL)sendMessage:(id)arg1 fromAccount:(id)arg2 toDestinations:(id)arg3 options:(id)arg4 identifier:(id )arg5 error:(id )arg6;
 - (BOOL)cancelOpportunisticDataWithIdentifier:(id)arg1 error:(id )arg2;
@@ -90,3 +90,4 @@
 
 @end
 
+NSString *IDSCopyIDForAccount(IDSAccount *account) NS_RETURNS_RETAINED;

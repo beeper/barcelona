@@ -10,7 +10,7 @@
 - (NSString* _Nonnull) prefixedURI;
 @end
 
-@interface IDSDestination
+@interface IDSDestination: NSObject
 + (id)destinationWithRapportPublicIdentifier:(id)arg1;
 + (id)destinationWithDevice:(id)arg1;
 + (instancetype _Nonnull) destinationWithURI:(NSString*)uri;
