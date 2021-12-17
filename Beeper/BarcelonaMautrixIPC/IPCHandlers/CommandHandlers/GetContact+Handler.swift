@@ -99,6 +99,10 @@ extension BLContact {
                 }
             }
             
+            if firstName == nil, lastName == nil, nickname == nil {
+                firstName = handles.compactMap(\.name).first
+            }
+            
             return BLContact (
                 first_name: firstName,
                 last_name: lastName,
