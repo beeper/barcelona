@@ -7,9 +7,14 @@
 #import <objc/NSObject.h>
 
 #import "IMSystemMonitorListener-Protocol.h"
+#import <Contacts/Contacts.h>
 #import "Presentity.h"
 
 @class IMHandle, IMPeople, IMServiceImpl, NSArray, NSAttributedString, NSData, NSDate, NSDictionary, NSMapTable, NSMutableDictionary, NSRecursiveLock, NSString;
+
+@interface CNContact ()
++(NSPredicate*)predicateForContactsMatchingHandleStrings:(NSArray*)strings;
+@end
 
 typedef NS_ENUM(NSUInteger, IMAccountLoginStatus) {
     IMAccountStatusLoggedOut,
