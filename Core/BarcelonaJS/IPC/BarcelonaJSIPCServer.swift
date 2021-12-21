@@ -34,7 +34,7 @@ public class BarcelonaJSIPCServer {
             }
         }
         
-        public func log(level: LoggingLevel, fileID: StaticString, line: Int, function: StaticString, dso: UnsafeRawPointer, category: StaticString, message: BackportedOSLogMessage) {
+        public func log(level: LoggingLevel, fileID: StaticString, line: Int, function: StaticString, dso: UnsafeRawPointer, category: StaticString, message: BackportedOSLogMessage, metadata: MetadataValue) {
             self.outlets.forEach { outlet in
                 outlet.send(content: LoggingPayload(level: level, message: message.render(level: .auto), category: String(category)), type: .log)
             }
