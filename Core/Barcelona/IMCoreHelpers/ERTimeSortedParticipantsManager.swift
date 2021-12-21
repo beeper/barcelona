@@ -46,8 +46,8 @@ extension ERTimeSortedParticipantsManagerIngestible {
 }
 
 fileprivate extension ERTimeSortedParticipantsManagerIngestible {
-    var bestHandleIDForMe: String {
-        Registry.sharedInstance.uniqueMeHandleIDs.first!
+    var bestHandleIDForMe: String? {
+        Registry.sharedInstance.uniqueMeHandleIDs.first
     }
 }
 
