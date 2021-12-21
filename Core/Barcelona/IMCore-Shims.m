@@ -84,12 +84,10 @@ NSXPCListener* ERConstructXPCListener(NSString* machServiceName) {
 
 @implementation IMContactStore (AlwaysCache)
 +(BOOL)isContactsCachingEnabled {
-    return YES;
+    return NO;
 }
-@end
 
-@implementation IMContactStore (NoOverrides)
--(void)setContactStore:(CNContactStore *)contactStore {
-    
++(BOOL)isContactsBatchingEnabled {
+    return YES;
 }
 @end
