@@ -90,8 +90,11 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
         
         controller.fetchNicknames()
         IMContactStore.sharedInstance().checkForContactStoreChanges()
-        for handle in IMHandleRegistrar.sharedInstance().allIMHandles() {
-            _ = handle.name
+        
+        if ProcessInfo.processInfo.environment["BLPrefetchContacts"] == "1" {
+            for handle in IMHandleRegistrar.sharedInstance().allIMHandles() {
+                _ = handle.name
+            }
         }
         
         log("Connected.")
