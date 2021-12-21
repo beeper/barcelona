@@ -10,6 +10,7 @@ import Foundation
 import InterposeKit
 import IMCore
 import OSLog
+import Contacts
 
 private let log = Logger(category: "Hooks")
 
@@ -40,14 +41,6 @@ private let _PNCopyIndexStringsForAddressBookSearch: (
     @convention(c) (CFString, CFString) -> Unmanaged<CFArray>
 ) = CBWeakLink(against: .privateFramework(name: "CorePhoneNumbers"), .symbol("_PNCopyIndexStringsForAddressBookSearch"))!
 
-private func contact(withPhoneNumber phoneNumber: String) -> CNContact? {
-    try? IMContactStore.sharedInstance()
-        .contactStore
-        .unifiedContacts(matching: CNContact.predicateForContacts(matching: .init(stringValue: phoneNumber)),
-                      keysToFetch: IMContactStore.keysForCNContact() as! [CNKeyDescriptor]
-        ).first
-}
-
 private func IMHandleHooks() throws -> Interpose {
     try Interpose(IMHandle.self) {
         try $0.prepareHook(#selector(getter: IMHandle.countryCode)) { (store: TypedHook<@convention(c) (AnyObject, Selector) -> String, @convention(block) (IMHandle) -> String>) in
@@ -70,16 +63,17 @@ private func IMHandleHooks() throws -> Interpose {
                     return store.original(handle, store.selector)
                 }
                 
-                if let contact = IMContactStore.sharedInstance().fetchCNContactForHandle(withID: id), contact.value(forKey: "hasBeenPersisted") as? Bool == true {
-                    return contact
+                let originalRetval = store.original(handle, store.selector)
+                if originalRetval.value(forKey: "hasBeenPersisted") as? Bool == true {
+                    return originalRetval
                 }
                 
                 let indices = _PNCopyIndexStringsForAddressBookSearch(id as CFString, countryCode as CFString).takeRetainedValue() as! [String]
                 
-                for index in indices {
-                    if let contact = contact(withPhoneNumber: index) {
-                        return contact
-                    }
+                if let contact = try? IMContactStore.sharedInstance().contactStore.unifiedContacts(matching: CNContact.predicateForContacts(matchingHandleStrings: indices), keysToFetch: IMContactStore.keysForCNContact() as! [CNKeyDescriptor]).first {
+                    IMContactStore.sharedInstance().addContact(contact, withID: id)
+                    handle.setValue(contact, forKey: "cnContact")
+                    return contact
                 }
                 
                 return store.original(handle, store.selector)
