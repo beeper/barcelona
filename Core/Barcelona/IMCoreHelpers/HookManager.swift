@@ -32,6 +32,62 @@ private func CNLogSilencerHooks() throws -> Interpose? {
     }
 }
 
+private let PNCopyBestGuessCountryCodeForNumber: (
+    @convention(c) (CFString) -> Unmanaged<CFString> // retained
+) = CBWeakLink(against: .privateFramework(name: "CorePhoneNumbers"), .symbol("PNCopyBestGuessCountryCodeForNumber"))!
+
+private let _PNCopyIndexStringsForAddressBookSearch: (
+    @convention(c) (CFString, CFString) -> Unmanaged<CFArray>
+) = CBWeakLink(against: .privateFramework(name: "CorePhoneNumbers"), .symbol("_PNCopyIndexStringsForAddressBookSearch"))!
+
+private func contact(withPhoneNumber phoneNumber: String) -> CNContact? {
+    try? IMContactStore.sharedInstance()
+        .contactStore
+        .unifiedContacts(matching: CNContact.predicateForContacts(matching: .init(stringValue: phoneNumber)),
+                      keysToFetch: IMContactStore.keysForCNContact() as! [CNKeyDescriptor]
+        ).first
+}
+
+private func IMHandleHooks() throws -> Interpose {
+    try Interpose(IMHandle.self) {
+        try $0.prepareHook(#selector(getter: IMHandle.countryCode)) { (store: TypedHook<@convention(c) (AnyObject, Selector) -> String, @convention(block) (IMHandle) -> String>) in
+            { handle in
+                let id = handle.id
+                
+                guard id.isPhoneNumber else {
+                    return store.original(handle, store.selector)
+                }
+                
+                return (PNCopyBestGuessCountryCodeForNumber(id as CFString).takeRetainedValue() as String).uppercased()
+            }
+        }
+        
+        try $0.prepareHook(#selector(getter: IMHandle.cnContact)) { (store: TypedHook<@convention(c) (AnyObject, Selector) -> CNContact, @convention(block) (IMHandle) -> CNContact>) in
+            { handle in
+                let id = handle.id, countryCode = handle.countryCode.lowercased()
+                
+                guard id.isPhoneNumber, countryCode == IMAccountController.shared.iMessageAccount?.countryCode else {
+                    return store.original(handle, store.selector)
+                }
+                
+                if let contact = IMContactStore.sharedInstance().fetchCNContactForHandle(withID: id), contact.value(forKey: "hasBeenPersisted") as? Bool == true {
+                    return contact
+                }
+                
+                let indices = _PNCopyIndexStringsForAddressBookSearch(id as CFString, countryCode as CFString).takeRetainedValue() as! [String]
+                
+                for index in indices {
+                    if let contact = contact(withPhoneNumber: index) {
+                        return contact
+                    }
+                }
+                
+                return store.original(handle, store.selector)
+            }
+        }
+    }
+}
+
 private func IMChatHooks() throws -> Interpose {
     try Interpose(IMChat.self) {
         try $0.prepareHook(#selector(IMChat._handleIncomingItem(_:))) { (store: TypedHook<@convention(c) (AnyObject, Selector, AnyObject) -> Bool, @convention(block) (IMChat, IMItem) -> Bool>) in
@@ -92,7 +148,7 @@ private func IMIDSHooks() throws -> Interpose {
 class HookManager {
     static let shared = HookManager()
     
-    let hooks = [IMChatHooks, IMIDSHooks, CNLogSilencerHooks]
+    let hooks = [IMChatHooks, IMIDSHooks, CNLogSilencerHooks, IMHandleHooks]
     private var appliedHooks: [Interpose]?
     
     func apply() throws {
