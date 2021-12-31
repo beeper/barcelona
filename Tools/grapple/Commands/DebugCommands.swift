@@ -64,51 +64,21 @@ class DebugCommands: CommandGroup {
     
     class DebugEventsCommand: BarcelonaCommand {
         let name = "events"
-        @Flag("--mautrix") var asMautrix: Bool
         
         init() {
-            LoggingDrivers = []
+//            LoggingDrivers = []
         }
         
         func execute() throws {
-//            let bus = EventBus()
-
-//            bus.resume()
-
-//            bus.publisher.receiveEvent { event in
-//                CLInfo("BLEvents", "receiveEvent(%@): %@", event.name.rawValue, String(debugDescribing: event))
-//            }
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = .prettyPrinted
             
-            
-            CBDaemonListener.shared.messagePipeline.pipe { message in
-                print(message.dump)
-                if self.asMautrix {
-                    print(BLMessage(message: message).dump)
-                }
+            func json<P: Encodable>(_ encodable: P) -> String {
+                String(decoding: try! encoder.encode(encodable), as: UTF8.self)
             }
             
-            CBDaemonListener.shared.messageStatusPipeline.pipe { status in
-                print(status.dump)
-            }
-            
-            CBDaemonListener.shared.typingPipeline.pipe { chat, typing in
-                print("chat:\(chat) typing:\(typing)")
-            }
-            
-            CBDaemonListener.shared.chatNamePipeline.pipe { chat, name in
-                print("chat:\(chat) name:\(name ?? "none")")
-            }
-            
-            CBDaemonListener.shared.unreadCountPipeline.pipe { chat, count in
-                print("chat:\(chat) unreadCount:\(count)")
-            }
-            
-            CBDaemonListener.shared.chatParticipantsPipeline.pipe { chat, participants in
-                print("chat:\(chat) participants:\(participants)")
-            }
-            
-            CBIDSListener.shared.reflectedReadReceiptPipeline.pipe { messageID in
-                print("reflected:\(messageID)")
+            CBDaemonListener.shared.aggregatePipeline.pipe { event in
+                CLInfo("BLEvents", "\(json(event))")
             }
         }
     }
