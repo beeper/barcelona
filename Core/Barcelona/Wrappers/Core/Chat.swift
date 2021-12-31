@@ -114,6 +114,44 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     }
 }
 
+// MARK: - Participants
+public extension Chat {
+    func addParticipants(_ participants: [String]) -> [String] {
+        toggleParticipants(participants, add: true)
+    }
+    
+    func removeParticipants(_ participants: [String]) -> [String] {
+        toggleParticipants(participants, add: false)
+    }
+    
+    func toggleParticipants(_ participants: [String], add: Bool) -> [String] {
+        /*
+         {"handles":["1234","eric@net.com"]}
+         */
+        let handles = participants.compactMap { Registry.sharedInstance.imHandle(withID: $0, onAccount: imChat.account) }
+        
+        var reasonMessage: IMMessage!
+        
+        let inviteText = add ? "Get in my van, kid." : "Goodbye, skank."
+        
+        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+            reasonMessage = IMMessage.instantMessage(withText: NSAttributedString(string: inviteText), messageSubject: nil, flags: 0x5, threadIdentifier: nil)
+        } else {
+            reasonMessage = IMMessage.instantMessage(withText: NSAttributedString(string: inviteText), messageSubject: nil, flags: 0x5)
+        }
+        
+        if add {
+            if imChat.canAddParticipants(handles) {
+                imChat.inviteParticipantsToiMessageChat(handles, reason: reasonMessage)
+            }
+        } else {
+            imChat.removeParticipantsFromiMessageChat(handles, reason: reasonMessage)
+        }
+        
+        return imChat.participantHandleIDs()
+    }
+}
+
 // MARK: - Read Receipts
 internal extension IMChat {
     func markDirectRead(items: [IMMessageItem]) {
