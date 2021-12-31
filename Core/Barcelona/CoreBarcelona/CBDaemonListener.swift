@@ -177,8 +177,56 @@ internal extension CBDaemonListener {
     }
 }
 
+@resultBuilder
+struct PipelineGlobber<T> {
+    static func buildBlock(_ components: CBPipeline<T>...) -> CBPipeline<T> {
+        let pipeline = CBPipeline<T>()
+        
+        for component in components {
+            component.pipe(pipeline.send(_:))
+        }
+        
+        return pipeline
+    }
+}
+
+func createPipelineGlob<T>(@PipelineGlobber<T> component: () -> CBPipeline<T>) -> CBPipeline<T> {
+    return component()
+}
+
 public class CBDaemonListener: ERBaseDaemonListener {
     public static let shared = CBDaemonListener()
+    
+    public enum PipelineEvent: Codable {
+        case unreadCount(chat: String, count: Int)
+        case typing(chat: String, typing: Bool)
+        case chatName(chat: String, name: String?)
+        case chatParticipants(chat: String, participants: [String])
+        case blocklist(entries: [String])
+        case messagesDeleted(ids: [String])
+        case chatsDeleted(chatIDs: [String])
+        case chatJoinState(chat: String, joinState: IMChatJoinState)
+        case message(payload: Message)
+        case phantom(item: PhantomChatItem)
+        case messageStatus(change: CBMessageStatusChange)
+        case configuration(updated: ChatConfiguration)
+        
+        static func message(_ message: Message) -> PipelineEvent {
+            return .message(payload: message)
+        }
+        
+        static func phantom(_ item: PhantomChatItem) -> PipelineEvent {
+            return .phantom(item: item)
+        }
+        
+        static func messageStatus(_ change: CBMessageStatusChange) -> PipelineEvent {
+            return .messageStatus(change: change)
+        }
+        
+        static func configuration(_ updated: ChatConfiguration) -> PipelineEvent {
+            return .configuration(updated: updated)
+        }
+    }
     
     public let unreadCountPipeline          = CBPipeline<(chat: String, count: Int)>()
     public let typingPipeline               = CBPipeline<(chat: String, typing: Bool)>()
@@ -199,6 +247,21 @@ public class CBDaemonListener: ERBaseDaemonListener {
         
         return pipeline
     }()
+    
+    public private(set) lazy var aggregatePipeline: CBPipeline<PipelineEvent> = createPipelineGlob {
+        unreadCountPipeline.pipe(PipelineEvent.unreadCount(chat:count:))
+        typingPipeline.pipe(PipelineEvent.typing(chat:typing:))
+        chatNamePipeline.pipe(PipelineEvent.chatName(chat:name:))
+        chatParticipantsPipeline.pipe(PipelineEvent.chatParticipants(chat:participants:))
+        blocklistPipeline.pipe(PipelineEvent.blocklist(entries:))
+        messagesDeletedPipeline.pipe(PipelineEvent.messagesDeleted(ids:))
+        chatsDeletedPipeline.pipe(PipelineEvent.chatsDeleted(chatIDs:))
+        chatJoinStatePipeline.pipe(PipelineEvent.chatJoinState(chat:joinState:))
+        messagePipeline.pipe(PipelineEvent.message(_:))
+        phantomPipeline.pipe(PipelineEvent.phantom(_:))
+        messageStatusPipeline.pipe(PipelineEvent.messageStatus(_:))
+        chatConfigurationPipeline.pipe(PipelineEvent.configuration(_:))
+    }
     
     private override init() {
         super.init()
