@@ -45,5 +45,42 @@ class ChatCommands: CommandGroup {
         }
     }
     
-    var children: [Routable] = [ListChats(), RecentMessages()]
+    class Participants: CommandGroup {
+        let name = "participants"
+        let shortDescription = "commands for managing participants"
+        
+        class Add: EphemeralBarcelonaCommand {
+            let name = "add"
+            
+            @Param var chatID: String
+            @CollectedParam var participants: [String]
+            
+            func execute() throws {
+                guard let chat = Chat.resolve(withIdentifier: chatID) else {
+                    return print("unknown chatID")
+                }
+                
+                print(chat.addParticipants(participants))
+            }
+        }
+        
+        class Remove: EphemeralBarcelonaCommand {
+            let name = "remove"
+            
+            @Param var chatID: String
+            @CollectedParam var participants: [String]
+            
+            func execute() throws {
+                guard let chat = Chat.resolve(withIdentifier: chatID) else {
+                    return print("unknown chatID")
+                }
+                
+                print(chat.removeParticipants(participants))
+            }
+        }
+        
+        var children: [Routable] = [Add(), Remove()]
+    }
+    
+    var children: [Routable] = [ListChats(), RecentMessages(), Participants()]
 }
