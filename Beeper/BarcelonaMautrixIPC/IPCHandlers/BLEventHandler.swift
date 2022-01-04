@@ -63,7 +63,17 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         }
         
         CBDaemonListener.shared.messagePipeline.pipe { message in
-            if message.fromMe, SendMessageCommand.messageSent(withGUID: message.id) == .suppress {
+            if message.fromMe {
+                if let payload = SendMessageCommand.messageSent(withGUID: message.id) {
+                    if message.failed {
+                        payload.reply(withCommand: .error(.init(code: message.failureCode.description, message: message.failureCode.localizedDescription)))
+                    } else {
+                        payload.respond(.message_receipt(message.partialMessage))
+                    }
+                } else {
+                    return
+                }
+                
                 CLInfo("Mautrix", "Dropping last-sent message \(message.id)")
                 return
             }

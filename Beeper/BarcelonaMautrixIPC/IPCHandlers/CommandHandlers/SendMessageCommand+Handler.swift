@@ -10,18 +10,10 @@ import Foundation
 import Barcelona
 
 extension SendMessageCommand: Runnable {
-    public internal(set) static var suppressedGUIDs: Set<String> = Set()
+    public internal(set) static var pendingPayloads: [String: IPCPayload] = [:]
     
-    public enum MessageHandlingBehavior {
-        case process, suppress
-    }
-    
-    public static func messageSent(withGUID guid: String) -> MessageHandlingBehavior {
-        if suppressedGUIDs.remove(guid) != nil {
-            return .suppress
-        } else {
-            return .process
-        }
+    public static func messageSent(withGUID guid: String) -> IPCPayload? {
+        return pendingPayloads.removeValue(forKey: guid)
     }
     
     public func run(payload: IPCPayload) {
@@ -37,10 +29,8 @@ extension SendMessageCommand: Runnable {
         messageCreation.replyToPart = reply_to_part
         
         do {
-            let message = try chat.send(message: messageCreation).partialMessage
-            Self.suppressedGUIDs.insert(message.guid)
-            
-            payload.respond(.message_receipt(message))
+            let message = try chat.send(message: messageCreation)
+            Self.pendingPayloads[message.id] = payload
         } catch {
             // girl fuck
             CLFault("BLMautrix", "failed to send text message: %@", error as NSError)

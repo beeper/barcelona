@@ -54,6 +54,8 @@ public struct BLMessage: Codable, ChatResolvable {
     public var group_action_type: Int?
     public var new_group_title: String?
     
+    public var error_notice: String?
+    
     public init(message: Message) {
         guid = message.id
         timestamp = message.time / 1000 // mautrix-imessage expects this to be seconds
@@ -67,6 +69,7 @@ public struct BLMessage: Codable, ChatResolvable {
         attachments = message.fileTransferIDs.compactMap {
             BLAttachment(guid: $0)
         }
+        error_notice = message.failed ? message.failureCode.localizedDescription : nil
         
         for item in message.items {
             switch item.item {

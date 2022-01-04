@@ -7,8 +7,14 @@
 //
 
 import Foundation
+import IMFoundation
 
 public struct BLMessageStatus: Codable {
     public var guid: String
     public var status: String
+}
+
+public struct BLMessageSendFailure: Codable {
+    public var guid: String
+    public var failure_reason: FZErrorType
 }
