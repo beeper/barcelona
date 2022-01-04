@@ -65,6 +65,8 @@ class DebugCommands: CommandGroup {
     class DebugEventsCommand: BarcelonaCommand {
         let name = "events"
         
+        @Flag("--mautrix") var logAsMautrix: Bool
+        
         init() {
 //            LoggingDrivers = []
         }
@@ -78,6 +80,16 @@ class DebugCommands: CommandGroup {
             }
             
             CBDaemonListener.shared.aggregatePipeline.pipe { event in
+                if self.logAsMautrix {
+                    switch event {
+                    case .message(let message):
+                        CLInfo("BLEvents", "\(json(BLMessage(message: message)))")
+                        return
+                    default:
+                        break
+                    }
+                }
+                
                 CLInfo("BLEvents", "\(json(event))")
             }
         }
