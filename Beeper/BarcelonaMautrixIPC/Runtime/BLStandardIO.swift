@@ -106,8 +106,8 @@ public func BLWritePayloads(_ payloads: [IPCPayload], log: Bool = true) {
     #endif
 }
 
-public func BLWritePayload(_ payload: IPCPayload, log: Bool = true) {
-    BLWritePayloads([payload], log: log)
+public func BLWritePayload(_ payload: @autoclosure () -> IPCPayload, log: Bool = true) {
+    BLWritePayloads([payload()], log: log)
 }
 
 public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
