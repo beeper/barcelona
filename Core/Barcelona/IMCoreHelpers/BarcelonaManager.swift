@@ -88,14 +88,13 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
         controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
         controller.blockUntilConnected()
         
-        controller.fetchNicknames()
-        IMContactStore.sharedInstance().checkForContactStoreChanges()
+        log("Connected to daemon. Fetching nicknames...")
         
-        if ProcessInfo.processInfo.environment["BLPrefetchContacts"] == "1" {
-            for handle in IMHandleRegistrar.sharedInstance().allIMHandles() {
-                _ = handle.name
-            }
-        }
+        controller.fetchNicknames()
+        
+        log("Fetched nicknames. Setting up IMContactStore...")
+        
+        IMContactStore.sharedInstance().checkForContactStoreChanges()
         
         log("Connected.")
     }
