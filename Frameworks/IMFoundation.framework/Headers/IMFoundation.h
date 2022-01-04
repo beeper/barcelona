@@ -196,4 +196,68 @@ typedef NS_ENUM(UInt8, IMChatStyle) {
 void IMComponentsFromChatGUID(NSString *guid, NSString **chatIdentifier, NSString **service, IMChatStyle *style);
 size_t IMiMessageMaxFileSizeForUTI(NSString * UTI, BOOL *allowedLargerRepresentation);
 
+
+typedef NS_ENUM(uint32_t, FZErrorType) {
+    kFZErrorNoError              = 0,
+
+    kFZErrorUnknownError,
+
+    kFZErrorCancelled,
+    kFZErrorTimeout,
+    kFZErrorSendFailed,
+    kFZErrorInternalFailure,
+    
+    kFZErrorNetworkFailure,
+    kFZErrorNetworkLookupFailure,
+    kFZErrorNetworkConnectionFailure,
+    kFZErrorNoNetworkFailure,
+    kFZErrorNetworkBusyFailure,      // 10
+    kFZErrorNetworkDeniedFailure,
+    
+    kFZErrorServerSignatureError,
+    kFZErrorServerDecodeError,
+    kFZErrorServerParseError,
+    kFZErrorServerInternalError,
+    kFZErrorServerInvalidRequestError,
+    kFZErrorServerMalformedRequestError,
+    kFZErrorServerUnknownRequestError,
+    kFZErrorServerInvalidTokenError,
+    kFZErrorServerRejectedError,     // 20
+    
+    kFZErrorRemoteUserInvalid,
+    kFZErrorRemoteUserDoesNotExist,
+    kFZErrorRemoteUserIncompatible,
+    kFZErrorRemoteUserRejected,
+    
+    kFZErrorTranscodingFailure,
+    
+    kFZErrorEncryptionFailure,
+    kFZErrorDecryptionFailure,
+    
+    kFZErrorOTREncryptionFailure,
+    kFZErrorOTRDecryptionFailure,
+    
+    kFZErrorLocalAccountDisabled,
+    kFZErrorLocalAccountDoesNotExist,
+    kFZErrorLocalAccountNeedsUpdate,
+    kFZErrorLocalAccountInvalid,
+
+    kFZErrorAttachmentUploadFailure,
+    kFZErrorAttachmentDownloadFailure,
+
+    kFZErrorMessageAttachmentUploadFailure,
+    kFZErrorMessageAttachmentDownloadFailure,
+
+    kFZErrorSystemNeedsUpdate,
+
+    kFZErrorServiceCrashed,
+
+    kFZErrorInvalidLocalCredentials,
+
+    kFZErrorAttachmentDownloadFailureFileNotFound,
+    
+    kFZErrorTextRenderingPreflightFailed,
+};
+
+
 #endif

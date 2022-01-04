@@ -5,6 +5,7 @@
 //
 
 #import <IMSharedUtilities/IMItem.h>
+#import <IMFoundation/IMFoundation.h>
 
 #import "IMRemoteObjectCoding.h"
 #import <Foundation/Foundation.h>
@@ -76,7 +77,7 @@
 @property(retain, nonatomic) NSData *bodyData; // @synthesize bodyData=_bodyData;
 @property(nonatomic) unsigned long long flags; // @synthesize flags=_flags;
 @property(retain, nonatomic) NSArray<NSString*> *fileTransferGUIDs; // @synthesize fileTransferGUIDs=_fileTransferGUIDs;
-@property(nonatomic) unsigned int errorCode; // @synthesize errorCode=_error;
+@property(nonatomic) FZErrorType errorCode; // @synthesize errorCode=_error;
 @property(retain, nonatomic) NSString *plainBody; // @synthesize plainBody=_plainBody;
 @property(retain, nonatomic) NSString *subject; // @synthesize subject=_subject;
 - (id)_localizedBackwardsCompatibleExpressiveSendText;

@@ -60,6 +60,152 @@ private extension IngestionContext {
     }
 }
 
+extension FZErrorType: Codable {
+    public init(from decoder: Decoder) throws {
+        self = .init(rawValue: try decoder.singleValueContainer().decode(RawValue.self)) ?? .unknownError
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        try rawValue.encode(to: encoder)
+    }
+}
+
+extension FZErrorType: CustomStringConvertible {
+    public var localizedDescription: String {
+        switch self {
+        case .noError:
+            return ""
+        case .unknownError, .cancelled, .timeout, .sendFailed, .internalFailure, .textRenderingPreflightFailed:
+            return "An unknown error \(rawValue)/\(description)) was encountered while sending your message."
+        case .networkFailure, .networkLookupFailure, .networkConnectionFailure, .noNetworkFailure, .networkBusyFailure, .networkDeniedFailure:
+            return "An internal network error is preventing your message from being sent."
+        case .serverSignatureError, .serverDecodeError, .serverParseError, .serverInternalError, .serverInvalidRequestError, .serverMalformedRequestError, .serverUnknownRequestError, .serverInvalidTokenError, .serverRejectedError:
+            return "An error was encountered while communicating with the server."
+        case .remoteUserInvalid, .remoteUserDoesNotExist, .remoteUserIncompatible, .remoteUserRejected:
+            return "The person you are trying to message is unavailable or does not exist."
+        case .transcodingFailure:
+            return "An error was encountered while transcoding your message."
+        case .encryptionFailure, .otrEncryptionFailure:
+            return "There's an issue with your iMessage encryption that is preventing messages from being sent."
+        case .decryptionFailure, .otrDecryptionFailure:
+            return "There's an issue with your iMessage decryption that is preventing messages from being processed."
+        case .localAccountDisabled:
+            return "You cannot use this service at this time."
+        case .localAccountDoesNotExist:
+            return "This service is not set up."
+        case .localAccountInvalid, .localAccountNeedsUpdate:
+            return "This account is misconfigured and you cannot send messages at this time."
+        case .attachmentUploadFailure, .messageAttachmentUploadFailure:
+            return "Sorry, we're having trouble uploading your attachment."
+        case .attachmentDownloadFailure, .messageAttachmentDownloadFailure:
+            return "Sorry, we couldn't download that attachment."
+        case .systemNeedsUpdate:
+            return "Please update the system running iMessage."
+        case .serviceCrashed:
+            return "A temporary outage stopped your message from being sent. Please try again."
+        case .invalidLocalCredentials:
+            return "You've been signed out of iMessage. Please log back in."
+        case .attachmentDownloadFailureFileNotFound:
+            return "One or more attachments associated with this message are no longer available to download."
+        @unknown default:
+            return "An unknown error (\(rawValue)) was encountered while sending your message."
+        }
+    }
+    
+    public var description: String {
+        switch self {
+        case .noError:
+            return "noError"
+        case .unknownError:
+            return "unknownError"
+        case .cancelled:
+            return "cancelled"
+        case .timeout:
+            return "timeout"
+        case .sendFailed:
+            return "sendFailed"
+        case .internalFailure:
+            return "internalFailure"
+        case .networkFailure:
+            return "networkFailure"
+        case .networkLookupFailure:
+            return "networkLookupFailure"
+        case .networkConnectionFailure:
+            return "networkConnectionFailure"
+        case .noNetworkFailure:
+            return "noNetworkFailure"
+        case .networkBusyFailure:
+            return "networkBusyFailure"
+        case .networkDeniedFailure:
+            return "networkDeniedFailure"
+        case .serverSignatureError:
+            return "serverSignatureError"
+        case .serverDecodeError:
+            return "serverDecodeError"
+        case .serverParseError:
+            return "serverParseError"
+        case .serverInternalError:
+            return "serverInternalError"
+        case .serverInvalidRequestError:
+            return "serverInvalidRequestError"
+        case .serverMalformedRequestError:
+            return "serverMalformedRequestError"
+        case .serverUnknownRequestError:
+            return "serverUnknownRequestError"
+        case .serverInvalidTokenError:
+            return "serverInvalidTokenError"
+        case .serverRejectedError:
+            return "serverRejectedError"
+        case .remoteUserInvalid:
+            return "remoteUserInvalid"
+        case .remoteUserDoesNotExist:
+            return "remoteUserDoesNotExist"
+        case .remoteUserIncompatible:
+            return "remoteUserIncompatible"
+        case .remoteUserRejected:
+            return "remoteUserRejected"
+        case .transcodingFailure:
+            return "transcodingFailure"
+        case .encryptionFailure:
+            return "encryptionFailure"
+        case .decryptionFailure:
+            return "decryptionFailure"
+        case .otrEncryptionFailure:
+            return "otrEncryptionFailure"
+        case .otrDecryptionFailure:
+            return "otrDecryptionFailure"
+        case .localAccountDisabled:
+            return "localAccountDisabled"
+        case .localAccountDoesNotExist:
+            return "localAccountDoesNotExist"
+        case .localAccountNeedsUpdate:
+            return "localAccountNeedsUpdate"
+        case .localAccountInvalid:
+            return "localAccountInvalid"
+        case .attachmentUploadFailure:
+            return "attachmentUploadFailure"
+        case .attachmentDownloadFailure:
+            return "attachmentDownloadFailure"
+        case .messageAttachmentUploadFailure:
+            return "messageAttachmentUploadFailure"
+        case .messageAttachmentDownloadFailure:
+            return "messageAttachmentDownloadFailure"
+        case .systemNeedsUpdate:
+            return "systemNeedsUpdate"
+        case .serviceCrashed:
+            return "serviceCrashed"
+        case .invalidLocalCredentials:
+            return "invalidLocalCredentials"
+        case .attachmentDownloadFailureFileNotFound:
+            return "attachmentDownloadFailureFileNotFound"
+        case .textRenderingPreflightFailed:
+            return "textRenderingPreflightFailed"
+        @unknown default:
+            return "unknown(\(rawValue)"
+        }
+    }
+}
+
 public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     static func message(withGUID guid: String, in chatID: String? = nil) -> Promise<Message?> {
         IMMessage.message(withGUID: guid, in: chatID).then {
@@ -119,6 +265,9 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         associatedMessageID = item.associatedMessageGUID()
         fileTransferIDs = item.fileTransferGUIDs
         description = item.message()?.description(forPurpose: .SPI, in: IMChat.resolve(withIdentifier: chatID), senderDisplayName: nil)
+        failureCode = item.errorCode
+        failed = failureCode != .noError
+        failureDescription = failureCode.description
         item.receipt.assign(toMessage: &self)
     }
 
@@ -141,6 +290,9 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         sender = item.resolveSenderID(inService: service)
         associatedMessageID = item.associatedMessageGUID()
         fileTransferIDs = additionalFileTransferGUIDs
+        failureCode = .noError
+        failed = false
+        failureDescription = failureCode.description
         item.bareReceipt.assign(toMessage: &self)
     }
     
@@ -165,6 +317,9 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         flags = IMMessageFlags(rawValue: backing?.flags ?? message.flags)
         associatedMessageID = backing?.associatedMessageGUID() ?? message.associatedMessageGUID
         fileTransferIDs = message.fileTransferGUIDs
+        failureCode = backing?.errorCode ?? message._imMessageItem?.errorCode ?? FZErrorType.noError
+        failed = failureCode != .noError
+        failureDescription = failureCode.description
         
         if let chat = IMChat.resolve(withIdentifier: chatID) {
             description = try? message.description(forPurpose: .conversationList, in: chat)
@@ -214,6 +369,9 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     public var isAudioMessage: Bool
     public var description: String?
     public var flags: IMMessageFlags
+    public var failed: Bool
+    public var failureCode: FZErrorType
+    public var failureDescription: String
     public var items: [AnyChatItem]
     public var service: IMServiceStyle
     public var fileTransferIDs: [String]

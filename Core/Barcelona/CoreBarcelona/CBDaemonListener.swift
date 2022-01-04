@@ -556,7 +556,7 @@ private extension IMMessageItem {
             return (.delivered, timeDelivered)
         } else if wasDowngraded {
             return (.downgraded, time)
-        } else if errorCode > 0 {
+        } else if errorCode.rawValue > 0 {
             return (.notDelivered, time)
         } else {
             return nil
