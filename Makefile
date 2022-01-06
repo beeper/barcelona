@@ -13,10 +13,10 @@ soft-clean:
 	rm -rf barcelona.xcodeproj
 
 init:
-	vendor/xcodegen generate
+	vendor/bin/xcodegen generate
 	
 refresh:
-	vendor/xcodegen generate
+	vendor/bin/xcodegen generate
 
 scheme:
 	xcodebuild \
