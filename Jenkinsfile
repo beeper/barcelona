@@ -37,5 +37,12 @@ pipeline {
                 sh 'mv Build "../$(pwd | rev | cut -f 1 -d/ | rev)-Build"'
             }
         }
+        stage('Trigger CMS') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'gitlab-token', passwordVariable: 'TOKEN', usernameVariable: '')]) {
+                    sh 'curl -X POST --fail -F token=${TOKEN} -F ref=refs/heads/beta https://gitlab.com/api/v4/projects/27603475/trigger/pipeline > /dev/null'
+                }
+            }
+        }
     }
 }
