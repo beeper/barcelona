@@ -15,6 +15,7 @@ These are not strict requirements – this project is simply only ensured to bu
 
 - Xcode 12.4
 - macOS Big Sur
+- Git LFS
 
 ### Building
 
