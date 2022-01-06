@@ -13,20 +13,19 @@ soft-clean:
 	rm -rf barcelona.xcodeproj
 
 init:
-	xcodegen generate
+	vendor/xcodegen generate
 	
 refresh:
-	rm -rf barcelona.xcodeproj
-	xcodegen generate
+	vendor/xcodegen generate
 
 scheme:
 	xcodebuild \
 		-project barcelona.xcodeproj \
 		-scheme "$(SCHEME)" \
 		-parallelizeTargets \
-		-jobs 16 \
+		-jobs 8 \
 		-destination "$(DESTINATION)" \
-		-configuration Debug \
+		-configuration Release \
 		-derivedDataPath $(DERIVED_DIR) \
 		-ONLY_ACTIVE_ARCH=NO | xcpretty
 
@@ -49,7 +48,7 @@ grapple-ios:
 	$(MAKE) scheme-ios SCHEME=grapple
 
 ios:
-	$(MAKE) scheme-ios SCHEME=tools
+	$(MAKE) scheme-ios SCHEME=ci-ios
 	
 macos:
-	$(MAKE) scheme-macos SCHEME=tools
+	$(MAKE) scheme-macos SCHEME=ci-macos
