@@ -59,8 +59,8 @@ extension SendMediaMessageCommand: Runnable {
                 }
             }
         } catch {
-            // girl fuck
             CLFault("BLMautrix", "failed to send media message: %@", error as NSError)
+            payload.reply(withCommand: .error(.init(code: "internal_error", message: "Sorry, we're having trouble processing your attachment upload.")))
         }
     }
 }
