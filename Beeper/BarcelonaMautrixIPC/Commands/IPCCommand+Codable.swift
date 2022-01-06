@@ -185,11 +185,15 @@ extension IPCCommand: Codable {
         case .pre_startup_sync:
             self = .pre_startup_sync
     	case .log:
-			fatalError("log cannot be decoded (yet)")
+            throw BLIPCError.some(errorMessage: "log cannot be decoded (yet)")
     	case .response:
-			fatalError("response cannot be decoded (yet)")
+            throw BLIPCError.some(errorMessage: "response cannot be decoded (yet)")
     	case .bridge_status:
 			self = .bridge_status(try container.decode(BridgeStatusCommand.self, forKey: .data))
         }
+    }
+    
+    public enum BLIPCError: Error {
+        case some(errorMessage: String)
     }
 }
