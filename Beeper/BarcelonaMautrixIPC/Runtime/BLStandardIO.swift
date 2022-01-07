@@ -126,7 +126,17 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
                 let payload = try JSONDecoder().decode(IPCPayload.self, from: chunk)
                 
                 CLInfo("BLStandardIO", "Incoming! %@ %ld", payload.command.name.rawValue, payload.id ?? -1)
-                CLInfo("BLStandardIO", "raw: %@", String(decoding: try! JSONEncoder().encode(payload.command), as: UTF8.self))
+                switch payload.command {
+                case .send_message, .send_media, .send_read_receipt, .send_tapback:
+                    #if DEBUG
+                    fallthrough
+                    #else
+                    break
+                    #endif
+                default:
+                    CLInfo("BLStandardIO", "raw: %@", String(decoding: try! JSONEncoder().encode(payload.command), as: UTF8.self))
+                    break
+                }
                 
                 cb(payload)
             } catch {
