@@ -41,7 +41,7 @@ extension GetGroupChatInfoCommand: Runnable {
     }
 }
 
-extension SendReadReceiptCommand: Runnable {
+extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {
         guard let chat = cbChat else {
             return payload.fail(strategy: .chat_not_found)
@@ -51,7 +51,7 @@ extension SendReadReceiptCommand: Runnable {
     }
 }
 
-extension SendTypingCommand: Runnable {
+extension SendTypingCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {
         guard let chat = cbChat else {
             return payload.fail(strategy: .chat_not_found)

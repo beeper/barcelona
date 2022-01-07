@@ -57,5 +57,12 @@ public func BLHandlePayload(_ payload: IPCPayload) {
         return IPCLog.warn("Received unhandleable payload type \(payload.command.name)")
     }
     
+    if runnable is AuthenticatedAsserting {
+        guard BLHealthTicker.shared.mostRecentStatus.state_event != .unconfigured else {
+            payload.reply(withCommand: .error(.init(code: BLHealthTicker.shared.mostRecentStatus.state_event.rawValue, message: "You must be signed in to do that.")))
+            return
+        }
+    }
+    
     runnable.run(payload: payload)
 }

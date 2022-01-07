@@ -9,7 +9,7 @@
 import Foundation
 import Barcelona
 
-extension SendMessageCommand: Runnable {
+extension SendMessageCommand: Runnable, AuthenticatedAsserting {
     public internal(set) static var suppressedGUIDs: Set<String> = Set()
     
     public enum MessageHandlingBehavior {

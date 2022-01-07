@@ -9,7 +9,7 @@
 import Foundation
 import Barcelona
 
-extension TapbackCommand: Runnable {
+extension TapbackCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {
         guard let chat = cbChat else {
             return payload.fail(strategy: .chat_not_found)
