@@ -9,7 +9,7 @@
 import Foundation
 import Barcelona
 
-extension GetMessagesAfterCommand: Runnable {
+extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {
         IPCLog("Getting messages for chat guid %@ after time %f", chat_guid, timestamp)
         
@@ -32,7 +32,7 @@ extension GetMessagesAfterCommand: Runnable {
     }
 }
 
-extension GetRecentMessagesCommand: Runnable {
+extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {
         guard let chat = chat else {
             return payload.fail(strategy: .chat_not_found)
