@@ -39,6 +39,16 @@ public class BLHealthTicker {
         }
     }
     
+    public var mostRecentStatus: BridgeStatusCommand {
+        if let latestStatus = latestStatus {
+            return latestStatus
+        }
+        
+        let status = status
+        latestStatus = status
+        return status
+    }
+    
     private var latestStatus: BridgeStatusCommand? {
         didSet {
             guard let latestStatus = latestStatus, latestStatus != oldValue else {
