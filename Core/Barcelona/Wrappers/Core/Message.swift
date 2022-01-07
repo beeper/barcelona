@@ -243,7 +243,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     }
     
     // SPI for CBDaemonListener ONLY
-    init(messageItem item: IMMessageItem, chatID: String) {
+    init(messageItem item: IMMessageItem, chatID: String, items: [AnyChatItem]? = nil) {
         id = item.id
         self.chatID = chatID
         fromMe = item.isFromMe()
@@ -257,7 +257,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         isDelivered = item.isDelivered
         isAudioMessage = item.isAudioMessage
         flags = .init(rawValue: item.flags)
-        items = IngestionContext(chatID: chatID).ingest(item.chatItems).map {
+        self.items = items ?? IngestionContext(chatID: chatID).ingest(item.chatItems).map {
             $0.eraseToAnyChatItem()
         }
         service = item.resolveServiceStyle(inChat: chatID)
@@ -331,7 +331,11 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     }
     
     init(_ backing: IMMessageItem, items: [ChatItem], chatID: String) {
-        self.init(backing, message: backing.message() ?? IMMessage.message(fromUnloadedItem: backing)!, items: items, chatID: chatID)
+        if let message = backing.message() ?? IMMessage.message(fromUnloadedItem: backing) {
+            self.init(backing, message: message, items: items, chatID: chatID)
+        } else {
+            self.init(messageItem: backing, chatID: chatID, items: items.map { $0.eraseToAnyChatItem() })
+        }
     }
     
     init(_ message: IMMessage, items: [ChatItem], chatID: String) {
