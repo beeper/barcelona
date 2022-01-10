@@ -6,21 +6,9 @@ pipeline {
                 sh '[ -d "../$(pwd | rev | cut -f 1 -d/ | rev)-Build" ] && mv "../$(pwd | rev | cut -f 1 -d/ | rev)-Build" ./Build || true'
             }
         }
-        stage('Prepare') {
-            steps {
-                sh 'make refresh'
-            }
-        }
         stage('Build') {
             steps {
-                parallel(
-                    macos: {
-                        sh 'make macos'
-                    },
-                    ios: {
-                        sh 'make ios'
-                    }
-                )
+                sh 'make all'
             }
         }
         stage('Archive') {

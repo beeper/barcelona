@@ -47,8 +47,15 @@ mautrix-ios:
 grapple-ios:
 	$(MAKE) scheme-ios SCHEME=grapple
 
-ios:
+ios-stale:
 	$(MAKE) scheme-ios SCHEME=ci-ios
-	
-macos:
+
+ios: refresh, ios-stale
+
+macos-stale:
 	$(MAKE) scheme-macos SCHEME=ci-macos
+
+macos: refresh, macos-stale
+
+all: refresh
+	$(MAKE) -j 2 macos-stale ios-stale
