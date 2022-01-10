@@ -155,6 +155,7 @@ targets:
     productNameFromSettings: true
     sources:
       - Tools/grapple
+    scheme: {}
     settings:
       base:
         CODE_SIGN_ENTITLEMENTS: Tools/grapple/grapple.entitlements
@@ -181,6 +182,7 @@ targets:
     group: Tools
     type: tool
     platform: macOS
+    scheme: {}
     sources:
       - Tools/imserver
     settings:
@@ -214,6 +216,7 @@ targets:
     platform: [macOS,iOS]
     platformSuffix: -${platform}
     productNameFromSettings: true
+    scheme: {}
     sources:
       - Beeper/barcelona-mautrix
     settings:

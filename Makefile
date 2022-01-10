@@ -35,17 +35,17 @@ scheme-macos:
 scheme-ios:
 	$(MAKE) scheme DESTINATION=$(IOS_DESTINATION) DERIVED_DIR=$(IOS_DERIVED_DIR)
 
-mautrix-macos:
-	$(MAKE) scheme-macos SCHEME=barcelona-mautrix
+mautrix-macos: refresh
+	$(MAKE) scheme-macos SCHEME=barcelona-mautrix-macOS
 
-grapple-macos:
-	$(MAKE) scheme-macos SCHEME=grapple
+grapple-macos: refresh
+	$(MAKE) scheme-macos SCHEME=grapple-macOS
 
-mautrix-ios:
-	$(MAKE) scheme-ios SCHEME=barcelona-mautrix
+mautrix-ios: refresh
+	$(MAKE) scheme-ios SCHEME=barcelona-mautrix-iOS
 
-grapple-ios:
-	$(MAKE) scheme-ios SCHEME=grapple
+grapple-ios: refresh
+	$(MAKE) scheme-ios SCHEME=grapple-iOS
 
 ios-stale:
 	$(MAKE) scheme-ios SCHEME=ci-ios
