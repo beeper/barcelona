@@ -131,6 +131,16 @@ private func IMChatHooks() throws -> Interpose {
     }
 }
 
+private func IDSServiceHooks() throws -> Interpose {
+    try Interpose(NSClassFromString("_IDSService")!) {
+        try $0.prepareHook(Selector("_enforceSandboxPolicy")) { (store: TypedHook<@convention(c) (AnyObject, Selector) -> Void, @convention(block) (AnyObject) -> ()>) in
+            { object in
+                
+            }
+        }
+    }
+}
+
 private func IMIDSHooks() throws -> Interpose {
     try Interpose(NSClassFromString("IDSIDQueryController")!) {
         try $0.prepareHook(Selector("_hasCacheForService:")) { (store: TypedHook<@convention(c) (AnyObject, Selector, AnyObject) -> Bool, @convention(block) (AnyObject) -> CChar>) in { _ in
@@ -142,7 +152,7 @@ private func IMIDSHooks() throws -> Interpose {
 class HookManager {
     static let shared = HookManager()
     
-    let hooks = [IMChatHooks, IMIDSHooks, CNLogSilencerHooks, IMHandleHooks]
+    let hooks = [IMChatHooks, IMIDSHooks, CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks]
     private var appliedHooks: [Interpose]?
     
     func apply() throws {
