@@ -37,12 +37,8 @@ private let PNCopyBestGuessCountryCodeForNumber: (
     @convention(c) (CFString) -> Unmanaged<CFString> // retained
 ) = CBWeakLink(against: .privateFramework(name: "CorePhoneNumbers"), .symbol("PNCopyBestGuessCountryCodeForNumber"))!
 
-private let _PNCopyIndexStringsForAddressBookSearch: (
-    @convention(c) (CFString, CFString) -> Unmanaged<CFArray>
-) = CBWeakLink(against: .privateFramework(name: "CorePhoneNumbers"), .symbol("_PNCopyIndexStringsForAddressBookSearch"))!
-
 private func IMHandleHooks() throws -> Interpose {
-    try Interpose(IMHandle.self) {
+    return try Interpose(IMHandle.self) {
         try $0.prepareHook(#selector(getter: IMHandle.countryCode)) { (store: TypedHook<@convention(c) (AnyObject, Selector) -> String, @convention(block) (IMHandle) -> String>) in
             { handle in
                 let id = handle.id
@@ -55,11 +51,13 @@ private func IMHandleHooks() throws -> Interpose {
             }
         }
         
+        let contactLogging = Logger(category: "ContactFuzzing")
+        
         try $0.prepareHook(#selector(getter: IMHandle.cnContact)) { (store: TypedHook<@convention(c) (AnyObject, Selector) -> CNContact, @convention(block) (IMHandle) -> CNContact>) in
             { handle in
                 let id = handle.id, countryCode = handle.countryCode.lowercased()
                 
-                guard id.isPhoneNumber, countryCode == IMAccountController.shared.iMessageAccount?.countryCode else {
+                guard id.isPhoneNumber, CBFeatureFlags.ifNot(\.ignoresSameCountryCodeAssertion, countryCode == IMAccountController.shared.iMessageAccount?.countryCode, else: true) else {
                     return store.original(handle, store.selector)
                 }
                 
@@ -68,9 +66,11 @@ private func IMHandleHooks() throws -> Interpose {
                     return originalRetval
                 }
                 
-                let indices = _PNCopyIndexStringsForAddressBookSearch(id as CFString, countryCode as CFString).takeRetainedValue() as! [String]
-                
-                if let contact = try? IMContactStore.sharedInstance().contactStore.unifiedContacts(matching: CNContact.predicateForContacts(matchingHandleStrings: indices), keysToFetch: IMContactStore.keysForCNContact() as! [CNKeyDescriptor]).first {
+                if let contact = try? IMContactStore.sharedInstance().contactStore.unifiedContacts(matching: CNContact.predicateForContacts(matchingHandleID: id, countryCode: countryCode), keysToFetch: IMContactStore.keysForCNContact() as! [CNKeyDescriptor]).first {
+                    ifDebugBuild {
+                        contactLogging.info("choosing \(contact.debugDescription) for fuzzing result against handleID \(id)")
+                    }
+                    
                     IMContactStore.sharedInstance().addContact(contact, withID: id)
                     handle.setValue(contact, forKey: "cnContact")
                     return contact

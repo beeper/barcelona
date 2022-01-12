@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <Contacts/CNContact.h>
 
 //! Project version number for CoreBarcelona.
 FOUNDATION_EXPORT double CoreBarcelonaVersionNumber;
@@ -20,3 +21,17 @@ FOUNDATION_EXPORT const unsigned char CoreBarcelonaVersionString[];
 
 CommunicationsFilterBlockList* ERSharedBlockList();
 NSXPCListener* ERConstructXPCListener(NSString*);
+
+@interface CNPhoneNumber ()
+- (nonnull instancetype)initWithStringValue:(nonnull NSString *)stringValue countryCode:(nullable NSString *)countryCode;
++(nonnull NSString*)dialingCodeForISOCountryCode:(nonnull NSString*)countryCode;
+-(nonnull NSString*)digitsRemovingDialingCode;
+@end
+
+@interface CNPredicate : NSPredicate <NSCopying> {
+    NSPredicate * _cn_predicate;
+}
+- (instancetype)initWithPredicate:(NSPredicate *)predicate NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithCoder:(NSCoder *)aDecoder NS_DESIGNATED_INITIALIZER;
+- (NSPredicate *)cn_predicate;
+@end
