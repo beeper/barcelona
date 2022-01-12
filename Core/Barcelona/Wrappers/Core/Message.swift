@@ -42,7 +42,7 @@ private func CBExtractThreadOriginatorAndPartFromIdentifier(_ identifier: String
 
 private extension IngestionContext {
     func ingest(_ items: [NSObject]) -> [ChatItem] {
-        CLDebug("IngestionContext", "Ingesting items: \(items, privacy: .private)")
+        CBLoggingFlags.if(\.ingestion, CLDebug("IngestionContext", "Ingesting items: \(items, privacy: .private)"))
         
         return items.map {
             ChatItemType.ingest(object: $0, context: self)

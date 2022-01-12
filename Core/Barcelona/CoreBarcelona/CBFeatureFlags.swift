@@ -38,7 +38,33 @@ private func debugOption(named name: String, defaultValue: Bool) -> Bool {
     #endif
 }
 
-public struct __CBFeatureFlags {
+@_marker
+public protocol _FlagProvider {}
+
+public extension _FlagProvider {
+    @inlinable @inline(__always) func `if`(_ keyPath: KeyPath<Self, Bool>, _ expr: @autoclosure () -> ()) {
+        guard self[keyPath: keyPath] else {
+            return
+        }
+        expr()
+    }
+    
+    @inlinable @inline(__always) func `if`<P>(_ keyPath: KeyPath<Self, Bool>, _ expr: @autoclosure () -> P, or: P) -> P {
+        guard self[keyPath: keyPath] else {
+            return or
+        }
+        return expr()
+    }
+    
+    @inlinable @inline(__always) func ifNot<P>(_ keyPath: KeyPath<Self, Bool>, _ expr: @autoclosure () -> P, else: P) -> P {
+        guard !self[keyPath: keyPath] else {
+            return `else`
+        }
+        return expr()
+    }
+}
+
+public struct _CBFeatureFlags: _FlagProvider {
     public let permitInvalidAudioMessages = option(named: "amr-validation", defaultValue: true)
     public let performAMRTranscoding = option(named: "amr-transcoding", defaultValue: false)
     public let permitAudioOverMautrix = debugOption(named: "matrix-audio", defaultValue: false)
@@ -47,30 +73,41 @@ public struct __CBFeatureFlags {
     public let ignoresSameCountryCodeAssertion = debugOption(named: "any-country", defaultValue: false)
     public let scratchbox = debugOption(named: "scratchbox", defaultValue: false)
     public let exitAfterScratchbox = debugOption(named: "exit-after-scratchbox", defaultValue: true)
-    
-    @inlinable @inline(__always) public func `if`(_ keyPath: KeyPath<__CBFeatureFlags, Bool>, _ expr: @autoclosure () -> ()) {
-        guard self[keyPath: keyPath] else {
-            return
+}
+
+extension String {
+    var splitByCamel: [String] {
+        unicodeScalars.reduce(into: [""]) { accumulator, character in
+            if CharacterSet.uppercaseLetters.contains(character) {
+                accumulator.append(String(character).lowercased())
+            } else {
+                accumulator[accumulator.index(before: accumulator.endIndex)].append(String(character))
+            }
         }
-        expr()
     }
     
-    @inlinable @inline(__always) public func `if`<P>(_ keyPath: KeyPath<__CBFeatureFlags, Bool>, _ expr: @autoclosure () -> P, or: P) -> P {
-        guard self[keyPath: keyPath] else {
-            return or
-        }
-        return expr()
-    }
-    
-    @inlinable @inline(__always) public func ifNot<P>(_ keyPath: KeyPath<__CBFeatureFlags, Bool>, _ expr: @autoclosure () -> P, else: P) -> P {
-        guard !self[keyPath: keyPath] else {
-            return `else`
-        }
-        return expr()
+    var camelToHyphen: String {
+        splitByCamel.joined(separator: "-")
     }
 }
 
-public let CBFeatureFlags = __CBFeatureFlags()
+@dynamicMemberLookup
+public struct _CBLoggingFlags: _FlagProvider {
+    private static var cache: [String: Bool] = [:]
+    
+    public subscript(dynamicMember dynamicMember: String) -> Bool {
+        if let cachedValue = Self.cache[dynamicMember] {
+            return cachedValue
+        }
+        let loggingToken = dynamicMember.camelToHyphen.appending("-logging")
+        let loggingStatus = option(named: loggingToken, defaultValue: isDebugBuild)
+        Self.cache[dynamicMember] = loggingStatus
+        return loggingStatus
+    }
+}
+
+public let CBFeatureFlags = _CBFeatureFlags()
+public let CBLoggingFlags = _CBLoggingFlags()
 
 @_transparent internal func ifInternal(_ block: () -> ()) {
     if CBFeatureFlags.internalDiagnostics {
