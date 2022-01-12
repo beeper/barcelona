@@ -55,10 +55,6 @@ public class BLHealthTicker {
                 return
             }
             
-            BLMautrixSTDOutDriver.shared.log(level: .info, module: "BLHealth", message: "Sending health payload", metadata: [
-                "health": latestStatus
-            ])
-            
             publish(latestStatus)
         }
     }
