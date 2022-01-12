@@ -71,7 +71,7 @@ class BarcelonaMautrix {
     func checkArguments() {
         // apply debug overlays for easier log reading
         if ProcessInfo.processInfo.arguments.contains("-d") {
-            LoggingDrivers = [OSLogDriver.shared, ConsoleDriver.shared]
+            LoggingDrivers = CBFeatureFlags.runningFromXcode ? [OSLogDriver.shared] : [OSLogDriver.shared, ConsoleDriver.shared]
             BLMetricStore.shared.set(true, forKey: .shouldDebugPayloads)
         }
     }

@@ -8,6 +8,7 @@
 
 import Foundation
 import BarcelonaFoundation
+import Barcelona
 
 private extension FileHandle {
     func handleDataAsynchronously(_ cb: @escaping (Data) -> ()) {
@@ -80,6 +81,10 @@ private let encoder: JSONEncoder = {
     let encoder = JSONEncoder()
     encoder.dateEncodingStrategy = .iso8601withFractionalSeconds
     
+    if CBFeatureFlags.runningFromXcode {
+        encoder.outputFormatting = .prettyPrinted
+    }
+    
     return encoder
 }()
 
@@ -87,7 +92,7 @@ public func BLWritePayloads(_ payloads: [IPCPayload], log: Bool = true) {
     var data = Data()
     
     for payload in payloads {
-        if log {
+        if !CBFeatureFlags.runningFromXcode && log {
             CLInfo(
                 "BLStandardIO",
                 "Outgoing! %@ %ld", payload.command.name.rawValue, payload.id ?? -1

@@ -97,6 +97,16 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
         IMContactStore.sharedInstance().checkForContactStoreChanges()
         
         log("Connected.")
+        
+        ifDebugBuild {
+            if CBFeatureFlags.scratchbox {
+                _scratchboxMain()
+                
+                if CBFeatureFlags.exitAfterScratchbox {
+                    exit(0)
+                }
+            }
+        }
     }
     
     if BLIsSimulation {
