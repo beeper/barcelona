@@ -23,9 +23,19 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         }
         
         let transfer = CBInitializeFileTransfer(filename: file_name, path: URL(fileURLWithPath: path_on_disk)), transferGUID = transfer.guid
-        let messageCreation = CreateMessage(parts: [
+        var messageCreation = CreateMessage(parts: [
             .init(type: .attachment, details: transfer.guid)
         ])
+        
+        if CBFeatureFlags.permitAudioOverMautrix {
+            if is_audio_message == true {
+                messageCreation.isAudioMessage = true
+            }
+            
+            if !CBFeatureFlags.permitInvalidAudioMessages {
+                // validate mime type blah
+            }
+        }
         
         do {
             let message = try chat.send(message: messageCreation).partialMessage

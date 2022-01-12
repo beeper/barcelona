@@ -53,6 +53,7 @@ public struct BLMessage: Codable, ChatResolvable {
     public var associated_message: BLAssociatedMessage?
     public var group_action_type: Int?
     public var new_group_title: String?
+    public var is_audio_message: Bool?
     
     public init(message: Message) {
         guid = message.id
@@ -67,6 +68,7 @@ public struct BLMessage: Codable, ChatResolvable {
         attachments = message.fileTransferIDs.compactMap {
             BLAttachment(guid: $0)
         }
+        is_audio_message = message.isAudioMessage
         
         for item in message.items {
             switch item.item {
