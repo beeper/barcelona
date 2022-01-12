@@ -12,6 +12,12 @@
 import Foundation
 
 #if DEBUG
+import IMCore
+import IMSharedUtilities
+import IMFoundation
+import IDS
+import Contacts
+
 internal func _scratchboxMain() {
     
 }
