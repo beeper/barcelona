@@ -27,12 +27,14 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             .init(type: .attachment, details: transfer.guid)
         ])
         
-        if is_audio_message == true {
-            messageCreation.isAudioMessage = true
-        }
-        
-        if !CBFeatureFlags.permitInvalidAudioMessages {
-            // validate mime type blah
+        if CBFeatureFlags.permitAudioOverMautrix {
+            if is_audio_message == true {
+                messageCreation.isAudioMessage = true
+            }
+            
+            if !CBFeatureFlags.permitInvalidAudioMessages {
+                // validate mime type blah
+            }
         }
         
         do {

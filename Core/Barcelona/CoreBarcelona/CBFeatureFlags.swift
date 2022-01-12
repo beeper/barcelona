@@ -9,5 +9,6 @@ import Foundation
 
 public let CBFeatureFlags = (
     permitInvalidAudioMessages: ProcessInfo.processInfo.arguments.contains("--disable-amr-validation"),
-    performAMRTranscoding: ProcessInfo.processInfo.arguments.contains("--enable-amr-transcoding")
+    performAMRTranscoding: ProcessInfo.processInfo.arguments.contains("--enable-amr-transcoding"),
+    permitAudioOverMautrix: ProcessInfo.processInfo.arguments.contains("--enable-mautrix-audio")
 )
