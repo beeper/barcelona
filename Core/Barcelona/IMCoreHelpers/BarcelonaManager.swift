@@ -99,7 +99,7 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
         log("Connected.")
         
         ifDebugBuild {
-            if CBFeatureFlags.scratchbox {
+            if CBFeatureFlags.scratchbox && !_scratchboxIsEmpty {
                 _scratchboxMain()
                 
                 if CBFeatureFlags.exitAfterScratchbox {
