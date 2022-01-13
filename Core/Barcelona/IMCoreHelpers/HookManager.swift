@@ -66,7 +66,15 @@ private func IMHandleHooks() throws -> Interpose {
                     return originalRetval
                 }
                 
-                if let contact = try? IMContactStore.sharedInstance().contactStore.unifiedContacts(matching: CNContact.predicateForContacts(matchingHandleID: id, countryCode: countryCode), keysToFetch: IMContactStore.keysForCNContact() as! [CNKeyDescriptor]).first {
+                var contact: CNContact?
+                
+                if CBFeatureFlags.contactFuzzEnumerator {
+                    contact = try? CNContact.contact(matchingHandleID: id, countryCode: countryCode)
+                } else {
+                    contact = try? IMContactStore.sharedInstance().contactStore.unifiedContacts(matching: CNContact.predicateForContacts(matchingHandleID: id, countryCode: countryCode), keysToFetch: IMContactStore.keysForCNContact() as! [CNKeyDescriptor]).first
+                }
+                
+                if let contact = contact {
                     ifDebugBuild {
                         contactLogging.info("choosing \(contact.debugDescription) for fuzzing result against handleID \(id)")
                     }

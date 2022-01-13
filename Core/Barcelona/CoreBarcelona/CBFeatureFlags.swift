@@ -64,6 +64,8 @@ public extension _FlagProvider {
     }
 }
 
+// to enable something off by default, --enable-
+// to disable, --disable-
 public struct _CBFeatureFlags: _FlagProvider {
     public let permitInvalidAudioMessages = option(named: "amr-validation", defaultValue: true)
     public let performAMRTranscoding = option(named: "amr-transcoding", defaultValue: false)
@@ -73,6 +75,7 @@ public struct _CBFeatureFlags: _FlagProvider {
     public let ignoresSameCountryCodeAssertion = debugOption(named: "any-country", defaultValue: false)
     public let scratchbox = debugOption(named: "scratchbox", defaultValue: false)
     public let exitAfterScratchbox = debugOption(named: "exit-after-scratchbox", defaultValue: true)
+    public let contactFuzzEnumerator = option(named: "contact-fuzz-enumerator", defaultValue: true)
 }
 
 extension String {

@@ -26,6 +26,8 @@ NSXPCListener* ERConstructXPCListener(NSString*);
 - (nonnull instancetype)initWithStringValue:(nonnull NSString *)stringValue countryCode:(nullable NSString *)countryCode;
 +(nonnull NSString*)dialingCodeForISOCountryCode:(nonnull NSString*)countryCode;
 -(nonnull NSString*)digitsRemovingDialingCode;
+-(nonnull NSString*)unformattedInternationalStringValue;
+-(nonnull NSString*)digits;
 @end
 
 @interface CNPredicate : NSPredicate <NSCopying> {
