@@ -10,14 +10,20 @@ import Foundation
 import BarcelonaFoundation
 import Barcelona
 
-private extension FileHandle {
+public extension FileHandle {
     func handleDataAsynchronously(_ cb: @escaping (Data) -> ()) {
-        NotificationCenter.default.addObserver(forName: .NSFileHandleDataAvailable, object: self, queue: .current) { notif in
-            let handle = notif.object as! FileHandle
-            cb(handle.availableData)
-            handle.waitForDataInBackgroundAndNotify()
-        }
-        waitForDataInBackgroundAndNotify()
+        Thread {
+            RunLoop.current.schedule {
+                NotificationCenter.default.addObserver(forName: .NSFileHandleDataAvailable, object: self, queue: nil) { notif in
+                    let handle = notif.object as! FileHandle
+                    cb(handle.availableData)
+                    handle.waitForDataInBackgroundAndNotify()
+                }
+                self.waitForDataInBackgroundAndNotify()
+            }
+            
+            RunLoop.current.run()
+        }.start()
     }
 }
 

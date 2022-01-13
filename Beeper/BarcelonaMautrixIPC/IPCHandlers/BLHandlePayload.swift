@@ -64,5 +64,7 @@ public func BLHandlePayload(_ payload: IPCPayload) {
         }
     }
     
-    runnable.run(payload: payload)
+    DispatchQueue.main.async {
+        runnable.run(payload: payload)
+    }
 }

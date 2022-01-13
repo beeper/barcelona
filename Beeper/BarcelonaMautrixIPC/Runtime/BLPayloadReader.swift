@@ -10,8 +10,7 @@ import Foundation
 import BarcelonaFoundation
 
 public class BLPayloadReader {
-    public let stream: SubjectStream<IPCPayload>
-    private let publish: (IPCPayload) -> ()
+    public var callback: (IPCPayload) -> () = { _ in }
     
     public var ready = ProcessInfo.processInfo.arguments.contains("-d") {
         didSet {
@@ -19,7 +18,7 @@ public class BLPayloadReader {
                 let queue = queue
                 self.queue = []
                 
-                queue.forEach(publish)
+                queue.forEach(callback)
             }
         }
     }
@@ -27,14 +26,9 @@ public class BLPayloadReader {
     private var queue = [IPCPayload]()
     
     public init() {
-        var publish: (IPCPayload) -> () = { _ in }
-        
-        self.stream = SubjectStream(publish: &publish)
-        self.publish = publish
-        
         BLCreatePayloadReader { payload in
             if self.ready {
-                self.publish(payload)
+                self.callback(payload)
             } else {
                 self.queue.append(payload)
             }

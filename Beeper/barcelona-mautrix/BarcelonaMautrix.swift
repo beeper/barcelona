@@ -38,10 +38,7 @@ class BarcelonaMautrix {
     }
     
     func bootstrap() {
-        reader.stream.subscribe { payload in
-            // pipe payload to central logic
-            BLHandlePayload(payload)
-        }
+        reader.callback = BLHandlePayload(_:)
 
         CLInfo("ERBarcelonaManager", "Bootstrapping")
 
