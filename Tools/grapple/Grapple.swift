@@ -38,6 +38,15 @@ class Grapple {
         ])
         LoggingDrivers.append(OSLogDriver.shared)
         
+        #if !DEBUG
+        if !ProcessInfo.processInfo.environment.keys.contains("I_HAVE_CONSENT") {
+            print("STOP! Do you have permission from the user to access these APIs? [y/N]")
+            guard readLine(strippingNewline: true)?.lowercased() == "y" else {
+                exit(1)
+            }
+        }
+        #endif
+        
         do {
             let path = try cli.parser.parse(cli: cli, arguments: ArgumentList(arguments: Array(CommandLine.arguments.dropFirst())))
             
