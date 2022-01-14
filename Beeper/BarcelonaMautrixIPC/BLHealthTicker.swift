@@ -8,18 +8,16 @@
 
 import Foundation
 import Barcelona
+import Combine
 
 public class BLHealthTicker {
     public static let shared = BLHealthTicker()
     
     private var timer: Timer? = nil
-    
-    private var publish: (BridgeStatusCommand) -> () = { _ in }
-    public let stream: SubjectStream<BridgeStatusCommand>
+    private var subject: PassthroughSubject<BridgeStatusCommand, Never> = PassthroughSubject()
+    public private(set) lazy var multi = subject.share()
     
     public init() {
-        stream = SubjectStream<BridgeStatusCommand>(publish: &publish)
-        
         NotificationCenter.default.subscribe(toNotificationsNamed: [.IMAccountLoginStatusChanged, .IMAccountRegistrationStatusChanged, .IMAccountNoLongerJustLoggedIn, .IMAccountLoggedIn, .IMAccountLoggedOut, .IMAccountActivated, .IMAccountDeactivated, .IMAccountAuthorizationIDChanged, .IMAccountControllerOperationalAccountsChanged]) { notification, subscription in
             self.run(schedulingNext: true)
         }
@@ -49,13 +47,29 @@ public class BLHealthTicker {
         return status
     }
     
-    private var latestStatus: BridgeStatusCommand? {
+    public var pinnedBridgeState: BridgeState? {
         didSet {
-            guard let latestStatus = latestStatus, latestStatus != oldValue else {
+            if latestStatus == nil {
                 return
             }
             
-            publish(latestStatus)
+            var status = BridgeStatusCommand.current
+            if let pinnedBridgeState = pinnedBridgeState {
+                status.state_event = pinnedBridgeState
+            }
+            latestStatus = status
+        }
+    }
+    
+    private var latestStatus: BridgeStatusCommand? {
+        didSet {
+            if latestStatus != nil, let pinnedBridgeState = pinnedBridgeState {
+                latestStatus!.state_event = pinnedBridgeState
+            }
+            
+            if latestStatus != oldValue, let latestStatus = latestStatus {
+                subject.send(latestStatus)
+            }
         }
     }
     
@@ -71,6 +85,16 @@ public class BLHealthTicker {
         if shouldScheduleNext {
             scheduleNext()
         }
+    }
+    
+    private static var cancellables: Set<AnyCancellable> = Set()
+    public func subscribeForever(_ callback: @escaping (BridgeStatusCommand) -> ()) {
+        let semaphore = DispatchSemaphore(value: 0)
+        FileHandle.standardInput.performOnThread {
+            self.multi.receive(on: RunLoop.current).sink(receiveValue: callback).store(in: &Self.cancellables)
+            semaphore.signal()
+        }
+        semaphore.wait()
     }
     
     /**

@@ -7,23 +7,59 @@
 //
 
 import Foundation
+import CoreFoundation
 import BarcelonaFoundation
 import Barcelona
+import Combine
 
 public extension FileHandle {
-    func handleDataAsynchronously(_ cb: @escaping (Data) -> ()) {
-        Thread {
+    private static var threads: [FileHandle: Thread] = [:]
+    private static var callbacks: [FileHandle: (Data) -> ()] = [:]
+    private static var runLoops: [FileHandle: CFRunLoop] = [:]
+    
+    var dataCallback: (Data) -> () {
+        get {
+            Self.callbacks[self] ?? { _ in }
+        }
+        set {
+            Self.callbacks[self] = newValue
+        }
+    }
+    
+    private var thread: Thread {
+        if let thread = Self.threads[self] {
+            return thread
+        }
+        
+        let thread = Thread {
+            Self.runLoops[self] = CFRunLoopGetCurrent()
+            
             RunLoop.current.schedule {
                 NotificationCenter.default.addObserver(forName: .NSFileHandleDataAvailable, object: self, queue: nil) { notif in
                     let handle = notif.object as! FileHandle
-                    cb(handle.availableData)
+                    self.dataCallback(handle.availableData)
                     handle.waitForDataInBackgroundAndNotify()
                 }
                 self.waitForDataInBackgroundAndNotify()
             }
             
             RunLoop.current.run()
-        }.start()
+        }
+        Self.threads[self] = thread
+        
+        return thread
+    }
+    
+    func performOnThread(_ callback: @escaping () -> ()) {
+        guard let runLoop = Self.runLoops[self] else {
+            return
+        }
+        CFRunLoopPerformBlock(runLoop, CFRunLoopMode.commonModes.rawValue, callback)
+    }
+    
+    func handleDataAsynchronously(_ cb: @escaping (Data) -> ()) {
+        dataCallback = cb
+        thread.start()
     }
 }
 

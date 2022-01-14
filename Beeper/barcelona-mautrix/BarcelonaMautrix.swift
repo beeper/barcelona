@@ -50,6 +50,7 @@ class BarcelonaMautrix {
             
             // allow payloads to start flowing
             self.reader.ready = true
+            BLHealthTicker.shared.pinnedBridgeState = nil
             
             CBPurgedAttachmentController.shared.enabled = true
             CBPurgedAttachmentController.shared.delegate = BLEventHandler.shared
@@ -75,7 +76,7 @@ class BarcelonaMautrix {
     
     // starts the bridge state interval
     func startHealthTicker() {
-        BLHealthTicker.shared.stream.subscribe { command in
+        BLHealthTicker.shared.subscribeForever { command in
             BLWritePayload(IPCPayload(command: .bridge_status(command)))
         }
         
