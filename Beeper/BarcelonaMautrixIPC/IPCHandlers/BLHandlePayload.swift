@@ -45,14 +45,6 @@ private extension IPCPayload {
 }
 
 public func BLHandlePayload(_ payload: IPCPayload) {
-    switch payload.command.name {
-    case .ping, .pre_startup_sync:
-        payload.reply(withResponse: .ack)
-        return
-    default:
-        break
-    }
-    
     guard let runnable = payload.runnable else {
         return IPCLog.warn("Received unhandleable payload type \(payload.command.name)")
     }

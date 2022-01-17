@@ -180,6 +180,9 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
                     #else
                     break
                     #endif
+                case .ping, .pre_startup_sync:
+                    payload.respond(.ack)
+                    continue
                 default:
                     CLInfo("BLStandardIO", "raw: %@", String(decoding: try! JSONEncoder().encode(payload.command), as: UTF8.self))
                     break
