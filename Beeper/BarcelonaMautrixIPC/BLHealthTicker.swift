@@ -67,7 +67,7 @@ public class BLHealthTicker {
                 latestStatus!.state_event = pinnedBridgeState
             }
             
-            if latestStatus != oldValue, let latestStatus = latestStatus {
+            if let latestStatus = latestStatus {
                 subject.send(latestStatus)
             }
         }
