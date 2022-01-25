@@ -77,6 +77,7 @@ public struct _CBFeatureFlags: _FlagProvider {
     public let exitAfterScratchbox = debugOption(named: "exit-after-scratchbox", defaultValue: true)
     public let contactFuzzEnumerator = option(named: "contact-fuzz-enumerator", defaultValue: true)
     public let useSMSReadBuffer = option(named: "sms-read-buffer", defaultValue: true)
+    public let dropSpamMessages = option(named: "drop-spam-messages", defaultValue: true)
 }
 
 extension String {

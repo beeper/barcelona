@@ -520,6 +520,10 @@ private extension CBDaemonListener {
                 return
             }
             
+            if CBFeatureFlags.dropSpamMessages, item.isSpam {
+                return
+            }
+            
             messagePipeline.send(Message(messageItem: item, chatID: chatIdentifier))
         case let item:
             // wrap non-message items and send them as transcript actions
@@ -641,6 +645,10 @@ private extension IMMessageItem {
 private extension CBDaemonListener {
     func process(serviceMessage message: IMMessageItem, chatIdentifier: String, chatStyle: IMChatStyle) {
         guard let messageStatus = message.statusChange(inChat: chatIdentifier, style: chatStyle) else {
+            return
+        }
+        
+        if CBFeatureFlags.dropSpamMessages, message.isSpam {
             return
         }
         
