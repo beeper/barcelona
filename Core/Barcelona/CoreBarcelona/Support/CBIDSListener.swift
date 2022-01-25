@@ -41,12 +41,12 @@ public class CBIDSListener: ERBaseIDSListener {
         IMAccountController.shared.iMessageAccount?.aliases.map { IDSDestination(uri: $0).uri().prefixedURI() } ?? []
     }
     
+    private let queue = DispatchQueue(label: "com.ericrabil.ids", attributes: [], autoreleaseFrequency: .workItem)
+    
     public override func messageReceived(_ arg1: [AnyHashable : Any]!, withGUID arg2: String!, withPayload arg3: [AnyHashable : Any]!, forTopic arg4: String!, toIdentifier arg5: String!, fromID arg6: String!, context arg7: [AnyHashable : Any]!) {
         guard let payload = arg1["IDSIncomingMessagePushPayload"] as? [String: Any], let rawCommand = payload["c"] as? IDSCommandID.RawValue, let command = IDSCommandID(rawValue: rawCommand) else {
             return
         }
-        
-        print(payload)
         
         guard let idsContext = IDSMessageContext(dictionary: arg7, boostContext: nil) else {
             return
@@ -56,15 +56,17 @@ public class CBIDSListener: ERBaseIDSListener {
             return
         }
         
-        switch command {
-        case .readReceipt, .smsReadReceipt:
-            guard let sender = payload["sP"] as? String, let timestamp = payload["e"] as? Int64, myDestinationURIs.contains(items: [sender, arg5]) else {
-                return
+        queue.schedule {
+            switch command {
+            case .readReceipt, .smsReadReceipt:
+                guard let sender = payload["sP"] as? String, let timestamp = payload["e"] as? Int64, self.myDestinationURIs.contains(items: [sender, arg5]) else {
+                    return
+                }
+                
+                self.reflectedReadReceiptPipeline.send((guid, Date(timeIntervalSince1970: Double(timestamp) / 1000000000)))
+            default:
+                break
             }
-            
-            reflectedReadReceiptPipeline.send((guid, Date(timeIntervalSince1970: Double(timestamp) / 1000000000)))
-        default:
-            break
         }
     }
 }
