@@ -54,6 +54,7 @@ public struct BLMessage: Codable, ChatResolvable {
     public var group_action_type: Int?
     public var new_group_title: String?
     public var is_audio_message: Bool?
+    public var is_read: Bool
     
     public init(message: Message) {
         guid = message.id
@@ -69,6 +70,7 @@ public struct BLMessage: Codable, ChatResolvable {
             BLAttachment(guid: $0)
         }
         is_audio_message = message.isAudioMessage
+        is_read = message.isReadByMe
         
         for item in message.items {
             switch item.item {

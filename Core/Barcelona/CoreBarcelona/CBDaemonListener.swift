@@ -147,6 +147,24 @@ internal extension CBDaemonListener {
             }
         }
         
+        if CBFeatureFlags.useSMSReadBuffer {
+            _ = messageStatusPipeline.pipe { status in
+                guard status.type == .read, status.fromMe else {
+                    return
+                }
+                
+                guard let chat = IMChat.resolve(withIdentifier: status.chatID) else {
+                    return
+                }
+                
+                guard chat.account?.service == .sms() else {
+                    return
+                }
+                
+                self.pushToSMSReadBuffer(status.messageID)
+            }
+        }
+        
         NotificationCenter.default.addObserver(forName: .IMAccountPrivacySettingsChanged, object: nil, queue: nil) { notification in
             guard let account = notification.object as? IMAccount else {
                 return
@@ -282,6 +300,14 @@ public class CBDaemonListener: ERBaseDaemonListener {
     private lazy var listenForDisconnectsOnce: Void = {
         disconnectPipeline.pipe(disconnectedFromDaemon)
     }()
+    
+    /// In the event a reflected read receipt is processed immediately before an SMS relay message, it will die. This buffer tracks the n most recent GUIDs, which should support this edge case.
+    internal private(set) var smsReadBuffer: [String] = []
+    internal var smsReadBufferCapacity: Int = 15 {
+        didSet {
+            smsReadBuffer = smsReadBuffer.suffix(smsReadBufferCapacity)
+        }
+    }
     
     private func disconnectedFromDaemon() {
         log.warn("Disconnected from daemon, reconnecting.")
@@ -619,5 +645,21 @@ private extension CBDaemonListener {
         }
         
         messageStatusPipeline.send(messageStatus)
+    }
+}
+
+internal extension CBDaemonListener {
+    func flushSMSReadBuffer() {
+        smsReadBuffer.removeAll()
+    }
+    
+    func pushToSMSReadBuffer(_ guid: String) {
+        guard CBFeatureFlags.useSMSReadBuffer, !smsReadBuffer.contains(guid) else {
+            return
+        }
+        smsReadBuffer.append(guid)
+        if smsReadBuffer.count > smsReadBufferCapacity {
+            smsReadBuffer = smsReadBuffer.suffix(smsReadBufferCapacity)
+        }
     }
 }

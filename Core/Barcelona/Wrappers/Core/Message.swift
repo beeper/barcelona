@@ -405,6 +405,22 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     public var type: ChatItemType {
         .message
     }
+    
+    public var isReadByMe: Bool {
+        if fromMe {
+            return true
+        }
+        if timeRead > 0 {
+            return true
+        }
+        if flags.contains(.read) {
+            return true
+        }
+        if CBFeatureFlags.useSMSReadBuffer {
+            return CBDaemonListener.shared.smsReadBuffer.contains(id)
+        }
+        return false
+    }
 }
 
 public extension Message {
