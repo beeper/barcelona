@@ -31,10 +31,6 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             if is_audio_message == true {
                 messageCreation.isAudioMessage = true
             }
-            
-            if !CBFeatureFlags.permitInvalidAudioMessages {
-                // validate mime type blah
-            }
         }
         
         do {
