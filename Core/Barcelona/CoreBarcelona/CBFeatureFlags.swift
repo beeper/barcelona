@@ -64,7 +64,7 @@ return option(named: name, defaultValue: defaultValue)
 }
 
 @propertyWrapper
-public struct FeatureFlag: Hashable {
+public struct FeatureFlag: Hashable, CustomDebugStringConvertible {
     public var wrappedValue: Bool {
         get {
             domain.boolean(forFlag: self)
@@ -77,6 +77,14 @@ public struct FeatureFlag: Hashable {
     public let key: String
     public let domain: FlagDomain
     public let defaultValue: Bool
+    
+    public var debugDescription: String {
+        let base = "\(domain.rawValue) \(key)=\(wrappedValue)"
+        if isDefinedInDefaults {
+            return base + " *"
+        }
+        return base
+    }
     
     public enum FlagDomain: String, Hashable, CaseIterable {
         private class NSObserver: NSObject {
@@ -150,6 +158,10 @@ public struct FeatureFlag: Hashable {
             }
         }
         
+        public var allFlags: [FeatureFlag] {
+            Array(flags.values)
+        }
+        
         private func setCachedBoolean(_ boolean: Bool, forKey key: String) {
             var domain = self
             
@@ -158,6 +170,17 @@ public struct FeatureFlag: Hashable {
             }
             
             domain.cache[flag] = boolean
+        }
+        
+        public func unsetBoolean(forFlag flag: FeatureFlag) {
+            guard var container = FlagDomain.suite.dictionary(forKey: rawValue) else {
+                return
+            }
+            var domain = self
+            container.removeValue(forKey: flag.key)
+            domain.cache.removeValue(forKey: flag)
+            FlagDomain.suite.set(container, forKey: rawValue)
+            FlagDomain.suite.synchronize()
         }
         
         public func setBoolean(_ boolean: Bool, forFlag flag: FeatureFlag) {
@@ -177,6 +200,10 @@ public struct FeatureFlag: Hashable {
             var domain = self
             domain.cache[flag] = boolean
             return boolean
+        }
+        
+        fileprivate func flagExistsInDefaults(_ flag: FeatureFlag) -> Bool {
+            FlagDomain.suite.dictionary(forKey: rawValue)?.keys.contains(flag.key) ?? false
         }
         
         fileprivate func notice(flag: FeatureFlag) {
@@ -204,11 +231,23 @@ public struct FeatureFlag: Hashable {
         
         domain.notice(flag: self)
     }
+    
+    public var isDefinedInDefaults: Bool {
+        domain.flagExistsInDefaults(self)
+    }
+    
+    public func unset() {
+        domain.unsetBoolean(forFlag: self)
+    }
 }
 
 // to enable something off by default, --enable-
 // to disable, --disable-
 public struct _CBFeatureFlags: _FlagProvider {
+    public var allFlags: [FeatureFlag] {
+        FeatureFlag.FlagDomain.allCases.flatMap(\.allFlags)
+    }
+    
     @FeatureFlag("matrix-audio", defaultValue: false)
     public var permitAudioOverMautrix: Bool
     
