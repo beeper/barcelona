@@ -65,6 +65,9 @@ packages:
   LineNoise:
     url: https://github.com/andybest/linenoise-swift
     from: 0.0.3
+  FeatureFlags:
+    url: https://github.com/EricRabil/FeatureFlags.swift
+    from: 1.0.0
 
 settings:
   base:
@@ -121,6 +124,7 @@ targets:
       - package: BarcelonaFoundation
       - package: Swog
       - package: Pwomise
+      - package: FeatureFlags
       - target: BarcelonaDB
         embed: true
         link: true

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FeatureFlags
 
 #if DEBUG
 private let isDebugBuild = true
@@ -13,240 +14,10 @@ private let isDebugBuild = true
 private let isDebugBuild = false
 #endif
 
-@_marker
-public protocol _FlagProvider {}
-
-public extension _FlagProvider {
-    @inlinable @inline(__always) func `if`(_ keyPath: KeyPath<Self, Bool>, _ expr: @autoclosure () -> ()) {
-        guard self[keyPath: keyPath] else {
-            return
-        }
-        expr()
-    }
-    
-    @inlinable @inline(__always) func `if`<P>(_ keyPath: KeyPath<Self, Bool>, _ expr: @autoclosure () -> P, or: P) -> P {
-        guard self[keyPath: keyPath] else {
-            return or
-        }
-        return expr()
-    }
-    
-    @inlinable @inline(__always) func ifNot<P>(_ keyPath: KeyPath<Self, Bool>, _ expr: @autoclosure () -> P, else: P) -> P {
-        guard !self[keyPath: keyPath] else {
-            return `else`
-        }
-        return expr()
-    }
-}
-
-private func checkArguments(_ name: String, defaultValue: Bool, insertEnablePrefix: Bool = true) -> Bool {
-    if ProcessInfo.processInfo.arguments.contains("--disable-" + name) {
-        return false
-    } else if ProcessInfo.processInfo.arguments.contains(insertEnablePrefix ? "--enable-" + name : name) {
-        return true
-    } else {
-        return defaultValue
-    }
-}
-
-private func option(named name: String, defaultValue: Bool, aliases: [String] = []) -> Bool {
-    checkArguments(name, defaultValue: defaultValue) || aliases.contains(where: { alias in
-        checkArguments(alias, defaultValue: defaultValue, insertEnablePrefix: false)
-    })
-}
-
-private func debugOption(named name: String, defaultValue: Bool) -> Bool {
-#if !DEBUG
-return false
-#else
-return option(named: name, defaultValue: defaultValue)
-#endif
-}
-
-@propertyWrapper
-public struct FeatureFlag: Hashable, CustomDebugStringConvertible {
-    public var wrappedValue: Bool {
-        get {
-            domain.boolean(forFlag: self)
-        }
-        set {
-            domain.setBoolean(newValue, forFlag: self)
-        }
-    }
-    
-    public let key: String
-    public let domain: FlagDomain
-    public let defaultValue: Bool
-    
-    public var debugDescription: String {
-        let base = "\(domain.rawValue) \(key)=\(wrappedValue)"
-        if isDefinedInDefaults {
-            return base + " *"
-        }
-        return base
-    }
-    
-    public enum FlagDomain: String, Hashable, CaseIterable {
-        private class NSObserver: NSObject {
-            typealias Callback = (String?, Any?, [NSKeyValueChangeKey: Any]?) -> ()
-            var callback: Callback
-            
-            init(_ callback: @escaping Callback) {
-                self.callback = callback
-            }
-            
-            override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-                callback(keyPath, object, change)
-            }
-        }
-        
-        private static let suite = UserDefaults(suiteName: "com.ericrabil.barcelona")!
-        
-        case feature = "feature-flags"
-        case debugging = "debug-flags"
-        
-        private static let observer = NSObserver(FlagDomain.applyKVOUpdate(forKeyPath:of:change:))
-        
-        private static var once: () = {
-            FlagDomain.allCases.forEach { domain in
-                suite.addObserver(observer, forKeyPath: domain.rawValue, options: [.new], context: nil)
-            }
-        }()
-        
-        private static func applyKVOUpdate(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?) {
-            guard let newValue = change?[.newKey] as? [String: Any] else {
-                return
-            }
-            
-            guard let keyPath = keyPath, let parsedDomain = FlagDomain(rawValue: keyPath) else {
-                return
-            }
-            
-            parsedDomain.applyKVOUpdate(newValue)
-        }
-        
-        static var caches: [FlagDomain: [FeatureFlag: Bool]] = [:]
-        static var flagsByDomain: [FlagDomain: [String: FeatureFlag]] = [:]
-        
-        fileprivate func applyKVOUpdate(_ dict: [String: Any]) {
-            var domain = self
-            
-            domain.cache = [:]
-            
-            for (key, value) in dict {
-                if let value = value as? Bool {
-                    domain.setCachedBoolean(value, forKey: key)
-                }
-            }
-        }
-        
-        private var cache: [FeatureFlag: Bool] {
-            _read {
-                yield FlagDomain.caches[self, default: [:]]
-            }
-            _modify {
-                yield &FlagDomain.caches[self, default: [:]]
-            }
-        }
-        
-        private var flags: [String: FeatureFlag] {
-            _read {
-                yield FlagDomain.flagsByDomain[self, default: [:]]
-            }
-            _modify {
-                yield &FlagDomain.flagsByDomain[self, default: [:]]
-            }
-        }
-        
-        public var allFlags: [FeatureFlag] {
-            Array(flags.values)
-        }
-        
-        private func setCachedBoolean(_ boolean: Bool, forKey key: String) {
-            var domain = self
-            
-            guard let flag = flags[key] else {
-                return
-            }
-            
-            domain.cache[flag] = boolean
-        }
-        
-        public func unsetBoolean(forFlag flag: FeatureFlag) {
-            guard var container = FlagDomain.suite.dictionary(forKey: rawValue) else {
-                return
-            }
-            var domain = self
-            container.removeValue(forKey: flag.key)
-            domain.cache.removeValue(forKey: flag)
-            FlagDomain.suite.set(container, forKey: rawValue)
-            FlagDomain.suite.synchronize()
-        }
-        
-        public func setBoolean(_ boolean: Bool, forFlag flag: FeatureFlag) {
-            var container = FlagDomain.suite.dictionary(forKey: rawValue) ?? [:]
-            var domain = self
-            container[flag.key] = boolean
-            domain.cache[flag] = boolean
-            FlagDomain.suite.set(container, forKey: rawValue)
-            FlagDomain.suite.synchronize()
-        }
-        
-        public func boolean(forFlag flag: FeatureFlag) -> Bool {
-            if let cachedBoolean = cache[flag] {
-                return cachedBoolean
-            }
-            let boolean = uncachedBoolean(forFlag: flag)
-            var domain = self
-            domain.cache[flag] = boolean
-            return boolean
-        }
-        
-        fileprivate func flagExistsInDefaults(_ flag: FeatureFlag) -> Bool {
-            FlagDomain.suite.dictionary(forKey: rawValue)?.keys.contains(flag.key) ?? false
-        }
-        
-        fileprivate func notice(flag: FeatureFlag) {
-            var domain = self
-            domain.flags[flag.key] = flag
-            _ = FlagDomain.once
-        }
-        
-        private func uncachedBoolean(forFlag flag: FeatureFlag) -> Bool {
-            let userDefaultsValue = FlagDomain.suite.dictionary(forKey: rawValue)?[flag.key] as? Bool
-            
-            switch self {
-            case .feature:
-                return option(named: flag.key, defaultValue: userDefaultsValue ?? flag.defaultValue)
-            case .debugging:
-                return debugOption(named: flag.key, defaultValue: userDefaultsValue ?? flag.defaultValue)
-            }
-        }
-    }
-    
-    public init(_ key: String, domain: FlagDomain = .feature, defaultValue: Bool) {
-        self.key = key
-        self.domain = domain
-        self.defaultValue = defaultValue
-        
-        domain.notice(flag: self)
-    }
-    
-    public var isDefinedInDefaults: Bool {
-        domain.flagExistsInDefaults(self)
-    }
-    
-    public func unset() {
-        domain.unsetBoolean(forFlag: self)
-    }
-}
-
 // to enable something off by default, --enable-
 // to disable, --disable-
-public struct _CBFeatureFlags: _FlagProvider {
-    public var allFlags: [FeatureFlag] {
-        FeatureFlag.FlagDomain.allCases.flatMap(\.allFlags)
-    }
+public class _CBFeatureFlags: FlagProvider {
+    public let suiteName = "com.ericrabil.barcelona"
     
     @FeatureFlag("matrix-audio", defaultValue: false)
     public var permitAudioOverMautrix: Bool
@@ -296,17 +67,22 @@ extension String {
 }
 
 @dynamicMemberLookup
-public struct _CBLoggingFlags: _FlagProvider {
-    private static var cache: [String: Bool] = [:]
-    
-    public subscript(dynamicMember dynamicMember: String) -> Bool {
-        if let cachedValue = Self.cache[dynamicMember] {
-            return cachedValue
+public class _CBLoggingFlags: FlagProvider {
+    private var cache: [String: FeatureFlag] = [:]
+
+    public let suiteName = "com.ericrabil.barcelona.logging"
+
+    private func flag(dynamicMember: String) -> FeatureFlag {
+        if _slowPath(!cache.keys.contains(dynamicMember)) {
+            let flag = FeatureFlag(dynamicMember.camelToHyphen, domain: .feature, defaultValue: false)
+            cache[dynamicMember] = flag
+            return flag
         }
-        let loggingToken = dynamicMember.camelToHyphen.appending("-logging")
-        let loggingStatus = option(named: loggingToken, defaultValue: false)
-        Self.cache[dynamicMember] = loggingStatus
-        return loggingStatus
+        return cache[dynamicMember]!
+    }
+
+    public subscript(dynamicMember dynamicMember: String) -> Bool {
+        flag(dynamicMember: dynamicMember).value(inSuite: suiteName)
     }
 }
 
