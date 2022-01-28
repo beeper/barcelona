@@ -177,6 +177,7 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
                 switch payload.command {
                 case .ping, .pre_startup_sync:
                     payload.respond(.ack)
+                    continue
                 default:
                     break
                 }
