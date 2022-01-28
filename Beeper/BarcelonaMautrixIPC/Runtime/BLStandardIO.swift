@@ -157,28 +157,6 @@ public func BLWritePayload(_ payload: @autoclosure () -> IPCPayload, log: Bool =
     BLWritePayloads([payload()], log: log)
 }
 
-extension IPCCommand {
-    var isNotSensitive: Bool {
-        switch self {
-        case .bridge_status, .error, .ping, .pre_startup_sync:
-            return true
-        default:
-            return false
-        }
-    }
-    
-    var isSensitive: Bool {
-        !isNotSensitive
-    }
-    
-    var canLog: Bool {
-        if isSensitive {
-            return CBFeatureFlags.logSensitivePayloads
-        }
-        return true
-    }
-}
-
 public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
     FileHandle.standardInput.handleDataAsynchronously { data in
         guard !data.isEmpty else {
@@ -196,8 +174,11 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
                 
                 CLInfo("BLStandardIO", "Incoming! %@ %ld", payload.command.name.rawValue, payload.id ?? -1)
                 
-                if payload.command.canLog {
-                    CLInfo("BLStandardIO", "raw: %@", String(decoding: try! JSONEncoder().encode(payload.command), as: UTF8.self))
+                switch payload.command {
+                case .ping, .pre_startup_sync:
+                    payload.respond(.ack)
+                default:
+                    break
                 }
                 
                 cb(payload)
