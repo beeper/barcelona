@@ -67,7 +67,7 @@ packages:
     from: 0.0.3
   FeatureFlags:
     url: https://github.com/EricRabil/FeatureFlags.swift
-    from: 1.0.0
+    from: 1.0.1
 
 settings:
   base:
