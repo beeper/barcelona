@@ -34,7 +34,7 @@ packages:
     from: 3.0.7
   Swog:
     url: https://github.com/EricRabil/Swog
-    from: 1.0.2
+    from: 1.0.3
   Pwomise:
     url: https://github.com/EricRabil/Pwomise
     from: 1.0.11
