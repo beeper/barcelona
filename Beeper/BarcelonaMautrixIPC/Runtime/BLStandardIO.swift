@@ -157,36 +157,63 @@ public func BLWritePayload(_ payload: @autoclosure () -> IPCPayload, log: Bool =
     BLWritePayloads([payload()], log: log)
 }
 
+private extension JSONDecoder {
+    convenience init(_ initBlock: (JSONDecoder) -> ()) {
+        self.init()
+        initBlock(self)
+    }
+}
+
+private let decoder = JSONDecoder { decoder in
+    decoder.dateDecodingStrategy = .iso8601
+}
+
+extension Data {
+    func endsWith(data: Data) -> Bool {
+        guard count >= data.count else {
+            return false
+        }
+        
+        let start = index(endIndex, offsetBy: -data.count)
+        return self[start...] == data
+    }
+}
+
 public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
+    var buffer = Data()
+    
     FileHandle.standardInput.handleDataAsynchronously { data in
         guard !data.isEmpty else {
             return
         }
         
-        let chunks = data.split(separator: BLPayloadSeparator)
+        buffer += data
         
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        guard data.endsWith(data: TERMINATOR) else {
+            return
+        }
         
-        for chunk in chunks {
-            do {
-                let payload = try JSONDecoder().decode(IPCPayload.self, from: chunk)
-                
-                CLInfo("BLStandardIO", "Incoming! %@ %ld", payload.command.name.rawValue, payload.id ?? -1)
-                
-                switch payload.command {
-                case .ping, .pre_startup_sync:
-                    payload.respond(.ack)
-                    continue
-                default:
-                    break
-                }
-                
-                cb(payload)
-            } catch {
-                CLWarn("MautrixIPC", "Failed to decode payload: %@", "\(error)")
-                CLInfo("MautrixIPC", "Raw payload: %@", String(data: chunk, encoding: .utf8)!)
+        defer {
+            buffer.removeAll(keepingCapacity: false)
+        }
+        
+        do {
+            let payload = try JSONDecoder().decode(IPCPayload.self, from: buffer)
+            
+            CLInfo("BLStandardIO", "Incoming! %@ %ld", payload.command.name.rawValue, payload.id ?? -1)
+            
+            switch payload.command {
+            case .ping, .pre_startup_sync:
+                payload.respond(.ack)
+                return
+            default:
+                break
             }
+            
+            cb(payload)
+        } catch {
+            CLWarn("MautrixIPC", "Failed to decode payload: %@", "\(error)")
+            CLInfo("MautrixIPC", "Raw payload: %@", String(decoding: buffer.prefix(1024), as: UTF8.self))
         }
     }
 }
