@@ -79,6 +79,14 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
             }
             
             send(.message(BLMessage(message: message)))
+            
+            if message.fromMe, message.isReadByMe, MXFeatureFlags.shared.enableReadHelpers {
+                message.chat.messages(before: message.id, limit: 1, beforeDate: nil).first.then { message in
+                    if let message = message {
+                        send(.read_receipt(.init(sender_guid: nil, is_from_me: true, chat_guid: message.imChat.guid, read_up_to: message.id)))
+                    }
+                }
+            }
         }
         
         CBDaemonListener.shared.messageStatusPipeline.pipe { change in
