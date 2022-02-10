@@ -218,3 +218,67 @@ NSArray<IMItem*> * FZCreateIMMessageItemsFromSerializedArray(NSArray * serialize
 BOOL IMSharedHelperPersonCentricMergingEnabled(void);
 
 NSArray * FZCreateSerializedIMMessageItemsfromArray(NSArray<IMMessageItem*> * imMessageItems) NS_RETURNS_RETAINED;
+
+typedef NS_ENUM(int64_t, IMAssociatedMessageType) {
+    IMAssociatedMessageTypeAcknowledgmentHeart                  = 2000,
+    IMAssociatedMessageTypeAcknowledgmentThumbsUp               = 2001,
+    IMAssociatedMessageTypeAcknowledgmentThumbsDown             = 2002,
+    IMAssociatedMessageTypeAcknowledgmentHa                     = 2003,
+    IMAssociatedMessageTypeAcknowledgmentExclamation            = 2004,
+    IMAssociatedMessageTypeAcknowledgmentQuestionMark           = 2005,
+    IMAssociatedMessageTypeAcknowledgmentDeselectedHeart        = 3000,
+    IMAssociatedMessageTypeAcknowledgmentDeselectedThumbsUp     = 3001,
+    IMAssociatedMessageTypeAcknowledgmentDeselectedThumbsDown   = 3002,
+    IMAssociatedMessageTypeAcknowledgmentDeselectedHa           = 3003,
+    IMAssociatedMessageTypeAcknowledgmentDeselectedExclamation  = 3004,
+    IMAssociatedMessageTypeAcknowledgmentDeselectedQuestionMark = 3005,
+};
+
+#import <CoreData/CoreData.h>
+
+@class CNContactStore;
+
+NS_ASSUME_NONNULL_BEGIN
+@interface NSPersistentStoreRequest (What)
+@property(nullable,nonatomic,strong)NSPredicate* predicate;
+@property(nullable, nonatomic, strong) NSArray<NSSortDescriptor *> *sortDescriptors;
+@property(nullable, nonatomic, copy) NSArray *propertiesToFetch;
+@end
+
+@interface CNContactImageFetchRequest: NSObject
+-(instancetype)initWithContactIdentifiers:(NSArray<NSString*>*)identifiers;
+-(NSPersistentStoreRequest*)persistentStoreRequest;
+@end
+
+@interface CNCDGroupFetcher: NSObject
++(NSPersistentStoreRequest*)fetchRequestWithEntityName:(NSString*)entityName;
+@end
+
+@interface CNCDPersistenceContext: NSObject
+- (void)performBlockAndWaitWithManagedObjectContext:(void (^)(NSManagedObjectContext * context))block;
+@end
+
+@interface CNCDPersistenceStack: NSObject
+-(CNCDPersistenceContext*)makePersistenceContext;
+@end
+
+@interface CNCDChangeHistoryStore: NSObject
+-(CNCDPersistenceStack*)persistenceStack;
+@end
+
+@interface CNCoreDataMapperX: NSObject
+-(CNCDChangeHistoryStore*)changeHistoryStore;
+@end
+
+@interface CNContactStore (Unshackled)
++(NSString*)storeIdentifierFromContactIdentifier:(NSString*)identifier;
+-(id)executeFetchRequest:(NSPersistentStoreRequest*)fetchRequest error:(NSError *_Nullable* _Nullable)error;
+-(CNCoreDataMapperX*)mapper;
+@end
+
+@interface CNContactMetadataPersistentStoreManager: NSObject
+-(instancetype)initWithStoreLocation:(NSString*)location;
+-(NSManagedObjectContext*)createManagedObjectContext;
+-(BOOL)setupIfNeeded:(NSError *_Nullable* _Nullable)error;
+@end
+NS_ASSUME_NONNULL_END

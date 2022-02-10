@@ -73,11 +73,14 @@
 @property(nonatomic) double lastMeContactStoreSync; // @synthesize lastMeContactStoreSync=_lastMeContactStoreSync;
 @property(nonatomic) double lastContactStoreSync; // @synthesize lastContactStoreSync=_lastContactStoreSync;
 @property(nonatomic) BOOL batchFetchingForLaunchCompleted; // @synthesize batchFetchingForLaunchCompleted=_batchFetchingForLaunchCompleted;
-@property(retain, nonatomic) NSMutableDictionary *IDToCNContactMap; // @synthesize IDToCNContactMap=_IDToCNContactMap;
+NS_ASSUME_NONNULL_BEGIN
+@property(retain, nonatomic) NSMutableDictionary<NSString*,CNContact*> *IDToCNContactMap; // @synthesize IDToCNContactMap=_IDToCNContactMap;
+@property(retain, nonatomic) CNContactStore *contactStore; // @synthesize contactStore=_contactStore;
+- (CNContact* _Nullable)fetchCNContactForHandleID:(NSString*)arg1 withKeys:(NSArray<NSString*>*)arg2;
+NS_ASSUME_NONNULL_END
 @property(retain, nonatomic) NSMutableDictionary *CNIDToHandleIDsMap; // @synthesize CNIDToHandleIDsMap=_CNIDToHandleIDsMap;
 @property(retain, nonatomic) NSDictionary *handleIDToCNIDMap; // @synthesize handleIDToCNIDMap=_handleIDToCNIDMap;
 @property(retain, nonatomic) NSData *changeHistoryToken; // @synthesize changeHistoryToken=_changeHistoryToken;
-@property(retain, nonatomic) CNContactStore *contactStore; // @synthesize contactStore=_contactStore;
 - (id)getCurrentHistoryToken;
 - (id)getIDToCNContactMap;
 - (id)getCNIDToHandleIDsMap;
@@ -102,7 +105,6 @@
 - (BOOL)isBatchFetchingForLaunchCompleted;
 - (id)completedContact:(id)arg1 withKeys:(id)arg2;
 - (CNContact* _Nullable)fetchCNContactForHandleWithID:(id)arg1;
-- (id)fetchCNContactForHandleID:(id)arg1 withKeys:(id)arg2;
 - (void)fetchCNContactsForHandlesWithIDs:(id)arg1 isFinalBatch:(BOOL)arg2;
 - (void)cacheBatchFetchResults:(id)arg1 handleIDsWithoutCNID:(id)arg2;
 - (id)getContactStore;
