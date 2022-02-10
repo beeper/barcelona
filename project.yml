@@ -173,6 +173,7 @@ targets:
       - package: LineNoise
       - package: SwiftCLI
       - package: Yammit
+      - package: FeatureFlags
       - target: Barcelona
         embed: true
         link: true
@@ -211,6 +212,7 @@ targets:
       - Beeper/BarcelonaMautrixIPC
     dependencies:
       - package: BarcelonaFoundation
+      - package: FeatureFlags
       - target: Barcelona
         embed: true
         link: true

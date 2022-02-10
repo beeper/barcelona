@@ -12,6 +12,7 @@ import Barcelona
 import OSLog
 import SwiftCLI
 import Swog
+import FeatureFlags
 
 protocol BarcelonaCommand: Command {}
 protocol EphemeralCommand: Command {}
@@ -28,15 +29,35 @@ extension Command {
     }
 }
 
+#if DEBUG
+let isDebugBuild = true
+#else
+let isDebugBuild = false
+#endif
+
+class GrappleFlags: FlagProvider {
+    let suiteName = "com.ericrabil.grapple"
+    
+    @FeatureFlag("logging", defaultValue: isDebugBuild)
+    var enableLogging: Bool
+    
+    static let shared = GrappleFlags()
+}
+
 @main
 class Grapple {
     static let shared = Grapple()
     
     static func main() throws {
         let cli = CLI(name: "grapple", commands: [
-            SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand(), IDSCommand(), AccountManagement(), Grudge.shared, QueryCommand(), DiagsCommand()
+            SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand(), IDSCommand(), AccountManagement(), Grudge.shared, QueryCommand(), DiagsCommand(), MessageCommand()
         ])
         LoggingDrivers.append(OSLogDriver.shared)
+        if !GrappleFlags.shared.enableLogging {
+            LoggingDrivers.removeAll(where: { $0 === ConsoleDriver.shared })
+        }
+        
+        cli.globalOptions.append(contentsOf: GrappleFlags.shared.allFlags.map(\.key).flatMap { key in ["--enable-\(key)", "--disable-\(key)"] }.map { Flag($0) })
         
         #if !DEBUG
         if !ProcessInfo.processInfo.environment.keys.contains("I_HAVE_CONSENT") {
