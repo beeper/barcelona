@@ -63,7 +63,13 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         }
         
         CBDaemonListener.shared.messagePipeline.pipe { message in
-            if message.fromMe, SendMessageCommand.messageSent(withGUID: message.id) == .suppress {
+            if message.fromMe, message.isSent || message.isUnsent, case .suppress(let payload) = SendMessageCommand.messageSent(withGUID: message.id) {
+                if message.isSent {
+                    payload.reply(withResponse: .message_receipt(message.partialMessage))
+                } else {
+                    let failureMessage = message.refreshedErrorDescription() ?? "Your message couldn't be sent to iMessage."
+                    payload.fail(code: "send_failure", message: failureMessage)
+                }
                 CLInfo("Mautrix", "Dropping last-sent message \(message.id)")
                 return
             }
@@ -93,6 +99,10 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
             switch change.type {
             case .read:
                 send(.read_receipt(BLReadReceipt(sender_guid: change.mautrixFriendlyGUID, is_from_me: change.fromMe, chat_guid: change.chat.guid, read_up_to: change.messageID)))
+            case .notDelivered:
+                if case .suppress(let responsePayload) = SendMessageCommand.messageSent(withGUID: change.messageID) {
+                    responsePayload.fail(code: "internal_error", message: "Sorry, we couldn't send your message.")
+                }
             default:
                 break
             }

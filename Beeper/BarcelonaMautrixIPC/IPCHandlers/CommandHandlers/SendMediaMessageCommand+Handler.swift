@@ -34,8 +34,8 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         }
         
         do {
-            let message = try chat.send(message: messageCreation).partialMessage
-            SendMessageCommand.suppressedGUIDs.insert(message.guid)
+            let message = try chat.send(message: messageCreation)
+            SendMessageCommand.sendingMessages[message.id] = payload
             
             NotificationCenter.default.subscribe(toNotificationsNamed: [.IMFileTransferUpdated, .IMFileTransferFinished]) { notif, sub in
                 guard let transfer = notif.object as? IMFileTransfer, transfer.guid == transferGUID else {
@@ -53,13 +53,13 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                     break
                 case .transferring:
                     break
+                case .error:
+                    SendMessageCommand.sendingMessages.removeValue(forKey: message.id)?.fail(code: "internal_error", message: "Sorry, we couldn't upload your attachment.")
+                    fallthrough
                 case .finalizing:
                     fallthrough
                 case .finished:
                     sub.unsubscribe()
-                    payload.respond(.message_receipt(message))
-                case .error:
-                    break
                 case .recoverableError:
                     break
                 case .unknown:
@@ -68,7 +68,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             }
         } catch {
             CLFault("BLMautrix", "failed to send media message: %@", error as NSError)
-            payload.reply(withCommand: .error(.init(code: "internal_error", message: "Sorry, we're having trouble processing your attachment upload.")))
+            payload.fail(code: "internal_error", message: "Sorry, we're having trouble processing your attachment upload.")
         }
     }
 }

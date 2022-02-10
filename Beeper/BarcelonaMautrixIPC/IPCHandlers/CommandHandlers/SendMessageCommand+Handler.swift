@@ -10,15 +10,15 @@ import Foundation
 import Barcelona
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
-    public internal(set) static var suppressedGUIDs: Set<String> = Set()
+    public internal(set) static var sendingMessages: [String: IPCPayload] = [:]
     
     public enum MessageHandlingBehavior {
-        case process, suppress
+        case process, suppress(IPCPayload)
     }
     
     public static func messageSent(withGUID guid: String) -> MessageHandlingBehavior {
-        if suppressedGUIDs.remove(guid) != nil {
-            return .suppress
+        if let payload = sendingMessages.removeValue(forKey: guid) {
+            return .suppress(payload)
         } else {
             return .process
         }
@@ -29,6 +29,13 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
             return payload.fail(strategy: .chat_not_found)
         }
         
+        if BLUnitTests.shared.forcedConditions.contains(.messageFailure) {
+            Timer.scheduledTimer(withTimeInterval: 2, repeats: false) { _ in
+                payload.fail(code: "idk", message: "couldnt send message lol")
+            }
+            return
+        }
+        
         var messageCreation = CreateMessage(parts: [
             .init(type: .text, details: text)
         ])
@@ -37,13 +44,12 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
         messageCreation.replyToPart = reply_to_part
         
         do {
-            let message = try chat.send(message: messageCreation).partialMessage
-            Self.suppressedGUIDs.insert(message.guid)
-            
-            payload.respond(.message_receipt(message))
+            let message = try chat.send(message: messageCreation)
+            Self.sendingMessages[message.id] = payload
         } catch {
             // girl fuck
             CLFault("BLMautrix", "failed to send text message: %@", error as NSError)
+            payload.fail(code: "internal_error", message: (error as NSError).localizedFailureReason ?? error.localizedDescription)
         }
     }
 }
