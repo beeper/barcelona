@@ -490,7 +490,45 @@ private extension CBDaemonListener {
 // MARK: - Message Handling
 
 private extension CBDaemonListener {
+    private func preflight(message: IMItem) -> Bool {
+        if nonces.contains(message.nonce) {
+            nonces.remove(message.nonce)
+            *log.debug("withholding message: dedupe")
+            return false
+        }
+        
+        guard let message = message as? IMMessageItem else {
+            nonces.insert(message.nonce)
+            return true
+        }
+        
+        if !message.isFromMe() {
+            nonces.insert(message.nonce)
+            return true
+        }
+        
+        switch message.sendProgress {
+        case .failed:
+            if message.errorCode == .noError {
+                *log.debug("withholding message: missing error code, message is either still in progress or the error code is coming soon")
+                return false
+            }
+            nonces.insert(message.nonce)
+            return true
+        case .sending:
+            *log.debug("withholding message: still sending")
+            return false
+        case .sent, .none:
+            nonces.insert(message.nonce)
+            return true
+        }
+    }
+    
     func process(newMessage: IMItem, chatIdentifier: String) {
+        if !preflight(message: newMessage) {
+            return
+        }
+        
         var currentlyTyping: Bool {
             get { self.currentlyTyping.contains(chatIdentifier) }
             set {
@@ -504,11 +542,6 @@ private extension CBDaemonListener {
                     }
                 }
             }
-        }
-        
-        if nonces.contains(newMessage.nonce) {
-            nonces.remove(newMessage.nonce)
-            return
         }
         
         switch newMessage {

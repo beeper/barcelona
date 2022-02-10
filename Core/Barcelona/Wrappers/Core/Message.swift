@@ -384,6 +384,18 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     public var threadOriginator: String?
     public var threadOriginatorPart: Int?
     
+    public var isFinished: Bool {
+        flags.contains(.finished)
+    }
+    
+    public var isSent: Bool {
+        flags.contains(.sent)
+    }
+    
+    public var isFromMe: Bool {
+        fromMe
+    }
+    
     public var debugDescription: String {
         String(format: "Message(id=%@,sender=%@,typing=%d,items=[%@])", id, sender ?? "(nil)", isTypingMessage, items.map(\.debugDescription).joined(separator: ", "))
     }
