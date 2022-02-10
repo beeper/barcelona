@@ -379,14 +379,12 @@ public class CBDaemonListener: ERBaseDaemonListener {
         *log.debug("messageSent: \(msg.debugDescription, privacy: .public)")
         
         process(newMessage: msg, chatIdentifier: chatIdentifier)
-        nonces.insert(msg.nonce)
     }
     
     public override func account(_ accountUniqueID: String, chat chatIdentifier: String, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any], groupID: String, chatPersonCentricID personCentricID: String, messageReceived msg: IMItem) {
         *log.debug("messageReceived: \(msg.debugDescription, privacy: .public)")
         
         process(newMessage: msg, chatIdentifier: chatIdentifier)
-        nonces.insert(msg.nonce)
     }
     
     public override func account(_ accountUniqueID: String, chat chatIdentifier: String, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any], groupID: String, chatPersonCentricID personCentricID: String, messagesReceived messages: [IMItem], messagesComingFromStorage fromStorage: Bool) {
@@ -394,7 +392,6 @@ public class CBDaemonListener: ERBaseDaemonListener {
         
         for message in messages {
             process(newMessage: message, chatIdentifier: chatIdentifier)
-            nonces.insert(message.nonce)
         }
     }
     
