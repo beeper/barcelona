@@ -71,44 +71,52 @@ extension FZErrorType: Codable {
 }
 
 extension FZErrorType: CustomStringConvertible {
-    public var localizedDescription: String {
+    public var localizedDescription: String? {
         switch self {
         case .noError:
-            return ""
-        case .unknownError, .cancelled, .timeout, .sendFailed, .internalFailure, .textRenderingPreflightFailed:
-            return "An unknown error \(rawValue)/\(description)) was encountered while sending your message."
+            return nil
+        case .cancelled:
+            return "Your message was interrupted while being sent."
+        case .timeout:
+            return "Your message took too long to send."
         case .networkFailure, .networkLookupFailure, .networkConnectionFailure, .noNetworkFailure, .networkBusyFailure, .networkDeniedFailure:
-            return "An internal network error is preventing your message from being sent."
-        case .serverSignatureError, .serverDecodeError, .serverParseError, .serverInternalError, .serverInvalidRequestError, .serverMalformedRequestError, .serverUnknownRequestError, .serverInvalidTokenError, .serverRejectedError:
-            return "An error was encountered while communicating with the server."
-        case .remoteUserInvalid, .remoteUserDoesNotExist, .remoteUserIncompatible, .remoteUserRejected:
-            return "The person you are trying to message is unavailable or does not exist."
+            return "Your message couldn't be sent due to a network connectivity issue."
+        case .serverSignatureError:
+            return "A secure connection cannot be established with iMessage, so your message will not be sent."
+        case .serverDecodeError, .serverParseError, .serverInternalError, .serverInvalidRequestError, .serverMalformedRequestError, .serverUnknownRequestError, .serverRejectedError:
+            return "The iMessage servers are having some trouble, please try again later."
+        case .serverInvalidTokenError:
+            return "The iMessage servers are rejecting your token. You may have to sign out and sign back in."
+        case .remoteUserInvalid:
+            return "The address you are trying to send a message to is invalid."
+        case .remoteUserDoesNotExist:
+            return "The address you are trying to send a message to is not registered for this service."
+        case .remoteUserIncompatible:
+            return "The address you are trying to send a message to cannot be reached using this mechanism."
+        case .remoteUserRejected:
+            return "The address you are trying to send a message to is rejecting your message."
         case .transcodingFailure:
-            return "An error was encountered while transcoding your message."
+            return "Your attachment failed to transcode."
         case .encryptionFailure, .otrEncryptionFailure:
-            return "There's an issue with your iMessage encryption that is preventing messages from being sent."
+            return "Your message couldn't be sent due to an iMessage encryption error."
         case .decryptionFailure, .otrDecryptionFailure:
-            return "There's an issue with your iMessage decryption that is preventing messages from being processed."
-        case .localAccountDisabled:
-            return "You cannot use this service at this time."
-        case .localAccountDoesNotExist:
-            return "This service is not set up."
-        case .localAccountInvalid, .localAccountNeedsUpdate:
-            return "This account is misconfigured and you cannot send messages at this time."
-        case .attachmentUploadFailure, .messageAttachmentUploadFailure:
-            return "Sorry, we're having trouble uploading your attachment."
-        case .attachmentDownloadFailure, .messageAttachmentDownloadFailure:
-            return "Sorry, we couldn't download that attachment."
+            return "Your message couldn't be sent due to an iMessage decryption error."
+        case .localAccountDisabled, .localAccountDoesNotExist, .localAccountNeedsUpdate, .localAccountInvalid, .invalidLocalCredentials:
+            return "Your message coulnd't be sent due to an issue with your account. You may have to sign out and sign back in."
+        case .attachmentUploadFailure, .attachmentDownloadFailure, .messageAttachmentUploadFailure, .messageAttachmentDownloadFailure:
+            return "Your message couldn't be sent because your attachment failed to upload to iMessage."
         case .systemNeedsUpdate:
-            return "Please update the system running iMessage."
+            return "Your message couldn't be sent because the system iMessage is running on is too outdated."
         case .serviceCrashed:
-            return "A temporary outage stopped your message from being sent. Please try again."
-        case .invalidLocalCredentials:
-            return "You've been signed out of iMessage. Please log back in."
+            return "Your message couldn't be sent because imagent is crashing."
         case .attachmentDownloadFailureFileNotFound:
-            return "One or more attachments associated with this message are no longer available to download."
+            return "The attachment couldn't be downloaded because it is no longer available."
+        case .textRenderingPreflightFailed:
+            return "The message couldn't be processed because it is corrupted."
+        case .unknownError, .sendFailed, .internalFailure:
+            fallthrough
         @unknown default:
-            return "An unknown error (\(rawValue)) was encountered while sending your message."
+            return "Your message couldn't be sent due to an unknown error."
         }
     }
     

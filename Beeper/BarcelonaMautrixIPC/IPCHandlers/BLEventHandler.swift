@@ -67,8 +67,9 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 if message.isSent {
                     payload.reply(withResponse: .message_receipt(message.partialMessage))
                 } else {
-                    let failureMessage = message.refreshedErrorDescription() ?? "Your message couldn't be sent to iMessage."
-                    payload.fail(code: "send_failure", message: failureMessage)
+                    let errorCode = message.refreshedErrorCode()
+                    let errorMessage = errorCode.localizedDescription ?? "Your message couldn't be sent to iMessage."
+                    payload.fail(code: errorCode.description, message: errorMessage)
                 }
                 CLInfo("Mautrix", "Dropping last-sent message \(message.id)")
                 return
