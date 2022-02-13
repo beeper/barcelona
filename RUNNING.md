@@ -137,7 +137,7 @@ created by go.mau.fi/mautrix-imessage/imessage/mac-nosip.(*MacNoSIPConnector).St
         /Users/ci/builds/YUMeaPfZ/0/mautrix/imessage/imessage/mac-nosip/nosip.go:80 +0x2bc
 ```
 
-This means that the process exited ungracefully and corrupted the sqlite database. Wipe it and let it recreate.
+This is a currently known issue when receiving or processing attachments (links, images), tracked in [#32](https://github.com/open-imcore/barcelona/issues/35)
 
 #### Things look strange
 
