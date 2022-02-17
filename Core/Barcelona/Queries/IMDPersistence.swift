@@ -228,7 +228,7 @@ public func BLLoadChatItems(_ items: [(chatID: String, messageID: String)]) -> P
 
 typealias IMFileTransferFromIMDAttachmentRecordRefType = @convention(c) (_ record: Any) -> IMFileTransfer?
 
-private let IMDaemonCore = "/System/Library/PrivateFrameworks/IMDaemonCore.framework/Versions/Current/IMDaemonCore".withCString({
+private let IMDaemonCore = "/System/Library/PrivateFrameworks/IMDaemonCore.framework/IMDaemonCore".withCString({
     dlopen($0, RTLD_LAZY)
 })!
 
