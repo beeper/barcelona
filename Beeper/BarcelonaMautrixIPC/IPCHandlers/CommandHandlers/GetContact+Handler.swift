@@ -42,6 +42,28 @@ extension BLContact {
             
             var firstName: String?, lastName: String?, nickname: String?, suggestedName: String?, avatar: Data?, phoneNumbers = [String](), emailAddresses = [String](), serviceHint: String = "SMS"
             
+            for handle in contacts {
+                if firstName == nil {
+                    firstName = handle.givenName
+                }
+
+                if lastName == nil {
+                    lastName = handle.familyName
+                }
+
+                if nickname == nil {
+                    nickname = handle.nickname
+                }
+
+                if suggestedName == nil {
+                    suggestedName = handle.organizationName
+                }
+
+                if avatar == nil {
+                    avatar = handle.imageData
+                }
+            }
+
             for handle in handles {
                 if firstName == nil {
                     firstName = handle.firstName
@@ -75,28 +97,6 @@ extension BLContact {
                 if let cnContact = handle.cnContact {
                     phoneNumbers.append(contentsOf: cnContact.phoneNumbers.map(\.value.stringValue))
                     emailAddresses.append(contentsOf: cnContact.emailAddresses.map { $0.value as String })
-                }
-            }
-            
-            for handle in contacts {
-                if firstName == nil {
-                    firstName = handle.givenName
-                }
-
-                if lastName == nil {
-                    lastName = handle.familyName
-                }
-
-                if nickname == nil {
-                    nickname = handle.nickname
-                }
-
-                if suggestedName == nil {
-                    suggestedName = handle.organizationName
-                }
-
-                if avatar == nil {
-                    avatar = handle.imageData
                 }
             }
 
