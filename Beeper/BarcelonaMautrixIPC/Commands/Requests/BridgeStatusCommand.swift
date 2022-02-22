@@ -204,13 +204,21 @@ public extension BridgeStatusCommand {
     static var current: BridgeStatusCommand {
         let account = IMAccountController.shared.iMessageAccount
         let state = IMAccountController.shared.state
+        let remoteID = account?.strippedLogin ?? nil
+        
+        switch remoteID {
+        case .none, "unknown", "":
+            return BridgeStatusCommand(state_event: .unconfigured, ttl: 240, error: nil, message: nil, remote_id: nil, remote_name: nil)
+        default:
+            break
+        }
         
         return BridgeStatusCommand(
             state_event: state,
             ttl: state == .connected ? 3600 : 240,
             error: IMAccountController.shared.error,
             message: IMAccountController.shared.message,
-            remote_id: account?.strippedLogin ?? nil, // Apple ID – absent when unconfigured. logged out includes the remote id, and then goes to unconfigured. everything else must include the remote ID
+            remote_id: remoteID, // Apple ID – absent when unconfigured. logged out includes the remote id, and then goes to unconfigured. everything else must include the remote ID
             remote_name: IMMe.me().fullName // Account Name
         )
     }
