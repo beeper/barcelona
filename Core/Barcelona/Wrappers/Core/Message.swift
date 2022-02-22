@@ -102,7 +102,7 @@ extension FZErrorType: CustomStringConvertible {
         case .decryptionFailure, .otrDecryptionFailure:
             return "Your message couldn't be sent due to an iMessage decryption error."
         case .localAccountDisabled, .localAccountDoesNotExist, .localAccountNeedsUpdate, .localAccountInvalid, .invalidLocalCredentials:
-            return "Your message coulnd't be sent due to an issue with your account. You may have to sign out and sign back in."
+            return "Your message couldn't be sent due to an issue with your account. You may have to sign out and sign back in."
         case .attachmentUploadFailure, .attachmentDownloadFailure, .messageAttachmentUploadFailure, .messageAttachmentDownloadFailure:
             return "Your message couldn't be sent because your attachment failed to upload to iMessage."
         case .systemNeedsUpdate:
