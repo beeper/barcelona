@@ -327,6 +327,12 @@ public class CBDaemonListener: ERBaseDaemonListener {
             }
         }
         
+        if CBFeatureFlags.prewarmItemRules {
+            for chat in IMChatRegistry.shared.allChats {
+                _ = chat.chatItemRules
+            }
+        }
+        
         guard ProcessInfo.processInfo.environment["BLNoBlocklist"] == nil else {
             return
         }

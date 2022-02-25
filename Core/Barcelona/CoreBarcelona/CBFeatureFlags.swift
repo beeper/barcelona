@@ -37,6 +37,9 @@ public class _CBFeatureFlags: FlagProvider {
     @FeatureFlag("exit-after-scratchbox", domain: .debugging, defaultValue: true)
     public var exitAfterScratchbox: Bool
     
+    @FeatureFlag("prewarm-item-rules", defaultValue: true)
+    public var prewarmItemRules: Bool
+    
     @FeatureFlag("contact-fuzz-enumerator", defaultValue: true)
     public var contactFuzzEnumerator: Bool
     
