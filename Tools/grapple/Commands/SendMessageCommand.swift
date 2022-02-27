@@ -99,6 +99,9 @@ class MessageCommand: CommandGroup {
             @Flag("-i", "--id", description: "treat the destination as a chat ID")
             var isID: Bool
             
+            @Flag("-e", "--everyone", description: "ping everyone because you crave attention")
+            var pingEveryone: Bool
+            
             var text: String {
                 message.joined(separator: " ")
             }
@@ -122,7 +125,11 @@ class MessageCommand: CommandGroup {
                     exit(0)
                 }
                 
-                message = try chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: text)]))
+                if pingEveryone {
+                    message = try chat.pingEveryone(text: text)
+                } else {
+                    message = try chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: text)]))
+                }
             }
         }
         
