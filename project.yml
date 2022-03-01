@@ -137,6 +137,7 @@ targets:
     dependencies:
       - package: GRDB
       - package: BarcelonaFoundation
+      - package: Swog
   BarcelonaJS:
     group: Core
     templates:

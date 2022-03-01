@@ -42,7 +42,7 @@ let databasePool = try! DatabasePool(path: ("~/Library/Messages/chat.db" as NSSt
  */
 // MARK: - I REPEAT DO NOT MAKE WRITES TO THE DATABASE DIRECTLY! THIS IS FOR READING ONLY!
 public struct DBReader {
-    private var pool: DatabasePool
+    internal var pool: DatabasePool
     
     public static let shared: DBReader = DBReader(pool: databasePool)
     

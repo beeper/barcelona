@@ -8,7 +8,10 @@
 
 import Foundation
 import BarcelonaFoundation
+import Swog
 import GRDB
+
+private let logger = Logger(category: "MessagesDB")
 
 // MARK: - Messages.swift
 public extension DBReader {
@@ -47,6 +50,20 @@ public extension DBReader {
                 .filter(guids.contains(RawMessage.Columns.guid))
                 .fetchAll(db)
                 .dictionary(keyedBy: \.guid, valuedBy: \.ROWID)
+        }
+    }
+    
+    func rawService(forMessage guid: String) -> String? {
+        do {
+            return try pool.read { database in
+                try RawMessage
+                    .select(RawMessage.Columns.guid, RawMessage.Columns.service)
+                    .filter(RawMessage.Columns.guid == guid)
+                    .fetchOne(database)?.service
+            }
+        } catch {
+            logger.fault("Failed to query database when fetching the service of IMMessage[guid=\(guid)]: \(String(describing: error))")
+            return nil
         }
     }
 }

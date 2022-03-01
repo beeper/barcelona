@@ -8,6 +8,7 @@
 
 import Foundation
 import IMCore
+import BarcelonaDB
 
 internal func CBResolveSenderHandle(originalHandle: String?, isFromMe: Bool, service: IMServiceStyle?) -> String? {
     guard isFromMe, let service = service?.service else {
@@ -24,7 +25,12 @@ internal func CBResolveSenderHandle(originalHandle: String?, isFromMe: Bool, ser
     }
 }
 
-internal func CBResolveService(originalService: IMServiceStyle?, type: IMItemType, chatID: String?) -> IMServiceStyle {
+/// Synchronously resolves the service a message came from. Only call this if you really need to, pull from other sources of truth first.
+internal func CBResolveMessageService(guid: String) -> IMServiceStyle {
+    DBReader.shared.rawService(forMessage: guid)?.service?.id ?? .SMS
+}
+
+internal func CBResolveService(originalService: IMServiceStyle?, messageGUID: String, type: IMItemType, chatID: String?) -> IMServiceStyle {
     if let service = originalService {
         return service
     }
@@ -33,7 +39,7 @@ internal func CBResolveService(originalService: IMServiceStyle?, type: IMItemTyp
         return .iMessage
     } else {
         guard let chatID = chatID, let chat = IMChat.resolve(withIdentifier: chatID), let serviceStyle = chat.account?.service?.id else {
-            return .SMS
+            return CBResolveMessageService(guid: messageGUID)
         }
         
         return serviceStyle
@@ -57,7 +63,7 @@ extension IMMessage: SenderServiceResolvable {
     }
     
     func resolveServiceStyle(inChat chat: String?) -> IMServiceStyle {
-        CBResolveService(originalService: _imMessageItem?.serviceStyle, type: _imMessageItem?.type ?? .message, chatID: chat)
+        _imMessageItem?.serviceStyle ?? CBResolveService(originalService: _imMessageItem?.serviceStyle, messageGUID: guid, type: _imMessageItem?.type ?? .message, chatID: chat)
     }
 }
 
@@ -67,6 +73,6 @@ extension IMItem: SenderServiceResolvable {
     }
     
     func resolveServiceStyle(inChat chat: String?) -> IMServiceStyle {
-        CBResolveService(originalService: serviceStyle, type: type, chatID: chat)
+        serviceStyle ?? CBResolveService(originalService: serviceStyle, messageGUID: guid, type: type, chatID: chat)
     }
 }
