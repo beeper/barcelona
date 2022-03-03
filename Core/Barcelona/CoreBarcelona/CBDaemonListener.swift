@@ -328,8 +328,10 @@ public class CBDaemonListener: ERBaseDaemonListener {
         }
         
         if CBFeatureFlags.prewarmItemRules {
-            for chat in IMChatRegistry.shared.allChats {
-                _ = chat.chatItemRules
+            DispatchQueue.global(qos: .background).async {
+                for chat in IMChatRegistry.shared.allChats {
+                    _ = chat.chatItemRules
+                }
             }
         }
         
@@ -394,6 +396,14 @@ public class CBDaemonListener: ERBaseDaemonListener {
     }
     
     public override func account(_ accountUniqueID: String, chat chatIdentifier: String, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any], groupID: String, chatPersonCentricID personCentricID: String, messagesReceived messages: [IMItem], messagesComingFromStorage fromStorage: Bool) {
+        *log.debug("messagesReceived: \(messages.debugDescription, privacy: .public)")
+        
+        for message in messages {
+            process(newMessage: message, chatIdentifier: chatIdentifier)
+        }
+    }
+    
+    public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, groupID: String!, chatPersonCentricID personCentricID: String!, messagesReceived messages: [IMItem]!) {
         *log.debug("messagesReceived: \(messages.debugDescription, privacy: .public)")
         
         for message in messages {
@@ -496,7 +506,7 @@ private extension CBDaemonListener {
     private func preflight(message: IMItem) -> Bool {
         if nonces.contains(message.nonce) {
             nonces.remove(message.nonce)
-            *log.debug("withholding message: dedupe")
+            log.debug("withholding message \(message.guid): dedupe")
             return false
         }
         
@@ -513,13 +523,13 @@ private extension CBDaemonListener {
         switch message.sendProgress {
         case .failed:
             if message.errorCode == .noError {
-                *log.debug("withholding message: missing error code, message is either still in progress or the error code is coming soon")
+                log.debug("withholding message \(message.guid): missing error code, message is either still in progress or the error code is coming soon")
                 return false
             }
             nonces.insert(message.nonce)
             return true
         case .sending:
-            *log.debug("withholding message: still sending")
+            log.debug("withholding message \(message.guid): still sending")
             return false
         case .sent, .none:
             nonces.insert(message.nonce)
@@ -529,6 +539,7 @@ private extension CBDaemonListener {
     
     func process(newMessage: IMItem, chatIdentifier: String) {
         if !preflight(message: newMessage) {
+            log.warn("withholding message \(newMessage.guid): preflight failure")
             return
         }
         
@@ -553,13 +564,16 @@ private extension CBDaemonListener {
             
             // typing messages are not part of the timeline anymore
             if item.isTypingMessage {
+                log.debug("ignoring message \(item.guid): typing doesnt flow through here")
                 return
             }
             
             if CBFeatureFlags.dropSpamMessages, item.isSpam {
+                log.debug("ignoring message \(item.guid): flagged as spam")
                 return
             }
             
+            log.debug("sending message \(item.guid) down the pipeline")
             messagePipeline.send(Message(messageItem: item, chatID: chatIdentifier))
         case let item:
             // wrap non-message items and send them as transcript actions
