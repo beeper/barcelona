@@ -51,6 +51,33 @@ public class _CBFeatureFlags: FlagProvider {
     
     @FeatureFlag("log-sensitive-payloads", defaultValue: isDebugBuild)
     public var logSensitivePayloads: Bool
+    
+    @_spi(featureFlags) public var overrideWithholdPartialFailures: Bool?
+    @_spi(featureFlags) public var overrideWithholdDupes: Bool?
+    
+    @FeatureFlag("withhold-partial-failures", defaultValue: true)
+    private var _withholdPartialFailures: Bool
+    
+    @FeatureFlag("withhold-dupes", defaultValue: true)
+    private var _withholdDupes: Bool
+    
+    public var withholdPartialFailures: Bool {
+        get {
+            overrideWithholdPartialFailures ?? _withholdPartialFailures
+        }
+        set {
+            _withholdPartialFailures = newValue
+        }
+    }
+    
+    public var withholdDupes: Bool {
+        get {
+            overrideWithholdDupes ?? _withholdDupes
+        }
+        set {
+            _withholdDupes = newValue
+        }
+    }
 }
 
 extension String {

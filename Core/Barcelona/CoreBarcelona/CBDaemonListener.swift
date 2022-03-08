@@ -504,7 +504,7 @@ private extension CBDaemonListener {
 
 private extension CBDaemonListener {
     private func preflight(message: IMItem) -> Bool {
-        if nonces.contains(message.nonce) {
+        if CBFeatureFlags.withholdDupes, nonces.contains(message.nonce) {
             nonces.remove(message.nonce)
             log.debug("withholding message \(message.guid): dedupe")
             return false
@@ -522,7 +522,7 @@ private extension CBDaemonListener {
         
         switch message.sendProgress {
         case .failed:
-            if message.errorCode == .noError {
+            if message.errorCode == .noError, CBFeatureFlags.withholdPartialFailures {
                 log.debug("withholding message \(message.guid): missing error code, message is either still in progress or the error code is coming soon")
                 return false
             }

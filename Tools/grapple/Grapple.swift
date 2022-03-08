@@ -13,6 +13,7 @@ import OSLog
 import SwiftCLI
 import Swog
 import FeatureFlags
+@_spi(featureFlags) import Barcelona
 
 protocol BarcelonaCommand: Command {}
 protocol EphemeralCommand: Command {}
@@ -49,6 +50,9 @@ class Grapple {
     static let shared = Grapple()
     
     static func main() throws {
+        
+        CBFeatureFlags.overrideWithholdPartialFailures = false
+        CBFeatureFlags.overrideWithholdDupes = false
         let cli = CLI(name: "grapple", commands: [
             SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand(), IDSCommand(), AccountManagement(), Grudge.shared, QueryCommand(), DiagsCommand(), MessageCommand()
         ])
