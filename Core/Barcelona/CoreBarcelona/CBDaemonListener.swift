@@ -681,7 +681,11 @@ private extension IMMessageItem {
                 return nil
             }
             
-            return resolveSenderID(inService: serviceStyle, chat: chat)
+            if style == .group {
+                return resolveSenderID(inService: serviceStyle)
+            } else {
+                return chat // chat identifier for DM is just the recipient
+            }
         }
         
         return CBMessageStatusChange(type: payload.type, time: payload.time.timeIntervalSince1970 * 1000, sender: sender, fromMe: fromMe, chatID: chat, messageID: id, context: CBMessageStatusChangeContext(message: self))

@@ -269,7 +269,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
             $0.eraseToAnyChatItem()
         }
         service = item.resolveServiceStyle(inChat: chatID)
-        sender = item.resolveSenderID(inService: service, chat: chatID)
+        sender = item.resolveSenderID(inService: service)
         associatedMessageID = item.associatedMessageGUID()
         fileTransferIDs = item.fileTransferGUIDs
         description = item.message()?.description(forPurpose: .SPI, in: IMChat.resolve(withIdentifier: chatID), senderDisplayName: nil)
@@ -295,7 +295,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         flags = 0x5
         items = [transcriptRepresentation.eraseToAnyChatItem()]
         service = item.resolveServiceStyle(inChat: chatID)
-        sender = item.resolveSenderID(inService: service, chat: chatID)
+        sender = item.resolveSenderID(inService: service)
         associatedMessageID = item.associatedMessageGUID()
         fileTransferIDs = additionalFileTransferGUIDs
         failureCode = .noError
@@ -310,7 +310,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         fromMe = message.isFromMe
         time = message.effectiveTime
         service = backing?.resolveServiceStyle(inChat: chatID) ?? message.resolveServiceStyle(inChat: chatID)
-        sender = message.resolveSenderID(inService: service, chat: chatID)
+        sender = message.resolveSenderID(inService: service)
         subject = message.subject?.id
         messageSubject = backing?.subject ?? message.messageSubject?.string
         isSOS = backing?.isSOS ?? message.isSOS

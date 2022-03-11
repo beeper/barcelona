@@ -10,12 +10,7 @@ import Foundation
 import IMCore
 import BarcelonaDB
 
-internal func CBResolveSenderHandle(originalHandle: String?, isFromMe: Bool, service: IMServiceStyle?, chat chatID: String?) -> String? {
-    if !isFromMe, let chatID = chatID, let chat = IMChat.resolve(withIdentifier: chatID), let recipient = chat.recipient {
-        // coerces messages sent from different handles into the original handle of the chat
-        return recipient.idWithoutResource
-    }
-    
+internal func CBResolveSenderHandle(originalHandle: String?, isFromMe: Bool, service: IMServiceStyle?) -> String? {
     guard isFromMe, let service = service?.service else {
         return originalHandle
     }
@@ -52,7 +47,7 @@ internal func CBResolveService(originalService: IMServiceStyle?, messageGUID: St
 }
 
 protocol SenderServiceResolvable {
-    func resolveSenderID(inService service: IMServiceStyle?, chat: String?) -> String?
+    func resolveSenderID(inService service: IMServiceStyle?) -> String?
     func resolveServiceStyle(inChat chat: String?) -> IMServiceStyle
 }
 
@@ -63,8 +58,8 @@ extension IMItem {
 }
 
 extension IMMessage: SenderServiceResolvable {
-    func resolveSenderID(inService service: IMServiceStyle? = nil, chat: String? = nil) -> String? {
-        CBResolveSenderHandle(originalHandle: sender?.idWithoutResource, isFromMe: isFromMe, service: service ?? _imMessageItem?.serviceStyle, chat: chat)
+    func resolveSenderID(inService service: IMServiceStyle? = nil) -> String? {
+        CBResolveSenderHandle(originalHandle: sender?.idWithoutResource, isFromMe: isFromMe, service: service ?? _imMessageItem?.serviceStyle)
     }
     
     func resolveServiceStyle(inChat chat: String?) -> IMServiceStyle {
@@ -73,8 +68,8 @@ extension IMMessage: SenderServiceResolvable {
 }
 
 extension IMItem: SenderServiceResolvable {
-    func resolveSenderID(inService service: IMServiceStyle? = nil, chat: String? = nil) -> String? {
-        CBResolveSenderHandle(originalHandle: sender, isFromMe: isFromMe, service: service ?? self.service?.service?.id, chat: chat)
+    func resolveSenderID(inService service: IMServiceStyle? = nil) -> String? {
+        CBResolveSenderHandle(originalHandle: sender, isFromMe: isFromMe, service: service ?? self.service?.service?.id)
     }
     
     func resolveServiceStyle(inChat chat: String?) -> IMServiceStyle {
