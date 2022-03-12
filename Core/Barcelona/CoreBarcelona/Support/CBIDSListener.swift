@@ -24,7 +24,7 @@ public class CBIDSListener: ERBaseIDSListener {
         
         IDSDaemonController.default.listener.addHandler(listener)
 
-        IDSDaemonController.default.addListenerID("com.barcelona.imagent", services: Set(arrayLiteral: IDSServiceNameiMessage, IDSServiceNameSMSRelay), commands: Set([IDSCommandID.readReceipt, IDSCommandID.smsReadReceipt].map(\.rawValue)))
+        IDSDaemonController.default.addListenerID("com.barcelona.imagent", services: Set(arrayLiteral: IDSServiceNameiMessage, IDSServiceNameSMSRelay), commands: Set([IDSCommandID.readReceipt, IDSCommandID.smsReadReceipt, .textMessage, .smsTextMessage].map(\.rawValue)))
 
         IDSDaemonController.default.setCapabilities(IDSListenerCapabilities.rawValue(for: .consumesIncomingMessages), forListenerID: "com.barcelona.imagent", shouldLog: true)
 
@@ -35,6 +35,7 @@ public class CBIDSListener: ERBaseIDSListener {
         return listener
     }()
     
+    public let senderCorrelationPipeline = CBPipeline<(senderID: String, correlationID: String)>()
     public let reflectedReadReceiptPipeline = CBPipeline<(guid: String, time: Date)>()
     
     private var myDestinationURIs: [String] {
@@ -44,7 +45,15 @@ public class CBIDSListener: ERBaseIDSListener {
     private let queue = DispatchQueue(label: "com.ericrabil.ids", attributes: [], autoreleaseFrequency: .workItem)
     
     public override func messageReceived(_ arg1: [AnyHashable : Any]!, withGUID arg2: String!, withPayload arg3: [AnyHashable : Any]!, forTopic arg4: String!, toIdentifier arg5: String!, fromID arg6: String!, context arg7: [AnyHashable : Any]!) {
-        guard let payload = arg1["IDSIncomingMessagePushPayload"] as? [String: Any], let rawCommand = payload["c"] as? IDSCommandID.RawValue, let command = IDSCommandID(rawValue: rawCommand) else {
+        guard let payload = arg1["IDSIncomingMessagePushPayload"] as? [String: Any] else {
+            return
+        }
+        
+        if let senderParticipant = payload["sP"] as? String, let correlationIdentifier = arg7?["IDSMessageContextSenderCorrelationIdentifierKey"] as? String {
+            senderCorrelationPipeline.send((senderParticipant, correlationIdentifier))
+        }
+        
+        guard let rawCommand = payload["c"] as? IDSCommandID.RawValue, let command = IDSCommandID(rawValue: rawCommand) else {
             return
         }
         
