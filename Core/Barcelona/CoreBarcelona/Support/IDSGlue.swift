@@ -13,35 +13,27 @@ class BLServiceListener: IDSServiceDelegate {
     static let shared = BLServiceListener()
     
     func service(_ service: IDSService!, account: IDSAccount!, incomingMessage message: [AnyHashable : Any]!, fromID: String!, context: IDSMessageContext!) {
-        print(message)
     }
     
     func service(_ service: IDSService!, account: IDSAccount!, incomingData data: Data!, fromID: String!, context: IDSMessageContext!) {
-        print(data)
     }
     
     func service(_ service: IDSService!, account: IDSAccount!, incomingResourceAt resourceURL: URL!, fromID: String!, context: IDSMessageContext!) {
-        print(resourceURL)
     }
     
     func service(_ service: IDSService!, account: IDSAccount!, identifier: String!, didSendWithSuccess success: Bool, error: Error!) {
-        print(identifier)
     }
     
     func service(_ service: IDSService!, account: IDSAccount!, identifier: String!, hasBeenDeliveredWithContext context: Any!) {
-        print(identifier)
     }
     
     func service(_ service: IDSService!, account: IDSAccount!, identifier: String!, fromID: String!, hasBeenDeliveredWithContext context: Any!) {
-        print(context)
     }
     
     func service(_ service: IDSService!, account: IDSAccount!, identifier: String!, didSendWithSuccess success: Bool, error: Error!, context: IDSMessageContext!) {
-        print(identifier)
     }
     
     func service(_ service: IDSService!, account: IDSAccount!, incomingResourceAt resourceURL: URL!, metadata: [AnyHashable : Any]!, fromID: String!, context: IDSMessageContext!) {
-        print(resourceURL)
     }
 }
 
