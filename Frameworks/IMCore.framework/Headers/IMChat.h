@@ -199,6 +199,7 @@ typedef NS_ENUM(NSInteger, IMChatJoinState) {
 @property(readonly, nonatomic) NSString *localTypingMessageGUID;
 - (void)sendCurrentLocationMessage;
 - (void)sendMessage:(IMMessage*)arg1;
+- (void)_sendMessage:(IMMessage*)arg1 adjustingSender:(BOOL)adjustingSender shouldQueue:(BOOL)shouldQueue;
 - (void)_fixItemForSendingMessageTime:(id)arg1;
 - (void)cancelMessage:(id)arg1;
 - (void)declineInvitation;

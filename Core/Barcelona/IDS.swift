@@ -198,6 +198,6 @@ private extension Dictionary {
 private extension String {
     /// Strips the URI prefix that IDS appends to destinations
     var idsURIStripped: String {
-        IDSURI(prefixedURI: self).unprefixedURI()
+        IDSURI(prefixedURI: self)?.unprefixedURI ?? self
     }
 }

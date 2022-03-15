@@ -39,7 +39,7 @@ public class CBIDSListener: ERBaseIDSListener {
     public let reflectedReadReceiptPipeline = CBPipeline<(guid: String, time: Date)>()
     
     private var myDestinationURIs: [String] {
-        IMAccountController.shared.iMessageAccount?.aliases.map { IDSDestination(uri: $0).uri().prefixedURI() } ?? []
+        IMAccountController.shared.iMessageAccount?.aliases.map { IDSDestination(uri: $0).uri().prefixedURI } ?? []
     }
     
     private let queue = DispatchQueue(label: "com.ericrabil.ids", attributes: [], autoreleaseFrequency: .workItem)

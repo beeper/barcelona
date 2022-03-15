@@ -129,188 +129,53 @@ extension Notification.Name: ExpressibleByStringLiteral {
 }
 
 import Combine
-import GRDB
 
-/// Tracks the correlation of different sender IDs to a single, unique identity representing an Apple ID
-public class CBSenderCorrelationController {
-    private class CBSenderCorrelationPersistence {
-        struct Correlation: Codable, FetchableRecord, PersistableRecord  {
-            var ROWID: Int64
-            var correlation_identifier: String
-            var sender_id: String
-        }
+struct asdf: ExpressibleByStringInterpolation, ExpressibleByStringLiteral {
+    typealias StringLiteralType = interp.StringLiteralType
+    
+    struct interp: StringInterpolationProtocol, ExpressibleByStringLiteral {
+        var staticStrings: ContiguousArray<StaticString> = ContiguousArray()
         
-        static let databasePath: String = ProcessInfo.processInfo.environment["CBSenderCorrelationDB"] ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("/Library/Barcelona/correlation.db").path
-        static let databaseFolder = URL(fileURLWithPath: databasePath).deletingLastPathComponent().path
-        
-        static let log = Logger(category: "CBSenderCorrelationDB")
-        let log = CBSenderCorrelationPersistence.log
-        let dbQueue: DatabaseQueue
-        
-        static let migrator: DatabaseMigrator = {
-            var migrator = DatabaseMigrator()
+        struct Capture {
             
-            migrator.registerMigration("v1") { database in
-                try database.create(table: "correlation") { table in
-                    table.autoIncrementedPrimaryKey("ROWID")
-                    table.column("correlation_identifier", .text).notNull()
-                    table.column("sender_id", .text).notNull().unique(onConflict: .replace)
-                }
-                try database.create(index: "idx_correlation_identifier", on: "correlation", columns: ["correlation_identifier"])
-                try database.create(index: "idx_sender_id", on: "correlation", columns: ["sender_id"])
-            }
+        }
+        
+        init(literalCapacity: Int, interpolationCount: Int) {
+            staticStrings = ContiguousArray()
+            staticStrings.reserveCapacity(literalCapacity)
+        }
+        
+        init(stringLiteral: StringLiteralType) {
             
-            return migrator
-        }()
-        
-        static let shared: CBSenderCorrelationPersistence? = {
-            do {
-                return try CBSenderCorrelationPersistence()
-            } catch {
-                log.fault("Couldn't open database at \(databasePath): \(String(describing: error))")
-                return nil
-            }
-        }()
-        
-        init() throws {
-            try FileManager.default.createDirectory(atPath: CBSenderCorrelationPersistence.databaseFolder, withIntermediateDirectories: true, attributes: nil)
-            dbQueue = try DatabaseQueue(path: CBSenderCorrelationPersistence.databasePath)
-            try CBSenderCorrelationPersistence.migrator.migrate(dbQueue)
         }
         
-        private func correlate(senderID: String, correlationID: String, database: Database) throws {
-            try database.execute(sql: "INSERT INTO correlation (correlation_identifier, sender_id) VALUES (?,?)", arguments: [correlationID, senderID])
+        mutating func appendLiteral(_ literal: StringLiteralType) {
+            
         }
         
-        private func correlationSucceeded(senderID: String, correlationID: String) {
-            log.debug("Persisted correlation of sender \(senderID, privacy: .private) and correl. \(correlationID, privacy: .public)")
+        mutating func appendInterpolation(_ interpolation: StringLiteralType) {
+            
         }
         
-        private func correlationFailed(senderID: String, correlationID: String, error: Error) {
-            log.fault("Failed to persist correlation of sender \(senderID, privacy: .private) and correl. \(correlationID, privacy: .public): \(String(describing: error))")
+        mutating func appendInterpolation(_ interpolation: Int) {
+            
         }
         
-        func correlate(senderID: String, correlationID: String) {
-            dbQueue.asyncWrite({ database in
-                try self.correlate(senderID: senderID, correlationID: correlationID, database: database)
-            }, completion: { [correlationSucceeded, correlationFailed, senderID, correlationID] database, result in
-                switch result {
-                case .success:
-                    correlationSucceeded(senderID, correlationID)
-                case .failure(let error):
-                    correlationFailed(senderID, correlationID, error)
-                }
-            })
-        }
         
-        func correlateNow(senderID: String, correlationID: String) {
-            do {
-                try dbQueue.write { database in
-                    try self.correlate(senderID: senderID, correlationID: correlationID, database: database)
-                }
-                correlationSucceeded(senderID: senderID, correlationID: correlationID)
-            } catch {
-                correlationFailed(senderID: senderID, correlationID: correlationID, error: error)
-            }
-        }
-        
-        func correlate(senderID: String) -> String? {
-            do {
-                let correlation = try dbQueue.read { database in
-                    try Correlation.fetchOne(database, key: [
-                        "sender_id": senderID
-                    ])
-                }
-                return correlation?.correlation_identifier
-            } catch {
-                log.fault("Failed to lookup correlation identifier of \(senderID, privacy: .private): \(String(describing: error))")
-                return nil
-            }
-        }
-        
-        func correlate(correlationID: String) -> [String] {
-            do {
-                let correlations = try dbQueue.read { database in
-                    try Correlation.fetchAll(database, sql: "SELECT * FROM correlation WHERE correlation_identifier = ?", arguments: [correlationID])
-                }
-                return correlations.map(\.sender_id)
-            } catch {
-                log.fault("Failed to lookup known sender IDs for correlation identifier \(correlationID): \(String(describing: error))")
-                return []
-            }
-        }
+        typealias StringLiteralType = StaticString
     }
     
-    public static let shared = CBSenderCorrelationController()
-    
-    private let log = Logger(category: "CBSenderCorrelation")
-    private let queue = DispatchQueue(label: "CBSenderCorrelation")
-    
-    /// A dictionary mapping sender IDs to a correlation ID that uniquely identifiers all sender IDs belonging to a specific person
-    private var correlations: [String: String] = [:]
-    /// A dictionary mapping correlation IDs to all known sender IDs
-    private var reverseCorrelations: [String: Set<String>] = [:]
-    
-    /// Rehydrates cache of a correlation/sender relationship from database
-    private func bulkLoad(senders: [String], correlationID: String) -> Set<String> {
-        queue.sync {
-            for senderID in senders {
-                if let oldID = correlations.removeValue(forKey: senderID) {
-                    reverseCorrelations[oldID]?.remove(senderID)
-                }
-                correlations[senderID] = correlationID
-            }
-            let senders = Set(senders)
-            reverseCorrelations[correlationID] = senders
-            return senders
-        }
+    init(stringInterpolation: interp) {
+        
     }
     
-    private func cache(senderID: String, correlationID: String) {
-        queue.sync {
-            if let oldID = correlations.removeValue(forKey: senderID) {
-                reverseCorrelations[oldID]?.remove(senderID)
-            }
-            correlations[senderID] = correlationID
-            reverseCorrelations[correlationID, default: Set()].insert(senderID)
-        }
+    init(stringLiteral value: interp.StringLiteralType) {
+        
     }
     
-    /// Establish a correlation between a sender ID and a correlation ID
-    public func correlate(senderID: String, correlationID: String) {
-        if let existingID = correlations[senderID], existingID == correlationID {
-            // no need to cache or persist, its already correlated
-            return
-        }
-        *log.debug("Correlating \(senderID) to \(correlationID)")
-        cache(senderID: senderID, correlationID: correlationID)
-        CBSenderCorrelationPersistence.shared?.correlate(senderID: senderID, correlationID: correlationID)
-    }
+    static let a: asdf = "a\(4)b"
     
-    /// Queries the correlation identifier for a given sender ID, if it is known
-    public func correlate(senderID: String) -> String? {
-        if let correlationID = queue.sync(execute: { correlations[senderID] }) {
-            // cache hit!
-            return correlationID
-        }
-        if let correlationID = CBSenderCorrelationPersistence.shared?.correlate(senderID: senderID) {
-            // store database correlation in cache and return
-            cache(senderID: senderID, correlationID: correlationID)
-            return correlationID
-        }
-        return nil
-    }
-    
-    /// Queries all known sender IDs for a given correlation identifier
-    public func correlate(correlationID: String) -> Set<String> {
-        if let correlations = queue.sync(execute: { reverseCorrelations[correlationID] }) {
-            return correlations
-        }
-        if let senders = CBSenderCorrelationPersistence.shared?.correlate(correlationID: correlationID) {
-            return bulkLoad(senders: senders, correlationID: correlationID)
-        }
-        return Set()
-    }
+//    typealias StaticString
 }
 
 internal extension CBDaemonListener {

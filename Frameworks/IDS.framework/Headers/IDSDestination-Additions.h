@@ -5,9 +5,11 @@
 //
 
 @interface IDSURI: NSObject
-+ (instancetype _Nonnull) URIWithPrefixedURI:(NSString*)uri;
-- (NSString* _Nonnull) unprefixedURI;
-- (NSString* _Nonnull) prefixedURI;
+//+ (instancetype _Nonnull) URIWithPrefixedURI:(NSString*)uri;
+- (nullable instancetype)initWithPrefixedURI:(NSString *)prefixedURI;
+- (nullable instancetype)initWithUnprefixedURI:(NSString *)unprefixedURI;
+@property (nonatomic, readonly, strong) NSString *prefixedURI;
+@property (nonatomic, readonly, strong) NSString *unprefixedURI;
 @end
 
 @interface IDSDestination: NSObject

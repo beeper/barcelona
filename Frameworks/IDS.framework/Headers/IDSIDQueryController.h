@@ -6,7 +6,17 @@
 
 #import <Foundation/Foundation.h>
 
-@class IDSInternalQueueController, _IDSIDQueryController;
+@class IDSInternalQueueController, _IDSIDQueryController, IDSDestination;
+
+NS_ASSUME_NONNULL_BEGIN
+@interface IDSEndpoint: NSObject
+@property (nonatomic, readonly, retain) IDSURI *URI;
+@property (nonatomic, strong, readonly) NSString *senderCorrelationIdentifier;
+@end
+NS_ASSUME_NONNULL_END
+
+@protocol ENParticipantProtocol
+@end
 
 @interface IDSIDQueryController : NSObject
 {
@@ -24,8 +34,8 @@
 - (void)__imQueryIDStatusForHandles:(id)arg1 service:(id)arg2 listenerID:(id)arg3 queue:(id)arg4 completionBlock:(void(^)(id))arg5;
 - (BOOL)requestIDStatusForDestination:(id)arg1 service:(id)arg2 listenerID:(id)arg3 queue:(id)arg4 completionBlock:(id)arg5;
 - (BOOL)requestIDStatusForDestinations:(id)arg1 service:(id)arg2 listenerID:(id)arg3 queue:(id)arg4 completionBlock:(id)arg5;
-- (BOOL)participantsForDestinations:(id)arg1 service:(id)arg2 listenerID:(id)arg3 queue:(id)arg4 completionBlock:(id)arg5;
-- (BOOL)currentRemoteDevicesForDestinations:(id)arg1 service:(id)arg2 listenerID:(id)arg3 queue:(id)arg4 completionBlock:(id)arg5;
+- (BOOL)participantsForDestinations:(NSArray<IDSDestination*>*)arg1 service:(NSString*)arg2 listenerID:(NSString*)arg3 queue:(dispatch_queue_t)arg4 completionBlock:(void(^)(NSArray <id <ENParticipantProtocol>>*participants))arg5;
+- (BOOL)currentRemoteDevicesForDestinations:(NSArray<IDSDestination*>*)arg1 service:(NSString*)arg2 listenerID:(NSString*)arg3 queue:(dispatch_queue_t)arg4 completionBlock:(void(^)(NSDictionary<NSString*,NSArray<IDSEndpoint*>*>*results))arg5;
 - (id)_currentIDStatusForDestinations:(id)arg1 service:(id)arg2 listenerID:(id)arg3;
 - (long long)_currentIDStatusForDestination:(id)arg1 service:(id)arg2 listenerID:(id)arg3;
 - (id)_refreshIDStatusForDestinations:(id)arg1 service:(id)arg2 listenerID:(id)arg3;
