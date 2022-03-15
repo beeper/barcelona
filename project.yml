@@ -68,6 +68,9 @@ packages:
   FeatureFlags:
     url: https://github.com/EricRabil/FeatureFlags.swift
     from: 1.0.1
+  SwiftyContacts:
+    url: https://github.com/SwiftyContacts/SwiftyContacts
+    from: "4.0"
 
 settings:
   base:
@@ -217,6 +220,7 @@ targets:
       - target: Barcelona
         embed: true
         link: true
+      - package: SwiftyContacts
   barcelona-mautrix:
     group: Beeper
     type: tool

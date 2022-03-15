@@ -11,6 +11,7 @@ import IMFoundation
 import IMSharedUtilities
 import IMCore
 import Barcelona
+import SwiftyContacts
 
 extension IMBusinessNameManager {
     func addCallback(forURI uri: String, callback: @escaping (NSString) -> ()) {
@@ -36,10 +37,33 @@ extension BLContact {
                 return BLContact(first_name: nil, last_name: nil, nickname: nil, avatar: nil, phones: [], emails: [], user_guid: handleID, serviceHint: "iMessage")
             }
         } else {
+            let contacts = (try? SwiftyContacts.fetchContacts(matching: CNPhoneNumber(stringValue: handleID))) ?? []
             let handles = IMHandleRegistrar.sharedInstance().getIMHandles(forID: handleID) ?? []
             
             var firstName: String?, lastName: String?, nickname: String?, suggestedName: String?, avatar: Data?, phoneNumbers = [String](), emailAddresses = [String](), serviceHint: String = "SMS"
             
+            for handle in contacts {
+                if firstName == nil {
+                    firstName = handle.givenName
+                }
+
+                if lastName == nil {
+                    lastName = handle.familyName
+                }
+
+                if nickname == nil {
+                    nickname = handle.nickname
+                }
+
+                if suggestedName == nil {
+                    suggestedName = handle.organizationName
+                }
+
+                if avatar == nil {
+                    avatar = handle.imageData
+                }
+            }
+
             for handle in handles {
                 if firstName == nil {
                     firstName = handle.firstName
@@ -75,7 +99,7 @@ extension BLContact {
                     emailAddresses.append(contentsOf: cnContact.emailAddresses.map { $0.value as String })
                 }
             }
-            
+
             if firstName == nil, lastName == nil, nickname == nil {
                 if let suggestedName = suggestedName {
                     firstName = suggestedName
