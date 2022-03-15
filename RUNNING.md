@@ -73,6 +73,11 @@ For this, fetch the latest mautrix-imessage binary for your platform:
 
 Now copy `example-config.yaml` to `config.yaml` and add your configuration as described in steps 1-5 [here](https://docs.mau.fi/bridges/go/imessage/ios/setup.html). You want to use `platform: mac-nosip` and `imessage_rest_path: /private/var/barcelona/ios-barcelona-mautrix`.
 
+Next, for receiving attachments filesystem that is mounted on your jailbroken device somehow doesn't match the paths returned by the iMessage libraries, hence we will correct this using a soft link on the filesystem to the correct location. For that, run the following in an ssh session as root user:
+```
+ln -s /private/var/mobile/Library/SMS /var/root/Library/SMS
+```
+
 Next, if you try to run `./mautrix-imessage` you'll get `Killed: 9`. This is because of how iOS security sandboxing works, this binary has no permissions to do IPC.
 
 To fix this, create a file called `entitlements.xml` with the following contents (you might not need all these entitlements, I just copied what debugserver uses):
@@ -120,28 +125,9 @@ Next, you need to allow these entitlements for `mautrix-imessage`: `ldid -Sentit
 After that you install `tmux` via cydia, run `tmux` to start a tmux session and then run `./mautrix-imessage`. Once you confirmed that everthing works, detach from the tmux session (`ctrl-b` followed by `d`) and enjoy the running bridge!
 
 
-## Troubleshooting
-
-```
-panic: runtime error: invalid memory address or nil pointer dereference
-[signal SIGSEGV: segmentation violation code=0x2 addr=0x8 pc=0x1053a6eb8]
-
-goroutine 26 [running]:
-os.(*ProcessState).exited(...)
-        /opt/homebrew/Cellar/go/1.17.6/libexec/src/os/exec_posix.go:84
-os.(*ProcessState).Exited(...)
-        /opt/homebrew/Cellar/go/1.17.6/libexec/src/os/exec.go:153
-go.mau.fi/mautrix-imessage/imessage/mac-nosip.(*MacNoSIPConnector).Start.func1(0x1301311d0, 0x13007c360)
-        /Users/ci/builds/YUMeaPfZ/0/mautrix/imessage/imessage/mac-nosip/nosip.go:82 +0x38
-created by go.mau.fi/mautrix-imessage/imessage/mac-nosip.(*MacNoSIPConnector).Start
-        /Users/ci/builds/YUMeaPfZ/0/mautrix/imessage/imessage/mac-nosip/nosip.go:80 +0x2bc
-```
-
-This means that the process exited ungracefully and corrupted the sqlite database. Wipe it and let it recreate.
-
 #### Things look strange
 
-Check if a second copy if barcelona is working:
+Check if a second copy if barcelona is running because of a previous crash:
 `ps aux | grep ios-barcelona-mautrix`
 
 If yes, stop mautrix-imessage, kill all barcelonas and start from scratch.
