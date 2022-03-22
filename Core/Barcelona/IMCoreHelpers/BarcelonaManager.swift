@@ -88,11 +88,15 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
         controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
         controller.blockUntilConnected()
         
-        log("Connected to daemon. Fetching nicknames...")
+        #if DEBUG
+        log.debug("Connected to daemon. Fetching nicknames...")
+        #endif
         
         controller.fetchNicknames()
         
-        log("Fetched nicknames. Setting up IMContactStore...")
+        #if DEBUG
+        log.debug("Fetched nicknames. Setting up IMContactStore...")
+        #endif
         
         IMContactStore.sharedInstance().checkForContactStoreChanges()
         

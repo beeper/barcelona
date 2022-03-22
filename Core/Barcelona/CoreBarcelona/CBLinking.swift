@@ -154,7 +154,9 @@ public func CBWeakLink<T>(against target: CBLinkingTarget, options: [LinkingOpti
     
     for option in options {
         if option.safe, let symbol = dlsym(handle, option.symbol) {
+            #if DEBUG
             log.debug("Selecting \(option.symbol) for linker candidate")
+            #endif
             
             return cast(symbol) as T
         }

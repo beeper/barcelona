@@ -36,21 +36,21 @@ extension IMMessage: IMItemIDResolvable {
 // MARK: - IMFileTransfer Preload
 @inlinable
 internal func _BLLoadFileTransfers(forObjects objects: [NSObject]) -> Promise<Void> {
-    let operation = BLIngestLog.operation(named: "BLLoadFileTransfers").begin("loading file transfers for %ld objects", objects.count)
+    let operation = BLIngestLog.operation(named: "BLLoadFileTransfers").begin()
     
     let unloadedFileTransferGUIDs = objects.compactMap {
         $0 as? IMFileTransferContainer
     }.flatMap(\.unloadedFileTransferGUIDs)
     
     guard unloadedFileTransferGUIDs.count > 0 else {
-        operation.end("aborting file transfer loading because there are no unloaded file transfers")
+        operation.end()
         return .success(())
     }
     
-    operation.event("loading %ld transfers", unloadedFileTransferGUIDs.count)
+    *operation.event("loading %ld transfers", unloadedFileTransferGUIDs.count)
     
     return DBReader.shared.attachments(withGUIDs: unloadedFileTransferGUIDs).endingOperation(operation) { attachments in
-        operation.end("loaded %ld attachments", attachments.count)
+        operation.end()
     }.compactMap(\.attachment).forEach {
         $0.initializeFileTransferIfNeeded()
     }
@@ -72,8 +72,6 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -
         return .success([])
     }
     
-    var operation = BLIngestLog.operation(named: "BLLoadTapbacks (db)").begin("querying tapbacks for %ld items in chat %@", items.count, chat)
-    
     let messages = items.compactMap { $0 as? Message }.dictionary(keyedBy: \.id)
     
     let associatedLedger = messages.values.flatMap { message in
@@ -83,15 +81,10 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -
     }.dictionary(keyedBy: \.itemID, valuedBy: \.messageID)
     
     guard associatedLedger.count > 0 else {
-        operation.end("early-exit because there's no associable items")
         return .success(items)
     }
     
     return DBReader.shared.associatedMessageGUIDs(with: messages.values.flatMap(\.associableItemIDs)).then { associations -> [String: [AcknowledgmentChatItem]] in
-        operation.end("loaded %ld associated items from db", associations.flatMap(\.value).count)
-        
-        operation = BLIngestLog.operation(named: "BLLoadTapbacks (IMDPersistence)").begin("loading items from IMDPersistenceAgent")
-        
         if associations.count == 0 {
             return [:]
         }
@@ -100,14 +93,11 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -
     }.observeAlways { completion in
         switch completion {
         case .failure(let error):
-            operation.end("failed to load with error %@", error as NSError)
-        case .success(let items):
-            operation.end("loaded %ld items", items.flatMap(\.value).count)
+            BLIngestLog.fault("failed to load with error %@", error as NSError)
+        default: break
         }
     }.then { ledger -> [ChatItem] in
         if ledger.values.flatten().count > 0 {
-            operation = BLIngestLog.operation(named: "BLLoadTapbacks (organize)").begin()
-            
             ledger.forEach { itemID, tapbacks -> Void in
                 guard let messageID = associatedLedger[itemID], let message = messages[messageID] else {
                     return
@@ -120,8 +110,6 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -
                 item.acknowledgments = tapbacks
             }
             
-            operation.end()
-            
             return Array(messages.values) + items.filter { $0.type != .message }
         } else {
             return items
@@ -132,11 +120,7 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -
 // MARK: - Translation
 @inlinable
 internal func _BLParseObjects(_ objects: [NSObject], inChat chat: String) -> [ChatItem] {
-    let operation = BLIngestLog.operation(named: "BLParseObjects").begin("parsing %ld objects in chat %@", objects.count, chat)
-    
-    defer { operation.end() }
-    
-    return objects.map {
+    objects.map {
         ChatItemType.ingest(object: $0, context: IngestionContext(chatID: chat))
     }
 }

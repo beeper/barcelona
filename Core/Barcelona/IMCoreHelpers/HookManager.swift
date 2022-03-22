@@ -166,19 +166,25 @@ class HookManager {
     func apply() throws {
         try revert()
         
+        #if DEBUG
         log.debug("Applying hooks")
+        #endif
         
         appliedHooks = []
         
         for (index, hook) in hooks.enumerated() {
+            #if DEBUG
             log.debug("Applying hook %ld of %ld", index + 1, hooks.count)
+            #endif
             
             if let interpose = try hook() {
                 appliedHooks!.append(interpose)
             }
         }
         
+        #if DEBUG
         log.debug("All hooks applied")
+        #endif
     }
     
     func revert() throws {
@@ -186,14 +192,20 @@ class HookManager {
             return
         }
         
+        #if DEBUG
         log.debug("Reverting hooks")
+        #endif
         
         for (index, hook) in appliedHooks.enumerated() {
+            #if DEBUG
             log.debug("Reverting hook %ld of %ld", index + 1, hooks.count)
+            #endif
             
             try hook.revert()
         }
         
+        #if DEBUG
         log.debug("All hooks reverted")
+        #endif
     }
 }

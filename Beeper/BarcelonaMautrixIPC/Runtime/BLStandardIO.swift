@@ -135,10 +135,19 @@ public func BLWritePayloads(_ payloads: [IPCPayload], log: Bool = true) {
     
     for payload in payloads {
         if !CBFeatureFlags.runningFromXcode && log {
-            CLInfo(
-                "BLStandardIO",
-                "Outgoing! %@ %ld", payload.command.name.rawValue, payload.id ?? -1
-            )
+            func printIt() {
+                CLInfo(
+                    "BLStandardIO",
+                    "Outgoing! %@ %ld", payload.command.name.rawValue, payload.id ?? -1
+                )
+            }
+            #if DEBUG
+            printIt()
+            #else
+            if payload.command.name == .message {
+                printIt()
+            }
+            #endif
         }
         
         data += try! encoder.encode(payload)
@@ -200,7 +209,9 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
         do {
             let payload = try JSONDecoder().decode(IPCPayload.self, from: buffer)
             
+            #if DEBUG
             CLInfo("BLStandardIO", "Incoming! %@ %ld", payload.command.name.rawValue, payload.id ?? -1)
+            #endif
             
             switch payload.command {
             case .ping, .pre_startup_sync:
@@ -213,7 +224,9 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
             cb(payload)
         } catch {
             CLWarn("MautrixIPC", "Failed to decode payload: %@", "\(error)")
+            #if DEBUG
             CLInfo("MautrixIPC", "Raw payload: %@", String(decoding: buffer.prefix(1024), as: UTF8.self))
+            #endif
         }
     }
 }

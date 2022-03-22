@@ -20,14 +20,14 @@ import BarcelonaDB
 private let log = Logger(category: "ERDaemonListener")
 
 // set to false and the logging conditions (probably) wont even compile, but they will be disabled
-private let loggingEnabled = false
+@usableFromInline internal let verboseLoggingEnabled = false
 
 prefix operator *
 
-@_transparent
-prefix func *(_ expression: @autoclosure () -> ()) {
+@_transparent @usableFromInline
+internal prefix func *(_ expression: @autoclosure () -> ()) {
     // TODO: replace with compilation condition to have this compile to nothing
-    if _slowPath(loggingEnabled) {
+    if _slowPath(verboseLoggingEnabled) {
         expression()
     }
 }

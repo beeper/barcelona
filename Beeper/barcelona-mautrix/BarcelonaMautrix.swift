@@ -55,12 +55,10 @@ class BarcelonaMautrix {
             CBPurgedAttachmentController.shared.enabled = true
             CBPurgedAttachmentController.shared.delegate = BLEventHandler.shared
             
-            CLInfo("ERBarcelonaManager", "BLMautrix is ready")
-            
             // starts the imessage notification processor
             BLEventHandler.shared.run()
             
-            CLInfo("ERBarcelonaManager", "BLMautrix event handler is running")
+            CLInfo("ERBarcelonaManager", "BLMautrix is ready")
             
             self.startHealthTicker()
         }
