@@ -13,9 +13,14 @@ protocol IMMessageActionItemParseable: IMCoreDataResolvable {
     var actionType: Int64 { get }
     var senderID: String? { get }
     var otherHandleID: String? { get }
+    var resolvedSenderID: String? { get }
 }
 
 extension IMMessageActionItem: IMMessageActionItemParseable {
+    var resolvedSenderID: String? {
+        resolveSenderID()
+    }
+    
     var otherHandleID: String? {
         otherHandle
     }
@@ -53,7 +58,7 @@ public struct ActionChatItem: ChatItemOwned, Hashable {
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
         actionType = item.actionType
-        sender = item.senderID
+        sender = item.resolvedSenderID
         otherHandle = item.otherHandleID
     }
     

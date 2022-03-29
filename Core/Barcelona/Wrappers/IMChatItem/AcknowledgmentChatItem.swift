@@ -9,6 +9,12 @@
 import Foundation
 import IMCore
 
+extension IMChatItem {
+    var resolvedSenderID: String? {
+        _item().resolveSenderID()
+    }
+}
+
 public struct AcknowledgmentChatItem: ChatItemAssociable, ChatItemOwned, Hashable {
     public static let ingestionClasses: [NSObject.Type] = [IMMessageAcknowledgmentChatItem.self]
     
@@ -24,7 +30,7 @@ public struct AcknowledgmentChatItem: ChatItemAssociable, ChatItemOwned, Hashabl
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
         acknowledgmentType = item.messageAcknowledgmentType
-        sender = item.sender?.id ?? item._item()?.senderID
+        sender = item.resolvedSenderID
         associatedID = item.associatedMessageGUID
     }
     

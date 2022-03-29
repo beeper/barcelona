@@ -53,7 +53,7 @@ fileprivate extension ERTimeSortedParticipantsManagerIngestible {
 
 extension IMItem: ERTimeSortedParticipantsManagerIngestible {
     public var senderID: String? {
-        self.sender ?? (isFromMe ? bestHandleIDForMe : nil)
+        resolveSenderID(inService: serviceStyle) ?? (isFromMe ? bestHandleIDForMe : nil)
     }
     
     public var effectiveTime: Double {
@@ -63,7 +63,7 @@ extension IMItem: ERTimeSortedParticipantsManagerIngestible {
 
 extension IMMessage: ERTimeSortedParticipantsManagerIngestible {
     public var senderID: String? {
-        self.sender?.id ?? (isFromMe ? bestHandleIDForMe : nil)
+        resolveSenderID(inService: _imMessageItem?.serviceStyle) ?? (isFromMe ? bestHandleIDForMe : nil)
     }
     
     public var effectiveTime: Double {

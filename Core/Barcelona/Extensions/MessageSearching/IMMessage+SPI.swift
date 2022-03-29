@@ -23,7 +23,7 @@ public extension IMMessage {
      Takes an IMMessageItem that has no context object and resolves it into a fully formed IMMessage
      */
     static func message(fromUnloadedItem item: IMMessageItem, withSubject subject: NSMutableAttributedString?) -> IMMessage? {
-        var rawSender: String? = item.sender()
+        var rawSender: String? = item.resolveSenderID(inService: item.serviceStyle)
         
         if item.sender() == nil, item.isFromMe(), let suitableHandle = Registry.sharedInstance.suitableHandle(for: item.service) {
             rawSender = suitableHandle.id

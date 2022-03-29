@@ -19,7 +19,7 @@ public struct TypingItem: ChatItemOwned, Hashable {
     init(_ item: IMTypingChatItem, chatID: String) {
         id = item.id
         fromMe = item.isFromMe
-        sender = item.sender?.id
+        sender = item.resolvedSenderID
         time = item.effectiveTime
         self.chatID = chatID
     }

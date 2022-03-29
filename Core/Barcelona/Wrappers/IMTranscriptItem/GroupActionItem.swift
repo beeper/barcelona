@@ -33,7 +33,7 @@ public struct GroupActionItem: ChatItemOwned, Hashable {
         fromMe = item.isFromMe
         time = item.effectiveTime
         actionType = item.actionType
-        sender = item.sender?.id
+        sender = item.resolvedSenderID
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
     }
@@ -44,7 +44,7 @@ public struct GroupActionItem: ChatItemOwned, Hashable {
         fromMe = item.isFromMe
         time = item.effectiveTime
         actionType = item.actionType
-        sender = item.sender
+        sender = item.resolveSenderID()
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
     }

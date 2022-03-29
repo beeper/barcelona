@@ -33,6 +33,17 @@ extension IMChat {
     }
 }
 
+
+extension IMChat: Identifiable {
+    public var id: String {
+        if CBFeatureFlags.preferCorrelationIdentifiers {
+            return CBSenderCorrelationController.shared.externalIdentifier(senderID: recipient.id)
+        } else {
+            return chatIdentifier
+        }
+    }
+}
+
 extension DatabaseWriter {
     func execute(sql: String, arguments: StatementArguments = StatementArguments(), _ callback: @escaping (Database, Result<(), Error>) -> ()) {
         asyncWrite({ database in
@@ -394,6 +405,16 @@ public class CBSenderCorrelationController {
         func pinned(senderFromSender sender: String) -> String {
             Correlation.correlate(dbQueue, senderID: sender)
         }
+        
+        func pin(correlationID: String, senderID: String) {
+            Correlation.correlate(dbQueue, identifier: correlationID, sender: senderID, pinned: true)
+        }
+        
+        func pin(senderID: String) {
+            if let correlationID = correlate(senderID: senderID) {
+                pin(correlationID: correlationID, senderID: senderID)
+            }
+        }
     }
     
     public static let shared = CBSenderCorrelationController()
@@ -468,7 +489,13 @@ public class CBSenderCorrelationController {
     }
     
     public func externalIdentifier(senderID: String) -> String {
-        CBSenderCorrelationPersistence.shared?.pinned(senderFromSender: senderID) ?? senderID
+        if let pinnedIdentifier = CBSenderCorrelationPersistence.shared?.pinned(senderFromSender: senderID) {
+            return pinnedIdentifier
+        }
+        if let correlationIdentifier = CBSenderCorrelationPersistence.shared?.correlate(senderID: senderID) {
+            CBSenderCorrelationPersistence.shared?.pin(correlationID: correlationIdentifier, senderID: senderID)
+        }
+        return senderID
     }
     
     private var allKnownURIs: [String] {

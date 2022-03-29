@@ -14,6 +14,16 @@ public protocol IMGroupTitleItemConforming: IMCoreDataResolvable {
     var senderID: String? { get }
 }
 
+extension IMGroupTitleItemConforming {
+    var resolvedSenderID: String? {
+        switch self {
+        case let item as IMChatItem: return item.resolvedSenderID
+        case let item as IMItem: return item.resolveSenderID()
+        default: return senderID
+        }
+    }
+}
+
 extension IMGroupTitleChangeItem: IMGroupTitleItemConforming {}
 extension IMGroupTitleChangeChatItem: IMGroupTitleItemConforming {
     public var senderID: String? {
@@ -41,7 +51,7 @@ public struct GroupTitleChangeItem: ChatItemOwned, Hashable {
         fromMe = item.isFromMe
         time = item.effectiveTime
         title = item.title
-        sender = item.senderID
+        sender = item.resolvedSenderID
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
     }
