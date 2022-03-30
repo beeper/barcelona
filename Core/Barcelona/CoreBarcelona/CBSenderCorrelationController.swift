@@ -202,11 +202,15 @@ public class CBSenderCorrelationController {
                 }
             }
             
+            private static func _correlate(_ database: Database, identifier correlationID: String) throws -> Correlation? {
+                try select(sql: "*").filter(Columns.correlation_identifier == correlationID && Columns.pinned == true).fetchOne(database)
+            }
+            
             /// Returns the pinned correlation for a given correlation identifier, or nil if none is pinned
             static func correlate(_ dbQueue: DatabaseReader, identifier correlationID: String) -> Correlation? {
                 do {
                     return try dbQueue.read { database in
-                        try select(Columns.correlation_identifier == correlationID && Columns.pinned == true).fetchOne(database)
+                        try _correlate(database, identifier: correlationID)
                     }
                 } catch {
                     log.fault("Failed to lookup pinned correlation for \(correlationID, privacy: .private): \(String(describing: error))")
@@ -214,25 +218,19 @@ public class CBSenderCorrelationController {
                 }
             }
             
-            /// Returns an existing pinned correlation for a given correlation identifier, otherwise establishes a pinned correlation with the given senderID and returns that correlation
-            /// This is an upsert, so if the sender ID provided is not already persisted it will be persisted and set to true.
-            static func correlate(_ dbQueue: DatabaseReader & DatabaseWriter, identifier correlationID: String, defaultPinnedSender senderID: String) -> Correlation {
-                if let correlation = correlate(dbQueue, identifier: correlationID) {
-                    return correlation
-                }
-                correlate(dbQueue, identifier: correlationID, sender: senderID, pinned: true)
-                return Correlation(pinned: true, correlation_identifier: correlationID, sender_id: senderID)
-            }
-            
             /// Returns an existing pinned correlation from the given sender ID, if there are any correlations for this sender ID. Otherwise returns the sender ID.
             static func correlate(_ dbQueue: DatabaseReader & DatabaseWriter, senderID: String) -> String {
                 do {
                     return try dbQueue.read { database in
-                        if let correlation = try select(Columns.sender_id == senderID).fetchOne(database) {
+                        if let correlation = try select(sql: "*").filter(Columns.sender_id == senderID).fetchOne(database) {
                             if correlation.pinned {
                                 return senderID
                             }
-                            return correlate(dbQueue, identifier: correlation.correlation_identifier, defaultPinnedSender: senderID).sender_id
+                            if let correlation = try _correlate(database, identifier: correlation.correlation_identifier) {
+                                return correlation.sender_id
+                            }
+                            correlate(dbQueue, identifier: correlation.correlation_identifier, sender: senderID, pinned: true)
+                            return senderID
                         }
                         return senderID
                     }
