@@ -53,10 +53,6 @@ private extension IMAccountController {
         case .irreparableFailure, .expiredDeviceCredentials, .loginFailed, .badCredentials, .badDeviceCredentials, .badPushToken:
             return .badCredentials
         default:
-            // this only takes 41 because honestly I have no clue what the other ones mean and don't want to do false data
-            if let dictionary = account.dictionary, let number = dictionary["RegistrationFailureError"] as? Int, number == 41 {
-                return .badCredentials
-            }
             break
         }
         
