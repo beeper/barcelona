@@ -21,12 +21,138 @@ extension IMBusinessNameManager {
     }
 }
 
-extension Sequence where Element: Hashable {
-    func uniqued() -> [Element] {
-        var set = Set<Element>()
-        return filter { set.insert($0).inserted }
+struct ContactInfoCollector {
+    var handleID: String
+    
+    init(_ handleID: String) {
+        self.handleID = handleID
+    }
+    
+    var firstName: String?
+    var lastName: String?
+    var nickname: String?
+    var suggestedName: String?
+    var avatar: Data?
+    var phoneNumbers: Set<String> = Set()
+    var emailAddresses: Set<String> = Set()
+    var serviceHint = "SMS"
+    
+    var contacts: Set<CNContact> = Set()
+    var handles: Set<IMHandle> = Set()
+    
+    mutating func collect(_ contact: CNContact) {
+        contacts.insert(contact)
+        
+        if firstName?.isEmpty != false {
+            firstName = contact.givenName
+        }
+
+        if lastName?.isEmpty != false {
+            lastName = contact.familyName
+        }
+
+        if nickname?.isEmpty != false {
+            nickname = contact.nickname
+        }
+
+        if suggestedName?.isEmpty != false {
+            suggestedName = contact.organizationName
+        }
+        
+        if avatar?.isEmpty != false {
+            avatar = contact.imageData
+        }
+        
+        for phoneNumber in contact.phoneNumbers {
+            phoneNumbers.insert(phoneNumber.value.stringValue)
+        }
+        
+        for emailAddress in contact.emailAddresses {
+            emailAddresses.insert(emailAddress.value as String)
+        }
+    }
+    
+    mutating func collect(_ handle: IMHandle) {
+        handles.insert(handle)
+        
+        if firstName?.isEmpty != false {
+            firstName = handle.firstName
+        }
+        
+        if lastName?.isEmpty != false {
+            lastName = handle.lastName
+        }
+        
+        if nickname?.isEmpty != false {
+            nickname = handle.nickname
+        }
+        
+        if suggestedName?.isEmpty != false {
+            suggestedName = handle.suggestedName
+        }
+        
+        if avatar == nil {
+            avatar = handle.pictureData
+        }
+        
+        // the service hint is used to decide what goes in the <service>;-;+15555555555 component of the guids. if unchanged it will be SMS
+        if handle.service == .iMessage() {
+            serviceHint = "iMessage"
+        }
+        
+        if let cnContact = handle.cnContact {
+            collect(cnContact)
+        }
+    }
+    
+    mutating func collect(_ imNickname: IMNickname) {
+        firstName = imNickname.firstName
+        lastName = imNickname.lastName
+        nickname = imNickname.displayName
+        
+        if avatar?.isEmpty != false {
+            avatar = imNickname.avatar.imageData()
+        }
+    }
+    
+    var criticalFieldsAreEmpty: Bool {
+        firstName?.isEmpty != false && lastName?.isEmpty != false && nickname?.isEmpty != false
+    }
+    
+    mutating func finalize() -> BLContact {
+        if criticalFieldsAreEmpty {
+            if let suggestedName = suggestedName {
+                firstName = suggestedName
+                nickname = nil
+                lastName = nil
+            } else {
+                // search every handle for an IMNickname, merge and break on first occurrence
+                for handle in handles {
+                    if let imNickname = IMNicknameController.sharedInstance().nickname(for: handle) ?? IMNicknameController.sharedInstance().pendingNicknameUpdates[handle.id] {
+                        collect(imNickname)
+                        break
+                    }
+                }
+            }
+        }
+        
+        if criticalFieldsAreEmpty {
+            firstName = handles.compactMap(\.name).first
+        }
+        
+        return BLContact (
+            first_name: firstName,
+            last_name: lastName,
+            nickname: nickname,
+            avatar: avatar?.base64EncodedString(),
+            phones: phoneNumbers.map { IMFormattedDisplayStringForID($0, nil) ?? $0 },
+            emails: emailAddresses.map { IMFormattedDisplayStringForID($0, nil) ?? $0 },
+            user_guid: handleID,
+            serviceHint: serviceHint
+        )
     }
 }
+
 extension BLContact {
     public static func blContact(forHandleID handleID: String) -> BLContact {
         if handleID.isBusinessID {
@@ -37,106 +163,31 @@ extension BLContact {
                 return BLContact(first_name: nil, last_name: nil, nickname: nil, avatar: nil, phones: [], emails: [], user_guid: handleID, serviceHint: "iMessage")
             }
         } else {
-            let contacts = (try? SwiftyContacts.fetchContacts(matching: CNPhoneNumber(stringValue: handleID))) ?? []
-            let handles = IMHandleRegistrar.sharedInstance().getIMHandles(forID: handleID) ?? []
+            var collector: ContactInfoCollector = ContactInfoCollector(handleID)
             
-            var firstName: String?, lastName: String?, nickname: String?, suggestedName: String?, avatar: Data?, phoneNumbers = [String](), emailAddresses = [String](), serviceHint: String = "SMS"
-            
-            for handle in contacts {
-                if firstName == nil {
-                    firstName = handle.givenName
-                }
-
-                if lastName == nil {
-                    lastName = handle.familyName
-                }
-
-                if nickname == nil {
-                    nickname = handle.nickname
-                }
-
-                if suggestedName == nil {
-                    suggestedName = handle.organizationName
-                }
-
-                if avatar == nil {
-                    avatar = handle.imageData
-                }
-            }
-
-            for handle in handles {
-                if firstName == nil {
-                    firstName = handle.firstName
-                }
+            do {
+                var contacts: [CNContact]
                 
-                if lastName == nil {
-                    lastName = handle.lastName
-                }
-                
-                if nickname == nil {
-                    nickname = handle.nickname
-                }
-                
-                if suggestedName == nil {
-                    suggestedName = handle.suggestedName
-                }
-                
-                if avatar == nil {
-                    avatar = handle.pictureData
-                    
-                    if avatar == nil, let contact = handle.cnContact {
-                        avatar = contact.imageData
-                    }
-                }
-                
-                // the service hint is used to decide what goes in the <service>;-;+15555555555 component of the guids. if unchanged it will be SMS
-                if handle.service == .iMessage() {
-                    serviceHint = "iMessage"
-                }
-                
-                if let cnContact = handle.cnContact {
-                    phoneNumbers.append(contentsOf: cnContact.phoneNumbers.map(\.value.stringValue))
-                    emailAddresses.append(contentsOf: cnContact.emailAddresses.map { $0.value as String })
-                }
-            }
-
-            if firstName == nil, lastName == nil, nickname == nil {
-                if let suggestedName = suggestedName {
-                    firstName = suggestedName
-                    nickname = nil
-                    lastName = nil
+                if handleID.isPhoneNumber {
+                    contacts = try SwiftyContacts.fetchContacts(matching: CNPhoneNumber(stringValue: handleID))
                 } else {
-                    // search every handle for an IMNickname, merge and break on first occurrence
-                    for handle in handles {
-                        if let imNickname = IMNicknameController.sharedInstance().nickname(for: handle) ?? IMNicknameController.sharedInstance().pendingNicknameUpdates[handle.id] {
-                            firstName = imNickname.firstName
-                            lastName = imNickname.lastName
-                            nickname = imNickname.displayName
-                            
-                            if avatar == nil {
-                                avatar = imNickname.avatar.imageData()
-                            }
-                            
-                            break
-                        }
-                    }
+                    contacts = try SwiftyContacts.fetchContacts(matchingEmailAddress: handleID)
+                }
+                
+                for contact in contacts {
+                    collector.collect(contact)
+                }
+            } catch {
+                CLWarn("ContactInfo", "Failed to query contacts: \(String(describing: error), privacy: .public)")
+            }
+            
+            if let handles = IMHandleRegistrar.sharedInstance().getIMHandles(forID: handleID) {
+                for handle in handles {
+                    collector.collect(handle)
                 }
             }
             
-            if firstName == nil, lastName == nil, nickname == nil {
-                firstName = handles.compactMap(\.name).first
-            }
-            
-            return BLContact (
-                first_name: firstName,
-                last_name: lastName,
-                nickname: nickname,
-                avatar: avatar?.base64EncodedString(),
-                phones: phoneNumbers.uniqued().map { IMFormattedDisplayStringForID($0, nil) ?? $0 },
-                emails: emailAddresses.uniqued().map { IMFormattedDisplayStringForID($0, nil) ?? $0 },
-                user_guid: handleID,
-                serviceHint: serviceHint
-            )
+            return collector.finalize()
         }
     }
 }
