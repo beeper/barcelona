@@ -23,6 +23,8 @@ extension IPCCommand: Codable {
     	case log
     	case response
     	case bridge_status
+        case resolve_identifier
+        case prepare_dm
         case ping
         case pre_startup_sync
     }
@@ -76,10 +78,14 @@ extension IPCCommand: Codable {
 			return .response
     	case .bridge_status:
 			return .bridge_status
+        case .resolve_identifier:
+            return .resolve_identifier
         case .ping:
             return .ping
         case .pre_startup_sync:
             return .pre_startup_sync
+        case .prepare_dm:
+            return .prepare_dm
         }
     }
 
@@ -131,6 +137,10 @@ extension IPCCommand: Codable {
 			try container.encode(data, forKey: .data)
     	case .bridge_status(let data):
 			try container.encode(data, forKey: .data)
+        case .resolve_identifier(let data):
+            try container.encode(data, forKey: .data)
+        case .prepare_dm(let data):
+            try container.encode(data, forKey: .data)
         case .ping:
             try container.encodeNil(forKey: .data)
         case .pre_startup_sync:
@@ -190,6 +200,10 @@ extension IPCCommand: Codable {
             throw BLIPCError.some(errorMessage: "response cannot be decoded (yet)")
     	case .bridge_status:
 			self = .bridge_status(try container.decode(BridgeStatusCommand.self, forKey: .data))
+        case .resolve_identifier:
+            self = .resolve_identifier(try container.decode(ResolveIdentifierCommand.self, forKey: .data))
+        case .prepare_dm:
+            self = .prepare_dm(try container.decode(PrepareDMCommand.self, forKey: .data))
         }
     }
     

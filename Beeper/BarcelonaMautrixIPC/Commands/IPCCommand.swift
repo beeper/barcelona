@@ -8,6 +8,7 @@
 
 import Foundation
 import BarcelonaFoundation
+import Barcelona
 
 public struct IPCError: Error {
     public let message: String?
@@ -44,6 +45,8 @@ public enum IPCCommand {
     case log(LogCommand)
     case response(IPCResponse) /* bmi-no-decode */
     case bridge_status(BridgeStatusCommand)
+    case resolve_identifier(ResolveIdentifierCommand)
+    case prepare_dm(PrepareDMCommand)
     case ping
     case pre_startup_sync
 }

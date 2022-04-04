@@ -25,7 +25,10 @@ extension IMChat {
     }
     
     /// The GUID that sticks to a specific sender handle from a pool of correlated sender IDs, creates a stable identifier to be used for the duration of the local machines iMessage
-    var senderCorrelatableGUID: String {
+    public var senderCorrelatableGUID: String {
+        guard CBFeatureFlags.preferCorrelationIdentifiers else {
+            return guid
+        }
         if isGroup {
             return guid
         }

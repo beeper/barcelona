@@ -21,6 +21,7 @@ public enum IPCResponse: Encodable {
     case messages([BLMessage])
     case chat_avatar(BLAttachment?)
     case message_receipt(BLPartialMessage)
+    case guid(GUIDResponse)
     case ack
     case none
     
@@ -44,6 +45,8 @@ public enum IPCResponse: Encodable {
             try container.encodeNil()
         case .none:
             try container.encodeNil()
+        case .guid(let data):
+            try container.encode(data)
         }
     }
 }
