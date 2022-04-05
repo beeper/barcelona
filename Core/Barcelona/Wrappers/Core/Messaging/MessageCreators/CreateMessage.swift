@@ -46,6 +46,12 @@ public struct TapbackCreation: Codable {
     }
 }
 
+public extension CreateMessage {
+    static func text(_ text: String) -> CreateMessage {
+        .init(parts: [.init(type: .text, details: text)])
+    }
+}
+
 public struct CreateMessage: Codable, CreateMessageBase {
     public init(subject: String? = nil, parts: [MessagePart], isAudioMessage: Bool? = nil, flags: CLongLong? = nil, ballonBundleID: String? = nil, payloadData: String? = nil, expressiveSendStyleID: String? = nil, threadIdentifier: String? = nil, replyToPart: Int? = nil, replyToGUID: String? = nil) {
         self.subject = subject

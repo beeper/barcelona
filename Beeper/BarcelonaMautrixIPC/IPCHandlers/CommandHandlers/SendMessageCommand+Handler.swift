@@ -8,6 +8,7 @@
 
 import Foundation
 import Barcelona
+import IMCore
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {
@@ -21,17 +22,24 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
             }
             return
         }
-        
-        var messageCreation = CreateMessage(parts: [
-            .init(type: .text, details: text)
-        ])
-        
-        messageCreation.replyToGUID = reply_to
-        messageCreation.replyToPart = reply_to_part
-        
         do {
-            let message = try chat.send(message: messageCreation)
-            payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message.id, service: message.service.rawValue, timestamp: message.time)))
+            var finalMessage: Message
+            if !CBFeatureFlags.adHocRichLinks, let url = URL(string: text.trimmingCharacters(in: [" "])), IMMessage.supportedRichLinkURL(url, additionalSupportedSchemes: []) {
+                let message = ERCreateBlankRichLinkMessage(text.trimmingCharacters(in: [" "]))
+                message.loadLinkMetadata(at: url)
+                finalMessage = try chat.send(message: message)
+            } else {
+                var messageCreation = CreateMessage(parts: [
+                    .init(type: .text, details: text)
+                ])
+                
+                messageCreation.replyToGUID = reply_to
+                messageCreation.replyToPart = reply_to_part
+            
+            
+                finalMessage = try chat.send(message: messageCreation)
+            }
+            payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: finalMessage.id, service: finalMessage.service.rawValue, timestamp: finalMessage.time)))
         } catch {
             // girl fuck
             CLFault("BLMautrix", "failed to send text message: %@", error as NSError)

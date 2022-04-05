@@ -6,7 +6,7 @@
 
 #import <objc/NSObject.h>
 
-@class IMBalloonApp, NSBundle, NSMutableArray, NSMutableDictionary, NSString;
+@class IMBalloonApp, NSBundle, NSMutableArray, NSMutableDictionary, NSString, IMBalloonPluginDataSource, IMPluginPayload;
 @protocol PKPlugIn;
 
 @interface IMBalloonPlugin : NSObject
@@ -56,7 +56,7 @@
 @property(readonly, nonatomic, getter=isBetaPlugin) BOOL betaPlugin;
 @property(readonly, nonatomic) NSString *version;
 @property(readonly, retain, nonatomic) NSString *identifier;
-- (id)dataSourceForPluginPayload:(id)arg1;
+- (IMBalloonPluginDataSource*)dataSourceForPluginPayload:(IMPluginPayload*)pluginPayload;
 - (void)insertDataSource:(id)arg1 forGUID:(id)arg2;
 - (id)existingDataSourceForMessageGUID:(id)arg1;
 - (BOOL)shouldShowForRecipients:(id)arg1;

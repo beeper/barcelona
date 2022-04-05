@@ -53,11 +53,11 @@
 + (BOOL)supportsSecureCoding;
 
 @property(copy, nonatomic) LPSpecializationMetadata *specialization; // @synthesize specialization=_specialization;
-@property(copy, nonatomic) NSArray *audios; // @synthesize audios=_audios;
-@property(copy, nonatomic) NSArray *streamingVideos; // @synthesize streamingVideos=_streamingVideos;
-@property(copy, nonatomic) NSArray *videos; // @synthesize videos=_videos;
-@property(copy, nonatomic) NSArray *images; // @synthesize images=_images;
-@property(copy, nonatomic) NSArray *icons; // @synthesize icons=_icons;
+@property(copy, nonatomic) NSArray<LPAudioMetadata*> *audios; // @synthesize audios=_audios;
+@property(copy, nonatomic) NSArray<LPVideoMetadata*> *streamingVideos; // @synthesize streamingVideos=_streamingVideos;
+@property(copy, nonatomic) NSArray<LPVideoMetadata*> *videos; // @synthesize videos=_videos;
+@property(copy, nonatomic) NSArray<LPImageMetadata*> *images; // @synthesize images=_images;
+@property(copy, nonatomic) NSArray<LPIconMetadata*> *icons; // @synthesize icons=_icons;
 @property(retain, nonatomic) LPAudioMetadata *audioMetadata; // @synthesize audioMetadata=_audioMetadata;
 @property(retain, nonatomic) LPAudio *audio; // @synthesize audio=_audio;
 @property(retain, nonatomic) LPVideoMetadata *videoMetadata; // @synthesize videoMetadata=_videoMetadata;
