@@ -489,14 +489,24 @@ public class CBSenderCorrelationController {
         return Set()
     }
     
-    public func externalIdentifier(senderID: String) -> String {
+    /// Returns the pinned counterpart for a sender ID if it is known
+    public func optionalExternalIdentifier(senderID: String) -> String? {
         if let pinnedIdentifier = CBSenderCorrelationPersistence.shared?.pinned(senderFromSender: senderID) {
             return pinnedIdentifier
         }
         if let correlationIdentifier = CBSenderCorrelationPersistence.shared?.correlate(senderID: senderID) {
-            CBSenderCorrelationPersistence.shared?.pin(correlationID: correlationIdentifier, senderID: senderID)
+            guard let persistence = CBSenderCorrelationPersistence.shared else {
+                return nil
+            }
+            persistence.pin(correlationID: correlationIdentifier, senderID: senderID)
+            return senderID
         }
-        return senderID
+        return nil
+    }
+    
+    /// Attempts to locate the pinned counterpart for a sender ID, returning the first parameter if nothing was found
+    public func externalIdentifier(senderID: String) -> String {
+        optionalExternalIdentifier(senderID: senderID) ?? senderID
     }
     
     private var allKnownURIs: [String] {
@@ -604,5 +614,28 @@ public class CBSenderCorrelationController {
         }
         backfillController.start()
         self.backfillController = backfillController
+    }
+}
+
+public extension CBSenderCorrelationController {
+    func externalIdentifier(from handles: [IMHandle], phoneNumbers: [String], emailAddresses: [String]) -> String! {
+        var firstID: String?
+        for handle in handles {
+            if let senderID = optionalExternalIdentifier(senderID: handle.id) {
+                return senderID
+            }
+            if firstID == nil {
+                firstID = handle.id
+            }
+        }
+        for address in phoneNumbers + emailAddresses {
+            if let senderID = optionalExternalIdentifier(senderID: address) {
+                return senderID
+            }
+            if firstID == nil {
+                firstID = address
+            }
+        }
+        return firstID.map(externalIdentifier(senderID:))
     }
 }

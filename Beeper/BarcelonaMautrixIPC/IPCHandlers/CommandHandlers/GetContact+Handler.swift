@@ -63,13 +63,14 @@ public func BMXGenerateContactList(omitAvatars: Bool = false, asyncLookup: Bool 
         collector.omitAvatars = omitAvatars
         collector.collect(contact)
         results.forEach { collector.collect($0) }
-        if let handle = results.first {
-            collector.handleID = handle.id
-        } else if let suitableID = collector.phoneNumbers.first ?? collector.emailAddresses.first {
-            collector.handleID = "SMS;-;\(suitableID)"
-        } else {
+        guard let id = CBSenderCorrelationController.shared.externalIdentifier(
+            from: results,
+            phoneNumbers: Array(collector.phoneNumbers),
+            emailAddresses: Array(collector.emailAddresses)
+        ) else {
             return
         }
+        collector.handleID = collector.serviceHint + ";-;" + id
         finalized.append(collector.finalize())
     }
     return finalized
