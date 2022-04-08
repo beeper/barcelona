@@ -21,8 +21,63 @@ extension IMBusinessNameManager {
     }
 }
 
+internal var BMXContactListIsBuilding = false
+
+public func BMXGenerateContactList(omitAvatars: Bool = false, asyncLookup: Bool = false) -> [BLContact] {
+    BMXContactListIsBuilding = true
+    defer { BMXContactListIsBuilding = false }
+    var contacts: [CNContact] = []
+    try! CNContactStore().enumerateContacts(with: CNContactFetchRequest(keysToFetch: [
+        CNContactIdentifierKey,
+        CNContactEmailAddressesKey,
+        CNContactPhoneNumbersKey,
+        "linkIdentifier",
+        CNContactNamePrefixKey,
+        CNContactGivenNameKey,
+        CNContactMiddleNameKey,
+        CNContactFamilyNameKey,
+        CNContactNameSuffixKey,
+        CNContactTypeKey,
+        CNContactOrganizationNameKey,
+        CNContactNicknameKey,
+        "displayNameOrder",
+        "sortingGivenName",
+        "sortingFamilyName"
+    ] as! [CNKeyDescriptor])) { contact, stop in
+        contacts.append(contact)
+    }
+    var finalized: [BLContact] = []
+    var loadedHandles: [String: [IMHandle]] = [:]
+    let semaphore = DispatchSemaphore(value: 0)
+    DispatchQueue.global(qos: .utility).async {
+        IMHandle.handles(for: Set(contacts), useBestHandle: false, useExtendedAsyncLookup: asyncLookup) { result in
+            loadedHandles = result ?? [:]
+            semaphore.signal()
+        }
+    }
+    semaphore.wait()
+    DispatchQueue.concurrentPerform(iterations: contacts.count) { index in
+        let contact = contacts[index]
+        let results = loadedHandles[contact.identifier] ?? []
+        var collector = ContactInfoCollector("")
+        collector.omitAvatars = omitAvatars
+        collector.collect(contact)
+        results.forEach { collector.collect($0) }
+        if let handle = results.first {
+            collector.handleID = handle.id
+        } else if let suitableID = collector.phoneNumbers.first ?? collector.emailAddresses.first {
+            collector.handleID = "SMS;-;\(suitableID)"
+        } else {
+            return
+        }
+        finalized.append(collector.finalize())
+    }
+    return finalized
+}
+
 struct ContactInfoCollector {
     var handleID: String
+    var omitAvatars: Bool = false
     
     init(_ handleID: String) {
         self.handleID = handleID
@@ -59,7 +114,7 @@ struct ContactInfoCollector {
             suggestedName = contact.organizationName
         }
         
-        if avatar?.isEmpty != false {
+        if !omitAvatars, avatar?.isEmpty != false {
             avatar = contact.imageData
         }
         
@@ -91,7 +146,7 @@ struct ContactInfoCollector {
             suggestedName = handle.suggestedName
         }
         
-        if avatar == nil {
+        if !omitAvatars, avatar == nil {
             avatar = handle.pictureData
         }
         
@@ -110,7 +165,7 @@ struct ContactInfoCollector {
         lastName = imNickname.lastName
         nickname = imNickname.displayName
         
-        if avatar?.isEmpty != false {
+        if !omitAvatars, avatar?.isEmpty != false {
             avatar = imNickname.avatar.imageData()
         }
     }

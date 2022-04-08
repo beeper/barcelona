@@ -27,6 +27,8 @@ extension IPCCommand: Codable {
         case prepare_dm
         case ping
         case pre_startup_sync
+        case get_contact_list
+        case contacts
     }
     
     private enum CodingKeys: CodingKey, CaseIterable {
@@ -86,6 +88,10 @@ extension IPCCommand: Codable {
             return .pre_startup_sync
         case .prepare_dm:
             return .prepare_dm
+        case .get_contact_list:
+            return .get_contact_list
+        case .contacts:
+            return .contacts
         }
     }
 
@@ -145,6 +151,10 @@ extension IPCCommand: Codable {
             try container.encodeNil(forKey: .data)
         case .pre_startup_sync:
             try container.encodeNil(forKey: .data)
+        case .get_contact_list:
+            try container.encodeNil(forKey: .data)
+        case .contacts(let contacts):
+            try container.encode(contacts, forKey: .data)
         }
     }
 
@@ -204,6 +214,10 @@ extension IPCCommand: Codable {
             self = .resolve_identifier(try container.decode(ResolveIdentifierCommand.self, forKey: .data))
         case .prepare_dm:
             self = .prepare_dm(try container.decode(PrepareDMCommand.self, forKey: .data))
+        case .get_contact_list:
+            self = .get_contact_list
+        case .contacts:
+            self = .contacts(try container.decode(GetContactListResponse.self, forKey: .data))
         }
     }
     

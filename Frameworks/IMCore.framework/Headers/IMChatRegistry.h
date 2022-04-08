@@ -116,7 +116,7 @@
 - (IMChat*)exisitingChatForGroupID:(NSString*)arg1;
 - (id)existingChatForRoom:(id)arg1 onAccount:(id)arg2;
 - (id)existingChatForIMHandles:(id)arg1;
-- (id)existingChatForIMHandle:(id)arg1;
+- (IMChat*)existingChatForIMHandle:(IMHandle*)arg1;
 - (IMChat*)existingChatWithGUID:(NSString*)arg1;
 - (id)existingChatForPersonID:(id)arg1;
 - (id)existingChatWithDisplayName:(id)arg1;

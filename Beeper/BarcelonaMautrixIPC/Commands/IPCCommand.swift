@@ -47,8 +47,10 @@ public enum IPCCommand {
     case bridge_status(BridgeStatusCommand)
     case resolve_identifier(ResolveIdentifierCommand)
     case prepare_dm(PrepareDMCommand)
+    case contacts(GetContactListResponse)
     case ping
     case pre_startup_sync
+    case get_contact_list
 }
 
 public struct IPCPayload: Codable {

@@ -110,6 +110,10 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         }
         
         NotificationCenter.default.addObserver(forName: .IMHandleInfoChanged, object: nil, queue: nil) { notification in
+            if BMXContactListIsBuilding {
+                return
+            }
+            
             guard let handle = notification.object as? IMHandle else {
                 return
             }
@@ -118,6 +122,10 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         }
         
         NotificationCenter.default.addObserver(forName: .IMNicknameDidChange, object: nil, queue: nil) { notification in
+            if BMXContactListIsBuilding {
+                return
+            }
+            
             guard let dict = notification.object as? [AnyHashable: Any], let handleIDs = dict["handleIDs"] as? [String] else {
                 return
             }

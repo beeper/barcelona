@@ -38,6 +38,8 @@ private extension IPCPayload {
             return req
         case .get_recent_messages(let req):
             return req
+        case .get_contact_list:
+            return GetContactListResponse.Runner()
         default:
             return nil
         }

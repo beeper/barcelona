@@ -80,6 +80,8 @@
     NSString *_suggestedName;
 }
 
++(void)handlesForCNContacts:(NSSet<CNContact*>*)arg2 useBestHandle:(BOOL)arg3 useExtendedAsyncLookup:(BOOL)arg4 completion:(void (^)(NSDictionary<NSString *, NSArray<IMHandle*> *> *handles))completion;
+
 + (id)filterIMHandlesForBestAccountSiblings:(id)arg1;
 + (id)filterIMHandlesForAccountSiblings:(id)arg1 onAccount:(id)arg2;
 + (id)bestIMHandleInArray:(id)arg1;
