@@ -34,7 +34,7 @@ packages:
     from: 3.0.7
   Swog:
     url: https://github.com/EricRabil/Swog
-    from: 1.0.4
+    from: 1.0.5
   Pwomise:
     url: https://github.com/EricRabil/Pwomise
     from: 1.0.11
@@ -67,7 +67,7 @@ packages:
     from: 0.0.3
   FeatureFlags:
     url: https://github.com/EricRabil/FeatureFlags.swift
-    from: 1.0.1
+    from: 1.0.2
   SwiftyContacts:
     url: https://github.com/SwiftyContacts/SwiftyContacts
     from: 4.0.0
