@@ -51,6 +51,16 @@ public struct BLContact: Codable {
         self.user_guid = ensuredPrefix(user_guid, withService: serviceHint)
     }
     
+    public init() {
+        first_name = nil
+        last_name = nil
+        nickname = nil
+        avatar = nil
+        phones = []
+        emails = []
+        user_guid = ""
+    }
+    
     public var first_name: String?
     public var last_name: String?
     public var nickname: String?

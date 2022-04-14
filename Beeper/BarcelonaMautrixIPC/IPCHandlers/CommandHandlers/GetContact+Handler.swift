@@ -46,7 +46,7 @@ public func BMXGenerateContactList(omitAvatars: Bool = false, asyncLookup: Bool 
     ] as! [CNKeyDescriptor])) { contact, stop in
         contacts.append(contact)
     }
-    var finalized: [BLContact] = []
+    var finalized: [BLContact] = [BLContact](repeating: BLContact(), count: contacts.count)
     var loadedHandles: [String: [IMHandle]] = [:]
     let semaphore = DispatchSemaphore(value: 0)
     DispatchQueue.global(qos: .utility).async {
