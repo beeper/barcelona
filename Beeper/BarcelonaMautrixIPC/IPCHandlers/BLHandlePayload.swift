@@ -40,6 +40,8 @@ private extension IPCPayload {
             return req
         case .get_contact_list:
             return GetContactListResponse.Runner()
+        case .resolve_identifier(let req):
+            return req
         default:
             return nil
         }

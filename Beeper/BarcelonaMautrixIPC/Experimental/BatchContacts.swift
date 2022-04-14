@@ -14,7 +14,7 @@ public struct GetContactListResponse: Codable {
         public func run(payload: IPCPayload) {
             GetContactListResponse.loadInBackground { response in
                 autoreleasepool {
-                    payload.reply(withCommand: .contacts(response))
+                    payload.reply(withResponse: .contacts(response))
                 }
             }
         }
