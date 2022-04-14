@@ -70,10 +70,11 @@ public func BMXGenerateContactList(omitAvatars: Bool = false, asyncLookup: Bool 
         ) else {
             return
         }
+        collector.primaryIdentifier = id
         collector.handleID = collector.serviceHint + ";-;" + id
-        finalized.append(collector.finalize())
+        finalized[index] = collector.finalize()
     }
-    return finalized
+    return finalized.filter { !$0.user_guid.isEmpty }
 }
 
 struct ContactInfoCollector {
@@ -84,6 +85,7 @@ struct ContactInfoCollector {
         self.handleID = handleID
     }
     
+    var primaryIdentifier: String?
     var firstName: String?
     var lastName: String?
     var nickname: String?
@@ -204,6 +206,7 @@ struct ContactInfoCollector {
             phones: Array(phoneNumbers),
             emails: emailAddresses.map { IMFormattedDisplayStringForID($0, nil) ?? $0 },
             user_guid: handleID,
+            primary_identifier: primaryIdentifier,
             serviceHint: serviceHint
         )
     }
