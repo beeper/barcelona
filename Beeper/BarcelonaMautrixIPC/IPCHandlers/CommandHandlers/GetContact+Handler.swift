@@ -120,7 +120,7 @@ struct ContactInfoCollector {
         }
         
         for phoneNumber in contact.phoneNumbers {
-            phoneNumbers.insert(phoneNumber.value.stringValue)
+            phoneNumbers.insert(phoneNumber.value.unformattedInternationalStringValue())
         }
         
         for emailAddress in contact.emailAddresses {
@@ -201,7 +201,7 @@ struct ContactInfoCollector {
             last_name: lastName,
             nickname: nickname,
             avatar: avatar?.base64EncodedString(),
-            phones: phoneNumbers.map { IMFormattedDisplayStringForID($0, nil) ?? $0 },
+            phones: Array(phoneNumbers),
             emails: emailAddresses.map { IMFormattedDisplayStringForID($0, nil) ?? $0 },
             user_guid: handleID,
             serviceHint: serviceHint
