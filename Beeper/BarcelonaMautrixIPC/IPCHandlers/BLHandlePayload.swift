@@ -42,6 +42,8 @@ private extension IPCPayload {
             return GetContactListResponse.Runner()
         case .resolve_identifier(let req):
             return req
+        case .prepare_dm(let req):
+            return req
         default:
             return nil
         }
