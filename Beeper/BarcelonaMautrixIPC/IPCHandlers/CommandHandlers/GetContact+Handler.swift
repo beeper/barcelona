@@ -42,8 +42,9 @@ public func BMXGenerateContactList(omitAvatars: Bool = false, asyncLookup: Bool 
         CNContactNicknameKey,
         "displayNameOrder",
         "sortingGivenName",
-        "sortingFamilyName"
-    ] as! [CNKeyDescriptor])) { contact, stop in
+        "sortingFamilyName",
+        CNContactImageDataAvailableKey
+    ] + (omitAvatars ? [] : [CNContactImageDataKey]) as! [CNKeyDescriptor])) { contact, stop in
         contacts.append(contact)
     }
     var finalized: [BLContact] = [BLContact](repeating: BLContact(), count: contacts.count)
@@ -75,6 +76,18 @@ public func BMXGenerateContactList(omitAvatars: Bool = false, asyncLookup: Bool 
         finalized[index] = collector.finalize()
     }
     return finalized.filter { !$0.user_guid.isEmpty }
+}
+
+extension CNContact {
+    var er_imageDataAvailable: Bool {
+        guard isKeyAvailable(CNContactImageDataAvailableKey) else {
+            if isKeyAvailable(CNContactImageDataKey) {
+                return imageData != nil
+            }
+            return false
+        }
+        return imageDataAvailable
+    }
 }
 
 struct ContactInfoCollector {
@@ -117,7 +130,7 @@ struct ContactInfoCollector {
             suggestedName = contact.organizationName
         }
         
-        if !omitAvatars, avatar?.isEmpty != false {
+        if !omitAvatars, avatar?.isEmpty != false, contact.er_imageDataAvailable {
             avatar = contact.imageData
         }
         
