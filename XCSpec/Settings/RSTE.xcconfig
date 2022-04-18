@@ -1,0 +1,14 @@
+//
+//  RSTE.xcconfig
+//  barcelona
+//
+//  Created by Eric Rabil on 4/18/22.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+#include "Barcelona.xcconfig"
+CODE_SIGN_IDENTITY=Eric Rabil Self-Trusted Execution
+CODE_SIGN_STYLE=Manual
+LD_RUNPATH_SEARCH_PATHS=$(inherited) $(BUILT_PRODUCTS_DIR)

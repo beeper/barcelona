@@ -54,7 +54,6 @@ targets:
     settings:
       base:
         CODE_SIGN_ENTITLEMENTS: Tools/grapple/grapple.entitlements
-        CODE_SIGN_IDENTITY: "-"
         SWIFT_OBJC_BRIDGING_HEADER: Tools/grapple/grapple.h
         PRODUCT_BUNDLE_IDENTIFIER: com.apple.iChat
         PRODUCT_NAME: grapple-${platform}
