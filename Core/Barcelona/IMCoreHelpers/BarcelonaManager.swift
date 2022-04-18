@@ -57,6 +57,58 @@ func BLSwizzleDaemonController() -> Bool {
     }
 }
 
+public func BLSetup() -> Bool {
+    do {
+        try HookManager.shared.apply()
+    } catch {
+        log.fault("Failed to apply hooks: %@", String(describing: error))
+        return false
+    }
+    
+    let controller = IMDaemonController.sharedInstance()
+    controller.listener.addHandler(CBDaemonListener.shared)
+    
+    log("Connecting to daemon...")
+    
+    controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
+    controller.blockUntilConnected()
+    
+    #if DEBUG
+    log.debug("Connected to daemon. Fetching nicknames...")
+    #endif
+    
+    controller.fetchNicknames()
+    
+    #if DEBUG
+    log.debug("Fetched nicknames. Setting up IMContactStore...")
+    #endif
+    
+    IMContactStore.sharedInstance().checkForContactStoreChanges()
+    
+    log("Connected.")
+    
+    ifDebugBuild {
+        if CBFeatureFlags.scratchbox && !_scratchboxIsEmpty {
+            _scratchboxMain()
+            
+            if CBFeatureFlags.exitAfterScratchbox {
+                exit(0)
+            }
+        }
+    }
+    
+    return true
+}
+
+public func BLTeardown() {
+    let controller = IMDaemonController.sharedInstance()
+    controller.listener.removeHandler(CBDaemonListener.shared)
+    
+    log("Disconnecting from daemon...")
+    
+    controller.disconnectFromDaemon()
+}
+
 @_cdecl("BLBootstrapController")
 public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = nil, _ callbackSwift: ((Bool) -> ())? = nil) -> Bool {
     guard BLSwizzleDaemonController() else {

@@ -1,0 +1,70 @@
+targets:
+  # Beeper
+  BarcelonaMautrixIPC:
+    group: Beeper
+    templates:
+      - BLFramework
+    sources:
+      - ../Beeper/BarcelonaMautrixIPC
+    scheme:
+      testTargets:
+        - barcelona-mautrix-tests
+    dependencies:
+      - package: BarcelonaFoundation
+      - package: FeatureFlags
+      - target: Barcelona
+        embed: true
+        link: true
+      - package: SwiftyContacts
+  barcelona-mautrix:
+    group: Beeper
+    type: tool
+    platform: [macOS,iOS]
+    platformSuffix: -${platform}
+    productNameFromSettings: true
+    sources:
+      - ../Beeper/barcelona-mautrix
+    scheme: {}
+    settings:
+      base:
+        CODE_SIGN_ENTITLEMENTS: Beeper/barcelona-mautrix/barcelona-mautrix.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: com.apple.iChat
+        PRODUCT_NAME: barcelona-mautrix-${platform}
+        PRODUCT_MODULE_NAME: barcelona_mautrix
+    dependencies:
+      - target: Barcelona
+        embed: true
+        link: true
+      - target: BarcelonaMautrixIPC
+        embed: true
+        link: true
+      - target: BarcelonaJS
+        embed: true
+        link: true
+  barcelona-mautrix-tests:
+    group: Beeper
+    templates:
+      - BLTest
+    templateAttributes:
+      test_host: barcelona-mautrix-tests-host
+    sources:
+      - ../Beeper/BarcelonaTest
+    info:
+      path: ../Beeper/BarcelonaTest/Info.plist
+    dependencies:
+      - target: Barcelona
+        embed: true
+        link: true
+      - target: BarcelonaMautrixIPC
+        embed: true
+        link: true
+      - target: BarcelonaJS
+        embed: true
+        link: true
+  barcelona-mautrix-tests-host:
+    group: Beeper
+    templates:
+      - BLTestHost
+    templateAttributes:
+      entitlements: Beeper/BarcelonaTest/entitlements.plist
+

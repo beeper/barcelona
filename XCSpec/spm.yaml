@@ -1,0 +1,55 @@
+packages:
+  SwiftyJavaScriptCore:
+    url: https://github.com/EricRabil/SwiftyJavaScriptCore
+    from: 1.0.0
+  SwiftCLI:
+    url: https://github.com/jakeheis/SwiftCLI
+    from: 6.0.3
+  BarcelonaIPC:
+    url: https://github.com/open-imcore/BarcelonaIPC
+    from: 1.0.3
+  GRDB:
+    url: https://github.com/groue/GRDB.swift
+    from: 4.14.0
+  Swime:
+    url: https://github.com/sendyhalim/Swime
+    from: 3.0.7
+  Swog:
+    url: https://github.com/EricRabil/Swog
+    from: 1.0.6
+  Pwomise:
+    url: https://github.com/EricRabil/Pwomise
+    from: 1.0.11
+  BarcelonaFoundation:
+    url: https://github.com/open-imcore/BarcelonaFoundation
+    from: 1.0.2
+  Gzip:
+    url: https://github.com/1024jp/GzipSwift
+    from: 5.1.1
+  Yammit:
+    url: https://github.com/EricRabil/Yammit
+    from: 1.0.0
+  Swexy:
+    url: https://github.com/EricRabil/Swexy
+    from: 1.0.9
+  SwiftyTextTable:
+    url: https://github.com/scottrhoyt/SwiftyTextTable
+    from: 0.9.0
+  AnyCodable:
+    url: https://github.com/Flight-School/AnyCodable
+    from: 0.6.1
+  InterposeKit:
+    url: https://github.com/steipete/InterposeKit
+    branch: master
+  LineNoise:
+    url: https://github.com/andybest/linenoise-swift
+    from: 0.0.3
+  FeatureFlags:
+    url: https://github.com/EricRabil/FeatureFlags.swift
+    from: 1.0.2
+  SwiftyContacts:
+    url: https://github.com/SwiftyContacts/SwiftyContacts
+    from: 4.0.0
+  XCTHarness:
+    url: https://github.com/EricRabil/XCTHarness
+    from: 1.0.0

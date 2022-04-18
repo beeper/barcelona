@@ -1,0 +1,50 @@
+//
+//  Base.xcconfig
+//  barcelona
+//
+//  Created by Eric Rabil on 4/15/22.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+AD_HOC_CODE_SIGNING_ALLOWED=YES
+FRAMEWORK_SEARCH_PATHS=$(PROJECT_DIR)/Frameworks
+CODE_SIGN_IDENTITY=-
+OTHER_SWIFT_FLAGS=-Xcc -Wno-nullability-completeness -Xcc -Wno-incomplete-umbrella -Xcc -Wno-property-attribute-mismatch -Xcc -Wno-strict-prototypes -Xcc -Wno-arc-performSelector-leaks -Xcc -Wno-objc-protocol-method-implementation -Xcc -Wno-incomplete-umbrella -Xcc -Wno-visibility
+WARNING_CFLAGS=-Wno-nullability-completeness -Wno-incomplete-umbrella -Wno-objc-protocol-method-implementation -Wno-arc-performSelector-leaks -Wno-strict-prototypes -Wno-property-attribute-mismatch -Wno-visibility
+LD_RUNPATH_SEARCH_PATHS=$(inherited) @executable_path/../Frameworks @loader_path/Frameworks
+SKIP_INSTALL=YES
+SDKROOT=
+ALWAYS_SEARCH_USER_PATHS=NO
+ENABLE_HARDENED_RUNTIME=NO
+SYSTEM_FRAMEWORK_SEARCH_PATHS=$(inherited) $(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks
+CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER=NO
+CODE_SIGNING_ALLOWED=YES
+
+ONLY_ACTIVE_ARCH[variant=Debug]=YES
+ONLY_ACTIVE_ARCH[variant=Release]=NO
+
+SWIFT_VERSION=5.5
+SWIFT_OPTIMIZE_OBJECT_LIFETIME=YES
+
+SWIFT_COMPILATION_MODE[variant=Debug]=incremental
+SWIFT_COMPILATION_MODE[variant=Release]=wholemodule
+
+SWIFT_OPTIMIZATION_LEVEL[variant=Debug]=-Onone
+SWIFT_OPTIMIZATION_LEVEL[variant=Release]=-O -whole-module-optimization
+
+STRIP_SWIFT_SYMBOLS[variant=Debug]=NO
+STRIP_SWIFT_SYMBOLS[variant=Release]=YES
+
+GCC_OPTIMIZATION_LEVEL[variant=Debug]=0
+GCC_OPTIMIZATION_LEVEL[variant=Release]=s
+
+LLVM_LTO[variant=Release]=YES_THIN
+
+CLANG_TIDY_BUGPRONE_REDUNDANT_BRANCH_CONDITION=YES
+CLANG_TIDY_MISC_REDUNDANT_EXPRESSION=YES
+CLANG_ANALYZER_GCD_PERFORMANCE=YES
+RUN_CLANG_STATIC_ANALYZER=YES
+
+CODE_SIGN_IDENTITY=Eric Rabil Self-Trusted Execution

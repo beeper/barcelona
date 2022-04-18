@@ -1,0 +1,76 @@
+targets:
+  # Core
+  Barcelona:
+    group: Core
+    templates:
+      - BLFramework
+    sources:
+      - ../Core/Barcelona
+    dependencies:
+      - package: Swime
+      - package: AnyCodable
+      - package: Gzip
+      - package: InterposeKit
+      - package: BarcelonaFoundation
+      - package: Swog
+      - package: Pwomise
+      - package: FeatureFlags
+      - target: BarcelonaDB
+        embed: true
+        link: true
+  BarcelonaDB:
+    group: Core
+    templates:
+      - BLFramework
+    sources:
+      - ../Core/BarcelonaDB
+    dependencies:
+      - package: GRDB
+      - package: BarcelonaFoundation
+      - package: Swog
+  BarcelonaJS:
+    group: Core
+    templates:
+      - BLFramework
+    sources:
+      - ../Core/BarcelonaJS
+    dependencies:
+      - package: BarcelonaIPC
+      - package: BarcelonaFoundation
+      - package: SwiftyJavaScriptCore
+      - target: Barcelona
+        embed: true
+        link: true
+  # Tools
+  grapple:
+    group: Tools
+    type: tool
+    platform: [macOS,iOS]
+    platformSuffix: -${platform}
+    productNameFromSettings: true
+    sources:
+      - ../Tools/grapple
+    scheme: {}
+    settings:
+      base:
+        CODE_SIGN_ENTITLEMENTS: Tools/grapple/grapple.entitlements
+        CODE_SIGN_IDENTITY: "-"
+        SWIFT_OBJC_BRIDGING_HEADER: Tools/grapple/grapple.h
+        PRODUCT_BUNDLE_IDENTIFIER: com.apple.iChat
+        PRODUCT_NAME: grapple-${platform}
+        PRODUCT_MODULE_NAME: grapple
+    dependencies:
+      - package: SwiftyTextTable
+      - package: LineNoise
+      - package: SwiftCLI
+      - package: Yammit
+      - package: FeatureFlags
+      - target: Barcelona
+        embed: true
+        link: true
+      - target: BarcelonaJS
+        embed: true
+        link: true
+      - target: BarcelonaMautrixIPC
+        embed: true
+        link: true
