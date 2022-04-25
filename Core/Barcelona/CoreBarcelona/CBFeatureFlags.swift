@@ -64,6 +64,9 @@ public class _CBFeatureFlags: FlagProvider {
     @FeatureFlag("withhold-dupes", defaultValue: true)
     private var _withholdDupes: Bool
     
+    @FeatureFlag("blocklist", defaultValue: true)
+    public var enableBlocklist: Bool
+    
     public var withholdPartialFailures: Bool {
         get {
             overrideWithholdPartialFailures ?? _withholdPartialFailures

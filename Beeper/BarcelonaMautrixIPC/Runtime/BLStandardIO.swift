@@ -130,6 +130,8 @@ private let encoder: JSONEncoder = {
     return encoder
 }()
 
+@_spi(unitTestInternals) public var BLPayloadIntercept: ((IPCPayload) -> ())? = nil
+
 public func BLWritePayloads(_ payloads: [IPCPayload], log: Bool = true) {
     var data = Data()
     
@@ -150,16 +152,22 @@ public func BLWritePayloads(_ payloads: [IPCPayload], log: Bool = true) {
             #endif
         }
         
+        if let BLPayloadIntercept = BLPayloadIntercept {
+            BLPayloadIntercept(payload)
+            continue
+        }
         data += try! encoder.encode(payload)
     }
     
-    FileHandle.standardOutput.write(data)
-    
-    #if DEBUG
-    if BLMetricStore.shared.get(key: .shouldDebugPayloads) ?? false {
-        FileHandle.standardOutput.write(TERMINATOR)
+    if BLPayloadIntercept == nil {
+        FileHandle.standardOutput.write(data)
+        
+        #if DEBUG
+        if BLMetricStore.shared.get(key: .shouldDebugPayloads) ?? false {
+            FileHandle.standardOutput.write(TERMINATOR)
+        }
+        #endif
     }
-    #endif
 }
 
 public func BLWritePayload(_ payload: @autoclosure () -> IPCPayload, log: Bool = true) {

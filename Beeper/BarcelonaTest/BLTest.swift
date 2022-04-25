@@ -7,9 +7,9 @@
 
 import XCTest
 import IMCore
-import BarcelonaMautrixIPC
-@testable import barcelona_mautrix_test_dummy
-import Barcelona
+@_spi(unitTestInternals) import BarcelonaMautrixIPC
+@_spi(unitTestInternals) import Barcelona
+import BarcelonaIPC
 
 class SmokeTests: XCTestCase {
     override func setUpWithError() throws {
@@ -48,6 +48,22 @@ class SmokeTests: XCTestCase {
             }
             wait(for: [expectation], timeout: 15)
         }
+    }
+    
+    public func testBlocked() {
+        let blockExpectation = expectation(description: "Blocked message")
+        blockExpectation.isInverted = true
+        let id = UUID().uuidString
+        BLBlocklistController.shared.testingOverride.insert("+123456")
+        BLPayloadIntercept = { payload in
+            if case .message(let message) = payload.command {
+                if message.guid == id {
+                    blockExpectation.fulfill()
+                }
+            }
+        }
+        BLEventHandler.shared.receiveMessage(Message.init(id: id, chatID: id, fromMe: false, time: 0, sender: "+123456", isSOS: false, isTypingMessage: false, isCancelTypingMessage: false, isDelivered: true, isAudioMessage: false, flags: .finished, failed: false, failureCode: .noError, failureDescription: "", items: [], service: .iMessage, fileTransferIDs: []))
+        wait(for: [blockExpectation], timeout: 3)
     }
 }
 

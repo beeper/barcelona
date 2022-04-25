@@ -215,6 +215,36 @@ extension FZErrorType: CustomStringConvertible {
 }
 
 public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
+    @_spi(unitTestInternals) public init(id: String, chatID: String, fromMe: Bool, time: Double, sender: String? = nil, subject: String? = nil, timeDelivered: Double = 0, timePlayed: Double = 0, timeRead: Double = 0, messageSubject: String? = nil, isSOS: Bool, isTypingMessage: Bool, isCancelTypingMessage: Bool, isDelivered: Bool, isAudioMessage: Bool, description: String? = nil, flags: IMMessageFlags, failed: Bool, failureCode: FZErrorType, failureDescription: String, items: [AnyChatItem], service: IMServiceStyle, fileTransferIDs: [String], associatedMessageID: String? = nil, threadIdentifier: String? = nil, threadOriginator: String? = nil, threadOriginatorPart: Int? = nil) {
+        self.id = id
+        self.chatID = chatID
+        self.fromMe = fromMe
+        self.time = time
+        self.sender = sender
+        self.subject = subject
+        self.timeDelivered = timeDelivered
+        self.timePlayed = timePlayed
+        self.timeRead = timeRead
+        self.messageSubject = messageSubject
+        self.isSOS = isSOS
+        self.isTypingMessage = isTypingMessage
+        self.isCancelTypingMessage = isCancelTypingMessage
+        self.isDelivered = isDelivered
+        self.isAudioMessage = isAudioMessage
+        self.description = description
+        self.flags = flags
+        self.failed = failed
+        self.failureCode = failureCode
+        self.failureDescription = failureDescription
+        self.items = items
+        self.service = service
+        self.fileTransferIDs = fileTransferIDs
+        self.associatedMessageID = associatedMessageID
+        self.threadIdentifier = threadIdentifier
+        self.threadOriginator = threadOriginator
+        self.threadOriginatorPart = threadOriginatorPart
+    }
+    
     static func message(withGUID guid: String, in chatID: String? = nil) -> Promise<Message?> {
         IMMessage.message(withGUID: guid, in: chatID).then {
             $0 as? Message
