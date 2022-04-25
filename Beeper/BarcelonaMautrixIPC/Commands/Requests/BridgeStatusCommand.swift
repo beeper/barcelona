@@ -50,7 +50,7 @@ private extension IMAccountController {
         }
         
         switch account.registrationFailureReason {
-        case .irreparableFailure, .expiredDeviceCredentials, .loginFailed, .badCredentials, .badDeviceCredentials, .badPushToken:
+        case .irreparableFailure, .expiredDeviceCredentials, .loginFailed, .badCredentials, .badDeviceCredentials, .badPushToken, .cancelled:
             return .badCredentials
         default:
             break
