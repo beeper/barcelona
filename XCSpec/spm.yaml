@@ -53,3 +53,6 @@ packages:
   XCTHarness:
     url: https://github.com/EricRabil/XCTHarness
     from: 1.0.0
+  ERBufferedStream:
+    url: https://github.com/EricRabil/ERBufferedStream
+    from: 1.0.2

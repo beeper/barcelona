@@ -11,6 +11,7 @@ import CoreFoundation
 import BarcelonaFoundation
 import Barcelona
 import Combine
+import ERBufferedStream
 
 public extension FileHandle {
     private static var threads: [FileHandle: Thread] = [:]
@@ -174,53 +175,29 @@ public func BLWritePayload(_ payload: @autoclosure () -> IPCPayload, log: Bool =
     BLWritePayloads([payload()], log: log)
 }
 
-private extension JSONDecoder {
-    convenience init(_ initBlock: (JSONDecoder) -> ()) {
-        self.init()
-        initBlock(self)
-    }
-}
+private var cancellables = Set<AnyCancellable>()
 
-private let decoder = JSONDecoder { decoder in
-    decoder.dateDecodingStrategy = .iso8601
-}
-
-extension Data {
-    func endsWith(data: Data) -> Bool {
-        guard count >= data.count else {
-            return false
-        }
-        
-        let start = index(endIndex, offsetBy: -data.count)
-        return self[start...] == data
-    }
-}
+let sharedBarcelonaStream: ERBufferedStream<IPCPayload> = {
+    let stream = ERBufferedStream<IPCPayload>()
+    stream.decoder.dateDecodingStrategy = .iso8601
+    return stream
+}()
 
 public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
-    var buffer = Data()
+    FileHandle.standardInput.handleDataAsynchronously(sharedBarcelonaStream.receive(data:))
     
-    FileHandle.standardInput.handleDataAsynchronously { data in
-        guard !data.isEmpty else {
-            return
-        }
-        
-        buffer += data
-        
-        guard data.endsWith(data: TERMINATOR) else {
-            return
-        }
-        
-        defer {
-            buffer.removeAll(keepingCapacity: false)
-        }
-        
-        do {
-            let payload = try JSONDecoder().decode(IPCPayload.self, from: buffer)
-            
+    unsafeBitCast(sharedBarcelonaStream.subject.sink { result in
+        switch result {
+        case .failure(let error):
+            CLWarn("MautrixIPC", "Failed to decode payload: %@", "\(error)")
+            #if DEBUG
+            CLInfo("MautrixIPC", "Raw payload: %@", String(decoding: error.rawData, as: UTF8.self))
+            #endif
+        case .success(let payload):
             #if DEBUG
             CLInfo("BLStandardIO", "Incoming! %@ %ld", payload.command.name.rawValue, payload.id ?? -1)
             #endif
-            
+
             switch payload.command {
             case .ping, .pre_startup_sync:
                 payload.respond(.ack)
@@ -228,13 +205,8 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
             default:
                 break
             }
-            
+
             cb(payload)
-        } catch {
-            CLWarn("MautrixIPC", "Failed to decode payload: %@", "\(error)")
-            #if DEBUG
-            CLInfo("MautrixIPC", "Raw payload: %@", String(decoding: buffer.prefix(1024), as: UTF8.self))
-            #endif
         }
-    }
+    }, to: AnyCancellable.self).store(in: &cancellables)
 }
