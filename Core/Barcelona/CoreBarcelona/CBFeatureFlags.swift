@@ -43,7 +43,7 @@ public class _CBFeatureFlags: FlagProvider {
     @FeatureFlag("contact-fuzz-enumerator", defaultValue: true)
     public var contactFuzzEnumerator: Bool
     
-    @FeatureFlag("prefer-correlation-identifiers", defaultValue: isDebugBuild)
+    @FeatureFlag("prefer-correlation-identifiers", defaultValue: true)
     public var preferCorrelationIdentifiers: Bool
     
     @FeatureFlag("sms-read-buffer", defaultValue: true)
