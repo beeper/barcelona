@@ -35,20 +35,28 @@ public extension DBReader {
         var chat_identifier: String
     }
     
-    /// Returns the chat id for a message with the given GUID
-    /// - Parameter guid: guid of the message to query
-    /// - Returns: identifier of the chat the message resides in
-    func chatIdentifier(forMessageGUID guid: String) -> Promise<String?> {
-        let join: SQLRequest<ChatIdentifierCursor> = """
+    private func chatIdentifierQuery(forMessageGUID guid: String) -> SQLRequest<ChatIdentifierCursor> {
+        """
         SELECT chat.chat_identifier from message
         JOIN chat_message_join ON chat_message_join.message_id = message.ROWID
         JOIN chat ON chat.ROWID = chat_message_join.chat_id
         WHERE message.guid = \(guid)
         LIMIT 1;
         """
-        
+    }
+    
+    /// Returns the chat id for a message with the given GUID
+    /// - Parameter guid: guid of the message to query
+    /// - Returns: identifier of the chat the message resides in
+    func chatIdentifier(forMessageGUID guid: String) -> Promise<String?> {
         return read { database in
-            try join.fetchOne(database)?.chat_identifier
+            try chatIdentifierQuery(forMessageGUID: guid).fetchOne(database)?.chat_identifier
+        }
+    }
+    
+    func immediateChatIdentifier(forMessageGUID guid: String) -> String? {
+        try? pool.read { database in
+            try chatIdentifierQuery(forMessageGUID: guid).fetchOne(database)?.chat_identifier
         }
     }
     

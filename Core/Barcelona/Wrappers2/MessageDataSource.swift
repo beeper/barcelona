@@ -40,8 +40,10 @@ public enum MessageSendProgress {
         if message.isFinished {
             if message.isSent {
                 self = .sent
-            } else {
+            } else if message.errorCode != .noError {
                 self = .failed
+            } else {
+                self = .sending
             }
         } else {
             self = .sending

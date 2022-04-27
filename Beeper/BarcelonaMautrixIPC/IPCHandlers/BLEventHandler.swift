@@ -128,8 +128,34 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         }
         
         CBDaemonListener.shared.typingPipeline.pipe(receiveTyping)
-        CBDaemonListener.shared.messagePipeline.pipe(receiveMessage(_:))
-        CBDaemonListener.shared.messageStatusPipeline.pipe(receiveStatusChange(_:))
+        
+        CBDaemonListener.shared.messageStatusPipeline.pipe { change in
+            guard change.type == .read else {
+                return
+            }
+            if let sender = change.sender, BLBlocklistController.shared.isSenderBlocked(sender) {
+                return
+            }
+            BLWritePayload(.init(command: .read_receipt(BLReadReceipt(sender_guid: change.mautrixFriendlyGUID, is_from_me: change.fromMe, chat_guid: change.chat.guid, read_up_to: change.messageID))))
+        }
+        
+        BLMessageExpert.shared.eventPipeline.pipe { event in
+            switch event {
+            case .message(let message):
+                if let senderID = message.senderID, BLBlocklistController.shared.isSenderBlocked(senderID) {
+                    return
+                }
+                BLWritePayload(.init(command: .message(BLMessage(message: message))))
+            case .sent(id: let id, time: let time):
+                SendMessageCommand.sendingMessages.removeValue(forKey: id)?.reply(withResponse: .message_receipt(BLPartialMessage(guid: id, timestamp: time ?? Date().timeIntervalSince1970)))
+                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(sentMessageGUID: id))))
+            case .failed(id: let id, code: let code):
+                SendMessageCommand.sendingMessages.removeValue(forKey: id)?.reply(withCommand: .error(.init(code: code.description, message: code.localizedDescription ?? "")))
+                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(guid: id, status: .failed, message: code.localizedDescription, statusCode: code.description))))
+            default:
+                break
+            }
+        }
         
         NotificationCenter.default.addObserver(forName: .IMHandleInfoChanged, object: nil, queue: nil) { notification in
             if BMXContactListIsBuilding {

@@ -20,7 +20,11 @@ import BarcelonaDB
 private let log = Logger(category: "ERDaemonListener")
 
 // set to false and the logging conditions (probably) wont even compile, but they will be disabled
+#if DEBUG
 @usableFromInline internal let verboseLoggingEnabled = false
+#else
+@usableFromInline internal let verboseLoggingEnabled = false
+#endif
 
 prefix operator *
 
@@ -68,6 +72,7 @@ public enum CBMessageStatusType: String, Codable {
     case played
     case downgraded
     case notDelivered
+    case sent
 }
 
 private struct CBMessageStatusChangeContext {
@@ -270,6 +275,77 @@ func createPipelineGlob<T>(@PipelineGlobber<T> component: () -> CBPipeline<T>) -
     return component()
 }
 
+public class OrderedDictionary<K: Hashable, V> {
+    private(set) var dictionary: [K: V] = [:]
+    private var orderedSet: NSMutableOrderedSet = .init()
+    
+    public var maximumCapacity: Int? = nil
+    
+    public init() {}
+    
+    public init(maximumCapacity: Int) {
+        self.maximumCapacity = maximumCapacity
+    }
+    
+    public subscript (_ key: K) -> V? {
+        get {
+            let index = orderedSet.index(of: key)
+            if index != NSNotFound {
+                orderedSet.moveObjects(at: IndexSet(integer: index), to: orderedSet.count - 1)
+            }
+            return dictionary[key]
+        }
+        set {
+            if newValue == nil {
+                orderedSet.remove(key)
+                dictionary.removeValue(forKey: key)
+            } else {
+                let index = orderedSet.index(of: key)
+                if index == NSNotFound {
+                    orderedSet.add(key)
+                    if let maximumCapacity = maximumCapacity, orderedSet.count == maximumCapacity, let first = orderedSet.firstObject {
+                        orderedSet.remove(first)
+                        dictionary.removeValue(forKey: first as! K)
+                    }
+                } else {
+                    orderedSet.moveObjects(at: IndexSet(integer: index), to: orderedSet.count - 1)
+                }
+                dictionary[key] = newValue
+            }
+        }
+    }
+    
+    public var count: Int {
+        orderedSet.count
+    }
+    
+    public func index(of key: K) -> Int {
+        orderedSet.index(of: key)
+    }
+    
+    public var keys: Dictionary<K,V>.Keys {
+        dictionary.keys
+    }
+    
+    public var values: Dictionary<K,V>.Values {
+        dictionary.values
+    }
+    
+    public func removeOldest(_ n: Int) {
+        Array(orderedSet.prefix(n)).forEach { element in
+            self[(element as! K)] = nil
+        }
+    }
+    
+    public func shrink(to size: Int) {
+        let overflow = max(count - size, 0)
+        guard overflow > 0 else {
+            return
+        }
+        removeOldest(overflow)
+    }
+}
+
 public class CBDaemonListener: ERBaseDaemonListener {
     public static let shared = CBDaemonListener()
     
@@ -367,6 +443,8 @@ public class CBDaemonListener: ERBaseDaemonListener {
         }
     }
     
+    private var chatIdentifierCache = OrderedDictionary<String, String>(maximumCapacity: 100)
+    
     private func disconnectedFromDaemon() {
         log.warn("Disconnected from daemon, reconnecting.")
         
@@ -443,8 +521,14 @@ public class CBDaemonListener: ERBaseDaemonListener {
     // Invoked when we send a message, either here or elsewhere
     public override func account(_ accountUniqueID: String, chat chatIdentifier: String, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any], groupID: String, chatPersonCentricID personCentricID: String!, messageSent msg: IMMessageItem) {
         *log.debug("messageSent: \(msg.debugDescription, privacy: .public)")
-        
+        chatIdentifierCache[msg.id] = chatIdentifier
         process(newMessage: msg, chatIdentifier: chatIdentifier)
+    }
+    
+    // Invoked when we sent a message *locally*
+    public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, notifySentMessage msg: IMMessageItem!, sendTime: NSNumber!) {
+        *log.debug("notifySentMessage: \(msg.debugDescription, privacy: .public)")
+        process(sentMessage: msg, sentTime: sendTime)
     }
     
     public override func account(_ accountUniqueID: String, chat chatIdentifier: String, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any], groupID: String, chatPersonCentricID personCentricID: String, messageReceived msg: IMItem) {
@@ -595,6 +679,14 @@ private extension CBDaemonListener {
         }
     }
     
+    func process(sentMessage message: IMMessageItem, sentTime: NSNumber) {
+        guard let chatID = chatIdentifierCache[message.id] ?? _BLImmediateResolveChatIDForMessage(message.id) else {
+            log.fault("Failed to resolve chat identifier for sent message \(message.id, privacy: .public)")
+            return
+        }
+        messageStatusPipeline.send(CBMessageStatusChange(type: .sent, time: sentTime.doubleValue, sender: nil, fromMe: true, chatID: chatID, messageID: message.id, context: .init(message: message)))
+    }
+    
     func process(newMessage: IMItem, chatIdentifier: String) {
         if !preflight(message: newMessage) {
             log.warn("withholding message \(newMessage.guid): preflight failure")
@@ -730,6 +822,8 @@ private extension IMMessageItem {
                 case .downgraded:
                     return true
                 case .notDelivered:
+                    return true
+                case .sent:
                     return true
                 }
             }

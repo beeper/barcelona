@@ -136,6 +136,10 @@ internal func _BLResolveChatID(forObject object: NSObject) -> Promise<String> {
     }
 }
 
+internal func _BLImmediateResolveChatIDForMessage(_ guid: String) -> String? {
+    DBReader.shared.immediateChatIdentifier(forMessageGUID: guid)
+}
+
 @inlinable
 internal func _BLResolveChatIDs(forObjects objects: [NSObject]) -> Promise<[String]> {
     guard objects.count > 0 else {

@@ -15,7 +15,7 @@ public class BLMessageExpert {
     /// A BLMessageEvent is emitted whenever something significant has happened to a message.
     public enum BLMessageEvent: Hashable {
         public enum Name: String, Codable {
-            case failed, delivered, read, message
+            case failed, delivered, read, sending, sent, message
         }
         
         /// The message with the given ID has failed with the given error code.
@@ -24,13 +24,17 @@ public class BLMessageExpert {
         case delivered(id: String, time: Double?)
         /// The message with the given ID was read by the recipient.
         case read(id: String, time: Double?)
+        /// The message with the given ID started sending
+        case sending(id: String, time: Double?)
+        /// The message with the given ID has been sent
+        case sent(id: String, time: Double?)
         /// A message has been sent or received.
         case message(Message)
         
         /// The ID of this message
         public var id: String {
             switch self {
-            case .failed(id: let id, code: _), .delivered(id: let id, time: _), .read(id: let id, time: _):
+            case .failed(id: let id, code: _), .delivered(id: let id, time: _), .read(id: let id, time: _), .sending(id: let id, time: _), .sent(id: let id, time: _):
                 return id
             case .message(let message):
                 return message.id
@@ -43,6 +47,8 @@ public class BLMessageExpert {
             case .failed: return .failed
             case .delivered: return .delivered
             case .read: return .read
+            case .sending: return .sending
+            case .sent: return .sent
             case .message: return .message
             }
         }
@@ -94,6 +100,8 @@ public class BLMessageExpert {
             process(deliveredMessageID: change.messageID, time: change.time)
         case .read:
             process(readMessageID: change.messageID, time: change.time)
+        case .sent:
+            send(.sent(id: change.messageID, time: change.time))
         default:
             break
         }
@@ -103,6 +111,12 @@ public class BLMessageExpert {
         if message.failed {
             process(failedMessageID: message.id, failureCode: message.failureCode)
             return
+        }
+        switch message.sendProgress {
+        case .sending:
+            send(.sending(id: message.id, time: message.time))
+        default:
+            break
         }
         send(.message(message))
     }
