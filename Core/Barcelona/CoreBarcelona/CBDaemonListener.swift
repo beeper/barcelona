@@ -528,7 +528,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
     // Invoked when we sent a message *locally*
     public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, notifySentMessage msg: IMMessageItem!, sendTime: NSNumber!) {
         *log.debug("notifySentMessage: \(msg.debugDescription, privacy: .public)")
-        process(sentMessage: msg, sentTime: sendTime)
+        process(sentMessage: msg, sentTime: (msg.clientSendTime ?? msg.time ?? Date()).timeIntervalSince1970)
     }
     
     public override func account(_ accountUniqueID: String, chat chatIdentifier: String, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any], groupID: String, chatPersonCentricID personCentricID: String, messageReceived msg: IMItem) {
@@ -679,12 +679,12 @@ private extension CBDaemonListener {
         }
     }
     
-    func process(sentMessage message: IMMessageItem, sentTime: NSNumber) {
+    func process(sentMessage message: IMMessageItem, sentTime: Double) {
         guard let chatID = chatIdentifierCache[message.id] ?? _BLImmediateResolveChatIDForMessage(message.id) else {
             log.fault("Failed to resolve chat identifier for sent message \(message.id, privacy: .public)")
             return
         }
-        messageStatusPipeline.send(CBMessageStatusChange(type: .sent, time: sentTime.doubleValue, sender: nil, fromMe: true, chatID: chatID, messageID: message.id, context: .init(message: message)))
+        messageStatusPipeline.send(CBMessageStatusChange(type: .sent, time: sentTime, sender: nil, fromMe: true, chatID: chatID, messageID: message.id, context: .init(message: message)))
     }
     
     func process(newMessage: IMItem, chatIdentifier: String) {
