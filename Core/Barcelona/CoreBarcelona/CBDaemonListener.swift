@@ -104,6 +104,10 @@ public struct CBMessageStatusChange: Codable, Hashable {
         IMChat.resolve(withIdentifier: chatID) ?? IMChat()
     }
     
+    public var hasFullMessage: Bool {
+        context.message != nil
+    }
+    
     public var message: IMMessageItem {
         context.message ?? IMMessageItem()
     }
@@ -682,6 +686,10 @@ private extension CBDaemonListener {
 
 private extension IMMessageItem {
     private var statusPayload: (type: CBMessageStatusType, time: Date)? {
+        if errorCode.rawValue > 0 {
+            return (.notDelivered, time)
+        }
+        
         if let timePlayed = timePlayed {
             return (.played, timePlayed)
         } else if let timeRead = timeRead {
@@ -690,8 +698,6 @@ private extension IMMessageItem {
             return (.delivered, timeDelivered)
         } else if wasDowngraded {
             return (.downgraded, time)
-        } else if errorCode.rawValue > 0 {
-            return (.notDelivered, time)
         } else {
             return nil
         }

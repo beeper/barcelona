@@ -13,6 +13,8 @@ public class CBPipeline<Value> {
     private var chains = [ObjectIdentifier: (Value) -> ()]()
     private var _cancel: () -> () = { }
     
+    @_spi(unitTestInternals) public init() {}
+    
     public func send(_ value: Value) {
         for chain in chains.values {
             chain(value)
