@@ -118,16 +118,21 @@ public class BLMessageExpert {
         default:
             break
         }
+        if message.fromMe && !message.isSent {
+            return
+        }
         send(.message(message))
     }
 }
 
-fileprivate extension BLMessageExpert {
+@_spi(messageExpertControlFlow) public extension BLMessageExpert {
     func process(failedMessageID: String, failureCode: FZErrorType) {
         log.warn("Message %@ failed with failure code %@", failedMessageID, failureCode.description)
         send(.failed(id: failedMessageID, code: failureCode))
     }
-    
+}
+
+fileprivate extension BLMessageExpert {
     func process(failedMessageID: String) {
         guard let message = BLLoadIMMessageItem(withGUID: failedMessageID) else {
             log.fault("Failed to process failed message ID %@ because its IMMessageItem could not be loaded", failedMessageID)
@@ -161,7 +166,7 @@ extension BLMessageExpert {
         
         /// A closure to the monitoring messageID – this is a closure so that an observer can be created immediately prior to a message being sent.
         public let messageID: () -> String
-        private let callback: (BLMessageEvent) -> NextStep
+        private var callback: ((BLMessageEvent) -> NextStep)?
         private var pipeline: CBPipeline<Void>?
         
         public init(id: @autoclosure @escaping () -> String, expert: BLMessageExpert, callback: @escaping (BLMessageEvent) -> NextStep) {
@@ -171,10 +176,10 @@ extension BLMessageExpert {
                 guard event.id == self.messageID() else {
                     return
                 }
-                switch self.callback(event) {
+                switch self.callback?(event) {
                 case .observe:
                     return
-                case .stop:
+                case .stop, .none:
                     self.pipeline?.cancel()
                     self.pipeline = nil
                 }
@@ -200,6 +205,7 @@ extension BLMessageExpert {
         /// Manually cancels the expert.
         public func cancel() {
             pipeline?.cancel()
+            callback = nil
             pipeline = nil
         }
     }

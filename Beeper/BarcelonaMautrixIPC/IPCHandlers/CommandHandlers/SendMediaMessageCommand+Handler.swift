@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Barcelona
+@_spi(messageExpertControlFlow) import Barcelona
 import IMCore
 
 public protocol Runnable {
@@ -35,7 +35,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         
         do {
             let message = try chat.send(message: messageCreation)
-            SendMessageCommand.sendingMessages[message.id] = payload
+            payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message.id, timestamp: message.time)))
             
             NotificationCenter.default.subscribe(toNotificationsNamed: [.IMFileTransferUpdated, .IMFileTransferFinished]) { notif, sub in
                 guard let transfer = notif.object as? IMFileTransfer, transfer.guid == transferGUID else {
@@ -54,7 +54,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                 case .transferring:
                     break
                 case .error:
-                    SendMessageCommand.sendingMessages.removeValue(forKey: message.id)?.fail(code: "internal_error", message: "Sorry, we couldn't upload your attachment.")
+                    BLMessageExpert.shared.process(failedMessageID: message.id, failureCode: .attachmentUploadFailure)
                     fallthrough
                 case .finalizing:
                     fallthrough
