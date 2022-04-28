@@ -77,6 +77,10 @@ private extension IMAccountController {
         
         switch account.loginStatus {
         case .statusLoggedOut:
+            if account.registrationStatus == .failed {
+                return .badCredentials
+            }
+            
             if isProcessing {
                 return .connecting
             } else {
