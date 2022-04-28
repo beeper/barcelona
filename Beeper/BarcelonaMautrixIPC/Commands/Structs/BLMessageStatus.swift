@@ -44,4 +44,8 @@ public struct BLMessageStatus: Codable {
     public var status: StatusEvent
     public var message: String?
     public var statusCode: String?
+    
+    public enum CodingKeys: String, CodingKey {
+        case guid, status, message, statusCode = "status_code"
+    }
 }
