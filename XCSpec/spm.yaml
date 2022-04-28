@@ -55,4 +55,4 @@ packages:
     from: 1.0.0
   ERBufferedStream:
     url: https://github.com/EricRabil/ERBufferedStream
-    from: 1.0.3
+    from: 1.0.4
