@@ -15,7 +15,7 @@ import IMCore
 import Swexy
 import Swog
 import CommunicationsFilter
-import BarcelonaDB
+@_spi(synchronousQueries) import BarcelonaDB
 
 private let log = Logger(category: "ERDaemonListener")
 
@@ -680,7 +680,7 @@ private extension CBDaemonListener {
     }
     
     func process(sentMessage message: IMMessageItem, sentTime: Double) {
-        guard let chatID = chatIdentifierCache[message.id] ?? _BLImmediateResolveChatIDForMessage(message.id) else {
+        guard let chatID = chatIdentifierCache[message.id] ?? DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id) else {
             log.fault("Failed to resolve chat identifier for sent message \(message.id, privacy: .public)")
             return
         }
