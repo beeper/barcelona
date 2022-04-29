@@ -146,12 +146,12 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                     return
                 }
                 BLWritePayload(.init(command: .message(BLMessage(message: message))))
-            case .sent(id: let id, time: let time):
-                SendMessageCommand.sendingMessages.removeValue(forKey: id)?.reply(withResponse: .message_receipt(BLPartialMessage(guid: id, timestamp: time ?? Date().timeIntervalSince1970)))
-                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(sentMessageGUID: id))))
-            case .failed(id: let id, code: let code):
-                SendMessageCommand.sendingMessages.removeValue(forKey: id)?.reply(withCommand: .error(.init(code: code.description, message: code.localizedDescription ?? "")))
-                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(guid: id, status: .failed, message: code.localizedDescription, statusCode: code.description))))
+            case .sent(id: let id, chat: let chat, time: let time):
+                SendMessageCommand.replyToMessageGUID(id, response: .message_receipt(BLPartialMessage(guid: id, timestamp: time ?? Date().timeIntervalSince1970)))
+                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(sentMessageGUID: id, forChatGUID: chat.senderCorrelatableGUID))))
+            case .failed(id: let id, chat: let chat, code: let code):
+                SendMessageCommand.replyToMessageGUID(id, command: .error(.init(code: code.description, message: code.localizedDescription ?? "")))
+                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(guid: id, chatGUID: chat.senderCorrelatableGUID, status: .failed, message: code.localizedDescription, statusCode: code.description))))
             default:
                 break
             }

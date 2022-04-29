@@ -53,3 +53,13 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
         }
     }
 }
+
+extension SendMessageCommand {
+    static func replyToMessageGUID(_ guid: String, command: IPCCommand) {
+        sendingMessages.removeValue(forKey: guid)?.reply(withCommand: command)
+    }
+
+    static func replyToMessageGUID(_ guid: String, response: IPCResponse) {
+        replyToMessageGUID(guid, command: .response(response))
+    }
+}

@@ -54,7 +54,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                 case .transferring:
                     break
                 case .error:
-                    BLMessageExpert.shared.process(failedMessageID: message.id, failureCode: .attachmentUploadFailure)
+                    BLMessageExpert.shared.process(failedMessageID: message.id, chat: message.imChat, failureCode: .attachmentUploadFailure)
                     fallthrough
                 case .finalizing:
                     fallthrough

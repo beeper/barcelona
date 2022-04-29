@@ -10,8 +10,9 @@ import Foundation
 import Barcelona
 
 public struct BLMessageStatus: Codable {
-    public init(guid: String, status: BLMessageStatus.StatusEvent, message: String? = nil, statusCode: String? = nil) {
+    public init(guid: String, chatGUID: String, status: BLMessageStatus.StatusEvent, message: String? = nil, statusCode: String? = nil) {
         self.guid = guid
+        self.chatGUID = chatGUID
         self.status = status
         self.message = message
         self.statusCode = statusCode
@@ -21,6 +22,7 @@ public struct BLMessageStatus: Codable {
         switch event.type {
         case .notDelivered:
             guid = event.messageID
+            chatGUID = event.chat.senderCorrelatableGUID
             status = .failed
             message = event.message.errorCode.localizedDescription
             statusCode = event.message.errorCode.description
@@ -29,8 +31,9 @@ public struct BLMessageStatus: Codable {
         }
     }
     
-    public init(sentMessageGUID: String) {
+    public init(sentMessageGUID: String, forChatGUID: String) {
         guid = sentMessageGUID
+        chatGUID = forChatGUID
         status = .sent
         message = nil
         statusCode = nil
@@ -41,11 +44,12 @@ public struct BLMessageStatus: Codable {
     }
     
     public var guid: String
+    public var chatGUID: String
     public var status: StatusEvent
     public var message: String?
     public var statusCode: String?
     
     public enum CodingKeys: String, CodingKey {
-        case guid, status, message, statusCode = "status_code"
+        case guid, chatGUID = "chat_guid", status, message, statusCode = "status_code"
     }
 }
