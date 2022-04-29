@@ -32,10 +32,15 @@ extension IMChat {
         if isGroup {
             return guid
         }
-        return guidPrefix + IDSDestination(uri: CBSenderCorrelationController.shared.externalIdentifier(senderID: recipient.id)).uri().unprefixedURI
+        return guidPrefix + CBSenderCorrelationController.shared.externalIdentifier(senderID: recipient.id)
     }
 }
 
+internal extension String {
+    var droppingURIPrefix: String {
+        IDSDestination(uri: self).uri().unprefixedURI
+    }
+}
 
 extension IMChat: Identifiable {
     public var id: String {
@@ -492,21 +497,21 @@ public class CBSenderCorrelationController {
     /// Returns the pinned counterpart for a sender ID if it is known
     public func optionalExternalIdentifier(senderID: String) -> String? {
         if let pinnedIdentifier = CBSenderCorrelationPersistence.shared?.pinned(senderFromSender: senderID) {
-            return pinnedIdentifier
+            return pinnedIdentifier.droppingURIPrefix
         }
         if let correlationIdentifier = CBSenderCorrelationPersistence.shared?.correlate(senderID: senderID) {
             guard let persistence = CBSenderCorrelationPersistence.shared else {
                 return nil
             }
             persistence.pin(correlationID: correlationIdentifier, senderID: senderID)
-            return senderID
+            return senderID.droppingURIPrefix
         }
         return nil
     }
     
     /// Attempts to locate the pinned counterpart for a sender ID, returning the first parameter if nothing was found
     public func externalIdentifier(senderID: String) -> String {
-        optionalExternalIdentifier(senderID: senderID) ?? senderID
+        optionalExternalIdentifier(senderID: senderID) ?? senderID.droppingURIPrefix
     }
     
     private var allKnownURIs: [String] {
