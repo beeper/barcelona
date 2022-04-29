@@ -32,7 +32,7 @@ extension IMChat {
         if isGroup {
             return guid
         }
-        return guidPrefix + CBSenderCorrelationController.shared.externalIdentifier(senderID: recipient.id)
+        return guidPrefix + IDSDestination(uri: CBSenderCorrelationController.shared.externalIdentifier(senderID: recipient.id)).uri().unprefixedURI
     }
 }
 
