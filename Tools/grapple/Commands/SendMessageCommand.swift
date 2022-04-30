@@ -10,6 +10,7 @@ import Foundation
 import SwiftCLI
 import Barcelona
 import IMCore
+import BarcelonaMautrixIPC
 
 extension IMAssociatedMessageType: ConvertibleFromString {
     public init?(input: String) {
@@ -83,7 +84,27 @@ class MessageCommand: CommandGroup {
             }
         }
         
-        var children: [Routable] = [RecentMessages()]
+        class Exact: BarcelonaCommand {
+            let name = "exact"
+            
+            @CollectedParam var ids: [String]
+            
+            var mautrix: Bool {
+                ids.contains(where: { $0 == "-m" || $0 == "--mautrix" })
+            }
+            
+            func execute() throws {
+                BLLoadChatItems(withGUIDs: ids).then { items in
+                    if self.mautrix {
+                        print(items.compactMap { $0 as? Message }.map { BLMessage(message: $0) }.prettyJSON)
+                    } else {
+                        print(items.map { $0.eraseToAnyChatItem() }.prettyJSON)
+                    }
+                }
+            }
+        }
+        
+        var children: [Routable] = [RecentMessages(), Exact()]
     }
     
     class Send: CommandGroup {
@@ -101,6 +122,14 @@ class MessageCommand: CommandGroup {
             
             @Flag("-e", "--everyone", description: "ping everyone because you crave attention")
             var pingEveryone: Bool
+            
+            @Flag("-f") var force: Bool
+            
+            static func ERSendIMessage(to: String, text: String) throws -> Message {
+                let chat = Chat.directMessage(withHandleID: to, service: .iMessage)
+                let message = try chat.send(message: CreateMessage(parts: [.init(type: .text, details: text)]))
+                return message
+            }
             
             var text: String {
                 message.joined(separator: " ")
@@ -125,10 +154,14 @@ class MessageCommand: CommandGroup {
                     exit(0)
                 }
                 
-                if pingEveryone {
-                    message = try chat.pingEveryone(text: text)
+                if force {
+                    message = try Self.ERSendIMessage(to: destination, text: text)
                 } else {
-                    message = try chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: text)]))
+                    if pingEveryone {
+                        message = try chat.pingEveryone(text: text)
+                    } else {
+                        message = try chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: text)]))
+                    }
                 }
             }
         }
