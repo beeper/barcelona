@@ -21,8 +21,17 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         guard let chat = cbChat else {
             return payload.fail(strategy: .chat_not_found)
         }
+        let messagesDirectory = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true).appendingPathComponent("Library").appendingPathComponent("Messages")
+        let messagesPath = messagesDirectory.path
+        var pathOnDisk = path_on_disk
+        pathOnDisk = messagesDirectory.appendingPathComponent(UUID().uuidString + "-barcelonatmp").path
+        do {
+            try FileManager.default.moveItem(atPath: path_on_disk, toPath: pathOnDisk)
+        } catch {
+            pathOnDisk = path_on_disk
+        }
         
-        let transfer = CBInitializeFileTransfer(filename: file_name, path: URL(fileURLWithPath: path_on_disk)), transferGUID = transfer.guid
+        let transfer = CBInitializeFileTransfer(filename: file_name, path: URL(fileURLWithPath: pathOnDisk))
         var messageCreation = CreateMessage(parts: [
             .init(type: .attachment, details: transfer.guid)
         ])
@@ -34,38 +43,23 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         }
         
         do {
-            let message = try chat.send(message: messageCreation)
-            payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message.id, timestamp: message.time)))
-            
-            NotificationCenter.default.subscribe(toNotificationsNamed: [.IMFileTransferUpdated, .IMFileTransferFinished]) { notif, sub in
-                guard let transfer = notif.object as? IMFileTransfer, transfer.guid == transferGUID else {
-                    return
+            var monitor: BLMediaMessageMonitor?, messageID = ""
+            monitor = BLMediaMessageMonitor(messageID: messageID, transferGUIDs: [transfer.guid]) { success, failureCode in
+                if pathOnDisk.hasSuffix("-barcelonatmp") {
+                    try? FileManager.default.removeItem(atPath: pathOnDisk)
                 }
-                
-                switch transfer.state {
-                case .archiving:
-                    break
-                case .waitingForAccept:
-                    break
-                case .accepted:
-                    break
-                case .preparing:
-                    break
-                case .transferring:
-                    break
-                case .error:
-                    BLMessageExpert.shared.process(failedMessageID: message.id, chat: message.imChat, failureCode: .attachmentUploadFailure)
-                    fallthrough
-                case .finalizing:
-                    fallthrough
-                case .finished:
-                    sub.unsubscribe()
-                case .recoverableError:
-                    break
-                case .unknown:
-                    break
+                if success {
+                    payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: messageID, timestamp: Date().timeIntervalSinceNow)))
+                } else if let failureCode = failureCode {
+                    payload.fail(code: failureCode.description, message: failureCode.localizedDescription ?? failureCode.description)
+                } else {
+                    payload.fail(strategy: .internal_error("Your message was unable to be sent."))
                 }
+                monitor = nil
             }
+            
+            let message = try chat.send(message: messageCreation)
+            messageID = message.id
         } catch {
             CLFault("BLMautrix", "failed to send media message: %@", error as NSError)
             payload.fail(code: "internal_error", message: "Sorry, we're having trouble processing your attachment upload.")

@@ -25,6 +25,21 @@ public extension IMFileTransfer {
         fileprivate init(transfer: IMFileTransfer) {
             self = .init(rawValue: transfer.value(forKey: "transferState") as! NSInteger) ?? .unknown
         }
+        
+        var description: String {
+            switch self {
+            case .archiving: return "archiving"
+            case .waitingForAccept: return "waitingForAccept"
+            case .accepted: return "accepted"
+            case .preparing: return "preparing"
+            case .transferring: return "transferring"
+            case .finalizing: return "finalizing"
+            case .finished: return "finished"
+            case .error: return "error"
+            case .recoverableError: return "recoverableError"
+            case .unknown: return "unknown"
+            }
+        }
     }
     
     var state: IMFileTransferState {
