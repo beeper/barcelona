@@ -38,6 +38,16 @@ private extension IMAccount {
     }
 }
 
+private extension IMAccount {
+    var registrationSuccessDate: Date? {
+        dictionary["RegistrationSuccessDate"] as? Date
+    }
+    
+    var registrationFailureDate: Date? {
+        dictionary["RegistrationFailureDate"] as? Date
+    }
+}
+
 private extension IMAccountController {
     /// Returns an interpretation of login status, or bad credentials if a registration failure is present
     var state: BridgeState {
@@ -75,6 +85,26 @@ private extension IMAccountController {
             }
         }
         
+        var potentiallyConnecting: BridgeState {
+            // isConnecting == true guarantees we are connecting, but isConnecting == false does not guarantee we are NOT connecting
+            if account.isActive && account.loginStatus.rawValue >= 2 {
+                return .connecting
+            }
+            if let registrationFailureDate = account.registrationFailureDate {
+                if let registrationSuccessDate = account.registrationSuccessDate {
+                    if registrationFailureDate > registrationSuccessDate {
+                        return .badCredentials
+                    }
+                } else if account.registrationStatus.rawValue <= 2 {
+                    return .badCredentials
+                }
+            }
+            if !account.isActive {
+                return .badCredentials
+            }
+            return .connecting
+        }
+        
         switch account.loginStatus {
         case .statusLoggedOut:
             if account.registrationStatus == .failed {
@@ -82,7 +112,7 @@ private extension IMAccountController {
             }
             
             if isProcessing {
-                return .connecting
+                return potentiallyConnecting
             } else {
                 return .unconfigured
             }
@@ -91,7 +121,7 @@ private extension IMAccountController {
         case .statusLoggingOut:
             return .loggedOut
         case .statusLoggingIn:
-            return .connecting
+            return potentiallyConnecting
         case .statusLoggedIn:
             switch account.registrationStatus {
             case .failed:
@@ -99,20 +129,20 @@ private extension IMAccountController {
                 case .noError:
                     fallthrough
                 case .unknownError:
-                    return .connecting
+                    return potentiallyConnecting
                 default:
                     return .badCredentials
                 }
             case .unknown:
-                return .connecting
+                return potentiallyConnecting
             case .unregistered:
-                return .connecting
+                return potentiallyConnecting
             case .authenticating:
-                return .connecting
+                return potentiallyConnecting
             case .authenticated:
-                return .connecting
+                return potentiallyConnecting
             case .registering:
-                return .connecting
+                return potentiallyConnecting
             case .registered:
                 return .connected
             @unknown default:
