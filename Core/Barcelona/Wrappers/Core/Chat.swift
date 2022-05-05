@@ -202,15 +202,23 @@ public extension Chat {
     }
     
     /// Returns a chat targeted at the appropriate service for a set of handleIDs
-    static func chat(withHandleIDs handleIDs: [String]) -> Chat {
+    static func chat(withHandleIDs handleIDs: [String], service: IMServiceStyle? = nil) -> Chat {
         guard handleIDs.count > 0 else {
             preconditionFailure("chat(withHandleIDs) requires at least one handle ID to be non-null return type")
         }
         
         if handleIDs.count == 1 {
-            return directMessage(withHandleID: handleIDs.first!)
+            if let service = service {
+                return directMessage(withHandleID: handleIDs.first!, service: service)
+            } else {
+                return directMessage(withHandleID: handleIDs.first!)
+            }
         } else {
-            return Chat(IMChatRegistry.shared.chat(for: homogenousHandles(forIDs: handleIDs)))
+            if let service = service, let account = service.account {
+                return Chat(IMChatRegistry.shared.chat(for: handleIDs.map(account.imHandle(withID:))))
+            } else {
+                return Chat(IMChatRegistry.shared.chat(for: homogenousHandles(forIDs: handleIDs)))
+            }
         }
     }
 }

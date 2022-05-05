@@ -26,7 +26,18 @@ protocol ChatCommandLike {
     var destination: String { get }
 }
 
+protocol ChatSMSForcingCapable: ChatCommandLike {
+    var sms: Bool { get }
+}
+
 extension ChatCommandLike {
+    var _sms: Bool {
+        if let cap = self as? ChatSMSForcingCapable {
+            return cap.sms
+        }
+        return false
+    }
+    
     var chat: Chat {
         if isID {
             guard let chat = Chat.resolve(withIdentifier: destination) else {
@@ -36,7 +47,7 @@ extension ChatCommandLike {
             return chat
         }
         
-        return Chat.chat(withHandleIDs: destination.split(separator: ",").map(String.init))
+        return Chat.chat(withHandleIDs: destination.split(separator: ",").map(String.init), service: _sms ? .SMS : nil)
     }
 }
 
@@ -111,7 +122,7 @@ class MessageCommand: CommandGroup {
         let name = "send"
         let shortDescription = "send messages"
         
-        class Text: BarcelonaCommand, ChatCommandLike {
+        class Text: BarcelonaCommand, ChatCommandLike, ChatSMSForcingCapable {
             let name = "text"
             
             @Param var destination: String
@@ -123,10 +134,12 @@ class MessageCommand: CommandGroup {
             @Flag("-e", "--everyone", description: "ping everyone because you crave attention")
             var pingEveryone: Bool
             
+            @Flag("-s") var sms: Bool
+            
             @Flag("-f") var force: Bool
             
-            static func ERSendIMessage(to: String, text: String) throws -> Message {
-                let chat = Chat.directMessage(withHandleID: to, service: .iMessage)
+            static func ERSendIMessage(to: String, text: String, _ sms: Bool) throws -> Message {
+                let chat = Chat.directMessage(withHandleID: to, service: sms ? .SMS : .iMessage)
                 let message = try chat.send(message: CreateMessage(parts: [.init(type: .text, details: text)]))
                 return message
             }
@@ -155,7 +168,7 @@ class MessageCommand: CommandGroup {
                 }
                 
                 if force {
-                    message = try Self.ERSendIMessage(to: destination, text: text)
+                    message = try Self.ERSendIMessage(to: destination, text: text, sms)
                 } else {
                     if pingEveryone {
                         message = try chat.pingEveryone(text: text)
