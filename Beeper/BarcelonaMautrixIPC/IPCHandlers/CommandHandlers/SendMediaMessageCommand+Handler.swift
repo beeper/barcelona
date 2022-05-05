@@ -43,23 +43,30 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         }
         
         do {
-            var monitor: BLMediaMessageMonitor?, messageID = ""
-            monitor = BLMediaMessageMonitor(messageID: messageID, transferGUIDs: [transfer.guid]) { success, failureCode in
+            var monitor: BLMediaMessageMonitor?, message: IMMessage?
+            monitor = BLMediaMessageMonitor(messageID: message?.id ?? "", transferGUIDs: [transfer.guid]) { success, failureCode, shouldCancel in
                 if pathOnDisk.hasSuffix("-barcelonatmp") {
                     try? FileManager.default.removeItem(atPath: pathOnDisk)
                 }
+                guard let message = message else {
+                    return
+                }
                 if success {
-                    payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: messageID, timestamp: Date().timeIntervalSinceNow)))
-                } else if let failureCode = failureCode {
-                    payload.fail(code: failureCode.description, message: failureCode.localizedDescription ?? failureCode.description)
+                    payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message.id, timestamp: Date().timeIntervalSinceNow)))
                 } else {
-                    payload.fail(strategy: .internal_error("Your message was unable to be sent."))
+                    if let failureCode = failureCode {
+                        payload.fail(code: failureCode.description, message: failureCode.localizedDescription ?? failureCode.description)
+                    } else {
+                        payload.fail(strategy: .internal_error("Your message was unable to be sent."))
+                    }
+                    if shouldCancel {
+                        chat.imChat.cancel(message)
+                    }
                 }
                 monitor = nil
             }
             
-            let message = try chat.send(message: messageCreation)
-            messageID = message.id
+            message = try chat.sendReturningRaw(message: messageCreation)
         } catch {
             CLFault("BLMautrix", "failed to send media message: %@", error as NSError)
             payload.fail(code: "internal_error", message: "Sorry, we're having trouble processing your attachment upload.")

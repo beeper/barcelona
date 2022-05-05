@@ -23,9 +23,9 @@ public class BLMediaMessageMonitor {
     private var completionMonitor: AnyCancellable?
     private var observer: NotificationSubscription?
     private var timeout: DispatchSourceTimer?
-    private let callback: (Bool, FZErrorType?) -> ()
+    private let callback: (Bool, FZErrorType?, Bool) -> ()
     
-    public init(messageID: @autoclosure @escaping () -> String, transferGUIDs: [String], callback: @escaping (Bool, FZErrorType?) -> ()) {
+    public init(messageID: @autoclosure @escaping () -> String, transferGUIDs: [String], callback: @escaping (Bool, FZErrorType?, Bool) -> ()) {
         self.messageID = messageID
         self.transferGUIDs = transferGUIDs
         self.callback = callback
@@ -75,16 +75,16 @@ public class BLMediaMessageMonitor {
         log.debug("Deallocating message monitor for message %@ and transfers %@", messageID(), transferGUIDs)
     }
     
-    public private(set) var result: (Bool, FZErrorType?)?
+    public private(set) var result: (Bool, FZErrorType?, Bool)?
     
-    private func snap(success: Bool, code: FZErrorType?) {
+    private func snap(success: Bool, code: FZErrorType?, shouldCancel: Bool = false) {
         guard result == nil else {
             return
         }
         timeout?.cancel()
         completionMonitor = nil
-        result = (success, code)
-        self.callback(success, code)
+        result = (success, code, shouldCancel)
+        self.callback(success, code, shouldCancel)
     }
     
     private func handle(updatedEvent latestEvent: BLMessageExpert.BLMessageEvent?, updatedStates latestStates: [String: IMFileTransfer.IMFileTransferState]) {
@@ -151,8 +151,9 @@ private extension BLMediaMessageMonitor {
             guard let self = self else {
                 return
             }
-            log.warn("Failed to send message %@ with attachments %@ in a timely manner! This is very, very sad.", self.messageID(), self.transferGUIDs)
-            self.snap(success: false, code: .attachmentUploadFailure)
+            let messageID = self.messageID()
+            log.warn("Failed to send message %@ with attachments %@ in a timely manner! This is very, very sad.", messageID, self.transferGUIDs)
+            self.snap(success: false, code: .attachmentUploadFailure, shouldCancel: true)
         }
         timer.schedule(deadline: .now().advanced(by: .seconds(60)))
         timer.resume()
