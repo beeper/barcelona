@@ -16,6 +16,19 @@ public extension Chat {
         imChat.markAllMessagesAsRead()
     }
     
+    func sendReturningRaw(message createMessage: CreateMessage) throws -> IMMessage {
+        let message = try createMessage.imMessage(inChat: self.id)
+            
+        Chat.delegate?.chat(self, willSendMessages: [message], fromCreateMessage: createMessage)
+        
+        Thread.main.sync {
+            markAsRead()
+            imChat.send(message)
+        }
+        
+        return message
+    }
+    
     func send(message options: CreatePluginMessage) throws -> Message {
         let message = try options.imMessage(inChat: self.id)
         
@@ -30,16 +43,7 @@ public extension Chat {
     }
     
     func send(message createMessage: CreateMessage) throws -> Message {
-        let message = try createMessage.imMessage(inChat: self.id)
-            
-        Chat.delegate?.chat(self, willSendMessages: [message], fromCreateMessage: createMessage)
-        
-        Thread.main.sync {
-            markAsRead()
-            imChat.send(message)
-        }
-        
-        return Message(messageItem: message._imMessageItem, chatID: imChat.id)
+        return Message(messageItem: try sendReturningRaw(message: createMessage)._imMessageItem, chatID: imChat.id)
     }
     
     func tapback(_ creation: TapbackCreation) throws -> Message {
