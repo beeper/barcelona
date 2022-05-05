@@ -201,7 +201,7 @@ typedef NS_ENUM(NSInteger, IMChatJoinState) {
 - (void)sendMessage:(IMMessage*)arg1;
 - (void)_sendMessage:(IMMessage*)arg1 adjustingSender:(BOOL)adjustingSender shouldQueue:(BOOL)shouldQueue;
 - (void)_fixItemForSendingMessageTime:(id)arg1;
-- (void)cancelMessage:(id)arg1;
+- (void)cancelMessage:(IMMessage*)arg1;
 - (void)declineInvitation;
 - (void)acceptInvitation;
 @property(readonly, nonatomic) BOOL hasUnhandledInvitation;
