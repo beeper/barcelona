@@ -67,6 +67,9 @@ public class _CBFeatureFlags: FlagProvider {
     @FeatureFlag("blocklist", defaultValue: true)
     public var enableBlocklist: Bool
     
+    @FeatureFlag("media-monitor-timeout", defaultValue: true)
+    public var mediaMonitorTimeout: Bool
+    
     public var withholdPartialFailures: Bool {
         get {
             overrideWithholdPartialFailures ?? _withholdPartialFailures

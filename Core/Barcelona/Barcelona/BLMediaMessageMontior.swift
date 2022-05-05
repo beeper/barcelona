@@ -22,6 +22,7 @@ public class BLMediaMessageMonitor {
     @Published public private(set) var transferStates: [String: IMFileTransfer.IMFileTransferState]
     private var completionMonitor: AnyCancellable?
     private var observer: NotificationSubscription?
+    private var timeout: DispatchSourceTimer?
     private let callback: (Bool, FZErrorType?) -> ()
     
     public init(messageID: @autoclosure @escaping () -> String, transferGUIDs: [String], callback: @escaping (Bool, FZErrorType?) -> ()) {
@@ -62,11 +63,15 @@ public class BLMediaMessageMonitor {
             }
             self.handle(updatedEvent: latestEvent, updatedStates: latestStates)
         }
+        if CBFeatureFlags.mediaMonitorTimeout {
+            startTimer()
+        }
     }
     
     deinit {
         monitor?.cancel()
         observer?.unsubscribe()
+        timeout?.cancel()
         log.debug("Deallocating message monitor for message %@ and transfers %@", messageID(), transferGUIDs)
     }
     
@@ -76,6 +81,7 @@ public class BLMediaMessageMonitor {
         guard result == nil else {
             return
         }
+        timeout?.cancel()
         completionMonitor = nil
         result = (success, code)
         self.callback(success, code)
@@ -135,5 +141,21 @@ public class BLMediaMessageMonitor {
             return
         }
         log.debug("%@; errorCode=%@", message.debugDescription, message.errorCode.description)
+    }
+}
+
+private extension BLMediaMessageMonitor {
+    func startTimer() {
+        let timer = DispatchSource.makeTimerSource(flags: [], queue: .global(qos: .userInitiated))
+        timer.setEventHandler { [weak self] in
+            guard let self = self else {
+                return
+            }
+            log.warn("Failed to send message %@ with attachments %@ in a timely manner! This is very, very sad.", self.messageID(), self.transferGUIDs)
+            self.snap(success: false, code: .attachmentUploadFailure)
+        }
+        timer.schedule(deadline: .now().advanced(by: .seconds(60)))
+        timer.resume()
+        timeout = timer
     }
 }
