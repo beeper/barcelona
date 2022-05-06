@@ -9,3 +9,4 @@ archive
 imessage-rest-ios/layout/Applications
 SourcePackages
 *.xcodeproj
+Beeper/barcelona-mautrix/Info.plist

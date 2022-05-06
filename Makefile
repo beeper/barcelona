@@ -6,6 +6,11 @@ MACOS_DESTINATION = "generic/platform=macOS,name=Any Mac"
 IOS_DERIVED_DIR = $(BUILD_DIR)/iOS
 IOS_DESTINATION = "generic/platform=iOS,name=Any iOS Device"
 
+GIT_TAG := $(shell git tag --points-at HEAD)
+ifeq ($(GIT_TAG),)
+GIT_TAG := $(shell git log -q -n 1 | head -n 1 | cut -f 2 -d ' ')
+endif
+
 clean:
 	rm -rf barcelona.xcodeproj Build
 
@@ -13,10 +18,9 @@ soft-clean:
 	rm -rf barcelona.xcodeproj
 
 init:
-	vendor/bin/xcodegen generate
+	GIT_TAG=${GIT_TAG} vendor/bin/xcodegen generate
 	
-refresh:
-	vendor/bin/xcodegen generate
+refresh: init
 
 scheme:
 	xcodebuild \

@@ -32,6 +32,12 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.apple.iChat
         PRODUCT_NAME: barcelona-mautrix-${platform}
         PRODUCT_MODULE_NAME: barcelona_mautrix
+        CREATE_INFOPLIST_SECTION_IN_BINARY: YES
+    info:
+      path: ../Beeper/barcelona-mautrix/Info.plist
+      properties:
+        CFBundleVersion: ${GIT_TAG}
+        CFBundleIdentifier: com.beeper.barcelona-mautrix
     dependencies:
       - target: Barcelona
         embed: true
