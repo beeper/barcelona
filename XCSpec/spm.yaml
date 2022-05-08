@@ -56,3 +56,6 @@ packages:
   ERBufferedStream:
     url: https://github.com/EricRabil/ERBufferedStream
     from: 1.0.4
+  Sentry:
+    url: https://github.com/getsentry/sentry-cocoa
+    from: 7.14.0

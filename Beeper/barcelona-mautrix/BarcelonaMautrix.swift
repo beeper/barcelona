@@ -11,6 +11,8 @@ import Barcelona
 import BarcelonaMautrixIPC
 import IMCore
 import BarcelonaJS
+import SwiftCLI
+import Sentry
 
 @main
 class BarcelonaMautrix {
@@ -23,6 +25,32 @@ class BarcelonaMautrix {
         
         CFPreferencesSetAppValue("Log" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
         CFPreferencesSetAppValue("Log.All" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
+        if let configurator = IMCSharedSentryConfigurator() {
+            CLInfo("CoreSentry", "Setting up CoreSentry-flavored Sentry integration")
+            configurator.productName = "barcelona-mautrix"
+            // even if CoreSentry is a release build we might be a debug build
+            #if DEBUG
+            configurator.debug = true
+            #else
+            configurator.debug = false
+            #endif
+            if !configurator.knownProduct {
+                CLWarn("CoreSentry", "CoreSentry has no DSN for us!")
+            }
+            configurator.startSentry()
+            if ProcessInfo.processInfo.arguments.count > 1, ProcessInfo.processInfo.arguments[1] == "sentry" {
+                let cli = CLI(name: "barcelona-mautrix")
+                cli.commands = [SentryCLICommandGroup(configurator.commandGroup)]
+                cli.goAndExit()
+            }
+        } else if let dsn = ProcessInfo.processInfo.environment["SENTRY_DSN"] {
+            CLInfo("CoreSentry", "Setting up fallback sentry using DSN \(dsn, privacy: .public)")
+            SentrySDK.start { options in
+                options.dsn = dsn
+            }
+        } else {
+            CLInfo("CoreSentry", "Starting without setting up Sentry")
+        }
         
         shared.run()
     }

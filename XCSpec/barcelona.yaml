@@ -15,6 +15,7 @@ targets:
       - package: Swog
       - package: Pwomise
       - package: FeatureFlags
+      - package: Sentry
       - target: BarcelonaDB
         embed: true
         link: true
@@ -27,6 +28,7 @@ targets:
     dependencies:
       - package: GRDB
       - package: BarcelonaFoundation
+      - package: Sentry
       - package: Swog
   BarcelonaJS:
     group: Core

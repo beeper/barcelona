@@ -12,6 +12,7 @@ targets:
     dependencies:
       - package: BarcelonaFoundation
       - package: FeatureFlags
+      - package: Sentry
       - package: ERBufferedStream
       - target: Barcelona
         embed: true
@@ -48,6 +49,8 @@ targets:
       - target: BarcelonaJS
         embed: true
         link: true
+      - package: SwiftCLI
+      - package: Sentry
   barcelona-mautrix-tests:
     group: Beeper
     templates:
