@@ -58,4 +58,4 @@ packages:
     from: 1.0.4
   Sentry:
     url: https://github.com/getsentry/sentry-cocoa
-    from: 7.14.0
+    from: 7.15.0
