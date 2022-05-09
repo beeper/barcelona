@@ -9,6 +9,7 @@
 import Foundation
 @_spi(messageExpertControlFlow) import Barcelona
 import IMCore
+import Sentry
 
 public protocol Runnable {
     func run(payload: IPCPayload)
@@ -21,6 +22,9 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         guard let chat = cbChat else {
             return payload.fail(strategy: .chat_not_found)
         }
+        
+        let transaction = SentrySDK.startTransaction(name: "send-message", operation: "send-media-message")
+        
         let messagesDirectory = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true).appendingPathComponent("Library").appendingPathComponent("Messages")
         let messagesPath = messagesDirectory.path
         var pathOnDisk = path_on_disk
@@ -28,6 +32,10 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         do {
             try FileManager.default.moveItem(atPath: path_on_disk, toPath: pathOnDisk)
         } catch {
+            SentrySDK.capture(error: error) { scope in
+                scope.span = transaction
+            }
+            transaction.setData(value: true, key: "fallback_to_ipc_transfer_path")
             pathOnDisk = path_on_disk
         }
         
@@ -44,17 +52,34 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         if CBFeatureFlags.permitAudioOverMautrix {
             if is_audio_message == true {
                 messageCreation.isAudioMessage = true
+                transaction.setData(value: true, key: "audio_message")
             }
         }
         
         do {
+            transaction.setData(value: transfer.totalBytes, key: "bytes")
+            transaction.setData(value: transfer.mimeType ?? mime_type, key: "mime")
+            transaction.setData(value: transfer.guid, key: "transfer_guid")
+            
             var monitor: BLMediaMessageMonitor?, message: IMMessage?
             monitor = BLMediaMessageMonitor(messageID: message?.id ?? "", transferGUIDs: [transfer.guid]) { success, failureCode, shouldCancel in
                 if pathOnDisk.hasSuffix("-barcelonatmp") {
                     try? FileManager.default.removeItem(atPath: pathOnDisk)
                 }
                 guard let message = message else {
+                    SentrySDK.capture(message: "aborting media processing because the message was never set") { scope in
+                        scope.span = transaction
+                    }
+                    transaction.finish(status: .cancelled)
                     return
+                }
+                transaction.setData(value: success, key: "success")
+                transaction.setData(value: failureCode?.description, key: "failure_code")
+                transaction.setData(value: shouldCancel, key: "should_cancel")
+                if success {
+                    transaction.finish(status: .ok)
+                } else {
+                    transaction.finish(status: .unknownError)
                 }
                 if !canSendReceiptImmediately {
                     if success {
@@ -75,10 +100,16 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             
             message = try chat.sendReturningRaw(message: messageCreation)
             
+            transaction.setData(value: message?.guid, key: "message_guid")
+            
             if canSendReceiptImmediately {
                 payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message!.id, timestamp: Date().timeIntervalSinceNow)))
             }
         } catch {
+            SentrySDK.capture(error: error) { scope in
+                scope.span = transaction
+            }
+            transaction.finish(status: .internalError)
             CLFault("BLMautrix", "failed to send media message: %@", error as NSError)
             payload.fail(code: "internal_error", message: "Sorry, we're having trouble processing your attachment upload.")
         }
