@@ -10,20 +10,6 @@ import Foundation
 import Barcelona
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
-    public internal(set) static var sendingMessages: [String: IPCPayload] = [:]
-    
-    public enum MessageHandlingBehavior {
-        case process, suppress(IPCPayload)
-    }
-    
-    public static func messageSent(withGUID guid: String) -> MessageHandlingBehavior {
-        if let payload = sendingMessages.removeValue(forKey: guid) {
-            return .suppress(payload)
-        } else {
-            return .process
-        }
-    }
-    
     public func run(payload: IPCPayload) {
         guard let chat = cbChat else {
             return payload.fail(strategy: .chat_not_found)
@@ -51,15 +37,5 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
             CLFault("BLMautrix", "failed to send text message: %@", error as NSError)
             payload.fail(code: "internal_error", message: (error as NSError).localizedFailureReason ?? error.localizedDescription)
         }
-    }
-}
-
-extension SendMessageCommand {
-    static func replyToMessageGUID(_ guid: String, command: IPCCommand) {
-        sendingMessages.removeValue(forKey: guid)?.reply(withCommand: command)
-    }
-
-    static func replyToMessageGUID(_ guid: String, response: IPCResponse) {
-        replyToMessageGUID(guid, command: .response(response))
     }
 }

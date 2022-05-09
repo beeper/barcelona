@@ -38,67 +38,12 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         BLWritePayload(.init(command: command))
     }
     
-    @_spi(unitTestInternals) public func receiveStatusChange(_ change: CBMessageStatusChange) {
-        if change.chat.isSingle, !change.fromMe, let sender = change.sender, BLBlocklistController.shared.isSenderBlocked(sender) {
-            return
-        }
-        
-        switch change.type {
-        case .read:
-            send(.read_receipt(BLReadReceipt(sender_guid: change.mautrixFriendlyGUID, is_from_me: change.fromMe, chat_guid: change.chat.guid, read_up_to: change.messageID)))
-        case .notDelivered:
-            if case .suppress(let responsePayload) = SendMessageCommand.messageSent(withGUID: change.messageID) {
-                responsePayload.fail(code: "internal_error", message: "Sorry, we couldn't send your message.")
-            }
-        default:
-            break
-        }
-    }
-    
     @_spi(unitTestInternals) public func receiveTyping(_ chat: String, _ typing: Bool) {
         if let chat = IMChat.resolve(withIdentifier: chat), chat.isSingle, let recipientID = chat.recipient?.id, BLBlocklistController.shared.isSenderBlocked(recipientID) {
             return
         }
         
         send(.typing(.init(chat_guid: Chat.resolve(withIdentifier: chat)!.imChat.guid, typing: typing)))
-    }
-    
-    @_spi(unitTestInternals) public func receiveMessage(_ message: Message) {
-        if let sender = message.sender, BLBlocklistController.shared.isSenderBlocked(sender) {
-            return
-        }
-        
-        if message.fromMe, message.isSent || message.isUnsent, case .suppress(let payload) = SendMessageCommand.messageSent(withGUID: message.id) {
-            if message.isSent {
-                payload.reply(withResponse: .message_receipt(message.partialMessage))
-            } else {
-                let errorCode = message.refreshedErrorCode()
-                let errorMessage = errorCode.localizedDescription ?? "Your message couldn't be sent to iMessage."
-                payload.fail(code: errorCode.description, message: errorMessage)
-            }
-            CLInfo("Mautrix", "Dropping last-sent message \(message.id)")
-            return
-        }
-        
-        if CBPurgedAttachmentController.shared.enabled {
-            if message.fileTransferIDs.count > 0 {
-                CBPurgedAttachmentController.shared.process(transferIDs: message.fileTransferIDs).then { [send, message] in
-                    send(.message(BLMessage(message: message.refresh())))
-                }
-                
-                return
-            }
-        }
-        
-        send(.message(BLMessage(message: message)))
-        
-        if message.fromMe, message.isReadByMe, MXFeatureFlags.shared.enableReadHelpers {
-            message.chat.messages(before: message.id, limit: 1, beforeDate: nil).first.then { [send] message in
-                if let message = message {
-                    send(.read_receipt(.init(sender_guid: nil, is_from_me: true, chat_guid: message.imChat.guid, read_up_to: message.id)))
-                }
-            }
-        }
     }
     
     @_spi(unitTestInternals) public func unreadCountChanged(_ chat: String, _ count: Int) {
@@ -145,12 +90,18 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 if let senderID = message.senderID, BLBlocklistController.shared.isSenderBlocked(senderID) {
                     return
                 }
+                if CBPurgedAttachmentController.shared.enabled {
+                    if message.fileTransferIDs.count > 0 {
+                        CBPurgedAttachmentController.shared.process(transferIDs: message.fileTransferIDs).then { [message] in
+                            BLWritePayload(.init(command: .message(BLMessage(message: message.refresh()))))
+                        }
+                        return
+                    }
+                }
                 BLWritePayload(.init(command: .message(BLMessage(message: message))))
-            case .sent(id: let id, chat: let chat, time: let time):
-                SendMessageCommand.replyToMessageGUID(id, response: .message_receipt(BLPartialMessage(guid: id, timestamp: time ?? Date().timeIntervalSince1970)))
+            case .sent(id: let id, chat: let chat, time: _):
                 BLWritePayload(.init(command: .send_message_status(BLMessageStatus(sentMessageGUID: id, forChatGUID: chat.senderCorrelatableGUID))))
             case .failed(id: let id, chat: let chat, code: let code):
-                SendMessageCommand.replyToMessageGUID(id, command: .error(.init(code: code.description, message: code.localizedDescription ?? "")))
                 BLWritePayload(.init(command: .send_message_status(BLMessageStatus(guid: id, chatGUID: chat.senderCorrelatableGUID, status: .failed, message: code.localizedDescription, statusCode: code.description))))
             default:
                 break
