@@ -90,11 +90,3 @@ public class SentryCLICommandGroup: CommandGroup {
     public private(set) lazy var children: [Routable] = group.children.map { unsafeBitCast($0, to: SentryCommand.self) }.map(SentryCLICommand.init(_:))
 }
 #endif
-
-
-func BLStartSentry() {
-    guard let configurator = IMCSharedSentryConfigurator() else {
-        return
-    }
-}
-
