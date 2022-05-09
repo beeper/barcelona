@@ -34,8 +34,7 @@ SWIFT_COMPILATION_MODE[variant=Release]=wholemodule
 SWIFT_OPTIMIZATION_LEVEL[variant=Debug]=-Onone
 SWIFT_OPTIMIZATION_LEVEL[variant=Release]=-O -whole-module-optimization
 
-STRIP_SWIFT_SYMBOLS[variant=Debug]=NO
-STRIP_SWIFT_SYMBOLS[variant=Release]=YES
+STRIP_SWIFT_SYMBOLS=NO
 
 GCC_OPTIMIZATION_LEVEL[variant=Debug]=0
 GCC_OPTIMIZATION_LEVEL[variant=Release]=s
