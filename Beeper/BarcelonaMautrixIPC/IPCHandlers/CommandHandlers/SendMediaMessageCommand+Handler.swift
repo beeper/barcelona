@@ -31,6 +31,11 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             pathOnDisk = path_on_disk
         }
         
+        // if the path on disk points to the ipc path, ipc might delete. if thats the case, wait until the transfer is uploaded.
+        var canSendReceiptImmediately: Bool {
+            pathOnDisk != path_on_disk
+        }
+        
         let transfer = CBInitializeFileTransfer(filename: file_name, path: URL(fileURLWithPath: pathOnDisk))
         var messageCreation = CreateMessage(parts: [
             .init(type: .attachment, details: transfer.guid)
@@ -51,22 +56,28 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                 guard let message = message else {
                     return
                 }
-                if success {
-                    payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message.id, timestamp: Date().timeIntervalSinceNow)))
-                } else {
-                    if let failureCode = failureCode {
+                if !canSendReceiptImmediately {
+                    if success {
+                        payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message.id, timestamp: Date().timeIntervalSinceNow)))
+                    } else if let failureCode = failureCode {
                         payload.fail(code: failureCode.description, message: failureCode.localizedDescription ?? failureCode.description)
                     } else {
                         payload.fail(strategy: .internal_error("Your message was unable to be sent."))
                     }
-                    if shouldCancel {
-                        chat.imChat.cancel(message)
-                    }
+                } else if !success {
+                    // this case should be handled by the send_message_status handlers. if it is not, that is a serious bug.
+                }
+                if !success && shouldCancel {
+                    chat.imChat.cancel(message)
                 }
                 monitor = nil
             }
             
             message = try chat.sendReturningRaw(message: messageCreation)
+            
+            if canSendReceiptImmediately {
+                payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message!.id, timestamp: Date().timeIntervalSinceNow)))
+            }
         } catch {
             CLFault("BLMautrix", "failed to send media message: %@", error as NSError)
             payload.fail(code: "internal_error", message: "Sorry, we're having trouble processing your attachment upload.")
