@@ -84,7 +84,7 @@
 
 + (id)filterIMHandlesForBestAccountSiblings:(id)arg1;
 + (id)filterIMHandlesForAccountSiblings:(id)arg1 onAccount:(id)arg2;
-+ (id)bestIMHandleInArray:(id)arg1;
++ (IMHandle*)bestIMHandleInArray:(NSArray<IMHandle*>*)arg1;
 + (id)imHandlesForIMPerson:(id)arg1;
 + (BOOL)supportsSecureCoding;
 + (id)nameOfStatus:(unsigned long long)arg1;
