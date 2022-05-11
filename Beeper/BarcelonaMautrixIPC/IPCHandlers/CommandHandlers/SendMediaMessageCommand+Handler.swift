@@ -89,8 +89,8 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                     } else {
                         payload.fail(strategy: .internal_error("Your message was unable to be sent."))
                     }
-                } else if !success {
-                    // this case should be handled by the send_message_status handlers. if it is not, that is a serious bug.
+                } else if !success && shouldCancel {
+                    BLWritePayload(.init(command: .send_message_status(.init(guid: message.id, chatGUID: chat.id, status: .failed, message: failureCode?.localizedDescription, statusCode: failureCode?.description))))
                 }
                 if !success && shouldCancel {
                     chat.imChat.cancel(message)
