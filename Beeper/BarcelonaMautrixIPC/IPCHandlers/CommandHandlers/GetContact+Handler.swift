@@ -12,6 +12,7 @@ import IMSharedUtilities
 import IMCore
 import Barcelona
 import SwiftyContacts
+import Sentry
 
 extension IMBusinessNameManager {
     func addCallback(forURI uri: String, callback: @escaping (NSString) -> ()) {
@@ -24,9 +25,14 @@ extension IMBusinessNameManager {
 internal var BMXContactListIsBuilding = false
 
 public func BMXGenerateContactList(omitAvatars: Bool = false, asyncLookup: Bool = false) -> [BLContact] {
+    let transaction = SentrySDK.startTransaction(name: "get_contacts", operation: "get_contacts")
+    
     BMXContactListIsBuilding = true
     defer { BMXContactListIsBuilding = false }
     var contacts: [CNContact] = []
+    
+    let enumerateTransaction = transaction.startChild(operation: "enumerate_cn_contacts")
+    
     try! CNContactStore().enumerateContacts(with: CNContactFetchRequest(keysToFetch: [
         CNContactIdentifierKey,
         CNContactEmailAddressesKey,
@@ -47,16 +53,30 @@ public func BMXGenerateContactList(omitAvatars: Bool = false, asyncLookup: Bool 
     ] + (omitAvatars ? [] : [CNContactImageDataKey]) as! [CNKeyDescriptor])) { contact, stop in
         contacts.append(contact)
     }
+    
+    enumerateTransaction.setData(value: contacts.count, key: "enumerated_count")
+    enumerateTransaction.finish()
+    
     var finalized: [BLContact] = [BLContact](repeating: BLContact(), count: contacts.count)
     var loadedHandles: [String: [IMHandle]] = [:]
     let semaphore = DispatchSemaphore(value: 0)
+    
+    let handleResolution = transaction.startChild(operation: "resolve_handles")
+    
     DispatchQueue.global(qos: .utility).async {
         IMHandle.handles(for: Set(contacts), useBestHandle: false, useExtendedAsyncLookup: asyncLookup) { result in
             loadedHandles = result ?? [:]
             semaphore.signal()
         }
     }
+    
     semaphore.wait()
+    
+    handleResolution.setData(value: loadedHandles.count, key: "resolved_count")
+    handleResolution.finish()
+    
+    let processingTransaction = transaction.startChild(operation: "process_results")
+    
     DispatchQueue.concurrentPerform(iterations: contacts.count) { index in
         let contact = contacts[index]
         let results = loadedHandles[contact.identifier] ?? []
@@ -64,18 +84,32 @@ public func BMXGenerateContactList(omitAvatars: Bool = false, asyncLookup: Bool 
         collector.omitAvatars = omitAvatars
         collector.collect(contact)
         results.forEach { collector.collect($0) }
-        guard let id = CBSenderCorrelationController.shared.externalIdentifier(
-            from: results,
-            phoneNumbers: Array(collector.phoneNumbers),
-            emailAddresses: Array(collector.emailAddresses)
-        ) else {
+        guard let id = collector.bestID(includingHandles: results) else {
             return
         }
         collector.primaryIdentifier = id
         collector.handleID = collector.serviceHint + ";-;" + id
         finalized[index] = collector.finalize()
     }
-    return finalized.filter { !$0.user_guid.isEmpty }
+    
+    processingTransaction.setData(value: finalized.count, key: "finalized_count")
+    processingTransaction.finish()
+    
+    let results = finalized.filter { !$0.user_guid.isEmpty }
+    
+    transaction.setData(value: results.count, key: "results_count")
+    transaction.finish()
+    
+    return results
+}
+
+extension ContactInfoCollector {
+    func bestID(includingHandles handles: [IMHandle] = []) -> String? {
+        if !handles.isEmpty, let handle = IMHandle.bestIMHandle(in: handles), let id = handle.idWithoutResource {
+            return id
+        }
+        return phoneNumbers.first ?? emailAddresses.first
+    }
 }
 
 extension CNContact {
