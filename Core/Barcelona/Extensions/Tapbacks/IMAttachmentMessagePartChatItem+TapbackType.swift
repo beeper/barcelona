@@ -33,14 +33,17 @@ extension IMAttachmentMessagePartChatItem {
     var tapBackType: TapBackSpecificItemType {
         guard let transferGUID = transferGUID, let transfer = IMFileTransferCenter.sharedInstance().transfer(forGUID: transferGUID) else { return .attachment }
         
-        let utType = transfer.type as CFString
-        if (isAudioMessage || UTTypeConformsTo(utType, kUTTypeAudio)) { return .audioMessage }
-        if UTTypeConformsTo(utType, kUTTypeImage) { return .image }
-        if UTTypeConformsTo(utType, kUTTypeContact) { return .contact }
-        if UTTypeConformsTo(utType, kUTTypeCalendarEvent) { return .event }
-        if transfer.mimeType == "text/x-vlocation" { return .location }
-        if UTTypeConformsTo(utType, kUTTypeMovie) { return .movie }
-        if transfer.mimeType == "application/vnd.apple.pkpass" { return .walletPass }
+        if let utType = transfer.type as CFString? {
+            if (isAudioMessage || UTTypeConformsTo(utType, kUTTypeAudio)) { return .audioMessage }
+            if UTTypeConformsTo(utType, kUTTypeImage) { return .image }
+            if UTTypeConformsTo(utType, kUTTypeContact) { return .contact }
+            if UTTypeConformsTo(utType, kUTTypeCalendarEvent) { return .event }
+            if UTTypeConformsTo(utType, kUTTypeMovie) { return .movie }
+        }
+        if let mimeType = transfer.mimeType {
+            if mimeType == "text/x-vlocation" { return .location }
+            if mimeType == "application/vnd.apple.pkpass" { return .walletPass }
+        }
         
         return .attachment
     }
