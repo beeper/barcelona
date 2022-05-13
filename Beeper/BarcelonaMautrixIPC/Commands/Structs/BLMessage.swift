@@ -18,7 +18,7 @@ internal extension Chat {
 
 internal extension IMChat {
     var blChatGUID: String {
-        "iMessage;\(isGroup ? "+" : "-");\(id)"
+        "\(account.serviceName ?? "SMS");\(isGroup ? "+" : "-");\(id)"
     }
 }
 
