@@ -55,6 +55,16 @@ private extension Message {
     }
 }
 
+private extension ParticipantChangeItem {
+    func blTargetGUID(on service: String, isGroup: Bool) -> String? {
+        guard let targetID = targetID else {
+            return nil
+        }
+        
+        return "\(service);\(isGroup ? "+" : "-");\(targetID)"
+    }
+}
+
 public struct BLMessage: Codable, ChatResolvable {
     public var guid: String
     public var timestamp: Double
@@ -72,6 +82,8 @@ public struct BLMessage: Codable, ChatResolvable {
     public var new_group_title: String?
     public var is_audio_message: Bool?
     public var is_read: Bool
+    public var item_type: Int64?
+    public var target: String?
     
     public init(message: Message) {
         guid = message.id
@@ -94,8 +106,14 @@ public struct BLMessage: Codable, ChatResolvable {
             switch item.item {
             case let changeItem as GroupTitleChangeItem:
                 self.new_group_title = changeItem.title
-            case let action as GroupActionItem:
-                self.group_action_type = Int(action.actionType.rawValue)
+                self.item_type = IMItemType.groupTitleChange.rawValue
+            case let action as ParticipantChangeItem:
+                self.group_action_type = Int(action.changeType)
+                self.item_type = IMItemType.participantChange.rawValue
+                self.target = action.blTargetGUID(on: service, isGroup: message.imChat.isGroup)
+            case let item as GroupActionItem:
+                self.group_action_type = Int(item.actionType.rawValue)
+                self.item_type = IMItemType.groupAction.rawValue
             case let acknowledgment as AcknowledgmentChatItem:
                 guard let parsedID = CBMessageItemIdentifierData(rawValue: acknowledgment.associatedID), let part = parsedID.part else {
                     continue
