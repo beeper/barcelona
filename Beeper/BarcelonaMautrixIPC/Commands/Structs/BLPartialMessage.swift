@@ -11,11 +11,12 @@ import Barcelona
 
 public struct BLPartialMessage: Codable {
     public var guid: String
+    public var service: String
     public var timestamp: Double
 }
 
 public extension Message {
     var partialMessage: BLPartialMessage {
-        BLPartialMessage(guid: id, timestamp: time)
+        BLPartialMessage(guid: id, service: service.rawValue, timestamp: time)
     }
 }

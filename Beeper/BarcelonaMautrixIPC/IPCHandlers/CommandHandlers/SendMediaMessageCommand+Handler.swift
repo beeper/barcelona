@@ -99,7 +99,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                 }
                 if !canSendReceiptImmediately {
                     if success {
-                        payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message.id, timestamp: Date().timeIntervalSinceNow)))
+                        payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message.id, service: resolveMessageService(), timestamp: Date().timeIntervalSinceNow)))
                     } else if let failureCode = failureCode {
                         payload.fail(code: failureCode.description, message: failureCode.localizedDescription ?? failureCode.description)
                     } else {
@@ -119,7 +119,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             transaction.setData(value: message?.guid, key: "message_guid")
             
             if canSendReceiptImmediately {
-                payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message!.id, timestamp: Date().timeIntervalSinceNow)))
+                payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message!.id, service: resolveMessageService(), timestamp: Date().timeIntervalSinceNow)))
             }
         } catch {
             SentrySDK.capture(error: error) { scope in

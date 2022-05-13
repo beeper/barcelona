@@ -31,7 +31,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
         
         do {
             let message = try chat.send(message: messageCreation)
-            payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message.id, timestamp: message.time)))
+            payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message.id, service: message.service.rawValue, timestamp: message.time)))
         } catch {
             // girl fuck
             CLFault("BLMautrix", "failed to send text message: %@", error as NSError)
