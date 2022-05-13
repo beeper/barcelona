@@ -44,8 +44,8 @@ public class CBIDSListener: ERBaseIDSListener {
     
     private let queue = DispatchQueue(label: "com.ericrabil.ids", attributes: [], autoreleaseFrequency: .workItem)
     
-    public override func messageReceived(_ arg1: [AnyHashable : Any]!, withGUID arg2: String!, withPayload arg3: [AnyHashable : Any]!, forTopic topic: String!, toIdentifier arg5: String!, fromID arg6: String!, context arg7: [AnyHashable : Any]!) {
-        guard let payload = arg1["IDSIncomingMessagePushPayload"] as? [String: Any] else {
+    public override func messageReceived(_ arg1: [AnyHashable : Any]?, withGUID arg2: String?, withPayload arg3: [AnyHashable : Any]?, forTopic topic: String?, toIdentifier: String?, fromID arg6: String?, context arg7: [AnyHashable : Any]?) {
+        guard let payload = arg1?["IDSIncomingMessagePushPayload"] as? [String: Any] else {
             return
         }
         
@@ -57,7 +57,7 @@ public class CBIDSListener: ERBaseIDSListener {
             return
         }
         
-        guard let idsContext = IDSMessageContext(dictionary: arg7, boostContext: nil) else {
+        guard let rawContext = arg7, let idsContext = IDSMessageContext(dictionary: rawContext, boostContext: nil) else {
             return
         }
         
@@ -76,10 +76,18 @@ public class CBIDSListener: ERBaseIDSListener {
             }
         }
         
+        var uris: [String] = []
+        if let sender = payload["sP"] as? String {
+            uris.append(sender)
+        }
+        if let toIdentifier = toIdentifier, !toIdentifier.isEmpty {
+            uris.append(toIdentifier)
+        }
+        
         queue.schedule {
             switch command {
             case .readReceipt, .smsReadReceipt:
-                guard let sender = payload["sP"] as? String, let timestamp = payload["e"] as? Int64, self.myDestinationURIs.contains(items: [sender, arg5]) else {
+                guard let timestamp = payload["e"] as? Int64, self.myDestinationURIs.contains(items: uris) else {
                     return
                 }
                 
