@@ -106,7 +106,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                         payload.fail(strategy: .internal_error("Your message was unable to be sent."))
                     }
                 } else if !success && shouldCancel {
-                    BLWritePayload(.init(command: .send_message_status(.init(guid: message.id, chatGUID: message._imMessageItem.service ?? chat.service?.rawValue ?? "iMessage", status: .failed, service: resolveMessageService(), message: failureCode?.localizedDescription, statusCode: failureCode?.description))))
+                    BLWritePayload(.init(command: .send_message_status(.init(guid: message.id, chatGUID: chat.blChatGUID, status: .failed, service: resolveMessageService(), message: failureCode?.localizedDescription, statusCode: failureCode?.description))))
                 }
                 if !success && shouldCancel {
                     chat.imChat.cancel(message)
