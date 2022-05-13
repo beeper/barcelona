@@ -10,6 +10,18 @@ import Foundation
 import Barcelona
 import IMCore
 
+internal extension Chat {
+    var blChatGUID: String {
+        imChat.blChatGUID
+    }
+}
+
+internal extension IMChat {
+    var blChatGUID: String {
+        "iMessage;\(isGroup ? "+" : "-");\(id)"
+    }
+}
+
 private extension Message {
     var blSenderGUID: String? {
         guard let sender = sender, !fromMe else {
@@ -17,6 +29,10 @@ private extension Message {
         }
         
         return "\(service.rawValue);\(isGroup ? "+" : "-");\(sender)"
+    }
+    
+    var blChatGUID: String {
+        imChat.blChatGUID
     }
     
     var isGroup: Bool {
@@ -46,6 +62,7 @@ public struct BLMessage: Codable, ChatResolvable {
     public var text: String
     public var chat_guid: String
     public var sender_guid: String?
+    public var service: String
     public var is_from_me: Bool
     public var thread_originator_guid: String?
     public var thread_originator_part: Int
@@ -61,8 +78,9 @@ public struct BLMessage: Codable, ChatResolvable {
         timestamp = message.time / 1000 // mautrix-imessage expects this to be seconds
         subject = message.subject
         text = message.textContent
-        chat_guid = IMChat.resolve(withIdentifier: message.chatID)!.guid!
+        chat_guid = message.blChatGUID
         sender_guid = message.blSenderGUID
+        service = message.service.rawValue
         is_from_me = message.fromMe
         thread_originator_guid = message.threadOriginator
         thread_originator_part = 0

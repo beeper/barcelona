@@ -43,7 +43,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
             return
         }
         
-        send(.typing(.init(chat_guid: Chat.resolve(withIdentifier: chat)!.imChat.guid, typing: typing)))
+        send(.typing(.init(chat_guid: Chat.resolve(withIdentifier: chat)!.imChat.blChatGUID, typing: typing)))
     }
     
     @_spi(unitTestInternals) public func unreadCountChanged(_ chat: String, _ count: Int) {
@@ -57,7 +57,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         
         if chat.unreadMessageCount == 0, let lastMessageID = chat.lastMessage?.id {
             CLInfo("Mautrix", "Read count for chat \(chat.id, privacy: .public): \(chat.unreadMessageCount, privacy: .public)")
-            BLWritePayload(.init(id: nil, command: .read_receipt(.init(sender_guid: nil, is_from_me: true, chat_guid: chat.guid, read_up_to: lastMessageID))))
+            BLWritePayload(.init(id: nil, command: .read_receipt(.init(sender_guid: nil, is_from_me: true, chat_guid: chat.blChatGUID, read_up_to: lastMessageID))))
         }
     }
     
@@ -81,7 +81,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
             if let sender = change.sender, BLBlocklistController.shared.isSenderBlocked(sender) {
                 return
             }
-            BLWritePayload(.init(command: .read_receipt(BLReadReceipt(sender_guid: change.mautrixFriendlyGUID, is_from_me: change.fromMe, chat_guid: change.chat.guid, read_up_to: change.messageID))))
+            BLWritePayload(.init(command: .read_receipt(BLReadReceipt(sender_guid: change.mautrixFriendlyGUID, is_from_me: change.fromMe, chat_guid: change.chat.blChatGUID, read_up_to: change.messageID))))
         }
         
         BLMessageExpert.shared.eventPipeline.pipe { event in
@@ -99,10 +99,10 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                     }
                 }
                 BLWritePayload(.init(command: .message(BLMessage(message: message))))
-            case .sent(id: let id, chat: let chat, time: _):
-                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(sentMessageGUID: id, forChatGUID: chat.senderCorrelatableGUID))))
-            case .failed(id: let id, chat: let chat, code: let code):
-                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(guid: id, chatGUID: chat.senderCorrelatableGUID, status: .failed, message: code.localizedDescription, statusCode: code.description))))
+            case .sent(id: let id, service: let service, chat: let chat, time: _):
+                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(sentMessageGUID: id, onService: service, forChatGUID: chat.blChatGUID))))
+            case .failed(id: let id, service: let service, chat: let chat, code: let code):
+                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(guid: id, chatGUID: chat.blChatGUID, status: .failed, service: service, message: code.localizedDescription, statusCode: code.description))))
             default:
                 break
             }

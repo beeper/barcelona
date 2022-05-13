@@ -36,7 +36,7 @@ public class CBIDSListener: ERBaseIDSListener {
     }()
     
     public let senderCorrelationPipeline = CBPipeline<(senderID: String, correlationID: String)>()
-    public let reflectedReadReceiptPipeline = CBPipeline<(guid: String, time: Date)>()
+    public let reflectedReadReceiptPipeline = CBPipeline<(guid: String, service: String, time: Date)>()
     
     private var myDestinationURIs: [String] {
         IMAccountController.shared.iMessageAccount?.aliases.map { IDSDestination(uri: $0).uri().prefixedURI } ?? []
@@ -44,7 +44,7 @@ public class CBIDSListener: ERBaseIDSListener {
     
     private let queue = DispatchQueue(label: "com.ericrabil.ids", attributes: [], autoreleaseFrequency: .workItem)
     
-    public override func messageReceived(_ arg1: [AnyHashable : Any]!, withGUID arg2: String!, withPayload arg3: [AnyHashable : Any]!, forTopic arg4: String!, toIdentifier arg5: String!, fromID arg6: String!, context arg7: [AnyHashable : Any]!) {
+    public override func messageReceived(_ arg1: [AnyHashable : Any]!, withGUID arg2: String!, withPayload arg3: [AnyHashable : Any]!, forTopic topic: String!, toIdentifier arg5: String!, fromID arg6: String!, context arg7: [AnyHashable : Any]!) {
         guard let payload = arg1["IDSIncomingMessagePushPayload"] as? [String: Any] else {
             return
         }
@@ -65,6 +65,17 @@ public class CBIDSListener: ERBaseIDSListener {
             return
         }
         
+        var serviceName: String {
+            switch topic {
+            case "com.apple.madrid", "com.apple.iMessage":
+                return IMService.iMessage().name
+            case "com.apple.private.alloy.sms", "com.apple.SMS":
+                return IMService.sms().name
+            default:
+                return IMService.iMessage().name
+            }
+        }
+        
         queue.schedule {
             switch command {
             case .readReceipt, .smsReadReceipt:
@@ -72,7 +83,7 @@ public class CBIDSListener: ERBaseIDSListener {
                     return
                 }
                 
-                self.reflectedReadReceiptPipeline.send((guid, Date(timeIntervalSince1970: Double(timestamp) / 1000000000)))
+                self.reflectedReadReceiptPipeline.send((guid, serviceName, Date(timeIntervalSince1970: Double(timestamp) / 1000000000)))
             default:
                 break
             }

@@ -85,8 +85,9 @@ public struct CBMessageStatusChange: Codable, Hashable {
         false
     }
     
-    fileprivate init(type: CBMessageStatusType, time: Double, sender: String? = nil, fromMe: Bool, chatID: String, messageID: String, context: CBMessageStatusChangeContext = .init()) {
+    fileprivate init(type: CBMessageStatusType, service: String, time: Double, sender: String? = nil, fromMe: Bool, chatID: String, messageID: String, context: CBMessageStatusChangeContext = .init()) {
         self.type = type
+        self.service = service
         self.time = time
         self.sender = sender
         self.fromMe = fromMe
@@ -96,6 +97,7 @@ public struct CBMessageStatusChange: Codable, Hashable {
     }
     
     public var type: CBMessageStatusType
+    public var service: String
     public var time: Double
     public var sender: String?
     public var fromMe: Bool
@@ -119,6 +121,7 @@ public struct CBMessageStatusChange: Codable, Hashable {
     
     public func hash(into hasher: inout Hasher) {
         hasher.combine(type)
+        hasher.combine(service)
         hasher.combine(time)
         hasher.combine(sender)
         hasher.combine(fromMe)
@@ -127,7 +130,7 @@ public struct CBMessageStatusChange: Codable, Hashable {
     }
     
     private enum CodingKeys : String, CodingKey {
-        case type, time, sender, fromMe, chatID, messageID
+        case type, service, time, sender, fromMe, chatID, messageID
     }
 }
 
@@ -196,13 +199,13 @@ internal extension CBDaemonListener {
         
         CBDaemonListener.didStartListening = true
         
-        _ = CBIDSListener.shared.reflectedReadReceiptPipeline.pipe { guid, time in
+        _ = CBIDSListener.shared.reflectedReadReceiptPipeline.pipe { guid, service, time in
             DBReader.shared.chatIdentifier(forMessageGUID: guid).then { chatIdentifier in
                 guard let chatIdentifier = chatIdentifier else {
                     return
                 }
                 
-                self.messageStatusPipeline.send(CBMessageStatusChange(type: .read, time: time.timeIntervalSince1970, fromMe: true, chatID: chatIdentifier, messageID: guid))
+                self.messageStatusPipeline.send(CBMessageStatusChange(type: .read, service: service, time: time.timeIntervalSince1970, fromMe: true, chatID: chatIdentifier, messageID: guid))
             }
         }
         
@@ -684,7 +687,7 @@ private extension CBDaemonListener {
             log.fault("Failed to resolve chat identifier for sent message \(message.id, privacy: .public)")
             return
         }
-        messageStatusPipeline.send(CBMessageStatusChange(type: .sent, time: sentTime, sender: nil, fromMe: true, chatID: chatID, messageID: message.id, context: .init(message: message)))
+        messageStatusPipeline.send(CBMessageStatusChange(type: .sent, service: message.service, time: sentTime, sender: nil, fromMe: true, chatID: chatID, messageID: message.id, context: .init(message: message)))
     }
     
     func process(newMessage: IMItem, chatIdentifier: String) {
@@ -842,7 +845,7 @@ private extension IMMessageItem {
             }
         }
         
-        return CBMessageStatusChange(type: payload.type, time: payload.time.timeIntervalSince1970 * 1000, sender: sender, fromMe: fromMe, chatID: chat, messageID: id, context: CBMessageStatusChangeContext(message: self))
+        return CBMessageStatusChange(type: payload.type, service: service, time: payload.time.timeIntervalSince1970 * 1000, sender: sender, fromMe: fromMe, chatID: chat, messageID: id, context: CBMessageStatusChangeContext(message: self))
     }
 }
 

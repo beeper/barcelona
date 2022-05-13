@@ -11,10 +11,25 @@ import Barcelona
 import IMCore
 import BarcelonaDB
 
+extension Array where Element == String {
+    /// Given self is an array of chat GUIDs, masks the GUIDs to iMessage service and returns the deduplicated result
+    func dedupeChatGUIDs() -> [String] {
+        var guids: Set<String> = Set()
+        for guid in self {
+            if guid.hasPrefix("iMessage;") {
+                guids.insert(guid)
+            } else if let firstSemi = guid.firstIndex(of: ";") {
+                guids.insert(String("iMessage" + guid[firstSemi...]))
+            }
+        }
+        return Array(guids)
+    }
+}
+
 extension GetChatsCommand: Runnable {
     public func run(payload: IPCPayload) {
         if min_timestamp <= 0 {
-            return payload.reply(withResponse: .chats_resolved(IMChatRegistry.shared.allChats.map(\.guid)))
+            return payload.reply(withResponse: .chats_resolved(IMChatRegistry.shared.allChats.map(\.blChatGUID)))
         }
         
         DBReader.shared.latestMessageTimestamps().then { timestamps in
@@ -24,7 +39,7 @@ extension GetChatsCommand: Runnable {
         }.filter { chatID, pair in
             pair.0 > min_timestamp
         }.map(\.value.1).then { guids in
-            payload.reply(withResponse: .chats_resolved(guids))
+            payload.reply(withResponse: .chats_resolved(guids.dedupeChatGUIDs()))
         }
     }
 }

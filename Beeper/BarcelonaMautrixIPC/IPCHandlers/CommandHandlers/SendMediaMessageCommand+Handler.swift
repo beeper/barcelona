@@ -62,6 +62,22 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             transaction.setData(value: transfer.guid, key: "transfer_guid")
             
             var monitor: BLMediaMessageMonitor?, message: IMMessage?
+            
+            func resolveMessageService() -> String {
+                if let message = message {
+                    if let item = message._imMessageItem {
+                        return item.service
+                    }
+                    if message.wasDowngraded {
+                        return "SMS"
+                    }
+                }
+                if chat.imChat.isDowngraded() {
+                    return "SMS"
+                }
+                return chat.imChat.account.serviceName
+            }
+            
             monitor = BLMediaMessageMonitor(messageID: message?.id ?? "", transferGUIDs: [transfer.guid]) { success, failureCode, shouldCancel in
                 if pathOnDisk.hasSuffix("-barcelonatmp") {
                     try? FileManager.default.removeItem(atPath: pathOnDisk)
@@ -90,7 +106,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                         payload.fail(strategy: .internal_error("Your message was unable to be sent."))
                     }
                 } else if !success && shouldCancel {
-                    BLWritePayload(.init(command: .send_message_status(.init(guid: message.id, chatGUID: chat.id, status: .failed, message: failureCode?.localizedDescription, statusCode: failureCode?.description))))
+                    BLWritePayload(.init(command: .send_message_status(.init(guid: message.id, chatGUID: message._imMessageItem.service ?? chat.service?.rawValue ?? "iMessage", status: .failed, service: resolveMessageService(), message: failureCode?.localizedDescription, statusCode: failureCode?.description))))
                 }
                 if !success && shouldCancel {
                     chat.imChat.cancel(message)

@@ -158,6 +158,7 @@ public func BLWritePayloads(_ payloads: [IPCPayload], log: Bool = true) {
             continue
         }
         data += try! encoder.encode(payload)
+        data += TERMINATOR
     }
     
     if BLPayloadIntercept == nil {
@@ -183,6 +184,8 @@ let sharedBarcelonaStream: ERBufferedStream<IPCPayload> = {
     return stream
 }()
 
+var pongedOnce = false
+
 public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
     FileHandle.standardInput.handleDataAsynchronously(sharedBarcelonaStream.receive(data:))
     
@@ -200,12 +203,18 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
 
             switch payload.command {
             case .ping, .pre_startup_sync:
+                pongedOnce = true
                 payload.respond(.ack)
                 return
             default:
                 break
             }
 
+            if !pongedOnce {
+                BLWritePayload(.init(id: 1, command: .response(.ack)))
+                pongedOnce = true
+            }
+            
             cb(payload)
         }
     }, to: AnyCancellable.self).store(in: &cancellables)
