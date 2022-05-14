@@ -430,6 +430,10 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         flags.contains(.sent)
     }
     
+    public var hasTranscriptItems: Bool {
+        items.contains(where: \.isTranscriptItem)
+    }
+    
     public var isFromMe: Bool {
         fromMe
     }
