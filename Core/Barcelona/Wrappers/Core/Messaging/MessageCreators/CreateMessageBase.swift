@@ -33,7 +33,7 @@ extension CreateMessageBase {
     }
     
     func finalize(imMessageItem: IMMessageItem, chat: IMChat, withSubject subject: NSMutableAttributedString?) throws -> IMMessage {
-        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+        if #available(iOS 14, macOS 10.16, watchOS 7, *), chat.account.service == .iMessage() {
             imMessageItem.setThreadIdentifier(resolvedThreadIdentifier(chat: chat))
         }
         
