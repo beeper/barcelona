@@ -267,8 +267,8 @@ public extension BridgeStatusCommand {
             remote_id: remoteID, // Apple ID – absent when unconfigured. logged out includes the remote id, and then goes to unconfigured. everything else must include the remote ID
             remote_name: IMMe.me().fullName, // Account Name
             info: [
-                "com.beeper.addresses": AnyCodable(addresses),
-                "com.beeper.primary_address": AnyCodable(account?.displayName)
+                "addresses": AnyCodable(addresses),
+                "primary_address": AnyCodable(account?.displayName)
             ]
         )
     }
