@@ -10,6 +10,7 @@ import Foundation
 import Barcelona
 import IMCore
 import IMFoundation
+import AnyCodable
 
 public enum BridgeState: String, Codable {
     case starting = "STARTING"
@@ -30,6 +31,7 @@ public struct BridgeStatusCommand: Codable, Equatable {
     public var message: String?
     public var remote_id: String?
     public var remote_name: String?
+    public var info: [String: AnyCodable]
 }
 
 private extension IMAccount {
@@ -242,9 +244,19 @@ public extension BridgeStatusCommand {
         
         switch remoteID {
         case .none, "unknown", "":
-            return BridgeStatusCommand(state_event: .unconfigured, ttl: 240, error: nil, message: nil, remote_id: nil, remote_name: nil)
+            return BridgeStatusCommand(state_event: .unconfigured, ttl: 240, error: nil, message: nil, remote_id: nil, remote_name: nil, info: [:])
         default:
             break
+        }
+        
+        var addresses: [String] {
+            if let aliases = account?.vettedAliases {
+                return aliases
+            } else if let remoteID = remoteID {
+                return [remoteID]
+            } else {
+                return []
+            }
         }
         
         return BridgeStatusCommand(
@@ -253,7 +265,11 @@ public extension BridgeStatusCommand {
             error: IMAccountController.shared.error,
             message: IMAccountController.shared.message,
             remote_id: remoteID, // Apple ID – absent when unconfigured. logged out includes the remote id, and then goes to unconfigured. everything else must include the remote ID
-            remote_name: IMMe.me().fullName // Account Name
+            remote_name: IMMe.me().fullName, // Account Name
+            info: [
+                "com.beeper.addresses": AnyCodable(addresses),
+                "com.beeper.primary_address": AnyCodable(account?.displayName)
+            ]
         )
     }
 }

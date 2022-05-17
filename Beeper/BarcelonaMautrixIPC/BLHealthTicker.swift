@@ -18,7 +18,7 @@ public class BLHealthTicker {
     public private(set) lazy var multi = subject.share()
     
     public init() {
-        NotificationCenter.default.subscribe(toNotificationsNamed: [.IMAccountLoginStatusChanged, .IMAccountRegistrationStatusChanged, .IMAccountNoLongerJustLoggedIn, .IMAccountLoggedIn, .IMAccountLoggedOut, .IMAccountActivated, .IMAccountDeactivated, .IMAccountAuthorizationIDChanged, .IMAccountControllerOperationalAccountsChanged]) { notification, subscription in
+        NotificationCenter.default.subscribe(toNotificationsNamed: [.IMAccountLoginStatusChanged, .IMAccountRegistrationStatusChanged, .IMAccountNoLongerJustLoggedIn, .IMAccountLoggedIn, .IMAccountLoggedOut, .IMAccountActivated, .IMAccountDeactivated, .IMAccountAuthorizationIDChanged, .IMAccountControllerOperationalAccountsChanged, .IMAccountVettedAliasesChanged, .IMAccountDisplayNameChanged]) { notification, subscription in
             self.run(schedulingNext: true)
         }
     }
