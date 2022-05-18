@@ -128,13 +128,17 @@ class MessageCommand: CommandGroup {
             @Param var destination: String
             @CollectedParam var message: [String]
             
-            @Flag("-i", "--id", description: "treat the destination as a chat ID")
-            var isID: Bool
+            
             
             @Flag("-e", "--everyone", description: "ping everyone because you crave attention")
             var pingEveryone: Bool
             
+            @Flag("-i", "--id", description: "treat the destination as a chat ID")
+            var isID: Bool
+            
             @Flag("-s") var sms: Bool
+            
+            @Flag("-r") var autoReply: Bool
             
             @Flag("-f") var force: Bool
             
@@ -163,6 +167,18 @@ class MessageCommand: CommandGroup {
                     }
                     
                     print(sentMessage.debugDescription)
+                    
+                    if self.autoReply {
+                        if #available(macOS 11.0, *) {
+                            let create = CreateMessage(subject: nil, parts: [.init(type: .text, details: "asdf")], isAudioMessage: nil, flags: nil, ballonBundleID: nil, payloadData: nil, expressiveSendStyleID: nil, threadIdentifier: sentMessage.threadIdentifier(), replyToPart: 0, replyToGUID: sentMessage.guid)
+                            let chat = Chat.directMessage(withHandleID: self.destination, service: self.sms ? .SMS : .iMessage)
+                            try! chat.send(message: create)
+                        } else {
+                            // Fallback on earlier versions
+                        }
+                    } else {
+                        exit(0)
+                    }
                     
                     exit(0)
                 }
@@ -220,7 +236,39 @@ class MessageCommand: CommandGroup {
             }
         }
         
-        var children: [Routable] = [Text(), Tapback()]
+        class Transfer: BarcelonaCommand, ChatCommandLike, ChatSMSForcingCapable {
+            let name = "transfer"
+            
+            @Param var destination: String
+            
+            @Flag("-i", "--id", description: "treat the destination as a chat ID")
+            var isID: Bool
+            
+            @Flag("-s") var sms: Bool
+            
+            @CollectedParam var transfers: [String]
+            var monitor: BLMediaMessageMonitor?
+            
+            func execute() throws {
+                var fileTransfers: [IMFileTransfer] = []
+                for transfer in transfers {
+                    let url = URL(fileURLWithPath: transfer)
+                    fileTransfers.append(CBInitializeFileTransfer(filename: url.lastPathComponent, path: url))
+                }
+                let creation = CreateMessage(parts: fileTransfers.map {
+                    .init(type: .attachment, details: $0.guid)
+                })
+                var messageID: String = ""
+                monitor = BLMediaMessageMonitor(messageID: messageID, transferGUIDs: fileTransfers.map(\.guid)) { success, error, cancel in
+                    print(success, error, cancel)
+                    exit(0)
+                }
+                let message = try chat.sendReturningRaw(message: creation)
+                messageID = message.id
+            }
+        }
+        
+        var children: [Routable] = [Text(), Tapback(), Transfer()]
     }
     
     var children: [Routable] = [Send(), Get()]
