@@ -49,7 +49,7 @@ extension CreateMessageBase {
         
         let (imMessageItem, subject) = try createIMMessageItem(withThreadIdentifier: nil, withChatIdentifier: chatIdentifier, withParseResult: parseResult)
         
-        imMessageItem.setValue(parseResult.transferGUIDs, forKey: "fileTransferGUIDs")
+        imMessageItem.fileTransferGUIDs = parseResult.transferGUIDs
         let chat = IMChat.resolve(withIdentifier: chatIdentifier)!
         imMessageItem.service = chat.account.service?.name
         

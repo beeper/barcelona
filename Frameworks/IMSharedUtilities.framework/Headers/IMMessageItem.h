@@ -76,7 +76,9 @@
 @property(nonatomic) long long replaceID; // @synthesize replaceID=_replaceID;
 @property(retain, nonatomic) NSData *bodyData; // @synthesize bodyData=_bodyData;
 @property(nonatomic) unsigned long long flags; // @synthesize flags=_flags;
+NS_ASSUME_NONNULL_BEGIN
 @property(retain, nonatomic) NSArray<NSString*> *fileTransferGUIDs; // @synthesize fileTransferGUIDs=_fileTransferGUIDs;
+NS_ASSUME_NONNULL_END
 @property(nonatomic) FZErrorType errorCode; // @synthesize errorCode=_error;
 @property(retain, nonatomic) NSString *plainBody; // @synthesize plainBody=_plainBody;
 @property(retain, nonatomic) NSString *subject; // @synthesize subject=_subject;

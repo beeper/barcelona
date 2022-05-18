@@ -24,8 +24,4 @@ extension IMMessage: IMFileTransferContainer {
 }
 
 extension IMMessageItem: IMFileTransferContainer {
-    @usableFromInline
-    var fileTransferGUIDs: [String] {
-        value(forKey: "_fileTransferGUIDs") as? [String] ?? []
-    }
 }
