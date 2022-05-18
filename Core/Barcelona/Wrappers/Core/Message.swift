@@ -439,7 +439,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     }
     
     public var debugDescription: String {
-        String(format: "Message(id=%@,sender=%@,typing=%d,items=[%@])", id, sender ?? "(nil)", isTypingMessage, items.map(\.debugDescription).joined(separator: ", "))
+        String(format: "Message(id=%@,sender=%@,typing=%d,items=[%@],failed=%d,sent=%d,error=%d)", id, sender ?? "(nil)", isTypingMessage, items.map(\.debugDescription).joined(separator: ", "), failed, isSent, errorCode.rawValue)
     }
     
     public var imChat: IMChat {
