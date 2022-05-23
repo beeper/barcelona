@@ -25,9 +25,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         
         let transaction = SentrySDK.startTransaction(name: "send-message", operation: "send-media-message")
         
-        let pathOnDisk = path_on_disk
-        
-        let transfer = CBInitializeFileTransfer(filename: file_name, path: URL(fileURLWithPath: pathOnDisk))
+        let transfer = CBInitializeFileTransfer(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
         var messageCreation = CreateMessage(parts: [
             .init(type: .attachment, details: transfer.guid)
         ])
@@ -62,9 +60,6 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             }
             
             monitor = BLMediaMessageMonitor(messageID: message?.id ?? "", transferGUIDs: [transfer.guid]) { success, failureCode, shouldCancel in
-                if pathOnDisk.hasSuffix("-barcelonatmp") {
-                    try? FileManager.default.removeItem(atPath: pathOnDisk)
-                }
                 guard let message = message else {
                     SentrySDK.capture(message: "aborting media processing because the message was never set") { scope in
                         scope.span = transaction
