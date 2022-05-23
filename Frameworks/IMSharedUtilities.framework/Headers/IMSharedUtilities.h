@@ -164,7 +164,7 @@
 #import <IMSharedUtilities/NSURL-IMPathAdditions.h>
 #import <IMSharedUtilities/XCTestObservation.h>
 
-extern id _IMAttachmentPersistentPath(NSString* guid, NSURL* url, NSString* mime, CFStringRef utType);
+NSString* IMAttachmentPersistentPath(NSString* guid, NSString* filename, NSString* mimeType, NSString* UTI);
 NSAttributedString* IMCreateSuperFormatStringFromPlainTextString(NSString*);
 NSSet<Class> *IMExtensionPayloadUnarchivingClasses();
 

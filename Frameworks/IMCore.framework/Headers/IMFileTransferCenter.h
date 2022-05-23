@@ -58,7 +58,7 @@
 - (void)stopTransfer:(id)arg1;
 - (void)acceptTransfer:(id)arg1;
 - (void)acceptTransfer:(id)arg1 withPath:(id)arg2 autoRename:(BOOL)arg3 overwrite:(BOOL)arg4;
-- (void)sendTransfer:(IMFileTransfer* _Nonnull)arg1;
+- (void)sendTransfer:(NSString*)arg1;
 - (IMFileTransfer*)transferForGUID:(NSString*)arg1 includeRemoved:(BOOL)arg2;
 - (IMFileTransfer*)transferForGUID:(NSString*)arg1;
 - (IMChat*)chatForTransfer:(id)arg1;
@@ -68,6 +68,7 @@
 - (void)_addSpotlightProperties:(id)arg1 sender:(id)arg2 recipients:(id)arg3 incoming:(BOOL)arg4;
 - (BOOL)registerGUID:(id)arg1 forNewOutgoingTransferWithLocalURL:(id)arg2;
 - (NSString*)guidForNewOutgoingTransferWithLocalURL:(NSURL*)arg1;
+- (NSString*)guidForNewOutgoingTransferWithLocalURL:(NSURL*)arg1 useLegacyGuid:(BOOL)arg2 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 - (BOOL)doesLocalURLRequireArchiving:(id)arg1 toHandle:(id)arg2;
 - (void)_addTransfer:(IMFileTransfer*)arg1;
 - (void)_addTransfer:(IMFileTransfer*)arg1 toAccount:(NSString*)arg2;

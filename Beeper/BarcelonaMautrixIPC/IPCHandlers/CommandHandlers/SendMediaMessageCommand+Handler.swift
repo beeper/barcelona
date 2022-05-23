@@ -7,7 +7,7 @@
 //
 
 import Foundation
-@_spi(messageExpertControlFlow) import Barcelona
+import Barcelona
 import IMCore
 import Sentry
 
@@ -25,24 +25,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         
         let transaction = SentrySDK.startTransaction(name: "send-message", operation: "send-media-message")
         
-        let messagesDirectory = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true).appendingPathComponent("Library").appendingPathComponent("Messages")
-        let messagesPath = messagesDirectory.path
-        var pathOnDisk = path_on_disk
-        pathOnDisk = messagesDirectory.appendingPathComponent(UUID().uuidString + "-barcelonatmp").path
-        do {
-            try FileManager.default.moveItem(atPath: path_on_disk, toPath: pathOnDisk)
-        } catch {
-            SentrySDK.capture(error: error) { scope in
-                scope.span = transaction
-            }
-            transaction.setData(value: true, key: "fallback_to_ipc_transfer_path")
-            pathOnDisk = path_on_disk
-        }
-        
-        // if the path on disk points to the ipc path, ipc might delete. if thats the case, wait until the transfer is uploaded.
-        var canSendReceiptImmediately: Bool {
-            pathOnDisk != path_on_disk
-        }
+        let pathOnDisk = path_on_disk
         
         let transfer = CBInitializeFileTransfer(filename: file_name, path: URL(fileURLWithPath: pathOnDisk))
         var messageCreation = CreateMessage(parts: [
@@ -97,15 +80,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                 } else {
                     transaction.finish(status: .unknownError)
                 }
-                if !canSendReceiptImmediately {
-                    if success {
-                        payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message.id, service: resolveMessageService(), timestamp: Date().timeIntervalSinceNow)))
-                    } else if let failureCode = failureCode {
-                        payload.fail(code: failureCode.description, message: failureCode.localizedDescription ?? failureCode.description)
-                    } else {
-                        payload.fail(strategy: .internal_error("Your message was unable to be sent."))
-                    }
-                } else if !success && shouldCancel {
+                if !success && shouldCancel {
                     BLWritePayload(.init(command: .send_message_status(.init(guid: message.id, chatGUID: chat.blChatGUID, status: .failed, service: resolveMessageService(), message: failureCode?.localizedDescription, statusCode: failureCode?.description))))
                 }
                 if !success && shouldCancel {
@@ -118,9 +93,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             
             transaction.setData(value: message?.guid, key: "message_guid")
             
-            if canSendReceiptImmediately {
-                payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message!.id, service: resolveMessageService(), timestamp: Date().timeIntervalSinceNow)))
-            }
+            payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message!.id, service: resolveMessageService(), timestamp: Date().timeIntervalSinceNow)))
         } catch {
             SentrySDK.capture(error: error) { scope in
                 scope.span = transaction

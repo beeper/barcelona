@@ -103,7 +103,23 @@ public class BLMediaMessageMonitor {
             log.debug("All transfers have finished! Removing the transfer observer.")
             observer?.unsubscribe()
             observer = nil
-            debugMessageState()
+            let messageID = messageID()
+            if messageID.isEmpty {
+                log.debug("A BLMediaMessageMonitor has no message ID at time of inspection")
+                return
+            }
+            guard let message = BLLoadIMMessage(withGUID: messageID) else {
+                log.debug("A BLMediaMessageMonitor was given a message ID that does not exist")
+                return
+            }
+            #if DEBUG
+            log.debug("%@; errorCode=%@", message.debugDescription, message.errorCode.description)
+            #endif
+            if message.isSent && message.isFinished {
+                if message._imMessageItem.serviceStyle == .SMS {
+                    return snap(success: true, code: nil)
+                }
+            }
         }
         switch latestEvent {
         case .sent, .read, .delivered:
@@ -128,19 +144,6 @@ public class BLMediaMessageMonitor {
         }
         log.info("Processing transfer state %@ for transfer %@ for message %@", transfer.state.description, transfer.guid, messageID())
         transferStates[transfer.guid] = transfer.state
-    }
-    
-    private func debugMessageState() {
-        let messageID = messageID()
-        if messageID.isEmpty {
-            log.debug("A BLMediaMessageMonitor has no message ID at time of inspection")
-            return
-        }
-        guard let message = BLLoadIMMessage(withGUID: messageID) else {
-            log.debug("A BLMediaMessageMonitor was given a message ID that does not exist")
-            return
-        }
-        log.debug("%@; errorCode=%@", message.debugDescription, message.errorCode.description)
     }
 }
 
