@@ -17,8 +17,16 @@ internal extension Chat {
 }
 
 internal extension IMChat {
+    var blFacingService: String {
+        if MXFeatureFlags.shared.mergedChats {
+            return "iMessage"
+        } else {
+            return account.serviceName
+        }
+    }
+    
     var blChatGUID: String {
-        "iMessage;\(isGroup ? "+" : "-");\(id)"
+        "\(blFacingService);\(isGroup ? "+" : "-");\(id)"
     }
 }
 

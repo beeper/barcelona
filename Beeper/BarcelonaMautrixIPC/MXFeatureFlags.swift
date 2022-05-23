@@ -15,4 +15,7 @@ public class MXFeatureFlags: FlagProvider {
     
     @FeatureFlag("read-helper", defaultValue: true)
     public var enableReadHelpers: Bool
+    
+    @FeatureFlag("merged-chats", defaultValue: false)
+    public var mergedChats: Bool
 }
