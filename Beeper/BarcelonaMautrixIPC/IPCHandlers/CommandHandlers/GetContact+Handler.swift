@@ -51,6 +51,9 @@ public func BMXGenerateContactList(omitAvatars: Bool = false, asyncLookup: Bool 
         "sortingFamilyName",
         CNContactImageDataAvailableKey
     ] + (omitAvatars ? [] : [CNContactImageDataKey]) as! [CNKeyDescriptor])) { contact, stop in
+        guard !(contact.emailAddresses.isEmpty && contact.phoneNumbers.isEmpty) else {
+            return
+        }
         contacts.append(contact)
     }
     
