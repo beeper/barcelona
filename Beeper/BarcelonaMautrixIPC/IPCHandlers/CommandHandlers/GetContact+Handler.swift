@@ -13,6 +13,7 @@ import IMCore
 import Barcelona
 import SwiftyContacts
 import Sentry
+import IDS
 
 extension IMBusinessNameManager {
     func addCallback(forURI uri: String, callback: @escaping (NSString) -> ()) {
@@ -24,14 +25,21 @@ extension IMBusinessNameManager {
 
 internal var BMXContactListIsBuilding = false
 
-public func BMXGenerateContactList(omitAvatars: Bool = false, asyncLookup: Bool = false) -> [BLContact] {
+extension Span {
+    var durationString: String {
+        "\(context.operation): \((startTimestamp!.distance(to: timestamp!) * 1000).description)ms"
+    }
+}
+
+public func BMXGenerateContactList(omitAvatars: Bool = false) -> [BLContact] {
     let transaction = SentrySDK.startTransaction(name: "get_contacts", operation: "get_contacts")
     
     BMXContactListIsBuilding = true
     defer { BMXContactListIsBuilding = false }
-    var contacts: [CNContact] = []
+
+    let registrar = IMHandleRegistrar.sharedInstance()
     
-    let enumerateTransaction = transaction.startChild(operation: "enumerate_cn_contacts")
+    var contacts: [BLContact] = [BLContact]()
     
     try! CNContactStore().enumerateContacts(with: CNContactFetchRequest(keysToFetch: [
         CNContactIdentifierKey,
@@ -51,59 +59,58 @@ public func BMXGenerateContactList(omitAvatars: Bool = false, asyncLookup: Bool 
         "sortingFamilyName",
         CNContactImageDataAvailableKey
     ] + (omitAvatars ? [] : [CNContactImageDataKey]) as! [CNKeyDescriptor])) { contact, stop in
-        guard !(contact.emailAddresses.isEmpty && contact.phoneNumbers.isEmpty) else {
+        // stop here if the contact has no emails or phone numbers
+        if contact.emailAddresses.isEmpty && contact.phoneNumbers.isEmpty {
             return
         }
-        contacts.append(contact)
-    }
-    
-    enumerateTransaction.setData(value: contacts.count, key: "enumerated_count")
-    enumerateTransaction.finish()
-    
-    var finalized: [BLContact] = [BLContact](repeating: BLContact(), count: contacts.count)
-    var loadedHandles: [String: [IMHandle]] = [:]
-    let semaphore = DispatchSemaphore(value: 0)
-    
-    let handleResolution = transaction.startChild(operation: "resolve_handles")
-    
-    DispatchQueue.global(qos: .utility).async {
-        IMHandle.handles(for: Set(contacts), useBestHandle: false, useExtendedAsyncLookup: asyncLookup) { result in
-            loadedHandles = result ?? [:]
-            semaphore.signal()
-        }
-    }
-    
-    semaphore.wait()
-    
-    handleResolution.setData(value: loadedHandles.count, key: "resolved_count")
-    handleResolution.finish()
-    
-    let processingTransaction = transaction.startChild(operation: "process_results")
-    
-    DispatchQueue.concurrentPerform(iterations: contacts.count) { index in
-        let contact = contacts[index]
-        let results = loadedHandles[contact.identifier] ?? []
+        
+        // create a blank collector
         var collector = ContactInfoCollector("")
         collector.omitAvatars = omitAvatars
-        collector.collect(contact)
-        results.forEach { collector.collect($0) }
-        guard let id = collector.bestID(includingHandles: results) else {
-            return
+        
+        // collect the base contact information, but dont pull phone or email since we'll do that here
+        collector.collect(contact, collectPhoneAndEmail: false)
+        
+        var handles: [IMHandle] = []
+        
+        // takes a collection of strings, locates the best handle, collects it, or stores an internationalized transformation of each string
+        func process<P: Collection>(handleIDs: P, keyPath: WritableKeyPath<ContactInfoCollector, Set<String>>) where P.Element == String {
+            collector[keyPath: keyPath] = handleIDs.reduce(into: collector[keyPath: keyPath]) { addresses, handleID in
+                // if there are handles, take either the iMessage handle or the first handle, and collect it
+                if let idHandles = registrar.getIMHandles(forID: handleID),
+                   let bestHandle = idHandles.first(where: { $0.service == .iMessage() }) ?? idHandles.first {
+                    addresses.insert(bestHandle.idWithoutResource)
+                    collector.collect(bestHandle, collectContact: false)
+                    handles.append(bestHandle)
+                // otherwise just internationalize the handleID and insert it
+                } else {
+                    addresses.insert(preprocessFZID(handleID))
+                }
+            }
         }
-        collector.primaryIdentifier = id
-        collector.handleID = collector.serviceHint + ";-;" + id
-        finalized[index] = collector.finalize()
+        
+        process(handleIDs: contact.phoneNumbers.map(\.value.stringValue), keyPath: \.phoneNumbers)
+        process(handleIDs: contact.emailAddresses.map { $0.value as String }, keyPath: \.emailAddresses)
+        
+        let bestHandle = IMHandle.bestIMHandle(in: handles)
+        let bestHandleID = bestHandle?.idWithoutResource ?? (collector.phoneNumbers.first ?? collector.emailAddresses.first)!
+        
+        collector.fill(handles)
+        collector.primaryIdentifier = bestHandleID
+        collector.handleID = collector.serviceHint + ";-;" + bestHandleID
+        
+        contacts.append(collector.finalize())
     }
     
-    processingTransaction.setData(value: finalized.count, key: "finalized_count")
-    processingTransaction.finish()
-    
-    let results = finalized.filter { !$0.user_guid.isEmpty }
-    
-    transaction.setData(value: results.count, key: "results_count")
+    transaction.setData(value: contacts.count, key: "results_count")
     transaction.finish()
     
-    return results
+    #if DEBUG
+    print(transaction.durationString)
+    #endif
+    
+    return contacts
+    
 }
 
 extension ContactInfoCollector {
@@ -127,6 +134,13 @@ extension CNContact {
     }
 }
 
+func preprocessFZID(_ fzID: String) -> String {
+    if let handle = IMHandleRegistrar.sharedInstance().getIMHandles(forID: fzID)?.first {
+        return handle.idWithoutResource
+    }
+    return IDSDestination(uri: fzID).uri().unprefixedURI
+}
+
 struct ContactInfoCollector {
     var handleID: String
     var omitAvatars: Bool = false
@@ -145,71 +159,78 @@ struct ContactInfoCollector {
     var emailAddresses: Set<String> = Set()
     var serviceHint = "SMS"
     
-    var contacts: Set<CNContact> = Set()
-    var handles: Set<IMHandle> = Set()
-    
-    mutating func collect(_ contact: CNContact) {
-        contacts.insert(contact)
+    mutating func collect(_ contact: CNContact, collectPhoneAndEmail: Bool = true) {
+        typealias ContactBinding = (WritableKeyPath<Self, String?>, KeyPath<CNContact, String>)
         
-        if firstName?.isEmpty != false {
-            firstName = contact.givenName
-        }
-
-        if lastName?.isEmpty != false {
-            lastName = contact.familyName
-        }
-
-        if nickname?.isEmpty != false {
-            nickname = contact.nickname
-        }
-
-        if suggestedName?.isEmpty != false {
-            suggestedName = contact.organizationName
+        let bindings: [ContactBinding] = [
+            (\.firstName, \.givenName),
+            (\.lastName, \.familyName),
+            (\.nickname, \.nickname),
+            (\.suggestedName, \.organizationName)
+        ]
+        
+        for (keyPath, contactKeyPath) in bindings {
+            if self[keyPath: keyPath]?.isEmpty != false {
+                let contactValue = contact[keyPath: contactKeyPath]
+                if !contactValue.isEmpty {
+                    self[keyPath: keyPath] = contactValue
+                }
+            }
         }
         
         if !omitAvatars, avatar?.isEmpty != false, contact.er_imageDataAvailable {
             avatar = contact.imageData
         }
         
-        for phoneNumber in contact.phoneNumbers {
-            phoneNumbers.insert(phoneNumber.value.unformattedInternationalStringValue())
-        }
-        
-        for emailAddress in contact.emailAddresses {
-            emailAddresses.insert(emailAddress.value as String)
+        if collectPhoneAndEmail {
+            for phoneNumber in contact.phoneNumbers {
+                phoneNumbers.insert(preprocessFZID(phoneNumber.value.stringValue))
+            }
+            
+            for emailAddress in contact.emailAddresses {
+                emailAddresses.insert(preprocessFZID(emailAddress.value as String))
+            }
         }
     }
     
-    mutating func collect(_ handle: IMHandle) {
-        handles.insert(handle)
-        
-        if firstName?.isEmpty != false {
-            firstName = handle.firstName
-        }
-        
-        if lastName?.isEmpty != false {
-            lastName = handle.lastName
-        }
-        
-        if nickname?.isEmpty != false {
-            nickname = handle.nickname
-        }
-        
-        if suggestedName?.isEmpty != false {
-            suggestedName = handle.suggestedName
-        }
-        
-        if !omitAvatars, avatar == nil {
-            avatar = handle.pictureData
-        }
-        
+    mutating func collect(_ handle: IMHandle, collectContact: Bool = true) {
         // the service hint is used to decide what goes in the <service>;-;+15555555555 component of the guids. if unchanged it will be SMS
         if handle.service == .iMessage() {
             serviceHint = "iMessage"
         }
         
-        if let cnContact = handle.cnContact {
-            collect(cnContact)
+        if collectContact {
+            var criticalFieldsAreEmpty = true
+            
+            typealias HandleBinding = (WritableKeyPath<Self, Optional<String>>, KeyPath<IMHandle, String?>)
+            
+            let handleCollectionKeyPaths: [HandleBinding] = [
+                (\.firstName, \.firstName),
+                (\.lastName, \.lastName),
+                (\.nickname, \.nickname)
+            ]
+            
+            for (localKeyPath, handleKeyPath) in handleCollectionKeyPaths {
+                if self[keyPath: localKeyPath]?.isEmpty != false {
+                    if let handleValue = handle[keyPath: handleKeyPath], !handleValue.isEmpty {
+                        self[keyPath: localKeyPath] = handleValue
+                    }
+                } else {
+                    criticalFieldsAreEmpty = false
+                }
+            }
+            
+            if criticalFieldsAreEmpty, suggestedName?.isEmpty != false, let handleSuggestedName = handle.suggestedName, !handleSuggestedName.isEmpty {
+                suggestedName = handleSuggestedName
+            }
+            
+            if !omitAvatars, avatar == nil {
+                avatar = handle.pictureData
+            }
+            
+            if collectContact, let cnContact = handle.cnContact {
+                collect(cnContact)
+            }
         }
     }
     
@@ -223,13 +244,17 @@ struct ContactInfoCollector {
         }
     }
     
+    static let lawg = Logger(category: "")
+    
     var criticalFieldsAreEmpty: Bool {
-        firstName?.isEmpty != false && lastName?.isEmpty != false && nickname?.isEmpty != false
+        let asdf = Self.lawg.operation(named: "mane").begin()
+        defer { asdf.end() }
+        return firstName?.isEmpty != false && lastName?.isEmpty != false && nickname?.isEmpty != false
     }
     
-    mutating func finalize() -> BLContact {
+    mutating func fill(_ handles: [IMHandle]) {
         if criticalFieldsAreEmpty {
-            if let suggestedName = suggestedName {
+            if let suggestedName = suggestedName, !suggestedName.isEmpty {
                 firstName = suggestedName
                 nickname = nil
                 lastName = nil
@@ -243,18 +268,16 @@ struct ContactInfoCollector {
                 }
             }
         }
-        
-        if criticalFieldsAreEmpty {
-            firstName = handles.compactMap(\.name).first
-        }
-        
-        return BLContact (
+    }
+    
+    mutating func finalize() -> BLContact {
+        BLContact (
             first_name: firstName,
             last_name: lastName,
             nickname: nickname,
             avatar: avatar?.base64EncodedString(),
             phones: Array(phoneNumbers),
-            emails: emailAddresses.map { IMFormattedDisplayStringForID($0, nil) ?? $0 },
+            emails: Array(emailAddresses),
             user_guid: handleID,
             primary_identifier: primaryIdentifier,
             serviceHint: serviceHint
