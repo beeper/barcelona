@@ -12,23 +12,8 @@ import IMCore
 public struct GetContactListResponse: Codable {
     public struct Runner: Runnable {
         public func run(payload: IPCPayload) {
-            GetContactListResponse.loadInBackground { response in
-                autoreleasepool {
-                    payload.reply(withResponse: .contacts(response))
-                }
-            }
+            payload.reply(withResponse: .contacts(GetContactListResponse(contacts: BMXGenerateContactList(omitAvatars: true))))
         }
-    }
-    
-    public static func loadInBackground(_ callback: @escaping (GetContactListResponse) -> ()) {
-        DispatchQueue.global(qos: .utility).async {
-            let list = BMXGenerateContactList(omitAvatars: true, asyncLookup: true)
-            callback(GetContactListResponse(contacts: list))
-        }
-    }
-    
-    public init() {
-        contacts = BMXGenerateContactList()
     }
     
     public init(contacts: [BLContact]) {
