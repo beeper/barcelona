@@ -26,6 +26,10 @@ protocol ChatCommandLike {
     var destination: String { get }
 }
 
+protocol ChatCommandGUIDSupporting {
+    var isGUID: Bool { get }
+}
+
 protocol ChatSMSForcingCapable: ChatCommandLike {
     var sms: Bool { get }
 }
@@ -45,6 +49,25 @@ extension ChatCommandLike {
             }
             
             return chat
+        }
+        
+        if let self = self as? ChatCommandGUIDSupporting, self.isGUID {
+            guard let chat = IMChatRegistry.shared.existingChat(withGUID: destination) else {
+                let components = destination.split(separator: ";")
+                if components.count == 3 {
+                    let service = components[0]
+                    let group = components[1]
+                    let identifier = components[2]
+                    if group == "-" {
+                        if let service = IMServiceStyle(rawValue: String(service))?.service, let account = IMAccountController.shared.bestAccount(forService: service) {
+                            return Chat(IMChatRegistry.shared.chat(for: account.imHandle(withID: String(identifier))))
+                        }
+                    }
+                }
+                fatalError("unknown chat with GUID \(destination)")
+            }
+            
+            return Chat(chat)
         }
         
         return Chat.chat(withHandleIDs: destination.split(separator: ",").map(String.init), service: _sms ? .SMS : nil)
@@ -122,7 +145,7 @@ class MessageCommand: CommandGroup {
         let name = "send"
         let shortDescription = "send messages"
         
-        class Text: BarcelonaCommand, ChatCommandLike, ChatSMSForcingCapable {
+        class Text: BarcelonaCommand, ChatCommandLike, ChatSMSForcingCapable, ChatCommandGUIDSupporting {
             let name = "text"
             
             @Param var destination: String
@@ -135,6 +158,9 @@ class MessageCommand: CommandGroup {
             
             @Flag("-i", "--id", description: "treat the destination as a chat ID")
             var isID: Bool
+            
+            @Flag("-g", "--guid", description: "treat the destination as a chat GUID")
+            var isGUID: Bool
             
             @Flag("-s") var sms: Bool
             
