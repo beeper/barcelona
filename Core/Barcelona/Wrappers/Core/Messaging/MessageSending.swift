@@ -8,6 +8,25 @@
 import Foundation
 import IMCore
 
+extension Date {
+    static func now() -> Date { Date() }
+}
+
+extension IMChat {
+    /// Refreshes the chat service for sending, runs once per chat.
+    /// This is a no-op unless `CBFeatureFlags.refreshChatServices` is enabled.
+    func refreshServiceForSendingIfNeeded() {
+        guard CBFeatureFlags.refreshChatServices else {
+            return
+        }
+        let hasRefreshed = value(forKey: "_hasRefreshedServiceForSending") as? Bool ?? false
+        if hasRefreshed {
+            return
+        }
+        refreshServiceForSending()
+    }
+}
+
 public extension Chat {
     private func markAsRead() {
         if ProcessInfo.processInfo.environment.keys.contains("BARCELONA_GHOST_REPLIES") {
@@ -21,6 +40,8 @@ public extension Chat {
             
         Chat.delegate?.chat(self, willSendMessages: [message], fromCreateMessage: createMessage)
         
+        imChat.refreshServiceForSendingIfNeeded()
+        
         Thread.main.sync {
             markAsRead()
             imChat.send(message)
@@ -33,6 +54,8 @@ public extension Chat {
         let message = try options.imMessage(inChat: self.id)
         
         Chat.delegate?.chat(self, willSendMessages: [message], fromCreatePluginMessage: options)
+        
+        imChat.refreshServiceForSendingIfNeeded()
         
         Thread.main.sync {
             markAsRead()

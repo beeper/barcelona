@@ -19,6 +19,10 @@ private let isDebugBuild = false
 public class _CBFeatureFlags: FlagProvider {
     public let suiteName = "com.ericrabil.barcelona"
     
+    /// Whether to check the chat service before sending the first message of the session on a per-chat basis
+    @FeatureFlag("refresh-chat-services", defaultValue: isDebugBuild)
+    public var refreshChatServices: Bool
+    
     @FeatureFlag("matrix-audio", defaultValue: false)
     public var permitAudioOverMautrix: Bool
     
