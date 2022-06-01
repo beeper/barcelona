@@ -11,6 +11,10 @@ import Barcelona
 
 extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {
+        if MXFeatureFlags.shared.mergedChats, chat_guid.starts(with: "SMS;") {
+            return payload.respond(.messages([]))
+        }
+        
         #if DEBUG
         IPCLog("Getting messages for chat guid %@ after time %f", chat_guid, timestamp)
         #endif
@@ -39,6 +43,10 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
 
 extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {
+        if MXFeatureFlags.shared.mergedChats, chat_guid.starts(with: "SMS;") {
+            return payload.respond(.messages([]))
+        }
+        
         guard let chat = chat else {
             return payload.fail(strategy: .chat_not_found)
         }
