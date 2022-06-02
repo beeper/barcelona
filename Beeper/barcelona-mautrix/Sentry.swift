@@ -40,6 +40,9 @@ import Sentry
 
 /** Resolves the sentry configurator by weak linking against potential paths */
 public func IMCSharedSentryConfigurator() -> IMCSentryConfiguratorProtocol? {
+    if ProcessInfo.processInfo.environment.keys.contains("DIE_SENTRY") {
+        return nil
+    }
     var cls: IMCSentryConfiguratorProtocol? {
         if let cls = NSClassFromString("IMCSentryConfigurator") {
             return unsafeBitCast(cls, to: IMCSentryConfiguratorProtocol.Type.self).shared

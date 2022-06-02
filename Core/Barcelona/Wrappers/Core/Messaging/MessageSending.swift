@@ -36,11 +36,11 @@ public extension Chat {
     }
     
     func sendReturningRaw(message createMessage: CreateMessage) throws -> IMMessage {
-        let message = try createMessage.imMessage(inChat: self.id)
-            
-        Chat.delegate?.chat(self, willSendMessages: [message], fromCreateMessage: createMessage)
-        
         imChat.refreshServiceForSendingIfNeeded()
+        
+        let message = try createMessage.imMessage(inChat: self.id)
+        
+        Chat.delegate?.chat(self, willSendMessages: [message], fromCreateMessage: createMessage)
         
         Thread.main.sync {
             markAsRead()
@@ -51,11 +51,11 @@ public extension Chat {
     }
     
     func send(message options: CreatePluginMessage) throws -> Message {
+        imChat.refreshServiceForSendingIfNeeded()
+        
         let message = try options.imMessage(inChat: self.id)
         
         Chat.delegate?.chat(self, willSendMessages: [message], fromCreatePluginMessage: options)
-        
-        imChat.refreshServiceForSendingIfNeeded()
         
         Thread.main.sync {
             markAsRead()
