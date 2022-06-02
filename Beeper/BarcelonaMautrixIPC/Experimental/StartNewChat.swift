@@ -42,12 +42,17 @@ extension PrepareDMCommand: Runnable {
     public func run(payload: IPCPayload) {
         let parsed = ParsedGUID(rawValue: guid)
         
-        guard let service = parsed.service.flatMap(IMServiceStyle.init(rawValue:)) else {
-            return payload.fail(code: "err_invalid_service", message: "The service provided does not exist.")
+        if MXFeatureFlags.shared.mergedChats {
+            let chat = Chat.directMessage(withHandleID: parsed.last, service: .iMessage)
+            CLInfo("PrepareDM", "Prepared chat \(chat.id)")
+        } else {
+            guard let service = parsed.service.flatMap(IMServiceStyle.init(rawValue:)) else {
+                return payload.fail(code: "err_invalid_service", message: "The service provided does not exist.")
+            }
+            
+            let chat = Chat.directMessage(withHandleID: parsed.last, service: service)
+            CLInfo("PrepareDM", "Prepared chat \(chat.id) on service \(service.rawValue)")
         }
-        
-        let chat = Chat.directMessage(withHandleID: parsed.last, service: service)
-        CLInfo("PrepareDM", "Prepared chat \(chat.id) on service \(service.rawValue)")
         
         payload.respond(.ack)
     }
