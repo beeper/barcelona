@@ -8,7 +8,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                # sh 'make all'
+                // sh 'make all'
                 sh 'make macos'
             }
         }
@@ -16,8 +16,8 @@ pipeline {
             steps {
                 sh 'cp Build/macOS/Build/Products/Release/barcelona-mautrix-macOS darwin-barcelona-mautrix'
                 sh 'cp Build/macOS/Build/Products/Release/grapple-macOS darwin-grapple'
-                # sh 'cp Build/iOS/Build/Products/Release-iphoneos/barcelona-mautrix-iOS ios-barcelona-mautrix'
-                # sh 'cp Build/iOS/Build/Products/Release-iphoneos/grapple-iOS ios-grapple'
+                // sh 'cp Build/iOS/Build/Products/Release-iphoneos/barcelona-mautrix-iOS ios-barcelona-mautrix'
+                // sh 'cp Build/iOS/Build/Products/Release-iphoneos/grapple-iOS ios-grapple'
                 archiveArtifacts artifacts: '*barcelona-mautrix, *grapple'
             }
         }
