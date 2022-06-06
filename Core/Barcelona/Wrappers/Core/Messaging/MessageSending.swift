@@ -7,23 +7,41 @@
 
 import Foundation
 import IMCore
+import Swog
 
 extension Date {
     static func now() -> Date { Date() }
 }
 
 extension IMChat {
+    /// Stored instance variable on IMChat
+    private var hasRefreshedServiceForSending: Bool {
+        get { value(forKey: "_hasRefreshedServiceForSending") as! Bool }
+        set { setValue(false, forKey: "_hasRefreshedServiceForSending") }
+    }
+    
     /// Refreshes the chat service for sending, runs once per chat.
     /// This is a no-op unless `CBFeatureFlags.refreshChatServices` is enabled.
     func refreshServiceForSendingIfNeeded() {
         guard CBFeatureFlags.refreshChatServices else {
             return
         }
-        let hasRefreshed = value(forKey: "_hasRefreshedServiceForSending") as? Bool ?? false
-        if hasRefreshed {
-            return
+        if hasRefreshedServiceForSending {
+            if let lastMessageItem = lastMessage?._imMessageItem, lastMessageItem.serviceStyle == account.service?.id {
+                if !lastMessageItem.isFromMe() {
+                    return
+                }
+                switch lastMessageItem.errorCode {
+                case .remoteUserDoesNotExist, .remoteUserInvalid, .remoteUserRejected, .remoteUserIncompatible:
+                    break
+                default:
+                    return
+                }
+            }
         }
         refreshServiceForSending()
+        let id = self.id, serviceName = account.serviceName ?? "nil"
+        CLInfo("ERChat", "The resolved service for \(id) is currently \(serviceName, privacy: .public)")
     }
 }
 
