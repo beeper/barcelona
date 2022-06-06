@@ -263,7 +263,13 @@ struct ContactInfoCollector {
                 for handle in handles {
                     if let imNickname = IMNicknameController.sharedInstance().nickname(for: handle) ?? IMNicknameController.sharedInstance().pendingNicknameUpdates[handle.id] {
                         collect(imNickname)
-                        break
+                        return
+                    } else if let formattedPhoneNumber = handle._formattedPhoneNumber() as? String {
+                        firstName = formattedPhoneNumber
+                        return
+                    } else if let displayID = handle.displayID {
+                        firstName = displayID
+                        return
                     }
                 }
             }
