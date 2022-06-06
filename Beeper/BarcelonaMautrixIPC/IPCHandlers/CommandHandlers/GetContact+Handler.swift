@@ -319,9 +319,19 @@ extension BLContact {
                 CLWarn("ContactInfo", "Failed to query contacts: \(String(describing: error), privacy: .public)")
             }
             
-            if let handles = IMHandleRegistrar.sharedInstance().getIMHandles(forID: handleID) {
+            if let handles = IMHandleRegistrar.sharedInstance().getIMHandles(forID: handleID), !handles.isEmpty {
                 for handle in handles {
                     collector.collect(handle)
+                }
+                collector.fill(handles)
+            } else if collector.criticalFieldsAreEmpty {
+                if handleID.isPhoneNumber {
+                    collector.firstName = CNPhoneNumber(stringValue: handleID).formattedInternationalStringValue()
+                } else if handleID.isBusinessID {
+                    // what the fuck? fix it.
+                    collector.firstName = IMBusinessNameManager.sharedInstance().businessName(forUID: handleID, updateHandler: nil) as? String
+                } else {
+                    collector.firstName = handleID
                 }
             }
             
