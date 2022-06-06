@@ -20,7 +20,7 @@
 @property(retain) NSMutableDictionary *pendingRequests; // @synthesize pendingRequests=_pendingRequests;
 @property(retain) NSMutableDictionary *cache; // @synthesize cache=_cache;
 @property(retain) NSLock *cacheLock; // @synthesize cacheLock=_cacheLock;
-- (id)businessNameForUID:(id)arg1 updateHandler:(id)arg2;
+- (id)businessNameForUID:(id)arg1 updateHandler:(void (^)(NSString *name))arg2;
 - (id)init;
 
 @end

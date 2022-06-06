@@ -27,6 +27,7 @@ NSXPCListener* ERConstructXPCListener(NSString*);
 +(nonnull NSString*)dialingCodeForISOCountryCode:(nonnull NSString*)countryCode;
 -(nonnull NSString*)digitsRemovingDialingCode;
 -(nonnull NSString*)unformattedInternationalStringValue;
+-(nonnull NSString*)formattedInternationalStringValue;
 -(nonnull NSString*)digits;
 @end
 

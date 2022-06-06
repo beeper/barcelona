@@ -329,7 +329,7 @@ extension BLContact {
                     collector.firstName = CNPhoneNumber(stringValue: handleID).formattedInternationalStringValue()
                 } else if handleID.isBusinessID {
                     // what the fuck? fix it.
-                    collector.firstName = IMBusinessNameManager.sharedInstance().businessName(forUID: handleID, updateHandler: nil) as? String
+                    collector.firstName = IMBusinessNameManager.sharedInstance().businessName(forUID: handleID, updateHandler: { [] _ in }) as? String
                 } else {
                     collector.firstName = handleID
                 }
