@@ -264,12 +264,10 @@ struct ContactInfoCollector {
                     if let imNickname = IMNicknameController.sharedInstance().nickname(for: handle) ?? IMNicknameController.sharedInstance().pendingNicknameUpdates[handle.id] {
                         collect(imNickname)
                         return
-                    } else if let formattedPhoneNumber = handle._formattedPhoneNumber() as? String {
-                        firstName = formattedPhoneNumber
-                        return
-                    } else if let displayID = handle.displayID {
-                        firstName = displayID
-                        return
+                    } else {
+                        if !handle.id.isPhoneNumber && !handle.id.isEmail && !handle.id.isBusinessID {
+                            phoneNumbers.insert(handle.id)
+                        }
                     }
                 }
             }
