@@ -7,10 +7,12 @@
 //
 
 import Foundation
+import Barcelona
 
 public struct SendMessageCommand: Codable, ChatResolvable {
     public var chat_guid: String
     public var text: String
     public var reply_to: String?
     public var reply_to_part: Int?
+    public var rich_link: RichLinkMetadata?
 }

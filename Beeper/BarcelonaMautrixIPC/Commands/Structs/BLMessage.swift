@@ -92,6 +92,7 @@ public struct BLMessage: Codable, ChatResolvable {
     public var is_read: Bool
     public var item_type: Int64?
     public var target: String?
+    public var rich_link: RichLinkMetadata?
     
     public init(message: Message) {
         guid = message.id
@@ -134,6 +135,7 @@ public struct BLMessage: Codable, ChatResolvable {
                 }.compactMap {
                     BLAttachment(guid: $0)
                 }
+                rich_link = plugin.richLink
             default:
                 continue
             }

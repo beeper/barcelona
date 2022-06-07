@@ -24,10 +24,32 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
         }
         do {
             var finalMessage: Message
-            if !CBFeatureFlags.adHocRichLinks, let url = URL(string: text.trimmingCharacters(in: [" "])), IMMessage.supportedRichLinkURL(url, additionalSupportedSchemes: []) {
-                let message = ERCreateBlankRichLinkMessage(text.trimmingCharacters(in: [" "]))
-                message.loadLinkMetadata(at: url)
-                finalMessage = try chat.send(message: message)
+            
+            lazy var richLinkURL: URL? = URL(string: text.trimmingCharacters(in: [" "]))
+            
+            var simpleRichLinkValid: Bool {
+                richLinkURL.map {
+                    IMMessage.supportedRichLinkURL($0, additionalSupportedSchemes: [])
+                } ?? false
+            }
+            
+            var isRichLink: Bool {
+                CBFeatureFlags.adHocRichLinks ? rich_link != nil : simpleRichLinkValid
+            }
+            
+            if isRichLink {
+                let message = ERCreateBlankRichLinkMessage(text.trimmingCharacters(in: [" "])) { item in
+                    if #available(macOS 11.0, *), let replyToGUID = reply_to {
+                        item.setThreadIdentifier(IMChatItem.resolveThreadIdentifier(forMessageWithGUID: replyToGUID, part: reply_to_part ?? 0, chat: chat.imChat))
+                    }
+                }
+                if CBFeatureFlags.adHocRichLinks, let richLink = rich_link {
+                    try message.provideLinkMetadata(richLink)
+                } else if !CBFeatureFlags.adHocRichLinks, let url = richLinkURL, IMMessage.supportedRichLinkURL(url, additionalSupportedSchemes: []) {
+                    message.loadLinkMetadata(at: url)
+                }
+                chat.imChat.send(message)
+                finalMessage = Message(ingesting: message, context: IngestionContext(chatID: chat.id))!
             } else {
                 var messageCreation = CreateMessage(parts: [
                     .init(type: .text, details: text)
@@ -36,9 +58,9 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                 messageCreation.replyToGUID = reply_to
                 messageCreation.replyToPart = reply_to_part
             
-            
                 finalMessage = try chat.send(message: messageCreation)
             }
+            
             payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: finalMessage.id, service: finalMessage.service.rawValue, timestamp: finalMessage.time)))
         } catch {
             // girl fuck

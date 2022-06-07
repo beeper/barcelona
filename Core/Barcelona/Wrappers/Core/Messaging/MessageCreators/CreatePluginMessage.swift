@@ -30,7 +30,7 @@ private extension NSAttributedString {
     }
 }
 
-public func ERCreateBlankRichLinkMessage(_ text: String) -> IMMessage {
+public func ERCreateBlankRichLinkMessage(_ text: String, _ initializer: (IMMessageItem) -> () = { _ in }) -> IMMessage {
     let messageItem = IMMessageItem.init(sender: nil, time: nil, guid: nil, type: 0)!
     
     messageItem.service = IMServiceStyle.iMessage.rawValue
@@ -46,6 +46,7 @@ public func ERCreateBlankRichLinkMessage(_ text: String) -> IMMessage {
     messageItem.balloonBundleID = "com.apple.messages.URLBalloonProvider"
     messageItem.payloadData = Data()
     messageItem.flags = 5
+    initializer(messageItem)
     
     return IMMessage.message(fromUnloadedItem: messageItem)!
 }

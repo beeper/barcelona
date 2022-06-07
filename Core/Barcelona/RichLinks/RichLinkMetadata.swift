@@ -9,21 +9,45 @@ import Foundation
 import LinkPresentation
 
 /// Wire-serializable struct for rich links
-public struct RichLinkMetadata: Codable {
-    public enum RichLinkImage: Codable {
-        case url(URL)
-        case data(Data)
-    }
+public struct RichLinkMetadata: Codable, Hashable {
+    public typealias RichLinkImage = RichLinkAsset.Source
     
-    public struct RichLinkAsset: Codable {
-        public enum Source: Codable {
+    public struct RichLinkAsset: Codable, Hashable {
+        public enum Source: Codable, Hashable {
             /// Where is the asset downloaded to
             case url(URL)
             /// Inline asset data
             case data(Data)
+            
+            public init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                if container.allKeys.contains(.data) {
+                    self = .data(try container.decode(Data.self, forKey: .data))
+                } else if container.allKeys.contains(.url) {
+                    let urlString = try container.decode(String.self, forKey: .url)
+                    guard let url = Foundation.URL(string: urlString) else {
+                        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "attempt to decode malformed URL"))
+                    }
+                    self = .url(url)
+                } else {
+                    throw DecodingError.dataCorrupted(.init(codingPath: container.codingPath, debugDescription: "no valid matches"))
+                }
+            }
+            
+            public func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                switch self {
+                case .url(let url): try container.encode(url.absoluteString, forKey: .url)
+                case .data(let data): try container.encode(data.base64EncodedString(), forKey: .data)
+                }
+            }
+            
+            private enum CodingKeys: String, CodingKey {
+                case url, data
+            }
         }
         
-        public struct Size: Codable {
+        public struct Size: Codable, Hashable {
             public var width: Double
             public var height: Double
             
@@ -50,7 +74,7 @@ public struct RichLinkMetadata: Codable {
         public var size: Size?
     }
     
-    public struct RichLinkVideoAsset: Codable {
+    public struct RichLinkVideoAsset: Codable, Hashable {
         public var hasAudio: Bool?
         public var youTubeURL: URL?
         public var streamingURL: URL?
