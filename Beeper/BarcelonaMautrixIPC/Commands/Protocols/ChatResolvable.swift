@@ -19,7 +19,7 @@ public extension ChatResolvable {
         if let chat = IMChatRegistry.shared.existingChat(withGUID: chat_guid) {
             return chat
         } else {
-            let parsed = ParsedGUID(rawValue: chat_guid)
+            var parsed = ParsedGUID(rawValue: chat_guid)
             
             let service = parsed.service == "iMessage" ? IMServiceStyle.iMessage : .SMS
             let id = parsed.last
@@ -27,7 +27,8 @@ public extension ChatResolvable {
             if id.isPhoneNumber || id.isEmail || id.isBusinessID {
                 return Chat.directMessage(withHandleID: id, service: service).imChat
             } else {
-                return nil
+                parsed.service = service == .iMessage ? "SMS" : "iMessage"
+                return IMChatRegistry.shared.existingChat(withGUID: parsed.description)
             }
         }
     }

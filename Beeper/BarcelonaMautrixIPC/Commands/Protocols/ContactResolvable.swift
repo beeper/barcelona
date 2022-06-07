@@ -15,7 +15,7 @@ public protocol ContactResolvable {
     var user_guid: String { get set }
 }
 
-public struct ParsedGUID: Codable {
+public struct ParsedGUID: Codable, CustomStringConvertible {
     public var service: String?
     public var style: String?
     public var last: String
@@ -36,6 +36,13 @@ public struct ParsedGUID: Codable {
         service = String(split[0])
         style = String(split[1])
         last = String(split[2])
+    }
+    
+    public var description: String {
+        guard let service = service, let style = style else {
+            return last
+        }
+        return "\(service);\(style);\(last)"
     }
 }
 
