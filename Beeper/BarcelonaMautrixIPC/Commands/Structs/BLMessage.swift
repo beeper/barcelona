@@ -124,11 +124,12 @@ public struct BLMessage: Codable, ChatResolvable {
                 self.group_action_type = Int(item.actionType.rawValue)
                 self.item_type = IMItemType.groupAction.rawValue
             case let acknowledgment as AcknowledgmentChatItem:
-                guard let parsedID = CBMessageItemIdentifierData(rawValue: acknowledgment.associatedID), let part = parsedID.part else {
+                guard let parsedID = CBMessageItemIdentifierData(rawValue: acknowledgment.associatedID) else {
+                    CLFault("BLMessage", "Failed to parse associatedID %@", acknowledgment.associatedID)
                     continue
                 }
                 
-                self.associated_message = BLTapback(chat_guid: chat_guid, target_guid: acknowledgment.associatedID, target_part: part, type: Int(acknowledgment.acknowledgmentType))
+                self.associated_message = BLTapback(chat_guid: chat_guid, target_guid: acknowledgment.associatedID, target_part: parsedID.part ?? 0, type: Int(acknowledgment.acknowledgmentType))
             case let plugin as PluginChatItem:
                 attachments = message.fileTransferIDs.filter { id in
                     !plugin.attachments.map(\.id).contains(id)
