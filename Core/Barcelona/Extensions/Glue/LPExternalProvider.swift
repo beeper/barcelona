@@ -243,7 +243,7 @@ public extension IMMessage {
             var attachments: NSArray?
             let data = richLinkDataSource.richLink.dataRepresentation(withOutOfLineAttachments: &attachments)
             CLInfo("LPLink", "RichLinkDataSource for message %@ sending packaged payload with size %d and attachment count %d", self.guid, data.count, attachments?.count ?? 0)
-            dataSource.sendPayload(richLinkDataSource.richLink.dataRepresentation(withOutOfLineAttachments: &attachments), attachments: attachments)
+            IMDaemonController.sharedInstance().sendBalloonPayload(data, attachments: attachments as! [Any]?, withMessageGUID: self.guid, bundleID: IMBalloonPluginIdentifierRichLinks)
         }
     }
 }
