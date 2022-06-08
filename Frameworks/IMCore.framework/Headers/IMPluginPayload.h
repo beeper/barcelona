@@ -10,6 +10,7 @@
 #import "NSSecureCoding-Protocol.h"
 
 @class DDScannerResult, IMBalloonPluginDataSource, NSArray, NSAttributedString, NSData, NSDate, NSDictionary, NSString, NSURL;
+@class IMMessage, IMMessageItem;
 
 @interface IMPluginPayload : NSObject
 {
@@ -58,9 +59,9 @@
 @property(retain, nonatomic) NSURL *url; // @synthesize url=_url;
 @property(retain, nonatomic) NSData *data; // @synthesize data=_data;
 @property(retain, nonatomic) NSAttributedString *text; // @synthesize text=_text;
-- (id)copyWithZone:(struct _NSZone *)arg1;
-- (id)initWithCoder:(id)arg1 additionalAllowedClasses:(id)arg2;
-- (id)initWithCoder:(id)arg1;
+- (instancetype)copyWithZone:(struct _NSZone *)arg1;
+- (instancetype)initWithCoder:(id)arg1 additionalAllowedClasses:(id)arg2;
+- (instancetype)initWithCoder:(id)arg1;
 - (void)encodeWithCoder:(id)arg1;
 - (BOOL)isEqual:(id)arg1;
 - (unsigned long long)hash;
@@ -68,8 +69,8 @@
 @property(readonly, nonatomic) BOOL shouldHideAttachments;
 - (void)addAttachmentsFromFilePaths:(id)arg1;
 - (void)addAttachmentsFromFileTransferGUIDs:(id)arg1;
-- (id)initWithMessageItem:(id)arg1;
-- (id)initWithMessage:(id)arg1;
+- (instancetype)initWithMessageItem:(IMMessageItem*)arg1;
+- (instancetype)initWithMessage:(IMMessage*)arg1;
 - (NSString*) threadIdentifier API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0));
 
 @end

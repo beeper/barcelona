@@ -8,6 +8,7 @@
 
 import Foundation
 import IMSharedUtilities
+import IMCore
 
 private extension String {
     func substring(trunactingFirst prefix: Int) -> Substring {
@@ -27,6 +28,27 @@ private extension NSAttributedString {
     func range(of string: String) -> NSRange {
         self.string.nsRange(of: string)
     }
+}
+
+public func ERCreateBlankRichLinkMessage(_ text: String, _ initializer: (IMMessageItem) -> () = { _ in }) -> IMMessage {
+    let messageItem = IMMessageItem.init(sender: nil, time: nil, guid: nil, type: 0)!
+    
+    messageItem.service = IMServiceStyle.iMessage.rawValue
+    
+    let messageString = NSMutableAttributedString(attributedString: .init(string: text))
+
+    messageString.addAttributes([
+        MessageAttributes.writingDirection: -1,
+        MessageAttributes.link: text
+    ], range: messageString.range(of: text))
+    
+    messageItem.body = messageString
+    messageItem.balloonBundleID = "com.apple.messages.URLBalloonProvider"
+    messageItem.payloadData = Data()
+    messageItem.flags = 5
+    initializer(messageItem)
+    
+    return IMMessage.message(fromUnloadedItem: messageItem)!
 }
 
 public struct CreatePluginMessage: Codable, CreateMessageBase {

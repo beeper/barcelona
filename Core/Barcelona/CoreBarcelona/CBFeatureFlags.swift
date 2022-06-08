@@ -17,11 +17,18 @@ private let isDebugBuild = false
 // to enable something off by default, --enable-
 // to disable, --disable-
 public class _CBFeatureFlags: FlagProvider {
+    // Supported way of overriding defaults, manipulate this early on since things are cached agressively
+    public struct Defaults {
+        public static var adHocRichLinks: Bool = true
+    }
     public let suiteName = "com.ericrabil.barcelona"
     
     /// Whether to check the chat service before sending the first message of the session on a per-chat basis
     @FeatureFlag("refresh-chat-services", defaultValue: true)
     public var refreshChatServices: Bool
+    
+    @FeatureFlag("ad-hoc-rich-links", defaultValue: Defaults.adHocRichLinks)
+    public var adHocRichLinks: Bool
     
     @FeatureFlag("matrix-audio", defaultValue: false)
     public var permitAudioOverMautrix: Bool

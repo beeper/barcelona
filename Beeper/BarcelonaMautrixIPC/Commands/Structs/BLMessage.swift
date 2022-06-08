@@ -92,6 +92,7 @@ public struct BLMessage: Codable, ChatResolvable {
     public var is_read: Bool
     public var item_type: Int64?
     public var target: String?
+    public var rich_link: RichLinkMetadata?
     
     public init(message: Message) {
         guid = message.id
@@ -133,6 +134,11 @@ public struct BLMessage: Codable, ChatResolvable {
                     !plugin.attachments.map(\.id).contains(id)
                 }.compactMap {
                     BLAttachment(guid: $0)
+                }
+                if let richLink = plugin.richLink {
+                    rich_link = richLink
+                } else if let extensionData = plugin.extension {
+                    rich_link = RichLinkMetadata(extensionData: extensionData, attachments: plugin.attachments, fallbackText: &text)
                 }
             default:
                 continue

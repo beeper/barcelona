@@ -6,7 +6,8 @@
 
 #import <objc/NSObject.h>
 
-@class NSMutableDictionary, NSMutableSet, NSString;
+@class NSMutableDictionary, NSMutableSet, NSString, IMBalloonPlugin, IMBalloonPluginDataSource;
+@class IMPluginPayload;
 
 @interface IMBalloonPluginManager : NSObject
 {
@@ -31,23 +32,23 @@
 @property(retain, nonatomic) id extensionMatchingContext; // @synthesize extensionMatchingContext=_extensionMatchingContext;
 @property(retain, nonatomic) NSMutableDictionary *pluginsMap; // @synthesize pluginsMap=_pluginsMap;
 @property(readonly, retain, nonatomic) Class richLinksDataSourceClass; // @synthesize richLinksDataSourceClass=_richLinksDataSourceClass;
-- (id)balloonPluginForBundleID:(id)arg1;
-- (id)allPlugins;
-- (void)insertDataSource:(id)arg1 forGUID:(id)arg2;
-- (id)existingDataSourceForMessageGUID:(id)arg1 bundleID:(id)arg2;
-- (id)dataSourceForPluginPayload:(id)arg1;
+- (IMBalloonPlugin*)balloonPluginForBundleID:(NSString*)arg1;
+- (NSArray<IMBalloonPlugin*>*)allPlugins;
+- (void)insertDataSource:(id)arg1 forGUID:(NSString*)arg2;
+- (IMBalloonPluginDataSource*)existingDataSourceForMessageGUID:(NSString*)arg1 bundleID:(NSString*)arg2;
+- (IMBalloonPluginDataSource*)dataSourceForPluginPayload:(IMPluginPayload*)arg1;
 - (id)_fallBackMessagesExtensionPluginForBundleID:(id)arg1;
-- (__typeof([IMBalloonPluginDataSource class]))dataSourceClassForBundleID:(id)arg1;
+- (__typeof([IMBalloonPluginDataSource class]))dataSourceClassForBundleID:(NSString*)arg1;
 - (void)_loadAllDataSources;
 - (void)_findPluginsInPathInternal:(id)arg1;
 - (void)_findPluginsInPaths:(id)arg1;
 - (void)_moveExtensionDataSourcesFromMessagesExtensionPluginToAppExtensions;
 - (BOOL)_isExtensionBlackListed:(id)arg1;
 - (BOOL)_isServerBlackListedBundle:(id)arg1 serverBag:(id)arg2;
-- (void)setPluginEnabled:(BOOL)arg1 identifier:(id)arg2;
+- (void)setPluginEnabled:(BOOL)arg1 identifier:(NSString*)arg2;
 - (void)_removePluginsForIdentifiers:(id)arg1;
 - (void)_removePluginsWithDelay;
-- (void)removePluginWithBundleID:(id)arg1;
+- (void)removePluginWithBundleID:(NSString*)arg1;
 - (id)_insertPluginForExtension:(id)arg1 balloonProviderBundle:(id)arg2 andTimingCollection:(id)arg3;
 - (id)_insertPluginForAppBundle:(id)arg1 balloonProviderBundle:(id)arg2;
 - (void)_updatePluginsForExtensions:(id)arg1 extensionPoint:(id)arg2;

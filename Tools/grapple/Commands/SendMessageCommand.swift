@@ -145,6 +145,39 @@ class MessageCommand: CommandGroup {
         let name = "send"
         let shortDescription = "send messages"
         
+        /// send ad-hoc link metadata
+        class Link: BarcelonaCommand, ChatCommandLike, ChatSMSForcingCapable, ChatCommandGUIDSupporting {
+            let name = "link"
+            
+            @Param var destination: String
+            
+            @Param var text: String
+            @Param var jsonPath: String
+            
+            @Flag("-i", "--id", description: "treat the destination as a chat ID")
+            var isID: Bool
+            
+            @Flag("-g", "--guid", description: "treat the destination as a chat GUID")
+            var isGUID: Bool
+            
+            @Flag("-s") var sms: Bool
+            @Flag("-f") var force: Bool
+            
+            var monitor: BLMediaMessageMonitor?
+            
+            func execute() throws {
+                let metadata = try! JSONDecoder().decode(RichLinkMetadata.self, from: Data(contentsOf: URL(fileURLWithPath: jsonPath)))
+                let message = ERCreateBlankRichLinkMessage(text)
+                let afterSend = try message.provideLinkMetadata(metadata)
+                monitor = BLMediaMessageMonitor(messageID: message.id, transferGUIDs: message._imMessageItem?.fileTransferGUIDs ?? []) { success, error, cancel in
+                    print(success, error?.description, cancel)
+                    self.monitor = nil
+                }
+                chat.imChat.send(message)
+                afterSend()
+            }
+        }
+        
         class Text: BarcelonaCommand, ChatCommandLike, ChatSMSForcingCapable, ChatCommandGUIDSupporting {
             let name = "text"
             
@@ -294,7 +327,7 @@ class MessageCommand: CommandGroup {
             }
         }
         
-        var children: [Routable] = [Text(), Tapback(), Transfer()]
+        var children: [Routable] = [Text(), Tapback(), Transfer(), Link()]
     }
     
     var children: [Routable] = [Send(), Get()]

@@ -108,8 +108,7 @@ public enum ChatItemType: String, Codable, CaseIterable {
 
 public struct IngestionContext {
     
-    @usableFromInline
-    internal init(chatID: String) {
+    public init(chatID: String) {
         self.chatID = chatID
     }
     

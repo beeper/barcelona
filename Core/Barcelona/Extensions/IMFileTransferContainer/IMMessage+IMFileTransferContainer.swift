@@ -19,7 +19,12 @@ extension Array: IMFileTransferContainer where Element: IMFileTransferContainer 
 extension IMMessage: IMFileTransferContainer {
     @usableFromInline
     var fileTransferGUIDs: [String] {
-        value(forKey: "_fileTransferGUIDs") as? [String] ?? []
+        get {
+            __fileTransferGUIDs ?? []
+        }
+        set {
+            __fileTransferGUIDs = newValue
+        }
     }
 }
 

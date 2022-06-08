@@ -84,7 +84,7 @@
 - (void)startFetchingMetadataForWebView:(id)arg1 completionHandler:(id)arg2;
 - (id)_startFetchingMetadataForURL:(id)arg1 completionHandler:(id)arg2;
 - (void)_internalStartFetchingMetadataFromURL;
-- (void)startFetchingMetadataForURL:(id)arg1 completionHandler:(id)arg2;
+- (void)startFetchingMetadataForURL:(NSURL*)arg1 completionHandler:(void (^)(LPLinkMetadata *__nullable, NSError *__nullable))arg2;
 - (void)_willStartFetchingMetadata;
 - (void)dealloc;
 - (id)init;

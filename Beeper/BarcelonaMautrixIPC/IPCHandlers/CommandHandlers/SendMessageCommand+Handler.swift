@@ -8,6 +8,7 @@
 
 import Foundation
 import Barcelona
+import IMCore
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {
@@ -21,17 +22,63 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
             }
             return
         }
-        
-        var messageCreation = CreateMessage(parts: [
-            .init(type: .text, details: text)
-        ])
-        
-        messageCreation.replyToGUID = reply_to
-        messageCreation.replyToPart = reply_to_part
-        
         do {
-            let message = try chat.send(message: messageCreation)
-            payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message.id, service: message.service.rawValue, timestamp: message.time)))
+            var finalMessage: Message!
+            
+            lazy var richLinkURL: URL? = URL(string: text.trimmingCharacters(in: [" "]))
+            
+            var simpleRichLinkValid: Bool {
+                richLinkURL.map {
+                    IMMessage.supportedRichLinkURL($0, additionalSupportedSchemes: [])
+                } ?? false
+            }
+            
+            var isRichLink: Bool {
+                CBFeatureFlags.adHocRichLinks ? rich_link != nil : simpleRichLinkValid
+            }
+            
+            if isRichLink {
+                var threadError: Error?
+                Thread.main.sync ({
+                    CLDebug("BLMautrix", "I am processing a rich link! text '%@'", text)
+                    let message = ERCreateBlankRichLinkMessage(text.trimmingCharacters(in: [" "])) { item in
+                        if #available(macOS 11.0, *), let replyToGUID = reply_to {
+                            item.setThreadIdentifier(IMChatItem.resolveThreadIdentifier(forMessageWithGUID: replyToGUID, part: reply_to_part ?? 0, chat: chat.imChat))
+                        }
+                    }
+                    var afterSend: () -> () = { }
+                    if CBFeatureFlags.adHocRichLinks, let richLink = rich_link {
+                        do {
+                            #if DEBUG
+                            CLInfo("AdHocLinks", "mautrix-imessage gave me %@", try String(decoding: JSONEncoder().encode(richLink), as: UTF8.self))
+                            #endif
+                            afterSend = try message.provideLinkMetadata(richLink)
+                        } catch {
+                            threadError = error
+                            return
+                        }
+                    } else if !CBFeatureFlags.adHocRichLinks, let url = richLinkURL, IMMessage.supportedRichLinkURL(url, additionalSupportedSchemes: []) {
+                        message.loadLinkMetadata(at: url)
+                    }
+                    chat.imChat.send(message)
+                    afterSend()
+                    finalMessage = Message(ingesting: message, context: IngestionContext(chatID: chat.id))!
+                } as @convention(block) () -> ())
+                if let threadError = threadError {
+                    throw threadError
+                }
+            } else {
+                var messageCreation = CreateMessage(parts: [
+                    .init(type: .text, details: text)
+                ])
+                
+                messageCreation.replyToGUID = reply_to
+                messageCreation.replyToPart = reply_to_part
+            
+                finalMessage = try chat.send(message: messageCreation)
+            }
+            
+            payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: finalMessage.id, service: finalMessage.service.rawValue, timestamp: finalMessage.time)))
         } catch {
             // girl fuck
             CLFault("BLMautrix", "failed to send text message: %@", error as NSError)

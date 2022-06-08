@@ -39,9 +39,7 @@ public struct PluginChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
             break
         case "com.apple.messages.URLBalloonProvider":
             if let dataSource = item.dataSource {
-                if let metadata = dataSource.richLinkMetadata, let richLink = RichLinkRepresentation(metadata: metadata, attachments: attachments) {
-                    self.richLink = richLink
-                }
+                richLink = dataSource.richLinkMetadata.map(RichLinkMetadata.init(metadata:))
                 
                 if let url = dataSource.url {
                     let urlString = url.absoluteString
@@ -74,7 +72,7 @@ public struct PluginChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var digitalTouch: DigitalTouchMessage?
-    public var richLink: RichLinkRepresentation?
+    public var richLink: RichLinkMetadata?
     public var fallback: TextChatItem?
     public var `extension`: MessageExtensionsData?
     public var payload: String?

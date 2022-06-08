@@ -223,7 +223,7 @@ public extension Chat {
     }
 }
 
-extension Thread {
+public extension Thread {
     func sync(_ block: @convention(block) @escaping () -> ()) {
         __im_performBlock(block, waitUntilDone: true)
     }
