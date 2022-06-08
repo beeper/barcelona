@@ -19,7 +19,7 @@ private let isDebugBuild = false
 public class _CBFeatureFlags: FlagProvider {
     // Supported way of overriding defaults, manipulate this early on since things are cached agressively
     public struct Defaults {
-        public static var adHocRichLinks: Bool = false
+        public static var adHocRichLinks: Bool = true
     }
     public let suiteName = "com.ericrabil.barcelona"
     

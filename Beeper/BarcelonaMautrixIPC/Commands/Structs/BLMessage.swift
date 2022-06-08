@@ -135,7 +135,11 @@ public struct BLMessage: Codable, ChatResolvable {
                 }.compactMap {
                     BLAttachment(guid: $0)
                 }
-                rich_link = plugin.richLink
+                if let richLink = plugin.richLink {
+                    rich_link = richLink
+                } else if let extensionData = plugin.extension {
+                    rich_link = RichLinkMetadata(extensionData: extensionData, attachments: plugin.attachments, fallbackText: &text)
+                }
             default:
                 continue
             }

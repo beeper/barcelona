@@ -166,15 +166,15 @@ class MessageCommand: CommandGroup {
             var monitor: BLMediaMessageMonitor?
             
             func execute() throws {
-                let metadata = try JSONDecoder().decode(RichLinkMetadata.self, from: Data(contentsOf: URL(fileURLWithPath: jsonPath)))
+                let metadata = try! JSONDecoder().decode(RichLinkMetadata.self, from: Data(contentsOf: URL(fileURLWithPath: jsonPath)))
                 let message = ERCreateBlankRichLinkMessage(text)
-                try message.provideLinkMetadata(metadata)
+                let afterSend = try message.provideLinkMetadata(metadata)
                 monitor = BLMediaMessageMonitor(messageID: message.id, transferGUIDs: message._imMessageItem?.fileTransferGUIDs ?? []) { success, error, cancel in
                     print(success, error?.description, cancel)
                     self.monitor = nil
-                    exit(0)
                 }
                 chat.imChat.send(message)
+                afterSend()
             }
         }
         

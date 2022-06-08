@@ -7,6 +7,7 @@
 #import <objc/NSObject.h>
 
 @class NSMutableDictionary, NSMutableSet, NSString, IMBalloonPlugin, IMBalloonPluginDataSource;
+@class IMPluginPayload;
 
 @interface IMBalloonPluginManager : NSObject
 {
@@ -35,7 +36,7 @@
 - (NSArray<IMBalloonPlugin*>*)allPlugins;
 - (void)insertDataSource:(id)arg1 forGUID:(NSString*)arg2;
 - (IMBalloonPluginDataSource*)existingDataSourceForMessageGUID:(NSString*)arg1 bundleID:(NSString*)arg2;
-- (IMBalloonPluginDataSource*)dataSourceForPluginPayload:(NSData*)arg1;
+- (IMBalloonPluginDataSource*)dataSourceForPluginPayload:(IMPluginPayload*)arg1;
 - (id)_fallBackMessagesExtensionPluginForBundleID:(id)arg1;
 - (__typeof([IMBalloonPluginDataSource class]))dataSourceClassForBundleID:(NSString*)arg1;
 - (void)_loadAllDataSources;

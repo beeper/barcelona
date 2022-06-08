@@ -193,6 +193,7 @@ extern NSString* IMBalloonLayoutInfoSecondarySubcaptionKey;
 extern NSString* IMBalloonLayoutInfoTertiarySubcaptionKey;
 // MARK: - Bundle IDs
 extern NSString* IMBalloonBundleIdentifierBusiness;
+extern NSString* IMBalloonPluginIdentifierRichLinks;
 
 void IMSharedHelperReplaceExtensionPayloadDataWithFilePathForMessage(IMMessageItem*, NSString*);
 

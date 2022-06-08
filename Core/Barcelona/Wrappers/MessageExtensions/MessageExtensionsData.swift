@@ -11,6 +11,8 @@ import IMCore
 import AnyCodable
 import Gzip
 import Swime
+import Swog
+import UniformTypeIdentifiers
 
 private let UnarchivingClasses = [
     NSMutableString.self,
@@ -231,3 +233,71 @@ public struct MessageExtensionsData: Codable, Hashable {
     public var alternateText: String?
 }
 
+public extension RichLinkMetadata {
+    init?(extensionData: MessageExtensionsData, attachments: [Attachment], fallbackText: inout String) {
+        if let appIcon = extensionData.appIcon, let iconData = Data(base64Encoded: appIcon) {
+            icon = RichLinkAsset(mimeType: nil, accessibilityText: nil, source: .data(iconData), originalURL: nil, size: .init(cg: .zero))
+        }
+        if let appName = extensionData.appName {
+            fallbackText = appName + " Message"
+        } else {
+            fallbackText = extensionData.localizedDescription ?? "Extension Message"
+        }
+        if let layoutInfo = extensionData.layoutInfo {
+            var captions = [extensionData.localizedDescription, layoutInfo.imageTitle, layoutInfo.imageSubtitle, layoutInfo.caption, layoutInfo.subcaption, layoutInfo.secondarySubcaption, layoutInfo.tertiarySubcaption].compactMap { $0 }.filter {
+                $0 != title && $0 != fallbackText
+            }
+            captions.removeDuplicates()
+            if title?.isEmpty != false, !captions.isEmpty {
+                title = captions.removeFirst()
+            }
+            var summary = ""
+            func push(_ text: String) {
+                if text.isEmpty {
+                    return
+                }
+                if !summary.isEmpty {
+                    summary += "\r"
+                }
+                summary += text
+            }
+            captions.forEach(push(_:))
+            if !summary.isEmpty {
+                self.summary = summary
+            }
+        }
+        if !attachments.isEmpty {
+            for attachment in attachments {
+                if let transfer = attachment.existingFileTransfer {
+                    CLInfo("LPLink+MSExt", "Transfer %@ mime %@ isAuxImage %d", transfer.guid, transfer.mimeType ?? "nil", transfer.isAuxImage)
+                    guard let type = transfer.type else {
+                        CLDebug("LPLink+MSExt", "Skip transfer %@ because it is missing a UTI", transfer.guid)
+                        continue
+                    }
+                    guard UTTypeConformsTo(type as CFString, kUTTypeImage) else {
+                        CLDebug("LPLink+MSExt", "Skip transfer %@ because it is not an image", transfer.guid)
+                        continue
+                    }
+                    guard let localURL = transfer.localURL else {
+                        CLInfo("LPLink+MSExt", "Skip transfer %@ because it has no local URL", transfer.guid)
+                        continue
+                    }
+                    guard let data = CBTranscoding.toJPEG(contentsOf: localURL) else {
+                        CLWarn("LPLink+MSExt", "Failed to transcode image to JPEG from %@", localURL.absoluteString)
+                        continue
+                    }
+                    CLInfo("LPLink+MSExt", "Selecting transfer %@ for extension data translation", transfer.guid)
+                    let size = transfer.mediaSize.map {
+                        RichLinkMetadata.RichLinkAsset.Size(width: Double($0.width), height: Double($0.height))
+                    }
+                    image = .init(mimeType: transfer.mimeType, accessibilityText: nil, source: .data(data), originalURL: nil, size: size)
+                    break
+                }
+            }
+        }
+        if let url = extensionData.url.flatMap(Foundation.URL.init(string:)), url.scheme != nil {
+            self.URL = url
+            self.originalURL = url
+        }
+    }
+}

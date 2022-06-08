@@ -23,7 +23,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
             return
         }
         do {
-            var finalMessage: Message
+            var finalMessage: Message!
             
             lazy var richLinkURL: URL? = URL(string: text.trimmingCharacters(in: [" "]))
             
@@ -38,18 +38,35 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
             }
             
             if isRichLink {
-                let message = ERCreateBlankRichLinkMessage(text.trimmingCharacters(in: [" "])) { item in
-                    if #available(macOS 11.0, *), let replyToGUID = reply_to {
-                        item.setThreadIdentifier(IMChatItem.resolveThreadIdentifier(forMessageWithGUID: replyToGUID, part: reply_to_part ?? 0, chat: chat.imChat))
+                var threadError: Error?
+                Thread.main.sync ({
+                    CLDebug("BLMautrix", "I am processing a rich link! text '%@'", text)
+                    let message = ERCreateBlankRichLinkMessage(text.trimmingCharacters(in: [" "])) { item in
+                        if #available(macOS 11.0, *), let replyToGUID = reply_to {
+                            item.setThreadIdentifier(IMChatItem.resolveThreadIdentifier(forMessageWithGUID: replyToGUID, part: reply_to_part ?? 0, chat: chat.imChat))
+                        }
                     }
+                    var afterSend: () -> () = { }
+                    if CBFeatureFlags.adHocRichLinks, let richLink = rich_link {
+                        do {
+                            #if DEBUG
+                            CLInfo("AdHocLinks", "mautrix-imessage gave me %@", try String(decoding: JSONEncoder().encode(richLink), as: UTF8.self))
+                            #endif
+                            afterSend = try message.provideLinkMetadata(richLink)
+                        } catch {
+                            threadError = error
+                            return
+                        }
+                    } else if !CBFeatureFlags.adHocRichLinks, let url = richLinkURL, IMMessage.supportedRichLinkURL(url, additionalSupportedSchemes: []) {
+                        message.loadLinkMetadata(at: url)
+                    }
+                    chat.imChat.send(message)
+                    afterSend()
+                    finalMessage = Message(ingesting: message, context: IngestionContext(chatID: chat.id))!
+                } as @convention(block) () -> ())
+                if let threadError = threadError {
+                    throw threadError
                 }
-                if CBFeatureFlags.adHocRichLinks, let richLink = rich_link {
-                    try message.provideLinkMetadata(richLink)
-                } else if !CBFeatureFlags.adHocRichLinks, let url = richLinkURL, IMMessage.supportedRichLinkURL(url, additionalSupportedSchemes: []) {
-                    message.loadLinkMetadata(at: url)
-                }
-                chat.imChat.send(message)
-                finalMessage = Message(ingesting: message, context: IngestionContext(chatID: chat.id))!
             } else {
                 var messageCreation = CreateMessage(parts: [
                     .init(type: .text, details: text)

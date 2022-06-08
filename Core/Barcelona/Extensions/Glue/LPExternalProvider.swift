@@ -36,6 +36,8 @@ internal extension IMBalloonPluginManager {
     func _startFetchingMetadata()
     @objc func dispatchDidReceiveMetadataToAllClients()
     @objc var richLink: RichLink { get }
+    @objc(setValue:forKey:) func setValue(_ value: Any!, forKey: String)
+    @objc func createEmptyMetadataWithOriginalURL()
 }
 
 internal extension IMBalloonPluginDataSource {
@@ -204,52 +206,44 @@ public extension IMMessage {
 //        }
     }
     
-    func provideLinkMetadata(_ metadata: RichLinkMetadata) throws {
+    func provideLinkMetadata(_ metadata: RichLinkMetadata) throws -> () -> () {
         try provideLinkMetadata(metadata.createLinkMetadata())
     }
     
-    func provideLinkMetadata(_ metadata: @autoclosure () -> LPLinkMetadata) throws {
-        guard let dataSource = decodePluginDataSource() else {
-            throw IMBalloonPluginMisuseError.iAmNotAPlugin
+    func provideLinkMetadata(_ metadata: @autoclosure () -> LPLinkMetadata) throws -> () -> () {
+        let payload = IMPluginPayload()
+        payload.messageGUID = guid
+        payload.pluginBundleID = IMBalloonPluginIdentifierRichLinks
+        guard let dataSource = IMBalloonPluginManager.sharedInstance().dataSource(for: payload) else {
+            CLWarn("LPLink", "Plugin manager returned no data source for rich link plugin payload")
+            throw IMBalloonPluginDataSource.LPBalloonPluginError.unsupported
         }
-        if isSent {
-            try dataSource.provideArbitraryLinkMetadata(metadata())
-        } else {
-            guard let richLinkDataSource = dataSource.richLinkDataSource else {
-                throw IMBalloonPluginDataSource.LPBalloonPluginError.dataSourceMismatch
-            }
-            CLInfo("LPLink", "Period")
-//            let metadata = metadata()
-//            richLinkDataSource.updateRichLink(with: metadata)
-//            richLinkDataSource.dispatchDidReceiveMetadataToAllClients()
+        guard let richLinkDataSource = dataSource.richLinkDataSource else {
+            CLWarn("LPLink", "Rich link data sources have changed, fixme!")
+            throw IMBalloonPluginDataSource.LPBalloonPluginError.unsupported
+        }
+        let metadata = metadata()
+        richLinkDataSource.setValue(metadata.originalURL, forKey: "_originalURL")
+        richLinkDataSource.setValue(false, forKey: "_shouldFetchWhenSent")
+        richLinkDataSource.createEmptyMetadataWithOriginalURL()
+        richLinkDataSource.richLink.needsCompleteFetch = false
+        richLinkDataSource.richLink.needsSubresourceFetch = false
+        CLInfo("LPLink", "Initialized a RichLinkDataSource for message %@ for URL %@", guid, metadata.originalURL?.absoluteString ?? "nil")
+        CLInfo("LPLink", "RichLinkDataSource for message %@ willEnterShelf", guid)
+        dataSource.payloadWillEnterShelf()
+        CLInfo("LPLink", "RichLinkDataSource for message %@ willSendFromShelf", guid)
+        dataSource.payloadWillSendFromShelf()
+        payloadData = dataSource.messagePayloadDataForSending
+        CLInfo("LPLink", "RichLinkDataSource for message %@ placeholder payload is %d", guid, payloadData.count)
+        dataSource.payloadInShelf = false
+        return {
+            CLInfo("LPLink", "RichLinkDataSource for message %@ was sent. Time for more!", self.guid)
+            richLinkDataSource.updateRichLink(with: metadata)
+            richLinkDataSource.dispatchDidReceiveMetadataToAllClients()
             var attachments: NSArray?
-//            print(attachments)
-            payloadData = richLinkDataSource.richLink.dataRepresentation(withOutOfLineAttachments: &attachments)
-//            print(attachments)
-            
-            let metadata = metadata()
-            var pipeline: CBPipeline<Void> = CBPipeline()
-            pipeline = CBDaemonListener.shared.messagePipeline.pipe { message in
-                if message.id == self.id, message.isSent {
-                    pipeline.cancel()
-                    richLinkDataSource.updateRichLink(with: metadata)
-                    richLinkDataSource.dispatchDidReceiveMetadataToAllClients()
-                    self.payloadData = richLinkDataSource.richLink.dataRepresentation(withOutOfLineAttachments: &attachments)
-                    dataSource.sendPayload(self.payloadData, attachments: attachments)
-                }
-            }
-            
-            if let attachments = attachments {
-                let transferGUIDs = IMFileTransferCenter.sharedInstance().guids(forStoredAttachmentPayloadData: attachments, messageGUID: guid) as? [String] ?? []
-                fileTransferGUIDs = transferGUIDs
-                _imMessageItem.fileTransferGUIDs = transferGUIDs
-//                for transferGUID in transferGUIDs {
-//                    IMDaemonController.sharedInstance().sendStandaloneFileTransfer(transferGUID)
-//                }
-//                print(fileTransferGUIDs)
-            }
-//            _imMessageItem.fileTransferGUIDs = fileTransferGUIDs
-//            setValue((fileTransferGUIDs as NSArray).copy(), forKey: "fileTransferGUIDs")
+            let data = richLinkDataSource.richLink.dataRepresentation(withOutOfLineAttachments: &attachments)
+            CLInfo("LPLink", "RichLinkDataSource for message %@ sending packaged payload with size %d and attachment count %d", self.guid, data.count, attachments?.count ?? 0)
+            dataSource.sendPayload(richLinkDataSource.richLink.dataRepresentation(withOutOfLineAttachments: &attachments), attachments: attachments)
         }
     }
 }
