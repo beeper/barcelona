@@ -30,6 +30,50 @@ private extension NSAttributedString {
     }
 }
 
+/// Replaces all IMLinkAttributeName values with parsed URLs
+public func ERRepairAttributedLinkString(_ link: NSAttributedString) -> NSAttributedString? {
+    let copy = link.mutableCopy() as! NSMutableAttributedString
+    var mutated = false
+    link.enumerateAttribute(MessageAttributes.link, in: link.wholeRange) { value, range, stop in
+        switch value {
+        case is URL, is NSURL:
+            break
+        default:
+            copy.removeAttribute(MessageAttributes.link, range: range)
+            if let string = value as? String, let url = URL(string: string) {
+                mutated = true
+                copy.addAttribute(MessageAttributes.link, value: url, range: range)
+            }
+        }
+    }
+    guard mutated else {
+        return nil
+    }
+    return NSAttributedString(attributedString: copy)
+}
+
+import IMDaemonCore
+import Sentry
+import Swog
+
+/// For rich link messages, repairs their attributed string by replacing all IMLinkAttributeName:NSString to IMLinkAttributeName:NSURL
+public func ERRepairIMMessageItem(_ message: IMMessageItem) -> IMMessageItem {
+    guard message.balloonBundleID == IMBalloonPluginIdentifierRichLinks else {
+        return message
+    }
+    guard let text = message.body, let repaired = ERRepairAttributedLinkString(text) else {
+        CLInfo("ERRepairIMMessage", "Not repairing message %@", message.guid)
+        return message
+    }
+    message.body = repaired
+    let newMessageItem = IMDMessageStore.sharedInstance().storeMessage(message, forceReplace: true, modifyError: false, modifyFlags: false, flagMask: 0, updateMessageCache: true, calculateUnreadCount: false)
+    CLInfo("ERRepairIMMessage", "Repaired corrupted rich link message with GUID %@", message.guid)
+    SentrySDK.capture(message: "Repaired corrupted rich link message") { scope in
+        scope.setTag(value: "guid", key: message.guid)
+    }
+    return newMessageItem
+}
+
 public func ERCreateBlankRichLinkMessage(_ text: String, _ url: URL, _ initializer: (IMMessageItem) -> () = { _ in }) -> IMMessage {
     let messageItem = IMMessageItem.init(sender: nil, time: nil, guid: nil, type: 0)!
     

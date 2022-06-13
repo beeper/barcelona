@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@class IMFileTransfer;
+@class IMFileTransfer, IMMessageItem;
 
 typedef struct _IMDAttachmentRecordStruct *IMDAttachmentRecordRef;
 
@@ -20,6 +20,12 @@ typedef void (^IMAttachmentSyncFetchOperationCompletionBlock)(NSError * _Nullabl
                      perTransferProgress:(IMAttachmentSyncPerTransferProgressBlock)perTransferProgress
                               completion:(IMAttachmentSyncFetchOperationCompletionBlock)completion;
 
+@end
+
+@interface IMDMessageStore: NSObject
++(instancetype)sharedInstance;
+- (IMMessageItem *) storeMessage:(IMMessageItem *)message forceReplace:(BOOL)force modifyError:(BOOL)modifyError modifyFlags:(BOOL)modifyFlags flagMask:(uint64_t)flagMask updateMessageCache:(BOOL)updateMessageCache calculateUnreadCount:(BOOL)calculateUnreadCount;
+- (IMMessageItem *) storeMessage:(IMMessageItem *)message forceReplace:(BOOL)force modifyError:(BOOL)modifyError modifyFlags:(BOOL)modifyFlags flagMask:(uint64_t)flagMask;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -158,7 +158,18 @@ private func BLIngestIMDMessageRecordRefs(_ refs: NSArray, in chat: String? = ni
         return .success([])
     }
     
-    let items = BLCreateIMItemFromIMDMessageRecordRefs(refs)
+    var items = BLCreateIMItemFromIMDMessageRecordRefs(refs)
+    
+    if CBFeatureFlags.repairCorruptedLinks {
+        items = items.map { item in
+            switch item {
+            case let item as IMMessageItem:
+                return ERRepairIMMessageItem(item)
+            case let item:
+                return item
+            }
+        }
+    }
     
     return BLIngestObjects(items, inChat: chat)
 }

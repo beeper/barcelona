@@ -167,7 +167,7 @@ class MessageCommand: CommandGroup {
             
             func execute() throws {
                 let metadata = try! JSONDecoder().decode(RichLinkMetadata.self, from: Data(contentsOf: URL(fileURLWithPath: jsonPath)))
-                let message = ERCreateBlankRichLinkMessage(text)
+                let message = ERCreateBlankRichLinkMessage(text, URL(string: "https://google.com")!)
                 let afterSend = try message.provideLinkMetadata(metadata)
                 monitor = BLMediaMessageMonitor(messageID: message.id, transferGUIDs: message._imMessageItem?.fileTransferGUIDs ?? []) { success, error, cancel in
                     print(success, error?.description, cancel)
