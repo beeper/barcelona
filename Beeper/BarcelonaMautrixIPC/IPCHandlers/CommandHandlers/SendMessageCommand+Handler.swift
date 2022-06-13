@@ -37,12 +37,12 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                 CBFeatureFlags.adHocRichLinks ? rich_link != nil : simpleRichLinkValid
             }
             
-            if isRichLink {
+            if isRichLink, let url = rich_link?.originalURL ?? rich_link?.URL ?? richLinkURL {
                 var threadError: Error?
                 Thread.main.sync ({
                     CLDebug("BLMautrix", "I am processing a rich link! text '\(text, privacy: .private)'")
                     
-                    let message = ERCreateBlankRichLinkMessage(text.trimmingCharacters(in: [" "])) { item in
+                    let message = ERCreateBlankRichLinkMessage(text.trimmingCharacters(in: [" "]), url) { item in
                         if #available(macOS 11.0, *), let replyToGUID = reply_to {
                             item.setThreadIdentifier(IMChatItem.resolveThreadIdentifier(forMessageWithGUID: replyToGUID, part: reply_to_part ?? 0, chat: chat.imChat))
                         }

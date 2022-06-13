@@ -30,7 +30,7 @@ private extension NSAttributedString {
     }
 }
 
-public func ERCreateBlankRichLinkMessage(_ text: String, _ initializer: (IMMessageItem) -> () = { _ in }) -> IMMessage {
+public func ERCreateBlankRichLinkMessage(_ text: String, _ url: URL, _ initializer: (IMMessageItem) -> () = { _ in }) -> IMMessage {
     let messageItem = IMMessageItem.init(sender: nil, time: nil, guid: nil, type: 0)!
     
     messageItem.service = IMServiceStyle.iMessage.rawValue
@@ -39,7 +39,7 @@ public func ERCreateBlankRichLinkMessage(_ text: String, _ initializer: (IMMessa
 
     messageString.addAttributes([
         MessageAttributes.writingDirection: -1,
-        MessageAttributes.link: text
+        MessageAttributes.link: url
     ], range: messageString.range(of: text))
     
     messageItem.body = messageString
