@@ -40,8 +40,9 @@ public func ERRepairAttributedLinkString(_ link: NSAttributedString) -> NSAttrib
             break
         default:
             copy.removeAttribute(MessageAttributes.link, range: range)
-            if let string = value as? String, let url = URL(string: string) {
+            if let string = value as? String {
                 mutated = true
+                let url = URL(string: string) ?? URL(string: ":")!
                 copy.addAttribute(MessageAttributes.link, value: url, range: range)
             }
         }
