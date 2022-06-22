@@ -113,10 +113,6 @@ private extension IMAccountController {
         
         // True if the account has conditions that should allow it to properly register
         var isProbablyAboutToRegister: Bool {
-            // If the account is inactive, it cannot register.
-            if !account.isActive {
-                return false
-            }
             // If the account is authorized, we are probably about to register.
             if isAuthorized {
                 return true
