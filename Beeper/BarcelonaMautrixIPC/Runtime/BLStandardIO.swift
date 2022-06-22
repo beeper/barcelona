@@ -202,9 +202,17 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
             #endif
 
             switch payload.command {
-            case .ping, .pre_startup_sync:
+            case .ping:
                 pongedOnce = true
                 payload.respond(.ack)
+                return
+            case .pre_startup_sync:
+                pongedOnce = true
+                if FileManager.default.fileExists(atPath: URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent(".mxnosync").path) {
+                    payload.respond(.arbitrary(["skip_sync":true]))
+                } else {
+                    payload.respond(.ack)
+                }
                 return
             default:
                 break

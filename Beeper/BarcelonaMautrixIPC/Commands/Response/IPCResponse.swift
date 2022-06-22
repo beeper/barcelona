@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Swog
 
 public extension IPCPayload {
     func respond(_ response: IPCResponse) {
@@ -23,6 +24,7 @@ public enum IPCResponse: Encodable {
     case chat_avatar(BLAttachment?)
     case message_receipt(BLPartialMessage)
     case guid(GUIDResponse)
+    case arbitrary(MetadataValue)
     case ack
     case none
     
@@ -42,6 +44,8 @@ public enum IPCResponse: Encodable {
             try container.encode(data)
         case .message_receipt(let data):
             try container.encode(data)
+        case .arbitrary(let codable):
+            try container.encode(codable)
         case .ack:
             try container.encodeNil()
         case .none:
