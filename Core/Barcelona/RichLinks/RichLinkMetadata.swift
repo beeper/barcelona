@@ -83,7 +83,7 @@ public struct RichLinkMetadata: Codable, Hashable {
     
     /// Converts an LPLinkMetadata object to wire format to be sent to arbitrary consumers
     public init(metadata: LPLinkMetadata) {
-        originalURL = metadata.originalURL
+        originalURL = metadata.originalURL ?? metadata.url
         URL = metadata.url
         title = metadata.title
         summary = metadata.summary
