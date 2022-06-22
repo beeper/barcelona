@@ -50,107 +50,114 @@ private extension IMAccount {
     }
 }
 
+extension RawRepresentable where RawValue: Comparable {
+    public static func >= (lhs: Self, rhs: Self) -> Bool {
+        lhs.rawValue >= rhs.rawValue
+    }
+    
+    public static func <= (lhs: Self, rhs: Self) -> Bool {
+        lhs.rawValue <= rhs.rawValue
+    }
+    
+    public static func < (lhs: Self, rhs: Self) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
+    
+    public static func > (lhs: Self, rhs: Self) -> Bool {
+        lhs.rawValue > rhs.rawValue
+    }
+}
+
 private extension IMAccountController {
-    /// Returns an interpretation of login status, or bad credentials if a registration failure is present
     var state: BridgeState {
+        // If there is no iMessage account, we are certainly unconfigured.
         guard let account = iMessageAccount else {
             return .unconfigured
         }
         
+        // If the account is a placeholder, we are certainly unconfigured.
         guard !account.isPlaceholder else {
             return .unconfigured
         }
         
-        switch account.registrationFailureReason {
-        case .irreparableFailure, .expiredDeviceCredentials, .loginFailed, .badCredentials, .badDeviceCredentials, .badPushToken, .cancelled:
+        // If the account has any of the following registration failure reasons, it is most certainly not working.
+        if [IMAccountRegistrationFailureReason.irreparableFailure, .expiredDeviceCredentials, .loginFailed, .badCredentials, .badDeviceCredentials, .badPushToken, .cancelled].contains(account.registrationFailureReason) {
             return .badCredentials
-        default:
-            break
         }
         
-        var isProcessing: Bool {
-            if IMServiceImpl.iMessage().status() == .loggingIn {
-                return true
+        // The value of the last registration failure, if the registration success date does not exist or is before the failure date.
+        lazy var registrationFailureDate: Date? = account.registrationFailureDate.flatMap { registrationFailureDate in
+            if let registrationSuccessDate = account.registrationSuccessDate {
+                if registrationFailureDate > registrationSuccessDate {
+                    return registrationFailureDate
+                }
+            } else if account.registrationStatus <= .failed {
+                return registrationFailureDate
             }
-            
-            switch account.registrationStatus {
-            case .unregistered:
-                return true
-            case .authenticating:
-                return true
-            case .authenticated:
-                return true
-            case .registering:
-                return true
-            default:
+            return nil
+        }
+        
+        // If there is no authorization token, we are certainly not authorized.
+        var isAuthorized: Bool {
+            account.authorizationToken != nil
+        }
+        
+        // If the account has a loggedIn status, or if justLoggedIn is true, or if the account says it is connected, then we will assume that we are logged in.
+        var isLoggedIn: Bool {
+            account.loginStatus == .statusLoggedIn || account.justLoggedIn || account.isConnected
+        }
+        
+        var isRegistered: Bool {
+            account.isRegistered
+        }
+        
+        // True if the account has conditions that should allow it to properly register
+        var isProbablyAboutToRegister: Bool {
+            // If the account is inactive, it cannot register.
+            if !account.isActive {
                 return false
             }
+            // If the account is authorized, we are probably about to register.
+            if isAuthorized {
+                return true
+            }
+            // If the account is logged in, we are probably about to register.
+            if isLoggedIn {
+                return true
+            }
+            // If the account just logged in, we are probably about to register.
+            if account.justLoggedIn {
+                return true
+            }
+            // If the account is connecting, we are probably about to register.
+            if account.isConnecting {
+                return true
+            }
+            // Otherwise, we are not about to register.
+            return false
         }
         
-        var potentiallyConnecting: BridgeState {
-            // isConnecting == true guarantees we are connecting, but isConnecting == false does not guarantee we are NOT connecting
-            if account.isActive && account.loginStatus.rawValue >= 2 {
-                return .connecting
-            }
-            if let registrationFailureDate = account.registrationFailureDate {
-                if let registrationSuccessDate = account.registrationSuccessDate {
-                    if registrationFailureDate > registrationSuccessDate {
-                        return .badCredentials
-                    }
-                } else if account.registrationStatus.rawValue <= 2 {
-                    return .badCredentials
-                }
-            }
-            if !account.isActive {
-                return .badCredentials
-            }
-            return .connecting
+        // True if the account failed to register, has a known registraiton failure reason, or most recently failed to register
+        var hasAccountError: Bool {
+            account.registrationStatus == .failed || account.registrationFailureReason > .unknownError || registrationFailureDate != nil
         }
         
-        switch account.loginStatus {
-        case .statusLoggedOut:
-            if account.registrationStatus == .failed {
-                return .badCredentials
-            }
-            
-            if isProcessing {
-                return potentiallyConnecting
-            } else {
-                return .unconfigured
-            }
-        case .statusDisconnected:
+        // If we are registered but disconnected, consider that a TRANSIENT_DISCONNECT
+        if isRegistered && account.loginStatus == .statusDisconnected {
             return .transientDisconnect
-        case .statusLoggingOut:
-            return .loggedOut
-        case .statusLoggingIn:
-            return potentiallyConnecting
-        case .statusLoggedIn:
-            switch account.registrationStatus {
-            case .failed:
-                switch account.registrationFailureReason {
-                case .noError:
-                    fallthrough
-                case .unknownError:
-                    return potentiallyConnecting
-                default:
-                    return .badCredentials
-                }
-            case .unknown:
-                return potentiallyConnecting
-            case .unregistered:
-                return potentiallyConnecting
-            case .authenticating:
-                return potentiallyConnecting
-            case .authenticated:
-                return potentiallyConnecting
-            case .registering:
-                return potentiallyConnecting
-            case .registered:
-                return .connected
-            @unknown default:
-                return .unknownError
-            }
-        @unknown default:
+        }
+        
+        // If we are registered, logged in, and have no account error, we are connected.
+        if isRegistered && isLoggedIn && !hasAccountError {
+            return .connected
+        // Otherwise, if we are probably about to register, then we are connecting.
+        } else if isProbablyAboutToRegister {
+            return .connecting
+        // Otherwise, if there is any kind of account error, we are in bad credentials.
+        } else if hasAccountError {
+            return .badCredentials
+        // Otherwise, we don't know what state we're in, but it isn't good.
+        } else {
             return .unknownError
         }
     }
