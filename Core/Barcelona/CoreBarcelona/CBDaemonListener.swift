@@ -655,6 +655,7 @@ private extension CBDaemonListener {
             return false
         }
         
+        
         guard let message = message as? IMMessageItem else {
             nonces.insert(message.nonce)
             return true
