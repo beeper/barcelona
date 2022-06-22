@@ -56,8 +56,8 @@ public func BLHandlePayload(_ payload: IPCPayload) {
     }
     
     if runnable is AuthenticatedAsserting {
-        guard BLHealthTicker.shared.mostRecentStatus.state_event != .unconfigured else {
-            payload.reply(withCommand: .error(.init(code: BLHealthTicker.shared.mostRecentStatus.state_event.rawValue, message: "You must be signed in to do that.")))
+        guard BLHealthTicker.shared.latestStatus.state_event != .unconfigured else {
+            payload.reply(withCommand: .error(.init(code: BLHealthTicker.shared.latestStatus.state_event.rawValue, message: "You must be signed in to do that.")))
             return
         }
     }

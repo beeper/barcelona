@@ -14,11 +14,10 @@ public class BLHealthTicker {
     public static let shared = BLHealthTicker()
     
     private var timer: Timer? = nil
-    private var subject: PassthroughSubject<BridgeStatusCommand, Never> = PassthroughSubject()
-    public private(set) lazy var multi = subject.share()
+    public private(set) lazy var multi = $latestStatus.removeDuplicates().debounce(for: .milliseconds(100), scheduler: DispatchQueue.global(qos: .userInitiated))
     
     public init() {
-        NotificationCenter.default.subscribe(toNotificationsNamed: [.IMAccountLoginStatusChanged, .IMAccountRegistrationStatusChanged, .IMAccountNoLongerJustLoggedIn, .IMAccountLoggedIn, .IMAccountLoggedOut, .IMAccountActivated, .IMAccountDeactivated, .IMAccountAuthorizationIDChanged, .IMAccountControllerOperationalAccountsChanged, .IMAccountVettedAliasesChanged, .IMAccountDisplayNameChanged]) { notification, subscription in
+        NotificationCenter.default.subscribe(toNotificationsNamed: [.IMAccountLoginStatusChanged, .IMAccountRegistrationStatusChanged, .IMAccountNoLongerJustLoggedIn, .IMAccountLoggedIn, .IMAccountLoggedOut, .IMAccountActivated, .IMAccountDeactivated, .IMAccountAuthorizationIDChanged, .IMAccountControllerOperationalAccountsChanged, .IMAccountVettedAliasesChanged, .IMAccountDisplayNameChanged, .IMDaemonDidConnect]) { notification, subscription in
             self.run(schedulingNext: true)
         }
     }
@@ -37,22 +36,8 @@ public class BLHealthTicker {
         }
     }
     
-    public var mostRecentStatus: BridgeStatusCommand {
-        if let latestStatus = latestStatus {
-            return latestStatus
-        }
-        
-        let status = status
-        latestStatus = status
-        return status
-    }
-    
     public var pinnedBridgeState: BridgeState? {
         didSet {
-            if latestStatus == nil {
-                return
-            }
-            
             var status = BridgeStatusCommand.current
             if let pinnedBridgeState = pinnedBridgeState {
                 status.state_event = pinnedBridgeState
@@ -61,17 +46,8 @@ public class BLHealthTicker {
         }
     }
     
-    private var latestStatus: BridgeStatusCommand? {
-        didSet {
-            if latestStatus != nil, let pinnedBridgeState = pinnedBridgeState {
-                latestStatus!.state_event = pinnedBridgeState
-            }
-            
-            if let latestStatus = latestStatus {
-                subject.send(latestStatus)
-            }
-        }
-    }
+    @Published
+    public private(set) var latestStatus: BridgeStatusCommand = .init(state_event: .unconfigured, ttl: .infinity, info: [:])
     
     /**
      Publishes the current bridge status and optionally schedules the next update
