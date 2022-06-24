@@ -56,7 +56,7 @@ public func BLHandlePayload(_ payload: IPCPayload) {
     }
     
     if runnable is AuthenticatedAsserting {
-        guard BLHealthTicker.shared.latestStatus.state_event != .unconfigured else {
+        guard IMAccountController.shared.accounts.contains(where: \.canSendMessages) else {
             payload.reply(withCommand: .error(.init(code: BLHealthTicker.shared.latestStatus.state_event.rawValue, message: "You must be signed in to do that.")))
             return
         }
