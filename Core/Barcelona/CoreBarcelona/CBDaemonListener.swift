@@ -691,6 +691,44 @@ private extension CBDaemonListener {
         messageStatusPipeline.send(CBMessageStatusChange(type: .sent, service: message.service, time: sentTime, sender: nil, fromMe: true, chatID: chatID, messageID: message.id, context: .init(message: message)))
     }
     
+    func recover(failedMessage: IMMessageItem, chatIdentifier: String) -> Bool {
+        lazy var chat = IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)
+        
+        switch failedMessage.errorCode {
+        case .remoteUserDoesNotExist:
+            guard failedMessage.serviceStyle == .iMessage else {
+                log.info("Message %@ failed with remoteUserDoesNotExist but it is not on iMessage. I can't fix this.", failedMessage.id)
+                return false
+            }
+            guard let chat = chat, chat.participantHandleIDs().allSatisfy ({ $0.isPhoneNumber || $0.isEmail }) else {
+                log.info("Message %@ failed with remoteUserDoesNotExist but I could not guarantee that the chat is downgradeable. I won't fix this.", failedMessage.id)
+                return false
+            }
+            log.info("Downgrading failed message %@ to SMS", failedMessage.id)
+            if chat.participants.count == 1 {
+                let manualDowngradesCount = chat._consecutiveDowngradeAttempts(viaManualDowngrades: true) as? Int ?? 0
+                if manualDowngradesCount > 5 {
+                    log.info("Chat %@ has had five consecutive downgrade attempts, persisting the downgrade.", chatIdentifier)
+                    chat._updateDowngradeState(true, checkAgainInterval: 10)
+                } else {
+                    log.info("Incrementing downgrade counter for chat %@", chatIdentifier)
+                    chat._setAndIncrementDowngradeMarkers(forManual: true)
+                }
+            }
+            chat._target(toService: IMServiceImpl.sms(), newComposition: false)
+            var flags = IMMessageFlags(rawValue: failedMessage.flags)
+            flags.insert(.downgraded)
+            nonces.remove(failedMessage.nonce)
+            failedMessage._updateFlags(flags.rawValue)
+            failedMessage.service = "SMS"
+            failedMessage.account = IMAccountController.shared.activeSMSAccount!.uniqueID
+            chat.send(IMMessage.init(fromIMMessageItem: failedMessage, sender: failedMessage.sender(), subject: failedMessage.subject))
+            return true
+        default:
+            return false
+        }
+    }
+    
     func process(newMessage: IMItem, chatIdentifier: String) {
         if !preflight(message: newMessage) {
             log.warn("withholding message \(newMessage.guid): preflight failure")
@@ -725,6 +763,12 @@ private extension CBDaemonListener {
             if CBFeatureFlags.dropSpamMessages, item.isSpam {
                 log.debug("ignoring message \(item.guid): flagged as spam")
                 return
+            }
+            
+            if item.errorCode != .noError {
+                if recover(failedMessage: item, chatIdentifier: chatIdentifier) {
+                    return
+                }
             }
             
             log.debug("sending message \(item.guid) down the pipeline")
