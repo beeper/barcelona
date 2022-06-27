@@ -85,6 +85,9 @@
 + (id)filterIMHandlesForBestAccountSiblings:(id)arg1;
 + (id)filterIMHandlesForAccountSiblings:(id)arg1 onAccount:(id)arg2;
 + (IMHandle*)bestIMHandleInArray:(NSArray<IMHandle*>*)arg1;
+NS_ASSUME_NONNULL_BEGIN
++ (NSArray<IMHandle*>*)handlesForCNContact:(CNContact*)contact;
+NS_ASSUME_NONNULL_END
 + (id)imHandlesForIMPerson:(id)arg1;
 + (BOOL)supportsSecureCoding;
 + (id)nameOfStatus:(unsigned long long)arg1;
