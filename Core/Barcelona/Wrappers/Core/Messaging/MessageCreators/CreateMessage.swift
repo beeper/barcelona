@@ -9,6 +9,7 @@
 import Foundation
 import IMSharedUtilities
 import IMCore
+import Swog
 
 private func additionalFlags(forCreation creation: CreateMessage) -> IMMessageFlags {
     if let _ = creation.ballonBundleID { return .hasDDResults }
@@ -53,7 +54,7 @@ public extension CreateMessage {
 }
 
 public struct CreateMessage: Codable, CreateMessageBase {
-    public init(subject: String? = nil, parts: [MessagePart], isAudioMessage: Bool? = nil, flags: CLongLong? = nil, ballonBundleID: String? = nil, payloadData: String? = nil, expressiveSendStyleID: String? = nil, threadIdentifier: String? = nil, replyToPart: Int? = nil, replyToGUID: String? = nil) {
+    public init(subject: String? = nil, parts: [MessagePart], isAudioMessage: Bool? = nil, flags: CLongLong? = nil, ballonBundleID: String? = nil, payloadData: String? = nil, expressiveSendStyleID: String? = nil, threadIdentifier: String? = nil, replyToPart: Int? = nil, replyToGUID: String? = nil, metadata: MetadataValue? = nil) {
         self.subject = subject
         self.parts = parts
         self.isAudioMessage = isAudioMessage
@@ -64,6 +65,7 @@ public struct CreateMessage: Codable, CreateMessageBase {
         self.threadIdentifier = threadIdentifier
         self.replyToPart = replyToPart
         self.replyToGUID = replyToGUID
+        self.metadata = metadata
     }
     
     public var subject: String?
@@ -76,6 +78,7 @@ public struct CreateMessage: Codable, CreateMessageBase {
     public var threadIdentifier: String?
     public var replyToGUID: String?
     public var replyToPart: Int?
+    public var metadata: MetadataValue?
     
     public func parseToAttributed() -> MessagePartParseResult {
         ERAttributedString(from: self.parts)

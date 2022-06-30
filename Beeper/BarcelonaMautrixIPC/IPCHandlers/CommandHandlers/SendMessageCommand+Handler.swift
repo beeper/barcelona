@@ -47,6 +47,9 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                             item.setThreadIdentifier(IMChatItem.resolveThreadIdentifier(forMessageWithGUID: replyToGUID, part: reply_to_part ?? 0, chat: chat.imChat))
                         }
                     }
+                    if let metadata = metadata {
+                        message.metadata = metadata
+                    }
                     var afterSend: () -> () = { }
                     if CBFeatureFlags.adHocRichLinks, let richLink = rich_link {
                         do {
@@ -75,6 +78,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                 
                 messageCreation.replyToGUID = reply_to
                 messageCreation.replyToPart = reply_to_part
+                messageCreation.metadata = metadata
             
                 finalMessage = try chat.send(message: messageCreation)
             }

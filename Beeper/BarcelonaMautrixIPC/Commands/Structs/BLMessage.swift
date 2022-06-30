@@ -93,6 +93,7 @@ public struct BLMessage: Codable, ChatResolvable {
     public var item_type: Int64?
     public var target: String?
     public var rich_link: RichLinkMetadata?
+    public var metadata: MetadataValue?
     
     public init(message: Message) {
         guid = message.id
@@ -110,6 +111,7 @@ public struct BLMessage: Codable, ChatResolvable {
         }
         is_audio_message = message.isAudioMessage
         is_read = message.isReadByMe
+        metadata = message.metadata
         
         for item in message.items {
             switch item.item {

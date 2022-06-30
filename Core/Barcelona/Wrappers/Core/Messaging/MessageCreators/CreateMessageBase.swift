@@ -9,11 +9,13 @@
 import Foundation
 import IMCore
 import IMSharedUtilities
+import Swog
 
 public protocol CreateMessageBase: Codable {
     var threadIdentifier: String? { get set }
     var replyToGUID: String? { get set }
     var replyToPart: Int? { get set }
+    var metadata: MetadataValue? { get set }
     
     func imMessage(inChat chatIdentifier: String) throws -> IMMessage
     func parseToAttributed() -> MessagePartParseResult
@@ -39,6 +41,10 @@ extension CreateMessageBase {
         
         guard let message = IMMessage.message(fromUnloadedItem: imMessageItem, withSubject: subject) else {
             throw BarcelonaError(code: 500, message: "Failed to construct IMMessage from IMMessageItem")
+        }
+        
+        if let metadata = metadata {
+            message.metadata = metadata
         }
         
         return message

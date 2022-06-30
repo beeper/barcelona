@@ -29,6 +29,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         var messageCreation = CreateMessage(parts: [
             .init(type: .attachment, details: transfer.guid)
         ])
+        messageCreation.metadata = metadata
         
         if CBFeatureFlags.permitAudioOverMautrix {
             if is_audio_message == true {

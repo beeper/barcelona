@@ -309,6 +309,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         failed = failureCode != .noError
         failureDescription = failureCode.description
         item.receipt.assign(toMessage: &self)
+        metadata = item.metadata
     }
 
     init(_ item: IMItem, transcriptRepresentation: ChatItem, chatID: String? = nil, additionalFileTransferGUIDs: [String] = []) {
@@ -368,6 +369,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         // load timestamps
         message.receipt.merging(receipt: backing?.receipt ?? message.receipt).assign(toMessage: &self)
         self.load(message: message, backing: backing)
+        metadata = backing?.metadata ?? message.metadata
     }
     
     init(_ backing: IMMessageItem, items: [ChatItem], chatID: String) {
@@ -423,6 +425,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var threadOriginatorPart: Int?
+    public var metadata: MetadataValue?
     
     public var isFinished: Bool {
         flags.contains(.finished)
@@ -487,5 +490,78 @@ public extension Message {
         }
         
         return Message(messageItem: item, chatID: chatID)
+    }
+}
+
+extension MessageAttributes {
+    static let metadataAttribute: NSAttributedString.Key = .init("com.ericrabil.metadata")
+}
+
+public protocol IMAttributedStringProvider: AnyObject {
+    var body: NSAttributedString! { get set }
+}
+
+extension IMMessageItem: IMAttributedStringProvider {}
+extension IMMessage: IMAttributedStringProvider {
+    public var body: NSAttributedString! {
+        get { text }
+        set { text = newValue }
+    }
+}
+
+public extension IMAttributedStringProvider {
+    func calculateMetadata() -> MetadataValue {
+        let wholeRange = body.wholeRange
+        guard body.attribute(MessageAttributes.metadataAttribute, existsIn: wholeRange) else {
+            return .nil
+        }
+        var rawMetadata: Data?
+        body.enumerateAttribute(MessageAttributes.metadataAttribute, in: wholeRange) { value, range, stop in
+            guard range == wholeRange else {
+                return
+            }
+            switch value {
+            case let data as Data:
+                rawMetadata = data
+            default:
+                return
+            }
+        }
+        guard let rawMetadata = rawMetadata else {
+            return .nil
+        }
+        do {
+            return try PropertyListDecoder().decode(MetadataValue.self, from: rawMetadata)
+        } catch {
+            return .nil
+        }
+    }
+    
+    var metadata: MetadataValue {
+        get {
+            if body == nil {
+                return .nil
+            }
+            switch objc_getAssociatedObject(body!, "com.ericrabil.metadata") {
+            case .some(let metadataValue as MetadataValue):
+                return metadataValue
+            default:
+                objc_setAssociatedObject(body!, "com.ericrabil.metadata", calculateMetadata(), .OBJC_ASSOCIATION_RETAIN)
+                return self.metadata
+            }
+        }
+        set {
+            if newValue == self.metadata {
+                return
+            }
+            let newText = NSMutableAttributedString(attributedString: body)
+            let encoder = PropertyListEncoder()
+            encoder.outputFormat = .binary
+            let data = try! encoder.encode(newValue)
+            newText.addAttribute(MessageAttributes.metadataAttribute, value: data, range: newText.wholeRange)
+            let roText = NSAttributedString(attributedString: newText)
+            objc_setAssociatedObject(roText, "com.ericrabil.metadata", newValue, .OBJC_ASSOCIATION_RETAIN)
+            body = roText
+        }
     }
 }

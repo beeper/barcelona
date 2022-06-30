@@ -88,9 +88,9 @@ public extension Chat {
         return Message(messageItem: try sendReturningRaw(message: createMessage)._imMessageItem, chatID: imChat.id)
     }
     
-    func tapback(_ creation: TapbackCreation) throws -> Message {
+    func tapback(_ creation: TapbackCreation, metadata: MetadataValue? = nil) throws -> Message {
         markAsRead()
-        let message = try imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil)
+        let message = try imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil, metadata: metadata)
         
         return Message(messageItem: message._imMessageItem, chatID: imChat.id)
     }

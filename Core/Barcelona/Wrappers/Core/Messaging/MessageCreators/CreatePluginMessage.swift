@@ -97,7 +97,7 @@ public func ERCreateBlankRichLinkMessage(_ text: String, _ url: URL, _ initializ
 }
 
 public struct CreatePluginMessage: Codable, CreateMessageBase {
-    public init(extensionData: MessageExtensionsData, attachmentID: String? = nil, bundleID: String, expressiveSendStyleID: String? = nil, threadIdentifier: String? = nil, replyToGUID: String? = nil, replyToPart: Int? = nil) {
+    public init(extensionData: MessageExtensionsData, attachmentID: String? = nil, bundleID: String, expressiveSendStyleID: String? = nil, threadIdentifier: String? = nil, replyToGUID: String? = nil, replyToPart: Int? = nil, metadata: MetadataValue?) {
         self.extensionData = extensionData
         self.attachmentID = attachmentID
         self.bundleID = bundleID
@@ -105,6 +105,7 @@ public struct CreatePluginMessage: Codable, CreateMessageBase {
         self.threadIdentifier = threadIdentifier
         self.replyToGUID = replyToGUID
         self.replyToPart = replyToPart
+        self.metadata = metadata
     }
     
     public var extensionData: MessageExtensionsData
@@ -114,6 +115,7 @@ public struct CreatePluginMessage: Codable, CreateMessageBase {
     public var threadIdentifier: String?
     public var replyToPart: Int?
     public var replyToGUID: String?
+    public var metadata: MetadataValue?
     
     public func parseToAttributed() -> MessagePartParseResult {
         ERAttributedString(forExtensionOptions: self)

@@ -8,6 +8,7 @@
 
 import Foundation
 import IMCore
+import Swog
 
 private let chatItemGUIDExtractor = try! NSRegularExpression(pattern: "(?:\\w+:\\d+)\\/([\\w-]+)")
 
@@ -15,7 +16,7 @@ public extension IMChat {
     /**
      Sends a tapback for a given message, calling back with a Vapor abort if the operation fails. This must be invoked on the main thread.
      */
-    func tapback(message: IMMessage, itemGUID: String, type: Int, overridingItemType: UInt8?) throws -> IMMessage {
+    func tapback(message: IMMessage, itemGUID: String, type: Int, overridingItemType: UInt8?, metadata: MetadataValue? = nil) throws -> IMMessage {
         guard Thread.isMainThread else {
             preconditionFailure("IMChat.tapback() must be invoked on the main thread")
         }
@@ -51,6 +52,10 @@ public extension IMChat {
             throw BarcelonaError(code: 500, message: "Couldn't create tapback message")
         }
         
+        if let metadata = metadata {
+            message.metadata = metadata
+        }
+        
         send(message)
         
         return message
@@ -59,11 +64,11 @@ public extension IMChat {
     /**
      Sends a tapback for a given message, calling back with a Vapor abort if the operation fails
      */
-    func tapback(guid: String, itemGUID: String, type: Int, overridingItemType: UInt8?) throws -> IMMessage {
+    func tapback(guid: String, itemGUID: String, type: Int, overridingItemType: UInt8?, metadata: MetadataValue? = nil) throws -> IMMessage {
         guard let message = BLLoadIMMessage(withGUID: guid) else {
             throw BarcelonaError(code: 404, message: "Unknown message: \(guid)")
         }
         
-        return try self.tapback(message: message, itemGUID: itemGUID, type: type, overridingItemType: overridingItemType)
+        return try self.tapback(message: message, itemGUID: itemGUID, type: type, overridingItemType: overridingItemType, metadata: metadata)
     }
 }
