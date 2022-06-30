@@ -570,6 +570,31 @@ public class CBDaemonListener: ERBaseDaemonListener {
         }
     }
     
+    public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, messageUpdated msg: IMItem!) {
+        account(accountUniqueID, chat: chatIdentifier, style: chatStyle, chatProperties: properties, messagesUpdated: [msg])
+    }
+    
+    public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, messagesUpdated messages: [NSObject]!) {
+        *log.debug("messagesUpdated[account]: \(messages.debugDescription, privacy: .public)")
+        
+        for message in messages as? [IMItem] ?? FZCreateIMMessageItemsFromSerializedArray(messages) {
+            switch message {
+            case let message as IMMessageItem:
+                // This listener call is only for failed messages that are not otherwise caught.
+                guard message.errorCode != .noError else {
+                    log.debug("messagesUpdated[account]: ignoring message \(message.id, privacy: .public) because it has no error. it will flow through another handler.")
+                    continue
+                }
+                guard let chatIdentifier = chatIdentifier ?? DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id) else {
+                    continue
+                }
+                self.process(newMessage: message, chatIdentifier: chatIdentifier)
+            default:
+                continue
+            }
+        }
+    }
+    
     public override func historicalMessageGUIDsDeleted(_ deletedGUIDs: [String], chatGUIDs: [String], queryID: String!) {
         if deletedGUIDs.count > 0 {
             messagesDeletedPipeline.send(deletedGUIDs)
@@ -650,11 +675,12 @@ private extension CBDaemonListener {
 private extension CBDaemonListener {
     private func preflight(message: IMItem) -> Bool {
         if CBFeatureFlags.withholdDupes, nonces.contains(message.nonce) {
-            nonces.remove(message.nonce)
-            log.debug("withholding message \(message.guid): dedupe")
-            return false
+            guard let message = message as? IMMessageItem, message.sendProgress == .failed else {
+                nonces.remove(message.nonce)
+                log.debug("withholding message \(message.guid): dedupe")
+                return false
+            }
         }
-        
         
         guard let message = message as? IMMessageItem else {
             nonces.insert(message.nonce)

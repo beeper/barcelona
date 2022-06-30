@@ -18,6 +18,7 @@
     BOOL _hasCachedURL;
 }
 
++ (DDScannerResult *) resultFromCoreResult:(void*)coreResult;
 + (id)scannerResultFromXML:(id)arg1 stringToScan:(id)arg2;
 + (id)scannerResultFromXML:(id)arg1;
 + (id)verboseXMLDescriptionFromElements:(id)arg1 stringToScan:(id)arg2;

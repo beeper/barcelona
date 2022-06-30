@@ -49,3 +49,19 @@
 #import <DataDetectorsCore/DDVariableNotFoundError.h>
 #import <DataDetectorsCore/DataDetectorsSourceAccess.h>
 #import <DataDetectorsCore/DataDetectorsSourceAccessProtocol.h>
+
+typedef void* DDResultRef;
+typedef void* DDScanQueryRef;
+
+DDResultRef DDResultCreateEmpty(void);
+typedef struct __DDQueryOffset {
+    CFIndex         p0:32;
+    CFIndex         p1:32;
+} DDQueryOffset;
+typedef struct __DDQueryRange {
+    DDQueryOffset     p0;
+    DDQueryOffset     p1;
+} DDQueryRange;
+DDResultRef DDResultCreate(CFStringRef arg0, DDQueryRange arg1);
+void DDResultSetContent(DDResultRef result, DDScanQueryRef query);
+DDScanQueryRef DDScanQueryCreateFromString(CFAllocatorRef allocator, CFStringRef string, CFRange range);
