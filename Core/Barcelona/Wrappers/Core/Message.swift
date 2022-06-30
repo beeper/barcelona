@@ -497,56 +497,49 @@ extension MessageAttributes {
     static let metadataAttribute: NSAttributedString.Key = .init("com.ericrabil.metadata")
 }
 
-public protocol IMAttributedStringProvider: AnyObject {
-    var body: NSAttributedString! { get set }
+public protocol IMMessageSummaryInfoProvider: NSObjectProtocol {
+    var messageSummaryInfo: [AnyHashable: Any]! { get set }
+    var sourceApplicationID: String! { get set }
 }
 
-extension IMMessageItem: IMAttributedStringProvider {}
-extension IMMessage: IMAttributedStringProvider {
-    public var body: NSAttributedString! {
-        get { text }
-        set { text = newValue }
+extension IMMessage: IMMessageSummaryInfoProvider {}
+extension IMMessageItem: IMMessageSummaryInfoProvider {
+    public var sourceApplicationID: String! {
+        get { messageSummaryInfo?[IMMessageSummaryInfoSourceApplicationID] as? String }
+        set {
+            if messageSummaryInfo == nil {
+                messageSummaryInfo = [:]
+            }
+            messageSummaryInfo[IMMessageSummaryInfoSourceApplicationID] = newValue
+        }
     }
 }
 
-public extension IMAttributedStringProvider {
+let metadataPrefix = "com.ericrabil.barcelona.metadata:00000000:"
+public extension IMMessageSummaryInfoProvider {
+    
     func calculateMetadata() -> MetadataValue {
-        let wholeRange = body.wholeRange
-        guard body.attribute(MessageAttributes.metadataAttribute, existsIn: wholeRange) else {
-            return .nil
-        }
-        var rawMetadata: Data?
-        body.enumerateAttribute(MessageAttributes.metadataAttribute, in: wholeRange) { value, range, stop in
-            guard range == wholeRange else {
-                return
-            }
-            switch value {
-            case let data as Data:
-                rawMetadata = data
-            default:
-                return
-            }
-        }
-        guard let rawMetadata = rawMetadata else {
+        guard let sourceApplicationID = sourceApplicationID, sourceApplicationID.starts(with: metadataPrefix) else {
             return .nil
         }
         do {
-            return try PropertyListDecoder().decode(MetadataValue.self, from: rawMetadata)
+            return try PropertyListDecoder().decode(MetadataValue.self, from: Data(base64Encoded: String(sourceApplicationID.dropFirst(metadataPrefix.count)))!)
         } catch {
+            print(error, sourceApplicationID.dropFirst(metadataPrefix.count))
             return .nil
         }
     }
     
     var metadata: MetadataValue {
         get {
-            if body == nil {
+            if sourceApplicationID == nil {
                 return .nil
             }
-            switch objc_getAssociatedObject(body!, "com.ericrabil.metadata") {
+            switch objc_getAssociatedObject(self, "com.ericrabil.metadata") {
             case .some(let metadataValue as MetadataValue):
                 return metadataValue
             default:
-                objc_setAssociatedObject(body!, "com.ericrabil.metadata", calculateMetadata(), .OBJC_ASSOCIATION_RETAIN)
+                objc_setAssociatedObject(self, "com.ericrabil.metadata", calculateMetadata(), .OBJC_ASSOCIATION_RETAIN)
                 return self.metadata
             }
         }
@@ -554,14 +547,11 @@ public extension IMAttributedStringProvider {
             if newValue == self.metadata {
                 return
             }
-            let newText = NSMutableAttributedString(attributedString: body)
             let encoder = PropertyListEncoder()
             encoder.outputFormat = .binary
             let data = try! encoder.encode(newValue)
-            newText.addAttribute(MessageAttributes.metadataAttribute, value: data, range: newText.wholeRange)
-            let roText = NSAttributedString(attributedString: newText)
-            objc_setAssociatedObject(roText, "com.ericrabil.metadata", newValue, .OBJC_ASSOCIATION_RETAIN)
-            body = roText
+            sourceApplicationID = metadataPrefix + data.base64EncodedString()
+            objc_setAssociatedObject(self, "com.ericrabil.metadata", newValue, .OBJC_ASSOCIATION_RETAIN)
         }
     }
 }

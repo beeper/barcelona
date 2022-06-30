@@ -283,3 +283,4 @@ NS_ASSUME_NONNULL_BEGIN
 -(BOOL)setupIfNeeded:(NSError *_Nullable* _Nullable)error;
 @end
 NS_ASSUME_NONNULL_END
+NSString* IMMessageSummaryInfoSourceApplicationID;
