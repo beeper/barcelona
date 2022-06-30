@@ -13,7 +13,7 @@ import OSLog
 import SwiftCLI
 import Swog
 import FeatureFlags
-@_spi(featureFlags) import Barcelona
+@_spi(featureFlags) @_spi(scratchbox) import Barcelona
 
 protocol BarcelonaCommand: Command {}
 protocol EphemeralCommand: Command {}
@@ -45,6 +45,18 @@ class GrappleFlags: FlagProvider {
     static let shared = GrappleFlags()
 }
 
+class ScratchboxCommand: Command {
+    let name = "scratchbox"
+    
+    func execute() throws {
+        guard BLSetup() else {
+            fatalError()
+        }
+        _scratchboxMain()
+        RunLoop.current.run()
+    }
+}
+
 @main
 class Grapple {
     static let shared = Grapple()
@@ -54,7 +66,7 @@ class Grapple {
         CBFeatureFlags.overrideWithholdPartialFailures = false
         CBFeatureFlags.overrideWithholdDupes = false
         let cli = CLI(name: "grapple", commands: [
-            SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand(), IDSCommand(), AccountManagement(), Grudge.shared, QueryCommand(), DiagsCommand(), MessageCommand()
+            SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand(), IDSCommand(), AccountManagement(), Grudge.shared, QueryCommand(), DiagsCommand(), MessageCommand(), ScratchboxCommand()
         ])
         LoggingDrivers.append(OSLogDriver.shared)
         if !GrappleFlags.shared.enableLogging {
