@@ -582,7 +582,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
             case let message as IMMessageItem:
                 // This listener call is only for failed messages that are not otherwise caught.
                 guard message.errorCode != .noError else {
-                    log.debug("messagesUpdated[account]: ignoring message \(message.id, privacy: .public) because it has no error. it will flow through another handler.")
+                    *log.debug("messagesUpdated[account]: ignoring message \(message.id, privacy: .public) because it has no error. it will flow through another handler.")
                     continue
                 }
                 guard let chatIdentifier = chatIdentifier ?? DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id) else {
