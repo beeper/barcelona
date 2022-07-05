@@ -175,7 +175,7 @@ public class CBSenderCorrelationController {
     private class CBSenderCorrelationPersistence {
         class Correlation: Codable, FetchableRecord, PersistableRecord  {
             private(set) var ROWID: Int64
-            private(set) var pinned: Bool
+            private(set) var pinned: Bool?
             private(set) var correlation_identifier: String
             private(set) var sender_id: String
             
