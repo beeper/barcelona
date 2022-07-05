@@ -425,7 +425,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var threadOriginatorPart: Int?
-    public var metadata: MetadataValue?
+    public var metadata: Metadata?
     
     public var isFinished: Bool {
         flags.contains(.finished)
@@ -520,25 +520,25 @@ extension IMMessageSummaryInfoProvider {
 let metadataPrefix = "com.ericrabil.barcelona.metadata:00000000:"
 public extension IMMessageSummaryInfoProvider {
     
-    func calculateMetadata() -> MetadataValue {
+    func calculateMetadata() -> Message.Metadata {
         guard let sourceApplicationID = sourceApplicationID, sourceApplicationID.starts(with: metadataPrefix) else {
-            return .nil
+            return [:]
         }
         do {
-            return try PropertyListDecoder().decode(MetadataValue.self, from: Data(base64Encoded: String(sourceApplicationID.dropFirst(metadataPrefix.count)))!)
+            return try PropertyListDecoder().decode(Message.Metadata.self, from: Data(base64Encoded: String(sourceApplicationID.dropFirst(metadataPrefix.count)))!)
         } catch {
             print(error, sourceApplicationID.dropFirst(metadataPrefix.count))
-            return .nil
+            return [:]
         }
     }
     
-    var metadata: MetadataValue {
+    var metadata: Message.Metadata {
         get {
             if sourceApplicationID == nil {
-                return .nil
+                return [:]
             }
             switch objc_getAssociatedObject(self, "com.ericrabil.metadata") {
-            case .some(let metadataValue as MetadataValue):
+            case .some(let metadataValue as Message.Metadata):
                 return metadataValue
             default:
                 objc_setAssociatedObject(self, "com.ericrabil.metadata", calculateMetadata(), .OBJC_ASSOCIATION_RETAIN)
@@ -556,4 +556,8 @@ public extension IMMessageSummaryInfoProvider {
             objc_setAssociatedObject(self, "com.ericrabil.metadata", newValue, .OBJC_ASSOCIATION_RETAIN)
         }
     }
+}
+
+public extension Message {
+    typealias Metadata = [String: MetadataValue]
 }

@@ -8,6 +8,7 @@
 
 import Foundation
 import enum Swog.MetadataValue
+import struct Barcelona.Message
 
 public struct SendMediaMessageCommand: Codable, ChatResolvable, SendMessageCommandBase {
     public var chat_guid: String
@@ -17,5 +18,5 @@ public struct SendMediaMessageCommand: Codable, ChatResolvable, SendMessageComma
     public var reply_to: String?
     public var reply_to_part: Int?
     public var is_audio_message: Bool?
-    public var metadata: MetadataValue?
+    public var metadata: Message.Metadata?
 }

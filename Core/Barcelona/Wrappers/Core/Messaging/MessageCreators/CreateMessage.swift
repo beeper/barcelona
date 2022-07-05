@@ -54,7 +54,7 @@ public extension CreateMessage {
 }
 
 public struct CreateMessage: Codable, CreateMessageBase {
-    public init(subject: String? = nil, parts: [MessagePart], isAudioMessage: Bool? = nil, flags: CLongLong? = nil, ballonBundleID: String? = nil, payloadData: String? = nil, expressiveSendStyleID: String? = nil, threadIdentifier: String? = nil, replyToPart: Int? = nil, replyToGUID: String? = nil, metadata: MetadataValue? = nil) {
+    public init(subject: String? = nil, parts: [MessagePart], isAudioMessage: Bool? = nil, flags: CLongLong? = nil, ballonBundleID: String? = nil, payloadData: String? = nil, expressiveSendStyleID: String? = nil, threadIdentifier: String? = nil, replyToPart: Int? = nil, replyToGUID: String? = nil, metadata: Message.Metadata? = nil) {
         self.subject = subject
         self.parts = parts
         self.isAudioMessage = isAudioMessage
@@ -78,7 +78,7 @@ public struct CreateMessage: Codable, CreateMessageBase {
     public var threadIdentifier: String?
     public var replyToGUID: String?
     public var replyToPart: Int?
-    public var metadata: MetadataValue?
+    public var metadata: Message.Metadata?
     
     public func parseToAttributed() -> MessagePartParseResult {
         ERAttributedString(from: self.parts)

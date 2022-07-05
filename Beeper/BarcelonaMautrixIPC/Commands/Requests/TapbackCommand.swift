@@ -13,7 +13,7 @@ public struct TapbackCommand: Codable, ChatResolvable, TargetResolvable {
     public var chat_guid: String
     public var target_guid: String
     public var type: Int
-    public var metadata: MetadataValue?
+    public var metadata: Message.Metadata?
 }
 
 public extension TapbackCommand {

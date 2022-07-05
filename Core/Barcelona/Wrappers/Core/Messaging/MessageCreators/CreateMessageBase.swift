@@ -15,7 +15,7 @@ public protocol CreateMessageBase: Codable {
     var threadIdentifier: String? { get set }
     var replyToGUID: String? { get set }
     var replyToPart: Int? { get set }
-    var metadata: MetadataValue? { get set }
+    var metadata: Message.Metadata? { get set }
     
     func imMessage(inChat chatIdentifier: String) throws -> IMMessage
     func parseToAttributed() -> MessagePartParseResult

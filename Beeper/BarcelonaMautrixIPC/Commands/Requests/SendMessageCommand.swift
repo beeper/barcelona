@@ -13,7 +13,7 @@ public protocol SendMessageCommandBase {
     var chat_guid: String { get set }
     var reply_to: String? { get set }
     var reply_to_part: Int? { get set }
-    var metadata: MetadataValue? { get set }
+    var metadata: Message.Metadata? { get set }
 }
 
 public struct SendMessageCommand: Codable, ChatResolvable, SendMessageCommandBase {
@@ -22,5 +22,5 @@ public struct SendMessageCommand: Codable, ChatResolvable, SendMessageCommandBas
     public var reply_to: String?
     public var reply_to_part: Int?
     public var rich_link: RichLinkMetadata?
-    public var metadata: MetadataValue?
+    public var metadata: Message.Metadata?
 }

@@ -93,7 +93,7 @@ public struct BLMessage: Codable, ChatResolvable {
     public var item_type: Int64?
     public var target: String?
     public var rich_link: RichLinkMetadata?
-    public var metadata: MetadataValue?
+    public var metadata: Message.Metadata?
     
     public init(message: Message) {
         guid = message.id
