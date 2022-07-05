@@ -231,7 +231,7 @@ public class CBSenderCorrelationController {
                 do {
                     return try dbQueue.read { database in
                         if let correlation = try select(sql: "*").filter(Columns.sender_id == senderID).fetchOne(database) {
-                            if correlation.pinned {
+                            if correlation.pinned == true {
                                 return senderID
                             }
                             if let correlation = try _correlate(database, identifier: correlation.correlation_identifier) {
@@ -340,6 +340,15 @@ public class CBSenderCorrelationController {
             migrator.registerMigration("v3") { database in
                 try database.drop(index: "idx_pinned_correlations")
                 try database.create(index: "idx_pinned_correlations", on: "correlation", columns: ["correlation_identifier","pinned"], unique: true, ifNotExists: false, condition: Column("pinned") == true)
+            }
+            
+            migrator.registerMigration("v4") { database in
+                var correlations = try Correlation.fetchAll(database)
+                correlations = correlations.filter { correlation in
+                    UUID(uuidString: correlation.correlation_identifier) == nil
+                }
+                let correlationIdentfiersToRemove = correlations.map(\.correlation_identifier)
+                try Correlation.filter(correlationIdentfiersToRemove.contains(Correlation.Columns.correlation_identifier)).deleteAll(database)
             }
             
             return migrator
