@@ -674,39 +674,30 @@ private extension CBDaemonListener {
 
 private extension CBDaemonListener {
     private func preflight(message: IMItem) -> Bool {
+        lazy var messageItem: IMMessageItem? = message as? IMMessageItem
+        lazy var sendProgress = messageItem?.sendProgress
+        
         if CBFeatureFlags.withholdDupes, nonces.contains(message.nonce) {
-            guard let message = message as? IMMessageItem, message.sendProgress == .failed else {
-                nonces.remove(message.nonce)
+            // only let failed messages emit more than once, as failed messages may not first fail with their error code
+            guard sendProgress == .failed else {
+//                nonces.remove(message.nonce)
                 log.debug("withholding message \(message.guid): dedupe")
                 return false
             }
         }
         
-        guard let message = message as? IMMessageItem else {
+        guard message.isFromMe, let message = messageItem else {
+            // passthrough!
             nonces.insert(message.nonce)
             return true
         }
         
-        if !message.isFromMe() {
-            nonces.insert(message.nonce)
-            return true
-        }
-        
-        switch message.sendProgress {
-        case .failed:
-            if message.errorCode == .noError, CBFeatureFlags.withholdPartialFailures {
-                log.debug("withholding message \(message.guid): missing error code, message is either still in progress or the error code is coming soon")
-                return false
-            }
-            nonces.insert(message.nonce)
-            return true
-        case .sending:
-            log.debug("withholding message \(message.guid): still sending")
+        if sendProgress == .failed, message.errorCode == .noError, CBFeatureFlags.withholdPartialFailures {
+            log.debug("withholding message \(message.guid): missing error code, message is either still in progress or the error code is coming soon")
             return false
-        case .sent, .none:
-            nonces.insert(message.nonce)
-            return true
         }
+        
+        return true
     }
     
     func process(sentMessage message: IMMessageItem, sentTime: Double) {
