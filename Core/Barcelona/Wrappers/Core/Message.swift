@@ -502,15 +502,17 @@ public protocol IMMessageSummaryInfoProvider: NSObjectProtocol {
     var sourceApplicationID: String! { get set }
 }
 
+extension IMMessageItem: IMMessageSummaryInfoProvider {}
 extension IMMessage: IMMessageSummaryInfoProvider {}
-extension IMMessageItem: IMMessageSummaryInfoProvider {
+
+extension IMMessageSummaryInfoProvider {
     public var sourceApplicationID: String! {
-        get { messageSummaryInfo?[IMMessageSummaryInfoSourceApplicationID] as? String }
+        get { messageSummaryInfo?["amsa"] as? String }
         set {
             if messageSummaryInfo == nil {
                 messageSummaryInfo = [:]
             }
-            messageSummaryInfo[IMMessageSummaryInfoSourceApplicationID] = newValue
+            messageSummaryInfo["amsa"] = newValue
         }
     }
 }
