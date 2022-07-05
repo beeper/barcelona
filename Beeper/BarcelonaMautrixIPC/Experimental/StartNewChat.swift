@@ -8,6 +8,7 @@
 import Foundation
 import Barcelona
 import Swog
+import Sentry
 
 public struct ResolveIdentifierCommand: Codable {
     public var identifier: String
@@ -40,6 +41,8 @@ public struct PrepareDMCommand: Codable {
 
 extension PrepareDMCommand: Runnable {
     public func run(payload: IPCPayload) {
+        let transaction = SentrySDK.startTransaction(name: "prepare_dm", operation: "prepare_dm")
+        
         let parsed = ParsedGUID(rawValue: guid)
         
         if MXFeatureFlags.shared.mergedChats {
@@ -47,6 +50,7 @@ extension PrepareDMCommand: Runnable {
             CLInfo("PrepareDM", "Prepared chat \(chat.id)")
         } else {
             guard let service = parsed.service.flatMap(IMServiceStyle.init(rawValue:)) else {
+                transaction.setData(value: "err_invalid_service", key: "error")
                 return payload.fail(code: "err_invalid_service", message: "The service provided does not exist.")
             }
             
@@ -55,5 +59,6 @@ extension PrepareDMCommand: Runnable {
         }
         
         payload.respond(.ack)
+        transaction.finish(status: .ok)
     }
 }
