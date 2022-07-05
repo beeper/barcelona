@@ -31,7 +31,7 @@ packages:
     from: 1.0.0
   Swexy:
     url: https://github.com/EricRabil/Swexy
-    from: 1.0.9
+    from: 1.0.10
   SwiftyTextTable:
     url: https://github.com/scottrhoyt/SwiftyTextTable
     from: 0.9.0
