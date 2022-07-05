@@ -480,6 +480,7 @@ public class CBSenderCorrelationController {
     
     /// Queries the correlation identifier for a given sender ID, if it is known
     public func correlate(senderID: String) -> String? {
+        let senderID = IDSDestination(uri: senderID).uri().prefixedURI!
         if let correlationID = queue.sync(execute: { correlations[senderID] }) {
             // cache hit!
             return correlationID
@@ -520,7 +521,8 @@ public class CBSenderCorrelationController {
     
     /// Attempts to locate the pinned counterpart for a sender ID, returning the first parameter if nothing was found
     public func externalIdentifier(senderID: String) -> String {
-        optionalExternalIdentifier(senderID: senderID) ?? senderID.droppingURIPrefix
+        let senderID = IDSDestination(uri: senderID).uri().prefixedURI!
+        return optionalExternalIdentifier(senderID: senderID) ?? senderID.droppingURIPrefix
     }
     
     private var allKnownURIs: [String] {
