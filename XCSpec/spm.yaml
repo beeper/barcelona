@@ -28,7 +28,7 @@ packages:
     from: 5.1.1
   Yammit:
     url: https://github.com/EricRabil/Yammit
-    from: 1.0.0
+    from: 1.0.2
   Swexy:
     url: https://github.com/EricRabil/Swexy
     from: 1.0.10
