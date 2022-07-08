@@ -107,6 +107,8 @@ struct ContactInfoCollector {
     var contacts: Set<CNContact> = Set()
     var handles: Set<IMHandle> = Set()
     
+    var correl_id: String?
+    
     mutating func reset() {
         handleID = ""
         primaryIdentifier = nil
@@ -120,6 +122,7 @@ struct ContactInfoCollector {
         serviceHint = "SMS"
         contacts.removeAll(keepingCapacity: true)
         handles.removeAll(keepingCapacity: true)
+        correl_id = nil
     }
     
     mutating func collect(_ contact: CNContact) {
@@ -223,16 +226,20 @@ struct ContactInfoCollector {
             firstName = handles.compactMap(\.name).first
         }
         
+        let phoneNumbers = Array(phoneNumbers)
+        let emailAddresses = Array(emailAddresses)
+        
         let contact = BLContact (
             first_name: firstName,
             last_name: lastName,
             nickname: nickname,
             avatar: avatar?.base64EncodedString(),
-            phones: Array(phoneNumbers),
+            phones: phoneNumbers,
             emails: emailAddresses.map { IMFormattedDisplayStringForID($0, nil) ?? $0 },
             user_guid: handleID,
             primary_identifier: primaryIdentifier,
-            serviceHint: serviceHint
+            serviceHint: serviceHint,
+            correl_id: CBSenderCorrelationController.shared.correlate(fuzzySenderIDs: (phoneNumbers + emailAddresses))
         )
         
         reset()
