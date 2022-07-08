@@ -11,4 +11,5 @@ import Foundation
 public struct BLTypingNotification: Codable, ChatResolvable {
     public var chat_guid: String
     public var typing: Bool
+    public var correl_id: String?
 }

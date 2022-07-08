@@ -72,7 +72,8 @@ func sendChatMarkedRead(guid: String, upTo message: String) {
 }
 
 func sendTyping(guid: String, typing: Bool) {
-    let notification = BLTypingNotification(chat_guid: guid, typing: typing)
+    let correl_id = IMChatRegistry.shared.existingChat(withGUID: guid).flatMap(CBSenderCorrelationController.shared.correlate(_:))
+    let notification = BLTypingNotification(chat_guid: guid, typing: typing, correl_id: correl_id)
     let command = IPCCommand.typing(notification)
     let payload = IPCPayload(command: command)
     BLWritePayload(payload)
