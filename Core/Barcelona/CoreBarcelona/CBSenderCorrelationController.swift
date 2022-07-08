@@ -249,7 +249,7 @@ public class CBSenderCorrelationController {
                         """
                         SELECT o.*
                         FROM correlation c
-                        INNER JOIN correlation o ON o.correlation_identifier = c.correlation_identifier
+                        INNER JOIN correlation o ON o.correl_id = c.correl_id
                         WHERE c.sender_id = $1
                         """, arguments: [senderID])
             }) ?? []
