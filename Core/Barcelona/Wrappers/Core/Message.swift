@@ -447,12 +447,12 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         String(format: "Message(id=%@,sender=%@,typing=%d,items=[%@],failed=%d,sent=%d,error=%d)", id, sender ?? "(nil)", isTypingMessage, items.map(\.debugDescription).joined(separator: ", "), failed, isSent, errorCode.rawValue)
     }
     
-    public var imChat: IMChat {
-        IMChat.resolve(withIdentifier: chatID)!
+    public var imChat: IMChat! {
+        IMChat.resolve(withIdentifier: chatID)
     }
     
-    public var chat: Chat {
-        Chat(imChat)
+    public var chat: Chat! {
+        imChat.map(Chat.init(_:))
     }
     
     public var associableItemIDs: [String] {
