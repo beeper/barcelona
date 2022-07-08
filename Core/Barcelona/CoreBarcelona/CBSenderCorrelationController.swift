@@ -351,3 +351,41 @@ public class CBSenderCorrelationController {
         correlate(senderID: IDSDestination(uri: fuzzySenderID).uri().prefixedURI)
     }
 }
+
+public extension CBSenderCorrelationController {
+    func correlate(_ message: Message) -> String? {
+        message.senderID.flatMap(correlate(senderID:))
+    }
+    
+    func correlate(_ chat: IMChat) -> String? {
+        guard chat.isSingle else {
+            return nil
+        }
+        guard let recipient = chat.recipient else {
+            return nil
+        }
+        return correlate(fuzzySenderID: recipient.id)
+    }
+    
+    func correlate(_ chat: Chat) -> String? {
+        chat.imChat.flatMap(correlate(_:))
+    }
+    
+    /// For an array of sender IDs, returns a single correlation identifier so long as there is at most one correlation identifier in the bunch
+    func correlate(senderIDs: [String]) -> String? {
+        var correlationIDs: Set<String> = Set()
+        for senderID in senderIDs {
+            if let correlationID = correlate(senderID: senderID) {
+                correlationIDs.insert(correlationID)
+            }
+            guard correlationIDs.count < 2 else {
+                return nil
+            }
+        }
+        return correlationIDs.first
+    }
+    
+    func correlate(fuzzySenderIDs: [String]) -> String? {
+        correlate(senderIDs: fuzzySenderIDs.lazy.map(IDSDestination.init(uri:)).map { $0.uri() }.map(\.prefixedURI))
+    }
+}
