@@ -29,11 +29,7 @@ class BarcelonaMautrix {
             CLInfo("CoreSentry", "Setting up CoreSentry-flavored Sentry integration")
             configurator.productName = "barcelona-mautrix"
             // even if CoreSentry is a release build we might be a debug build
-            #if DEBUG
-            configurator.debug = true
-            #else
-            configurator.debug = false
-            #endif
+            configurator.debug = ProcessInfo.processInfo.environment.keys.contains("DEBUG_SENTRY")
             if !configurator.knownProduct {
                 CLWarn("CoreSentry", "CoreSentry has no DSN for us!")
             }
