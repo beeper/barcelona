@@ -13,9 +13,11 @@ import GRDB
 internal let DBLog = Logger(category: "Database")
 
 extension Configuration {
-    init(trace: TraceFunction?) {
+    init(trace: ((Database.TraceEvent) -> Void)?) {
         self.init()
-        self.trace = trace
+        prepareDatabase { db in
+            db.trace(options: [], trace)
+        }
         maximumReaderCount = 25
         qos = .init(qosClass: .userInitiated, relativePriority: 9999)
     }

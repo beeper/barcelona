@@ -10,7 +10,7 @@ packages:
     from: 1.0.3
   GRDB:
     url: https://github.com/groue/GRDB.swift
-    from: 4.14.0
+    from: 5.25.0
   Swime:
     url: https://github.com/sendyhalim/Swime
     from: 3.0.7

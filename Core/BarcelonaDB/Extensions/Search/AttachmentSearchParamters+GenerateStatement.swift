@@ -78,7 +78,8 @@ internal extension AttachmentSearchParameters {
             self.statement(forChatROWIDs: ROWIDs)
         }.then { stmt in
             DBReader.shared.read { db in
-                try RawAttachment.fetchAll(db, sql: stmt.sql, arguments: stmt.arguments, adapter: nil)
+                let (sql, arguments) = try stmt.build(db)
+                return try RawAttachment.fetchAll(db, sql: sql, arguments: arguments, adapter: nil)
             }
         }
     }
