@@ -262,7 +262,7 @@ public class CBSenderCorrelationController {
     private let queue = DispatchQueue(label: "CBSenderCorrelation")
     
     /// A dictionary mapping sender IDs to a correlation ID that uniquely identifiers all sender IDs belonging to a specific person
-    private var correlations: [String: Correlation] = [:]
+    private var correlations: [String: Correlation?] = [:]
     /// A dictionary mapping correlation IDs to all known sender IDs
     private var reverseCorrelations: [String: Set<Correlation>] = [:]
     
@@ -272,7 +272,7 @@ public class CBSenderCorrelationController {
             runtimeCorrelation.first_seen = correlation.first_seen
             runtimeCorrelation.last_seen = correlation.last_seen
         } else {
-            if correlations[runtimeCorrelation.sender_id] === runtimeCorrelation {
+            if case .some(.some(let correlation)) = correlations[runtimeCorrelation.sender_id], correlation === runtimeCorrelation {
                 correlations.removeValue(forKey: runtimeCorrelation.sender_id)
             }
             reverseCorrelations[runtimeCorrelation.correl_id]?.remove(runtimeCorrelation)
@@ -299,12 +299,12 @@ public class CBSenderCorrelationController {
     
     private func cache(senderID: String, correlationID: String) {
         queue.sync {
-            if let runtimeCorrelation = correlations[senderID], runtimeCorrelation.correl_id == correlationID {
+            if case .some(.some(let runtimeCorrelation)) = correlations[senderID], runtimeCorrelation.correl_id == correlationID {
                 runtimeCorrelation.last_seen = Date()
                 persist(runtimeCorrelation)
                 return
             }
-            if let oldCorrelation = correlations.removeValue(forKey: senderID) {
+            if case .some(.some(let oldCorrelation)) = correlations.removeValue(forKey: senderID) {
                 reverseCorrelations[oldCorrelation.correl_id]?.remove(oldCorrelation)
             }
             let runtimeCorrelation = Correlation(correl_id: correlationID, sender_id: senderID)
@@ -322,10 +322,16 @@ public class CBSenderCorrelationController {
     
     /// Query the correlation ID for the given sender ID
     public func correlate(senderID: String) -> String? {
-        if let correlation = queue.sync(execute: { correlations[senderID] }) {
-            return correlation.correl_id
+        switch queue.sync(execute: { correlations[senderID] }) {
+        case .some(.some(let runtimeCorrelation)):
+            return runtimeCorrelation.correl_id
+        case .some(.none):
+            return nil
+        case .none:
+            break
         }
         guard let correlations = CBSenderCorrelationPersistence.shared?.correlateASAP(senderID: senderID), let correlID = correlations.first?.correl_id else {
+            correlations[senderID] = .some(.none)
             return nil
         }
         queue.async {
