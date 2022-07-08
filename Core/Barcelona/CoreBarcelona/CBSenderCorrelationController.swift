@@ -334,9 +334,12 @@ public class CBSenderCorrelationController {
             correlations[senderID] = .some(.none)
             return nil
         }
-        queue.async {
+        queue.sync {
             self.reverseCorrelations[correlID] = Set(correlations)
             for correlation in correlations {
+                if case .some(.some(let existing)) = self.correlations[correlation.sender_id], existing.databaseEquals(correlation) {
+                    continue
+                }
                 self.correlations[correlation.sender_id] = correlation
             }
         }
