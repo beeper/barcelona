@@ -109,8 +109,8 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     }
     
     /// The underlying IMChat this Chat was created from
-    public var imChat: IMChat {
-        IMChat.resolve(withIdentifier: id)!
+    public var imChat: IMChat! {
+        IMChat.resolve(withIdentifier: id)
     }
 }
 

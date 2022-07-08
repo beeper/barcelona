@@ -77,7 +77,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                     transaction.finish(status: .unknownError)
                 }
                 if !success && shouldCancel {
-                    BLWritePayload(.init(command: .send_message_status(.init(guid: message.id, chatGUID: chat.blChatGUID, status: .failed, service: resolveMessageService(), message: failureCode?.localizedDescription, statusCode: failureCode?.description))))
+                    sendMessageFailed(withGUID: message.id, code: failureCode ?? .unknownError, service: resolveMessageService(), chatGUID: chat.blChatGUID)
                 }
                 if !success && shouldCancel {
                     chat.imChat.cancel(message)

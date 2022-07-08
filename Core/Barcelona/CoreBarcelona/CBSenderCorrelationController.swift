@@ -39,7 +39,7 @@ extension IMChat: Identifiable {
 
 @propertyWrapper
 public struct Atomic<T> {
-    private var _wrappedValue: T!
+    private var _wrappedValue: T
     private let lock = NSRecursiveLock()
     
     public var wrappedValue: T {
@@ -55,8 +55,8 @@ public struct Atomic<T> {
         }
     }
     
-    public init() {
-        
+    public init(wrappedValue: T) {
+        _wrappedValue = wrappedValue
     }
 }
 
@@ -322,6 +322,7 @@ public class CBSenderCorrelationController {
     
     /// Query the correlation ID for the given sender ID
     public func correlate(senderID: String) -> String? {
+        *log.debug("Looking up \(senderID, privacy: .auto)")
         switch queue.sync(execute: { correlations[senderID] }) {
         case .some(.some(let runtimeCorrelation)):
             return runtimeCorrelation.correl_id
@@ -354,7 +355,7 @@ public class CBSenderCorrelationController {
 
 public extension CBSenderCorrelationController {
     func correlate(_ message: Message) -> String? {
-        message.senderID.flatMap(correlate(senderID:))
+        message.senderID.flatMap(correlate(fuzzySenderID:))
     }
     
     func correlate(_ chat: IMChat) -> String? {

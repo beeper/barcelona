@@ -21,15 +21,16 @@ private let log = Logger(category: "ERDaemonListener")
 
 // set to false and the logging conditions (probably) wont even compile, but they will be disabled
 #if DEBUG
-@usableFromInline internal let verboseLoggingEnabled = false
+@_spi(verboseLogging) public let verboseLoggingEnabled = false
 #else
-@usableFromInline internal let verboseLoggingEnabled = false
+@_spi(verboseLogging) public let verboseLoggingEnabled = false
 #endif
 
 prefix operator *
 
-@_transparent @usableFromInline
-internal prefix func *(_ expression: @autoclosure () -> ()) {
+@_transparent
+@_spi(verboseLogging)
+public prefix func *(_ expression: @autoclosure () -> ()) {
     // TODO: replace with compilation condition to have this compile to nothing
     if _slowPath(verboseLoggingEnabled) {
         expression()
