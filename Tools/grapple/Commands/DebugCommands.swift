@@ -79,7 +79,9 @@ class DebugCommands: CommandGroup {
                 String(decoding: try! encoder.encode(encodable), as: UTF8.self)
             }
             
-            LoggingDrivers.append(ConsoleDriver.shared)
+            if !LoggingDrivers.contains(where: { $0 is ConsoleDriver }) {
+                LoggingDrivers.append(ConsoleDriver.shared)
+            }
             
             CBDaemonListener.shared.aggregatePipeline.pipe { event in
                 if self.logAsMautrix {
