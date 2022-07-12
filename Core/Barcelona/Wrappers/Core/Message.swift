@@ -97,10 +97,14 @@ extension FZErrorType: CustomStringConvertible {
             return "The address you are trying to send a message to is rejecting your message."
         case .transcodingFailure:
             return "Your attachment failed to transcode."
-        case .encryptionFailure, .otrEncryptionFailure:
+        case .encryptionFailure:
             return "Your message couldn't be sent due to an iMessage encryption error."
-        case .decryptionFailure, .otrDecryptionFailure:
+        case .otrEncryptionFailure:
+            return "Your message couldn't be sent due to an iMessage OTR encryption error."
+        case .decryptionFailure:
             return "Your message couldn't be sent due to an iMessage decryption error."
+        case .otrDecryptionFailure:
+            return "Your message couldn't be sent due to an iMessage OTR decryption error."
         case .localAccountDisabled, .localAccountDoesNotExist, .localAccountNeedsUpdate, .localAccountInvalid, .invalidLocalCredentials:
             return "Your message couldn't be sent due to an issue with your account. You may have to sign out and sign back in."
         case .attachmentDownloadFailure, .messageAttachmentDownloadFailure:
