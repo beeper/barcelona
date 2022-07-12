@@ -140,5 +140,44 @@ class DebugCommands: CommandGroup {
         }
     }
     
-    var children: [Routable] = [DebugEventsCommand(), IMDTest(), NicknameTest()]
+    class AlwaysRead: BarcelonaCommand {
+        let name = "always-read"
+        
+        @Flag("-e", "--enable-read-receipts", description: "forcibly enable sending read receipts for this chat") var enableReadReceipts: Bool
+        @Param var chatID: String
+        
+        func execute() throws {
+            if enableReadReceipts, let chat = IMChat.resolve(withIdentifier: chatID) {
+                chat.userToggledReadReceiptSwitch(true)
+                chat.markAllMessagesAsRead()
+            }
+            CBDaemonListener.shared.unreadCountPipeline.pipe { chatID, count in
+                guard chatID == self.chatID else {
+                    return
+                }
+                guard let chat = IMChat.resolve(withIdentifier: chatID) else {
+                    return
+                }
+                chat.markAllMessagesAsRead()
+            }
+        }
+    }
+    
+    class Pong: BarcelonaCommand {
+        let name = "pong"
+        
+        @Param var chatID: String
+        @Param var triggerText: String
+        @Param var copyText: String
+        
+        func execute() throws {
+            CBDaemonListener.shared.messagePipeline.pipe { message in
+                if message.chatID == self.chatID, !message.fromMe, message.items.contains(where: { ($0.item as? TextChatItem)?.text == self.triggerText }) {
+                    try! MessageCommand.Send.Text.ERSendIMessage(to: self.chatID, text: self.copyText, false)
+                }
+            }
+        }
+    }
+    
+    var children: [Routable] = [DebugEventsCommand(), IMDTest(), NicknameTest(), AlwaysRead(), Pong()]
 }
