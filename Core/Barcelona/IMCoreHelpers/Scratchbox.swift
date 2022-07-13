@@ -20,11 +20,11 @@ import IMFoundation
 import IDS
 import Contacts
 
-internal func _scratchboxMain() {
+@_spi(scratchbox) public func _scratchboxMain() {
     
 }
 #else
-internal func _scratchboxMain() {
+@_spi(scratchbox) public func _scratchboxMain() {
     
 }
 #endif
