@@ -164,6 +164,12 @@ private extension IMAccountController {
             return nil
         }
         
+        let registrationFailureReason = account.registrationFailureReason
+        
+        if registrationFailureReason == .irreparableFailure, CBFeatureFlags.beeper {
+            return "An error occurred while activating iMessage. Please contact Beeper support to resolve this issue."
+        }
+        
         if let alertInfo = account.registrationFailureAlertInfo, var body = alertInfo["body"] as? String {
             if let action = alertInfo["action"] as? [AnyHashable: Any], let url = action["url"] as? String {
                 body += " " + url
@@ -172,7 +178,7 @@ private extension IMAccountController {
             return body
         }
         
-        switch account.registrationFailureReason {
+        switch registrationFailureReason {
         case .noError:
             return nil
         case .unknownError:

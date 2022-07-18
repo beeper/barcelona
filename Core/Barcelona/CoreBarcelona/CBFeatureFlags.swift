@@ -85,6 +85,9 @@ public class _CBFeatureFlags: FlagProvider {
     @FeatureFlag("media-monitor-timeout", defaultValue: true)
     public var mediaMonitorTimeout: Bool
     
+    @FeatureFlag("beeper", defaultValue: false)
+    public var beeper: Bool
+    
     public var withholdPartialFailures: Bool {
         get {
             overrideWithholdPartialFailures ?? _withholdPartialFailures
