@@ -228,6 +228,10 @@ public class CBSenderCorrelationController {
     
     /// Establish a correlation between a sender ID and a correlation ID
     public func correlate(senderID: String, correlationID: String) {
+        if senderID == correlationID {
+            log.debug("Ignoring equal self-referencing ID for \(senderID) (this means they are using a temporary registration and there's nothing to correlate against)")
+            return
+        }
         { senderIDToCorrelationID in
             switch senderIDToCorrelationID[senderID] {
             case .none, .some(.none):
