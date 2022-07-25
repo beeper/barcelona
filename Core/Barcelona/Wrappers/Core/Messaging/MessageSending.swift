@@ -54,7 +54,7 @@ public extension Chat {
         imChat.markAllMessagesAsRead()
     }
     
-    func sendReturningRaw(message createMessage: CreateMessage) throws -> IMMessage {
+    func sendReturningRaw(message createMessage: CreateMessage, from: String? = nil) throws -> IMMessage {
         imChat.refreshServiceForSendingIfNeeded()
         
         let message = try createMessage.imMessage(inChat: self.id)
@@ -63,6 +63,10 @@ public extension Chat {
         
         Thread.main.sync {
             markAsRead()
+            let imChat = imChat
+            if let from = from {
+                imChat.lastAddressedHandleID = from
+            }
             imChat.send(message)
         }
         
@@ -84,8 +88,8 @@ public extension Chat {
         return Message(messageItem: message._imMessageItem, chatID: imChat.id)
     }
     
-    func send(message createMessage: CreateMessage) throws -> Message {
-        return Message(messageItem: try sendReturningRaw(message: createMessage)._imMessageItem, chatID: imChat.id)
+    func send(message createMessage: CreateMessage, from: String? = nil) throws -> Message {
+        return Message(messageItem: try sendReturningRaw(message: createMessage, from: from)._imMessageItem, chatID: imChat.id)
     }
     
     func tapback(_ creation: TapbackCreation, metadata: Message.Metadata? = nil) throws -> Message {

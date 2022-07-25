@@ -201,6 +201,8 @@ class MessageCommand: CommandGroup {
             
             @Flag("-f") var force: Bool
             
+            @Key("--from") var from: String?
+            
             static func ERSendIMessage(to: String, text: String, _ sms: Bool) throws -> Message {
                 let chat = Chat.directMessage(withHandleID: to, service: sms ? .SMS : .iMessage)
                 let message = try chat.send(message: CreateMessage(parts: [.init(type: .text, details: text)]))
@@ -248,7 +250,7 @@ class MessageCommand: CommandGroup {
                     if pingEveryone {
                         message = try chat.pingEveryone(text: text)
                     } else {
-                        message = try chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: text)]))
+                        message = try chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: text)]), from: from)
                     }
                 }
             }
