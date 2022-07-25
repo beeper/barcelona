@@ -151,7 +151,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         }
         
         NotificationCenter.default.addObserver(forName: .IMNicknameDidChange, object: nil, queue: nil) { notification in
-            if BMXContactListIsBuilding {
+            if !nicknamesLoaded {
                 return
             }
             
