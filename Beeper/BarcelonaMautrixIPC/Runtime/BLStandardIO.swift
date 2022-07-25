@@ -53,6 +53,7 @@ public extension FileHandle {
     
     func performOnThread(_ callback: @escaping () -> ()) {
         guard let runLoop = Self.runLoops[self] else {
+            callback()
             return
         }
         CFRunLoopPerformBlock(runLoop, CFRunLoopMode.commonModes.rawValue, callback)
@@ -163,13 +164,15 @@ public func BLWritePayloads(_ payloads: [IPCPayload], log: Bool = true) {
     }
     
     if BLPayloadIntercept == nil {
-        FileHandle.standardOutput.write(data)
-        
-        #if DEBUG
-        if BLMetricStore.shared.get(key: .shouldDebugPayloads) ?? false {
-            FileHandle.standardOutput.write(TERMINATOR)
+        FileHandle.standardOutput.performOnThread {
+            FileHandle.standardOutput.write(data)
+            
+            #if DEBUG
+            if BLMetricStore.shared.get(key: .shouldDebugPayloads) ?? false {
+                FileHandle.standardOutput.write(TERMINATOR)
+            }
+            #endif
         }
-        #endif
     }
 }
 
