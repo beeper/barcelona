@@ -37,6 +37,22 @@ private let PNCopyBestGuessCountryCodeForNumber: (
     @convention(c) (CFString) -> Unmanaged<CFString> // retained
 ) = CBWeakLink(against: .privateFramework(name: "CorePhoneNumbers"), .symbol("PNCopyBestGuessCountryCodeForNumber"))!
 
+private func IMHandleRegistrarHooks() throws -> Interpose {
+    return try Interpose(IMHandleRegistrar.self) {
+        try $0.prepareHook(#selector(IMHandleRegistrar._handleDeleteContactChangeHistoryEvent(_:))) { (store: TypedHook<@convention(c) (AnyObject, Selector, AnyObject) -> Int, @convention(block) (IMHandleRegistrar, NSNotification) -> Int>) in
+            { _self, notification in
+                if let contactIdentifier = notification.userInfo?["__kIMCSChangeHistoryContactIdentifierKey"] as? String {
+                    if let handleIDs = IMContactStore.sharedInstance().handleIDs(forCNID: contactIdentifier) as? [String] {
+                        // emit the handle IDs whose information is being reset due to an address book change
+                        CBDaemonListener.shared.resetHandlePipeline.send(handleIDs)
+                    }
+                }
+                return store.original(_self, store.selector, notification)
+            } as @convention(block) (IMHandleRegistrar, NSNotification) -> Int
+        }
+    }
+}
+
 private func IMHandleHooks() throws -> Interpose {
     return try Interpose(IMHandle.self) {
         try $0.prepareHook(#selector(getter: IMHandle.countryCode)) { (store: TypedHook<@convention(c) (AnyObject, Selector) -> String, @convention(block) (IMHandle) -> String>) in
@@ -160,7 +176,7 @@ private func IMIDSHooks() throws -> Interpose {
 class HookManager {
     static let shared = HookManager()
     
-    let hooks = [IMChatHooks, IMIDSHooks, CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks]
+    let hooks = [IMChatHooks, IMIDSHooks, CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks, IMHandleRegistrarHooks]
     private var appliedHooks: [Interpose]?
     
     func apply() throws {

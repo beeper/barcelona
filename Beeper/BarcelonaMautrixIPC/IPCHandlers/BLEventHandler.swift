@@ -124,16 +124,30 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
             }
         }
         
-        NotificationCenter.default.addObserver(forName: .IMHandleInfoChanged, object: nil, queue: nil) { notification in
-            if BMXContactListIsBuilding {
+        func handleAddOrChangeContactNotification(_ notification: Notification) {
+            guard let contact = notification.userInfo?["__kIMCSChangeHistoryContactKey"] as? CNContact else {
                 return
             }
-            
-            guard let handle = notification.object as? IMHandle else {
+            guard let blContact = BLContact.blContact(for: contact) else {
                 return
             }
-            
-            BLWritePayload(.init(command: .contact(BLContact.blContact(forHandleID: handle.id))))
+            BLWritePayload(.init(command: .contact(blContact)))
+        }
+        
+        NotificationCenter.default.addObserver(forName: "IMCSChangeHistoryUpdateContactEventNotification", object: nil, queue: nil, using: handleAddOrChangeContactNotification(_:))
+        NotificationCenter.default.addObserver(forName: "IMCSChangeHistoryAddContactEventNotification", object: nil, queue: nil, using: handleAddOrChangeContactNotification(_:))
+        
+        // There's no way Apple-native way to know which handle IDs are being cleared out, without avoiding false positives.
+        CBDaemonListener.shared.resetHandlePipeline.pipe { handleIDs in
+            for handleID in handleIDs {
+                BLWritePayload(.init(command: .contact(.emptyContact(for: handleID))))
+            }
+            BLWritePayloads(handleIDs.map(BLContact.emptyContact(for:)).map { IPCPayload(command: .contact($0)) })
+        }
+        
+        var nicknamesLoaded = false
+        NotificationCenter.default.addObserver(forName: .IMNicknameControllerDidLoad, object: nil, queue: nil) { notification in
+            nicknamesLoaded = true
         }
         
         NotificationCenter.default.addObserver(forName: .IMNicknameDidChange, object: nil, queue: nil) { notification in
