@@ -142,54 +142,6 @@ extension Notification.Name: ExpressibleByStringLiteral {
 
 import Combine
 
-struct asdf: ExpressibleByStringInterpolation, ExpressibleByStringLiteral {
-    typealias StringLiteralType = interp.StringLiteralType
-    
-    struct interp: StringInterpolationProtocol, ExpressibleByStringLiteral {
-        var staticStrings: ContiguousArray<StaticString> = ContiguousArray()
-        
-        struct Capture {
-            
-        }
-        
-        init(literalCapacity: Int, interpolationCount: Int) {
-            staticStrings = ContiguousArray()
-            staticStrings.reserveCapacity(literalCapacity)
-        }
-        
-        init(stringLiteral: StringLiteralType) {
-            
-        }
-        
-        mutating func appendLiteral(_ literal: StringLiteralType) {
-            
-        }
-        
-        mutating func appendInterpolation(_ interpolation: StringLiteralType) {
-            
-        }
-        
-        mutating func appendInterpolation(_ interpolation: Int) {
-            
-        }
-        
-        
-        typealias StringLiteralType = StaticString
-    }
-    
-    init(stringInterpolation: interp) {
-        
-    }
-    
-    init(stringLiteral value: interp.StringLiteralType) {
-        
-    }
-    
-    static let a: asdf = "a\(4)b"
-    
-//    typealias StaticString
-}
-
 internal extension CBDaemonListener {
     static var didStartListening = false
     func startListening() {
