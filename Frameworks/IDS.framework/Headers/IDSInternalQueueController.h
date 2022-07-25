@@ -8,13 +8,13 @@
 
 @class NSObject;
 
-@interface IDSInternalQueueController : NSObject
-{
-    NSObject *_queue;
-    void *_contextKey;
-}
+@protocol IDSInternalQueueController <NSObject>
+//{
+//    NSObject *_queue;
+//    void *_contextKey;
+//}
 
-+ (id)sharedInstance;
++ (id<IDSInternalQueueController>)sharedInstance;
 
 - (id)queue;
 - (BOOL)isQueueCurrent;

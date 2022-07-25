@@ -7,11 +7,13 @@
 #import <Foundation/Foundation.h>
 
 @class IDSInternalQueueController, _IDSIDQueryController, IDSDestination;
+@protocol IDSIDQueryControllerDelegate;
 
 NS_ASSUME_NONNULL_BEGIN
 @interface IDSEndpoint: NSObject
 @property (nonatomic, readonly, retain) IDSURI *URI;
-@property (nonatomic, strong, readonly) NSString *senderCorrelationIdentifier;
+@property (nonatomic, strong, readonly, nullable) NSString *senderCorrelationIdentifier;
+@property (nonatomic, strong, readonly, nullable) NSString *anonymizedSenderID;
 @end
 NS_ASSUME_NONNULL_END
 
@@ -54,7 +56,7 @@ NS_ASSUME_NONNULL_END
 - (BOOL)removeListenerID:(id)arg1 forService:(id)arg2;
 - (void)addListenerID:(id)arg1 forService:(id)arg2;
 - (void)removeDelegate:(id)arg1 forService:(id)arg2 listenerID:(id)arg3;
-- (void)addDelegate:(id)arg1 forService:(id)arg2 listenerID:(id)arg3 queue:(id)arg4;
+- (void)addDelegate:(id<IDSIDQueryControllerDelegate>)arg1 forService:(NSString*)arg2 listenerID:(NSString*)arg3 queue:(dispatch_queue_t)arg4;
 - (void)removeDelegate:(id)arg1;
 - (void)addDelegate:(id)arg1 queue:(id)arg2;
 - (void)dealloc;

@@ -102,7 +102,9 @@ struct ContactInfoCollector {
     var avatar: Data?
     var phoneNumbers: Set<String> = Set()
     var emailAddresses: Set<String> = Set()
+    var uris: Set<String> = Set()
     var serviceHint = "SMS"
+    var correlationID: String?
     
     var contacts: Set<CNContact> = Set()
     var handles: Set<IMHandle> = Set()
@@ -120,6 +122,8 @@ struct ContactInfoCollector {
         serviceHint = "SMS"
         contacts.removeAll(keepingCapacity: true)
         handles.removeAll(keepingCapacity: true)
+        uris.removeAll(keepingCapacity: true)
+        correlationID = nil
     }
     
     mutating func collect(_ contact: CNContact) {
@@ -146,12 +150,14 @@ struct ContactInfoCollector {
         }
         
         for phoneNumber in contact.phoneNumbers {
-            let uncanonicalized = IDSDestination(uri: phoneNumber.value.unformattedInternationalStringValue()).uri().unprefixedURI!
-            phoneNumbers.insert(uncanonicalized)
+            let destination = IDSDestination(uri: phoneNumber.value.unformattedInternationalStringValue()).uri()
+            phoneNumbers.insert(destination.unprefixedURI!)
+            uris.insert(destination.prefixedURI!)
         }
         
-        for emailAddress in contact.emailAddresses {
-            emailAddresses.insert(emailAddress.value as String)
+        for emailAddress in contact.emailAddresses.lazy.map({ $0.value as String }) {
+            emailAddresses.insert(emailAddress)
+            uris.insert("mailto:\(emailAddress)")
         }
     }
     
@@ -232,7 +238,8 @@ struct ContactInfoCollector {
             emails: emailAddresses.map { IMFormattedDisplayStringForID($0, nil) ?? $0 },
             user_guid: handleID,
             primary_identifier: primaryIdentifier,
-            serviceHint: serviceHint
+            serviceHint: serviceHint,
+            correlation_id: CBSenderCorrelationController.shared.correlate(sameSenders: Array(uris))
         )
         
         reset()

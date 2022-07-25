@@ -94,6 +94,8 @@ public struct BLMessage: Codable, ChatResolvable {
     public var target: String?
     public var rich_link: RichLinkMetadata?
     public var metadata: Message.Metadata?
+    public var sender_correlation_id: String?
+    public var correlation_id: String?
     
     public init(message: Message) {
         guid = message.id
@@ -112,6 +114,8 @@ public struct BLMessage: Codable, ChatResolvable {
         is_audio_message = message.isAudioMessage
         is_read = message.isReadByMe
         metadata = message.metadata
+        correlation_id = message.imChat?.senderCorrelationID
+        sender_correlation_id = message.senderCorrelationID
         
         for item in message.items {
             switch item.item {

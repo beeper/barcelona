@@ -152,6 +152,12 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
         
         IMContactStore.sharedInstance().checkForContactStoreChanges()
         
+        #if DEBUG
+        log.debug("Set up IMContactStore. Loading correlation controller...")
+        #endif
+        
+        _ = CBSenderCorrelationController.shared
+        
         log("Connected.")
         
         ifDebugBuild {

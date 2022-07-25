@@ -41,7 +41,7 @@ private func ensuredPrefix(_ handleID: String, withService service: String) -> S
 }
 
 public struct BLContact: Codable {
-    public init(first_name: String? = nil, last_name: String? = nil, nickname: String? = nil, avatar: String? = nil, phones: [String], emails: [String], user_guid: String, primary_identifier: String? = nil, serviceHint: String = "iMessage") {
+    public init(first_name: String? = nil, last_name: String? = nil, nickname: String? = nil, avatar: String? = nil, phones: [String], emails: [String], user_guid: String, primary_identifier: String? = nil, serviceHint: String = "iMessage", correlation_id: String? = nil) {
         self.first_name = first_name
         self.last_name = last_name
         self.nickname = nickname
@@ -50,6 +50,7 @@ public struct BLContact: Codable {
         self.emails = emails
         self.user_guid = ensuredPrefix(user_guid, withService: serviceHint)
         self.primary_identifier = primary_identifier
+        self.correlation_id = correlation_id
     }
     
     public init() {
@@ -61,6 +62,7 @@ public struct BLContact: Codable {
         emails = []
         user_guid = ""
         primary_identifier = nil
+        correlation_id = nil
     }
     
     public var first_name: String?
@@ -72,6 +74,7 @@ public struct BLContact: Codable {
     public var user_guid: String
     public var primary_identifier: String?
 //    public var contact_id: String
+    public var correlation_id: String?
 }
 
 private extension BLContactSuggestionData {

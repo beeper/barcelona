@@ -26,4 +26,5 @@ public struct BLChat: Codable, ChatResolvable {
     public var chat_guid: String
     public var title: String?
     public var members: [String]
+    public var correlation_id: String?
 }
