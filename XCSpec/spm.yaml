@@ -19,7 +19,7 @@ packages:
     from: 1.0.6
   Pwomise:
     url: https://github.com/EricRabil/Pwomise
-    from: 1.0.11
+    from: 1.1
   BarcelonaFoundation:
     url: https://github.com/open-imcore/BarcelonaFoundation
     from: 1.0.2
