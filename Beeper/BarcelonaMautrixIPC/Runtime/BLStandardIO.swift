@@ -56,6 +56,7 @@ public extension FileHandle {
             return
         }
         CFRunLoopPerformBlock(runLoop, CFRunLoopMode.commonModes.rawValue, callback)
+        CFRunLoopWakeUp(runLoop)
     }
     
     func handleDataAsynchronously(_ cb: @escaping (Data) -> ()) {
