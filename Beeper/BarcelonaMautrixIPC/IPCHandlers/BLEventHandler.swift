@@ -54,6 +54,18 @@ extension IMChatRegistry {
     }
 }
 
+private extension BLContact {
+    static func emptyContact(for handleID: String) -> BLContact {
+        if handleID.isEmail {
+            return BLContact(phones: [], emails: [handleID], user_guid: "iMessage;-;\(handleID)")
+        } else if handleID.isPhoneNumber {
+            return BLContact(phones: [handleID], emails: [], user_guid: "iMessage;-;\(handleID)")
+        } else {
+            return BLContact(phones: [], emails: [], user_guid: "iMessage;-;\(handleID)")
+        }
+    }
+}
+
 public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
     public static let shared = BLEventHandler()
     
