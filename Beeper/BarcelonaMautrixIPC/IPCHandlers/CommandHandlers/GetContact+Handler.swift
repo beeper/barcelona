@@ -53,19 +53,9 @@ public func BMXGenerateContactList(omitAvatars: Bool = false, asyncLookup: Bool 
         CNContactNicknameKey,
         CNContactImageDataAvailableKey
     ] + (omitAvatars ? [] : [CNContactImageDataKey]) as! [CNKeyDescriptor])) { contact, stop in
-        if contact.phoneNumbers.isEmpty && contact.emailAddresses.isEmpty {
-            return
+        if let contact = BLContact.blContact(for: contact, collector: &collector) {
+            finalized.append(contact)
         }
-        let handles = IMHandle.handles(for: contact)
-        collector.collect(contact)
-        handles.forEach { collector.collect($0, checkContact: false) }
-        guard let id = (IMHandle.bestIMHandle(in: handles) ?? handles.first)?.mautrixID ?? collector.phoneNumbers.first ?? collector.emailAddresses.first else {
-            collector.reset()
-            return
-        }
-        collector.primaryIdentifier = id
-        collector.handleID = collector.serviceHint + ";-;" + id
-        finalized.append(collector.finalize())
     }
     let filtered = finalized.filter { !$0.user_guid.isEmpty }
     transaction.setTag(value: NSUserName(), key: "sessionID")
@@ -249,6 +239,27 @@ struct ContactInfoCollector {
 }
 
 extension BLContact {
+    public static func blContact(for contact: CNContact) -> BLContact? {
+        var collector = ContactInfoCollector("")
+        return blContact(for: contact, collector: &collector)
+    }
+    
+    static func blContact(for contact: CNContact, collector: inout ContactInfoCollector) -> BLContact? {
+        if contact.phoneNumbers.isEmpty && contact.emailAddresses.isEmpty {
+            return nil
+        }
+        let handles = IMHandle.handles(for: contact)
+        collector.collect(contact)
+        handles.forEach { collector.collect($0, checkContact: false) }
+        guard let id = (IMHandle.bestIMHandle(in: handles) ?? handles.first)?.mautrixID ?? collector.phoneNumbers.first ?? collector.emailAddresses.first else {
+            collector.reset()
+            return nil
+        }
+        collector.primaryIdentifier = id
+        collector.handleID = collector.serviceHint + ";-;" + id
+        return collector.finalize()
+    }
+    
     public static func blContact(forHandleID handleID: String) -> BLContact {
         if handleID.isBusinessID {
             if let handle = IMHandle.resolve(withIdentifier: handleID) {

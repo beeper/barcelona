@@ -279,16 +279,14 @@ public class CBSenderCorrelationController {
         }
         let semaphore = DispatchSemaphore(value: 1)
         // load from database
-        Stack.stack.correlationIDs(for: missingCorrelations).always { outcome in
+        try? Stack.stack.correlationIDs(for: missingCorrelations).always { outcome in
             if case .success(let correlations) = outcome {
                 for (senderID, correlationID) in correlations {
                     loadedCorrelations[senderID] = correlationID
                 }
             }
             semaphore.signal()
-        }
-        // wait for database
-        semaphore.wait();
+        }.wait(upTo: .distantFuture);
         // lock for the entire enumeration
         { senderIDToCorrelationID in
             // store the database results
