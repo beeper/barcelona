@@ -151,29 +151,40 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         
         // There's no way Apple-native way to know which handle IDs are being cleared out, without avoiding false positives.
         CBDaemonListener.shared.resetHandlePipeline.pipe { handleIDs in
-            for handleID in handleIDs {
-                BLWritePayload(.init(command: .contact(.emptyContact(for: handleID))))
-            }
             BLWritePayloads(handleIDs.map(BLContact.emptyContact(for:)).map { IPCPayload(command: .contact($0)) })
         }
         
-        var nicknamesLoaded = false
+        var nicknamesLoadedAt: Date? = nil, lastNicknamePayloads: [String: BLContact] = [:]
         NotificationCenter.default.addObserver(forName: .IMNicknameControllerDidLoad, object: nil, queue: nil) { notification in
-            nicknamesLoaded = true
+            nicknamesLoadedAt = Date()
         }
         
         NotificationCenter.default.addObserver(forName: .IMNicknameDidChange, object: nil, queue: nil) { notification in
-            if !nicknamesLoaded {
-                return
-            }
-            
             guard let dict = notification.object as? [AnyHashable: Any], let handleIDs = dict["handleIDs"] as? [String] else {
                 return
             }
             
-            BLWritePayloads(handleIDs.map(BLContact.blContact(forHandleID:)).map {
+            CLDebug("BLNotifications", "attempt to process nickname change")
+            
+            let payloads: [IPCPayload] = handleIDs.map(BLContact.blContact(forHandleID:)).filter { contact in
+                if lastNicknamePayloads[contact.user_guid] == contact {
+                    return false
+                }
+                lastNicknamePayloads[contact.user_guid] = contact
+                return true
+            }.map {
                 .init(command: .contact($0))
-            })
+            }
+            
+            guard let nicknamesLoadedAt = nicknamesLoadedAt, nicknamesLoadedAt.distance(to: Date()) > 1 else {
+                return
+            }
+            
+            if payloads.isEmpty {
+                return
+            }
+            
+            BLWritePayloads(payloads)
         }
     }
     

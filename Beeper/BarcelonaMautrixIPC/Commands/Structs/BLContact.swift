@@ -40,7 +40,7 @@ private func ensuredPrefix(_ handleID: String, withService service: String) -> S
     }
 }
 
-public struct BLContact: Codable {
+public struct BLContact: Codable, Hashable {
     public init(first_name: String? = nil, last_name: String? = nil, nickname: String? = nil, avatar: String? = nil, phones: [String], emails: [String], user_guid: String, primary_identifier: String? = nil, serviceHint: String = "iMessage", correlation_id: String? = nil) {
         self.first_name = first_name
         self.last_name = last_name
