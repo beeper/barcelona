@@ -60,7 +60,9 @@ public extension FileManager {
     }
     
     func barcelonaDirectory() throws -> URL {
-        try libraryURLForCurrentUser().appendingPathComponent("Barcelona")
+        let url = try libraryURLForCurrentUser().appendingPathComponent("Barcelona")
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return url
     }
 }
 
@@ -142,66 +144,69 @@ public class CBSenderCorrelationController {
             try! migrator.migrate(pool)
         }
         
-        func correlations(forSender sender: String) -> Promise<[Correlation]> {
+        private func read<T>(_ callback: @escaping (Database) throws -> T) -> Promise<T> {
             Promise { resolve, reject in
                 pool.asyncRead { result in
                     do {
                         let result = try result.get()
-                        let stmt = try result.makeSelectStatement(sql:
-                            """
-                            SELECT o.*
-                            FROM correlation c
-                            INNER JOIN correlation o ON o.correl_id = c.correl_id
-                            WHERE c.sender_id = $1
-                            """)
-                        try stmt.setArguments([sender])
-                        let rows = try Row.fetchCursor(stmt)
-                        try resolve(Array(rows.map(Correlation.init(row:))))
+                        try resolve(callback(result))
                     } catch {
                         reject(error)
                     }
                 }
             }.resolving(on: CBSenderCorrelationController.queue)
+        }
+        
+        func correlations(forCorrelation correlationID: String) -> Promise<[String]> {
+            read { result in
+                let req: SQLRequest<String> =  """
+                                            SELECT c.sender_id
+                                            FROM correlation c
+                                            WHERE c.correl_id = \(correlationID)
+                                            """
+                return try req.fetchAll(result)
+            }
+        }
+        
+        func correlations(forSender sender: String) -> Promise<[Correlation]> {
+            read { result in
+                let stmt = try result.makeSelectStatement(sql:
+                    """
+                    SELECT o.*
+                    FROM correlation c
+                    INNER JOIN correlation o ON o.correl_id = c.correl_id
+                    WHERE c.sender_id = $1
+                    """)
+                try stmt.setArguments([sender])
+                let rows = try Row.fetchCursor(stmt)
+                return try Array(rows.map(Correlation.init(row:)))
+            }
         }
         
         func correlationID(for sender: String) -> Promise<String?> {
-            Promise { resolve, reject in
-                pool.asyncRead { result in
-                    do {
-                        let result = try result.get()
-                        let stmt = try result.makeSelectStatement(sql:
-                            """
-                            SELECT c.correl_id
-                            FROM correlation c
-                            WHERE c.sender_id = $1
-                            """)
-                        try stmt.setArguments([sender])
-                        let row = try Row.fetchOne(stmt)
-                        resolve(row?["correl_id"])
-                    } catch {
-                        reject(error)
-                    }
-                }
-            }.resolving(on: CBSenderCorrelationController.queue)
+            read { result in
+                let stmt = try result.makeSelectStatement(sql:
+                    """
+                    SELECT c.correl_id
+                    FROM correlation c
+                    WHERE c.sender_id = $1
+                    """)
+                try stmt.setArguments([sender])
+                let row = try Row.fetchOne(stmt)
+                return row?["correl_id"]
+            }
         }
         
         func correlationIDs(for senders: [String]) -> Promise<[String: String]> {
-            Promise { resolve, reject in
-                pool.asyncRead { result in
-                    do {
-                        let result = try result.get()
-                        let req: SQLRequest<Row> =  """
-                                                    SELECT c.sender_id, c.correl_id
-                                                    FROM correlation c
-                                                    WHERE c.sender_id IN \(senders)
-                                                    """
-                        let cursor = try req.fetchCursor(result)
-                        try resolve(Dictionary(uniqueKeysWithValues: Array(cursor.map { ($0["sender_id"], $0["correl_id"]) })))
-                    } catch {
-                        reject(error)
-                    }
-                }
-            }.resolving(on: CBSenderCorrelationController.queue)
+            read { result in
+                let req: SQLRequest<Row> =  """
+                                            SELECT c.sender_id, c.correl_id
+                                            FROM correlation c
+                                            WHERE c.sender_id IN \(senders)
+                                            """
+                let cursor = try req.fetchCursor(result)
+                return try Dictionary(uniqueKeysWithValues: Array(cursor.map { ($0["sender_id"], $0["correl_id"]) }))
+            }
         }
         
         func witness(correlationID: String, senderID: String) -> Promise<Void> {
@@ -384,6 +389,23 @@ public class CBSenderCorrelationController {
     public func correlate(senderID: String) -> String? {
         correlate(sameSenders: [senderID])
     }
+    
+    /// Queries all URIs for the given correlation identifier
+    public func correlations(for correlationID: String) -> [String] {
+        do {
+            return try Stack.stack.correlations(forCorrelation: correlationID).wait(upTo: .distantFuture)
+        } catch {
+            return []
+        }
+    }
+    
+    public func siblingSenders(for senderID: String) -> [String] {
+        do {
+            return try Stack.stack.correlations(forSender: senderID).map(\.sender_id).wait(upTo: .distantFuture)
+        } catch {
+            return []
+        }
+    }
 }
 
 public protocol CBSenderTargetable {
@@ -454,5 +476,27 @@ extension CBMessageStatusChange: CBSenderTargetable {
 extension Message: CBSenderTargetable {
     public var senderDestination: IDSDestination? {
         sender.flatMap(IDSDestination.init(imID:))
+    }
+}
+
+extension IMChat {
+    /// Returns other chats with the same sender correlation ID
+    public var siblings: [IMChat] {
+        if isGroup {
+            return [self]
+        } else {
+            var siblings = senderDestination.map { destination in
+                CBSenderCorrelationController.shared.siblingSenders(for: destination.uri().prefixedURI)
+            }.map { senders -> [IMChat] in
+                senders.compactMap { senderID in
+                    IMAccountController.shared.iMessageAccount?.imHandle(withID: senderID.droppingURIPrefix)
+                }.compactMap(IMChatRegistry.shared.chat(for:))
+            } ?? []
+            if !siblings.contains(self) {
+                siblings.insert(self, at: 0)
+            }
+            CLDebug("Correlation", "Siblings for \(self.id) are \(siblings.map(\.debugDescription))")
+            return siblings
+        }
     }
 }

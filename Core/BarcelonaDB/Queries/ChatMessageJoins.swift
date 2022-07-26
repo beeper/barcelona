@@ -112,7 +112,7 @@ public extension DBReader {
     ///   - beforeMessageGUID: message GUID to load messages before
     ///   - limit: max number of results to return
     /// - Returns: array of message GUIDs matching the query
-    func newestMessageGUIDs(forChatIdentifier chatIdentifier: String, beforeDate: Date? = nil, afterDate: Date? = nil, beforeMessageGUID: String? = nil, afterMessageGUID: String? = nil, limit: Int? = nil) -> Promise<[String]> {
+    func newestMessageGUIDs(forChatIdentifiers chatIdentifiers: [String], beforeDate: Date? = nil, afterDate: Date? = nil, beforeMessageGUID: String? = nil, afterMessageGUID: String? = nil, limit: Int? = nil) -> Promise<[(messageID: String, chatID: String)]> {
         read { db in
             class MessageGUIDCursor: GRDB.Record {
                 required init(row: Row) {
@@ -124,11 +124,11 @@ public extension DBReader {
             }
             
             var sql = """
-            SELECT message.guid
+            SELECT message.guid, chat.chat_identifier
             FROM message
             INNER JOIN chat_message_join cmj ON cmj.message_id = message.ROWID
             INNER JOIN chat ON cmj.chat_id = chat.ROWID
-            WHERE chat.chat_identifier = \(chatIdentifier)
+            WHERE chat.chat_identifier IN \(chatIdentifiers)
             """ as SQLLiteral
             
             if let beforeMessageGUID = beforeMessageGUID {
@@ -164,7 +164,7 @@ public extension DBReader {
             LIMIT \(limit ?? 75)
             """)
             
-            return try SQLRequest<MessageGUIDCursor>(literal: sql).fetchAll(db).map(\.guid)
+            return try SQLRequest<Row>(literal: sql).fetchAll(db).map { ($0["guid"], $0["chat_identifier"]) }
         }
     }
 }

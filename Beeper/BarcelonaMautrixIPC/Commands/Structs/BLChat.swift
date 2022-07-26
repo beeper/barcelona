@@ -12,13 +12,13 @@ import IMCore
 
 public extension IMChat {
     var blChat: BLChat {
-        BLChat(chat_guid: blChatGUID, title: displayName, members: participants.map(\.id))
+        BLChat(chat_guid: blChatGUID, title: displayName, members: participants.map(\.id), correlation_id: correlationIdentifier)
     }
 }
 
 public extension Chat {
     var blChat: BLChat {
-        BLChat(chat_guid: blChatGUID, title: displayName, members: participants)
+        BLChat(chat_guid: blChatGUID, title: displayName, members: participants, correlation_id: imChat.correlationIdentifier)
     }
 }
 

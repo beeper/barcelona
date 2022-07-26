@@ -106,7 +106,7 @@ class MessageCommand: CommandGroup {
             }
             
             func execute() throws {
-                BLLoadChatItems(withChatIdentifier: chat, onServices: [.iMessage, .SMS], afterDate: nil, beforeDate: nil, afterGUID: nil, beforeGUID: nil, limit: limit ?? 100).then(
+                BLLoadChatItems(withChatIdentifiers: [chat], onServices: [.iMessage, .SMS], afterDate: nil, beforeDate: nil, afterGUID: nil, beforeGUID: nil, limit: limit ?? 100).then(
                     onlyIDs ? { chatItems in
                         print(chatItems.map { MessageIdentifier(messageID: $0.id, chatID: $0.chatID) }.jsonString)
                     } : { chatItems in

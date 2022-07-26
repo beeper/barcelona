@@ -254,7 +254,7 @@ public extension Chat {
         
         log("Querying IMD for recent messages using chat fast-path")
         
-        return BLLoadChatItems(withChatIdentifier: self.id, onServices: [.iMessage, .SMS], beforeGUID: before, limit: limit).compactMap {
+        return BLLoadChatItems(withChatIdentifiers: [self.id], onServices: [.iMessage, .SMS], beforeGUID: before, limit: limit).compactMap {
             $0 as? Message
         }
     }

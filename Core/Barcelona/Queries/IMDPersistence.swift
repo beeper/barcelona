@@ -160,27 +160,16 @@ private func BLIngestIMDMessageRecordRefs(_ refs: NSArray, in chat: String? = ni
     
     var items = BLCreateIMItemFromIMDMessageRecordRefs(refs)
     
-    if CBFeatureFlags.repairCorruptedLinks {
-        items = items.map { item in
-            switch item {
-            case let item as IMMessageItem:
-                return ERRepairIMMessageItem(item)
-            case let item:
-                return item
-            }
-        }
-    }
-    
     return BLIngestObjects(items, inChat: chat)
 }
 
-private func ERResolveGUIDsForChat(withChatIdentifier chatIdentifier: String, afterDate: Date? = nil, beforeDate: Date? = nil, afterGUID: String? = nil, beforeGUID: String? = nil, limit: Int? = nil) -> Promise<[String]> {
+private func ERResolveGUIDsForChats(withChatIdentifiers chatIdentifiers: [String], afterDate: Date? = nil, beforeDate: Date? = nil, afterGUID: String? = nil, beforeGUID: String? = nil, limit: Int? = nil) -> Promise<[(messageID: String, chatID: String)]> {
     #if DEBUG
     let operation = IMDLog.operation(named: "ERResolveGUIDsForChat")
-    operation.begin("Resolving GUIDs for chat %@ before time %f before guid %@ limit %ld", chatIdentifier, beforeDate?.timeIntervalSince1970 ?? 0, beforeGUID ?? "(nil)", limit ?? -1)
+    operation.begin("Resolving GUIDs for chat %@ before time %f before guid %@ limit %ld", chatIdentifiers, beforeDate?.timeIntervalSince1970 ?? 0, beforeGUID ?? "(nil)", limit ?? -1)
     #endif
     
-    let result = DBReader.shared.newestMessageGUIDs(forChatIdentifier: chatIdentifier, beforeDate: beforeDate, afterDate: afterDate, beforeMessageGUID: beforeGUID, afterMessageGUID: afterGUID, limit: limit)
+    let result = DBReader.shared.newestMessageGUIDs(forChatIdentifiers: chatIdentifiers, beforeDate: beforeDate, afterDate: afterDate, beforeMessageGUID: beforeGUID, afterMessageGUID: afterGUID, limit: limit)
     #if DEBUG
     result.observeAlways { result in
         switch result {
@@ -239,6 +228,30 @@ public func BLLoadChatItems(withGUIDs guids: [String], chatID: String? = nil) ->
     return IMDPersistenceMarshal.putBuffers(guids, BLIngestIMDMessageRecordRefs(refs, in: chatID)) + buffer
 }
 
+public func BLLoadChatItems(withGraph graph: [String: [String]]) -> Promise<[ChatItem]> {
+    if graph.count == 0 {
+        return .success([])
+    }
+    
+    let guids = graph.flatMap(\.value)
+    let (buffer, remaining) = IMDPersistenceMarshal.partialBuffer(guids)
+    
+    guard let guids = remaining else {
+        return buffer
+    }
+    
+    let refs = BLCreateIMItemFromIMDMessageRecordRefs(BLLoadIMDMessageRecordRefsWithGUIDs(guids))
+    let items = refs.dictionary(keyedBy: \.id)
+    
+    let pendingIngestion = Promise.all(graph.mapValues { guids in
+        guids.compactMap { items[$0] }
+    }.map { chatID, items -> Promise<[ChatItem]> in
+        BLIngestObjects(items, inChat: chatID)
+    }).flatten()
+    
+    return IMDPersistenceMarshal.putBuffers(guids, pendingIngestion) + buffer
+}
+
 /// Resolves ChatItems with the given parameters
 /// - Parameters:
 ///   - chatIdentifier: identifier of the chat to load messages from
@@ -246,23 +259,10 @@ public func BLLoadChatItems(withGUIDs guids: [String], chatID: String? = nil) ->
 ///   - beforeGUID: GUID of the message all messages must precede
 ///   - limit: max number of messages to return
 /// - Returns: NIO future of ChatItems
-public func BLLoadChatItems(withChatIdentifier chatIdentifier: String, onServices services: [IMServiceStyle] = [], afterDate: Date? = nil, beforeDate: Date? = nil, afterGUID: String? = nil, beforeGUID: String? = nil, limit: Int? = nil) -> Promise<[ChatItem]> {
-    ERResolveGUIDsForChat(withChatIdentifier: chatIdentifier, afterDate: afterDate, beforeDate: beforeDate, afterGUID: afterGUID, beforeGUID: beforeGUID, limit: limit).then {
-        BLLoadChatItems(withGUIDs: $0, chatID: chatIdentifier)
+public func BLLoadChatItems(withChatIdentifiers chatIdentifiers: [String], onServices services: [IMServiceStyle] = [], afterDate: Date? = nil, beforeDate: Date? = nil, afterGUID: String? = nil, beforeGUID: String? = nil, limit: Int? = nil) -> Promise<[ChatItem]> {
+    ERResolveGUIDsForChats(withChatIdentifiers: chatIdentifiers, afterDate: afterDate, beforeDate: beforeDate, afterGUID: afterGUID, beforeGUID: beforeGUID, limit: limit).then {
+        BLLoadChatItems(withGraph: $0.collectedDictionary(keyedBy: \.chatID, valuedBy: \.messageID))
     }
-}
-
-public func BLLoadChatItems(_ items: [(chatID: String, messageID: String)]) -> Promise<[ChatItem]> {
-    let ledger = items.dictionary(keyedBy: \.messageID, valuedBy: \.chatID)
-    let records = BLLoadIMMessages(withGUIDs: items.map(\.messageID))
-    
-    let groups = records.map {
-        (chatID: ledger[$0.guid]!, message: $0)
-    }.collectedDictionary(keyedBy: \.chatID, valuedBy: \.message)
-    
-    return Promise.all(groups.map { chatID, messages in
-        BLIngestObjects(messages, inChat: chatID)
-    }).flatten()
 }
 
 typealias IMFileTransferFromIMDAttachmentRecordRefType = @convention(c) (_ record: Any) -> IMFileTransfer?

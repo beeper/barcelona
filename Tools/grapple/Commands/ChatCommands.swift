@@ -38,7 +38,7 @@ class ChatCommands: CommandGroup {
         @Param var id: String
         
         func execute() throws {
-            BLLoadChatItems(withChatIdentifier: id, onServices: [.iMessage, .SMS], limit: 20).then {
+            BLLoadChatItems(withChatIdentifiers: [id], onServices: [.iMessage, .SMS], limit: 20).then {
                 print($0)
                 exit(0)
             }

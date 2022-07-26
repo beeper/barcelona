@@ -13,7 +13,7 @@ extension Message: Searchable {
     public static func resolve(withParameters parameters: MessageQueryParameters) -> Promise<[Message]> {
         DBReader.shared.queryMessages(withParameters: parameters)
             .then {
-                BLLoadChatItems($0)
+                BLLoadChatItems(withGraph: $0.collectedDictionary(keyedBy: \.chatID, valuedBy: \.messageID))
             }.compactMap { $0 as? Message }
     }
 }

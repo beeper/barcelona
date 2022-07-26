@@ -26,16 +26,19 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
             return payload.fail(strategy: .chat_not_found)
         }
         
-        if let lastMessage = chat.lastMessage, lastMessage.time!.timeIntervalSince1970 < timestamp {
+        let siblings = chat.siblings
+        
+        if let lastMessageTime = siblings.compactMap(\.lastMessage?.time?.timeIntervalSince1970).max(),
+           lastMessageTime < timestamp {
             #if DEBUG
-            IPCLog.debug("Not processing get_messages_after because chats last message timestamp %f is before req.timestamp %f", lastMessage.time!.timeIntervalSince1970, timestamp)
+            IPCLog.debug("Not processing get_messages_after because chats last message timestamp %f is before req.timestamp %f", lastMessageTime, timestamp)
             #endif
             return payload.respond(.messages([]))
         }
         
-        BLLoadChatItems(withChatIdentifier: chat.id, onServices: .CBMessageServices, afterDate: date, limit: limit).then {
-            $0.blMessages
-        }.then {
+        
+        
+        BLLoadChatItems(withChatIdentifiers: siblings.compactMap(\.chatIdentifier), onServices: .CBMessageServices, afterDate: date, limit: limit).then(\.blMessages).then {
             payload.respond(.messages($0))
         }
     }
@@ -51,9 +54,9 @@ extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
             return payload.fail(strategy: .chat_not_found)
         }
         
-        BLLoadChatItems(withChatIdentifier: chat.id, onServices: .CBMessageServices, limit: limit).then {
-            $0.blMessages
-        }.then {
+        let siblings = chat.siblings
+        
+        BLLoadChatItems(withChatIdentifiers: siblings.compactMap(\.chatIdentifier), onServices: .CBMessageServices, limit: limit).then(\.blMessages).then {
             payload.respond(.messages($0))
         }
     }
