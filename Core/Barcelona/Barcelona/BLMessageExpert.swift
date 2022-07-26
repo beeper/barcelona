@@ -96,6 +96,7 @@ public class BLMessageExpert {
         if seenMessages[event.id]?.event == event {
             return
         }
+        event.tryLog()
         seenMessages[event.id] = BLMessageEventReceipt(event: event, counter: counter)
         if seenMessages.count > 100 {
             seenMessages.sorted(usingKey: \.value.counter, by: <).dropLast(100).forEach { key, _ in
@@ -144,9 +145,22 @@ public class BLMessageExpert {
     }
 }
 
+extension BLMessageExpert.BLMessageEvent {
+    @_transparent var log: Logger { BLMessageExpert.shared.log }
+    func tryLog() {
+        switch self {
+        case .delivered(id: let deliveredMessageID, service: _, chat: _, time: let time):
+            log.info("Message %@ was delivered at %@", deliveredMessageID, time.map(NSNumber.init(value:)) ?? "null")
+        case .failed(id: let failedMessageID, service: _, chat: _, code: let failureCode):
+            log.warn("Message %@ failed with failure code %@", failedMessageID, failureCode.description)
+        default:
+            return
+        }
+    }
+}
+
 @_spi(messageExpertControlFlow) public extension BLMessageExpert {
     func process(failedMessageID: String, service: String, chat: IMChat, failureCode: FZErrorType) {
-        log.warn("Message %@ failed with failure code %@", failedMessageID, failureCode.description)
         send(.failed(id: failedMessageID, service: service, chat: chat, code: failureCode))
     }
 }
@@ -163,7 +177,6 @@ fileprivate extension BLMessageExpert {
 
 fileprivate extension BLMessageExpert {
     func process(deliveredMessageID: String, service: String, chat: IMChat, time: Double?) {
-        log.info("Message %@ was delivered at %@", deliveredMessageID, time.map(NSNumber.init(value:)) ?? "null")
         send(.delivered(id: deliveredMessageID, service: service, chat: chat, time: time))
     }
     
