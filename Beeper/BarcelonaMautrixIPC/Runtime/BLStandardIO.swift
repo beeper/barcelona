@@ -204,6 +204,11 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
             #if DEBUG
             CLInfo("BLStandardIO", "Incoming! %@ %ld", payload.command.name.rawValue, payload.id ?? -1)
             #endif
+            
+            if payload.command.name != .ping, let id = payload.id, id > 1, !pongedOnce {
+                pongedOnce = true
+                BLWritePayload(.init(id: 1, command: .response(.ack)))
+            }
 
             switch payload.command {
             case .ping:
