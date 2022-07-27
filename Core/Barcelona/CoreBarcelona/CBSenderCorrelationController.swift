@@ -378,7 +378,7 @@ public class CBSenderCorrelationController {
         }.resolving(on: CBSenderCorrelationController.queue)
     }
     
-    private func retrieveCorrelationsAndWait(senderIDs: [String], upTo time: DispatchTime = .now().advanced(by: .milliseconds(250))) -> [String: String] {
+    private func retrieveCorrelationsAndWait(senderIDs: [String], upTo time: DispatchTime = .now().advanced(by: .seconds(1))) -> [String: String] {
         (try? retrieveCorrelations(senderIDs: senderIDs).wait(upTo: time)) ?? [:]
     }
     
