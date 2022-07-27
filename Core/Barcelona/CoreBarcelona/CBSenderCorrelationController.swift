@@ -112,6 +112,10 @@ public class CBSenderCorrelationController {
             try FileManager.default.barcelonaDirectory().appendingPathComponent("correlation2.sqlite")
         }
         
+        static func oldStoreURL() throws -> URL {
+            try FileManager.default.barcelonaDirectory().appendingPathComponent("correlation.db")
+        }
+        
         struct Correlation: Codable {
             var correl_id: String
             var sender_id: String
@@ -141,7 +145,43 @@ public class CBSenderCorrelationController {
                     table.column("first_seen", .date).defaults(sql: "CURRENT_TIMESTAMP")
                 }
             }
+            
             try! migrator.migrate(pool)
+            
+            if let oldURL = try? Self.oldStoreURL(), FileManager.default.fileExists(atPath: oldURL.path), !CBFeatureFlags.migratedDatabase {
+                CLInfo("Correlation", "Found old correlation database, attempting to import")
+                do {
+                    let queue = try DatabaseQueue(path: oldURL.path)
+                    try queue.read { database in
+                        var stmt = try database.makeSelectStatement(sql: "SELECT identifier FROM grdb_migrations where identifier = 'v4';")
+                        guard try String.fetchOne(stmt) != nil else {
+                            CLWarn("Correlation", "Correlation database was not upgraded to v4, I will not be migrating it.")
+                            return
+                        }
+                        stmt = try database.makeSelectStatement(sql: "SELECT correlation_identifier, sender_id FROM correlation")
+                        let cursor = try Row.fetchCursor(stmt)
+                        try self.pool.writeInTransaction { database2 in
+                            while let row = try cursor.next() {
+                                let correl_id: String = row["correlation_identifier"]
+                                guard UUID(uuidString: correl_id) != nil else {
+                                    continue
+                                }
+                                let sender_id: String = row["sender_id"]
+                                CLDebug("Correlation", "Importing correlation of \(sender_id, privacy: .private)/\(correl_id, privacy: .private)")
+                                try database2.execute(literal: """
+                                                               INSERT OR IGNORE INTO correlation (correl_id, sender_id) VALUES (\(correl_id), \(sender_id))
+                                                               """)
+                            }
+                            return .commit
+                        }
+                        CLInfo("Correlation", "Migrated correlation database!")
+                        try FileManager.default.removeItem(at: oldURL)
+                    }
+                    CBFeatureFlags.migratedDatabase = true
+                } catch {
+                    CLFault("Correlation", "Failed to migrate old correlation database: \((error as NSError).debugDescription)")
+                }
+            }
         }
         
         private func read<T>(_ callback: @escaping (Database) throws -> T) -> Promise<T> {

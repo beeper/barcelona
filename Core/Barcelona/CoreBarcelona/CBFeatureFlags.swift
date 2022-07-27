@@ -85,6 +85,9 @@ public class _CBFeatureFlags: FlagProvider {
     @FeatureFlag("beeper", defaultValue: false)
     public var beeper: Bool
     
+    @FeatureFlag("migrated-database", defaultValue: false)
+    public var migratedDatabase: Bool
+    
     public var withholdPartialFailures: Bool {
         get {
             overrideWithholdPartialFailures ?? _withholdPartialFailures
