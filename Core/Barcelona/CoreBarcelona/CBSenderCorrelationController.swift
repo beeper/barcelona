@@ -160,7 +160,7 @@ public class CBSenderCorrelationController {
                         }
                         stmt = try database.makeSelectStatement(sql: "SELECT correlation_identifier, sender_id FROM correlation")
                         let cursor = try Row.fetchCursor(stmt)
-                        try self.pool.writeInTransaction { database2 in
+                        try self.pool.write { database2 in
                             while let row = try cursor.next() {
                                 let correl_id: String = row["correlation_identifier"]
                                 guard UUID(uuidString: correl_id) != nil else {
@@ -172,7 +172,6 @@ public class CBSenderCorrelationController {
                                                                INSERT OR IGNORE INTO correlation (correl_id, sender_id) VALUES (\(correl_id), \(sender_id))
                                                                """)
                             }
-                            return .commit
                         }
                         CLInfo("Correlation", "Migrated correlation database!")
                         try FileManager.default.removeItem(at: oldURL)
