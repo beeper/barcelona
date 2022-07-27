@@ -50,7 +50,7 @@
 @property(readonly, nonatomic) __weak NSArray *orderedTransfers;
 @property(readonly, nonatomic) NSArray *activeTransferGUIDs;
 @property(readonly, nonatomic) __weak NSArray *activeTransfers;
-@property(readonly, nonatomic) NSDictionary *transfers;
+@property(readonly, nonatomic) NSDictionary<NSString*, IMFileTransfer*> *transfers;
 - (id)transfersForAccount:(id)arg1;
 - (void)retargetTransfer:(id)arg1 toPath:(id)arg2;
 - (void)deleteTransfer:(id)arg1;
