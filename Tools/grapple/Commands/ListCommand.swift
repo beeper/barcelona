@@ -47,3 +47,26 @@ class ListCommand: CommandGroup {
     }
     #endif
 }
+
+class TransferCommands: CommandGroup {
+    let shortDescription = "interact with the file transfer system"
+    let name = "transfers"
+    
+    class Getters: CommandGroup {
+        let shortDescription = "query existing transfers"
+        let name = "get"
+        
+        class GetAllTransfers: EphemeralBarcelonaCommand {
+            let shortDescription = "dump all file transfers to console (noisy!)"
+            let name = "all"
+            
+            func execute() throws {
+                print(IMFileTransferCenter.sharedInstance().transfers.prettyJSON)
+            }
+        }
+        
+        let children: [Routable] = [GetAllTransfers()]
+    }
+    
+    let children: [Routable] = [Getters()]
+}
