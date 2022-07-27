@@ -10,7 +10,7 @@ import Foundation
 import Barcelona
 
 public struct BLMessageStatus: Codable {
-    public init(guid: String, chatGUID: String, status: BLMessageStatus.StatusEvent, service: String, message: String? = nil, statusCode: String? = nil, correlation_id: String? = nil) {
+    public init(guid: String, chatGUID: String, status: BLMessageStatus.StatusEvent, service: String, message: String? = nil, statusCode: String? = nil, correlation_id: String? = nil, sender_correlation_id: String? = nil) {
         self.guid = guid
         self.chatGUID = chatGUID
         self.status = status
@@ -18,6 +18,7 @@ public struct BLMessageStatus: Codable {
         self.message = message
         self.statusCode = statusCode
         self.correlationID = correlation_id
+        self.senderCorrelationID = sender_correlation_id
     }
     
     public init?(event: CBMessageStatusChange) {
@@ -29,13 +30,14 @@ public struct BLMessageStatus: Codable {
             message = event.message.errorCode.localizedDescription
             statusCode = event.message.errorCode.description
             service = event.service
-            correlationID = event.senderCorrelationID
+            correlationID = event.chat.correlationIdentifier
+            senderCorrelationID = event.senderCorrelationID
         default:
             return nil
         }
     }
     
-    public init(sentMessageGUID: String, onService: String, forChatGUID: String, correlation_id: String? = nil) {
+    public init(sentMessageGUID: String, onService: String, forChatGUID: String, correlation_id: String? = nil, sender_correlation_id: String? = nil) {
         guid = sentMessageGUID
         chatGUID = forChatGUID
         status = .sent
@@ -43,6 +45,7 @@ public struct BLMessageStatus: Codable {
         statusCode = nil
         service = onService
         correlationID = correlation_id
+        senderCorrelationID = sender_correlation_id
     }
     
     public enum StatusEvent: String, Codable {
@@ -56,8 +59,9 @@ public struct BLMessageStatus: Codable {
     public var message: String?
     public var statusCode: String?
     public var correlationID: String?
+    public var senderCorrelationID: String?
     
     public enum CodingKeys: String, CodingKey {
-        case guid, chatGUID = "chat_guid", status, service, message, statusCode = "status_code", correlationID = "correlation_id"
+        case guid, chatGUID = "chat_guid", status, service, message, statusCode = "status_code", correlationID = "correlation_id", senderCorrelationID = "sender_correlation_id"
     }
 }

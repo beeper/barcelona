@@ -92,9 +92,9 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
             return
         }
         
-        if chat.unreadMessageCount == 0, let lastMessageID = chat.lastMessage?.id {
+        if chat.unreadMessageCount == 0, let lastMessage = chat.lastMessage {
             CLInfo("Mautrix", "Read count for chat \(chat.id, privacy: .public): \(chat.unreadMessageCount, privacy: .public)")
-            BLWritePayload(.init(id: nil, command: .read_receipt(.init(sender_guid: nil, is_from_me: true, chat_guid: chat.blChatGUID, read_up_to: lastMessageID, correlation_id: chat.senderCorrelationID))))
+            BLWritePayload(.init(id: nil, command: .read_receipt(.init(sender_guid: nil, is_from_me: true, chat_guid: chat.blChatGUID, read_up_to: lastMessage.id, correlation_id: chat.correlationIdentifier, sender_correlation_id: lastMessage.senderCorrelationID))))
         }
     }
     
@@ -109,7 +109,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
             if let sender = change.sender, BLBlocklistController.shared.isSenderBlocked(sender) {
                 return
             }
-            BLWritePayload(.init(command: .read_receipt(BLReadReceipt(sender_guid: change.mautrixFriendlyGUID, is_from_me: change.fromMe, chat_guid: change.chat.blChatGUID, read_up_to: change.messageID, correlation_id: change.chat.senderCorrelationID, sender_correlation_id: change.senderCorrelationID))))
+            BLWritePayload(.init(command: .read_receipt(BLReadReceipt(sender_guid: change.mautrixFriendlyGUID, is_from_me: change.fromMe, chat_guid: change.chat.blChatGUID, read_up_to: change.messageID, correlation_id: change.chat.correlationIdentifier, sender_correlation_id: change.senderCorrelationID))))
         }
         
         BLMessageExpert.shared.eventPipeline.pipe { event in
@@ -126,11 +126,17 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                         return
                     }
                 }
+                #if DEBUG
+                if NSUserName() == "ericrabil" || NSUserName() == "3AFBF1C7-8088-4ACF-B998-BC84C6947233" {
+                    let message = BLLoadIMMessage(withGUID: message.id)
+                    CLDebug("", "%@", message.debugDescription)
+                }
+                #endif
                 BLWritePayload(.init(command: .message(BLMessage(message: message))))
-            case .sent(id: let id, service: let service, chat: let chat, time: _):
-                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(sentMessageGUID: id, onService: service, forChatGUID: chat.blChatGUID, correlation_id: chat.senderCorrelationID))))
-            case .failed(id: let id, service: let service, chat: let chat, code: let code):
-                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(guid: id, chatGUID: chat.blChatGUID, status: .failed, service: service, message: code.localizedDescription, statusCode: code.description, correlation_id: chat.senderCorrelationID))))
+            case .sent(id: let id, service: let service, chat: let chat, time: _, senderCorrelationID: let senderCorrelationID):
+                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(sentMessageGUID: id, onService: service, forChatGUID: chat.blChatGUID, correlation_id: chat.correlationIdentifier, sender_correlation_id: senderCorrelationID))))
+            case .failed(id: let id, service: let service, chat: let chat, code: let code, senderCorrelationID: let senderCorrelationID):
+                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(guid: id, chatGUID: chat.blChatGUID, status: .failed, service: service, message: code.localizedDescription, statusCode: code.description, correlation_id: chat.correlationIdentifier, sender_correlation_id: senderCorrelationID))))
             default:
                 break
             }

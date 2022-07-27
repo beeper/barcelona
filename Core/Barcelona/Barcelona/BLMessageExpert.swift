@@ -19,22 +19,22 @@ public class BLMessageExpert {
         }
         
         /// The message with the given ID has failed with the given error code.
-        case failed(id: String, service: String, chat: IMChat, code: FZErrorType)
+        case failed(id: String, service: String, chat: IMChat, code: FZErrorType, senderCorrelationID: String?)
         /// The message with the given ID was delivered to the recipient.
-        case delivered(id: String, service: String, chat: IMChat, time: Double?)
+        case delivered(id: String, service: String, chat: IMChat, time: Double?, senderCorrelationID: String?)
         /// The message with the given ID was read by the recipient.
-        case read(id: String, service: String, chat: IMChat, time: Double?)
+        case read(id: String, service: String, chat: IMChat, time: Double?, senderCorrelationID: String?)
         /// The message with the given ID started sending
-        case sending(id: String, service: String, chat: IMChat, time: Double?)
+        case sending(id: String, service: String, chat: IMChat, time: Double?, senderCorrelationID: String?)
         /// The message with the given ID has been sent
-        case sent(id: String, service: String, chat: IMChat, time: Double?)
+        case sent(id: String, service: String, chat: IMChat, time: Double?, senderCorrelationID: String?)
         /// A message has been sent or received.
         case message(Message)
         
         /// The ID of this message
         public var id: String {
             switch self {
-            case .failed(id: let id, _, _, _), .delivered(id: let id, _, _, _), .read(id: let id, _, _, _), .sending(id: let id, _, _, _), .sent(id: let id, _,  _, _):
+            case .failed(id: let id, _, _, _, _), .delivered(id: let id, _, _, _, _), .read(id: let id, _, _, _, _), .sending(id: let id, _, _, _, _), .sent(id: let id, _,  _, _, _):
                 return id
             case .message(let message):
                 return message.id
@@ -43,7 +43,7 @@ public class BLMessageExpert {
         
         public var imChat: IMChat {
             switch self {
-            case .failed(_, _, let chat, _), .delivered(_, _, let chat, _), .read(_, _, let chat, _), .sending(_, _, let chat, _), .sent(_, _, let chat, _):
+            case .failed(_, _, let chat, _, _), .delivered(_, _, let chat, _, _), .read(_, _, let chat, _, _), .sending(_, _, let chat, _, _), .sent(_, _, let chat, _, _):
                 return chat
             case .message(let message):
                 return message.imChat
@@ -52,10 +52,19 @@ public class BLMessageExpert {
         
         public var service: String {
             switch self {
-            case .failed(_, let service, _, _), .delivered(_, let service, _, _), .read(_, let service, _, _), .sending(_, let service, _, _), .sent(_, let service, _, _):
+            case .failed(_, let service, _, _, _), .delivered(_, let service, _, _, _), .read(_, let service, _, _, _), .sending(_, let service, _, _, _), .sent(_, let service, _, _, _):
                 return service
             case .message(let message):
                 return message.service.rawValue
+            }
+        }
+        
+        public var senderCorrelationID: String? {
+            switch self {
+            case .failed(_, _, _, _, let senderCorrelationID), .delivered(_, _, _, _, let senderCorrelationID), .read(_, _, _, _, let senderCorrelationID), .sending(_, _, _, _, let senderCorrelationID), .sent(_, _, _, _, let senderCorrelationID):
+                return senderCorrelationID
+            case .message(let message):
+                return message.senderCorrelationID
             }
         }
         
@@ -111,16 +120,16 @@ public class BLMessageExpert {
         switch change.type {
         case .notDelivered:
             if change.hasFullMessage {
-                process(failedMessageID: change.messageID, service: change.service, chat: change.chat, failureCode: change.message.errorCode)
+                process(failedMessageID: change.messageID, service: change.service, chat: change.chat, failureCode: change.message.errorCode, senderCorrelationID: change.senderCorrelationID)
             } else {
-                process(failedMessageID: change.messageID, service: change.service, chat: change.chat)
+                process(failedMessageID: change.messageID, service: change.service, chat: change.chat, senderCorrelationID: change.senderCorrelationID)
             }
         case .delivered:
-            process(deliveredMessageID: change.messageID, service: change.service, chat: change.chat, time: change.time)
+            process(deliveredMessageID: change.messageID, service: change.service, chat: change.chat, time: change.time, senderCorrelationID: change.senderCorrelationID)
         case .read:
-            process(readMessageID: change.messageID, service: change.service, chat: change.chat, time: change.time)
+            process(readMessageID: change.messageID, service: change.service, chat: change.chat, time: change.time, senderCorrelationID: change.senderCorrelationID)
         case .sent:
-            send(.sent(id: change.messageID, service: change.service, chat: change.chat, time: change.time))
+            send(.sent(id: change.messageID, service: change.service, chat: change.chat, time: change.time, senderCorrelationID: change.senderCorrelationID))
         default:
             break
         }
@@ -128,12 +137,12 @@ public class BLMessageExpert {
     
     private func process(message: Message) {
         if message.failed {
-            process(failedMessageID: message.id, service: message.service.rawValue, chat: message.imChat, failureCode: message.failureCode)
+            process(failedMessageID: message.id, service: message.service.rawValue, chat: message.imChat, failureCode: message.failureCode, senderCorrelationID: message.senderCorrelationID)
             return
         }
         switch message.sendProgress {
         case .sending:
-            send(.sending(id: message.id, service: message.service.rawValue, chat: message.imChat, time: message.time))
+            send(.sending(id: message.id, service: message.service.rawValue, chat: message.imChat, time: message.time, senderCorrelationID: message.senderCorrelationID))
         default:
             break
         }
@@ -149,9 +158,9 @@ extension BLMessageExpert.BLMessageEvent {
     @_transparent var log: Logger { BLMessageExpert.shared.log }
     func tryLog() {
         switch self {
-        case .delivered(id: let deliveredMessageID, service: _, chat: _, time: let time):
+        case .delivered(id: let deliveredMessageID, service: _, chat: _, time: let time, _):
             log.info("Message %@ was delivered at %@", deliveredMessageID, time.map(NSNumber.init(value:)) ?? "null")
-        case .failed(id: let failedMessageID, service: _, chat: _, code: let failureCode):
+        case .failed(id: let failedMessageID, service: _, chat: _, code: let failureCode, _):
             log.warn("Message %@ failed with failure code %@", failedMessageID, failureCode.description)
         default:
             return
@@ -160,28 +169,28 @@ extension BLMessageExpert.BLMessageEvent {
 }
 
 @_spi(messageExpertControlFlow) public extension BLMessageExpert {
-    func process(failedMessageID: String, service: String, chat: IMChat, failureCode: FZErrorType) {
-        send(.failed(id: failedMessageID, service: service, chat: chat, code: failureCode))
+    func process(failedMessageID: String, service: String, chat: IMChat, failureCode: FZErrorType, senderCorrelationID: String?) {
+        send(.failed(id: failedMessageID, service: service, chat: chat, code: failureCode, senderCorrelationID: senderCorrelationID))
     }
 }
 
 fileprivate extension BLMessageExpert {
-    func process(failedMessageID: String, service: String, chat: IMChat) {
+    func process(failedMessageID: String, service: String, chat: IMChat, senderCorrelationID: String?) {
         guard let message = BLLoadIMMessageItem(withGUID: failedMessageID) else {
             log.fault("Failed to process failed message ID %@ because its IMMessageItem could not be loaded", failedMessageID)
             return
         }
-        process(failedMessageID: failedMessageID, service: service, chat: chat, failureCode: message.errorCode)
+        process(failedMessageID: failedMessageID, service: service, chat: chat, failureCode: message.errorCode, senderCorrelationID: senderCorrelationID)
     }
 }
 
 fileprivate extension BLMessageExpert {
-    func process(deliveredMessageID: String, service: String, chat: IMChat, time: Double?) {
-        send(.delivered(id: deliveredMessageID, service: service, chat: chat, time: time))
+    func process(deliveredMessageID: String, service: String, chat: IMChat, time: Double?, senderCorrelationID: String?) {
+        send(.delivered(id: deliveredMessageID, service: service, chat: chat, time: time, senderCorrelationID: senderCorrelationID))
     }
     
-    func process(readMessageID: String, service: String, chat: IMChat, time: Double?) {
-        send(.read(id: readMessageID, service: service, chat: chat, time: time))
+    func process(readMessageID: String, service: String, chat: IMChat, time: Double?, senderCorrelationID: String?) {
+        send(.read(id: readMessageID, service: service, chat: chat, time: time, senderCorrelationID: senderCorrelationID))
     }
 }
 

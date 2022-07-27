@@ -30,13 +30,7 @@ extension IMChat {
         guard isSingle else {
             return nil
         }
-        return recipient?.correlationIdentifier
-    }
-}
-
-extension IMHandle {
-    public var correlationIdentifier: String? {
-        CBSenderCorrelationController.shared.correlate(senderID: id)
+        return recipient?.senderCorrelationID
     }
 }
 
@@ -480,15 +474,6 @@ fileprivate extension IDSDestination {
     }
 }
 
-extension IMChat: CBSenderTargetable {
-    public var senderDestination: IDSDestination? {
-        if isGroup {
-            return nil
-        }
-        return recipient?.senderDestination
-    }
-}
-
 extension IMHandle: CBSenderTargetable {
     public var senderDestination: IDSDestination? {
         IDSDestination(imID: id)
@@ -525,7 +510,7 @@ extension IMChat {
         if isGroup {
             return [self]
         } else {
-            var siblings = senderDestination.map { destination in
+            var siblings = recipient?.senderDestination.map { destination in
                 CBSenderCorrelationController.shared.siblingSenders(for: destination.uri().prefixedURI)
             }.map { senders -> [IMChat] in
                 senders.compactMap { senderID in

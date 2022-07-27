@@ -114,7 +114,7 @@ public struct BLMessage: Codable, ChatResolvable {
         is_audio_message = message.isAudioMessage
         is_read = message.isReadByMe
         metadata = message.metadata
-        correlation_id = message.imChat?.senderCorrelationID
+        correlation_id = message.imChat?.correlationIdentifier
         sender_correlation_id = message.senderCorrelationID
         
         for item in message.items {
