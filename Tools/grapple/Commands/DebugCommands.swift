@@ -61,11 +61,11 @@ class DebugCommands: CommandGroup {
     let name = "debug"
     let shortDescription = "commands useful when debugging barcelona"
     
-    
     class DebugEventsCommand: BarcelonaCommand {
         let name = "events"
         
         @Flag("--mautrix") var logAsMautrix: Bool
+        @Flag("--transfers") var logTransferUpdates: Bool
         
         init() {
 //            LoggingDrivers = []
@@ -81,6 +81,22 @@ class DebugCommands: CommandGroup {
             
             if !LoggingDrivers.contains(where: { $0 is ConsoleDriver }) {
                 LoggingDrivers.append(ConsoleDriver.shared)
+            }
+            
+            if logTransferUpdates {
+                func handleTransferNotification(_ notification: Notification) {
+                    guard let transfer = notification.object as? IMFileTransfer else {
+                        return
+                    }
+                    print(([
+                        "name": notification.name,
+                        "transfer": transfer
+                    ] as NSDictionary).prettyJSON)
+                    visited = Set()
+                }
+                
+                NotificationCenter.default.addObserver(forName: .IMFileTransferUpdated, object: nil, queue: nil, using: handleTransferNotification)
+                NotificationCenter.default.addObserver(forName: .IMFileTransferCreated, object: nil, queue: nil, using: handleTransferNotification)
             }
             
             CBDaemonListener.shared.aggregatePipeline.pipe { event in
