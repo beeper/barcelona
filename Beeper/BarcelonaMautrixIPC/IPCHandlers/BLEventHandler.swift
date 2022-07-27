@@ -164,8 +164,6 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 return
             }
             
-            CLDebug("BLNotifications", "attempt to process nickname change")
-            
             let payloads: [IPCPayload] = handleIDs.map(BLContact.blContact(forHandleID:)).filter { contact in
                 if lastNicknamePayloads[contact.user_guid] == contact {
                     return false
