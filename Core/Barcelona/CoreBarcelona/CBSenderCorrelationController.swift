@@ -142,7 +142,16 @@ public class CBSenderCorrelationController {
             
             try! migrator.migrate(pool)
             
-            if let oldURL = try? Self.oldStoreURL(), FileManager.default.fileExists(atPath: oldURL.path), !CBFeatureFlags.migratedDatabase {
+            var migratedDatabase: Bool {
+                get {
+                    UserDefaults.standard.bool(forKey: "migrated-database")
+                }
+                set {
+                    UserDefaults.standard.set(newValue, forKey: "migrated-database")
+                }
+            }
+            
+            if let oldURL = try? Self.oldStoreURL(), FileManager.default.fileExists(atPath: oldURL.path), !migratedDatabase {
                 CLInfo("Correlation", "Found old correlation database, attempting to import")
                 do {
                     let queue = try DatabaseQueue(path: oldURL.path)
@@ -170,7 +179,7 @@ public class CBSenderCorrelationController {
                         CLInfo("Correlation", "Migrated correlation database!")
                         try FileManager.default.removeItem(at: oldURL)
                     }
-                    CBFeatureFlags.migratedDatabase = true
+                    migratedDatabase = true
                 } catch {
                     CLFault("Correlation", "Failed to migrate old correlation database: \((error as NSError).debugDescription)")
                 }
