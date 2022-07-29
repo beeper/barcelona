@@ -529,7 +529,9 @@ extension IMChat {
             if !siblings.contains(self) {
                 siblings.insert(self, at: 0)
             }
+            #if DEBUG
             CLDebug("Correlation", "Siblings for \(self.id) are \(siblings.map(\.debugDescription))")
+            #endif
             return siblings
         }
     }
