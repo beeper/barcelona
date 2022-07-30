@@ -134,6 +134,8 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
     /** Registers with imagent */
     controller.listener.addHandler(CBDaemonListener.shared)
     
+    _ = CBFileTransferCenter.shared
+    
     RunLoop.main.schedule {
         log("Connecting to daemon...")
         
