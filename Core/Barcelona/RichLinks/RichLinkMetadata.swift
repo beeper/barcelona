@@ -357,3 +357,19 @@ fileprivate extension RichLinkMetadata.RichLinkAsset {
         return metadata
     }
 }
+
+// MARK: - Introspection
+public extension RichLinkMetadata {
+    @_spi(matrix) var usableForMatrix: Bool {
+        if originalURL == nil && URL == nil {
+            return false
+        }
+        if (selectedText ?? summary ?? title) != nil {
+            return true
+        }
+        if image != nil {
+            return true
+        }
+        return false
+    }
+}

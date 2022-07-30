@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Barcelona
+@_spi(matrix) import Barcelona
 import IMCore
 
 internal extension Chat {
@@ -146,6 +146,9 @@ public struct BLMessage: Codable, ChatResolvable {
                     rich_link = richLink
                 } else if let extensionData = plugin.extension {
                     rich_link = RichLinkMetadata(extensionData: extensionData, attachments: plugin.attachments, fallbackText: &text)
+                }
+                if rich_link?.usableForMatrix == false {
+                    rich_link = nil
                 }
             default:
                 continue
