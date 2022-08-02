@@ -30,10 +30,18 @@ extension IMChat {
         guard CBFeatureFlags.refreshChatServices && !IMChat.regressionTesting_disableServiceRefresh else {
             return
         }
-        if !forceRefresh && hasRefreshedServiceForSending {
-            if let lastMessageItem = lastFinishedMessageItem, lastMessageItem.serviceStyle == .iMessage, lastMessageItem.isFinished, lastMessageItem.errorCode == .noError {
-                // The last finished item was iMessage, let's fallthrough and refresh the service.
-            } else if let lastMessageItem = lastMessage?._imMessageItem, lastMessageItem.serviceStyle == account.service?.id {
+        if let lastMessageItem = lastFinishedMessageItem,
+           lastMessageItem.isFinished, // message must be finished
+           lastMessageItem.errorCode == .noError, // message must have no error
+           let serviceStyle = lastMessageItem.serviceStyle,
+           serviceStyle == .iMessage,
+           let messageAccount = serviceStyle.account,
+           self.account != messageAccount {
+            // We are targeted to iMessage, but we don't really know why. Let's retarget to iMessage and see what IDS thinks.
+            CLInfo("ERChat", "Previous message on service \(serviceStyle.rawValue) appears to have been successful, but my service is \(self.account?.serviceName ?? "nil"). I'm going to try my best to refresh the ID query.")
+            _setAccount(messageAccount, locally: true)
+        } else if !forceRefresh && hasRefreshedServiceForSending {
+            if let lastMessageItem = lastMessage?._imMessageItem, lastMessageItem.serviceStyle == account.service?.id {
                 if !lastMessageItem.isFromMe() {
                     return
                 }

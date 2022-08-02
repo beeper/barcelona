@@ -23,6 +23,14 @@ public extension BLRegressionTesting {
     static var unprefixedURIs: [String] {
         uris.map(\.fastDroppingURIPrefix)
     }
+    
+    static var handles: [IMHandle] {
+        IMAccountController.shared.activeAccounts!.filter { $0.service?.id != .FaceTime }.flatMap { account in
+            unprefixedURIs.compactMap {
+                account.imHandle(withID: $0)
+            }
+        }
+    }
 }
 
 // Testing methods
@@ -38,6 +46,22 @@ fileprivate extension IMChat {
 import IMCore
 
 public extension BLRegressionTesting {
+    static func BRI4482() {
+        guard let smsEmailHandle = handles.first(where: {
+            $0.id.isEmail && $0.service?.id == .SMS
+        }) else {
+            preconditionFailure("Expected to find an SMS email handle, but did not.")
+        }
+        
+        let chat = IMChatRegistry.shared.chat(for: smsEmailHandle)
+        chat._setAccount(smsEmailHandle.account, locally: true)
+        guard chat.willSendSMS else {
+            preconditionFailure("Expected chat to be SMS targeted initially")
+        }
+        let wrapper = Chat(chat)
+        try! wrapper.send(message: .init(parts: [.init(type: .text, details: "asdf")]))
+    }
+    
     /// Coverage for the case where an SMS chat is pointed at an e-mail
     static func BRI4462() {
         enum Outcome {
@@ -45,12 +69,9 @@ public extension BLRegressionTesting {
             case succeed
         }
         
+        let handles = handles
+        
         func go_barcelona(_ outcome: Outcome) {
-            let handles = IMAccountController.shared.activeAccounts!.filter { $0.service?.id != .FaceTime }.flatMap { account in
-                unprefixedURIs.compactMap {
-                    account.imHandle(withID: $0)
-                }
-            }
             // hunt down the SMS email handle
             guard let smsEmailHandle = handles.first(where: {
                 $0.id.isEmail && $0.service?.id == .SMS
@@ -89,11 +110,6 @@ public extension BLRegressionTesting {
         }
         
         func go(_ outcome: Outcome) {
-            let handles = IMAccountController.shared.activeAccounts!.filter { $0.service?.id != .FaceTime }.flatMap { account in
-                unprefixedURIs.compactMap {
-                    account.imHandle(withID: $0)
-                }
-            }
             // hunt down the SMS email handle
             guard let smsEmailHandle = handles.first(where: {
                 $0.id.isEmail && $0.service?.id == .SMS
