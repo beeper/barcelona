@@ -13,6 +13,10 @@ extension Date {
     static func now() -> Date { Date() }
 }
 
+internal extension IMChat {
+    static var regressionTesting_disableServiceRefresh = false
+}
+
 extension IMChat {
     /// Stored instance variable on IMChat
     private var hasRefreshedServiceForSending: Bool {
@@ -23,11 +27,13 @@ extension IMChat {
     /// Refreshes the chat service for sending, runs once per chat.
     /// This is a no-op unless `CBFeatureFlags.refreshChatServices` is enabled.
     func refreshServiceForSendingIfNeeded() {
-        guard CBFeatureFlags.refreshChatServices else {
+        guard CBFeatureFlags.refreshChatServices && !IMChat.regressionTesting_disableServiceRefresh else {
             return
         }
-        if hasRefreshedServiceForSending {
-            if let lastMessageItem = lastMessage?._imMessageItem, lastMessageItem.serviceStyle == account.service?.id {
+        if !forceRefresh && hasRefreshedServiceForSending {
+            if let lastMessageItem = lastFinishedMessageItem, lastMessageItem.serviceStyle == .iMessage, lastMessageItem.isFinished, lastMessageItem.errorCode == .noError {
+                // The last finished item was iMessage, let's fallthrough and refresh the service.
+            } else if let lastMessageItem = lastMessage?._imMessageItem, lastMessageItem.serviceStyle == account.service?.id {
                 if !lastMessageItem.isFromMe() {
                     return
                 }

@@ -84,7 +84,7 @@
 - (NSArray<IMAccount*>*)accountsForService:(IMService*)arg1;
 @property(readonly, nonatomic) NSArray *operationalAccounts;
 @property(readonly, nonatomic) NSArray *connectedAccounts;
-@property(readonly, nonatomic) NSArray *activeAccounts;
+@property(readonly, nonatomic) NSArray<IMAccount*> *activeAccounts;
 @property(readonly, nonatomic) int numberOfAccounts;
 - (IMAccount*)accountAtIndex:(int)arg1;
 - (IMAccount*)accountForUniqueID:(id)arg1;
