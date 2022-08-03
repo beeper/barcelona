@@ -316,11 +316,11 @@ class MessageCommand: CommandGroup {
                     let url = URL(fileURLWithPath: transfer)
                     fileTransfers.append(CBInitializeFileTransfer(filename: url.lastPathComponent, path: url))
                 }
-                let creation = CreateMessage(parts: fileTransfers.map {
-                    .init(type: .attachment, details: $0.guid)
+                let creation = CreateMessage(parts: fileTransfers.compactMap(\.guid).map {
+                    .init(type: .attachment, details: $0)
                 })
                 var messageID: String = ""
-                monitor = BLMediaMessageMonitor(messageID: messageID, transferGUIDs: fileTransfers.map(\.guid)) { success, error, cancel in
+                monitor = BLMediaMessageMonitor(messageID: messageID, transferGUIDs: fileTransfers.compactMap(\.guid)) { success, error, cancel in
                     print(success, error, cancel)
                     exit(0)
                 }
