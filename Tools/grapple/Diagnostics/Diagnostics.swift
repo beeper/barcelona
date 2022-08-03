@@ -26,7 +26,7 @@ struct ChatDiagnostics: Codable {
                                    myHandle: chat.imChat.lastAddressedHandleID,
                                    participants: chat.participants.map(Handle.init(id:)),
                                    contacts: contacts,
-                                   blContacts: handles.dictionary(keyedBy: \.id).mapValues(\.id).mapValues(BLContact.blContact(forHandleID:)),
+                                   blContacts: handles.dictionary(keyedBy: \.id).mapValues(\.id).mapValues { BLContact.blContact(forHandleID: $0) },
                                    recentBLMessages: messages.map(BLMessage.init(message:)),
                                    recentMessages: messages)
         }
