@@ -419,7 +419,7 @@ public class CBSenderCorrelationController {
     }
     
     /// Determines the correlation ID for a set of senders assumed to be the same person
-    public func correlate(sameSenders senders: [String]) -> String? {
+    public func correlate(sameSenders senders: [String], offline: Bool = false) -> String? {
         // no-op
         if senders.isEmpty {
             return nil
@@ -440,7 +440,7 @@ public class CBSenderCorrelationController {
                 }
             }
             return mostPopulousCorrelationID
-        } else {
+        } else if !offline {
             // no correlations!
             let correlations = retrieveCorrelationsAndWait(senderIDs: senders)
             if correlations.isEmpty {
@@ -462,6 +462,8 @@ public class CBSenderCorrelationController {
                 }
                 return mostPopulousCorrelationID
             }
+        } else {
+            return nil
         }
     }
     

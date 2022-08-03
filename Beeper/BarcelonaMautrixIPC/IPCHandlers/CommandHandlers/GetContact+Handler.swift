@@ -232,7 +232,7 @@ struct ContactInfoCollector {
         firstName?.isEmpty != false && lastName?.isEmpty != false && nickname?.isEmpty != false
     }
     
-    mutating func finalize() -> BLContact {
+    mutating func finalize(assertCorrelationID: Bool = false) -> BLContact {
         if criticalFieldsAreEmpty {
             if let suggestedName = suggestedName {
                 firstName = suggestedName
@@ -254,7 +254,7 @@ struct ContactInfoCollector {
         }
         
         BMXContactListTrace("lookup correlation ID for \(uriCollector.uris.count) uris") {
-            correlationID = CBSenderCorrelationController.shared.correlate(sameSenders: Array(uriCollector.uris))
+            correlationID = CBSenderCorrelationController.shared.correlate(sameSenders: Array(uriCollector.uris), offline: !assertCorrelationID)
         }
         
         let contact = BLContact (
@@ -304,7 +304,7 @@ extension BLContact {
         return BMXContactListTrace("finalize contact \(contact.id)") { collector.finalize() }
     }
     
-    public static func blContact(forHandleID handleID: String) -> BLContact {
+    public static func blContact(forHandleID handleID: String, assertCorrelationID: Bool = false) -> BLContact {
         if handleID.isBusinessID {
             if let handle = IMHandle.resolve(withIdentifier: handleID) {
                 // mapItemImageData was replaced with a brandSquareLogoImageData in Monterey, in order to integrate with BusinessServices.framework. this can be removed once big sur support is dropped (if ever)
@@ -337,13 +337,13 @@ extension BLContact {
                 }
             }
             
-            return collector.finalize()
+            return collector.finalize(assertCorrelationID: assertCorrelationID)
         }
     }
 }
 
 extension GetContactCommand: Runnable {
     public func run(payload: IPCPayload) {
-        payload.respond(.contact(BLContact.blContact(forHandleID: normalizedHandleID)))
+        payload.respond(.contact(BLContact.blContact(forHandleID: normalizedHandleID, assertCorrelationID: true)))
     }
 }

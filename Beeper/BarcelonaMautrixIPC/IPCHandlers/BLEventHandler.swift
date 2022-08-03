@@ -170,7 +170,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 return
             }
             
-            let payloads: [IPCPayload] = handleIDs.map(BLContact.blContact(forHandleID:)).filter { contact in
+            let payloads: [IPCPayload] = handleIDs.map { BLContact.blContact(forHandleID: $0, assertCorrelationID: false) }.filter { contact in
                 if lastNicknamePayloads[contact.user_guid] == contact {
                     return false
                 }
