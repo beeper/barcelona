@@ -106,5 +106,5 @@ private func ERAttributedString(forAttachment attachment: String) -> MessagePart
         MessageAttributes.filename: filename,
     ], range: NSRange(location: 0, length: IMAttachmentString.count))
     
-    return MessagePartParseResult(string: attachmentAttributes, transferGUIDs: [transfer.guid])
+    return MessagePartParseResult(string: attachmentAttributes, transferGUIDs: [guid])
 }

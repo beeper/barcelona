@@ -78,7 +78,7 @@ public class JBLChat: NSObject, JBLChatJSExports {
     public func sendAttachmentWithFilenameAndPath(_ filename: String, _ path: String) -> JBLMessageExports? {
         let attachment = CBInitializeFileTransfer(filename: filename, path: URL(fileURLWithPath: path))
         
-        guard let message = try? chat.send(message: .init(parts: [.init(type: .attachment, details: attachment.guid)])) else {
+        guard let guid = attachment.guid, let message = try? chat.send(message: .init(parts: [.init(type: .attachment, details: guid)])) else {
             return nil
         }
         

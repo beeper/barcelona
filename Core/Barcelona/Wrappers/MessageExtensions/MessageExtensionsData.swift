@@ -269,24 +269,28 @@ public extension RichLinkMetadata {
         if !attachments.isEmpty {
             for attachment in attachments {
                 if let transfer = attachment.existingFileTransfer {
-                    CLInfo("LPLink+MSExt", "Transfer %@ mime %@ isAuxImage %d", transfer.guid, transfer.mimeType ?? "nil", transfer.isAuxImage)
+                    guard let guid = transfer.guid else {
+                        CLDebug("LPLink+MSExt", "Skipping transfer %@ because it has no GUID?!", transfer)
+                        continue
+                    }
+                    CLInfo("LPLink+MSExt", "Transfer %@ mime %@ isAuxImage %d", guid, transfer.mimeType ?? "nil", transfer.isAuxImage)
                     guard let type = transfer.type else {
-                        CLDebug("LPLink+MSExt", "Skip transfer %@ because it is missing a UTI", transfer.guid)
+                        CLDebug("LPLink+MSExt", "Skip transfer %@ because it is missing a UTI", guid)
                         continue
                     }
                     guard UTTypeConformsTo(type as CFString, kUTTypeImage) else {
-                        CLDebug("LPLink+MSExt", "Skip transfer %@ because it is not an image", transfer.guid)
+                        CLDebug("LPLink+MSExt", "Skip transfer %@ because it is not an image", guid)
                         continue
                     }
                     guard let localURL = transfer.localURL else {
-                        CLInfo("LPLink+MSExt", "Skip transfer %@ because it has no local URL", transfer.guid)
+                        CLInfo("LPLink+MSExt", "Skip transfer %@ because it has no local URL", guid)
                         continue
                     }
                     guard let data = CBTranscoding.toJPEG(contentsOf: localURL) else {
                         CLWarn("LPLink+MSExt", "Failed to transcode image to JPEG from %@", localURL.absoluteString)
                         continue
                     }
-                    CLInfo("LPLink+MSExt", "Selecting transfer %@ for extension data translation", transfer.guid)
+                    CLInfo("LPLink+MSExt", "Selecting transfer %@ for extension data translation", guid)
                     let size = transfer.mediaSize.map {
                         RichLinkMetadata.RichLinkAsset.Size(width: Double($0.width), height: Double($0.height))
                     }

@@ -112,7 +112,7 @@
 @property(retain, nonatomic) NSDate *createdDate; // @synthesize createdDate=_createdDate;
 @property(retain, nonatomic, setter=_setStartDate:) NSDate *startDate; // @synthesize startDate=_startDate;
 @property(retain, nonatomic) NSString *messageGUID; // @synthesize messageGUID=_messageGUID;
-@property(retain, nonatomic) NSString *guid; // @synthesize guid=_guid;
+@property(retain, nonatomic, nullable) NSString *guid; // @synthesize guid=_guid;
 @property(readonly, nonatomic) unsigned long long _lastAveragedBytes; // @synthesize _lastAveragedBytes;
 @property(nonatomic, setter=_setLastAveragedInterval:) double _lastAveragedInterval; // @synthesize _lastAveragedInterval;
 @property(nonatomic, setter=_setLastUpdatedInterval:) double _lastUpdatedInterval; // @synthesize _lastUpdatedInterval;

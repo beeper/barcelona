@@ -26,8 +26,11 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         let transaction = SentrySDK.startTransaction(name: "send-message", operation: "send-media-message")
         
         let transfer = CBInitializeFileTransfer(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
+        guard let guid = transfer.guid else {
+            return payload.fail(strategy: .internal_error("created transfer was not assigned a guid!!!"))
+        }
         var messageCreation = CreateMessage(parts: [
-            .init(type: .attachment, details: transfer.guid)
+            .init(type: .attachment, details: guid)
         ])
         messageCreation.metadata = metadata
         
@@ -60,7 +63,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                 return chat.imChat.account.serviceName
             }
             
-            monitor = BLMediaMessageMonitor(messageID: message?.id ?? "", transferGUIDs: [transfer.guid]) { success, failureCode, shouldCancel in
+            monitor = BLMediaMessageMonitor(messageID: message?.id ?? "", transferGUIDs: [guid]) { success, failureCode, shouldCancel in
                 guard let message = message else {
                     SentrySDK.capture(message: "aborting media processing because the message was never set") { scope in
                         scope.span = transaction

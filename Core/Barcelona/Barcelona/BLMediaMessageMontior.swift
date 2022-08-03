@@ -136,14 +136,14 @@ public class BLMediaMessageMonitor {
     }
     
     private func handle(transferNotification notification: Notification, subscription: NotificationSubscription) {
-        guard let transfer = notification.object as? IMFileTransfer else {
+        guard let transfer = notification.decodeObject(to: IMFileTransfer.self) else {
             return
         }
-        guard transferGUIDs.contains(transfer.guid) else {
+        guard let guid = transfer.guid, transferGUIDs.contains(guid) else {
             return
         }
-        log.info("Processing transfer state %@ for transfer %@ for message %@", transfer.state.description, transfer.guid, messageID())
-        transferStates[transfer.guid] = transfer.state
+        log.info("Processing transfer state %@ for transfer %@ for message %@", transfer.state.description, guid, messageID())
+        transferStates[guid] = transfer.state
     }
 }
 

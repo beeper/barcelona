@@ -26,6 +26,41 @@ public struct Size: Codable, Hashable {
     }
 }
 
+public extension IMFileTransfer {
+    @_transparent private var compatibilityGUIDKey: String {
+        "__kIMFileTransferCompatibilityGUIDKey"
+    }
+    
+    private func setCompatibilityGUID(_ guid: String) {
+        objc_setAssociatedObject(self, compatibilityGUIDKey, guid, .OBJC_ASSOCIATION_COPY_NONATOMIC)
+    }
+    
+    /// A fake GUID created in place of a real GUID. This is constant for the lifetime of this instance. This is a shim, and will result in strange behavior.
+    private var compatibilityGUID: String {
+        get {
+            if let guid = objc_getAssociatedObject(self, compatibilityGUIDKey) as? String {
+                return guid
+            }
+            let guid = UUID().uuidString
+            setCompatibilityGUID(guid)
+            return guid
+        }
+        set {
+            setCompatibilityGUID(newValue)
+        }
+    }
+    
+    /// A non-nil GUID which will more than likely be true to the underlying transfer.
+    var assertedGUID: String {
+        if let guid = guid {
+            return guid
+        } else {
+            CLFault("IMFileTransfer+Barcelona", "Encountered an IMFileTransfer with no GUID. Returning a fake GUID for compatibility.")
+            return compatibilityGUIDKey
+        }
+    }
+}
+
 public struct Attachment: Codable, Hashable {
     public init(mime: String? = nil, filename: String, id: String, uti: String? = nil, origin: ResourceOrigin? = nil, size: Size? = nil, sticker: StickerInformation? = nil) {
         self.mime = mime
@@ -42,7 +77,7 @@ public struct Attachment: Codable, Hashable {
         
         mime = transfer.mimeType
         filename = transfer.filename
-        id = transfer.guid
+        id = transfer.assertedGUID
         uti = transfer.type
         size = transfer.mediaSize
         

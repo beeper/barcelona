@@ -27,7 +27,7 @@ internal extension IMFileTransfer {
             return localPath
         }
         
-        if let path = BLLoadAttachmentPathForTransfer(withGUID: guid) {
+        if let guid = guid, let path = BLLoadAttachmentPathForTransfer(withGUID: guid) {
             self.localPath = path
             return path
         }
