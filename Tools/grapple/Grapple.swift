@@ -66,7 +66,7 @@ class Grapple {
         CBFeatureFlags.overrideWithholdPartialFailures = false
         CBFeatureFlags.overrideWithholdDupes = false
         let cli = CLI(name: "grapple", commands: [
-            SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand(), IDSCommand(), AccountManagement(), Grudge.shared, QueryCommand(), DiagsCommand(), MessageCommand(), ScratchboxCommand(), TransferCommands()
+            SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand(), IDSCommand(), AccountManagement(), Grudge.shared, QueryCommand(), DiagsCommand(), MessageCommand(), ScratchboxCommand(), TransferCommands(), RegressionTestingCommand()
         ])
         LoggingDrivers.append(OSLogDriver.shared)
         if !GrappleFlags.shared.enableLogging {

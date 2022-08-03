@@ -46,6 +46,11 @@ fileprivate extension IMChat {
 import IMCore
 
 public extension BLRegressionTesting {
+    static let tests: [String: () -> ()] = [
+        "BRI4482": BRI4482,
+        "BRI4462": BRI4462
+    ]
+    
     static func BRI4482() {
         guard let smsEmailHandle = handles.first(where: {
             $0.id.isEmail && $0.service?.id == .SMS

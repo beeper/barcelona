@@ -97,6 +97,20 @@ extension Collection where Element: Hashable {
     }
 }
 
+public extension CBSenderCorrelationController {
+    static var debug = false
+}
+
+prefix operator ~
+
+@_transparent
+private prefix func ~(_ expression: @autoclosure () -> ()) {
+    if _fastPath(!CBSenderCorrelationController.debug) {
+        return
+    }
+    expression()
+}
+
 /// Tracks the correlation of different sender IDs to a single, unique identity representing an Apple ID
 public class CBSenderCorrelationController {
     private class Stack {
@@ -251,6 +265,18 @@ public class CBSenderCorrelationController {
             }
         }
         
+        func allCorrelations() -> Promise<[Correlation]> {
+            read { result in
+                let stmt = try result.makeSelectStatement(sql:
+                    """
+                    SELECT *
+                    FROM correlation c
+                    """)
+                let rows = try Row.fetchCursor(stmt)
+                return try Array(rows.map(Correlation.init(row:)))
+            }
+        }
+        
         func witness(correlationID: String, senderID: String) -> Promise<Void> {
             Promise { resolve, reject in
                 pool.asyncWrite({ database in
@@ -267,6 +293,10 @@ public class CBSenderCorrelationController {
     
     public static let shared = CBSenderCorrelationController()
     
+    public init() {
+        reset()
+    }
+    
     private let log = Logger(category: "CBSenderCorrelation")
     private static let queue = DispatchQueue(label: "CBSenderCorrelation")
     
@@ -277,7 +307,7 @@ public class CBSenderCorrelationController {
     public func correlate(senderID: String, correlationID: String) {
         let senderID = IDSDestination(uri: senderID).uri().prefixedURI ?? senderID
         if senderID == correlationID {
-            log.debug("Ignoring equal self-referencing ID for \(senderID) (this means they are using a temporary registration and there's nothing to correlate against)")
+            ~log.debug("Ignoring equal self-referencing ID for \(senderID) (this means they are using a temporary registration and there's nothing to correlate against)")
             return
         }
         { senderIDToCorrelationID in
@@ -295,9 +325,7 @@ public class CBSenderCorrelationController {
         if let correlationID = senderIDToCorrelationID[senderID] {
             return correlationID
         }
-        #if DEBUG
-        log.debug("Looking up correlation ID for \(senderID, privacy: .public)")
-        #endif
+        ~log.debug("Looking up correlation ID for \(senderID, privacy: .public)")
         let semaphore = DispatchSemaphore(value: 1)
         var semaphoreLocked: Bool {
             if semaphore.wait(timeout: .now()) == .success {
@@ -318,8 +346,8 @@ public class CBSenderCorrelationController {
         return result
     }
     
-    private func loadCachedCorrelations(senderIDs: [String]) -> [String: String] {
-        var loadedCorrelations = Dictionary(uniqueKeysWithValues: senderIDs.map { ($0, senderIDToCorrelationID[$0]) }).compactMapValues { $0 as? String }
+    private func loadCachedCorrelations(senderIDs: [String]) -> [String: String?] {
+        var loadedCorrelations = Dictionary(uniqueKeysWithValues: senderIDs.map { ($0, senderIDToCorrelationID[$0]) }).compactMapValues { $0 }
         let missingCorrelations = senderIDs.filter { loadedCorrelations[$0] == nil }
         // no missing correlations, fast return
         if missingCorrelations.isEmpty {
@@ -350,10 +378,11 @@ public class CBSenderCorrelationController {
             var correlations: [String: String] = [:]
             // we will only ever lookup IDs we have imessaged with at some point
             let senderIDs = senderIDs.filter {
-                IMHandleRegistrar.sharedInstance().getIMHandles(forID: IDSDestination(uri: $0).uri().unprefixedURI)?.contains(where: { $0.service == .iMessage() }) ?? false
+                IMHandleRegistrar.sharedInstance().getIMHandles(forID: $0.fastDroppingURIPrefix)?.contains(where: { $0.service == .iMessage() }) ?? false
             }
             if senderIDs.isEmpty {
                 resolve([:])
+                ~log.debug("No senders to query after filter, stop here")
                 return
             }
             IDSIDQueryController.sharedInstance().currentRemoteDevices(for: senderIDs.compactMap(IDSDestination.init(uri:)), service: "com.apple.madrid", listenerID: "com.ericrabil.listener", queue: CBSenderCorrelationController.queue) { results in
@@ -372,9 +401,13 @@ public class CBSenderCorrelationController {
                                 self.log.info("IDS says the correlation identifier for \(senderID) is \(correlationID, privacy: .auto)")
                                 correlations[senderID] = correlationID
                                 break
+                            } else {
+                                ~self.log.debug("\(senderID, privacy: .public) has no correlationID")
                             }
                         }
                     }
+                } else {
+                    ~self.log.debug("IDSIDQueryController returned no results for ID query, confused. \(senderIDs, privacy: .public)")
                 }
                 resolve(correlations)
             }
@@ -395,12 +428,14 @@ public class CBSenderCorrelationController {
         let cachedCorrelations = loadCachedCorrelations(senderIDs: senders)
         if cachedCorrelations.count == senders.count {
             // all correlations are stored
-            return cachedCorrelations.values.mostPopulousElement
-        } else if let mostPopulousCorrelationID = cachedCorrelations.values.mostPopulousElement {
+            ~log.debug("Cache hit when querying \(senders.count, privacy: .public) senders, returning immediately")
+            return cachedCorrelations.values.mostPopulousElement ?? nil
+        } else if case .some(.some(let mostPopulousCorrelationID)) = cachedCorrelations.values.mostPopulousElement {
             // some correlations are stored, but not all
             for sender in senders {
                 if cachedCorrelations[sender] == nil {
                     // this sender has no correlation, set it to the correlation ID with the highest count
+                    ~log.debug("Cloning correlation of \(mostPopulousCorrelationID, privacy: .auto) to \(sender, privacy: .auto)")
                     correlate(senderID: sender, correlationID: mostPopulousCorrelationID)
                 }
             }
@@ -411,7 +446,8 @@ public class CBSenderCorrelationController {
             if correlations.isEmpty {
                 // there's truly no correlations, set caches to nil and return
                 for sender in senders {
-                    senderIDToCorrelationID[sender] = nil
+                    ~log.debug("\(sender, privacy: .auto) has no correlation ID, caching a nil value")
+                    senderIDToCorrelationID[sender] = .some(.none)
                 }
                 return nil
             } else {
@@ -420,12 +456,41 @@ public class CBSenderCorrelationController {
                 for sender in senders {
                     if correlations[sender] == nil {
                         // this sender has no correlation, set it to the correlation ID with the highest count
+                        ~log.debug("Cloning correlation of \(mostPopulousCorrelationID, privacy: .auto) to \(sender, privacy: .auto)")
                         correlate(senderID: sender, correlationID: mostPopulousCorrelationID)
                     }
                 }
                 return mostPopulousCorrelationID
             }
         }
+    }
+    
+    /// For an array of senders, prewarms their correlation data.
+    public func prewarm(senders: [String]) {
+        // only take senders that haven't been queried
+        let senders = { senderIDToCorrelationID in
+            senders.filter {
+                senderIDToCorrelationID[$0] == .none
+            }
+        }(&senderIDToCorrelationID)
+        guard !senders.isEmpty else {
+            return
+        }
+        let correlations = retrieveCorrelationsAndWait(senderIDs: senders);
+        { senderIDToCorrelationID in
+            for sender in senders {
+                senderIDToCorrelationID[sender] = .some(correlations[sender])
+            }
+        }(&senderIDToCorrelationID)
+    }
+    
+    public func reset() {
+        let allCorrelations = try! Stack.stack.allCorrelations().wait(upTo: .distantFuture);
+        { senderIDToCorrelationID in
+            for correlation in allCorrelations {
+                senderIDToCorrelationID[correlation.sender_id] = correlation.correl_id
+            }
+        }(&senderIDToCorrelationID)
     }
     
     /// Queries the correlation identifier for a given sender ID, if it is known

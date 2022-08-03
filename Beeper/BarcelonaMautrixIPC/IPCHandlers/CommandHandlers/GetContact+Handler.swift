@@ -24,6 +24,17 @@ extension IMBusinessNameManager {
 }
 
 internal var BMXContactListIsBuilding = false
+@usableFromInline internal var BMXContactListDebug = false
+
+internal let BMXContactListTrace = Tracer(Logger(category: "BMXContactList"), BMXContactListDebug)
+
+/// Prewarms the correlation data for all URIs currently in the contact store
+public func BMXPrewarm() {
+    let uris = Array(BMXGenerateURIList()), uriCount = uris.count
+    for start in stride(from: uris.startIndex, to: uris.endIndex, by: 25) {
+        CBSenderCorrelationController.shared.prewarm(senders: Array(uris[start..<min(uriCount, start + 10)]))
+    }
+}
 
 private extension IMHandle {
     var mautrixID: String {
@@ -33,6 +44,17 @@ private extension IMHandle {
         }
         return id
     }
+}
+
+public func BMXGenerateURIList() -> Set<String> {
+    var collector = URICollector()
+    try! CNContactStore().enumerateContacts(with: CNContactFetchRequest(keysToFetch: [
+        CNContactEmailAddressesKey,
+        CNContactPhoneNumbersKey
+    ] as! [CNKeyDescriptor])) { contact, stop in
+        collector.collect(contact)
+    }
+    return collector.uris
 }
 
 public func BMXGenerateContactList(omitAvatars: Bool = false, asyncLookup: Bool = false) -> [BLContact] {
@@ -76,6 +98,31 @@ extension CNContact {
     }
 }
 
+struct URICollector {
+    var uris: Set<String> = Set()
+    var phoneNumbers: Set<String> = Set()
+    var emailAddresses: Set<String> = Set()
+    
+    mutating func collect(_ contact: CNContact) {
+        for phoneNumber in contact.phoneNumbers {
+            let unformatted = phoneNumber.value.unformattedInternationalStringValue()
+            phoneNumbers.insert(unformatted)
+            uris.insert("tel:\(unformatted)")
+        }
+        
+        for emailAddress in contact.emailAddresses.lazy.map({ $0.value as String }) {
+            emailAddresses.insert(emailAddress)
+            uris.insert("mailto:\(emailAddress)")
+        }
+    }
+    
+    mutating func reset(keepingCapacity: Bool = false) {
+        uris.removeAll(keepingCapacity: keepingCapacity)
+        phoneNumbers.removeAll(keepingCapacity: keepingCapacity)
+        emailAddresses.removeAll(keepingCapacity: keepingCapacity)
+    }
+}
+
 struct ContactInfoCollector {
     var handleID: String
     var omitAvatars: Bool = false
@@ -90,9 +137,7 @@ struct ContactInfoCollector {
     var nickname: String?
     var suggestedName: String?
     var avatar: Data?
-    var phoneNumbers: Set<String> = Set()
-    var emailAddresses: Set<String> = Set()
-    var uris: Set<String> = Set()
+    var uriCollector: URICollector = URICollector()
     var serviceHint = "SMS"
     var correlationID: String?
     
@@ -107,12 +152,10 @@ struct ContactInfoCollector {
         nickname = nil
         suggestedName = nil
         avatar = nil
-        phoneNumbers.removeAll(keepingCapacity: true)
-        emailAddresses.removeAll(keepingCapacity: true)
+        uriCollector.reset(keepingCapacity: true)
         serviceHint = "SMS"
         contacts.removeAll(keepingCapacity: true)
         handles.removeAll(keepingCapacity: true)
-        uris.removeAll(keepingCapacity: true)
         correlationID = nil
     }
     
@@ -139,16 +182,7 @@ struct ContactInfoCollector {
             avatar = contact.imageData
         }
         
-        for phoneNumber in contact.phoneNumbers {
-            let destination = IDSDestination(uri: phoneNumber.value.unformattedInternationalStringValue()).uri()
-            phoneNumbers.insert(destination.unprefixedURI!)
-            uris.insert(destination.prefixedURI!)
-        }
-        
-        for emailAddress in contact.emailAddresses.lazy.map({ $0.value as String }) {
-            emailAddresses.insert(emailAddress)
-            uris.insert("mailto:\(emailAddress)")
-        }
+        uriCollector.collect(contact)
     }
     
     mutating func collect(_ handle: IMHandle, checkContact: Bool = true) {
@@ -219,17 +253,21 @@ struct ContactInfoCollector {
             firstName = handles.compactMap(\.name).first
         }
         
+        BMXContactListTrace("lookup correlation ID for \(uriCollector.uris.count) uris") {
+            correlationID = CBSenderCorrelationController.shared.correlate(sameSenders: Array(uriCollector.uris))
+        }
+        
         let contact = BLContact (
             first_name: firstName,
             last_name: lastName,
             nickname: nickname,
             avatar: avatar?.base64EncodedString(),
-            phones: Array(phoneNumbers),
-            emails: emailAddresses.map { IMFormattedDisplayStringForID($0, nil) ?? $0 },
+            phones: Array(uriCollector.phoneNumbers),
+            emails: uriCollector.emailAddresses.map { IMFormattedDisplayStringForID($0, nil) ?? $0 },
             user_guid: handleID,
             primary_identifier: primaryIdentifier,
             serviceHint: serviceHint,
-            correlation_id: CBSenderCorrelationController.shared.correlate(sameSenders: Array(uris))
+            correlation_id: correlationID
         )
         
         reset()
@@ -249,15 +287,21 @@ extension BLContact {
             return nil
         }
         let handles = IMHandle.handles(for: contact)
-        collector.collect(contact)
-        handles.forEach { collector.collect($0, checkContact: false) }
-        guard let id = (IMHandle.bestIMHandle(in: handles) ?? handles.first)?.mautrixID ?? collector.phoneNumbers.first ?? collector.emailAddresses.first else {
+        BMXContactListTrace("collect contact \(contact.id)") {
+            collector.collect(contact)
+        }
+        handles.forEach { handle in
+            BMXContactListTrace("collect handle \(handle.id)") {
+                collector.collect(handle, checkContact: false)
+            }
+        }
+        guard let id = (IMHandle.bestIMHandle(in: handles) ?? handles.first)?.mautrixID ?? collector.uriCollector.phoneNumbers.first ?? collector.uriCollector.emailAddresses.first else {
             collector.reset()
             return nil
         }
         collector.primaryIdentifier = id
         collector.handleID = collector.serviceHint + ";-;" + id
-        return collector.finalize()
+        return BMXContactListTrace("finalize contact \(contact.id)") { collector.finalize() }
     }
     
     public static func blContact(forHandleID handleID: String) -> BLContact {

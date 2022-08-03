@@ -14,6 +14,9 @@ import BarcelonaJS
 import SwiftCLI
 import Sentry
 
+private let log = Logger(category: "ERBarcelonaManager", subsystem: "com.beeper.imc.barcelona-mautrix")
+private let trace = Tracer(log, true)
+
 @main
 class BarcelonaMautrix {
     static let shared = BarcelonaMautrix()
@@ -64,11 +67,11 @@ class BarcelonaMautrix {
     func bootstrap() {
         reader.callback = BLHandlePayload(_:)
 
-        CLInfo("ERBarcelonaManager", "Bootstrapping")
+        log.info("Bootstrapping")
 
         BarcelonaManager.shared.bootstrap().then { success in
             guard success else {
-                CLError("ERBarcelonaManager", "Failed to bootstrap")
+                log.error("Failed to bootstrap")
                 exit(-1)
             }
             
@@ -82,7 +85,12 @@ class BarcelonaMautrix {
             // starts the imessage notification processor
             BLEventHandler.shared.run()
             
-            CLInfo("ERBarcelonaManager", "BLMautrix is ready")
+            log.info("BLMautrix is ready")
+            
+            DispatchQueue.global().async {
+                log.info("Prewarming...")
+                trace("Prewarm", callback: BMXPrewarm)
+            }
             
             self.startHealthTicker()
         }
