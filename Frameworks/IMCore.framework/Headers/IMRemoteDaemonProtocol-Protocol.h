@@ -196,6 +196,10 @@
 - (void)loadHistoryForIDs:(NSArray *)arg1 style:(unsigned char)arg2 onServices:(NSArray *)arg3 limit:(unsigned long long)arg4 beforeGUID:(NSString *)arg5 afterGUID:(NSString *)arg6 chatID:(NSString *)arg7 queryID:(NSString *)arg8;
 - (void)loadMessageWithGUID:(NSString *)arg1 queryID:(NSString *)arg2;
 - (void)loadChatsWithChatID:(NSString *)arg1;
+//-(void)loadChatsWithIdentifier:(void *)arg2 queryID:(void *)arg3
+- (id <IMRemoteDaemonProtocol>)synchronousReplyingRemoteDaemon;
+- (void)loadChatsWithIdentifier:(NSString*)arg1 queryID:(NSString*)arg2;
+- (void)loadChatsWithGroupID:(NSString*)arg1 queryID:(NSString*)arg2;
 - (void)setListenerCapabilities:(unsigned int)arg1;
 - (void)account:(NSString *)arg1 avAction:(unsigned int)arg2 withArguments:(NSDictionary *)arg3 toAVChat:(NSString *)arg4 isVideo:(BOOL)arg5;
 - (void)conference:(NSString *)arg1 account:(NSString *)arg2 notifyInvitationCancelledFromPerson:(NSString *)arg3;

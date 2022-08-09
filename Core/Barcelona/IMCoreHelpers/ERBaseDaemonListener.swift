@@ -77,7 +77,7 @@ open class ERBaseDaemonListener: NSObject, IMDaemonListenerProtocol {
         
     }
     
-    open func service(_ serviceID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, messagesUpdated messages: [Any]!) {
+    open func service(_ serviceID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, messagesUpdated messages: [[AnyHashable: Any]]!) {
         
     }
     

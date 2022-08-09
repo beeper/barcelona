@@ -32,7 +32,7 @@ public enum FZListenerCapabilities: UInt32 {
         .Status, .Notifications, .Chats, .Lega, .Transfers, .Accounts, .BuddyList, .ChatObserver, .SendMessages, .MessageHistory, .IDQueries, .ChatCounts
     ]
     
-    static var defaults_: UInt32 {
+    public static var defaults_: UInt32 {
         defaults.map(\.rawValue).reduce(into: 0, |=)
     }
 }

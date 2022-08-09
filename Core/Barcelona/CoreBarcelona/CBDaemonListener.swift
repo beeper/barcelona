@@ -512,7 +512,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
     }
     
     // Invoked for status updates (read/deliver/play/save etc)
-    public override func service(_ serviceID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, messagesUpdated messages: [Any]!) {
+    public override func service(_ serviceID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, messagesUpdated messages: [[AnyHashable: Any]]!) {
         *log.debug("messagesUpdated[service]: \(messages.debugDescription, privacy: .public)")
         
         for message in FZCreateIMMessageItemsFromSerializedArray(messages) {

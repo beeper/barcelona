@@ -38,3 +38,8 @@ NSXPCListener* ERConstructXPCListener(NSString*);
 - (instancetype)initWithCoder:(NSCoder *)aDecoder NS_DESIGNATED_INITIALIZER;
 - (NSPredicate *)cn_predicate;
 @end
+
+
+@interface ObjC: NSObject
++ (id)catchException:(id(^)())tryBlock error:(__autoreleasing NSError **)error;
+@end

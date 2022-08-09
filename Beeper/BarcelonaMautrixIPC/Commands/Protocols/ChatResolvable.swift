@@ -33,6 +33,10 @@ public extension ChatResolvable {
         }
     }
     
+    var cbChat2: CBChat? {
+        CBChatRegistry.shared.chats[.guid(chat_guid)]
+    }
+    
     var cbChat: Chat? {
         guard let chat = chat else {
             return nil

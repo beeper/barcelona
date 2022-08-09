@@ -110,7 +110,7 @@ typedef NS_ENUM(int32_t, FZChatStatus) {
 - (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties messageUpdated:(IMItem *)msg;
 - (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties notifySentMessage:(IMMessageItem *)msg sendTime:(NSNumber *)sendTime;
 - (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties messagesUpdated:(NSArray<NSObject*> *)messages;
-- (void) service:(NSString *)serviceID chat:(NSString*)chatIdentifier style:(IMChatStyle)chatStyle messagesUpdated:(NSArray*)messages;
+- (void) service:(NSString *)serviceID chat:(NSString*)chatIdentifier style:(IMChatStyle)chatStyle messagesUpdated:(NSArray<NSDictionary*>*)messages;
 - (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties error:(NSError *)error;
 - (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties groupID:(NSString *)groupID chatPersonCentricID:(NSString *) personCentricID statusChanged:(FZChatStatus)status handleInfo:(NSArray *)handleInfo;
 - (void) account:(NSString *)accountUniqueID chat:(NSString *)chatIdentifier style:(IMChatStyle)chatStyle chatProperties:(NSDictionary *)properties member:(NSDictionary *)memberInfo statusChanged:(FZChatMemberStatus)status;
@@ -178,6 +178,7 @@ typedef NS_ENUM(int32_t, FZChatStatus) {
 - (void) lastMessageForAllChats:(NSDictionary *)chatIDToLastMessageDictionary;
 
 - (void) groupPhotoUpdatedForChatIdentifier:(NSString*)chatIdentifier style:(IMChatStyle)style account:(NSString*)account userInfo:(NSDictionary*)userInfo;
+- (void) loadedChats:(NSArray<NSDictionary*>*)chats queryID:(NSString*)queryID;
 @end
 
 typedef id<IMDaemonListenerProtocol> FZDaemonListenerRef;

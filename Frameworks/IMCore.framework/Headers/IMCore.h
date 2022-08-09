@@ -186,7 +186,6 @@ NSString* IMNormalizedPhoneNumberForPhoneNumber(NSString*, NSString*, BOOL);
 BOOL IMSPIQueryIMMessageItemsWithGUIDsAndQOS(NSArray<NSString *> *__strong, dispatch_qos_class_t, __strong dispatch_queue_t, __strong void (^)(NSArray*));
 BOOL IMSPIQueryMessagesWithGUIDsAndQOS(NSArray<NSString *> *__strong, dispatch_qos_class_t, __strong dispatch_queue_t, __strong void (^)(NSArray*));
 DDScannerResult* IMCopyDDScannerResultFromAttributedStringData(NSData*) CF_RETURNS_RETAINED;
-void IMChatCalculateServiceForSendingNewComposeMaybeForce(NSString* recipient, NSString* lastAddressedHandleID, NSString* simIdentifier, NSArray* addresses, BOOL appearsToBeEmail, BOOL hasDeliveredMessage, BOOL chatIsDowngraded, id historyState, id previousService);
 BOOL IMCoreSimulatedEnvironmentEnabled();
 
 extern NSString* ABIMHandlesChangedNotification;
@@ -345,5 +344,20 @@ extern NSString* kFZDaemonLaunchedDistNotification;
 
 API_AVAILABLE(macos(10.16), ios(14.0), watchos(7.0))
 NSString* IMCreateThreadIdentifierForMessagePartChatItem(IMMessagePartChatItem* chatItem);
+
+enum {
+    IMChatServiceForSendingAvailabilityErrorNone = 0,
+    IMChatServiceForSendingAvailabilityErrorTooManyRecipients = 1,
+    IMChatServiceForSendingAvailabilityErrorIMessageRequired = 2,
+    IMChatServiceForSendingAvailabilityErrorMMSRequired = 3,
+    IMChatServiceForSendingAvailabilityErrorNoAvailableServices = 4,
+};
+typedef int8_t IMChatServiceForSendingAvailabilityError;
+
+void IMChatCalculateServiceForSendingNewComposeMaybeForce
+               (NSArray<NSString*> *canonicalIDSAddresses,NSString *senderLastAddressedHandle,
+               NSString *senderLastAddressedSIMID,BOOL forceMMS,BOOL hasEmailRecipients,
+               BOOL hasCachedQuery,BOOL isDowngraded,BOOL hasHistory,IMService* previousService,
+                void(^completion)(BOOL allAddressesiMessageCapable, NSDictionary *perRecipientAvailability, BOOL checkedServer, IMChatServiceForSendingAvailabilityError error));
 
 #endif

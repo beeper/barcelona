@@ -93,7 +93,3 @@ FOUNDATION_EXPORT NSNotificationName const NSTaskDidTerminateNotification;
 NS_ASSUME_NONNULL_END
 
 #endif
-
-@interface ObjC: NSObject
-+ (id)catchException:(id(^)())tryBlock error:(__autoreleasing NSError **)error;
-@end

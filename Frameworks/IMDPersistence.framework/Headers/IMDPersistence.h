@@ -58,6 +58,7 @@ void IMDEnsureSharedRecordStoreInitialized();
 //NSArray *_IMDSqlOperationGetRowsWithBindingBlock(IMDSqlOperation *, CFStringRef, dispatch_block_t);
 //NSArray *_IMDSqlOperationGetRowsForQueryWithBindingBlock(CFStringRef, NSError **, void (^)(id));
 void IMDSetIsRunningInDatabaseServerProcess(char);
+BOOL IMDIsRunningInDatabaseServerProcess(void);
 
 typedef struct _IMDChatRecordStruct *IMDChatRecordRef;
 typedef struct _IMDMessageRecordStruct *IMDMessageRecordRef;
@@ -82,3 +83,7 @@ int64_t IMDMessageRecordGetIdentifier(IMDMessageRecordRef message);
 //CFArrayRef IMDMessageRecordCopyMessagesForAssociatedGUID(NSString *) CF_RETURNS_RETAINED;
 //CFArrayRef IMDMessageRecordCopyMessagesWithChatIdentifiersOnServicesUpToGUIDOrLimit(CFArrayRef, CFArrayRef, CFStringRef, Boolean, Boolean, int64_t) CF_RETURNS_RETAINED;
 //CFArrayRef IMDMessageRecordCopyMessagesWithChatIdentifiersOnServicesUpToGUIDOrLimitWithOptionalThreadIdentifier(CFArrayRef, CFArrayRef, CFStringRef, CFStringRef, Boolean, Boolean, int64_t) CF_RETURNS_RETAINED;
+
+typedef struct _IMDChatRecordStruct *IMDChatRecordRef;
+IMDChatRecordRef IMDChatRecordCopyChatForMessageID(int64_t messageID) CF_RETURNS_RETAINED;
+CFStringRef IMDChatRecordCopyGUID(CFAllocatorRef allocator, IMDChatRecordRef chat) CF_RETURNS_RETAINED;

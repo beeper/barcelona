@@ -66,7 +66,6 @@ private func IMHandleHooks() throws -> Interpose {
                 return (PNCopyBestGuessCountryCodeForNumber(id as CFString).takeRetainedValue() as String).uppercased()
             }
         }
-        
         let contactLogging = Logger(category: "ContactFuzzing")
         
         try $0.prepareHook(#selector(getter: IMHandle.cnContact)) { (store: TypedHook<@convention(c) (AnyObject, Selector) -> CNContact, @convention(block) (IMHandle) -> CNContact>) in
@@ -173,13 +172,13 @@ private func IMIDSHooks() throws -> Interpose {
     }
 }
 
-class HookManager {
-    static let shared = HookManager()
+public class HookManager {
+    public static let shared = HookManager()
     
     let hooks = [IMChatHooks, IMIDSHooks, CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks, IMHandleRegistrarHooks]
     private var appliedHooks: [Interpose]?
     
-    func apply() throws {
+    public func apply() throws {
         try revert()
         
         #if DEBUG
@@ -203,7 +202,7 @@ class HookManager {
         #endif
     }
     
-    func revert() throws {
+    public func revert() throws {
         guard let appliedHooks = appliedHooks else {
             return
         }

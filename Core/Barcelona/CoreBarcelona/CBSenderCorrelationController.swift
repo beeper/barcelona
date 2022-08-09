@@ -346,11 +346,11 @@ public class CBSenderCorrelationController {
         return result
     }
     
-    private func loadCachedCorrelations(senderIDs: [String]) -> [String: String?] {
+    private func loadCachedCorrelations(senderIDs: [String], hitDatabase: Bool = true) -> [String: String?] {
         var loadedCorrelations = Dictionary(uniqueKeysWithValues: senderIDs.map { ($0, senderIDToCorrelationID[$0]) }).compactMapValues { $0 }
         let missingCorrelations = senderIDs.filter { loadedCorrelations[$0] == nil }
         // no missing correlations, fast return
-        if missingCorrelations.isEmpty {
+        if missingCorrelations.isEmpty || !hitDatabase {
             return loadedCorrelations
         }
         let semaphore = DispatchSemaphore(value: 1)
@@ -419,13 +419,13 @@ public class CBSenderCorrelationController {
     }
     
     /// Determines the correlation ID for a set of senders assumed to be the same person
-    public func correlate(sameSenders senders: [String], offline: Bool = false) -> String? {
+    public func correlate(sameSenders senders: [String], offline: Bool = false, hitDatabase: Bool = true) -> String? {
         // no-op
         if senders.isEmpty {
             return nil
         }
         // get all persisted correlation identifiers
-        let cachedCorrelations = loadCachedCorrelations(senderIDs: senders)
+        let cachedCorrelations = loadCachedCorrelations(senderIDs: senders, hitDatabase: hitDatabase)
         if cachedCorrelations.count == senders.count {
             // all correlations are stored
             ~log.debug("Cache hit when querying \(senders.count, privacy: .public) senders, returning immediately")
@@ -497,7 +497,7 @@ public class CBSenderCorrelationController {
     
     /// Queries the correlation identifier for a given sender ID, if it is known
     public func correlate(senderID: String) -> String? {
-        correlate(sameSenders: [senderID])
+        correlate(sameSenders: [senderID], offline: true)
     }
     
     /// Queries all URIs for the given correlation identifier

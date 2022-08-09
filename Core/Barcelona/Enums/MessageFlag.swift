@@ -28,7 +28,7 @@ public struct IMMessageFlags: OptionSet, ExpressibleByIntegerLiteral, Codable, H
     public static let delayed:         IMMessageFlags = 0x20
     public static let autoReply:       IMMessageFlags = 0x40
     public static let alert:           IMMessageFlags = 0x200
-    public static let addressedToMe:   IMMessageFlags = 0x800
+    public static let prepared:        IMMessageFlags = 0x800
     public static let delivered:       IMMessageFlags = 0x1000
     public static let read:            IMMessageFlags = 0x2000
     public static let systemMessage:   IMMessageFlags = 0x4000
@@ -44,6 +44,9 @@ public struct IMMessageFlags: OptionSet, ExpressibleByIntegerLiteral, Codable, H
     public static let locating:        IMMessageFlags = 0x800000
     public static let expirable:       IMMessageFlags = 0x1000000
     public static let fromExtSource:   IMMessageFlags = 0x2000000
+    
+    public static let corrupt:         IMMessageFlags = 0x4000000
+    public static let spam:            IMMessageFlags = 0x8000000
     
     public static let legacyBits:      IMMessageFlags = 0xee000000
 }

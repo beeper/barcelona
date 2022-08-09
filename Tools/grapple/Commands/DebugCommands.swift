@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Barcelona
+@_spi(EncodingBoxInternals) import Barcelona
 import SwiftCLI
 import OSLog
 import IMDPersistence
@@ -60,6 +60,25 @@ private extension Encodable {
 class DebugCommands: CommandGroup {
     let name = "debug"
     let shortDescription = "commands useful when debugging barcelona"
+    
+    class ChatRegistry: Command {
+        let name = "registry"
+        
+        func execute() throws {
+            LoggingDrivers = [OSLogDriver.shared]
+            try HookManager.shared.apply()
+            DispatchQueue.main.async {
+                _ = CBChatRegistry.shared
+                _ = CBFileTransferCenter.shared
+                let controller = IMDaemonController.sharedInstance()
+                controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
+                controller.blockUntilConnected()
+                controller.fetchNicknames()
+                IMContactStore.sharedInstance().checkForContactStoreChanges()
+            }
+            RunLoop.main.run()
+        }
+    }
     
     class DebugEventsCommand: BarcelonaCommand {
         let name = "events"
@@ -197,5 +216,5 @@ class DebugCommands: CommandGroup {
         }
     }
     
-    var children: [Routable] = [DebugEventsCommand(), IMDTest(), NicknameTest(), AlwaysRead(), Pong()]
+    var children: [Routable] = [DebugEventsCommand(), IMDTest(), NicknameTest(), AlwaysRead(), Pong(), ChatRegistry()]
 }

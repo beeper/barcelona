@@ -8,6 +8,9 @@
 import Foundation
 import IMCore
 import Swog
+import Combine
+import BarcelonaDB
+import IMDPersistence
 
 extension Date {
     static func now() -> Date { Date() }
@@ -15,6 +18,15 @@ extension Date {
 
 internal extension IMChat {
     static var regressionTesting_disableServiceRefresh = false
+}
+
+extension Encodable {
+    var prettyJSON: String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        
+        return try! String(decoding: encoder.encode(encode(to:)), as: UTF8.self)
+    }
 }
 
 extension IMChat {
@@ -49,7 +61,7 @@ extension IMChat {
                 case .remoteUserDoesNotExist, .remoteUserInvalid, .remoteUserRejected, .remoteUserIncompatible:
                     break
                 default:
-                    return
+                     return
                 }
             }
         }
@@ -68,7 +80,16 @@ public extension Chat {
         imChat.markAllMessagesAsRead()
     }
     
+    private var cbChat: CBChat? {
+        CBChatRegistry.shared.chats[.guid(imChat.guid)]
+    }
+    
     func sendReturningRaw(message createMessage: CreateMessage, from: String? = nil) throws -> IMMessage {
+        if CBFeatureFlags.useSendingV2, let cbChat = cbChat {
+            CLInfo("MessageSending", "Using CBChat for sending per feature flags")
+            return try cbChat.send(message: createMessage)
+        }
+        
         imChat.refreshServiceForSendingIfNeeded()
         
         let message = try createMessage.imMessage(inChat: self.id)
@@ -88,6 +109,13 @@ public extension Chat {
     }
     
     func send(message options: CreatePluginMessage) throws -> Message {
+        if CBFeatureFlags.useSendingV2, let cbChat = cbChat {
+            CLInfo("MessageSending", "Using CBChat for sending per feature flags")
+            let message = try options.imMessage(inChat: id)
+            cbChat.send(message: message)
+            return Message(ingesting: message, context: .init(chatID: id))!
+        }
+        
         imChat.refreshServiceForSendingIfNeeded()
         
         let message = try options.imMessage(inChat: self.id)

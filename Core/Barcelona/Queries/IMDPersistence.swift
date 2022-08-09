@@ -163,7 +163,7 @@ private func BLIngestIMDMessageRecordRefs(_ refs: NSArray, in chat: String? = ni
     return BLIngestObjects(items, inChat: chat)
 }
 
-private func ERResolveGUIDsForChats(withChatIdentifiers chatIdentifiers: [String], afterDate: Date? = nil, beforeDate: Date? = nil, afterGUID: String? = nil, beforeGUID: String? = nil, limit: Int? = nil) -> Promise<[(messageID: String, chatID: String)]> {
+internal func ERResolveGUIDsForChats(withChatIdentifiers chatIdentifiers: [String], afterDate: Date? = nil, beforeDate: Date? = nil, afterGUID: String? = nil, beforeGUID: String? = nil, limit: Int? = nil) -> Promise<[(messageID: String, chatID: String)]> {
     #if DEBUG
     let operation = IMDLog.operation(named: "ERResolveGUIDsForChat")
     operation.begin("Resolving GUIDs for chat %@ before time %f before guid %@ limit %ld", chatIdentifiers, beforeDate?.timeIntervalSince1970 ?? 0, beforeGUID ?? "(nil)", limit ?? -1)
@@ -211,7 +211,7 @@ public func BLLoadIMMessage(withGUID guid: String) -> IMMessage? {
 /// - Parameters:
 ///   - guids: GUIDs of messages to load
 ///   - chat: ID of the chat to load. if omitted, it will be resolved at ingestion.
-/// - Returns: NIO futuer of ChatItems
+/// - Returns: NIO future of ChatItems
 public func BLLoadChatItems(withGUIDs guids: [String], chatID: String? = nil) -> Promise<[ChatItem]> {
     if guids.count == 0 {
         return .success([])

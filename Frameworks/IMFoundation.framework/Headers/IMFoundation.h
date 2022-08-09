@@ -259,5 +259,6 @@ typedef NS_ENUM(uint32_t, FZErrorType) {
     kFZErrorTextRenderingPreflightFailed,
 };
 
+NSString* IMRemoteObjectsRunLoopMode;
 
 #endif
