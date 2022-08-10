@@ -103,7 +103,7 @@ public extension CBChatIdentifier {
     var IMChat: IMChat? {
         switch scheme {
         case .chatIdentifier: return IMChatRegistry.shared.existingChat(withChatIdentifier: value)
-        case .guid: return IMChatRegistry.shared.chatGUIDToChatMap()[value]
+        case .guid: return (IMChatRegistry.shared.value(forKey: "_chatGUIDToChatMap") as! NSMutableDictionary)[value] as? IMChat
         case .groupID: return IMChatRegistry.shared.existingChat(withGroupID: value)
         case .handleID: return IMChatRegistry.shared.existingChat(withChatIdentifier: value)
         default: return nil
