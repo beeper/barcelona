@@ -135,6 +135,7 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
     controller.listener.addHandler(CBDaemonListener.shared)
     
     _ = CBFileTransferCenter.shared
+    _ = CBChatRegistry.shared
     
     RunLoop.main.schedule {
         log("Connecting to daemon...")
