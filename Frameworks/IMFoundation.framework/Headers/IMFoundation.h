@@ -184,7 +184,8 @@ const FZListenerCapabilities
                 kFZListenerCapOnDemandChatRegistry,
                 kFZListenerCapTruncatedChatRegistry,
                 kFZListenerCapOneTimeCode,
-                kFZListenerCapSkipLastMessageLoad;
+                kFZListenerCapSkipLastMessageLoad,
+                kFZListenerCapOnDemandChatRegistry;
 
 NSString * JWUUIDPushObjectToString(NSData * data);
 

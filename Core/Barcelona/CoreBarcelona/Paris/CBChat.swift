@@ -157,23 +157,25 @@ import IMCore
 
 public extension CBChat {
     var IMChats: [IMChat] {
-        var identifiers: Set<String> = Set(), groupIDs: Set<String> = Set()
-        func addListener(_ groupID: String) -> String {
-            groupIDs.insert(groupID)
-            let queryID = UUID().uuidString
-            CBChatRegistry.shared.queryCallbacks[queryID, default: []].append {
-                groupIDs.remove(groupID)
+        var identifiers: Set<String> = Set(), chats: Set<IMChat> = Set()
+        func addListener(_ chatIdentifier: String) -> String {
+            guard identifiers.insert(chatIdentifier).inserted else {
+                return chatIdentifier
             }
-            return queryID
+            CBChatRegistry.shared.loadedChatsByChatIdentifierCallback[chatIdentifier, default: []].append { loadedChats in
+                for chat in loadedChats {
+                    chats.insert(chat)
+                }
+                identifiers.remove(chatIdentifier)
+            }
+            IMDaemonController.shared().loadChat(withChatIdentifier: chatIdentifier)
+            return chatIdentifier
         }
         for leaf in leaves.values {
             if let existing = IMChatRegistry.shared.existingChat(withGUID: leaf.guid), existing.guid == leaf.guid {
                 continue
             }
-            if !identifiers.insert(leaf.groupID).inserted {
-                continue
-            }
-            IMDaemonController.shared().synchronousReplyingRemoteDaemon().loadChats(withGroupID: leaf.groupID, queryID: addListener(leaf.groupID))
+            _ = addListener(leaf.chatIdentifier)
         }
         return leaves.values.compactMap(\.IMChat)
     }

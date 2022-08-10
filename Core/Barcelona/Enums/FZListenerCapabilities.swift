@@ -26,10 +26,11 @@ public enum FZListenerCapabilities: UInt32 {
     case MessageHistory = 8192
     case IDQueries = 16384
     case ChatCounts = 32768
+    case OnDemandRegistry = 2097152
     case unknown = 0x20000
     
     static var defaults: [FZListenerCapabilities] = [
-        .Status, .Notifications, .Chats, .Lega, .Transfers, .Accounts, .BuddyList, .ChatObserver, .SendMessages, .MessageHistory, .IDQueries, .ChatCounts
+        .Status, .Notifications, .Chats, .Lega, .Transfers, .Accounts, .BuddyList, .ChatObserver, .SendMessages, .MessageHistory, .IDQueries, .ChatCounts, .OnDemandRegistry
     ]
     
     public static var defaults_: UInt32 {

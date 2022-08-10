@@ -200,6 +200,7 @@
 - (id <IMRemoteDaemonProtocol>)synchronousReplyingRemoteDaemon;
 - (void)loadChatsWithIdentifier:(NSString*)arg1 queryID:(NSString*)arg2;
 - (void)loadChatsWithGroupID:(NSString*)arg1 queryID:(NSString*)arg2;
+- (void)loadAllChats;
 - (void)setListenerCapabilities:(unsigned int)arg1;
 - (void)account:(NSString *)arg1 avAction:(unsigned int)arg2 withArguments:(NSDictionary *)arg3 toAVChat:(NSString *)arg4 isVideo:(BOOL)arg5;
 - (void)conference:(NSString *)arg1 account:(NSString *)arg2 notifyInvitationCancelledFromPerson:(NSString *)arg3;

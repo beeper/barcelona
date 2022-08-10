@@ -161,7 +161,13 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
         
         _ = CBSenderCorrelationController.shared
         
-        log("Connected.")
+        log("Connected. Loading chats...")
+        
+        if #available(macOS 12, *) {
+            controller.loadAllChats()
+        } else {
+            controller.loadChats(withChatID: "all")
+        }
         
         ifDebugBuild {
             if CBFeatureFlags.scratchbox && !_scratchboxIsEmpty {
@@ -180,11 +186,11 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
         IMSimulatedDaemonController.beginSimulatingDaemon()
     }
     
-    NotificationCenter.default.once(notificationNamed: .IMChatRegistryDidLoad).resolve(on: DispatchQueue.main).then { _ in
+    CBChatRegistry.shared.onLoadedChats {
         CBDaemonListener.shared.startListening()
-        
         callbackC?(true)
         callbackSwift?(true)
+        log.info("All systems go!")
     }
     
     return true

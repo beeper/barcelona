@@ -57,12 +57,18 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         
     }
     
+    var loadedChatsByChatIdentifierCallback: [String: [([IMChat]) -> ()]] = [:]
+    
     public func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) {
         trace(chatIdentifier, nil, "chats loaded: \((chatDictionaries as NSArray).prettyJSON)")
-    }
-    
-    public func loadedChats(_ chats: [[AnyHashable : Any]]!) {
-        trace(nil, nil, "loaded chats \((chats as NSArray).prettyJSON)")
+        guard let callbacks = loadedChatsByChatIdentifierCallback.removeValue(forKey: chatIdentifier) else {
+            return
+        }
+        for callback in callbacks {
+            callback(chats.compactMap {
+                $0 as? [AnyHashable: Any]
+            }.compactMap(internalize(chat:)))
+        }
     }
     
     public func lastMessage(forAllChats chatIDToLastMessageDictionary: [AnyHashable : Any]!) {
@@ -198,25 +204,52 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     
     var queryCallbacks: [String: [() -> ()]] = [:]
     
+    private func internalize(chat: [AnyHashable: Any]) -> IMChat? {
+        let guid = chat["guid"] as? String
+        _ = handle(chat: chat)
+        if let existingChat = IMChatRegistry.shared.allChats.first(where: { $0.guid == guid }) {
+            return existingChat
+        }
+        guard let imChat = IMChat()._init(withDictionaryRepresentation: chat, items: nil, participantsHint: nil, accountHint: nil) else {
+            return nil
+        }
+        let hash = IMChatRegistry.shared._sortedParticipantIDHash(forParticipants: imChat.participants)
+        IMChatRegistry.shared._addChat(imChat, participantSet: hash)
+        (IMChatRegistry.shared.value(forKey: "_chatGUIDToChatMap") as! NSMutableDictionary)[guid] = imChat
+        return imChat
+    }
+    
     public func loadedChats(_ chats: [[AnyHashable : Any]]!, queryID: String!) {
         guard queryCallbacks.keys.contains(queryID) else {
             return
         }
-        for chat in chats {
-            let guid = chat["guid"] as? String
-            if let existingChat = IMChatRegistry.shared.allChats.first(where: { $0.guid == guid }) {
-                continue
-            }
-            guard let imChat = IMChat()._init(withDictionaryRepresentation: chat, items: nil, participantsHint: nil, accountHint: nil) else {
-                continue
-            }
-            let hash = IMChatRegistry.shared._sortedParticipantIDHash(forParticipants: imChat.participants)
-            IMChatRegistry.shared._addChat(imChat, participantSet: hash)
-            (IMChatRegistry.shared.value(forKey: "_chatGUIDToChatMap") as! NSMutableDictionary)[guid] = imChat
-            print(imChat)
+        chats.forEach {
+            _ = internalize(chat: $0)
         }
         for callback in queryCallbacks.removeValue(forKey: queryID) ?? [] {
             callback()
+        }
+    }
+    
+    var hasLoadedChats = false
+    var loadedChatsCallbacks: [() -> ()] = []
+    
+    public func loadedChats(_ chats: [[AnyHashable : Any]]!) {
+        for chat in chats {
+            _ = internalize(chat: chat)
+        }
+        let loadedChatsCallbacks = loadedChatsCallbacks
+        self.loadedChatsCallbacks = []
+        for callback in loadedChatsCallbacks {
+            callback()
+        }
+    }
+    
+    public func onLoadedChats(_ callback: @escaping () -> ()) {
+        if hasLoadedChats {
+            callback()
+        } else {
+            loadedChatsCallbacks.append(callback)
         }
     }
 }
