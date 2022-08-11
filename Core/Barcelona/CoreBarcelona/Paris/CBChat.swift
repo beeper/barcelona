@@ -36,11 +36,31 @@ public class CBChat {
     
     /// Immediately calculates all identifiers for this chat
     private func calculateIdentifiers(_ leaves: [String: CBChatLeaf]? = nil) -> Set<CBChatIdentifier> {
-        (leaves ?? self.leaves).values.reduce(into: Set<CBChatIdentifier>()) { identifiers, leaf in
+        var identifiers = (leaves ?? self.leaves).values.reduce(into: Set<CBChatIdentifier>()) { identifiers, leaf in
             leaf.forEachIdentifier {
                 identifiers.insert($0)
             }
         }
+        for identifier in identifiers {
+            switch identifier.scheme {
+            case .guid:
+                guard !identifier.value.isEmpty else {
+                    continue
+                }
+                var components = identifier.value.split(separator: ";").map(String.init(_:))
+                switch components[0] {
+                case "iMessage":
+                    components[0] = "SMS"
+                default:
+                    components[0] = "iMessage"
+                }
+                identifiers.insert(.guid(components.joined(separator: ";")))
+                continue
+            default:
+                continue
+            }
+        }
+        return identifiers
     }
     
     /// All chat identifiers that should match against this conversation
