@@ -455,6 +455,7 @@ public extension CBMessage {
                 log.warn("Failed to find valid account ID for re-sending message \(id, privacy: .public), this is not good...")
             }
             message.service = serviceName
+            IMDaemonController.sharedInstance().updateMessage(message)
             log.debug("Changed service for message \(id, privacy: .public) to \(serviceName)")
         }
         guard serviceChat.account.serviceName == service.IMServiceStyle.service?.name else {
