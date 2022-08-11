@@ -737,10 +737,8 @@ private extension CBDaemonListener {
                 return
             }
             
-            if item.errorCode != .noError {
-                if recover(failedMessage: item, chatIdentifier: chatIdentifier) {
-                    return
-                }
+            if item.errorCode == .remoteUserDoesNotExist {
+                return
             }
             
             log.debug("sending message \(item.guid) down the pipeline")
