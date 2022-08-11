@@ -12,6 +12,8 @@ import Combine
 import BarcelonaDB
 import IMDPersistence
 
+private let IMCopyThreadNameForChat: (@convention(c) (String, String, IMChatStyle) -> Unmanaged<NSString>)? = CBWeakLink(against: .privateFramework(name: "IMFoundation"), .symbol("IMCopyThreadNameForChat"))
+
 public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     public var chats: [CBChatIdentifier: CBChat] = [:]
     public var allChats: [ObjectIdentifier: CBChat] = [:]
@@ -64,10 +66,9 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         guard let callbacks = loadedChatsByChatIdentifierCallback.removeValue(forKey: chatIdentifier) else {
             return
         }
+        let parsed = internalize(chats: chatDictionaries.compactMap { $0 as? [AnyHashable: Any] })
         for callback in callbacks {
-            callback(chats.compactMap {
-                $0 as? [AnyHashable: Any]
-            }.compactMap(internalize(chat:)))
+            callback(parsed)
         }
     }
     
@@ -204,41 +205,87 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     
     var queryCallbacks: [String: [() -> ()]] = [:]
     
-    private func internalize(chat: [AnyHashable: Any]) -> IMChat? {
-        let guid = chat["guid"] as? String
-        _ = handle(chat: chat)
-        if let existingChat = IMChatRegistry.shared.allChats.first(where: { $0.guid == guid }) {
-            return existingChat
+    private func internalize(chats: [[AnyHashable: Any]]) -> [IMChat] {
+        func getMutableDictionary(_ key: String) -> NSMutableDictionary {
+            if let dict = IMChatRegistry.shared.value(forKey: key) as? NSMutableDictionary {
+                return dict
+            }
+            let dict = NSMutableDictionary()
+            IMChatRegistry.shared.setValue(dict, forKey: key)
+            return dict
         }
-        guard let imChat = IMChat()._init(withDictionaryRepresentation: chat, items: nil, participantsHint: nil, accountHint: nil) else {
-            return nil
+        func getMutableArray(_ key: String) -> NSMutableArray {
+            if let array = IMChatRegistry.shared.value(forKey: key) as? NSMutableArray {
+                return array
+            }
+            let array = NSMutableArray()
+            IMChatRegistry.shared.setValue(array, forKey: key)
+            return array
         }
-        let hash = IMChatRegistry.shared._sortedParticipantIDHash(forParticipants: imChat.participants)
-        IMChatRegistry.shared._addChat(imChat, participantSet: hash)
-        (IMChatRegistry.shared.value(forKey: "_chatGUIDToChatMap") as! NSMutableDictionary)[guid] = imChat
-        return imChat
+        // 0x20 <= Big Sur, 0x78 Monterey
+        lazy var chatGUIDToChatMap: NSMutableDictionary = getMutableDictionary("_chatGUIDToChatMap")
+        // 0xb0 <= Big Sur, 0xb8 Monterey
+        lazy var groupIDToChatMap: NSMutableDictionary = getMutableDictionary("_groupIDToChatMap")
+        // 0x10 <= Big Sur, 0x80 Monterey
+        lazy var chatGUIDToCurrentThreadMap: NSMutableDictionary = getMutableDictionary("_chatGUIDToCurrentThreadMap")
+        // 0x30 <= Big Sur, 0x90 Monterey
+        lazy var threadNameToChatMap: NSMutableDictionary = getMutableDictionary("_threadNameToChatMap")
+        lazy var allChatsInThreadNameMap: NSMutableArray = {
+            if #available(macOS 12, *) {
+                // 0xa8
+                return getMutableArray("_cachedChatsInThreadNameMap")
+            } else {
+                // 0x40
+                return getMutableArray("_allChatsInThreadNameMap")
+            }
+        }()
+        return chats.compactMap { chat in
+            let guid = chat["guid"] as? String
+            _ = handle(chat: chat)
+            if let guid = guid, let existingChat = chatGUIDToChatMap[guid] as? IMChat, existingChat.guid == guid {
+                return existingChat
+            }
+            guard let imChat = IMChat()._init(withDictionaryRepresentation: chat, items: nil, participantsHint: nil, accountHint: nil) else {
+                return nil
+            }
+            if let groupID = chat["groupID"] as? String {
+                groupIDToChatMap[groupID] = imChat
+            }
+            if let guid = guid {
+                chatGUIDToChatMap[guid] = imChat
+                if let IMCopyThreadNameForChat = IMCopyThreadNameForChat, let chatIdentifier = chat["chatIdentifier"] as? String, let accountID = imChat.account?.uniqueID {
+                    let threadName = IMCopyThreadNameForChat(chatIdentifier, accountID, imChat.chatStyle)
+                    if chatGUIDToCurrentThreadMap[guid] == nil {
+                        chatGUIDToCurrentThreadMap[guid] = threadName
+                    }
+                    if threadNameToChatMap[threadName] == nil {
+                        threadNameToChatMap[threadName] = imChat
+                    }
+                }
+            }
+            if !allChatsInThreadNameMap.containsObjectIdentical(to: imChat) {
+                allChatsInThreadNameMap.add(imChat)
+            }
+            return imChat
+        }
     }
     
     public func loadedChats(_ chats: [[AnyHashable : Any]]!, queryID: String!) {
         guard queryCallbacks.keys.contains(queryID) else {
             return
         }
-        chats.forEach {
-            _ = internalize(chat: $0)
-        }
+        _ = internalize(chats: chats)
         for callback in queryCallbacks.removeValue(forKey: queryID) ?? [] {
             callback()
         }
     }
     
     var hasLoadedChats = false
-    var loadedChatsCallbacks: [() -> ()] = []
+    @Atomic var loadedChatsCallbacks: [() -> ()] = []
     
     public func loadedChats(_ chats: [[AnyHashable : Any]]!) {
-        for chat in chats {
-            _ = internalize(chat: chat)
-        }
-        let loadedChatsCallbacks = loadedChatsCallbacks
+        _ = internalize(chats: chats)
+        let loadedChatsCallbacks = self.loadedChatsCallbacks
         self.loadedChatsCallbacks = []
         for callback in loadedChatsCallbacks {
             callback()
