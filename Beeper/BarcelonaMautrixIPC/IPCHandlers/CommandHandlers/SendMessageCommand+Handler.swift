@@ -87,7 +87,12 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
         } catch {
             // girl fuck
             CLFault("BLMautrix", "failed to send text message: %@", error as NSError)
-            payload.fail(code: "internal_error", message: (error as NSError).localizedFailureReason ?? error.localizedDescription)
+            switch error {
+            case let error as BarcelonaError:
+                payload.fail(code: error.code.description, message: error.message)
+            case let error as NSError:
+                payload.fail(code: error.code.description, message: error.localizedDescription)
+            }
         }
     }
 }
