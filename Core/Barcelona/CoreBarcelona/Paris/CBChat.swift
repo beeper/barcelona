@@ -221,7 +221,7 @@ public extension CBChat {
     }
     
     var serviceForSending: IMService {
-        chatForSending().account.service ?? .init()
+        chatForSending()?.account.service ?? .sms()
     }
     
     func bestRecipient(on service: IMServiceImpl = .iMessage()) -> IMHandle? {
@@ -249,67 +249,96 @@ public extension CBChat {
         let recipients = Array(recipientsByID.values)
         let recipientCount = recipients.count
         log.info("There are \(recipientCount, privacy: .public) recipients to choose from: \(recipients.map(\.id).joined(separator: ","))")
-        if let bestHandle = IMHandle.bestIMHandle(in: recipients) {
-            log.info("IMCore says that \(bestHandle.id, privacy: .public) is the best recipient")
-            return bestHandle
+        func compareHandles(_ handle1: IMHandle, _ handle2: IMHandle) -> Bool {
+            lazy var handle1PN = handle1.id.isPhoneNumber
+            lazy var handle2PN = handle2.id.isPhoneNumber
+            if handle1PN {
+                if handle2PN {
+                    return false
+                }
+                return true
+            } else {
+                return false
+            }
         }
-        log.info("IMCore returned no best handle, I'll pick myself")
-        return recipients.sorted(by: { handle1, handle2 in
-            false
-        }).first
+        if let bestRecipient = recipients.sorted(by: compareHandles(_:_:)).first {
+            log.info("Choosing \(bestRecipient.id) for sending messages")
+            return bestRecipient
+        }
+        return nil
     }
     
-    func chatForSending(on service: CBServiceName = .iMessage) -> IMChat {
+    func chatForSending(on service: CBServiceName = .iMessage) -> IMChat? {
         let IMChats = IMChats, service = service.service!
         if style == .instantMessage {
-            guard let recipient = bestRecipient(on: service) else {
-                let idTag = chatIdentifiers.joined(separator: ",")
-                log.fault("Failed to determine best recipient in chat \(idTag) for service \(service.name ?? "nil", privacy: .public)")
-                return IMChats.first(where: { $0.account.service == service && $0.hasHadSuccessfulQuery }) ?? IMChats.first!
+            func findBestRecipient() -> IMHandle? {
+                guard var recipient = bestRecipient(on: service) else {
+                    let idTag = chatIdentifiers.joined(separator: ",")
+                    if service == .iMessage(), IMAccountController.shared.activeSMSAccount?.canSendMessages == true, let recipient = bestRecipient(on: .sms()) {
+                        log.info("Can't reach \(idTag) over \(service.name ?? "nil"), but SMS is working. Retargeting!")
+                        return recipient
+                    }
+                    log.fault("Failed to determine best recipient in chat \(idTag) for service \(service.name ?? "nil", privacy: .public)")
+                    return nil
+                }
+                if recipient.service != service {
+                    recipient = IMAccountController.shared.bestAccount(forService: service).map {
+                        $0.imHandle(withID: recipient.id)
+                    } ?? recipient
+                }
+                return recipient
+            }
+            guard let recipient = findBestRecipient() else {
+                return nil
             }
             let recipientChats = IMChats.filter { $0.recipient == recipient }.sorted {
                 let account0 = $0.account
                 let account1 = $1.account
-                return account0?.service != account1?.service && account0?.service == service
+                return account0?.service != account1?.service && account0?.service == recipient.service
             }
             if let chat = recipientChats.first {
-                if chat.account.service != service {
-                    log.fault("Failed to reconcile chat for sending on service \(service.name ?? "nil", privacy: .public), I will retarget \(chat.debugDescription, privacy: .private) instead")
-                    chat._target(toService: service, newComposition: true)
-                    chat._setAccount(IMAccountController.shared.bestAccount(forService: service))
+                if chat.account.service != recipient.service {
+                    log.fault("Failed to reconcile chat for sending on service \(recipient.service.name ?? "nil", privacy: .public), I will retarget \(chat.debugDescription, privacy: .private) instead")
+                    chat._target(toService: recipient.service, newComposition: true)
+                    chat._setAccount(IMAccountController.shared.bestAccount(forService: recipient.service))
                 } else {
-                    log.debug("Chat \(chat.debugDescription) has expected service \(service.debugDescription)")
+                    log.debug("Chat \(chat.debugDescription) has expected service \(recipient.service.debugDescription)")
                 }
                 return chat
             } else {
-                log.fault("Failed to reconcile chat for sending on service \(service.name ?? "nil", privacy: .public)")
-                return IMChats[0]
+                log.fault("Failed to reconcile chat for sending on service \(recipient.service.name ?? "nil", privacy: .public)")
+                return nil
             }
         } else {
-            return IMChats.first(where: { $0.account.service == service }) ?? IMChats.first!
+            return IMChats.first(where: { $0.account.service == service })
         }
     }
 }
 
 // MARK: - Message sending
 public extension CBChat {
-    func send(message: IMMessage, chat: IMChat? = nil) {
-        let chat = chat ?? chatForSending()
+    func send(message: IMMessage, chat: IMChat? = nil) -> Bool {
+        guard let chat = chat ?? chatForSending() else {
+            return false
+        }
         chat.send(message)
+        return true
     }
     
-    func send(message: IMMessageItem, chat: IMChat? = nil) {
+    func send(message: IMMessageItem, chat: IMChat? = nil) -> Bool {
         send(message: IMMessage(fromIMMessageItem: message, sender: nil, subject: nil), chat: chat)
     }
     
     func send(message: CreateMessage) throws -> IMMessage {
-        let chat = chatForSending()
+        guard let chat = chatForSending() else {
+            throw BarcelonaError(code: 400, message: "You can't send messages to this chat. If this is an SMS, make sure forwarding is still enabled. If this is an iMessage, check your connection to Apple.")
+        }
         let message = try message.imMessage(inChat: chat.chatIdentifier)
-        send(message: message, chat: chat)
+        _ = send(message: message, chat: chat)
         return message
     }
     
-    func send(message: String) throws {
+    func send(message: String) throws -> IMMessage {
         try send(message: CreateMessage(parts: [.init(type: .text, details: message)]))
     }
 }
