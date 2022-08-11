@@ -414,7 +414,7 @@ public extension CBMessage {
             guard eligibleToResend, error == .remoteUserDoesNotExist else {
                 return self.service
             }
-            return .SMS
+            return .iMessage
         }()
         log.info("The best service for sending \(id, privacy: .public) is currently \(service.rawValue, privacy: .public)")
         return service
@@ -440,7 +440,7 @@ public extension CBMessage {
         let service = serviceForResending
         let serviceChat = chat.chatForSending(on: service)
         log.info("I will re-send \(id, privacy: .public) on \(serviceChat.guid, privacy: .public)")
-        if service == .SMS {
+        if service == .iMessage {
             var messageFlags = IMMessageFlags(rawValue: message.flags)
             messageFlags.insert(.downgraded)
             message._updateFlags(messageFlags.rawValue)
