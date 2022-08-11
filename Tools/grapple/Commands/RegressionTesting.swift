@@ -26,7 +26,7 @@ class RegressionTestingCommand: CommandGroup {
                 exit(0)
             }
             for id in ids {
-                guard let test = Barcelona.BLRegressionTesting.tests[id.uppercased()] else {
+                guard let test = Barcelona.BLRegressionTesting.tests[id] ?? Barcelona.BLRegressionTesting.tests[id.uppercased()] else {
                     print("skipping \(id): unknown test")
                     continue
                 }

@@ -48,7 +48,51 @@ import IMCore
 public extension BLRegressionTesting {
     static let tests: [String: () -> ()] = [
         "BRI4482": BRI4482,
-        "BRI4462": BRI4462
+        "BRI4462": BRI4462,
+        "ChatRegistryPerf": {
+            let semaphore = DispatchSemaphore(value: 0)
+            DispatchQueue.global().async {
+                let queue = OperationQueue()
+                queue.underlyingQueue = .global()
+                queue.maxConcurrentOperationCount = 10
+                for chat in CBChatRegistry.shared.allChats.values {
+                    queue.schedule {
+                        let group = DispatchGroup()
+                        group.enter()
+                        DispatchQueue.global().async {
+                            print(">>> Raw history query for \(chat.chatIdentifiers.joined(separator: ","))")
+                            chat.rawHistoryQuery(limit: 10).forEach { chat, message in
+                                guard chat.scheme == .chatIdentifier else {
+                                    preconditionFailure()
+                                }
+                                let message = Message(messageItem: message, chatID: chat.value)
+                                guard message.imChat != nil else {
+                                    preconditionFailure("Failed to resolve IMChat[\(chat.scheme):\(chat.value)] for message \(message.id)")
+                                }
+                            }.always { result in
+                                if case .failure(let error) = result {
+                                    preconditionFailure("Failed to do history query on on chat \(chat.IMChats.map(\.debugDescription))")
+                                } else {
+                                    print(">>> Raw history query for \(chat.chatIdentifiers.joined(separator: ",")) completed")
+                                }
+                                group.leave()
+                            }
+                        }
+                        group.wait()
+                    }
+                }
+                queue.waitUntilAllOperationsAreFinished()
+                semaphore.signal()
+            }
+            while true {
+                switch semaphore.wait(timeout: .now()) {
+                case DispatchTimeoutResult.timedOut:
+                    RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.250))
+                case DispatchTimeoutResult.success:
+                    return
+                }
+            }
+        }
     ]
     
     static func BRI4482() {
