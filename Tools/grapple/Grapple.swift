@@ -57,11 +57,30 @@ class ScratchboxCommand: Command {
     }
 }
 
+import IMFoundation
+
 @main
 class Grapple {
     static let shared = Grapple()
     
     static func main() throws {
+        if ProcessInfo.processInfo.environment["RAVIOLI"] == "RAVIOLI" || isDebugBuild {
+            CLInfo("Grapple", "Forcing internal install for enhanced logging")
+            func ERForceInternalInstall() -> Bool {
+                let isInternalInstall_imp = imp_implementationWithBlock({ _ in
+                    true
+                } as @convention(block) (NSObject) -> Bool)
+                if let meth = class_getInstanceMethod(IMLockdownManager.self, #selector(getter: IMLockdownManager.isInternalInstall)) {
+                    method_setImplementation(meth, isInternalInstall_imp)
+                    if let meth2 = class_getInstanceMethod(IMLockdownManager.self, #selector(getter: IMLockdownManager._isInternalInstall)) {
+                        method_setImplementation(meth2, isInternalInstall_imp)
+                        return true
+                    }
+                }
+                return false
+            }
+            _ = ERForceInternalInstall()
+        }
         
         CBFeatureFlags.overrideWithholdPartialFailures = false
         CBFeatureFlags.overrideWithholdDupes = false
