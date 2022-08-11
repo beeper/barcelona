@@ -7,6 +7,9 @@
 
 import Foundation
 import Swog
+#if canImport(BarcelonaDB)
+@_spi(synchronousQueries) import BarcelonaDB
+#endif
 
 fileprivate let log = Logger(category: "CBMessage", subsystem: "com.beeper.imc.paris")
 
@@ -257,8 +260,12 @@ extension CBMessage.Flags: Codable {
 
 // MARK: - IMCore interop
 
-#if canImport(IMSharedUtilities)
-import IMSharedUtilities
+#if canImport(IMCore)
+import IMCore
+#else
+import CParis
+import BarcelonaDB
+#endif
 
 extension CBMessage.Flags {
     /// Update flag state using an `IMMessageItem` object
@@ -307,10 +314,6 @@ extension CBMessage.Flags {
     }
     
 }
-#endif
-
-#if canImport(IMSharedUtilities)
-import IMSharedUtilities
 
 public extension CBMessage {
     /// Initializes the message using an `IMItem` instance
@@ -350,10 +353,6 @@ public extension CBMessage {
         return handle(time: item.time, timeDelivered: item.timeDelivered, timeRead: item.timeRead, sender: CBSender(item: item))
     }
 }
-#endif
-
-#if canImport(IMSharedUtilities)
-import IMSharedUtilities
 
 public extension CBMessage {
     func loadIMMessageItem() -> IMMessageItem? {
@@ -366,7 +365,6 @@ public extension CBMessage {
         }
     }
 }
-#endif
 
 extension CBMessage {
     func locateCBChat() -> CBChat? {
@@ -438,7 +436,14 @@ public extension CBMessage {
         }
         log.info("Located origin chat for \(id, privacy: .public)")
         let service = serviceForResending
-        let serviceChat = chat.chatForSending(on: service)
+        guard let serviceChat = chat.chatForSending(on: service) else {
+            log.info("Can't resend \(message.id, privacy: .public) because we have no way to reach them via \(service.rawValue)")
+            #if canImport(IMFoundation) && canImport(BarcelonaDB)
+            // only if we have CBDaemonListener
+            CBDaemonListener.shared.messagePipeline.send(Message(messageItem: message, chatID: DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id) ?? chat.chatIdentifiers[0]))
+            #endif
+            return
+        }
         log.info("I will re-send \(id, privacy: .public) on \(serviceChat.guid, privacy: .public)")
         if service == .SMS {
             var messageFlags = IMMessageFlags(rawValue: message.flags)
