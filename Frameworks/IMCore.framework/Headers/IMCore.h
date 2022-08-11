@@ -185,7 +185,7 @@
 NSString* IMNormalizedPhoneNumberForPhoneNumber(NSString*, NSString*, BOOL);
 BOOL IMSPIQueryIMMessageItemsWithGUIDsAndQOS(NSArray<NSString *> *__strong, dispatch_qos_class_t, __strong dispatch_queue_t, __strong void (^)(NSArray*));
 BOOL IMSPIQueryMessagesWithGUIDsAndQOS(NSArray<NSString *> *__strong, dispatch_qos_class_t, __strong dispatch_queue_t, __strong void (^)(NSArray*));
-DDScannerResult* IMCopyDDScannerResultFromAttributedStringData(NSData*) CF_RETURNS_RETAINED;
+DDScannerResult* IMCopyDDScannerResultFromAttributedStringData(NSData*);
 BOOL IMCoreSimulatedEnvironmentEnabled();
 
 extern NSString* ABIMHandlesChangedNotification;
