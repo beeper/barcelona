@@ -94,7 +94,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     
     private func trace(_ chatIdentifier: String!, _ personCentricID: String!, _ message: String, _ function: StaticString = #function) {
         defer { visited = Set() }
-        log.debug("chat \(chatIdentifier ?? "nil", privacy: .public) pcID \(personCentricID ?? "nil", privacy: .public) \(message, privacy: .public): \(function.description, privacy: .public)")
+        log.debug("chat \(chatIdentifier ?? "nil", privacy: .public) pcID \(personCentricID ?? "nil", privacy: .public) \(message, privacy: .private): \(function.description, privacy: .public)")
     }
     
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, groupID: String!, chatPersonCentricID personCentricID: String!, messagesReceived messages: [IMItem]!, messagesComingFromStorage fromStorage: Bool) {
