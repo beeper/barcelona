@@ -166,7 +166,7 @@ private func BLIngestIMDMessageRecordRefs(_ refs: NSArray, in chat: String? = ni
 internal func ERResolveGUIDsForChats(withChatIdentifiers chatIdentifiers: [String], afterDate: Date? = nil, beforeDate: Date? = nil, afterGUID: String? = nil, beforeGUID: String? = nil, limit: Int? = nil) -> Promise<[(messageID: String, chatID: String)]> {
     #if DEBUG
     let operation = IMDLog.operation(named: "ERResolveGUIDsForChat")
-    operation.begin("Resolving GUIDs for chat %@ before time %f before guid %@ limit %ld", chatIdentifiers, beforeDate?.timeIntervalSince1970 ?? 0, beforeGUID ?? "(nil)", limit ?? -1)
+    operation.begin("Resolving GUIDs for chat %@ before time %@ before guid %@ limit %@", chatIdentifiers, (beforeDate?.timeIntervalSince1970 ?? 0).description, beforeGUID ?? "(nil)", (limit ?? -1).description)
     #endif
     
     let result = DBReader.shared.newestMessageGUIDs(forChatIdentifiers: chatIdentifiers, beforeDate: beforeDate, afterDate: afterDate, beforeMessageGUID: beforeGUID, afterMessageGUID: afterGUID, limit: limit)
