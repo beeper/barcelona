@@ -64,7 +64,7 @@ public struct DBReader {
                     reject(error)
                 }
             }
-        }.resolve(on: DispatchQueue.main)
+        }.resolving(on: DispatchQueue.main)
     }
     
     internal func read<R: PromiseConvertible>(_ cb: @escaping (Database) throws -> R) -> Promise<R.Output> {
