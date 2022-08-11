@@ -44,7 +44,7 @@ private func withinIMDQueue<R>(_ exp: @autoclosure() -> R) -> R {
     #endif
 }
 
-private let IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve_imp: (@convention(c) (Any?, Any?, Bool, Any?) -> IMItem?)? = CBWeakLink(against: .privateFramework(name: "IMDPersistence"), options: [
+private let IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve_imp: (@convention(c) (Any?, Any?, Bool, Any?) -> Unmanaged<IMItem>?)? = CBWeakLink(against: .privateFramework(name: "IMDPersistence"), options: [
     .symbol("IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve").preMonterey,
     .symbol("IMDCreateIMItemFromIMDMessageRecordRefWithAccountLookup").monterey
 ])
@@ -73,7 +73,7 @@ private func BLCreateIMItemFromIMDMessageRecordRefs(_ refs: NSArray) -> [IMItem]
     #endif
     
     return refs.compactMap {
-        withinIMDQueue(IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve_imp($0, nil, false, nil))
+        withinIMDQueue(IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve_imp($0, nil, false, nil))?.takeRetainedValue()
     }
 }
 
