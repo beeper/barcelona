@@ -92,6 +92,14 @@ public extension BLRegressionTesting {
                     return
                 }
             }
+        },
+        "iChatForSending": {
+            let chat = CBChatRegistry.shared.chats[.guid(ProcessInfo.processInfo.environment["CHAT_GUID"]!)]!
+            print(chat.chatForSending(on: .iMessage).debugDescription)
+        },
+        "sChatForSending": {
+            let chat = CBChatRegistry.shared.chats[.guid(ProcessInfo.processInfo.environment["CHAT_GUID"]!)]!
+            print(chat.chatForSending(on: .SMS).debugDescription)
         }
     ]
     

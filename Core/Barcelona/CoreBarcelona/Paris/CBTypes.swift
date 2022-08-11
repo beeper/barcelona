@@ -47,6 +47,14 @@ public enum CBServiceName: String, Codable {
     case iMessage
     case SMS
     case None
+    
+    var service: IMServiceImpl? {
+        switch self {
+        case .iMessage: return .iMessage()
+        case .SMS: return .sms()
+        case .None: return nil
+        }
+    }
 }
 
 #if canImport(IMCore)

@@ -7,6 +7,9 @@
 
 import Foundation
 import IDS
+import Swog
+
+fileprivate let log = Logger(category: "IDS", subsystem: "com.beeper.imc.IDS")
 
 public enum IDStatusError: Error, CustomDebugStringConvertible {
     case malformedID
@@ -44,6 +47,16 @@ public enum IDSState: Int, Codable {
     }
 }
 
+extension IDSState: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .unknown: return "unknown"
+        case .available: return "available"
+        case .unavailable: return "unavailable"
+        }
+    }
+}
+
 public struct BLIDSResolutionOptions: OptionSet {
     public init(rawValue: Int) {
         self.rawValue = rawValue
@@ -68,16 +81,18 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
     switch service {
     case .SMS:
         guard Registry.sharedInstance.smsServiceEnabled else {
+            log.info("Bailing SMS IDS query, sms service is not enabled.")
             return callback(allUnavailable)
         }
         
         return callback(
             ids.map {
-                ($0, ($0.isPhoneNumber || $0.isEmail) ? IDSState.available : IDSState.unavailable)
+                ($0, ($0.isPhoneNumber /*|| $0.isEmail*/) ? IDSState.available : IDSState.unavailable)
             }.dictionary(keyedBy: \.0, valuedBy: \.1)
         )
     case .Phone:
         guard Registry.sharedInstance.callServiceEnabled else {
+            log.info("Bailing phone IDS query, calling is not enabled.")
             return callback(allUnavailable)
         }
         
@@ -98,6 +113,7 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
     let destinations = ids.compactMap(\.destination)
     
     guard destinations.count == ids.count else {
+        log.info("Bailing IDS query, some IDs were malformed.")
         throw IDStatusError.malformedID
     }
     
@@ -105,6 +121,8 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
         guard destinations.count > 0 else {
             return callback([:])
         }
+        
+        log.info("Requesting ID status from server for destinations \(destinations.joined(separator: ","), privacy: .auto) on service \(service.idsIdentifier ?? "nil", privacy: .public)")
         
         IDSIDQueryController.sharedInstance()!.forceRefreshIDStatus(forDestinations: destinations, service: service.idsIdentifier!, listenerID: IDSListenerID, queue: HandleQueue) {
             callback($0.mapValues { IDSState(rawValue: $0.intValue) })
@@ -115,6 +133,8 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
         guard destinations.count > 0 else {
             return callback([:], [])
         }
+        
+        log.info("Requesting ID status from cache for destinations \(destinations.joined(separator: ","), privacy: .auto) on service \(service.idsIdentifier ?? "nil", privacy: .public)")
         
         IDSIDQueryController.sharedInstance()!.currentIDStatus(forDestinations: destinations, service: service.idsIdentifier!, listenerID: IDSListenerID, queue: HandleQueue) { cachedResults in
             let cachedResults = cachedResults.mapValues { IDSState(rawValue: $0.intValue) }

@@ -224,11 +224,49 @@ public extension CBChat {
         chatForSending().account.service ?? .init()
     }
     
+    func bestRecipient(on service: IMServiceImpl = .iMessage()) -> IMHandle? {
+        guard style == .instantMessage else {
+            log.error("Ignoring request to query best recipient in a group chat")
+            return nil
+        }
+        var recipientsByID: [String: IMHandle] = [:]
+        lazy var statuses = (try? BLResolveIDStatusForIDs(IMChats.compactMap { $0.recipient?.id }.removingDuplicates(), onService: service.id)) ?? [:]
+        for chat in IMChats {
+            guard let recipient = chat.recipient else {
+                continue
+            }
+            guard !recipientsByID.keys.contains(recipient.id) else {
+                continue
+            }
+            let idsStatus = statuses[recipient.id]
+            guard statuses[recipient.id] == .available else {
+                log.info("Skipping \(recipient.id): IDS status is \(idsStatus?.description ?? "nil")")
+                continue
+            }
+            log.info("\(recipient.id) is available")
+            recipientsByID[recipient.id] = recipient
+        }
+        let recipients = Array(recipientsByID.values)
+        let recipientCount = recipients.count
+        log.info("There are \(recipientCount, privacy: .public) recipients to choose from: \(recipients.map(\.id).joined(separator: ","))")
+        if let bestHandle = IMHandle.bestIMHandle(in: recipients) {
+            log.info("IMCore says that \(bestHandle.id, privacy: .public) is the best recipient")
+            return bestHandle
+        }
+        log.info("IMCore returned no best handle, I'll pick myself")
+        return recipients.sorted(by: { handle1, handle2 in
+            false
+        }).first
+    }
+    
     func chatForSending(on service: CBServiceName = .iMessage) -> IMChat {
-        let IMChats = IMChats, service = participants.contains(where: \.isEmail) ? .iMessage() : service.IMServiceStyle.service
+        let IMChats = IMChats, service = service.service!
         if style == .instantMessage {
-            let recipients = IMChats.compactMap(\.recipient).filter { $0.service == service }
-            let recipient = IMHandle.bestIMHandle(in: recipients) ?? recipients.first
+            guard let recipient = bestRecipient(on: service) else {
+                let idTag = chatIdentifiers.joined(separator: ",")
+                log.fault("Failed to determine best recipient in chat \(idTag) for service \(service.name ?? "nil", privacy: .public)")
+                return IMChats.first(where: { $0.account.service == service && $0.hasHadSuccessfulQuery }) ?? IMChats.first!
+            }
             let recipientChats = IMChats.filter { $0.recipient == recipient }.sorted {
                 let account0 = $0.account
                 let account1 = $1.account
@@ -236,13 +274,15 @@ public extension CBChat {
             }
             if let chat = recipientChats.first {
                 if chat.account.service != service {
-                    log.fault("Failed to reconcile chat for sending on service \(service?.name ?? "nil", privacy: .public), I will retarget \(chat.debugDescription, privacy: .private) instead")
+                    log.fault("Failed to reconcile chat for sending on service \(service.name ?? "nil", privacy: .public), I will retarget \(chat.debugDescription, privacy: .private) instead")
                     chat._target(toService: service, newComposition: true)
                     chat._setAccount(IMAccountController.shared.bestAccount(forService: service))
+                } else {
+                    log.debug("Chat \(chat.debugDescription) has expected service \(service.debugDescription)")
                 }
                 return chat
             } else {
-                log.fault("Failed to reconcile chat for sending on service \(service?.name ?? "nil", privacy: .public)")
+                log.fault("Failed to reconcile chat for sending on service \(service.name ?? "nil", privacy: .public)")
                 return IMChats[0]
             }
         } else {
