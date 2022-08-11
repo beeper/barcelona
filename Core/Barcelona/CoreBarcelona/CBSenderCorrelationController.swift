@@ -468,7 +468,7 @@ public class CBSenderCorrelationController {
     }
     
     /// For an array of senders, prewarms their correlation data.
-    public func prewarm(senders: [String]) {
+    public func prewarm(senders: [String]) -> Promise<Void> {
         // only take senders that haven't been queried
         let senders = { senderIDToCorrelationID in
             senders.filter {
@@ -476,14 +476,15 @@ public class CBSenderCorrelationController {
             }
         }(&senderIDToCorrelationID)
         guard !senders.isEmpty else {
-            return
+            return .success(())
         }
-        let correlations = retrieveCorrelationsAndWait(senderIDs: senders);
-        { senderIDToCorrelationID in
-            for sender in senders {
-                senderIDToCorrelationID[sender] = .some(correlations[sender])
-            }
-        }(&senderIDToCorrelationID)
+        return retrieveCorrelations(senderIDs: senders).then { correlations in
+            { senderIDToCorrelationID in
+                for sender in senders {
+                    senderIDToCorrelationID[sender] = .some(correlations[sender])
+                }
+            }(&self.senderIDToCorrelationID)
+        }
     }
     
     public func reset() {

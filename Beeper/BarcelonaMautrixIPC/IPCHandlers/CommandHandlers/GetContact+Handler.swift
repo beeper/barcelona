@@ -14,6 +14,7 @@ import Barcelona
 import SwiftyContacts
 import Sentry
 import IDS
+import Pwomise
 
 extension IMBusinessNameManager {
     func addCallback(forURI uri: String, callback: @escaping (NSString) -> ()) {
@@ -29,10 +30,13 @@ internal var BMXContactListIsBuilding = false
 internal let BMXContactListTrace = Tracer(Logger(category: "BMXContactList"), BMXContactListDebug)
 
 /// Prewarms the correlation data for all URIs currently in the contact store
-public func BMXPrewarm() {
+public func BMXPrewarm() -> Promise<TimeInterval> {
     let uris = Array(BMXGenerateURIList()), uriCount = uris.count
-    for start in stride(from: uris.startIndex, to: uris.endIndex, by: 25) {
-        CBSenderCorrelationController.shared.prewarm(senders: Array(uris[start..<min(uriCount, start + 10)]))
+    let start = Date()
+    return Array(stride(from: uris.startIndex, to: uris.endIndex, by: 25)).serial { start in
+        CBSenderCorrelationController.shared.prewarm(senders: Array(uris[start..<min(uriCount, start + 25)])).resolving(on: DispatchQueue.global())
+    }.then { _ in
+        abs(start.timeIntervalSinceNow)
     }
 }
 

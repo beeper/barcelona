@@ -89,7 +89,9 @@ class BarcelonaMautrix {
             
             DispatchQueue.global().async {
                 log.info("Prewarming...")
-                trace("Prewarm", callback: BMXPrewarm)
+                BMXPrewarm().then {
+                    log.info("Prewarm took \($0, privacy: .public)s")
+                }
             }
             
             self.startHealthTicker()
