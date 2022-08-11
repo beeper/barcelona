@@ -431,24 +431,37 @@ public extension CBMessage {
         guard let message = loadIMMessageItem() else {
             return
         }
+        let id = id
+        log.info("Loaded message item for \(id, privacy: .public)")
         guard let chat = locateCBChat() else {
             return
         }
+        log.info("Located origin chat for \(id, privacy: .public)")
         let service = serviceForResending
         let serviceChat = chat.chatForSending(on: service)
-        let id = id
+        log.info("I will re-send \(id, privacy: .public) on \(serviceChat.guid, privacy: .public)")
         if service == .SMS {
             var messageFlags = IMMessageFlags(rawValue: message.flags)
             messageFlags.insert(.downgraded)
             message._updateFlags(messageFlags.rawValue)
-            message.account = service.IMServiceStyle.rawValue
-            message.accountID = service.IMServiceStyle.service?.accountIDs.first as? String
-            message.service = service.IMServiceStyle.rawValue
-            
+            log.debug("Added downgraded flag to message \(id, privacy: .public)")
+            let serviceName = service.IMServiceStyle.rawValue
+            message.account = serviceName
+            log.debug("Changed account name for message \(id, privacy: .public) to \(serviceName)")
+            if let newAccountID = service.IMServiceStyle.service?.accountIDs.first as? String {
+                message.accountID = newAccountID
+                log.debug("Changed account ID for message \(id, privacy: .public) to \(newAccountID, privacy: .public)")
+            } else {
+                log.warn("Failed to find valid account ID for re-sending message \(id, privacy: .public), this is not good...")
+            }
+            message.service = serviceName
+            log.debug("Changed service for message \(id, privacy: .public) to \(serviceName)")
         }
         guard serviceChat.account.serviceName == service.IMServiceStyle.service?.name else {
-            preconditionFailure("Misaligned IMChat/IMMessage/CBChat service")
+            log.fault("Misaligned IMChat/IMMessage/CBChat service when trying to re-send message \(id, privacy: .public)!!!!!!")
+            return
         }
+        log.info("Re-sending message \(id, privacy: .public) on chat \(serviceChat.guid, privacy: .public)")
         chat.send(message: message, chat: serviceChat)
     }
 }
