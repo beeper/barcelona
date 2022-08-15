@@ -138,13 +138,13 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
     _ = CBChatRegistry.shared
     
     RunLoop.main.schedule {
-        log("Connecting to daemon...")
-        
+        let operation = log.operation(named: "daemon-connect").begin("Connecting to daemon...")
         controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
         controller.blockUntilConnected()
+        operation.end("Connected to daemon.")
         
         #if DEBUG
-        log.debug("Connected to daemon. Fetching nicknames...")
+        log.debug("Fetching nicknames...")
         #endif
         
         controller.fetchNicknames()
@@ -161,7 +161,9 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
         
         _ = CBSenderCorrelationController.shared
         
-        log("Connected. Loading chats...")
+        #if DEBUG
+        log.debug("Loaded correlation controller. Loading all chats...")
+        #endif
         
         if #available(macOS 12, *) {
             controller.loadAllChats()
@@ -212,10 +214,22 @@ public class BarcelonaManager {
     }
     
     public func bootstrap() -> Promise<Bool> {
-        Promise { resolve in
+        let lifetime = BarcelonaManager.bootstrapTimeout
+        return Promise<Bool> { resolve in
             guard BLBootstrapController(nil, resolve) else {
                 return resolve(false)
             }
+        }.resolve(on: RunLoop.main).withLifetime(lifetime: lifetime).then { result in
+            switch result {
+            case .timedOut:
+                throw BarcelonaError(code: 504, message: "Barcelona took more than \(lifetime)s to bootstrap")
+            case .finished(let result):
+                return result
+            }
         }
     }
+}
+
+@_spi(grapple) public extension BarcelonaManager {
+    @_spi(grapple) static var bootstrapTimeout: TimeInterval = 120
 }

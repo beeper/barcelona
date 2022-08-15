@@ -68,8 +68,11 @@ class BarcelonaMautrix {
         reader.callback = BLHandlePayload(_:)
 
         log.info("Bootstrapping")
-
-        BarcelonaManager.shared.bootstrap().then { success in
+        
+        BarcelonaManager.shared.bootstrap().catch { error in
+            log.fault("fatal error while setting up barcelona: \(String(describing: error))")
+            exit(197)
+        }.then { success in
             guard success else {
                 log.error("Failed to bootstrap")
                 exit(-1)
