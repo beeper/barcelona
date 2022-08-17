@@ -84,18 +84,6 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
     }
     
     @_spi(unitTestInternals) public func unreadCountChanged(_ chat: String, _ count: Int) {
-        guard let chat = IMChat.resolve(withIdentifier: chat) else {
-            return
-        }
-        
-        if chat.isSingle, let recipientID = chat.recipient?.id, BLBlocklistController.shared.isSenderBlocked(recipientID) {
-            return
-        }
-        
-        if chat.unreadMessageCount == 0, let lastMessage = chat.lastMessage {
-            CLInfo("Mautrix", "Read count for chat \(chat.id, privacy: .public): \(chat.unreadMessageCount, privacy: .public)")
-            BLWritePayload(.init(id: nil, command: .read_receipt(.init(sender_guid: nil, is_from_me: true, chat_guid: chat.blChatGUID, read_up_to: lastMessage.id, correlation_id: chat.correlationIdentifier, sender_correlation_id: lastMessage.senderCorrelationID))))
-        }
     }
     
     public func run() {
