@@ -471,16 +471,20 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     
     public var isReadByMe: Bool {
         if fromMe {
+            CLDebug("ReadState", "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because it is from me")
             return true
         }
         if timeRead > 0 {
+            CLDebug("ReadState", "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because time read is non-zero")
             return true
         }
         if flags.contains(.read) {
+            CLDebug("ReadState", "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because flags contain read")
             return true
         }
-        if CBFeatureFlags.useSMSReadBuffer {
-            return CBDaemonListener.shared.smsReadBuffer.contains(id)
+        if CBFeatureFlags.useSMSReadBuffer && CBDaemonListener.shared.smsReadBuffer.contains(id) {
+            CLDebug("ReadState", "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because read buffer contains ID")
+            return true
         }
         return false
     }

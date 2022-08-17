@@ -887,6 +887,7 @@ internal extension CBDaemonListener {
         guard CBFeatureFlags.useSMSReadBuffer, !smsReadBuffer.contains(guid) else {
             return
         }
+        CLDebug("ReadState", "Adding \(guid) to sms read buffer")
         smsReadBuffer.append(guid)
         if smsReadBuffer.count > smsReadBufferCapacity {
             smsReadBuffer = smsReadBuffer.suffix(smsReadBufferCapacity)
