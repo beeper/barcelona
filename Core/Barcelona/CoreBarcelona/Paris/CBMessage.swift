@@ -393,15 +393,15 @@ public extension CBMessage {
         case .remoteUserDoesNotExist, .remoteUserIncompatible, .remoteUserInvalid, .remoteUserRejected:
             return true
         case .networkFailure, .networkBusyFailure, .networkDeniedFailure, .networkLookupFailure, .networkConnectionFailure, .noNetworkFailure:
-            return true
+            return false
         case .localAccountDisabled, .localAccountInvalid, .localAccountNeedsUpdate, .localAccountDoesNotExist:
             return false
         case .encryptionFailure, .otrEncryptionFailure, .decryptionFailure, .otrDecryptionFailure:
-            return true
+            return false
         case .sendFailed, .timeout, .serverInternalError, .internalFailure, .serviceCrashed:
-            return true
+            return false
         case .attachmentUploadFailure, .messageAttachmentUploadFailure:
-            return true
+            return false
         default:
             return false
         }
@@ -429,6 +429,12 @@ public extension CBMessage {
         guard let message = loadIMMessageItem() else {
             return
         }
+        if message.isBeingRetried {
+            log.info("Ignoring request to resend message \(message.guid), it is already being retried")
+            return
+        }
+        message.isBeingRetried = true
+        IMDaemonController.shared().updateMessage(message)
         let id = id
         log.info("Loaded message item for \(id, privacy: .public)")
         guard let chat = locateCBChat() else {
