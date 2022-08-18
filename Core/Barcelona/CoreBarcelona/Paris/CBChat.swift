@@ -66,6 +66,8 @@ public class CBChat {
     /// All chat identifiers that should match against this conversation
     @Published public internal(set) var identifiers: Set<CBChatIdentifier> = Set()
     
+    @Published public internal(set) var mergedID: String = ""
+    
     /// Immediately calculates and updates the latest value for the chat identifiers
     private func refreshIdentifiers(_ leaves: [String: CBChatLeaf]? = nil) {
         let currentIdentifiers = calculateIdentifiers(leaves)
@@ -73,6 +75,9 @@ public class CBChat {
             return
         }
         identifiers = currentIdentifiers
+        mergedID = identifiers.filter {
+            $0.scheme == .chatIdentifier
+        }.map(\.value).sorted(by: >).joined(separator: ",")
     }
     
     /// Handle a chat update in dictionary representation
@@ -230,25 +235,56 @@ public extension CBChat {
             return nil
         }
         var recipientsByID: [String: IMHandle] = [:]
-        lazy var statuses = (try? BLResolveIDStatusForIDs(IMChats.compactMap { $0.recipient?.id }.removingDuplicates(), onService: service.id)) ?? [:]
+        let IMChats = IMChats
+        lazy var deduplicatedRecipientIDs: [String] = {
+            var ids: Set<String> = Set()
+            for chat in IMChats {
+                guard let recipient = chat.recipient else {
+                    log.warn("\(chat.id) has no recipient!")
+                    continue
+                }
+                ids.insert(recipient.id)
+            }
+            log.info("Deduplicated recipient IDs for \(self.mergedID): \(ids)")
+            return Array(ids)
+        }()
+        lazy var statuses: [String: IDSState] = {
+            do {
+                let statuses = try BLResolveIDStatusForIDs(deduplicatedRecipientIDs, onService: service.id)
+                if statuses.count < deduplicatedRecipientIDs.count {
+                    // Some results were not returned, lets sanity check and log any missing IDs
+                    for recipientID in deduplicatedRecipientIDs {
+                        if !statuses.keys.contains(recipientID) {
+                            log.warn("ID status query for chat \(self.mergedID) did not return results for \(recipientID)")
+                        }
+                    }
+                }
+                return statuses
+            } catch {
+                log.fault("Error while resolving ID status for \(deduplicatedRecipientIDs.joined(separator: ",")) in \(self.mergedID): \(String(describing: error))")
+                return [:]
+            }
+        }()
         for chat in IMChats {
             guard let recipient = chat.recipient else {
+                log.debug("Skip chat \(chat.id): recipient is missing")
                 continue
             }
             guard !recipientsByID.keys.contains(recipient.id) else {
+                log.debug("Skip chat \(chat.id): already visited")
                 continue
             }
             let idsStatus = statuses[recipient.id]
             guard statuses[recipient.id] == .available else {
-                log.info("Skipping \(recipient.id): IDS status is \(idsStatus?.description ?? "nil")")
+                log.info("Skip recipient \(recipient.id): IDS status is \(idsStatus?.description ?? "nil")")
                 continue
             }
-            log.info("\(recipient.id) is available")
+            log.info("\(recipient.id) is available on \(service.name)")
             recipientsByID[recipient.id] = recipient
         }
         let recipients = Array(recipientsByID.values)
         let recipientCount = recipients.count
-        log.info("There are \(recipientCount, privacy: .public) recipients to choose from: \(recipients.map(\.id).joined(separator: ","))")
+        log.info("There are \(recipientCount, privacy: .public) recipients to choose from: \(recipientsByID.keys.joined(separator: ","))")
         func compareHandles(_ handle1: IMHandle, _ handle2: IMHandle) -> Bool {
             lazy var handle1PN = handle1.id.isPhoneNumber
             lazy var handle2PN = handle2.id.isPhoneNumber
@@ -268,17 +304,18 @@ public extension CBChat {
         return nil
     }
     
+    
+    
     func chatForSending(on service: CBServiceName = .iMessage) -> IMChat? {
         let IMChats = IMChats, service = service.service!
         if style == .instantMessage {
             func findBestRecipient() -> IMHandle? {
                 guard var recipient = bestRecipient(on: service) else {
-                    let idTag = chatIdentifiers.joined(separator: ",")
                     if service == .iMessage(), IMAccountController.shared.activeSMSAccount?.canSendMessages == true, let recipient = bestRecipient(on: .sms()) {
-                        log.info("Can't reach \(idTag) over \(service.name ?? "nil"), but SMS is working. Retargeting!")
+                        log.info("Can't reach \(self.mergedID) over \(service.name ?? "nil"), but SMS is working. Retargeting!")
                         return recipient
                     }
-                    log.fault("Failed to determine best recipient in chat \(idTag) for service \(service.name ?? "nil", privacy: .public)")
+                    log.fault("Failed to determine best recipient in chat \(self.mergedID) for service \(service.name ?? "nil", privacy: .public)")
                     return nil
                 }
                 if recipient.service != service {
@@ -291,14 +328,14 @@ public extension CBChat {
             guard let recipient = findBestRecipient() else {
                 return nil
             }
-            let recipientChats = IMChats.filter { $0.recipient == recipient }.sorted {
+            let recipientChats = IMChats.filter { $0.recipient.id == recipient.id }.sorted {
                 let account0 = $0.account
                 let account1 = $1.account
                 return account0?.service != account1?.service && account0?.service == recipient.service
             }
             if let chat = recipientChats.first {
                 if chat.account.service != recipient.service {
-                    log.fault("Failed to reconcile chat for sending on service \(recipient.service.name ?? "nil", privacy: .public), I will retarget \(chat.debugDescription, privacy: .private) instead")
+                    log.fault("Failed to reconcile chat for sending on service \(recipient.service.name ?? "nil", privacy: .public), I will retarget \(chat) instead")
                     chat._target(toService: recipient.service, newComposition: true)
                     chat._setAccount(IMAccountController.shared.bestAccount(forService: recipient.service))
                 } else {
@@ -306,8 +343,8 @@ public extension CBChat {
                 }
                 return chat
             } else {
-                log.fault("Failed to reconcile chat for sending on service \(recipient.service.name ?? "nil", privacy: .public)")
-                return nil
+                log.warn("Failed to reconcile chat for sending on service \(recipient.service.name ?? "nil", privacy: .public) for chat \(self.mergedID), deferring to IMChatRegistry!")
+                return IMChatRegistry.shared.chat(for: recipient)
             }
         } else {
             return IMChats.first(where: { $0.account.service == service })
