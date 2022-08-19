@@ -221,7 +221,7 @@ extension FZErrorType: CustomStringConvertible {
 }
 
 public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
-    @_spi(unitTestInternals) public init(id: String, chatID: String, fromMe: Bool, time: Double, sender: String? = nil, subject: String? = nil, timeDelivered: Double = 0, timePlayed: Double = 0, timeRead: Double = 0, messageSubject: String? = nil, isSOS: Bool, isTypingMessage: Bool, isCancelTypingMessage: Bool, isDelivered: Bool, isAudioMessage: Bool, description: String? = nil, flags: IMMessageFlags, failed: Bool, failureCode: FZErrorType, failureDescription: String, items: [AnyChatItem], service: IMServiceStyle, fileTransferIDs: [String], associatedMessageID: String? = nil, threadIdentifier: String? = nil, threadOriginator: String? = nil, threadOriginatorPart: Int? = nil) {
+    @_spi(unitTestInternals) public init(id: String, chatID: String, fromMe: Bool, time: Double, sender: String? = nil, subject: String? = nil, timeDelivered: Double = 0, timePlayed: Double = 0, timeRead: Double = 0, messageSubject: String? = nil, isSOS: Bool, isTypingMessage: Bool, isCancelTypingMessage: Bool, isDelivered: Bool, isAudioMessage: Bool, isRead: Bool = false, description: String? = nil, flags: IMMessageFlags, failed: Bool, failureCode: FZErrorType, failureDescription: String, items: [AnyChatItem], service: IMServiceStyle, fileTransferIDs: [String], associatedMessageID: String? = nil, threadIdentifier: String? = nil, threadOriginator: String? = nil, threadOriginatorPart: Int? = nil) {
         self.id = id
         self.chatID = chatID
         self.fromMe = fromMe
@@ -237,6 +237,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         self.isCancelTypingMessage = isCancelTypingMessage
         self.isDelivered = isDelivered
         self.isAudioMessage = isAudioMessage
+        self.isRead = isRead
         self.description = description
         self.flags = flags
         self.failed = failed
@@ -300,6 +301,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         isCancelTypingMessage = item.isCancelTypingMessage()
         isDelivered = item.isDelivered
         isAudioMessage = item.isAudioMessage
+        isRead = item.isRead
         flags = .init(rawValue: item.flags)
         self.items = items ?? IngestionContext(chatID: chatID).ingest(item.chatItems).map {
             $0.eraseToAnyChatItem()
@@ -329,6 +331,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         isCancelTypingMessage = false
         isDelivered = true
         isAudioMessage = false
+        isRead = false
         flags = 0x5
         items = [transcriptRepresentation.eraseToAnyChatItem()]
         service = item.resolveServiceStyle(inChat: chatID)
@@ -359,6 +362,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         isDelivered = backing?.isDelivered ?? message.isDelivered
         isAudioMessage = backing?.isAudioMessage ?? message.isAudioMessage
         items = chatItems.map { $0.eraseToAnyChatItem() }
+        isRead = backing?.isRead ?? message.isRead
         flags = IMMessageFlags(rawValue: backing?.flags ?? message.flags)
         associatedMessageID = backing?.associatedMessageGUID() ?? message.associatedMessageGUID
         fileTransferIDs = message.fileTransferGUIDs
@@ -417,6 +421,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     public var isCancelTypingMessage: Bool
     public var isDelivered: Bool
     public var isAudioMessage: Bool
+    public var isRead: Bool
     public var description: String?
     public var flags: IMMessageFlags
     public var failed: Bool
@@ -478,8 +483,8 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
             CLDebug("ReadState", "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because time read is non-zero")
             return true
         }
-        if flags.contains(.read) {
-            CLDebug("ReadState", "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because flags contain read")
+        if isRead {
+            CLDebug("ReadState", "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because isRead == true")
             return true
         }
         if CBFeatureFlags.useSMSReadBuffer && CBDaemonListener.shared.smsReadBuffer.contains(id) {
