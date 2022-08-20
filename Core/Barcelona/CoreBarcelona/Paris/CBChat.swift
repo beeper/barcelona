@@ -328,24 +328,7 @@ public extension CBChat {
             guard let recipient = findBestRecipient() else {
                 return nil
             }
-            let recipientChats = IMChats.filter { $0.recipient.id == recipient.id }.sorted {
-                let account0 = $0.account
-                let account1 = $1.account
-                return account0?.service != account1?.service && account0?.service == recipient.service
-            }
-            if let chat = recipientChats.first {
-                if chat.account.service != recipient.service {
-                    log.fault("Failed to reconcile chat for sending on service \(recipient.service.name ?? "nil", privacy: .public), I will retarget \(chat) instead")
-                    chat._target(toService: recipient.service, newComposition: true)
-                    chat._setAccount(IMAccountController.shared.bestAccount(forService: recipient.service))
-                } else {
-                    log.debug("Chat \(chat.debugDescription) has expected service \(recipient.service.debugDescription)")
-                }
-                return chat
-            } else {
-                log.warn("Failed to reconcile chat for sending on service \(recipient.service.name ?? "nil", privacy: .public) for chat \(self.mergedID), deferring to IMChatRegistry!")
-                return IMChatRegistry.shared.chat(for: recipient)
-            }
+            return (IMChatRegistry.shared.existingChat(forIMHandle: recipient, allowRetargeting: true) as? IMChat) ?? IMChatRegistry.shared.chat(for: recipient)
         } else {
             return IMChats.first(where: { $0.account.service == service })
         }
