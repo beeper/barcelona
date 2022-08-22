@@ -1,5 +1,0 @@
-framework module CoreUI [extern_c] {
-    umbrella header "CoreUI.h"
-    export *
-    module * { export * }
-}

@@ -1,5 +1,0 @@
-framework module CoreSDB [extern_c] {
-    umbrella header "CoreSDB.h"
-    export *
-    module * { export * }
-}

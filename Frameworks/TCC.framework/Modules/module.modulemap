@@ -1,5 +1,0 @@
-framework module TCC [extern_c] {
-    umbrella header "TCC.h"
-    export *
-    module * { export * }
-}
