@@ -61,4 +61,4 @@ packages:
     from: 7.15.0
   Paris:
     url: https://github.com/EricRabil/Paris
-    branch: main
+    revision: "3d5d45b1e54296b21722ec24cefd32ccbd41aa62"

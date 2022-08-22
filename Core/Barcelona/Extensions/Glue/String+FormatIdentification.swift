@@ -12,15 +12,15 @@ import IMFoundation
 /// Helper variables when processing string IDs into IDS destinations
 public extension String {
     var isEmail: Bool {
-        IMStringIsEmail(self as CFString)
+        IMStringIsEmail(self)
     }
     
     var isBusinessID: Bool {
-        IMStringIsBusinessID(self as CFString)
+        IMStringIsBusinessID(self)
     }
     
     var isPhoneNumber: Bool {
-        IMStringIsPhoneNumber(self as CFString)
+        IMStringIsPhoneNumber(self)
     }
     
     var style: HandleIDStyle {
