@@ -14,6 +14,7 @@ import SwiftCLI
 import Swog
 import FeatureFlags
 @_spi(featureFlags) @_spi(scratchbox) import Barcelona
+import IMCore
 
 protocol BarcelonaCommand: Command {}
 protocol EphemeralCommand: Command {}

@@ -16,6 +16,8 @@ import Swexy
 import Swog
 import CommunicationsFilter
 @_spi(synchronousQueries) import BarcelonaDB
+import IMSharedUtilities
+import IMFoundation
 
 private let log = Logger(category: "ERDaemonListener")
 

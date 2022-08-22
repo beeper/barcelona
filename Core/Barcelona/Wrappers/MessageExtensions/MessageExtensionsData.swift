@@ -8,6 +8,7 @@
 
 import Foundation
 import IMCore
+import IMSharedUtilities
 import AnyCodable
 import Gzip
 import Swime

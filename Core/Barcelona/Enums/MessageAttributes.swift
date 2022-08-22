@@ -8,6 +8,8 @@
 
 import Foundation
 import IMCore
+import IMFoundation
+import IMSharedUtilities
 
 /** Various attributes in an IMMessage attributed string. Some are no longer used by iMessage. */
 public struct MessageAttributes {

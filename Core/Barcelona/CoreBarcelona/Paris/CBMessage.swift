@@ -7,9 +7,10 @@
 
 import Foundation
 import Swog
-#if canImport(BarcelonaDB)
 @_spi(synchronousQueries) import BarcelonaDB
-#endif
+import IMCore
+import IMSharedUtilities
+import IMFoundation
 
 fileprivate let log = Logger(category: "CBMessage", subsystem: "com.beeper.imc.paris")
 
@@ -259,13 +260,6 @@ extension CBMessage.Flags: Codable {
 }
 
 // MARK: - IMCore interop
-
-#if canImport(IMCore)
-import IMCore
-#else
-import CParis
-import BarcelonaDB
-#endif
 
 extension CBMessage.Flags {
     /// Update flag state using an `IMMessageItem` object

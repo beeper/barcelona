@@ -8,6 +8,7 @@
 
 import Foundation
 import IMCore
+import IMSharedUtilities
 
 extension IMItem {
     var imAccount: IMAccount? {

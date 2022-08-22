@@ -7,10 +7,12 @@
 
 import Foundation
 import IMCore
+import IMFoundation
 import Swog
 import Combine
 import BarcelonaDB
 import IMDPersistence
+import IMSharedUtilities
 
 private let IMCopyThreadNameForChat: (@convention(c) (String, String, IMChatStyle) -> Unmanaged<NSString>)? = CBWeakLink(against: .privateFramework(name: "IMFoundation"), .symbol("IMCopyThreadNameForChat"))
 

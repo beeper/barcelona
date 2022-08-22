@@ -9,6 +9,7 @@
 import Foundation
 import IMCore
 import os.log
+import IMSharedUtilities
 
 extension Array where Element == IMMessage {
     func bulkRepresentation(in chat: String) -> Promise<[Message]> {

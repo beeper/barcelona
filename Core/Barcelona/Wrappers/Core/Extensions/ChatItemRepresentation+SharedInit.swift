@@ -8,6 +8,7 @@
 
 import Foundation
 import IMCore
+import IMSharedUtilities
 
 public protocol IMCoreDataResolvable: NSObjectProtocol {
     var id: String { get }

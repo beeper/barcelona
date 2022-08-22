@@ -11,6 +11,7 @@ import SwiftCLI
 import Barcelona
 import IMCore
 import BarcelonaMautrixIPC
+import IMSharedUtilities
 
 extension IMAssociatedMessageType: ConvertibleFromString {
     public init?(input: String) {

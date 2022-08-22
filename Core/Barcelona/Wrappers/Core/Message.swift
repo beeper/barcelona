@@ -11,6 +11,7 @@ import IMCore
 import IMSharedUtilities
 import BarcelonaDB
 import Swog
+import IMFoundation
 
 public extension Array where Element == String {
     func er_chatItems(in chat: String) -> Promise<[ChatItem]> {

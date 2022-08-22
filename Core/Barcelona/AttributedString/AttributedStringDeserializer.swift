@@ -9,6 +9,7 @@
 import Foundation
 import DataDetectorsCore
 import IMCore
+import IMFoundation
 
 public struct MessagePartParseResult {
     var string: NSAttributedString

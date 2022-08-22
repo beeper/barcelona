@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import IMFoundation
+import IMSharedUtilities
 
 /// An entity tracking a single logical conversation comprised of potentially several different chats
 public class CBChat {

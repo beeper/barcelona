@@ -10,6 +10,7 @@ import Foundation
 import IMCore
 import BarcelonaDB
 import IDS
+import IMSharedUtilities
 
 struct CBHandleFormatter {
     enum OutputFormat {

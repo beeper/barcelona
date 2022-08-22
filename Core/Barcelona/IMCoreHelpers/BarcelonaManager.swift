@@ -12,6 +12,7 @@ import BarcelonaFoundation
 import OSLog
 import IMCore
 import IMDPersistence
+import IMSharedUtilities
 
 private let log = Logger(category: "BarcelonaManager")
 

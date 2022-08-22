@@ -8,6 +8,7 @@
 
 import Foundation
 import IMCore
+import IMSharedUtilities
 
 extension Array: IMFileTransferContainer where Element: IMFileTransferContainer {
     @usableFromInline

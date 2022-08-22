@@ -7,6 +7,7 @@
 
 import Foundation
 import IMCore
+import IMFoundation
 
 /// The BLMessageExpert offers a simplified API for monitoring message state events
 public class BLMessageExpert {

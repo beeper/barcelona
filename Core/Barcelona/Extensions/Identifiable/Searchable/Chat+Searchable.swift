@@ -9,6 +9,7 @@
 import Foundation
 import BarcelonaDB
 import IMCore
+import IMFoundation
 
 #if DEBUG
 import os.log

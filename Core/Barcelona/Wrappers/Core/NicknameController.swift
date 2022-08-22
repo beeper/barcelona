@@ -7,6 +7,7 @@
 
 import Foundation
 import IMCore
+import IMSharedUtilities
 
 @available(macOS 10.15, iOS 13.0, *)
 fileprivate var nicknames: [String: IMNickname] {

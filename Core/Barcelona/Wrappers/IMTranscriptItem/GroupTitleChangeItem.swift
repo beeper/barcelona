@@ -8,6 +8,7 @@
 
 import Foundation
 import IMCore
+import IMSharedUtilities
 
 public protocol IMGroupTitleItemConforming: IMCoreDataResolvable {
     var title: String! { get }

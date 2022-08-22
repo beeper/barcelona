@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import IMCore
 import IMSharedUtilities
 import IMFoundation
 

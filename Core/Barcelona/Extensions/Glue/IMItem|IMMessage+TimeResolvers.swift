@@ -8,6 +8,7 @@
 
 import Foundation
 import IMCore
+import IMSharedUtilities
 
 public struct TimeReceipt {
     public var time: Double = 0

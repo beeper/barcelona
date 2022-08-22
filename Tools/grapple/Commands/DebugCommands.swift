@@ -14,6 +14,7 @@ import IMDPersistence
 import SwiftyTextTable
 import IMCore
 import BarcelonaMautrixIPC
+import IMSharedUtilities
 
 private extension String {
     init(debugDescribing value: Any) {

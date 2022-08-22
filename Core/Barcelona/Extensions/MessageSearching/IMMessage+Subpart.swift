@@ -8,6 +8,7 @@
 
 import Foundation
 import IMCore
+import IMSharedUtilities
 
 public extension IMMessageItem {
     var chatItems: [IMChatItem] {

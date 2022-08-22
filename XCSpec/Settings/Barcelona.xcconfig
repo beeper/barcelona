@@ -9,7 +9,6 @@
 // https://help.apple.com/xcode/#/dev745c5c974
 
 AD_HOC_CODE_SIGNING_ALLOWED=YES
-FRAMEWORK_SEARCH_PATHS=$(PROJECT_DIR)/Frameworks
 CODE_SIGN_IDENTITY=-
 OTHER_SWIFT_FLAGS=-Xcc -Wno-nullability-completeness -Xcc -Wno-incomplete-umbrella -Xcc -Wno-property-attribute-mismatch -Xcc -Wno-strict-prototypes -Xcc -Wno-arc-performSelector-leaks -Xcc -Wno-objc-protocol-method-implementation -Xcc -Wno-incomplete-umbrella -Xcc -Wno-visibility
 WARNING_CFLAGS=-Wno-nullability-completeness -Wno-incomplete-umbrella -Wno-objc-protocol-method-implementation -Wno-arc-performSelector-leaks -Wno-strict-prototypes -Wno-property-attribute-mismatch -Wno-visibility

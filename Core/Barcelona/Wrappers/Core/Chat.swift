@@ -10,6 +10,7 @@ import Foundation
 import IMSharedUtilities
 import BarcelonaDB
 import IMCore
+import IMFoundation
 
 private let log = Logger(category: "Chat")
 

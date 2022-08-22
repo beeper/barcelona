@@ -7,6 +7,7 @@
 
 import Foundation
 import IMCore
+import IMFoundation
 import Combine
 import Swog
 @_spi(synchronousQueries) import BarcelonaDB

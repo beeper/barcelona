@@ -11,6 +11,7 @@ import InterposeKit
 import IMCore
 import OSLog
 import Contacts
+import IMSharedUtilities
 
 private let log = Logger(category: "Hooks")
 

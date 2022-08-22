@@ -1,7 +1,6 @@
 name: barcelona
 
 fileGroups:
-  - Headers
   - project.yml
   - README.md
   - Makefile

@@ -10,6 +10,7 @@ import Foundation
 import IMDPersistence
 import BarcelonaDB
 import IMCore
+import IMSharedUtilities
 
 private let IMDLog = Logger(category: "IMDPersistenceQueries")
 

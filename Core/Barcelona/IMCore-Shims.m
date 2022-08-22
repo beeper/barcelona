@@ -8,8 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import <CommunicationsFilter.h>
-#import <IMCore/IMCore.h>
-#import <IMSharedUtilities/IMSharedUtilities.h>
+#import <IMCore.h>
+#import <IMSharedUtilities.h>
 #import "swizzleInstance.h"
 
 #ifndef TARGET_OS_IPHONE

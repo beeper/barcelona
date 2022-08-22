@@ -9,6 +9,7 @@
 import Foundation
 import IMSharedUtilities
 import IMCore
+import IMFoundation
 
 private extension String {
     func substring(trunactingFirst prefix: Int) -> Substring {

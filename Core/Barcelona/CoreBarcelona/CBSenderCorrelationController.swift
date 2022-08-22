@@ -11,6 +11,7 @@ import IDS
 import IMCore
 import Swog
 import Pwomise
+import IMSharedUtilities
 
 extension IMChat {
     var styleSeparator: String {

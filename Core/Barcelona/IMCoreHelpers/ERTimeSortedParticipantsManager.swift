@@ -10,6 +10,7 @@ import Foundation
 import IMCore
 import os.log
 import BarcelonaDB
+import IMSharedUtilities
 
 private let ManagerLog = OSLog(subsystem: "CoreBarcelona", category: "ParticipantsManager")
 

@@ -7,6 +7,8 @@
 
 import Foundation
 import IMCore
+import IMFoundation
+import IMSharedUtilities
 
 private extension IMChatRegistry {
     func __cb_allGUIDs(forChat chat: IMChat) -> [String] {

@@ -7,6 +7,8 @@
 
 import Foundation
 import IMCore
+import IMSharedUtilities
+import IMFoundation
 
 public protocol MessageDataSource {
     var id: String { get }

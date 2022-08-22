@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import IMFoundation
+import IMCore
 
 public enum CBChatStyle: UInt8 {
     case group = 43
@@ -20,9 +22,6 @@ public extension CBChatStyle {
         }
     }
 }
-
-#if canImport(IMCore)
-import IMCore
 
 extension CBChatStyle {
     var IMCore: IMChatStyle {
@@ -41,7 +40,6 @@ extension IMChatStyle {
         }
     }
 }
-#endif
 
 public enum CBServiceName: String, Codable {
     case iMessage
@@ -57,7 +55,6 @@ public enum CBServiceName: String, Codable {
     }
 }
 
-#if canImport(IMCore)
 public extension CBServiceName {
     init(style: IMServiceStyle) {
         switch style {
@@ -75,4 +72,4 @@ public extension CBServiceName {
         }
     }
 }
-#endif
+

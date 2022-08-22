@@ -10,6 +10,7 @@ import IMSharedUtilities
 import CoreGraphics
 import AVFoundation
 import CoreServices
+import IMCore
 
 internal extension IMFileTransfer {
     var ensuredUTI: CFString? {
