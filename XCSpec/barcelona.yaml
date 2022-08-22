@@ -18,6 +18,14 @@ targets:
       - package: Sentry
       - package: Paris
         product: CommunicationsFilter
+      - package: Paris
+        product: DataDetectorsCore
+      - package: Paris
+        product: DigitalTouchShared
+      - package: Paris
+        product: LinkPresentation
+      - package: Paris
+        product: IDS
       - target: BarcelonaDB
         embed: true
         link: true
@@ -44,6 +52,14 @@ targets:
       - package: SwiftyJavaScriptCore
       - package: Paris
         product: CommunicationsFilter
+      - package: Paris
+        product: DataDetectorsCore
+      - package: Paris
+        product: DigitalTouchShared
+      - package: Paris
+        product: LinkPresentation
+      - package: Paris
+        product: IDS
       - target: Barcelona
         embed: true
         link: true

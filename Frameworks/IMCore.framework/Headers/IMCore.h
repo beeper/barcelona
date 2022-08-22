@@ -175,7 +175,6 @@
 #import <IMCore/TUConversationManagerDelegate-Protocol.h>
 #import <IMCore/_IMBalloonBundleApp.h>
 #import <IMCore/_IMBalloonExtensionApp.h>
-#import <DataDetectorsCore/DDScannerResult.h>
 #import <IMCore/BusinessChat.h>
 
 #ifndef IMCORE_TYPES
@@ -185,7 +184,7 @@
 NSString* IMNormalizedPhoneNumberForPhoneNumber(NSString*, NSString*, BOOL);
 BOOL IMSPIQueryIMMessageItemsWithGUIDsAndQOS(NSArray<NSString *> *__strong, dispatch_qos_class_t, __strong dispatch_queue_t, __strong void (^)(NSArray*));
 BOOL IMSPIQueryMessagesWithGUIDsAndQOS(NSArray<NSString *> *__strong, dispatch_qos_class_t, __strong dispatch_queue_t, __strong void (^)(NSArray*));
-DDScannerResult* IMCopyDDScannerResultFromAttributedStringData(NSData*);
+NSObject* IMCopyDDScannerResultFromAttributedStringData(NSData*);
 BOOL IMCoreSimulatedEnvironmentEnabled();
 
 extern NSString* ABIMHandlesChangedNotification;

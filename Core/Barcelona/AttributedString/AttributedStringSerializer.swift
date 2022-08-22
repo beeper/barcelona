@@ -123,7 +123,7 @@ private func ERTextPart(fromCalendar attributedCalendar: NSAttributedString) -> 
     if let calendarData = attributedCalendar.allAttributes[MessageAttributes.calendarData] as? Data {
         var result = IMCopyDDScannerResultFromAttributedStringData(calendarData).map(Unmanaged.passRetained)
         
-        if let date = result?.takeUnretainedValue().date(fromReferenceDate: nil, referenceTimezone: nil, timezoneRef: nil, allDayRef: nil) as? Date {
+        if let date = (result?.takeUnretainedValue() as? DDScannerResult)?.date(fromReferenceDate: nil, referenceTimezone: nil, timezoneRef: nil, allDayRef: nil) as? Date {
             unixTime = date.timeIntervalSince1970 * 1000
         }
         

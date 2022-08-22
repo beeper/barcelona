@@ -142,7 +142,7 @@ public struct RichLinkMetadata: Codable, Hashable {
     
     /// Rebuilds an LPLinkMetadata object from wire format to be sent over iMessage
     public func createLinkMetadata() -> LPLinkMetadata {
-        let metadata = LPLinkMetadata()!
+        let metadata = LPLinkMetadata()
         metadata.originalURL = originalURL
         metadata.url = URL
         metadata.title = title
@@ -175,14 +175,14 @@ public struct RichLinkMetadata: Codable, Hashable {
 // Mush
 
 private protocol LPSolidAssetConforming: NSObjectProtocol {
-    var mimeType: String! { get }
-    var data: Data! { get }
-    var fileURL: URL! { get set }
+    var mimeType: String? { get }
+    var data: Data? { get }
+    var fileURL: URL? { get set }
 }
 
 private protocol LPSolidAssetMetadataConforming: NSObjectProtocol {
-    var accessibilityText: String! { get set }
-    var url: URL! { get set }
+    var accessibilityText: String? { get set }
+    var url: URL? { get set }
     var size: CGSize { get set }
 }
 
@@ -325,7 +325,7 @@ fileprivate extension RichLinkMetadata.RichLinkAsset {
         guard let size = size else {
             return nil
         }
-        let metadata = LPVideoMetadata()!
+        let metadata = LPVideoMetadata()
         metadata.size = size.cg
         metadata.url = originalURL
         metadata.accessibilityText = accessibilityText
@@ -333,7 +333,7 @@ fileprivate extension RichLinkMetadata.RichLinkAsset {
     }
     
     var lpAudioMetadata: LPAudioMetadata {
-        let metadata = LPAudioMetadata()!
+        let metadata = LPAudioMetadata()
         metadata.url = originalURL
         metadata.accessibilityText = accessibilityText
         return metadata
@@ -343,7 +343,7 @@ fileprivate extension RichLinkMetadata.RichLinkAsset {
         guard let size = size else {
             return nil
         }
-        let metadata = LPImageMetadata()!
+        let metadata = LPImageMetadata()
         metadata.url = originalURL
         metadata.size = size.cg
         metadata.accessibilityText = accessibilityText
@@ -351,7 +351,7 @@ fileprivate extension RichLinkMetadata.RichLinkAsset {
     }
     
     var lpIconMetadata: LPIconMetadata {
-        let metadata = LPIconMetadata()!
+        let metadata = LPIconMetadata()
         metadata.url = originalURL
         metadata.accessibilityText = accessibilityText
         return metadata

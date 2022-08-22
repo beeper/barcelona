@@ -158,7 +158,7 @@ public extension IMMessage {
         }
         
         func _load() {
-            let metadata = LPLinkMetadata()!
+            let metadata = LPLinkMetadata()
             metadata.originalURL = url
             richLinkDataSource.richLink.placeholder = true
             richLinkDataSource.richLink.metadata = metadata
