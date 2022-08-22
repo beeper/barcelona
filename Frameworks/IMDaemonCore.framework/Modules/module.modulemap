@@ -1,5 +1,0 @@
-framework module IMDaemonCore [extern_c] {
-  umbrella header "IMDaemonCore.h"
-  export *
-  module * { export * }
-}

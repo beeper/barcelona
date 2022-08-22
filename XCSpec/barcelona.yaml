@@ -26,6 +26,8 @@ targets:
         product: LinkPresentation
       - package: Paris
         product: IDS
+      - package: Paris
+        product: IMDaemonCore
       - target: BarcelonaDB
         embed: true
         link: true
@@ -60,6 +62,8 @@ targets:
         product: LinkPresentation
       - package: Paris
         product: IDS
+      - package: Paris
+        product: IMDaemonCore
       - target: Barcelona
         embed: true
         link: true
