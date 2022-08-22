@@ -328,7 +328,7 @@ public extension CBChat {
             guard let recipient = findBestRecipient() else {
                 return nil
             }
-            return (IMChatRegistry.shared.existingChat(forIMHandle: recipient, allowRetargeting: true) as? IMChat) ?? IMChatRegistry.shared.chat(for: recipient)
+            return IMChatRegistry.shared._existingChat(withIdentifier: recipient.id, style: 0x2d, service: recipient.service.internalName) as? IMChat ?? IMChatRegistry.shared.chat(for: recipient)
         } else {
             return IMChats.first(where: { $0.account.service == service })
         }
