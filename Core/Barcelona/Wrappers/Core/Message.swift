@@ -294,7 +294,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         self.chatID = chatID
         fromMe = item.isFromMe()
         time = item.effectiveTime
-        threadIdentifier = item.threadIdentifier()
+        threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
         subject = item.subject
         isSOS = item.isSOS

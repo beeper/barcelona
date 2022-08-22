@@ -15,6 +15,7 @@ targets:
       - package: Swog
       - package: Pwomise
       - package: FeatureFlags
+      - package: SwiftCLI
       - package: Sentry
       - package: Paris
         product: CommunicationsFilter
@@ -60,26 +61,6 @@ targets:
       - package: BarcelonaIPC
       - package: BarcelonaFoundation
       - package: SwiftyJavaScriptCore
-      - package: Paris
-        product: CommunicationsFilter
-      - package: Paris
-        product: DataDetectorsCore
-      - package: Paris
-        product: DigitalTouchShared
-      - package: Paris
-        product: LinkPresentation
-      - package: Paris
-        product: IDS
-      - package: Paris
-        product: IMDaemonCore
-      - package: Paris
-        product: IMCore
-      - package: Paris
-        product: IMSharedUtilities
-      - package: Paris
-        product: IMFoundation
-      - package: Paris
-        product: IMDPersistence
       - target: Barcelona
         embed: true
         link: true
