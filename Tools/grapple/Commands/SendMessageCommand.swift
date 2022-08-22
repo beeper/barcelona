@@ -298,38 +298,6 @@ class MessageCommand: CommandGroup {
             }
         }
         
-        class Transfer: BarcelonaCommand, ChatCommandLike, ChatSMSForcingCapable {
-            let name = "transfer"
-            
-            @Param var destination: String
-            
-            @Flag("-i", "--id", description: "treat the destination as a chat ID")
-            var isID: Bool
-            
-            @Flag("-s") var sms: Bool
-            
-            @CollectedParam var transfers: [String]
-            var monitor: BLMediaMessageMonitor?
-            
-            func execute() throws {
-                var fileTransfers: [IMFileTransfer] = []
-                for transfer in transfers {
-                    let url = URL(fileURLWithPath: transfer)
-                    fileTransfers.append(CBInitializeFileTransfer(filename: url.lastPathComponent, path: url))
-                }
-                let creation = CreateMessage(parts: fileTransfers.compactMap(\.guid).map {
-                    .init(type: .attachment, details: $0)
-                })
-                var messageID: String = ""
-                monitor = BLMediaMessageMonitor(messageID: messageID, transferGUIDs: fileTransfers.compactMap(\.guid)) { success, error, cancel in
-                    print(success, error, cancel)
-                    exit(0)
-                }
-                let message = try chat.sendReturningRaw(message: creation)
-                messageID = message.id
-            }
-        }
-        
         var children: [Routable] = [Text(), Tapback(), Transfer(), Link()]
     }
     

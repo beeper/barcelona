@@ -9,9 +9,7 @@
 import Foundation
 import SwiftCLI
 import IMCore
-#if DEBUG
 import BarcelonaMautrixIPC
-#endif
 
 class ListCommand: CommandGroup {
     var shortDescription = "list different entities in IMCore"

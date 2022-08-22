@@ -84,9 +84,7 @@ targets:
     dependencies:
       - package: SwiftyTextTable
       - package: LineNoise
-      - package: SwiftCLI
       - package: Yammit
-      - package: FeatureFlags
       - target: Barcelona
         embed: true
         link: true
@@ -96,3 +94,5 @@ targets:
       - target: BarcelonaMautrixIPC
         embed: true
         link: true
+      - package: Paris
+        product: IMSharedUtilities
