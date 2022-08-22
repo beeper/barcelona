@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <CommunicationsFilter/CommunicationsFilter.h>
+#import <CommunicationsFilter.h>
 #import <IMCore/IMCore.h>
 #import <IMSharedUtilities/IMSharedUtilities.h>
 #import "swizzleInstance.h"

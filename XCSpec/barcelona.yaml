@@ -16,6 +16,8 @@ targets:
       - package: Pwomise
       - package: FeatureFlags
       - package: Sentry
+      - package: Paris
+        product: CommunicationsFilter
       - target: BarcelonaDB
         embed: true
         link: true
@@ -40,6 +42,8 @@ targets:
       - package: BarcelonaIPC
       - package: BarcelonaFoundation
       - package: SwiftyJavaScriptCore
+      - package: Paris
+        product: CommunicationsFilter
       - target: Barcelona
         embed: true
         link: true

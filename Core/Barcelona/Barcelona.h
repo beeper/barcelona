@@ -17,7 +17,7 @@ FOUNDATION_EXPORT const unsigned char CoreBarcelonaVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <CoreBarcelona/PublicHeader.h>
 
-#import <CommunicationsFilter/CommunicationsFilter.h>
+#import <CommunicationsFilter.h>
 
 CommunicationsFilterBlockList* ERSharedBlockList();
 NSXPCListener* ERConstructXPCListener(NSString*);
