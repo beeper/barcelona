@@ -10,6 +10,7 @@ import Foundation
 import Barcelona
 import IMCore
 import BarcelonaDB
+import Swog
 
 extension Array where Element == String {
     /// Given self is an array of chat GUIDs, masks the GUIDs to iMessage service and returns the deduplicated result

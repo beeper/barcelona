@@ -9,6 +9,7 @@
 import Foundation
 import Barcelona
 import IMCore
+import Swog
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {
@@ -43,7 +44,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                     CLDebug("BLMautrix", "I am processing a rich link! text '\(text, privacy: .private)'")
                     
                     let message = ERCreateBlankRichLinkMessage(text.trimmingCharacters(in: [" "]), url) { item in
-                        if #available(macOS 11.0, *), let replyToGUID = reply_to {
+                        if #available(macOS 11.0, iOS 14, *), let replyToGUID = reply_to {
                             item.setThreadIdentifier(IMChatItem.resolveThreadIdentifier(forMessageWithGUID: replyToGUID, part: reply_to_part ?? 0, chat: chat.imChat))
                         }
                     }

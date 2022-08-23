@@ -1,0 +1,5 @@
+
+module CBarcelona {
+    umbrella header "CBarcelona.h"
+    export *
+}

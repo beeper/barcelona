@@ -6,9 +6,12 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
+import Foundation
 import Barcelona
 import IMCore
 import IDS
+import Swog
+import Contacts
 
 private extension ChatItemOwned {
     var mautrixFriendlyGUID: String {
@@ -66,7 +69,7 @@ private extension BLContact {
     }
 }
 
-public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
+public class BLEventHandler {
     public static let shared = BLEventHandler()
     
     private let fifoQueue = FifoQueue<Void>()
@@ -178,6 +181,10 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
             
             BLWritePayloads(payloads)
         }
+    }
+    
+    public func purgedTransferResolved(_ transfer: IMFileTransfer) {
+        
     }
     
     public func purgedTransferFailed(_ transfer: IMFileTransfer) {

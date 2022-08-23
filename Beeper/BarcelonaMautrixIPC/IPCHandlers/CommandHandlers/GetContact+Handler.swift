@@ -15,6 +15,7 @@ import SwiftyContacts
 import Sentry
 import IDS
 import Pwomise
+import Swog
 
 extension IMBusinessNameManager {
     func addCallback(forURI uri: String, callback: @escaping (NSString) -> ()) {

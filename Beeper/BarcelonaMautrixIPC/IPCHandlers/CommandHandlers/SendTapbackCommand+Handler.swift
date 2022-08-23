@@ -8,6 +8,7 @@
 
 import Foundation
 import Barcelona
+import Swog
 
 extension TapbackCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {

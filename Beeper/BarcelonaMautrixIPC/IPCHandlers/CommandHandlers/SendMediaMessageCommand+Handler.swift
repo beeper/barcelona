@@ -10,6 +10,7 @@ import Foundation
 import Barcelona
 import IMCore
 import Sentry
+import Swog
 
 public protocol Runnable {
     func run(payload: IPCPayload)

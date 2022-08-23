@@ -9,6 +9,7 @@
 import Foundation
 @_spi(matrix) import Barcelona
 import IMCore
+import Swog
 
 internal extension Chat {
     var blChatGUID: String {
