@@ -70,6 +70,42 @@ public struct BLIDSResolutionOptions: OptionSet {
     public static let none: BLIDSResolutionOptions = []
 }
 
+import Swexy
+
+class BLIDSIDQueryCache {
+    static let shared = BLIDSIDQueryCache()
+    
+    let defaults = UserDefaults(suiteName: "com.ericrabil.barcelona.id-query")!
+    @Atomic private var results: [String: (Date, IDSState)] = [:]
+    
+    static let queryValidityDuration: TimeInterval = 1 * 60 * 60 * 1.5
+    
+    func result(for destination: String) -> IDSState? {
+        if let (date, result) = results[destination] {
+            if date.timeIntervalSinceNow < -Self.queryValidityDuration {
+                return result
+            }
+        }
+        if let dict = defaults.dictionary(forKey: destination),
+           let date = dict["date"] as? Date,
+           date.timeIntervalSinceNow < -Self.queryValidityDuration,
+           let result = dict["result"] as? IDSState.RawValue {
+            let state = IDSState(rawValue: result)
+            results[destination] = (date, state)
+            return state
+        }
+        return nil
+    }
+    
+    func cache(_ result: IDSState, for destination: String, time: Date = Date()) {
+        defaults.set([
+            "result": result.rawValue,
+            "date": time
+        ], forKey: destination)
+        results[destination] = (time, result)
+    }
+}
+
 /// Asynchronously resolves the latest IDS status for a set of handles on a given service, defaulting to iMessage.
 public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServiceStyle = IMServiceStyle.iMessage, options: BLIDSResolutionOptions = .none, _ callback: @escaping ([String: IDSState]) -> ()) throws {
     var allUnavailable: [String: IDSState] {
@@ -136,11 +172,10 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
         log.info("Requesting ID status from cache for destinations \(destinations.joined(separator: ","), privacy: .auto) on service \(service.idsIdentifier ?? "nil", privacy: .public)")
         
         let (cached, uncached) = destinations.splitReduce(intoLeft: [String: IDSState](), intoRight: [String]()) { cached, uncached, destination in
-            switch IDSState(rawValue: IDSIDQueryController.sharedInstance()!._currentCachedIDStatus(forDestination: destination, service: service.idsIdentifier!, listenerID: IDSListenerID)) {
-            case .unknown:
+            if let status = BLIDSIDQueryCache.shared.result(for: destination) {
+                cached[destination] = status
+            } else {
                 uncached.append(destination)
-            case let state:
-                cached[destination] = state
             }
         }
         
@@ -154,7 +189,9 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
     } else {
         FetchCached(destinations) { cached, needed in
             FetchLatest(needed) { resolved in
+                lazy var now = Date()
                 callback(resolved.reduce(into: cached) { masterResult, pair in
+                    BLIDSIDQueryCache.shared.cache(pair.value, for: pair.key, time: now)
                     masterResult[pair.key] = pair.value
                 }.mapKeys(\.idsURIStripped))
             }
