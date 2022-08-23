@@ -24,6 +24,7 @@ public class CBChat {
         self.style = style
         $leaves.sink { [weak self] leaves in
             self?.refreshIdentifiers(leaves)
+            self?.refreshParticipants(leaves)
         }.store(in: &subscribers)
     }
     
@@ -68,6 +69,21 @@ public class CBChat {
     @Published public internal(set) var identifiers: Set<CBChatIdentifier> = Set()
     
     @Published public internal(set) var mergedID: String = ""
+    
+    @Published public internal(set) var mergedRecipientIDs: Set<String> = []
+    
+    private func refreshParticipants(_ leaves: [String: CBChatLeaf]? = nil) {
+        let leaves = leaves ?? self.leaves
+        guard style == .instantMessage else {
+            mergedRecipientIDs = []
+            return
+        }
+        mergedRecipientIDs = leaves.values.reduce(into: Set()) { recipients, leaf in
+            if let last = leaf.participants.last {
+                recipients.insert(last.personID)
+            }
+        }
+    }
     
     /// Immediately calculates and updates the latest value for the chat identifiers
     private func refreshIdentifiers(_ leaves: [String: CBChatLeaf]? = nil) {
@@ -236,19 +252,7 @@ public extension CBChat {
             return nil
         }
         var recipientsByID: [String: IMHandle] = [:]
-        let IMChats = IMChats
-        lazy var deduplicatedRecipientIDs: [String] = {
-            var ids: Set<String> = Set()
-            for chat in IMChats {
-                guard let recipient = chat.recipient else {
-                    log.warn("\(chat.id) has no recipient!")
-                    continue
-                }
-                ids.insert(recipient.id)
-            }
-            log.info("Deduplicated recipient IDs for \(self.mergedID): \(ids)")
-            return Array(ids)
-        }()
+        let deduplicatedRecipientIDs: [String] = Array(mergedRecipientIDs)
         lazy var statuses: [String: IDSState] = {
             do {
                 let statuses = try BLResolveIDStatusForIDs(deduplicatedRecipientIDs, onService: service.id)
@@ -266,22 +270,21 @@ public extension CBChat {
                 return [:]
             }
         }()
-        for chat in IMChats {
-            guard let recipient = chat.recipient else {
-                log.debug("Skip chat \(chat.id): recipient is missing")
+        for (recipientID, status) in statuses {
+            guard !recipientsByID.keys.contains(recipientID) else {
+                log.debug("Skip recipient \(recipientID): already visited")
                 continue
             }
-            guard !recipientsByID.keys.contains(recipient.id) else {
-                log.debug("Skip chat \(chat.id): already visited")
+            guard status == .available else {
+                log.info("Skip recipient \(recipientID): IDS status is \(status.description)")
                 continue
             }
-            let idsStatus = statuses[recipient.id]
-            guard statuses[recipient.id] == .available else {
-                log.info("Skip recipient \(recipient.id): IDS status is \(idsStatus?.description ?? "nil")")
+            guard let handle = IMAccountController.shared.bestAccount(forService: service)?.imHandle(withID: recipientID) else {
+                log.debug("Skip recipient \(recipientID): can't find a handle")
                 continue
             }
-            log.info("\(recipient.id) is available on \(service.name)")
-            recipientsByID[recipient.id] = recipient
+            log.info("\(recipientID) is available on \(service.name)")
+            recipientsByID[recipientID] = handle
         }
         let recipients = Array(recipientsByID.values)
         let recipientCount = recipients.count
