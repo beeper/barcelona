@@ -246,25 +246,16 @@ public extension CBChat {
         chatForSending()?.account.service ?? .sms()
     }
     
-    func bestRecipient(on service: IMServiceImpl = .iMessage()) -> IMHandle? {
+    func validRecipients(on service: IMServiceImpl = .iMessage()) -> [IMHandle] {
         guard style == .instantMessage else {
             log.error("Ignoring request to query best recipient in a group chat")
-            return nil
+            return []
         }
         var recipientsByID: [String: IMHandle] = [:]
         let deduplicatedRecipientIDs: [String] = Array(mergedRecipientIDs)
         lazy var statuses: [String: IDSState] = {
             do {
-                let statuses = try BLResolveIDStatusForIDs(deduplicatedRecipientIDs, onService: service.id)
-                if statuses.count < deduplicatedRecipientIDs.count {
-                    // Some results were not returned, lets sanity check and log any missing IDs
-                    for recipientID in deduplicatedRecipientIDs {
-                        if !statuses.keys.contains(recipientID) {
-                            log.warn("ID status query for chat \(self.mergedID) did not return results for \(recipientID)")
-                        }
-                    }
-                }
-                return statuses
+                return try BLResolveIDStatusForIDs(deduplicatedRecipientIDs, onService: service.id)
             } catch {
                 log.fault("Error while resolving ID status for \(deduplicatedRecipientIDs.joined(separator: ",")) in \(self.mergedID): \(String(describing: error))")
                 return [:]
@@ -301,40 +292,40 @@ public extension CBChat {
                 return false
             }
         }
-        if let bestRecipient = recipients.sorted(by: compareHandles(_:_:)).first {
-            log.info("Choosing \(bestRecipient.id) for sending messages")
-            return bestRecipient
-        }
-        return nil
+        return recipients.sorted(by: compareHandles(_:_:))
+    }
+    
+    func bestRecipient(on service: IMServiceImpl = .iMessage()) -> IMHandle? {
+        validRecipients(on: service).first
     }
     
     func chatForSending(on service: CBServiceName = .iMessage) -> IMChat? {
         let IMChats = IMChats, service = service.service!
         if style == .instantMessage {
-            func findBestRecipient() -> IMHandle? {
-                guard var recipient = bestRecipient(on: service) else {
+            func findValidRecipients() -> [IMHandle] {
+                let recipients = validRecipients(on: service)
+                if recipients.isEmpty {
                     if service == .iMessage(), IMAccountController.shared.activeSMSAccount?.canSendMessages == true, let recipient = bestRecipient(on: .sms()) {
                         log.info("Can't reach \(self.mergedID) over \(service.name ?? "nil"), but SMS is working. Retargeting!")
-                        return recipient
+                        return [recipient]
                     }
                     log.fault("Failed to determine best recipient in chat \(self.mergedID) for service \(service.name ?? "nil", privacy: .public)")
-                    return nil
+                    return []
                 }
-                if recipient.service != service {
-                    recipient = IMAccountController.shared.bestAccount(forService: service).map {
-                        $0.imHandle(withID: recipient.id)
-                    } ?? recipient
-                }
-                return recipient
+                return recipients
             }
-            guard let recipient = findBestRecipient() else {
-                return nil
-            }
-//            let chat = IMChatRegistry.shared.existingChat(forIMHandle: recipient, allowRetargeting: true, fixChatHandle: true) as? IMChat
-            return IMChatRegistry.shared._existingChat(withIdentifier: recipient.id, style: 0x2d, service: recipient.service.internalName) as? IMChat ?? IMChatRegistry.shared.chat(for: recipient)
+            let recipients = findValidRecipients()
+            let chats = recipients.compactMap(\.chat)
+            return chats.sorted(usingKey: \.lastMessage?.time, withDefaultValue: .distantPast, by: >).first
         } else {
             return IMChats.first(where: { $0.account.service == service })
         }
+    }
+}
+
+private extension IMHandle {
+    var chat: IMChat? {
+        IMChatRegistry.shared._existingChat(withIdentifier: id, style: 0x2d, account: service.internalName) as? IMChat ?? IMChatRegistry.shared.chat(for: self)
     }
 }
 
