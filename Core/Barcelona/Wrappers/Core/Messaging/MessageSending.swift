@@ -135,6 +135,16 @@ public extension Chat {
     }
     
     func tapback(_ creation: TapbackCreation, metadata: Message.Metadata? = nil) throws -> Message {
+        func chatForSending() -> IMChat {
+            if CBFeatureFlags.useSendingV2, let cbChat = cbChat {
+                CLInfo("MessageSending", "Using CBChat for sending per feature flags")
+                return cbChat.chatForSending(on: .iMessage) ?? self.imChat
+            } else {
+                return self.imChat
+            }
+        }
+        let imChat = chatForSending()
+        
         markAsRead()
         let message = try imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil, metadata: metadata)
         
