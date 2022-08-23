@@ -112,9 +112,8 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
     
     let destinations = ids.compactMap(\.destination)
     
-    guard destinations.count == ids.count else {
-        log.info("Bailing IDS query, some IDs were malformed.")
-        throw IDStatusError.malformedID
+    if destinations.count != ids.count {
+        log.warn("Some IDs are malformed and will not be queried, partial results will be returned")
     }
     
     func FetchLatest(_ destinations: [String], _ callback: @escaping ([String: IDSState]) -> ()) {
@@ -183,7 +182,9 @@ fileprivate extension String {
         case .email: return IDSCopyIDForEmailAddress(self as CFString)
         case .businessID: return IDSCopyIDForBusinessID(self as CFString)
         case .phoneNumber: return IDSCopyIDForPhoneNumber(self as CFString)
-        case .unknown: return nil
+        case .unknown:
+            log.warn("\(self) will not be queried because it is an unrecognized address")
+            return nil
         }
     }
 }
