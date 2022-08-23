@@ -135,14 +135,16 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
         
         log.info("Requesting ID status from cache for destinations \(destinations.joined(separator: ","), privacy: .auto) on service \(service.idsIdentifier ?? "nil", privacy: .public)")
         
-        IDSIDQueryController.sharedInstance()!.currentIDStatus(forDestinations: destinations, service: service.idsIdentifier!, listenerID: IDSListenerID, queue: HandleQueue) { cachedResults in
-            let cachedResults = cachedResults.mapValues { IDSState(rawValue: $0.intValue) }
-            let (needed, resolved) = cachedResults.splitFilter {
-                $0.value == .unknown
+        let (cached, uncached) = destinations.splitReduce(intoLeft: [String: IDSState](), intoRight: [String]()) { cached, uncached, destination in
+            switch IDSState(rawValue: IDSIDQueryController.sharedInstance()!._currentCachedIDStatus(forDestination: destination, service: service.idsIdentifier!, listenerID: IDSListenerID)) {
+            case .unknown:
+                uncached.append(destination)
+            case let state:
+                cached[destination] = state
             }
-            
-            callback(resolved, Array(needed.keys))
         }
+        
+        callback(cached, uncached)
     }
     
     if options.contains(.ignoringCache) {
