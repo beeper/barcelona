@@ -82,13 +82,13 @@ class BLIDSIDQueryCache {
     
     func result(for destination: String) -> IDSState? {
         if let (date, result) = results[destination] {
-            if date.timeIntervalSinceNow < -Self.queryValidityDuration {
+            if abs(date.timeIntervalSinceNow) < Self.queryValidityDuration {
                 return result
             }
         }
         if let dict = defaults.dictionary(forKey: destination),
            let date = dict["date"] as? Date,
-           date.timeIntervalSinceNow < -Self.queryValidityDuration,
+           abs(date.timeIntervalSinceNow) < Self.queryValidityDuration,
            let result = dict["result"] as? IDSState.RawValue {
             let state = IDSState(rawValue: result)
             results[destination] = (date, state)
