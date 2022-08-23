@@ -90,13 +90,6 @@ class BarcelonaMautrix {
             
             log.info("BLMautrix is ready")
             
-            DispatchQueue.global().async {
-                log.info("Prewarming...")
-                BMXPrewarm().then {
-                    log.info("Prewarm took \($0, privacy: .public)s")
-                }
-            }
-            
             self.startHealthTicker()
         }
     }
