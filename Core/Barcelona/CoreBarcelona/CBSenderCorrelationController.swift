@@ -370,7 +370,7 @@ public class CBSenderCorrelationController {
                 }
             }
             semaphore.signal()
-        }.wait(upTo: .distantFuture);
+        }.resolving(on: DispatchQueue.global()).wait(upTo: .distantFuture);
         // lock for the entire enumeration
         { senderIDToCorrelationID in
             // store the database results
