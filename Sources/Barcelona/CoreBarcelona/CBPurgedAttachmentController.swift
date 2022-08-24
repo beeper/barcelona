@@ -16,6 +16,8 @@ import IMCore
 import Swog
 import Pwomise
 
+public typealias IMFileTransfer = IMSharedUtilities.IMFileTransfer
+
 public protocol CBPurgedAttachmentControllerDelegate {
     func purgedTransferResolved(_ transfer: IMFileTransfer)
     func purgedTransferFailed(_ transfer: IMFileTransfer)

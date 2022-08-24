@@ -32,7 +32,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/open-imcore/BarcelonaFoundation", from: "1.0.2"),
-        .package(name: "GRDB", url: "https://github.com/groue/GRDB.swift.git", .upToNextMajor(from: "4.12.0")),
+        .package(name: "GRDB", url: "https://github.com/groue/GRDB.swift.git", .upToNextMajor(from: "5.26.0")),
         .package(url: "https://github.com/EricRabil/Paris", .branchItem("main")),
         .package(name: "FeatureFlags", url: "https://github.com/EricRabil/FeatureFlags.swift", from: "1.0.0"),
         .package(url: "https://github.com/sendyhalim/Swime", .upToNextMajor(from: "3.0.7")),
@@ -43,13 +43,16 @@ let package = Package(
         .package(name: "Gzip", url: "https://github.com/1024jp/GzipSwift", .upToNextMajor(from: "5.1.1")),
         .package(url: "https://github.com/SwiftyContacts/SwiftyContacts", .upToNextMajor(from: "4.0.0")),
         .package(url: "https://github.com/EricRabil/ERBufferedStream", .upToNextMajor(from: "1.0.4")),
-        .package(url: "https://github.com/EricRabil/Pwomise", .upToNextMajor(from: "1.1.1"))
+        .package(url: "https://github.com/EricRabil/Pwomise", .upToNextMajor(from: "1.1.1")),
+        .package(url: "https://github.com/EricRabil/SwiftyJavaScriptCore", .upToNextMajor(from: "1.0.2")),
+        .package(url: "https://github.com/open-imcore/BarcelonaIPC", .branchItem("main"))
     ]
 ).addingLibrary(name: "BarcelonaDB", dependencies: ["GRDB", "BarcelonaFoundation"])
 .addingLibrary(name: "CBarcelona", dependencies: [.paris("CommunicationsFilter"), .paris("IMCore")])
 .addingLibrary(name: "Barcelona", dependencies: [
     "CBarcelona", "BarcelonaDB", "FeatureFlags", "Swime", "InterposeKit", "SwiftCLI", "Sentry", "AnyCodable", "Gzip"
 ] + .paris("DataDetectorsCore", "IMDPersistence", "IMDaemonCore", "IMCore", "IMSharedUtilities", "IMFoundation", "IDS", "DigitalTouchShared", "LinkPresentation"))
+.addingLibrary(name: "BarcelonaJS", dependencies: ["Barcelona", "SwiftyJavaScriptCore", "BarcelonaIPC"])
 //.addingLibrary(name: "BarcelonaMautrixIPC", dependencies: [
 //    "Barcelona", "BarcelonaDB", "SwiftyContacts", "ERBufferedStream", "Pwomise"
 //])

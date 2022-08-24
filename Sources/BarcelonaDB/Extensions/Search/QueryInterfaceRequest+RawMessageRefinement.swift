@@ -9,7 +9,7 @@
 import Foundation
 import GRDB
 
-internal extension QueryInterfaceRequest where T == RawMessage {
+internal extension QueryInterfaceRequest where RowDecoder == RawMessage {
     func joiningOnHandlesWhenNotEmpty(handles: [String]) -> Self {
         /// the handle_id is the recipient when from_me is 0, other_handle is the recipient when from_me is 1
         if handles.count > 0 {
