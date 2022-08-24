@@ -33,7 +33,7 @@ let package = Package(
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/open-imcore/BarcelonaFoundation", from: "1.0.2"),
         .package(name: "GRDB", url: "https://github.com/groue/GRDB.swift.git", .upToNextMajor(from: "5.26.0")),
-        .package(url: "https://github.com/EricRabil/Paris", .upToNextMinor(from: "1.0.0")),
+        .package(url: "https://github.com/EricRabil/Paris", .branchItem("main")),
         .package(name: "FeatureFlags", url: "https://github.com/EricRabil/FeatureFlags.swift", from: "1.0.0"),
         .package(url: "https://github.com/sendyhalim/Swime", .upToNextMajor(from: "3.0.7")),
         .package(url: "https://github.com/steipete/InterposeKit", .branchItem("master")),
