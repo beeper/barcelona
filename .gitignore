@@ -10,3 +10,5 @@ imessage-rest-ios/layout/Applications
 SourcePackages
 *.xcodeproj
 Beeper/barcelona-mautrix/Info.plist
+.build
+Package.resolved
