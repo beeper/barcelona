@@ -323,8 +323,15 @@ public class CBSenderCorrelationController {
         }(&senderIDToCorrelationID)
     }
     
+    private func cachedCorrelation(for destination: String) -> String?? {
+        if let override = CBCorrelationOverrideController.shared.override(for: destination) {
+            return .some(override)
+        }
+        return senderIDToCorrelationID[destination]
+    }
+    
     private func loadCachedCorrelation(senderID: String) -> String? {
-        if let correlationID = senderIDToCorrelationID[senderID] {
+        if let correlationID = cachedCorrelation(for: senderID) {
             return correlationID
         }
         ~log.debug("Looking up correlation ID for \(senderID, privacy: .public)")
@@ -349,7 +356,7 @@ public class CBSenderCorrelationController {
     }
     
     private func loadCachedCorrelations(senderIDs: [String], hitDatabase: Bool = true) -> [String: String?] {
-        var loadedCorrelations = Dictionary(uniqueKeysWithValues: senderIDs.map { ($0, senderIDToCorrelationID[$0]) }).compactMapValues { $0 }
+        var loadedCorrelations = Dictionary(uniqueKeysWithValues: senderIDs.map { ($0, cachedCorrelation(for: $0)) }).compactMapValues { $0 }
         let missingCorrelations = senderIDs.filter { loadedCorrelations[$0] == nil }
         // no missing correlations, fast return
         if missingCorrelations.isEmpty || !hitDatabase {
@@ -605,4 +612,100 @@ extension IMChat {
             return siblings
         }
     }
+}
+
+// MARK: - Overrides
+
+public class CBCorrelationOverrideController {
+    public static let shared = CBCorrelationOverrideController()
+    
+    private let suite = UserDefaults(suiteName: "com.ericrabil.barcelona.correlation-override")!
+
+    public func override(for destination: String) -> String? {
+        suite.string(forKey: destination)
+    }
+    
+    public func store(_ override: String, for destination: String) {
+        suite.set(override, forKey: destination)
+    }
+    
+    public func clear(_ destination: String) {
+        suite.removeObject(forKey: destination)
+    }
+}
+
+internal extension CBCorrelationOverrideController {
+    var allOverrides: [String: String] {
+        suite.dictionaryRepresentation().compactMapValues {
+            $0 as? String
+        }
+    }
+}
+
+// MARK: - CLI
+
+import SwiftCLI
+
+public class CBCorrelationCommands: CommandGroup {
+    public let name: String = "correlation"
+    public let shortDescription: String = "interact with the correlation subsystem"
+    
+    public init() {
+        
+    }
+    
+    public class Resolve: Command {
+        public let name: String = "resolve"
+        public let shortDescription: String = "resolve the current correlation identifier for a given sender"
+        
+        @Param public var sender: String
+        
+        public func execute() throws {
+            print(CBSenderCorrelationController.shared.correlate(senderID: sender))
+        }
+    }
+    
+    public class Overrides: CommandGroup {
+        public let name: String = "overrides"
+        public let shortDescription: String = "manage correlation overrides"
+        
+        public class ShowOverrides: Command {
+            public let name: String = "show"
+            public let shortDescription: String = "show all stored overrides"
+            
+            public func execute() throws {
+                print(CBCorrelationOverrideController.shared.allOverrides.debugDescription)
+            }
+        }
+        
+        public class ClearOverrides: Command {
+            public let name: String = "clear"
+            public let shortDescription: String = "clear overrides from defaults"
+            
+            @CollectedParam
+            public var destinations: [String]
+            
+            public func execute() throws {
+                for destination in destinations {
+                    CBCorrelationOverrideController.shared.clear(destination)
+                }
+            }
+        }
+        
+        public class InsertOverride: Command {
+            public let name: String = "insert"
+            public let shortDescription: String = "insert an override into defaults"
+            
+            @Param public var destination: String
+            @Param public var override: String
+            
+            public func execute() throws {
+                CBCorrelationOverrideController.shared.store(override, for: destination)
+            }
+        }
+        
+        public let children: [Routable] = [ShowOverrides(), ClearOverrides(), InsertOverride()]
+    }
+    
+    public let children: [Routable] = [Overrides(), Resolve()]
 }
