@@ -24,7 +24,7 @@ extension Array {
 }
 
 let package = Package(
-    name: "barcelona",
+    name: "Barcelona",
     platforms: [
         .iOS(.v13), .macOS(.v10_15)
     ],
