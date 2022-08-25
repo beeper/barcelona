@@ -33,7 +33,7 @@ let package = Package(
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/open-imcore/BarcelonaFoundation", from: "1.0.2"),
         .package(name: "GRDB", url: "https://github.com/groue/GRDB.swift.git", .upToNextMajor(from: "5.26.0")),
-        .package(url: "https://github.com/EricRabil/Paris", .branchItem("main")),
+        .package(url: "https://github.com/EricRabil/Paris", .revisionItem("11b7f013eca8883701340eb3dfd06742c622b93b")),
         .package(name: "FeatureFlags", url: "https://github.com/EricRabil/FeatureFlags.swift", from: "1.0.0"),
         .package(url: "https://github.com/sendyhalim/Swime", .upToNextMajor(from: "3.0.7")),
         .package(url: "https://github.com/steipete/InterposeKit", .branchItem("master")),
@@ -45,7 +45,7 @@ let package = Package(
         .package(url: "https://github.com/EricRabil/ERBufferedStream", .upToNextMajor(from: "1.0.4")),
         .package(url: "https://github.com/EricRabil/Pwomise", .upToNextMajor(from: "1.1.1")),
         .package(url: "https://github.com/EricRabil/SwiftyJavaScriptCore", .upToNextMajor(from: "1.0.2")),
-        .package(url: "https://github.com/open-imcore/BarcelonaIPC", .branchItem("main"))
+        .package(url: "https://github.com/open-imcore/BarcelonaIPC", from: "1.0.5")
     ]
 ).addingLibrary(name: "BarcelonaDB", dependencies: ["GRDB", "BarcelonaFoundation"])
 .addingLibrary(name: "CBarcelona", dependencies: [.paris("CommunicationsFilter"), .paris("IMCore")])
