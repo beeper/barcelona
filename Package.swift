@@ -37,7 +37,7 @@ let package = Package(
         .package(url: "https://github.com/EricRabil/Paris", .upToNextMajor(from: "1.0.1")),
         .package(name: "FeatureFlags", url: "https://github.com/EricRabil/FeatureFlags.swift", from: "1.0.0"),
         .package(url: "https://github.com/sendyhalim/Swime", .upToNextMajor(from: "3.0.7")),
-        .package(url: "https://github.com/steipete/InterposeKit", .upToNextMajor(from: "0.0.2")),
+        .package(url: "https://github.com/open-imcore/InterposeKit", .upToNextMajor(from: "0.0.3")),
         .package(url: "https://github.com/jakeheis/SwiftCLI", .upToNextMajor(from: "6.0.3")),
         .package(name: "Sentry", url: "https://github.com/getsentry/sentry-cocoa", .upToNextMajor(from: "7.15.0")),
         .package(url: "https://github.com/Flight-School/AnyCodable", .upToNextMajor(from: "0.6.1")),
