@@ -11,6 +11,7 @@ import IMSharedUtilities
 import BarcelonaDB
 import IMCore
 import IMFoundation
+import CBarcelona
 
 private let log = Logger(category: "Chat")
 
@@ -156,7 +157,7 @@ public extension Chat {
 // MARK: - Read Receipts
 internal extension IMChat {
     func markDirectRead(items: [IMMessageItem]) {
-        guard let serialized = FZCreateSerializedIMMessageItemsfromArray(items), serialized.count > 0 else {
+        guard let serialized = ERCreateSerializedIMMessageItemsFromArray(items), serialized.count > 0 else {
             return
         }
         

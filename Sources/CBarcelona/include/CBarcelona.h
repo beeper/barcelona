@@ -43,3 +43,8 @@ NSXPCListener* ERConstructXPCListener(NSString*);
 @interface ObjC: NSObject
 + (id)catchException:(id(^)())tryBlock error:(__autoreleasing NSError **)error;
 @end
+
+@class NSArray, IMItem;
+
+NSArray<IMItem*>* ERCreateIMMessageItemsFromSerializedArray(NSArray* items);
+NSArray<NSDictionary*>* ERCreateSerializedIMMessageItemsFromArray(NSArray<IMItem*>* items);

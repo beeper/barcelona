@@ -33,7 +33,7 @@ let package = Package(
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/open-imcore/BarcelonaFoundation", from: "1.0.2"),
         .package(name: "GRDB", url: "https://github.com/groue/GRDB.swift.git", .upToNextMajor(from: "5.26.0")),
-        .package(url: "https://github.com/EricRabil/Paris", .revisionItem("11b7f013eca8883701340eb3dfd06742c622b93b")),
+        .package(url: "https://github.com/EricRabil/Paris", .revisionItem("0f631b35a2a8871b8517dda33973a76cfacaea33")),
         .package(name: "FeatureFlags", url: "https://github.com/EricRabil/FeatureFlags.swift", from: "1.0.0"),
         .package(url: "https://github.com/sendyhalim/Swime", .upToNextMajor(from: "3.0.7")),
         .package(url: "https://github.com/steipete/InterposeKit", .branchItem("master")),
@@ -41,16 +41,13 @@ let package = Package(
         .package(name: "Sentry", url: "https://github.com/getsentry/sentry-cocoa", .upToNextMajor(from: "7.15.0")),
         .package(url: "https://github.com/Flight-School/AnyCodable", .upToNextMajor(from: "0.6.1")),
         .package(name: "Gzip", url: "https://github.com/1024jp/GzipSwift", .upToNextMajor(from: "5.1.1")),
-        .package(url: "https://github.com/SwiftyContacts/SwiftyContacts", .upToNextMajor(from: "4.0.0")),
-        .package(url: "https://github.com/EricRabil/ERBufferedStream", .upToNextMajor(from: "1.0.4")),
-        .package(url: "https://github.com/EricRabil/Pwomise", .upToNextMajor(from: "1.1.1")),
         .package(url: "https://github.com/EricRabil/SwiftyJavaScriptCore", .upToNextMajor(from: "1.0.2")),
         .package(url: "https://github.com/open-imcore/BarcelonaIPC", from: "1.0.5")
     ]
 ).addingLibrary(name: "BarcelonaDB", dependencies: ["GRDB", "BarcelonaFoundation"])
 .addingLibrary(name: "CBarcelona", dependencies: [.paris("CommunicationsFilter"), .paris("IMCore")])
 .addingLibrary(name: "Barcelona", dependencies: [
-    "CBarcelona", "BarcelonaDB", "FeatureFlags", "Swime", "InterposeKit", "SwiftCLI", "Sentry", "AnyCodable", "Gzip"
+    "CBarcelona", "BarcelonaDB", "FeatureFlags", "Swime", "InterposeKit", "SwiftCLI", "Sentry", "AnyCodable", "Gzip", "BarcelonaFoundation"
 ] + .paris("DataDetectorsCore", "IMDPersistence", "IMDaemonCore", "IMCore", "IMSharedUtilities", "IMFoundation", "IDS", "DigitalTouchShared", "LinkPresentation"))
 .addingLibrary(name: "BarcelonaJS", dependencies: ["Barcelona", "SwiftyJavaScriptCore", "BarcelonaIPC"])
 //.addingLibrary(name: "BarcelonaMautrixIPC", dependencies: [

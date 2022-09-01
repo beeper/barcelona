@@ -518,7 +518,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
     public override func service(_ serviceID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, messagesUpdated messages: [[AnyHashable: Any]]!) {
         *log.debug("messagesUpdated[service]: \(messages.debugDescription, privacy: .public)")
         
-        for message in FZCreateIMMessageItemsFromSerializedArray(messages) {
+        for message in ERCreateIMMessageItemsFromSerializedArray(messages) {
             switch message {
             case let message as IMMessageItem:
                 self.process(serviceMessage: message, chatIdentifier: chatIdentifier, chatStyle: chatStyle)
