@@ -535,7 +535,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
     public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, messagesUpdated messages: [NSObject]!) {
         *log.debug("messagesUpdated[account]: \(messages.debugDescription, privacy: .public)")
         
-        for message in messages as? [IMItem] ?? FZCreateIMMessageItemsFromSerializedArray(messages) {
+        for message in messages as? [IMItem] ?? ERCreateIMMessageItemsFromSerializedArray(messages) {
             switch message {
             case let message as IMMessageItem:
                 // This listener call is only for failed messages that are not otherwise caught.
