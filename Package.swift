@@ -31,7 +31,7 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(url: "https://github.com/open-imcore/BarcelonaFoundation", from: "1.0.2"),
+        .package(url: "https://github.com/open-imcore/BarcelonaFoundation", from: "1.0.3"),
         .package(name: "GRDB", url: "https://github.com/groue/GRDB.swift.git", .upToNextMajor(from: "5.26.0")),
         .package(url: "https://github.com/EricRabil/Paris", .revisionItem("0f631b35a2a8871b8517dda33973a76cfacaea33")),
         .package(name: "FeatureFlags", url: "https://github.com/EricRabil/FeatureFlags.swift", from: "1.0.0"),
