@@ -7,6 +7,7 @@
 
 import Foundation
 import LinkPresentation
+import LinkPresentationPrivate
 
 /// Wire-serializable struct for rich links
 public struct RichLinkMetadata: Codable, Hashable {
