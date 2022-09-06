@@ -202,7 +202,9 @@ internal extension CBDaemonListener {
                 return
             }
             
-            self.chatJoinStatePipeline.send((chat.id, chat.joinState))
+            CBChatRegistry.shared.chat(for: chat).map { cbChat, _ in
+                self.chatJoinStatePipeline.send((cbChat, chat.joinState))
+            }
         }
         
         NotificationCenter.default.addObserver(forName: .IMChatPropertiesChanged, object: nil, queue: nil) { notification in
@@ -303,18 +305,19 @@ public class OrderedDictionary<K: Hashable, V> {
     }
 }
 
+
 public class CBDaemonListener: ERBaseDaemonListener {
     public static let shared = CBDaemonListener()
     
-    public enum PipelineEvent: Codable {
-        case unreadCount(chat: String, count: Int)
-        case typing(chat: String, typing: Bool)
-        case chatName(chat: String, name: String?)
-        case chatParticipants(chat: String, participants: [String])
+    public enum PipelineEvent {
+        case unreadCount(chat: CBChat, count: Int)
+        case typing(chat: CBChat, typing: Bool)
+        case chatName(chat: CBChat, name: String?)
+        case chatParticipants(chat: CBChat, participants: [String])
         case blocklist(entries: [String])
         case messagesDeleted(ids: [String])
         case chatsDeleted(chatIDs: [String])
-        case chatJoinState(chat: String, joinState: IMChatJoinState)
+        case chatJoinState(chat: CBChat, joinState: IMChatJoinState)
         case message(payload: Message)
         case phantom(item: PhantomChatItem)
         case messageStatus(change: CBMessageStatusChange)
@@ -338,14 +341,14 @@ public class CBDaemonListener: ERBaseDaemonListener {
         }
     }
     
-    public let unreadCountPipeline          = CBPipeline<(chat: String, count: Int)>()
-    public let typingPipeline               = CBPipeline<(chat: String, typing: Bool)>()
-    public let chatNamePipeline             = CBPipeline<(chat: String, name: String?)>()
-    public let chatParticipantsPipeline     = CBPipeline<(chat: String, participants: [String])>()
+    public let unreadCountPipeline          = CBPipeline<(chat: CBChat, count: Int)>()
+    public let typingPipeline               = CBPipeline<(chat: CBChat, typing: Bool)>()
+    public let chatNamePipeline             = CBPipeline<(chat: CBChat, name: String?)>()
+    public let chatParticipantsPipeline     = CBPipeline<(chat: CBChat, participants: [String])>()
     public let blocklistPipeline            = CBPipeline<[String]>()
     public let messagesDeletedPipeline      = CBPipeline<[String]>()
     public let chatsDeletedPipeline         = CBPipeline<[String]>()
-    public let chatJoinStatePipeline        = CBPipeline<(chat: String, joinState: IMChatJoinState)>()
+    public let chatJoinStatePipeline        = CBPipeline<(chat: CBChat, joinState: IMChatJoinState)>()
     public let messagePipeline              = CBPipeline<Message>()
     public let phantomPipeline              = CBPipeline<PhantomChatItem>()
     public let messageStatusPipeline        = CBPipeline<CBMessageStatusChange>()
@@ -453,7 +456,21 @@ public class CBDaemonListener: ERBaseDaemonListener {
     // Group name changed
     public override func chat(_ persistentIdentifier: String!, displayNameUpdated displayName: String?) {
         *log.debug("chat:\(persistentIdentifier, privacy: .public) displayNameUpdated:\(displayName ?? "nil", privacy: .public)")
-        chatNamePipeline.send((persistentIdentifier.bl_mergedID, displayName))
+        guard let chat = chat(withPID: persistentIdentifier, for: "display name change") else {
+            return
+        }
+        chatNamePipeline.send((chat, displayName))
+    }
+
+    private func chat(withPID persistentIdentifier: String!, for eventType: @autoclosure () -> String) -> CBChat! {
+        guard let chat = IMChatRegistry.shared.existingChat(withChatIdentifier: persistentIdentifier)
+            .flatMap(CBChatRegistry.shared.chat(for:))
+            .flatMap(\.?.0) else {
+                let eventType = eventType()
+                log.fault("Drop \(eventType): chat not found with ID \(persistentIdentifier)")
+                return nil
+            }
+        return chat
     }
     
     public override func leftChat(_ persistentIdentifier: String!) {
@@ -517,7 +534,9 @@ public class CBDaemonListener: ERBaseDaemonListener {
     public override func service(_ serviceID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, messagesUpdated messages: [[AnyHashable: Any]]!) {
         *log.debug("messagesUpdated[service]: \(messages.debugDescription, privacy: .public)")
         
-        for message in FZCreateIMMessageItemsFromSerializedArray(messages) {
+        
+        
+        for message in ERCreateIMMessageItemsFromSerializedArray(messages) {
             switch message {
             case let message as IMMessageItem:
                 self.process(serviceMessage: message, chatIdentifier: chatIdentifier, chatStyle: chatStyle)
@@ -534,7 +553,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
     public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, messagesUpdated messages: [NSObject]!) {
         *log.debug("messagesUpdated[account]: \(messages.debugDescription, privacy: .public)")
         
-        for message in messages as? [IMItem] ?? FZCreateIMMessageItemsFromSerializedArray(messages) {
+        for message in messages as? [IMItem] ?? ERCreateIMMessageItemsFromSerializedArray(messages) {
             switch message {
             case let message as IMMessageItem:
                 // This listener call is only for failed messages that are not otherwise caught.
@@ -602,7 +621,9 @@ private extension CBDaemonListener {
             unreadCounts[chatIdentifier] = unreadCount
             
             if emitIfNeeded && previousUnreadCount != unreadCount {
-                unreadCountPipeline.send((chatIdentifier, unreadCount))
+                chat(withPID: chatIdentifier, for: "unread count change").map { chat in
+                    unreadCountPipeline.send((chat, unreadCount))
+                }
             }
         }
         
@@ -611,7 +632,9 @@ private extension CBDaemonListener {
         displayNames[chatIdentifier] = displayName
         
         if emitIfNeeded && previousDisplayName != displayName {
-            chatNamePipeline.send((chatIdentifier, displayName))
+            chat(withPID: chatIdentifier, for: "chat name change").map { chat in
+                chatNamePipeline.send((chat, displayName))
+            }
         }
         
         apply(chatIdentifier: chatIdentifier, participants: extractParticipants(dict["participants"]), emitIfNeeded: emitIfNeeded)
@@ -622,7 +645,10 @@ private extension CBDaemonListener {
         participants[chatIdentifier] = chatParticipants
         
         if emitIfNeeded && previousParticipants != chatParticipants {
-            chatParticipantsPipeline.send((chatIdentifier, chatParticipants))
+            guard let chat = chat(withPID: chatIdentifier, for: "participant change") else {
+                return
+            }
+            chatParticipantsPipeline.send((chat, chatParticipants))
         }
     }
 }
@@ -708,17 +734,21 @@ private extension CBDaemonListener {
             log.warn("withholding message \(newMessage.guid): preflight failure")
             return
         }
-        
+
         var currentlyTyping: Bool {
             get { self.currentlyTyping.contains(chatIdentifier) }
             set {
                 if newValue {
                     if self.currentlyTyping.insert(chatIdentifier).inserted {
-                        typingPipeline.send((chatIdentifier, true))
+                        chat(withPID: chatIdentifier, for: "start typing").map { chat in
+                            typingPipeline.send((chat, true))
+                        }
                     }
                 } else {
                     if self.currentlyTyping.remove(chatIdentifier) != nil {
-                        typingPipeline.send((chatIdentifier, false))
+                        chat(withPID: chatIdentifier, for: "stop typing").map { chat in
+                            typingPipeline.send((chat, false))
+                        }
                     }
                 }
             }

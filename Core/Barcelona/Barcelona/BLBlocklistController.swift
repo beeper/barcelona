@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CommunicationsFilter
 
 public class BLBlocklistController {
     @_spi(unitTestInternals) public var testingOverride: Set<String> = Set()

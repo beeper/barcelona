@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Pwomise
 
 private extension Dictionary {
     func merge(into dictionary: inout Dictionary) {

@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import Barcelona
 import BarcelonaMautrixIPC
+import Barcelona
 import IMCore
 import BarcelonaJS
 import SwiftCLI
@@ -17,8 +17,11 @@ import Sentry
 private let log = Logger(category: "ERBarcelonaManager", subsystem: "com.beeper.imc.barcelona-mautrix")
 private let trace = Tracer(log, true)
 
+import BarcelonaMautrixIPCProtobuf
+
 @main
-class BarcelonaMautrix {
+struct BarcelonaMautrix {
+
     static let shared = BarcelonaMautrix()
     
     let reader = BLPayloadReader()
@@ -90,6 +93,13 @@ class BarcelonaMautrix {
             
             log.info("BLMautrix is ready")
             
+            DispatchQueue.global().async {
+                log.info("Prewarming...")
+                BMXPrewarm().then {
+                    log.info("Prewarm took \($0, privacy: .public)s")
+                }
+            }
+            
             self.startHealthTicker()
         }
     }
@@ -105,7 +115,9 @@ class BarcelonaMautrix {
     // starts the bridge state interval
     func startHealthTicker() {
         BLHealthTicker.shared.subscribeForever { command in
-            BLWritePayload(IPCPayload(command: .bridge_status(command)))
+            BLWritePayload(.with {
+                $0.command = .bridgeStatus(command)
+            })
         }
         
         BLHealthTicker.shared.run(schedulingNext: true)

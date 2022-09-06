@@ -33,15 +33,19 @@ struct ChatDiagnostics: Codable {
     }
     
     var chat: Chat
-    var blChat: BLChat
+    var blChat: BLChat!
     
     var myHandle: String
     var participants: [Handle]
     var contacts: [String: Contact]
-    var blContacts: [String: BLContact]
+    var blContacts: [String: BLContact] = [:]
     
-    var recentBLMessages: [BLMessage]
+    var recentBLMessages: [BLMessage] = []
     var recentMessages: [Message]
+    
+    enum CodingKeys: String, CodingKey {
+        case chat, myHandle, participants, contacts, recentMessages
+    }
 }
 
 struct AccountDiagnostics: Codable {

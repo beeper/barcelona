@@ -13,6 +13,7 @@ import Combine
 import BarcelonaDB
 import IMDPersistence
 import IMSharedUtilities
+import Swexy
 
 private let IMCopyThreadNameForChat: (@convention(c) (String, String, IMChatStyle) -> Unmanaged<NSString>)? = CBWeakLink(against: .privateFramework(name: "IMFoundation"), .symbol("IMCopyThreadNameForChat"))
 
@@ -30,8 +31,8 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         IMDaemonController.shared().listener.addHandler(self)
     }
     
-    public func setupComplete(_ success: Bool, info: [AnyHashable : Any]!) {
-        if let chats = info["personMergedChats"] as? [[AnyHashable: Any]] {
+    public func setupComplete(_ success: Bool, info: [AnyHashable : Any]?) {
+        if let chats = info?["personMergedChats"] as? [[AnyHashable: Any]] {
             for chat in chats {
                 _ = handle(chat: chat)
             }
@@ -304,6 +305,43 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
 }
 
 public extension CBChatRegistry {
+    func chat(for chat: IMChat) -> (CBChat, CBChatIdentifier)! {
+        enum Stop: Error {
+            case found(CBChat, CBChatIdentifier)
+            case bestID(CBChatIdentifier)
+        }
+        do {
+            try chat.forEachIdentifier { identifier in
+                if let existing = self.chats[identifier] {
+                    throw Stop.found(existing, identifier)
+                }
+            }
+        } catch {
+            if case Stop.found(let (found, id)) = error {
+                return (found, id)
+            } else {
+                preconditionFailure("\(error)")
+            }
+        }
+        do {
+            try chat.forEachIdentifier {
+                throw Stop.bestID($0)
+            }
+        } catch {
+            if case Stop.bestID(let id) = error {
+                let cbChat = CBChat(style: chat.chatStyle.CBChat)
+                cbChat.handle(chat: chat)
+                store(chat: cbChat)
+                return (cbChat, id)
+            } else {
+                preconditionFailure("\(error)")
+            }
+        }
+        return nil
+    }
+}
+
+public extension CBChatRegistry {
     static let shared = CBChatRegistry()
     
     func handle(chat: [AnyHashable: Any]) -> (CBChat?, CBChatIdentifier?) {
@@ -334,7 +372,7 @@ public extension CBChatRegistry {
         store(chat: cbChat)
         return (cbChat, leaf.mostUniqueIdentifier)
     }
-    
+
     func handle(chat: CBChatIdentifier, item: [AnyHashable: Any]) {
         if let guid = item["guid"] as? String, !messageIDReverseLookup.keys.contains(guid) {
             messageIDReverseLookup[guid] = chat

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Contacts
 import IMCore
 
 private extension Array where Element: Hashable {

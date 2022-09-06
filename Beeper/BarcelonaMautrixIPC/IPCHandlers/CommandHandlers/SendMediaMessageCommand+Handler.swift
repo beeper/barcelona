@@ -10,6 +10,7 @@ import Foundation
 import Barcelona
 import IMCore
 import Sentry
+import Swog
 
 public protocol Runnable {
     func run(payload: IPCPayload)
@@ -80,7 +81,18 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                     transaction.finish(status: .unknownError)
                 }
                 if !success && shouldCancel {
-                    BLWritePayload(.init(command: .send_message_status(.init(guid: message.id, chatGUID: chat.blChatGUID, status: .failed, service: resolveMessageService(), message: failureCode?.localizedDescription, statusCode: failureCode?.description))))
+                    BLWritePayload {
+                        $0.command = .sendMessageStatus(.with { status in
+                            status.guid = message.id
+                            status.chatGuid = chat.imChat.ipcGUID
+                            status.status = "failed"
+                            status.service = resolveMessageService()
+                            status.error = .with { error in
+                                (failureCode?.localizedDescription).oassign(to: &error.message)
+                                (failureCode?.description).oassign(to: &error.code)
+                            }
+                        })
+                    }
                 }
                 if !success && shouldCancel {
                     chat.imChat.cancel(message)
@@ -91,8 +103,11 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             message = try chat.sendReturningRaw(message: messageCreation)
             
             transaction.setData(value: message?.guid, key: "message_guid")
-            
-            payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message!.id, service: resolveMessageService(), timestamp: Date().timeIntervalSinceNow)))
+            payload.reply(.sendResponse(.with {
+                $0.guid = message!.id
+                $0.service = resolveMessageService()
+                $0.time = .init(date: Date())
+            }))
         } catch {
             SentrySDK.capture(error: error) { scope in
                 scope.span = transaction

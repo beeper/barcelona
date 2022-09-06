@@ -16,6 +16,8 @@ import IMCore
 import Swog
 import Pwomise
 
+public typealias IMFileTransfer = IMSharedUtilities.IMFileTransfer
+
 public protocol CBPurgedAttachmentControllerDelegate {
     func purgedTransferResolved(_ transfer: IMFileTransfer)
     func purgedTransferFailed(_ transfer: IMFileTransfer)
@@ -355,4 +357,12 @@ extension Promise {
             }
         }
     }
+    
+    
+    static func +(lhs: Promise, rhs: Promise) -> Promise<[Output.Element]> where Output: Collection {
+        Promise.all([lhs, rhs]).then {
+            $0.flatten()
+        }
+    }
 }
+

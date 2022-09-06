@@ -15,6 +15,8 @@ import SwiftyContacts
 import Sentry
 import IDS
 import Pwomise
+import Swog
+import BarcelonaMautrixIPCProtobuf
 
 extension IMBusinessNameManager {
     func addCallback(forURI uri: String, callback: @escaping (NSString) -> ()) {
@@ -83,7 +85,7 @@ public func BMXGenerateContactList(omitAvatars: Bool = false, asyncLookup: Bool 
             finalized.append(contact)
         }
     }
-    let filtered = finalized.filter { !$0.user_guid.isEmpty }
+    let filtered = finalized.filter { $0.hasUserGuid }
     transaction.setTag(value: NSUserName(), key: "sessionID")
     transaction.setData(value: filtered.count, key: "loadedCount")
     transaction.finish(status: .ok)
@@ -261,18 +263,23 @@ struct ContactInfoCollector {
             correlationID = CBSenderCorrelationController.shared.correlate(sameSenders: Array(uriCollector.uris), offline: !assertCorrelationID)
         }
         
-        let contact = BLContact (
-            first_name: firstName,
-            last_name: lastName,
-            nickname: nickname,
-            avatar: avatar?.base64EncodedString(),
-            phones: Array(uriCollector.phoneNumbers),
-            emails: uriCollector.emailAddresses.map { IMFormattedDisplayStringForID($0, nil) ?? $0 },
-            user_guid: handleID,
-            primary_identifier: primaryIdentifier,
-            serviceHint: serviceHint,
-            correlation_id: correlationID
-        )
+        let contact = BLContact.with {
+            firstName.oassign(to: &$0.firstName)
+            lastName.oassign(to: &$0.lastName)
+            nickname.oassign(to: &$0.nickname)
+            if let avatar = avatar, !avatar.isEmpty {
+                $0.avatar = avatar
+            }
+            $0.phones = Array(uriCollector.phoneNumbers)
+            $0.emails = Array(uriCollector.emailAddresses).map { IMFormattedDisplayStringForID($0, nil) ?? $0 }
+            $0.userGuid = .with {
+                $0.service = serviceHint
+                $0.isGroup = false
+                primaryIdentifier.oassign(to: &$0.localID)
+            }
+            primaryIdentifier.oassign(to: &$0.primaryIdentifier)
+            correlationID.oassign(to: &$0.correlationID)
+        }
         
         reset()
         
@@ -312,9 +319,16 @@ extension BLContact {
         if handleID.isBusinessID {
             if let handle = IMHandle.resolve(withIdentifier: handleID) {
                 // mapItemImageData was replaced with a brandSquareLogoImageData in Monterey, in order to integrate with BusinessServices.framework. this can be removed once big sur support is dropped (if ever)
-                return BLContact(first_name: handle.name, last_name: nil, nickname: nil, avatar: handle.businessPhotoData?.base64EncodedString(), phones: [], emails: [], user_guid: handle.id, serviceHint: "iMessage")
+                return .with {
+                    handle.name.oassign(to: &$0.firstName)
+                    handle.businessPhotoData.oassign(to: &$0.avatar)
+                    $0.userGuid = handle.ipcGUID
+                }
             } else {
-                return BLContact(first_name: nil, last_name: nil, nickname: nil, avatar: nil, phones: [], emails: [], user_guid: handleID, serviceHint: "iMessage")
+//                return BLContact(first_name: nil, last_name: nil, nickname: nil, avatar: nil, phones: [], emails: [], user_guid: handleID, serviceHint: "iMessage")
+                return .with {
+                    $0.userGuid = .iMessageDM(handleID)
+                }
             }
         } else {
             var collector: ContactInfoCollector = ContactInfoCollector(handleID)
@@ -346,8 +360,8 @@ extension BLContact {
     }
 }
 
-extension GetContactCommand: Runnable {
+extension PBGetContactRequest: Runnable {
     public func run(payload: IPCPayload) {
-        payload.respond(.contact(BLContact.blContact(forHandleID: normalizedHandleID, assertCorrelationID: true)))
+        payload.respond(.contact(BLContact.blContact(forHandleID: identifier, assertCorrelationID: false)))
     }
 }

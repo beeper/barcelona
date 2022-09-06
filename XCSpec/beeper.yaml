@@ -11,6 +11,7 @@ targets:
         - barcelona-mautrix-tests
     dependencies:
       - package: BarcelonaFoundation
+      - package: BarcelonaMautrixIPCProtobuf
       - package: FeatureFlags
       - package: Sentry
       - package: ERBufferedStream

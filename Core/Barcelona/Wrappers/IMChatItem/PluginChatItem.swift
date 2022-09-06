@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import LinkPresentation
+import LinkPresentationPrivate
 import IMCore
 import DigitalTouchShared
 

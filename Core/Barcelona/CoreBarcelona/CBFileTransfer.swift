@@ -16,7 +16,7 @@ public func CBInitializeFileTransfer(filename: String, path: URL) -> IMFileTrans
     var transfer: IMFileTransfer!
     Thread.main.sync {
         var guid: String
-        if #available(macOS 11.0, *) {
+        if #available(macOS 11.0, iOS 14, *) {
             guid = IMFileTransferCenter.sharedInstance().guidForNewOutgoingTransfer(withLocalURL: path, useLegacyGuid: true)
         } else {
             guid = IMFileTransferCenter.sharedInstance().guidForNewOutgoingTransfer(withLocalURL: path)

@@ -8,17 +8,14 @@
 import Foundation
 import Barcelona
 import IMCore
+import BarcelonaMautrixIPCProtobuf
 
-public struct GetContactListResponse: Codable {
+public struct PBContactList {
     public struct Runner: Runnable {
         public func run(payload: IPCPayload) {
-            payload.reply(withResponse: .contacts(GetContactListResponse(contacts: BMXGenerateContactList(omitAvatars: true))))
+            payload.reply(withResponse: .contacts(.with {
+                $0.contacts = BMXGenerateContactList(omitAvatars: true)
+            }))
         }
     }
-    
-    public init(contacts: [BLContact]) {
-        self.contacts = contacts
-    }
-    
-    public var contacts: [BLContact]
 }

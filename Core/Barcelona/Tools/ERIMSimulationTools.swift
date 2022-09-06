@@ -8,6 +8,7 @@
 
 import Foundation
 import IMCore
+import Swog
 
 private let SIMULATION_OUTGOING_ID = "+15555648583"
 private let SIMULATION_INCOMING_IDS = ["iMessage"]

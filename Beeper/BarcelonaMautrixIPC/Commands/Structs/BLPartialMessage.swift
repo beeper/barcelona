@@ -8,15 +8,16 @@
 
 import Foundation
 import Barcelona
+import BarcelonaMautrixIPCProtobuf
 
-public struct BLPartialMessage: Codable {
-    public var guid: String
-    public var service: String
-    public var timestamp: Double
-}
+public typealias BLPartialMessage = PBSendResponse
 
 public extension Message {
     var partialMessage: BLPartialMessage {
-        BLPartialMessage(guid: id, service: service.rawValue, timestamp: time)
+        .with {
+            $0.guid = id
+            $0.service = service.rawValue
+            $0.time = .init(timeIntervalSince1970: time)
+        }
     }
 }

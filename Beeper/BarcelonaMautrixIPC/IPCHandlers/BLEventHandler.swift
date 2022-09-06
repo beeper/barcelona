@@ -6,9 +6,12 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
+import Foundation
 import Barcelona
 import IMCore
 import IDS
+import Swog
+import Contacts
 
 private extension ChatItemOwned {
     var mautrixFriendlyGUID: String {
@@ -57,11 +60,37 @@ extension IMChatRegistry {
 private extension BLContact {
     static func emptyContact(for handleID: String) -> BLContact {
         if handleID.isEmail {
-            return BLContact(phones: [], emails: [handleID], user_guid: "iMessage;-;\(handleID)")
+            // return BLContact(phones: [], emails: [handleID], user_guid: "iMessage;-;\(handleID)")
+            return BLContact.with { $0.emails = [handleID]; $0.userGuid = .iMessageDM(handleID) }
         } else if handleID.isPhoneNumber {
-            return BLContact(phones: [handleID], emails: [], user_guid: "iMessage;-;\(handleID)")
+            // return BLContact(phones: [handleID], emails: [], user_guid: "iMessage;-;\(handleID)")
+            return BLContact.with { $0.phones = [handleID]; $0.userGuid = .iMessageDM(handleID) }
         } else {
-            return BLContact(phones: [], emails: [], user_guid: "iMessage;-;\(handleID)")
+            // return BLContact(phones: [], emails: [], user_guid: "iMessage;-;\(handleID)")
+            return BLContact.with { $0.userGuid = .iMessageDM(handleID) }
+        }
+    }
+}
+
+extension PBGUID {
+    static func iMessageDM(_ localID: String) -> PBGUID {
+        .with {
+            $0.service = "iMessage"
+            $0.localID = localID
+        }
+    }
+}
+
+import BarcelonaMautrixIPCProtobuf
+
+extension CBChat {
+    var bestChatIdentifier: PBGUID! {
+        chatForSending().map { chat in
+            PBGUID.with { guid in
+                guid.service = chat.account.serviceName
+                guid.isGroup = chat.isGroup
+                guid.localID = chat.chatIdentifier
+            }
         }
     }
 }
@@ -71,19 +100,24 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
     
     private let fifoQueue = FifoQueue<Void>()
     
-    internal func send(_ command: IPCCommand) {
-        BLWritePayload(.init(command: command))
-    }
-    
-    @_spi(unitTestInternals) public func receiveTyping(_ chat: String, _ typing: Bool) {
-        if let chat = IMChat.resolve(withIdentifier: chat), chat.isSingle, let recipientID = chat.recipient?.id, BLBlocklistController.shared.isSenderBlocked(recipientID) {
+    @_spi(unitTestInternals) public func receiveTyping(_ chat: CBChat, _ typing: Bool) {
+        if chat.style == .instantMessage, let recipientID = chat.mergedRecipientIDs.first, BLBlocklistController.shared.isSenderBlocked(recipientID) {
             return
         }
         
-        send(.typing(.init(chat_guid: Chat.resolve(withIdentifier: chat)!.imChat.blChatGUID, typing: typing)))
+        // send(.typing(.init(chat_guid: Chat.resolve(withIdentifier: chat)!.imChat.blChatGUID, typing: typing)))
+        BLWritePayload {
+            $0.command = .typingNotification(.with {
+                $0.chatGuid = .with {
+                    $0.service = chat.serviceForSending.name
+                    $0.isGroup = chat.style == .group
+                    // $0.localID = chat.
+                }
+            })
+        }
     }
     
-    @_spi(unitTestInternals) public func unreadCountChanged(_ chat: String, _ count: Int) {
+    @_spi(unitTestInternals) public func unreadCountChanged(_ chat: CBChat, _ count: Int) {
     }
     
     public func run() {
@@ -97,7 +131,28 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
             if let sender = change.sender, BLBlocklistController.shared.isSenderBlocked(sender) {
                 return
             }
-            BLWritePayload(.init(command: .read_receipt(BLReadReceipt(sender_guid: change.mautrixFriendlyGUID, is_from_me: change.fromMe, chat_guid: change.chat.blChatGUID, read_up_to: change.messageID, correlation_id: change.chat.correlationIdentifier, sender_correlation_id: change.senderCorrelationID))))
+            BLWritePayload {
+                $0.command = .readReceipt(.with { rr in
+                    change.sender.map { senderID in
+                        rr.senderGuid = .with {
+                            $0.service = change.service
+                            $0.isGroup = change.chat.isGroup
+                            $0.localID = senderID
+                        }
+                    }
+                    rr.isFromMe = change.fromMe
+                    rr.chatGuid = .with {
+                        $0.service = change.service
+                        $0.isGroup = change.chat.isGroup
+                        $0.localID = change.chatID
+                    }
+                    rr.readUpTo = change.messageID
+                    rr.correlations = .with { correlations in
+                        change.chat.correlationIdentifier.oassign(to: &correlations.chat)
+                        change.senderCorrelationID.oassign(to: &correlations.sender)
+                    }
+                })
+            }
         }
         
         BLMessageExpert.shared.eventPipeline.pipe { event in
@@ -109,7 +164,9 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 if CBPurgedAttachmentController.shared.enabled {
                     if message.fileTransferIDs.count > 0 {
                         CBPurgedAttachmentController.shared.process(transferIDs: message.fileTransferIDs).then { [message] in
-                            BLWritePayload(.init(command: .message(BLMessage(message: message.refresh()))))
+                            BLWritePayload {
+                                $0.command = .message(PBMessage(message: message.refresh()))
+                            }
                         }
                         return
                     }
@@ -120,11 +177,48 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                     CLDebug("", "%@", message.debugDescription)
                 }
                 #endif
-                BLWritePayload(.init(command: .message(BLMessage(message: message))))
+                BLWritePayload {
+                    $0.command = .message(PBMessage(message: message))
+                }
+                // BLWritePayload {}
             case .sent(id: let id, service: let service, chat: let chat, time: _, senderCorrelationID: let senderCorrelationID):
-                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(sentMessageGUID: id, onService: service, forChatGUID: chat.blChatGUID, correlation_id: chat.correlationIdentifier, sender_correlation_id: senderCorrelationID))))
+                BLWritePayload {
+                    $0.command = .sendMessageStatus(.with { status in
+                        status.guid = id
+                        status.service = service
+                        status.status = "sent"
+                        status.chatGuid = .with {
+                            $0.service = service
+                            $0.isGroup = chat.isGroup
+                            $0.localID = chat.chatIdentifier
+                        }
+                        status.correlations = .with {
+                            chat.correlationIdentifier.oassign(to: &$0.chat)
+                            senderCorrelationID.oassign(to: &$0.sender)
+                        }
+                    })
+                }
             case .failed(id: let id, service: let service, chat: let chat, code: let code, senderCorrelationID: let senderCorrelationID):
-                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(guid: id, chatGUID: chat.blChatGUID, status: .failed, service: service, message: code.localizedDescription, statusCode: code.description, correlation_id: chat.correlationIdentifier, sender_correlation_id: senderCorrelationID))))
+                BLWritePayload {
+                    $0.command = .sendMessageStatus(.with { status in
+                        status.guid = id
+                        status.service = service
+                        status.status = "failed"
+                        status.chatGuid = .with {
+                            $0.service = service
+                            $0.isGroup = chat.isGroup
+                            $0.localID = chat.chatIdentifier
+                        }
+                        status.correlations = .with {
+                            chat.correlationIdentifier.oassign(to: &$0.chat)
+                            senderCorrelationID.oassign(to: &$0.sender)
+                        }
+                        status.error = .with { error in
+                            error.code = code.description
+                            code.localizedDescription.oassign(to: &error.message)
+                        }
+                    })
+                }
             default:
                 break
             }
@@ -137,7 +231,9 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
             guard let blContact = BLContact.blContact(for: contact) else {
                 return
             }
-            BLWritePayload(.init(command: .contact(blContact)))
+            BLWritePayload {
+                $0.command = .contact(blContact)
+            }
         }
         
         NotificationCenter.default.addObserver(forName: "IMCSChangeHistoryUpdateContactEventNotification", object: nil, queue: nil, using: handleAddOrChangeContactNotification(_:))
@@ -145,7 +241,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         
         // There's no way Apple-native way to know which handle IDs are being cleared out, without avoiding false positives.
         CBDaemonListener.shared.resetHandlePipeline.pipe { handleIDs in
-            BLWritePayloads(handleIDs.map(BLContact.emptyContact(for:)).map { IPCPayload(command: .contact($0)) })
+            BLWritePayloads(handleIDs.map(BLContact.emptyContact(for:)).map { contact in .with { $0.command = .contact(contact) } })
         }
         
         var nicknamesLoadedAt: Date? = nil, lastNicknamePayloads: [String: BLContact] = [:]
@@ -158,14 +254,17 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 return
             }
             
-            let payloads: [IPCPayload] = handleIDs.map { BLContact.blContact(forHandleID: $0, assertCorrelationID: false) }.filter { contact in
-                if lastNicknamePayloads[contact.user_guid] == contact {
+            let payloads: [PBPayload] = handleIDs.map { BLContact.blContact(forHandleID: $0, assertCorrelationID: false) }.filter { contact in
+                let rawValue = contact.userGuid.rawValue
+                if lastNicknamePayloads[rawValue] == contact {
                     return false
                 }
-                lastNicknamePayloads[contact.user_guid] = contact
+                lastNicknamePayloads[rawValue] = contact
                 return true
-            }.map {
-                .init(command: .contact($0))
+            }.map { contact in
+                .with {
+                    $0.command = .contact(contact)
+                }
             }
             
             guard let nicknamesLoadedAt = nicknamesLoadedAt, nicknamesLoadedAt.distance(to: Date()) > 1 else {
@@ -180,13 +279,28 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         }
     }
     
+    public func purgedTransferResolved(_ transfer: IMFileTransfer) {
+        
+    }
+    
     public func purgedTransferFailed(_ transfer: IMFileTransfer) {
-        BLWritePayload(.init(id: nil, command: .error(.init(code: "file-transfer-failure", message: "Failed to download file transfer: \(transfer.errorDescription ?? transfer.error.description) (\(transfer.error.description))"))))
+        BLWritePayload {
+            $0.command = .error(.with {
+                $0.code = "file-transfer-failure"
+                $0.message = "Failed to download file transfer: \(transfer.errorDescription ?? transfer.error.description) (\(transfer.error.description))"
+            })
+        }
     }
 }
 
 extension Chat {
     var lastMessageID: String? {
         imChat.lastMessage?.guid
+    }
+}
+
+extension PBGUID {
+    var rawValue: String {
+        "\(service);\(isGroup ? "+" : "-");\(localID)"
     }
 }

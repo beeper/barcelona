@@ -105,13 +105,50 @@ public struct CBChatLeaf {
         return self
     }
 }
-
-#if canImport(IMCore)
+ 
 import IMCore
+
+public extension CBChatLeaf {
+    mutating func handle(chat: IMChat) {
+        guid = chat.guid ?? guid
+        chatIdentifier = chat.chatIdentifier ?? chatIdentifier
+        groupID = chat.groupID ?? groupID
+        if let participants = chat.participants {
+            self.participants = participants.map {
+                CBChatParticipant(handle: $0)
+            }
+            if chat.isSingle {
+                correlationID = chat.correlationIdentifier ?? ""
+            } else {
+                correlationID = ""
+            }
+        }
+        service = chat.account.serviceName.flatMap(CBServiceName.init(rawValue:)) ?? service
+        hasHadSuccessfulQuery = chat.hasHadSuccessfulQuery
+        handle(properties: chat.allChatProperties())
+    }
+}
 
 public extension CBChatLeaf {
     var IMChat: IMChat? {
         return mostUniqueIdentifier?.IMChat
     }
 }
-#endif
+
+public protocol CBChatIdentifierIterable {
+    func forEachIdentifier(_ callback: (CBChatIdentifier) throws -> ()) rethrows
+}
+
+extension IMChat: CBChatIdentifierIterable {
+    public func forEachIdentifier(_ callback: (CBChatIdentifier) throws -> ()) rethrows {
+        if !guid.isEmpty {
+            try callback(.guid(guid))
+        }
+        if !chatIdentifier.isEmpty {
+            try callback(.chatIdentifier(chatIdentifier))
+        }
+        if !groupID.isEmpty {
+            try callback(.groupID(groupID))
+        }
+    }
+}

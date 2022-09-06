@@ -27,8 +27,8 @@ private class IMServiceRegistrationProviderImpl: IMServiceRegistrationProvider {
 
 public extension DBReader {
     func attachments(matchingParameters parameters: AttachmentSearchParameters, serviceRegistrationProvider: IMServiceRegistrationProvider? = nil) -> Promise<[RawAttachment]> {
-        parameters.loadRawAttachments().then { attachments in
-            read { db -> ([RawAttachment], [Int64: RawMessage], [Int64: (RawMessage?, RawHandle?)]) in
+        parameters.loadRawAttachments().then { attachments -> Promise<([RawAttachment], [Int64: RawMessage], [Int64: (RawMessage?, RawHandle?)])> in
+            read { db in
                 let messageAttachmentJoins: [MessageAttachmentJoin] = try MessageAttachmentJoin
                     .filter(attachments.compactMap(\.ROWID).contains(MessageAttachmentJoin.Columns.attachment_id))
                     .fetchAll(db)
@@ -40,7 +40,7 @@ public extension DBReader {
                     .filter(messageROWIDs.contains(RawMessage.Columns.ROWID))
                     .fetchAll(db)
                 
-                let messagesLedger = messages.dictionary(keyedBy: \.ROWID)
+                let messagesLedger: [Int64: RawMessage] = messages.dictionary(keyedBy: \.ROWID)
                 
                 let handleROWIDs = messages.filter {
                     $0.is_from_me == 0
@@ -53,7 +53,7 @@ public extension DBReader {
                 
                 let handlesLedger = handles.dictionary(keyedBy: \.ROWID)
                 
-                let messageAttachmentLedger = messageAttachmentJoins.reduce(into: [Int64: (RawMessage?, RawHandle?)]()) { ledger, join in
+                let messageAttachmentLedger: [Int64: (RawMessage?, RawHandle?)] = messageAttachmentJoins.reduce(into: [:]) { ledger, join in
                     guard let messageID = join.message_id, let attachmentID = join.attachment_id else {
                         return
                     }

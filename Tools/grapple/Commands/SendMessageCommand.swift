@@ -131,7 +131,7 @@ class MessageCommand: CommandGroup {
             func execute() throws {
                 BLLoadChatItems(withGUIDs: ids).then { items in
                     if self.mautrix {
-                        print(items.compactMap { $0 as? Message }.map { BLMessage(message: $0) }.prettyJSON)
+                        print(items.compactMap { $0 as? Message }.map { BLMessage(message: $0) })
                     } else {
                         print(items.map { $0.eraseToAnyChatItem() }.prettyJSON)
                     }

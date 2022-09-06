@@ -10,7 +10,9 @@ import IMCore
 import IMFoundation
 import Combine
 import Swog
+import IMSharedUtilities
 @_spi(synchronousQueries) import BarcelonaDB
+import BarcelonaFoundation
 
 fileprivate let log = Logger(category: "MessageMonitor")
 
@@ -20,7 +22,7 @@ public class BLMediaMessageMonitor {
     
     private var monitor: BLMessageExpert.BLMessageObserver?
     @Published public private(set) var latestMessageEvent: BLMessageExpert.BLMessageEvent?
-    @Published public private(set) var transferStates: [String: IMFileTransfer.IMFileTransferState]
+    @Published public private(set) var transferStates: [String: IMFileTransferState]
     private var completionMonitor: AnyCancellable?
     private var observer: NotificationSubscription?
     private var timeout: DispatchSourceTimer?
@@ -30,7 +32,7 @@ public class BLMediaMessageMonitor {
         self.messageID = messageID
         self.transferGUIDs = transferGUIDs
         self.callback = callback
-        self.transferStates = transferGUIDs.map { ($0, IMFileTransfer.IMFileTransferState.unknown) }.dictionary(keyedBy: \.0, valuedBy: \.1)
+        self.transferStates = transferGUIDs.map { ($0, IMFileTransferState.unknown) }.dictionary(keyedBy: \.0, valuedBy: \.1)
         var monitor: BLMessageExpert.BLMessageObserver?
         log.debug("Set up monitoring for message %@ and transfers %@", messageID(), transferGUIDs)
         monitor = BLMessageExpert.shared.observer(forMessage: messageID()) { [weak self, messageID, monitor] event in
@@ -88,7 +90,7 @@ public class BLMediaMessageMonitor {
         self.callback(success, code, shouldCancel)
     }
     
-    private func handle(updatedEvent latestEvent: BLMessageExpert.BLMessageEvent?, updatedStates latestStates: [String: IMFileTransfer.IMFileTransferState]) {
+    private func handle(updatedEvent latestEvent: BLMessageExpert.BLMessageEvent?, updatedStates latestStates: [String: IMFileTransferState]) {
         var finishedCount = 0
         for state in latestStates.values {
             switch state {

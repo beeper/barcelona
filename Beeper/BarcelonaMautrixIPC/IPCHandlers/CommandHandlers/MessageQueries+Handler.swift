@@ -8,20 +8,17 @@
 
 import Foundation
 import Barcelona
+import BarcelonaMautrixIPCProtobuf
 
-extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
+extension PBGetMessagesAfterRequest: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {
-        if MXFeatureFlags.shared.mergedChats, chat_guid.starts(with: "SMS;") {
-            return payload.respond(.messages([]))
-        }
-        
         #if DEBUG
-        IPCLog("Getting messages for chat guid %@ after time %f", chat_guid, timestamp)
+        IPCLog("Getting messages for chat guid %@ after time %f", chatGuid.rawValue, timestamp.timeIntervalSince1970)
         #endif
         
-        guard let chat = chat else {
+        guard let chat = chatGuid.imChat else {
             #if DEBUG
-            IPCLog.debug("Unknown chat with guid %@", chat_guid)
+            IPCLog.debug("Unknown chat with guid %@", chatGuid.rawValue)
             #endif
             return payload.fail(strategy: .chat_not_found)
         }
@@ -29,35 +26,58 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
         let siblings = chat.siblings
         
         if let lastMessageTime = siblings.compactMap(\.lastMessage?.time?.timeIntervalSince1970).max(),
-           lastMessageTime < timestamp {
+           lastMessageTime < timestamp.timeIntervalSince1970 {
             #if DEBUG
-            IPCLog.debug("Not processing get_messages_after because chats last message timestamp %f is before req.timestamp %f", lastMessageTime, timestamp)
+            IPCLog.debug("Not processing get_messages_after because chats last message timestamp %f is before req.timestamp %f", lastMessageTime, timestamp.timeIntervalSince1970)
             #endif
-            return payload.respond(.messages([]))
+            return payload.respond(.messages(.init()))
         }
         
-        
-        
-        BLLoadChatItems(withChatIdentifiers: siblings.compactMap(\.chatIdentifier), onServices: .CBMessageServices, afterDate: date, limit: limit).then(\.blMessages).then {
-            payload.respond(.messages($0))
+        BLLoadChatItems(withChatIdentifiers: siblings.compactMap(\.chatIdentifier), onServices: .CBMessageServices, afterDate: timestamp.date, limit: Int(limit)).then(\.blMessages).then { messages in
+            payload.respond(.messages(.with {
+                $0.messages = messages
+            }))
         }
     }
 }
 
-extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
+extension PBGetRecentMessagesRequest: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {
-        if MXFeatureFlags.shared.mergedChats, chat_guid.starts(with: "SMS;") {
-            return payload.respond(.messages([]))
-        }
-        
-        guard let chat = chat else {
+        guard let chat = chatGuid.imChat else {
             return payload.fail(strategy: .chat_not_found)
         }
         
         let siblings = chat.siblings
         
-        BLLoadChatItems(withChatIdentifiers: siblings.compactMap(\.chatIdentifier), onServices: .CBMessageServices, limit: limit).then(\.blMessages).then {
-            payload.respond(.messages($0))
+        BLLoadChatItems(withChatIdentifiers: siblings.compactMap(\.chatIdentifier), onServices: .CBMessageServices, limit: Int(limit)).then(\.blMessages).then { messages in
+            payload.respond(.messages(.with {
+                $0.messages = messages
+            }))
         }
+    }
+}
+
+extension PBHistoryQuery: Runnable {
+    public func run(payload: IPCPayload) {
+        guard let chat = chatGuid.imChat else {
+            return payload.fail(strategy: .chat_not_found)
+        }
+
+        let siblings = chat.siblings
+
+        BLLoadChatItems(
+            withChatIdentifiers: siblings.compactMap(\.chatIdentifier),
+            onServices: .CBMessageServices,
+            afterDate: (hasAfterDate ? afterDate : nil)?.date,
+            beforeDate: (hasBeforeDate ? beforeDate : nil)?.date,
+            afterGUID: (hasAfterGuid ? afterGuid : nil),
+            beforeGUID: (hasBeforeGuid ? beforeGuid : nil),
+            limit: (hasLimit ? limit : nil).flatMap(Int.init(_:))
+        ).then(\.blMessages)
+         .then { messages in
+             payload.respond(.messages(.with {
+                 $0.messages = messages
+             }))
+         }
     }
 }

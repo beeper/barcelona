@@ -11,6 +11,8 @@ import IMDPersistence
 import BarcelonaDB
 import IMCore
 import IMSharedUtilities
+import Pwomise
+import Swog
 
 private let IMDLog = Logger(category: "IMDPersistenceQueries")
 

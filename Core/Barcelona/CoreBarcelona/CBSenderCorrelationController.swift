@@ -12,6 +12,7 @@ import IMCore
 import Swog
 import Pwomise
 import IMSharedUtilities
+import Swexy
 
 extension IMChat {
     var styleSeparator: String {

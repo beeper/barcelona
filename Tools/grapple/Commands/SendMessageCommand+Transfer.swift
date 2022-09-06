@@ -14,7 +14,7 @@ import Barcelona
 // TODO: Use Barcelona's export of this once migrated to SPM
 /// Registers a file transfer with imagent for the given filename and path.
 /// The returned file transfer is ready to be sent by including its GUID in a message.
-private func CBInitializeFileTransfer(filename: String, path: URL) -> IMFileTransfer {
+private func CBInitializeFileTransfer(filename: String, path: URL) -> Barcelona.IMFileTransfer {
     var transfer: IMFileTransfer!
     Thread.main.sync {
         var guid: String

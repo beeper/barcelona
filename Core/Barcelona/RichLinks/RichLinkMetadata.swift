@@ -7,6 +7,9 @@
 
 import Foundation
 import LinkPresentation
+import LinkPresentationPrivate
+import struct CoreGraphics.CGSize
+import struct CoreGraphics.CGFloat
 
 /// Wire-serializable struct for rich links
 public struct RichLinkMetadata: Codable, Hashable {

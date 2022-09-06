@@ -8,6 +8,7 @@
 
 import Foundation
 import Barcelona
+import Swog
 
 extension TapbackCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {
@@ -20,7 +21,7 @@ extension TapbackCommand: Runnable, AuthenticatedAsserting {
         }
         
         do {
-            payload.respond(.message_receipt(try chat.tapback(creation, metadata: metadata).partialMessage))
+            payload.respond(.sendResponse(try chat.tapback(creation, metadata: metadata).partialMessage))
         } catch {
             // girl fuck
             CLFault("BLMautrix", "failed to send tapback: %@", error as NSError)

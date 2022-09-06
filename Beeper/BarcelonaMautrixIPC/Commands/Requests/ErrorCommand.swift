@@ -51,6 +51,9 @@ public enum ErrorStrategy {
     }
     
     public var asCommand: IPCCommand {
-        return .error(.init(code: code, message: message))
+        return .error(.with {
+            $0.code = code
+            $0.message = message
+        })
     }
 }

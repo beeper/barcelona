@@ -9,6 +9,71 @@
 import Foundation
 import Barcelona
 import IMCore
+import Swog
+import BarcelonaMautrixIPCProtobuf
+
+extension PBSendMessageRequest: Runnable, AuthenticatedAsserting {
+    public func run(payload: IPCPayload) {
+        guard let chat = chatGuid.chat else {
+            return payload.fail(strategy: .chat_not_found)
+        }
+        
+        if BLUnitTests.shared.forcedConditions.contains(.messageFailure) {
+            Timer.scheduledTimer(withTimeInterval: 2, repeats: false) { _ in
+                payload.fail(code: "idk", message: "couldnt send message lol")
+            }
+            return
+        }
+        
+        var create = CreateMessage(parts: [])
+        
+        if hasReplyTarget {
+            create.replyToGUID = replyTarget.guid
+            create.replyToPart = Int(replyTarget.part)
+        }
+        
+        if hasMetadata {
+            create.metadata = metadata.metadataValue
+        }
+        
+        for part in parts {
+            switch part.part {
+            case .media:
+                break
+            case .text:
+                break
+            case .tapback:
+                break
+            default:
+                continue
+            }
+        }
+    }
+}
+
+extension PBMetadataValue.OneOf_Value {
+    var metadataValue: MetadataValue {
+        switch self {
+        case .string(let string): return .string(string)
+        case .bool(let bool): return .boolean(bool)
+        case .double(let double): return .double(double)
+        case .bytes(let bytes): return .string(bytes.base64EncodedString()) // LOSSY
+        case .array(let elements): return .array(elements.values.compactMap(\.value?.metadataValue))
+        case .mapping(let mapping): return .dictionary(mapping.metadataValue)
+        case .int64(let int64), .sint64(let int64), .sfixed64(let int64): return .int(Int(int64))
+        case .int32(let int32), .sint32(let int32), .sfixed32(let int32): return .int(Int(int32))
+        case .uint64(let uint64), .fixed64(let uint64): return .int(Int(uint64))
+        case .uint32(let uint32), .fixed32(let uint32): return .int(Int(uint32))
+        case .float(let float): return .double(Double(float))
+        }
+    }
+}
+
+extension PBMapping {
+    var metadataValue: [String: MetadataValue] {
+        mapping.compactMapValues(\.value?.metadataValue)
+    }
+}
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {
@@ -43,7 +108,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                     CLDebug("BLMautrix", "I am processing a rich link! text '\(text, privacy: .private)'")
                     
                     let message = ERCreateBlankRichLinkMessage(text.trimmingCharacters(in: [" "]), url) { item in
-                        if #available(macOS 11.0, *), let replyToGUID = reply_to {
+                        if #available(macOS 11.0, iOS 14, *), let replyToGUID = reply_to {
                             item.setThreadIdentifier(IMChatItem.resolveThreadIdentifier(forMessageWithGUID: replyToGUID, part: reply_to_part ?? 0, chat: chat.imChat))
                         }
                     }
@@ -83,7 +148,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                 finalMessage = try chat.send(message: messageCreation)
             }
             
-            payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: finalMessage.id, service: finalMessage.service.rawValue, timestamp: finalMessage.time)))
+            payload.reply(withResponse: .sendResponse(finalMessage.partialMessage))
         } catch {
             // girl fuck
             CLFault("BLMautrix", "failed to send text message: %@", error as NSError)

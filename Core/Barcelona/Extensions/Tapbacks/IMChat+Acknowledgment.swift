@@ -33,7 +33,21 @@ public extension IMChat {
         let rawType = Int64(type)
         
 //        sendMessageAcknowledgment(Int64(type), forChatItem: subpart, withMessageSummaryInfo: )
-        guard let summaryInfo = subpart.summaryInfo(for: message, in: self, itemTypeOverride: overridingItemType), let compatibilityString = IMMessageAcknowledgmentStringHelper.generateBackwardCompatibilityString(forMessageAcknowledgmentType: rawType, messageSummaryInfo: summaryInfo), let superFormat = IMCreateSuperFormatStringFromPlainTextString(compatibilityString) else {
+//        guard let summaryInfo = subpart.summaryInfo(for: message, in: self, itemTypeOverride: overridingItemType), let compatibilityString = IMMessageAcknowledgmentStringHelper.generateBackwardCompatibilityString(forMessageAcknowledgmentType: rawType, messageSummaryInfo: summaryInfo), let superFormat = IMCreateSuperFormatStringFromPlainTextString(compatibilityString) else {
+//            throw BarcelonaError(code: 500, message: "Internal server error")
+//        }
+//
+        let item = message._imMessageItem
+        let summaryInfo = subpart.summaryInfo(for: message, in: self, itemTypeOverride: overridingItemType) as? [AnyHashable: Any]
+        item?.messageSummaryInfo = summaryInfo
+        
+        guard let summary = IMSharedMessageSummaryCreateWithShortName(0, message._imMessageItem, message.senderName, message.sender.displayName(forChat: self) as? String, { transferGUID, _, _, _, _, isOutgoing in
+            isOutgoing?.pointee = .init(transferGUID.flatMap(IMFileTransferCenter.sharedInstance().transfer(forGUID:))?.isIncoming == false)
+        }) else {
+            throw BarcelonaError(code: 500, message: "Internal server error")
+        }
+        
+        guard let superFormat = IMCreateSuperFormatStringFromPlainTextString(summary) else {
             throw BarcelonaError(code: 500, message: "Internal server error")
         }
         

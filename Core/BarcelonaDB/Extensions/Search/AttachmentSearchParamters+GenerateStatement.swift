@@ -11,8 +11,8 @@ import BarcelonaFoundation
 import GRDB
 
 fileprivate extension AttachmentSearchParameters {
-    func statement(forChatROWIDs ROWIDs: [Int64]) -> SQLLiteral {
-        var components: [SQLLiteral] = [
+    func statement(forChatROWIDs ROWIDs: [Int64]) -> SQL {
+        var components: [SQL] = [
             """
             SELECT attachment.ROWID, attachment.guid, attachment.original_guid, attachment.filename, attachment.total_bytes, attachment.is_outgoing, attachment.mime_type, attachment.uti FROM attachment
             """
@@ -74,11 +74,11 @@ fileprivate extension AttachmentSearchParameters {
 
 internal extension AttachmentSearchParameters {
     func loadRawAttachments() -> Promise<[RawAttachment]> {
-        chatROWIDs().then { ROWIDs in
+        chatROWIDs().then { ROWIDs -> SQL in
             self.statement(forChatROWIDs: ROWIDs)
         }.then { stmt in
             DBReader.shared.read { db in
-                try RawAttachment.fetchAll(db, sql: stmt.sql, arguments: stmt.arguments, adapter: nil)
+                try RawAttachment.fetchAll(db, SQLRequest(literal: stmt))
             }
         }
     }

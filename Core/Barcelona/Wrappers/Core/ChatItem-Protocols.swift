@@ -14,10 +14,6 @@ private extension NSObject {
     static var className: String {
         NSStringFromClass(self)
     }
-    
-    var className: String {
-        NSStringFromClass(object_getClass(self)!)
-    }
 }
 #endif
 

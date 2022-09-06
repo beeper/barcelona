@@ -67,9 +67,7 @@ public class CBChat {
     
     /// All chat identifiers that should match against this conversation
     @Published public internal(set) var identifiers: Set<CBChatIdentifier> = Set()
-    
     @Published public internal(set) var mergedID: String = ""
-    
     @Published public internal(set) var mergedRecipientIDs: Set<String> = []
     
     private func refreshParticipants(_ leaves: [String: CBChatLeaf]? = nil) {
@@ -122,6 +120,12 @@ public struct CBChatParticipant {
         self.personID = personID
         self.unformattedName = dictionary["FZPersonUnformattedName"] as? String
         self.countryCode = dictionary["FZPersonCountryCode"] as? String
+    }
+
+    public init(handle: IMHandle) {
+        personID = handle.id
+        unformattedName = handle.name
+        countryCode = handle.countryCode
     }
 }
 
@@ -196,6 +200,15 @@ public extension CBChat {
 
 #if canImport(IMCore)
 import IMCore
+
+public extension CBChat {
+    func handle(chat: IMChat) {
+        guard let guid = chat.guid else {
+            return
+        }
+        leaves[guid, default: CBChatLeaf()].handle(chat: chat)
+    }    
+}
 
 public extension CBChat {
     var IMChats: [IMChat] {

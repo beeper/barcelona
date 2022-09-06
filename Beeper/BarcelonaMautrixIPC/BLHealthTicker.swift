@@ -31,7 +31,7 @@ public class BLHealthTicker {
      Schedules a delayed bridge status update
      */
     public func scheduleNext() {
-        timer = Timer.scheduledTimer(withTimeInterval: status.ttl, repeats: false) { timer in
+        timer = Timer.scheduledTimer(withTimeInterval: Double(status.ttl), repeats: false) { timer in
             self.run(schedulingNext: true)
         }
     }
@@ -40,14 +40,16 @@ public class BLHealthTicker {
         didSet {
             var status = BridgeStatusCommand.current
             if let pinnedBridgeState = pinnedBridgeState {
-                status.state_event = pinnedBridgeState
+                status.stateEvent = pinnedBridgeState.rawValue
             }
             latestStatus = status
         }
     }
     
     @Published
-    public private(set) var latestStatus: BridgeStatusCommand = .init(state_event: .unconfigured, ttl: .infinity, info: [:])
+    public private(set) var latestStatus: BridgeStatusCommand = .with {
+        $0.stateEvent = "UNCONFIGURED"
+    }
     
     /**
      Publishes the current bridge status and optionally schedules the next update

@@ -9,10 +9,9 @@ import Foundation
 import Barcelona
 import Swog
 import Sentry
+import BarcelonaMautrixIPCProtobuf
 
-public struct ResolveIdentifierCommand: Codable {
-    public var identifier: String
-}
+public typealias ResolveIdentifierCommand = PBResolveIdentifierRequest
 
 public struct GUIDResponse: Codable {
     public var guid: String
@@ -26,8 +25,12 @@ extension ResolveIdentifierCommand: Runnable {
     public func run(payload: IPCPayload) {
         ChatLocator.senderGUID(for: identifier).then { result in
             switch result {
-            case .guid(let guid):
-                payload.respond(.guid(.init(guid)))
+            case .guid(let service, let localID):
+                payload.respond(.guid(.with {
+                    $0.service = service
+                    $0.isGroup = false
+                    $0.localID = localID
+                }))
             case .failed(let message):
                 payload.fail(code: "err_destination_unreachable", message: message)
             }
@@ -35,30 +38,26 @@ extension ResolveIdentifierCommand: Runnable {
     }
 }
 
-public struct PrepareDMCommand: Codable {
-    public var guid: String
-}
+public typealias PrepareDMCommand = PBPrepareDMRequest
 
 extension PrepareDMCommand: Runnable {
     public func run(payload: IPCPayload) {
         let transaction = SentrySDK.startTransaction(name: "prepare_dm", operation: "prepare_dm")
         
-        let parsed = ParsedGUID(rawValue: guid)
-        
         if MXFeatureFlags.shared.mergedChats {
-            let chat = Chat.directMessage(withHandleID: parsed.last, service: .iMessage)
+            let chat = Chat.directMessage(withHandleID: guid.localID, service: .iMessage)
             CLInfo("PrepareDM", "Prepared chat \(chat.id)")
         } else {
-            guard let service = parsed.service.flatMap(IMServiceStyle.init(rawValue:)) else {
+            guard let service = IMServiceStyle(rawValue: guid.service) else {
                 transaction.setData(value: "err_invalid_service", key: "error")
                 return payload.fail(code: "err_invalid_service", message: "The service provided does not exist.")
             }
             
-            let chat = Chat.directMessage(withHandleID: parsed.last, service: service)
+            let chat = Chat.directMessage(withHandleID: guid.localID, service: service)
             CLInfo("PrepareDM", "Prepared chat \(chat.id) on service \(service.rawValue)")
         }
         
-        payload.respond(.ack)
+        payload.respond(.ack(true))
         transaction.finish(status: .ok)
     }
 }

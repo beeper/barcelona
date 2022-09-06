@@ -34,22 +34,43 @@ public class BLMautrixSTDOutDriver: LoggingDriver {
     private init() {}
     
     public func log(level: LoggingLevel, fileID: StaticString, line: Int, function: StaticString, dso: UnsafeRawPointer, category: StaticString, message: StaticString, args: [CVarArg]) {
-        BLWritePayload(.init(id: nil, command: .log(LogCommand(level: level.ipcLevel, module: String(category), message: String(format: String(message), arguments: args), metadata: [
-            "fileID": fileID.description,
-            "function": function.description,
-            "line": line.description
-        ]))), log: false)
+        BLWritePayload {
+            $0.command = .log(.with {
+                $0.level = level.ipcLevel.rawValue
+                $0.module = String(category)
+                $0.message = String(format: String(message), arguments: args)
+                $0.metadata = [
+                    "fileID": .string(fileID.description),
+                    "function": .string(function.description),
+                    "line": .string(line.description)
+                ].pb
+            })
+        }
     }
     
-    public func log(level: LoggingLevel, module: String, message: BackportedOSLogMessage, metadata: [String: Encodable]) {
-        BLWritePayload(.init(id: nil, command: .log(LogCommand(level: level.ipcLevel, module: module, message: message.render(level: BLRuntimeConfiguration.privacyLevel), metadata: metadata))))
+    public func log(level: LoggingLevel, module: String, message: BackportedOSLogMessage, metadata: [String: MetadataValue]) {
+        BLWritePayload {
+            $0.command = .log(.with {
+                $0.level = level.ipcLevel.rawValue
+                $0.module = module
+                $0.message = message.render(level: BLRuntimeConfiguration.privacyLevel)
+                $0.metadata = metadata.pb
+            })
+        }
     }
     
     public func log(level: LoggingLevel, fileID: StaticString, line: Int, function: StaticString, dso: UnsafeRawPointer, category: StaticString, message: BackportedOSLogMessage, metadata: MetadataValue) {
-        BLWritePayload(.init(id: nil, command: .log(LogCommand(level: level.ipcLevel, module: String(category), message: message.render(level: BLRuntimeConfiguration.privacyLevel), metadata: [
-            "fileID": fileID.description,
-            "function": function.description,
-            "line": line.description
-        ]))), log: false)
+        BLWritePayload {
+            $0.command = .log(.with {
+                $0.level = level.ipcLevel.rawValue
+                $0.module = String(category)
+                $0.message = message.render(level: BLRuntimeConfiguration.privacyLevel)
+                $0.metadata = [
+                    "fileID": .string(fileID.description),
+                    "function": .string(function.description),
+                    "line": .string(line.description)
+                ].pb
+            })
+        }
     }
 }

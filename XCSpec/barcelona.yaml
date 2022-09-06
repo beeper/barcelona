@@ -24,7 +24,7 @@ targets:
       - package: Paris
         product: DigitalTouchShared
       - package: Paris
-        product: LinkPresentation
+        product: LinkPresentationPrivate
       - package: Paris
         product: IDS
       - package: Paris

@@ -9,18 +9,29 @@
 import Foundation
 import Barcelona
 
-public struct BLAttachment: Codable {
-    public var mime_type: String?
-    public var file_name: String
-    public var path_on_disk: String
-    
-    public init?(guid: String) {
-        guard let attachment = Attachment(guid: guid), let path = attachment.path else {
+public typealias BLAttachment = PBAttachment
+
+import BarcelonaMautrixIPCProtobuf
+
+public extension PBAttachment {
+    init?(_ attachment: Attachment) {
+        guard let path = attachment.path else {
             return nil
         }
-        
-        mime_type = attachment.mime
-        file_name = attachment.name
-        path_on_disk = path
+        self = .with { `self` in
+            self.guid = attachment.id
+            self.fileName = attachment.name
+            self.pathOnDisk = path
+            attachment.mime.map { mime in
+                self.mimeType = mime
+            }
+        }
+    }
+    
+    init?(guid: String) {
+        guard let attachment = Attachment(guid: guid) else {
+            return nil
+        }
+        self.init(attachment)
     }
 }

@@ -133,64 +133,182 @@ private let encoder: JSONEncoder = {
     return encoder
 }()
 
-@_spi(unitTestInternals) public var BLPayloadIntercept: ((IPCPayload) -> ())? = nil
+@_spi(unitTestInternals) public var BLPayloadIntercept: ((PBPayload) -> ())? = nil
 
-public func BLWritePayloads(_ payloads: [IPCPayload], log: Bool = true) {
-    var data = Data()
-    
+import SwiftProtobuf
+
+extension OutputStream {
+    static let stdout: OutputStream = {
+        let os = OutputStream(toFileAtPath: "/dev/stdout", append: false)!
+        os.open()
+        return os
+    }()
+}
+
+extension InputStream {
+    static let stdin: InputStream = {
+        let os = InputStream(fileAtPath: "/dev/stdin")!
+        os.open()
+        return os
+    }()
+}
+
+var nameMapCache: [String: [Int: String]] = [:]
+extension _NameMap {
+    func protoNameFor(rawValue: Int, cacheKey: String) -> String? {
+        if let cache = nameMapCache[cacheKey] {
+            return cache[rawValue]
+        }
+        let selfMirror = Mirror(reflecting: self)
+        
+        guard let numberToNameMapChild = selfMirror.children.first(where: { (name, _) -> Bool in
+            return name == "numberToNameMap"
+        }), let numberToNameMap = numberToNameMapChild.value as? Dictionary<Int, Any> else {
+                return nil
+        }
+
+        nameMapCache[cacheKey] = numberToNameMap.compactMapValues { value in
+            let valueMirror = Mirror(reflecting: value)
+            
+            guard let protoChild = valueMirror.children.first(where: { (name, _) -> Bool in
+                return name == "proto"
+            }), let stringConvertible = protoChild.value as? CustomStringConvertible else {
+                return nil
+            }
+            
+            return stringConvertible.description
+        }
+        return protoNameFor(rawValue: rawValue, cacheKey: cacheKey)
+    }
+}
+
+struct PBPayloadCommandNameReader: SwiftProtobuf.Visitor {
+    let start: Int
+
+    mutating func visitSingularDoubleField(value: Double, fieldNumber: Int) throws {
+        try check(fieldNumber: fieldNumber)
+    }
+
+    mutating func visitSingularInt64Field(value: Int64, fieldNumber: Int) throws {
+        try check(fieldNumber: fieldNumber)
+    }
+
+    mutating func visitSingularUInt64Field(value: UInt64, fieldNumber: Int) throws {
+        try check(fieldNumber: fieldNumber)
+    }
+
+    mutating func visitSingularBoolField(value: Bool, fieldNumber: Int) throws {
+        try check(fieldNumber: fieldNumber)
+    }
+
+    mutating func visitSingularStringField(value: String, fieldNumber: Int) throws {
+        try check(fieldNumber: fieldNumber)
+    }
+
+    mutating func visitSingularBytesField(value: Data, fieldNumber: Int) throws {
+        try check(fieldNumber: fieldNumber)
+    }
+
+    mutating func visitSingularEnumField<E>(value: E, fieldNumber: Int) throws where E : Enum {
+        try check(fieldNumber: fieldNumber)
+    }
+
+    mutating func visitMapField<KeyType, ValueType>(fieldType: _ProtobufMap<KeyType, ValueType>.Type, value: _ProtobufMap<KeyType, ValueType>.BaseType, fieldNumber: Int) throws where KeyType : MapKeyType, ValueType : MapValueType {
+        try check(fieldNumber: fieldNumber)
+    }
+
+    mutating func visitMapField<KeyType, ValueType>(fieldType: _ProtobufEnumMap<KeyType, ValueType>.Type, value: _ProtobufEnumMap<KeyType, ValueType>.BaseType, fieldNumber: Int) throws where KeyType : MapKeyType, ValueType : Enum, ValueType.RawValue == Int {
+        try check(fieldNumber: fieldNumber)
+    }
+
+    mutating func visitMapField<KeyType, ValueType>(fieldType: _ProtobufMessageMap<KeyType, ValueType>.Type, value: _ProtobufMessageMap<KeyType, ValueType>.BaseType, fieldNumber: Int) throws where KeyType : MapKeyType, ValueType : Hashable, ValueType : SwiftProtobuf.Message {
+        try check(fieldNumber: fieldNumber)
+    }
+
+    mutating func visitUnknown(bytes: Data) throws {
+    }
+
+    enum Found: Error { case found(String?) }
+    mutating func visitSingularMessageField<M>(value: M, fieldNumber: Int) throws where M : SwiftProtobuf.Message {
+        try check(fieldNumber: fieldNumber)
+    }
+
+    func check(fieldNumber: Int) throws {
+        guard fieldNumber >= start else {
+            return
+        }
+        throw Found.found(PBPayload._protobuf_nameMap.protoNameFor(rawValue: fieldNumber, cacheKey: "PBPayloadCommandReflection"))
+    }
+}
+
+/// PBPayload { int64 ID = 1; bool IsResponse = 2; oneof Command { ... }; }
+extension PBPayload {
+    var commandName: String? {
+        var reader = PBPayloadCommandNameReader(start: 3)
+        do {
+            try traverse(visitor: &reader)
+        } catch {
+            if case PBPayloadCommandNameReader.Found.found(let name) = error {
+                return name
+            }
+            fatalError("Error while traversing: \(error)")
+        }
+        return nil
+    }
+}
+
+public func BLWritePayloads(_ payloads: [PBPayload]) {
     for payload in payloads {
-        if !CBFeatureFlags.runningFromXcode && log {
-            func printIt() {
-                CLInfo(
-                    "BLStandardIO",
-                    "Outgoing! %@ %ld", payload.command.name.rawValue, payload.id ?? -1
-                )
-            }
-            #if DEBUG
-            printIt()
-            #else
-            if payload.command.name == .message {
+        if !CBFeatureFlags.runningFromXcode {
+            switch payload.command {
+            case .log:
+                break
+            default:
+                func printIt() {
+                    CLInfo(
+                        "BLStandardIO",
+                        "Outgoing! %@", payload.commandName ?? "unknown"
+                    )
+                }
+                #if DEBUG
                 printIt()
+                #else
+                if payload.command.name != .message {
+                    printIt()
+                }
+                #endif
             }
-            #endif
         }
         
         if let BLPayloadIntercept = BLPayloadIntercept {
             BLPayloadIntercept(payload)
             continue
         }
-        data += try! encoder.encode(payload)
-        data += TERMINATOR
-    }
-    
-    if BLPayloadIntercept == nil {
         FileHandle.standardOutput.performOnThread {
-            FileHandle.standardOutput.write(data)
-            
-            #if DEBUG
-            if BLMetricStore.shared.get(key: .shouldDebugPayloads) ?? false {
-                FileHandle.standardOutput.write(TERMINATOR)
+            do {
+                try BinaryDelimited.serialize(message: payload, to: .stdout, partial: true)
+            } catch {
+                fatalError("\(error)")
+                // what do we do here?
             }
-            #endif
         }
     }
 }
 
-public func BLWritePayload(_ payload: @autoclosure () -> IPCPayload, log: Bool = true) {
-    BLWritePayloads([payload()], log: log)
+public func BLWritePayload(_ payload: @autoclosure () -> PBPayload) {
+    BLWritePayloads([payload()])
+}
+
+public func BLWritePayload(builder: (inout PBPayload) -> ()) {
+    BLWritePayload(.with(builder))
 }
 
 private var cancellables = Set<AnyCancellable>()
 
-let sharedBarcelonaStream: ERBufferedStream<IPCPayload> = {
-    let stream = ERBufferedStream<IPCPayload>()
-    stream.decoder.dateDecodingStrategy = .iso8601
-    return stream
-}()
-
 var pongedOnce = false
 
-public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
+public func BLCreatePayloadReader_(_ cb: @escaping (IPCPayload) -> ()) {
+    #if false
     FileHandle.standardInput.handleDataAsynchronously(sharedBarcelonaStream.receive(data:))
     
     unsafeBitCast(sharedBarcelonaStream.subject.sink { result in
@@ -207,7 +325,9 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
             
             if payload.command.name != .ping, let id = payload.id, id > 1, !pongedOnce {
                 pongedOnce = true
-                BLWritePayload(.init(id: 1, command: .response(.ack)))
+                // BLWritePayload(.init(id: 1, command: .response(.ack)))
+                // BLWritePayload(Payload)
+                
             }
 
             switch payload.command {
@@ -228,11 +348,63 @@ public func BLCreatePayloadReader(_ cb: @escaping (IPCPayload) -> ()) {
             }
 
             if !pongedOnce {
-                BLWritePayload(.init(id: 1, command: .response(.ack)))
+                // BLWritePayload(.init(id: 1, command: .response(.ack)))
+                BLWritePayload {
+                    $0.id = 1
+                    $0.command = .ack(true)
+                    $0.isResponse = true
+                }
                 pongedOnce = true
             }
             
             cb(payload)
         }
     }, to: AnyCancellable.self).store(in: &cancellables)
+    #endif
+}
+
+import BarcelonaMautrixIPCProtobuf
+
+class IPCHandler {
+    static var shared: IPCHandler!
+    
+    let input = FileHandle.standardInput
+    let output = FileHandle.standardOutput
+
+    let queue = DispatchQueue(label: "com.ericrabil.barcelona.mautrix.ipc", attributes: .concurrent)
+    let operationQueue = OperationQueue()
+
+    let observers = NSMutableSet()
+
+    let callback: (PBPayload) -> ()
+    
+    init(callback: @escaping (PBPayload) -> ()) {
+        self.callback = callback
+        operationQueue.underlyingQueue = queue
+
+        NotificationCenter.default.addObserver(self, selector: #selector(IPCHandler.readInput(from:)), name: Notification.Name.NSFileHandleDataAvailable, object: input)
+        input.waitForDataInBackgroundAndNotify()
+    }
+
+    func write(payload: PBPayload) {
+        
+    }
+
+    func read() {
+        do {
+            let payload = try BinaryDelimited.parse(messageType: PBPayload.self, from: .stdin, partial: true)
+            callback(payload)
+        } catch {
+            CLFault("IPC", "Failed to parse payload: \("\(error)")")
+        }
+    }
+
+    @objc func readInput(from notification: Notification) {
+        read()
+        input.waitForDataInBackgroundAndNotify()
+    }
+}
+
+public func BLCreatePayloadReader(_ callback: @escaping (IPCPayload) -> ()) {
+    IPCHandler.shared = .init(callback: callback)
 }

@@ -91,3 +91,43 @@ NSXPCListener* ERConstructXPCListener(NSString* machServiceName) {
     return YES;
 }
 @end
+
+
+NSArray<IMItem*>* ERCreateIMMessageItemsFromSerializedArray(NSArray<NSDictionary*>* serializedItems) {
+    if ([serializedItems count] == 0) {
+        return NULL;
+    }
+    NSMutableArray<IMItem*>* items = [[NSMutableArray alloc] init];
+    for (NSDictionary* dict in serializedItems) {
+        Class cls = [IMItem classForMessageItemDictionary:dict];
+        if (cls == NULL) {
+            continue;
+        }
+        IMItem* item = [[cls alloc] initWithDictionary:dict];
+        if (item != NULL) {
+            [items addObject:item];
+        }
+    }
+    if ([items count] == 0) {
+        return NULL;
+    }
+    return items;
+}
+
+NSArray<NSDictionary*>* ERCreateSerializedIMMessageItemsFromArray(NSArray<IMItem*>* items) {
+    if ([items count] == 0) {
+        return NULL;
+    }
+    NSMutableArray<NSDictionary*>* serializedItems = [[NSMutableArray alloc] init];
+    for (IMItem* item in items) {
+        NSDictionary* dictionary = [item dictionaryRepresentation];
+        if ([dictionary count] == 0) {
+            continue;
+        }
+        [serializedItems addObject:dictionary];
+    }
+    if ([serializedItems count] == 0) {
+        return NULL;
+    }
+    return serializedItems;
+}

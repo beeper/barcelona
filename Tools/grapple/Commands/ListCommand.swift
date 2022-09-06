@@ -39,8 +39,7 @@ class ListCommand: CommandGroup {
         let name = "contacts"
         
         func execute() throws {
-            let data = try JSONEncoder().encode(BMXGenerateContactList(omitAvatars: true))
-            print(data.count)
+            print(BMXGenerateContactList(omitAvatars: true).count)
         }
     }
     #endif

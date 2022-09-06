@@ -123,14 +123,14 @@ class DebugCommands: CommandGroup {
                 if self.logAsMautrix {
                     switch event {
                     case .message(let message):
-                        CLInfo("BLEvents", "\(json(BLMessage(message: message)))")
+                        CLInfo("BLEvents", "\(BLMessage(message: message).debugDescription)")
                         return
                     default:
                         break
                     }
                 }
                 
-                CLInfo("BLEvents", "\(json(event))")
+                CLInfo("BLEvents", "\(String(describing: event))")
             }
         }
     }
@@ -189,14 +189,11 @@ class DebugCommands: CommandGroup {
                 chat.userToggledReadReceiptSwitch(true)
                 chat.markAllMessagesAsRead()
             }
-            CBDaemonListener.shared.unreadCountPipeline.pipe { chatID, count in
-                guard chatID == self.chatID else {
+            CBDaemonListener.shared.unreadCountPipeline.pipe { chat, count in
+                guard chat.chatIdentifiers.contains(self.chatID) else {
                     return
                 }
-                guard let chat = IMChat.resolve(withIdentifier: chatID) else {
-                    return
-                }
-                chat.markAllMessagesAsRead()
+                chat.IMChats.forEach { $0.markAllMessagesAsRead() }
             }
         }
     }

@@ -16,33 +16,35 @@ internal let IPCLog = Logger(category: "BLIPC")
 private extension IPCPayload {
     var runnable: Runnable? {
         switch command {
-        case .send_message(let req):
+        case .sendMessage(let req):
             return req
-        case .send_media(let req):
+//        case .send_media(let req):
+//            return req
+//        case .send_tapback(let req):
+//            return req
+        case .sendReadReceipt(let req):
             return req
-        case .send_tapback(let req):
+        case .setTyping(let req):
             return req
-        case .send_read_receipt(let req):
+        case .getChats(let req):
             return req
-        case .set_typing(let req):
+        case .getChat(let req):
             return req
-        case .get_chats(let req):
+        case .getChatAvatar(let req):
             return req
-        case .get_chat(let req):
+        case .getContact(let req):
             return req
-        case .get_chat_avatar(let req):
+        case .getMessagesAfter(let req):
             return req
-        case .get_contact(let req):
+        case .getRecentMessages(let req):
             return req
-        case .get_messages_after(let req):
+        case .getContactList(let req):
+            return PBContactList.Runner()
+        case .resolveIdentifier(let req):
             return req
-        case .get_recent_messages(let req):
+        case .prepareDm(let req):
             return req
-        case .get_contact_list:
-            return GetContactListResponse.Runner()
-        case .resolve_identifier(let req):
-            return req
-        case .prepare_dm(let req):
+        case .historyQuery(let req):
             return req
         default:
             return nil
@@ -50,19 +52,34 @@ private extension IPCPayload {
     }
 }
 
-public func BLHandlePayload(_ payload: IPCPayload) {
-    guard let runnable = payload.runnable else {
-        return IPCLog.warn("Received unhandleable payload type \(payload.command.name)")
-    }
-    
-    if runnable is AuthenticatedAsserting {
-        guard IMAccountController.shared.accounts.contains(where: \.canSendMessages) else {
-            payload.reply(withCommand: .error(.init(code: BLHealthTicker.shared.latestStatus.state_event.rawValue, message: "You must be signed in to do that.")))
-            return
+import BarcelonaMautrixIPCProtobuf
+
+extension PBPayload {
+    func reply(_ command: PBPayload.OneOf_Command) {
+        BLWritePayload {
+            $0.id = self.id
+            $0.isResponse = true
+            $0.command = command
         }
     }
-    
-    DispatchQueue.main.async {
+}
+
+public func BLHandlePayload(_ payload: PBPayload) {
+    if let runnable = payload.runnable {
         runnable.run(payload: payload)
+    } else {
+        switch payload.command {
+        case .preStartupSync:
+            payload.reply(.syncHookResponse(.with {
+                $0.skipSync = false
+            }))
+            return
+        case .ping:
+            payload.reply(.pong(.init()))
+            return
+        default:
+            break
+        }
+        CLWarn("BLSTDIO", "Dropping unhandleable payload %@", payload.debugDescription)
     }
 }

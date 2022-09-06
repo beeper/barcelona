@@ -7,10 +7,11 @@
 //
 
 import Foundation
-import BarcelonaFoundation
+// import BarcelonaFoundation
+import BarcelonaMautrixIPCProtobuf
 
 public class BLPayloadReader {
-    public var callback: (IPCPayload) -> () = { _ in }
+    public var callback: (PBPayload) -> () = { _ in }
     
     public var ready = ProcessInfo.processInfo.arguments.contains("-d") {
         didSet {
@@ -23,7 +24,7 @@ public class BLPayloadReader {
         }
     }
     
-    private var queue = [IPCPayload]()
+    private var queue = [PBPayload]()
     
     public init() {
         BLCreatePayloadReader { payload in

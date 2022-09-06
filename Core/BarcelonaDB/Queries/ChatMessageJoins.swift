@@ -161,7 +161,7 @@ public extension DBReader {
             
             sql.append(literal: """
             ORDER BY message.date DESC
-            LIMIT \(limit ?? 75)
+            LIMIT \((limit == 0 ? nil : limit) ?? 75)
             """)
             
             return try SQLRequest<Row>(literal: sql).fetchAll(db).map { ($0["guid"], $0["chat_identifier"]) }
@@ -170,35 +170,59 @@ public extension DBReader {
 }
 
 private let latestTimestamps = """
-SELECT          chat_id, MAX(message_date) AS message_date, chat.guid
+SELECT          chat_id, MAX(message_date) AS message_date, chat.guid AS chat_guid,
+                chat.service_name, chat.chat_identifier, chat.style,
+                message.guid AS message_guid
 FROM            chat_message_join
-LEFT JOIN       chat
+INNER JOIN      chat
 ON              chat.ROWID = chat_id
+INNER JOIN      message
+ON              message.ROWID = message_id
 GROUP BY        chat_id;
 """
 
-private class TimestampView: GRDB.Record {
+public protocol IMDBChatMarker {
+    var chat_guid: String { get }
+    var service_name: String { get }
+    var chat_identifier: String { get }
+    var style: Int64 { get }
+}
+
+public protocol IMDBMessageMarker: IMDBChatMarker {
+    var message_guid: String { get }
+    var message_date: Double { get }
+}
+
+private class TimestampView: GRDB.Record, IMDBMessageMarker {
     required init(row: Row) {
         chat_id = row["chat_id"]
-        message_date = row["message_date"]
-        guid = row["guid"]
+        message_date = IMDPersistenceTimestampToUnixSeconds(timestamp: row["message_date"])
+        chat_guid = row["chat_guid"]
+        service_name = row["service_name"]
+        chat_identifier = row["chat_identifier"]
+        style = row["style"]
+        message_guid = row["message_guid"]
         super.init(row: row)
     }
     
     var chat_id: Int64
-    var message_date: Int64
-    var guid: String
+    var message_date: Double
+    var chat_guid: String
+    var service_name: String
+    var chat_identifier: String
+    var style: Int64
+    var message_guid: String
 }
 
 // MARK: - Latest timestamp API
 public extension DBReader {
-    typealias RawTimestampView = [Int64: (message_date: Int64, chat_guid: String)]
+    typealias RawTimestampView = [Int64: IMDBMessageMarker]
     
     @_optimize(speed) func latestMessageTimestamps() -> Promise<RawTimestampView> {
         read { database in
             try TimestampView.fetchCursor(database, sql: latestTimestamps)
                 .reduce(into: RawTimestampView()) { dictionary, join in
-                    dictionary[join.chat_id] = (join.message_date, join.guid)
+                    dictionary[join.chat_id] = join
                 }
         }
     }

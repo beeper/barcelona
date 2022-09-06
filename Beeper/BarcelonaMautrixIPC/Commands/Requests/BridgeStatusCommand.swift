@@ -24,15 +24,9 @@ public enum BridgeState: String, Codable {
     case loggedOut = "LOGGED_OUT"
 }
 
-public struct BridgeStatusCommand: Codable, Equatable {
-    public var state_event: BridgeState
-    public var ttl: TimeInterval
-    public var error: String?
-    public var message: String?
-    public var remote_id: String?
-    public var remote_name: String?
-    public var info: [String: AnyCodable]
-}
+import BarcelonaMautrixIPCProtobuf
+
+public typealias BridgeStatusCommand = PBBridgeStatus
 
 private extension IMAccount {
     var isPlaceholder: Bool {
@@ -253,7 +247,10 @@ public extension BridgeStatusCommand {
         
         switch remoteID {
         case .none, "unknown", "":
-            return BridgeStatusCommand(state_event: .unconfigured, ttl: 240, error: nil, message: nil, remote_id: nil, remote_name: nil, info: [:])
+            return .with {
+                $0.stateEvent = "UNCONFIGURED"
+                $0.ttl = 360
+            }
         default:
             break
         }
@@ -280,24 +277,128 @@ public extension BridgeStatusCommand {
             }
         }()
         
-        return BridgeStatusCommand(
-            state_event: state,
-            ttl: state == .connected ? 3600 : 240,
-            error: IMAccountController.shared.error,
-            message: IMAccountController.shared.message,
-            remote_id: remoteID, // Apple ID – absent when unconfigured. logged out includes the remote id, and then goes to unconfigured. everything else must include the remote ID
-            remote_name: fullName, // Account Name
-            info: [
-                "sms_forwarding_enabled": IMAccountController.shared.accounts(for: .sms())?.first?.allowsSMSRelay == true,
-                "sms_forwarding_capable": IMAccountController.shared.accounts(for: .sms())?.first?.isSMSRelayCapable == true,
-                "active_alias_acount": addresses.count,
-                "active_phone_number_count": addresses.filter(\.isPhoneNumber).count,
-                "active_email_count": addresses.filter(\.isEmail).count,
-                "alias_count": allAddresses.count,
-                "phone_number_count": allAddresses.filter(\.isPhoneNumber).count,
-                "email_count": allAddresses.filter(\.isEmail).count,
-                "loginStatusMessage": account?.loginStatusMessage
-            ].mapValues(AnyCodable.init(_:))
-        )
+        return .with { command in
+            command.stateEvent = state.rawValue
+            command.ttl = state == .connected ? 3600 : 240
+            if let error = IMAccountController.shared.error {
+                command.error = error
+            }
+            if let message = IMAccountController.shared.message {
+                command.message = message
+            }
+            if let remoteID = remoteID {
+                command.remoteID = remoteID
+            }
+            if let fullName = fullName {
+                command.remoteName = fullName
+            }
+            command.info = .with { info in
+                info.mapping["sms_forwarding_enabled"] = .bool(IMAccountController.shared.accounts(for: .sms())?.first?.allowsSMSRelay == true)
+                info.mapping["sms_forwarding_capable"] = .bool(IMAccountController.shared.accounts(for: .sms())?.first?.isSMSRelayCapable == true)
+                info.mapping["active_alias_count"] = .int(addresses.count)
+                info.mapping = [
+                    "sms_forwarding_enabled": .bool(IMAccountController.shared.accounts(for: .sms())?.first?.allowsSMSRelay == true),
+                    "sms_forwarding_capable": .bool(IMAccountController.shared.accounts(for: .sms())?.first?.isSMSRelayCapable == true),
+                    "active_alias_acount": .int(addresses.count),
+                    "active_phone_number_count": .int(addresses.filter(\.isPhoneNumber).count),
+                    "active_email_count": .int(addresses.filter(\.isEmail).count),
+                    "alias_count": .int(allAddresses.count),
+                    "phone_number_count": .int(allAddresses.filter(\.isPhoneNumber).count),
+                    "email_count": .int(allAddresses.filter(\.isEmail).count),
+                    "loginStatusMessage": account?.loginStatusMessage.map(PBMetadataValue.string(_:))
+                ].compactMapValues { $0 }
+            }
+        }
+    }
+}
+
+extension PBMetadataValue: ExpressibleByBooleanLiteral {
+    public static func bool(_ value: Bool) -> PBMetadataValue {
+        .init(booleanLiteral: value)
+    }
+
+    public init(booleanLiteral value: Bool) {
+        self = .with {
+            $0.value = .bool(value)
+        }
+    }
+}
+
+extension PBMetadataValue: ExpressibleByStringLiteral {
+    public static func string(_ value: String) -> PBMetadataValue {
+        .init(stringLiteral: value)
+    }
+
+    public init(stringLiteral value: String) {
+        self = .with {
+            $0.value = .string(value)
+        }
+    }
+}
+
+extension PBMetadataValue: ExpressibleByIntegerLiteral {
+    public static func int(_ value: Int) -> PBMetadataValue {
+        .init(integerLiteral: value)
+    }
+
+    public init(integerLiteral value: Int) {
+        self = .with {
+            $0.value = .int64(Int64(value))
+        }
+    }
+}
+
+extension PBMapping {
+    init(_ metadata: [String: MetadataValue]) {
+        self = .with { mapping in
+            
+        }
+    }
+}
+
+extension MetadataValue {
+    var pb: PBMetadataValue {
+        switch self {
+            case .array(let values):
+            return .with {
+                $0.value = .array(.with {
+                    $0.values = values.map(\.pb)
+                })
+            }
+            case .dictionary(let dictionary):
+            return .with {
+                $0.value = .mapping(.with {
+                    $0.mapping = dictionary.mapValues {
+                        $0.pb
+                    }
+                })
+            }
+            case .int(let int):
+            return .with {
+                $0.value = .int64(Int64(int))
+            }
+            case .double(let double):
+            return .with {
+                $0.value = .double(double)
+            }
+            case .boolean(let bool):
+            return .with {
+                $0.value = .bool(bool)
+            }
+            case .string(let string):
+            return .with {
+                $0.value = .string(string)
+            }
+            case .nil:
+            return .with {
+                $0.value = nil
+            }
+        }
+    }
+}
+
+extension Dictionary where Key == String, Value == MetadataValue {
+    var pb: PBMapping {
+        MetadataValue.dictionary(self).pb.mapping
     }
 }

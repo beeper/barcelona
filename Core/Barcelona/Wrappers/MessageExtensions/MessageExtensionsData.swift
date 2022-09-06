@@ -14,6 +14,7 @@ import Gzip
 import Swime
 import Swog
 import UniformTypeIdentifiers
+import CoreServices
 
 private let UnarchivingClasses = [
     NSMutableString.self,

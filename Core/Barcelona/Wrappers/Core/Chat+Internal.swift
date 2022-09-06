@@ -48,7 +48,7 @@ public struct ChatLocator {
     }
     
     public enum SenderGUIDResult {
-        case guid(String)
+        case guid(service: String, localID: String)
         case failed(String)
     }
     
@@ -56,7 +56,7 @@ public struct ChatLocator {
         service(for: handle).then { result in
             switch result {
             case .service(let service):
-                return .guid(service.rawValue + ";-;" + handle)
+                return .guid(service: service.rawValue, localID: handle)
             case .failed(let message):
                 return .failed(message)
             }
