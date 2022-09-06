@@ -7,6 +7,7 @@
 
 import Foundation
 import LinkPresentation
+import LinkPresentationPrivate
 import struct CoreGraphics.CGSize
 import struct CoreGraphics.CGFloat
 

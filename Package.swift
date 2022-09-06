@@ -34,7 +34,7 @@ let package = Package(
         .package(url: "https://github.com/open-imcore/BarcelonaFoundation", from: "1.0.3"),
         .package(url: "https://github.com/EricRabil/Swexy", .upToNextMajor(from: "1.1.2")),
         .package(name: "GRDB", url: "https://github.com/groue/GRDB.swift.git", .upToNextMajor(from: "5.26.0")),
-        .package(url: "https://github.com/EricRabil/Paris", .upToNextMajor(from: "1.0.1")),
+        .package(url: "https://github.com/EricRabil/Paris", .upToNextMajor(from: "1.0.2")),
         .package(name: "FeatureFlags", url: "https://github.com/EricRabil/FeatureFlags.swift", from: "1.0.0"),
         .package(url: "https://github.com/sendyhalim/Swime", .upToNextMajor(from: "3.0.7")),
         .package(url: "https://github.com/open-imcore/InterposeKit", .upToNextMajor(from: "0.0.3")),
@@ -49,7 +49,7 @@ let package = Package(
 .addingLibrary(name: "CBarcelona", dependencies: [.paris("CommunicationsFilter"), .paris("IMCore")])
 .addingLibrary(name: "Barcelona", dependencies: [
     "CBarcelona", "BarcelonaDB", "FeatureFlags", "Swime", "InterposeKit", "SwiftCLI", "Sentry", "AnyCodable", "Gzip", "BarcelonaFoundation"
-] + .paris("DataDetectorsCore", "IMDPersistence", "IMDaemonCore", "IMCore", "IMSharedUtilities", "IMFoundation", "IDS", "DigitalTouchShared", "LinkPresentation"))
+] + .paris("DataDetectorsCore", "IMDPersistence", "IMDaemonCore", "IMCore", "IMSharedUtilities", "IMFoundation", "IDS", "DigitalTouchShared", "LinkPresentationPrivate"))
 .addingLibrary(name: "BarcelonaJS", dependencies: ["Barcelona", "SwiftyJavaScriptCore", "BarcelonaIPC"])
 //.addingLibrary(name: "BarcelonaMautrixIPC", dependencies: [
 //    "Barcelona", "BarcelonaDB", "SwiftyContacts", "ERBufferedStream", "Pwomise"

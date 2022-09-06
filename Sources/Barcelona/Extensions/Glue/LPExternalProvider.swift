@@ -8,6 +8,7 @@
 import Foundation
 import IMCore
 import LinkPresentation
+import LinkPresentationPrivate
 import IMSharedUtilities
 import Swog
 
