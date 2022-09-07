@@ -1,12 +1,12 @@
 # Barcelona
 A Swift framework for interacting with iMessage.
 
-## [Downloads](https://jank.crap.studio/job/barcelona/job/mautrix/lastSuccessfulBuild/artifact/)
+## [Downloads](https://jank.crap.studio/job/barcelona/job/main/lastSuccessfulBuild/artifact/)
 
 | Host  | Grapple  | Mautrix  |
 |-------|----------|----------|
-| macOS | [Download](https://jank.crap.studio/job/barcelona/job/mautrix/lastSuccessfulBuild/artifact/darwin-grapple) | [Download](https://jank.crap.studio/job/barcelona/job/mautrix/lastSuccessfulBuild/artifact/darwin-barcelona-mautrix) |
-| iOS   | [Download](https://jank.crap.studio/job/barcelona/job/mautrix/lastSuccessfulBuild/artifact/ios-grapple) | [Download](https://jank.crap.studio/job/barcelona/job/mautrix/lastSuccessfulBuild/artifact/ios-barcelona-mautrix) |
+| macOS | [Download](https://jank.crap.studio/job/barcelona/job/main/lastSuccessfulBuild/artifact/darwin-grapple) | [Download](https://jank.crap.studio/job/barcelona/job/main/lastSuccessfulBuild/artifact/darwin-barcelona-mautrix) |
+| iOS   | [Download](https://jank.crap.studio/job/barcelona/job/main/lastSuccessfulBuild/artifact/ios-grapple) | [Download](https://jank.crap.studio/job/barcelona/job/main/lastSuccessfulBuild/artifact/ios-barcelona-mautrix) |
 
 ## Getting Started
 
@@ -62,9 +62,9 @@ automaticSending:
 
 `barcelona-mautrix` is a driver for connecting to matrix, via [matrix-imessage](https://github.com/mautrix/imessage). **This driver is in heavy development and stability is not guaranteed. You will find bugs! Please open issues as you find them so we can improve the driver.**
 
-Downloads for barcelona-mautrix are available for both [macOS](https://jank.crap.studio/job/barcelona/job/mautrix/lastSuccessfulBuild/artifact/darwin-barcelona-mautrix) and [iOS](https://jank.crap.studio/job/barcelona/job/mautrix/lastSuccessfulBuild/artifact/ios-barcelona-mautrix), though iOS is completely untested. Please open an issue with bugs you find on iOS as I do not actively develop or test on it.
+Downloads for barcelona-mautrix are available for both [macOS](https://jank.crap.studio/job/barcelona/job/main/lastSuccessfulBuild/artifact/darwin-barcelona-mautrix) and [iOS](https://jank.crap.studio/job/barcelona/job/main/lastSuccessfulBuild/artifact/ios-barcelona-mautrix), though iOS is completely untested. Please open an issue with bugs you find on iOS as I do not actively develop or test on it.
 
-Ensure you have [com.apple.security.xpc.plist](https://github.com/open-imcore/barcelona/raw/mautrix/com.apple.security.xpc.plist) installed to `/Library/Preferences/com.apple.security.xpc.plist`, as this is required to allow communication with IMDPersistenceAgent directly (imagent does not provide efficient message querying APIs, IMDPersistenceAgent does).
+Ensure you have [com.apple.security.xpc.plist](https://github.com/open-imcore/barcelona/raw/main/com.apple.security.xpc.plist) installed to `/Library/Preferences/com.apple.security.xpc.plist`, as this is required to allow communication with IMDPersistenceAgent directly (imagent does not provide efficient message querying APIs, IMDPersistenceAgent does).
 
 ## Built With
 - [Swift Package Manager](https://github.com/apple/swift-package-manager) – Dependency management
