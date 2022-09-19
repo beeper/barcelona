@@ -199,27 +199,7 @@ import IMCore
 
 public extension CBChat {
     var IMChats: [IMChat] {
-        var identifiers: Set<String> = Set(), chats: Set<IMChat> = Set()
-        func addListener(_ chatIdentifier: String) -> String {
-            guard identifiers.insert(chatIdentifier).inserted else {
-                return chatIdentifier
-            }
-            CBChatRegistry.shared.loadedChatsByChatIdentifierCallback[chatIdentifier, default: []].append { loadedChats in
-                for chat in loadedChats {
-                    chats.insert(chat)
-                }
-                identifiers.remove(chatIdentifier)
-            }
-            IMDaemonController.shared().loadChat(withChatIdentifier: chatIdentifier)
-            return chatIdentifier
-        }
-        for leaf in leaves.values {
-            if let existing = IMChatRegistry.shared.existingChat(withGUID: leaf.guid), existing.guid == leaf.guid {
-                continue
-            }
-            _ = addListener(leaf.chatIdentifier)
-        }
-        return leaves.values.compactMap(\.IMChat)
+        leaves.values.compactMap(\.IMChat)
     }
     
     var participants: [String] {
@@ -318,7 +298,7 @@ public extension CBChat {
             let chats = recipients.compactMap(\.chat)
             return chats.sorted(usingKey: \.lastMessage?.time, withDefaultValue: .distantPast, by: >).first
         } else {
-            return IMChats.first(where: { $0.account.service == service })
+            return IMChats.first(where: { $0.account.service == service }) ?? IMChats.first
         }
     }
 }
