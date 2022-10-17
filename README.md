@@ -1,3 +1,6 @@
+> 🚨 Heads up!
+> Barcelona is currently in **maintenance mode**. I am going to be focusing my time towards a second iteration of wrapping iMessage, and will not be adding new features to Barcelona for the forseeable future.
+
 # Barcelona
 A Swift framework for interacting with iMessage.
 
