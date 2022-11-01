@@ -2,8 +2,6 @@ name: Builder
 
 on:
   push:
-    branches:
-      - main
 
 jobs:
   mac-builder:
