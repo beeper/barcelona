@@ -4,7 +4,6 @@ fileGroups:
   - project.yml
   - README.md
   - Makefile
-  - Jenkinsfile
   - BUILDING.md
   - Scripts
   - XCSpec
