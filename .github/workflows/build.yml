@@ -12,11 +12,11 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
-        
+        uses: actions/checkout@v3
+
       - name: Cache macOS Build
         id: cache-build
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             $GITHUB_WORKSPACE/SourcePackages
@@ -28,66 +28,7 @@ jobs:
         run: make macos
 
       - name: Archive Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: macOS-build
-          path: archive
-  ios-builder:
-    name: iOS Builder
-    runs-on: macos-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
-
-      - name: Prepare Environment
-        run: |
-          brew install ldid make
-          echo "THEOS=$GITHUB_WORKSPACE/theos" >> $GITHUB_ENV
-          PATH="/usr/local/opt/make/libexec/gnubin:$PATH" >> $GITHUB_ENV
-          echo "Succesfully installed tools!"
- 
-      - name: Cache Theos
-        id: cache-theos
-        uses: actions/cache@v2
-        with:
-          path: theos
-          key: ${{ runner.os }}-theos
-
-      - name: Setup Theos
-        if: steps.cache-theos.outputs.cache-hit != 'true'
-        uses: actions/checkout@main
-        with:
-          repository: theos/theos
-          ref: 8771215f765e774bfefdacc6ddf0e151c2973d49
-          path: theos
-          submodules: recursive
-
-      - name: Download SDKs
-        if: steps.cache-theos.outputs.cache-hit != 'true'
-        run: |
-          curl -LO https://github.com/xybp888/iOS-SDKs/archive/master.zip
-          bsdtar --strip-components=1 -xf master.zip --directory $GITHUB_WORKSPACE/theos/sdks
-          rm -f master.zip
-
-      - name: Cache iOS Build
-        id: cache-build
-        uses: actions/cache@v2
-        with:
-          path: |
-            $GITHUB_WORKSPACE/SourcePackages
-            $GITHUB_WORKSPACE/ios_build
-            /Users/runner/Library/Developer/Xcode/DerivedData
-          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
-
-      - name: Build iOS
-        run: |
-          export THEOS=$GITHUB_WORKSPACE/theos
-          make ios
-
-      - name: Archive Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: iOS-build
-          path: archive
-          
+          name: barcelona
+          path: Build/macOS/Build/Products/Release/barcelona-mautrix-macOS/
