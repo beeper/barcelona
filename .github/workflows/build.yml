@@ -25,8 +25,14 @@ jobs:
       - name: Build Barcelona for macOS
         run: make macos
 
-      - name: Upload artifacts
+      - name: Upload barcelona-mautrix artifact
         uses: actions/upload-artifact@v3
         with:
-          name: barcelona
-          path: Build/macOS/Build/Products/Release/barcelona-mautrix-macOS/
+          name: darwin-barcelona-mautrix
+          path: Build/macOS/Build/Products/Release/barcelona-mautrix-macOS
+
+      - name: Upload grapple artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: darwin-grapple
+          path: Build/macOS/Build/Products/Release/barcelona-grapple
