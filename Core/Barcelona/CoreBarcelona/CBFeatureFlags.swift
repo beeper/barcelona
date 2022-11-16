@@ -72,6 +72,7 @@ public class _CBFeatureFlags: FlagProvider {
     
     @_spi(featureFlags) public var overrideWithholdPartialFailures: Bool?
     @_spi(featureFlags) public var overrideWithholdDupes: Bool?
+    public var correlateChats: Bool = true
     
     @FeatureFlag("withhold-partial-failures", defaultValue: true)
     private var _withholdPartialFailures: Bool
