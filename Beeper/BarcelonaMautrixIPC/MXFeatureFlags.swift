@@ -18,7 +18,4 @@ public class MXFeatureFlags: FlagProvider {
     
     @FeatureFlag("merged-chats", defaultValue: false)
     public var mergedChats: Bool
-
-    @FeatureFlag("correlated-chats", defaultValue: false)
-    public var correlatedChats: Bool
 }

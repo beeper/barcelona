@@ -101,8 +101,8 @@ class BarcelonaMautrix {
             BLMetricStore.shared.set(true, forKey: .shouldDebugPayloads)
         }
 
-        // Update barcelona to respect whatever flags were passed into mautrix
-        CBFeatureFlags.correlateChats = MXFeatureFlags.shared.correlatedChats
+        // Only correlate chats if mautrix wants us to merge them
+        CBFeatureFlags.correlateChats = MXFeatureFlags.shared.mergedChats
     }
     
     // starts the bridge state interval
