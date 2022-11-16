@@ -100,6 +100,9 @@ class BarcelonaMautrix {
             LoggingDrivers = CBFeatureFlags.runningFromXcode ? [OSLogDriver.shared] : [OSLogDriver.shared, ConsoleDriver.shared]
             BLMetricStore.shared.set(true, forKey: .shouldDebugPayloads)
         }
+
+        // Update barcelona to respect whatever flags were passed into mautrix
+        CBFeatureFlags.correlateChats = MXFeatureFlags.shared.correlatedChats
     }
     
     // starts the bridge state interval

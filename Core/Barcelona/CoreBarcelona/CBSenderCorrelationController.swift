@@ -592,7 +592,11 @@ extension Message: CBSenderTargetable {
 extension IMChat {
     /// Returns other chats with the same sender correlation ID
     public var siblings: [IMChat] {
-        if isGroup {
+        // This is a band-aid for now. Since this doesn't try to merge
+        // SMS<->iMessage conversations, this flag (`correlateChats`)
+        // controls chat merging along with correlating.
+        // TODO: Actually separate them out and fix correlation lol
+        if isGroup || !CBFeatureFlags.correlateChats {
             return [self]
         } else {
             var siblings = recipient?.senderDestination.map { destination in
