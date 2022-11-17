@@ -133,7 +133,7 @@ private extension IMAccountController {
             return false
         }
         
-        // True if the account failed to register, has a known registraiton failure reason, or most recently failed to register
+        // True if the account failed to register, has a known registration failure reason, or most recently failed to register
         var hasAccountError: Bool {
             account.registrationStatus == .failed || account.registrationFailureReason > .unknownError || registrationFailureDate != nil
         }

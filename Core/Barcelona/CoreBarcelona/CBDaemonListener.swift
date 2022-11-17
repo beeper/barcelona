@@ -513,11 +513,11 @@ public class CBDaemonListener: ERBaseDaemonListener {
         }
     }
     
-    // Invoked for status updates (read/deliver/play/save etc)
+    // Invoked for status updates (read/deliver/play/save/edit etc)
     public override func service(_ serviceID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, messagesUpdated messages: [[AnyHashable: Any]]!) {
         *log.debug("messagesUpdated[service]: \(messages.debugDescription, privacy: .public)")
         
-        for message in FZCreateIMMessageItemsFromSerializedArray(messages) {
+        for message in CBCreateItemsFromSerializedArray(messages) {
             switch message {
             case let message as IMMessageItem:
                 self.process(serviceMessage: message, chatIdentifier: chatIdentifier, chatStyle: chatStyle)
@@ -534,7 +534,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
     public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, messagesUpdated messages: [NSObject]!) {
         *log.debug("messagesUpdated[account]: \(messages.debugDescription, privacy: .public)")
         
-        for message in messages as? [IMItem] ?? FZCreateIMMessageItemsFromSerializedArray(messages) {
+        for message in messages as? [IMItem] ?? CBCreateItemsFromSerializedArray(messages) {
             switch message {
             case let message as IMMessageItem:
                 // This listener call is only for failed messages that are not otherwise caught.
@@ -723,11 +723,11 @@ private extension CBDaemonListener {
                 }
             }
         }
-        
+
         switch newMessage {
         case let item as IMMessageItem:
             currentlyTyping = item.isIncomingTypingMessage() && !item.isCancelTypingMessage()
-            
+
             // typing messages are not part of the timeline anymore
             if item.isTypingMessage {
                 log.debug("ignoring message \(item.guid): typing doesnt flow through here")

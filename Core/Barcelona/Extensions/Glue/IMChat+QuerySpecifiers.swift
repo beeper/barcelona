@@ -12,11 +12,11 @@ import IMSharedUtilities
 
 private extension IMChatRegistry {
     func __cb_allGUIDs(forChat chat: IMChat) -> [String] {
-        if self.responds(to: Selector("allGUIDsForChat:")) {
+        if self.responds(to: #selector(self.allGUIDs(forChat:))) {
             return allGUIDs(forChat: chat)
-        } else if self.responds(to: Selector("_allGUIDsForChat:")) {
+        } else if self.responds(to: #selector(self._allGUIDs(forChat:))) {
             return _allGUIDs(forChat: chat)
-        } else if self.responds(to: Selector("_chatGUIDToChatMap")) {
+        } else if self.responds(to: #selector(self._chatGUIDToChatMap)) {
             return _chatGUIDToChatMap().compactMap { id, chatCompare in
                 guard chat == chatCompare else {
                     return nil
@@ -24,7 +24,7 @@ private extension IMChatRegistry {
                 
                 return id
             }
-        } else if self.responds(to: Selector("chatGUIDToChatMap")) {
+        } else if self.responds(to: #selector(self.chatGUIDToChatMap)) {
             return chatGUIDToChatMap().compactMap { id, chatCompare in
                 guard chat == chatCompare else {
                     return nil
