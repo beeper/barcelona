@@ -156,7 +156,7 @@ public extension Chat {
 // MARK: - Read Receipts
 internal extension IMChat {
     func markDirectRead(items: [IMMessageItem]) {
-        guard let serialized = FZCreateSerializedIMMessageItemsfromArray(items), serialized.count > 0 else {
+        guard let serialized = CBCreateSerializedItemsFromArray(items), serialized.count > 0 else {
             return
         }
         

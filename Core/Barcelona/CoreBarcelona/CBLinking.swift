@@ -14,6 +14,10 @@ private let log = Logger(category: "CBLinking")
 
 /// A constraint that will either qualify or disqualify a symbol from being selected during reconciliation
 public enum CBLinkerConstraint: Hashable, Equatable, CustomDebugStringConvertible {
+    /// macOS 13, iOS 16, watchOS 9
+    case ventura
+    /// before macOS 13, iOS 16, watchOS 9
+    case preVentura
     /// before macOS 12, iOS 15, watchOS 8
     case preMonterey
     /// macOS 12, iOS 15, watchOS 8
@@ -26,12 +30,16 @@ public enum CBLinkerConstraint: Hashable, Equatable, CustomDebugStringConvertibl
     /// Whether the current environment satisfies the constraint
     public var applies: Bool {
         switch self {
-        case .preMonterey:
-            if #available(macOS 12, iOS 15, watchOS 8, *) {
-                return false
-            } else {
+        case .preVentura:
+            return !Self.ventura.applies
+        case .ventura:
+            if #available(macOS 13, iOS 16, watchOS 9, *) {
                 return true
+            } else {
+                return false
             }
+        case .preMonterey:
+            return !Self.monterey.applies
         case .monterey:
             if #available(macOS 12, iOS 15, watchOS 8, *) {
                 return true
@@ -39,11 +47,7 @@ public enum CBLinkerConstraint: Hashable, Equatable, CustomDebugStringConvertibl
                 return false
             }
         case .preBigSur:
-            if #available(macOS 11, iOS 14, watchOS 7, *) {
-                return false
-            } else {
-                return true
-            }
+            return !Self.bigSur.applies
         case .bigSur:
             if #available(macOS 11, iOS 14, watchOS 7, *) {
                 return true
@@ -55,6 +59,10 @@ public enum CBLinkerConstraint: Hashable, Equatable, CustomDebugStringConvertibl
     
     public var debugDescription: String {
         switch self {
+        case .preVentura:
+            return "preVentura"
+        case .ventura:
+            return "ventura"
         case .preMonterey:
             return "preMonterey"
         case .monterey:
