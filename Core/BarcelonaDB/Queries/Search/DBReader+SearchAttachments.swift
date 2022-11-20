@@ -8,6 +8,7 @@
 
 import Foundation
 import BarcelonaFoundation
+import GRDB
 
 public protocol IMServiceRegistrationProvider {
     func handle(forService service: String) -> String?
@@ -27,32 +28,44 @@ private class IMServiceRegistrationProviderImpl: IMServiceRegistrationProvider {
 
 public extension DBReader {
     func attachments(matchingParameters parameters: AttachmentSearchParameters, serviceRegistrationProvider: IMServiceRegistrationProvider? = nil) -> Promise<[RawAttachment]> {
-        parameters.loadRawAttachments().then { attachments in
+        func getMessages(_ db: Database, attachments: [RawAttachment]) throws -> ([RawMessage], [MessageAttachmentJoin]) {
+            let messageAttachmentJoins: [MessageAttachmentJoin] = try MessageAttachmentJoin
+                .filter(attachments.compactMap(\.ROWID).contains(MessageAttachmentJoin.Columns.attachment_id))
+                .fetchAll(db)
+
+            let messageROWIDs = messageAttachmentJoins.compactMap(\.message_id)
+
+            let messages: [RawMessage] = try RawMessage
+                .select([RawMessage.Columns.ROWID, RawMessage.Columns.is_from_me, RawMessage.Columns.handle_id, RawMessage.Columns.service, RawMessage.Columns.date])
+                .filter(messageROWIDs.contains(RawMessage.Columns.ROWID))
+                .fetchAll(db)
+
+            return (messages, messageAttachmentJoins)
+        }
+
+        func getLedgers(_ db: Database, messages: [RawMessage]) throws -> ([Int64: RawMessage], [Int64: RawHandle]) {
+            let messagesLedger = messages.dictionary(keyedBy: \.ROWID)
+
+            let handleROWIDs = messages.filter {
+                $0.is_from_me == 0
+            }.compactMap(\.handle_id)
+
+            let handles: [RawHandle] = try RawHandle
+                .select([RawHandle.Columns.ROWID, RawHandle.Columns.id])
+                .filter(handleROWIDs.contains(RawHandle.Columns.ROWID))
+                .fetchAll(db)
+
+            let handlesLedger = handles.dictionary(keyedBy: \.ROWID)
+
+            return (messagesLedger, handlesLedger)
+        }
+
+        return parameters.loadRawAttachments().then { attachments in
             read { db -> ([RawAttachment], [Int64: RawMessage], [Int64: (RawMessage?, RawHandle?)]) in
-                let messageAttachmentJoins: [MessageAttachmentJoin] = try MessageAttachmentJoin
-                    .filter(attachments.compactMap(\.ROWID).contains(MessageAttachmentJoin.Columns.attachment_id))
-                    .fetchAll(db)
-                
-                let messageROWIDs = messageAttachmentJoins.compactMap(\.message_id)
-                
-                let messages: [RawMessage] = try RawMessage
-                    .select([RawMessage.Columns.ROWID, RawMessage.Columns.is_from_me, RawMessage.Columns.handle_id, RawMessage.Columns.service, RawMessage.Columns.date])
-                    .filter(messageROWIDs.contains(RawMessage.Columns.ROWID))
-                    .fetchAll(db)
-                
-                let messagesLedger = messages.dictionary(keyedBy: \.ROWID)
-                
-                let handleROWIDs = messages.filter {
-                    $0.is_from_me == 0
-                }.compactMap(\.handle_id)
-                
-                let handles: [RawHandle] = try RawHandle
-                    .select([RawHandle.Columns.ROWID, RawHandle.Columns.id])
-                    .filter(handleROWIDs.contains(RawHandle.Columns.ROWID))
-                    .fetchAll(db)
-                
-                let handlesLedger = handles.dictionary(keyedBy: \.ROWID)
-                
+                let (messages, messageAttachmentJoins) = try getMessages(db, attachments: attachments)
+
+                let (messagesLedger, handlesLedger) = try getLedgers(db, messages: messages)
+
                 let messageAttachmentLedger = messageAttachmentJoins.reduce(into: [Int64: (RawMessage?, RawHandle?)]()) { ledger, join in
                     guard let messageID = join.message_id, let attachmentID = join.attachment_id else {
                         return

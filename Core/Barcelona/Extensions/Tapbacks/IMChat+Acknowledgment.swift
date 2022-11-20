@@ -33,7 +33,9 @@ public extension IMChat {
         let rawType = Int64(type)
         
 //        sendMessageAcknowledgment(Int64(type), forChatItem: subpart, withMessageSummaryInfo: )
-        guard let summaryInfo = subpart.summaryInfo(for: message, in: self, itemTypeOverride: overridingItemType), let compatibilityString = IMMessageAcknowledgmentStringHelper.generateBackwardCompatibilityString(forMessageAcknowledgmentType: rawType, messageSummaryInfo: summaryInfo), let superFormat = IMCreateSuperFormatStringFromPlainTextString(compatibilityString) else {
+        guard let summaryInfo = subpart.summaryInfo(for: message, in: self, itemTypeOverride: overridingItemType),
+              let compatibilityString = CBGeneratePreviewStringForAcknowledgmentItem(message),
+              let superFormat = IMCreateSuperFormatStringFromPlainTextString(compatibilityString) else {
             throw BarcelonaError(code: 500, message: "Internal server error")
         }
         
