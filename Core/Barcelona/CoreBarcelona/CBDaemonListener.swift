@@ -155,6 +155,9 @@ internal extension CBDaemonListener {
         
         _ = CBIDSListener.shared.reflectedReadReceiptPipeline.pipe { guid, service, time in
             DBReader.shared.chatIdentifier(forMessageGUID: guid).then { chatIdentifier in
+
+                log.debug("reflectedReadReceiptPipeline received guid \(guid) in chat \(String(describing: chatIdentifier))")
+
                 guard let chatIdentifier = chatIdentifier else {
                     return
                 }

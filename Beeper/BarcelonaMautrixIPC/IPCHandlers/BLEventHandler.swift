@@ -9,6 +9,9 @@
 import Barcelona
 import IMCore
 import IDS
+import Swog
+
+fileprivate let log = Logger(category: "BLEventHandler")
 
 private extension ChatItemOwned {
     var mautrixFriendlyGUID: String {
@@ -94,9 +97,13 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
             guard change.type == .read else {
                 return
             }
+
             if let sender = change.sender, BLBlocklistController.shared.isSenderBlocked(sender) {
                 return
             }
+
+            log.debug("Processing read receipt from \(String(describing: change.sender)) in \(change.chat.blChatGUID)")
+
             BLWritePayload(.init(command: .read_receipt(BLReadReceipt(sender_guid: change.mautrixFriendlyGUID, is_from_me: change.fromMe, chat_guid: change.chat.blChatGUID, read_up_to: change.messageID, correlation_id: change.chat.correlationIdentifier, sender_correlation_id: change.senderCorrelationID))))
         }
         

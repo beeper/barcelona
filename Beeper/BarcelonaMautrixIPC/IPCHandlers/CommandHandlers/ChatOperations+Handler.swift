@@ -62,10 +62,12 @@ extension GetGroupChatInfoCommand: Runnable {
 
 extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload) {
+        CLInfo("MautrixIPC", "Sending read receipt to %@", String(describing: cbChat?.blChatGUID))
+
         guard let chat = cbChat else {
             return payload.fail(strategy: .chat_not_found)
         }
-        
+
         chat.markMessageAsRead(withID: read_up_to)
     }
 }
