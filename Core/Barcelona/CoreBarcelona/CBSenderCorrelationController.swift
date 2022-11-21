@@ -429,7 +429,7 @@ public class CBSenderCorrelationController {
     /// Determines the correlation ID for a set of senders assumed to be the same person
     public func correlate(sameSenders senders: [String], offline: Bool = false, hitDatabase: Bool = true) -> String? {
         // no-op
-        if senders.isEmpty {
+        if senders.isEmpty || !CBFeatureFlags.correlateChats {
             return nil
         }
         // get all persisted correlation identifiers
