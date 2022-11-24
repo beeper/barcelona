@@ -23,9 +23,9 @@ private let log = Logger(category: "ERDaemonListener")
 
 // set to false and the logging conditions (probably) wont even compile, but they will be disabled
 #if DEBUG
-@usableFromInline internal let verboseLoggingEnabled = false
+@usableFromInline internal let verboseLoggingEnabled = true
 #else
-@usableFromInline internal let verboseLoggingEnabled = false
+@usableFromInline internal let verboseLoggingEnabled = true
 #endif
 
 prefix operator *
@@ -746,7 +746,7 @@ private extension CBDaemonListener {
                 return
             }
             
-            log.debug("sending message \(item.guid) down the pipeline")
+            log.debug("sending message \(item.guid) \(item.service) \(chatIdentifier) down the pipeline")
             messagePipeline.send(Message(messageItem: item, chatID: chatIdentifier))
         case let item:
             // wrap non-message items and send them as transcript actions

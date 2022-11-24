@@ -127,7 +127,9 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                     CLDebug("", "%@", message.debugDescription)
                 }
                 #endif
-                BLWritePayload(.init(command: .message(BLMessage(message: message))))
+                let blMessage = BLMessage(message: message)
+                log.debug("Sending message payload \(blMessage.guid) \(blMessage.chat_guid) \(blMessage.sender_guid ?? "nil") \(blMessage.sender_correlation_id ?? "nil") \(blMessage.service)")
+                BLWritePayload(.init(command: .message(blMessage)))
             case .sent(id: let id, service: let service, chat: let chat, time: _, senderCorrelationID: let senderCorrelationID):
                 BLWritePayload(.init(command: .send_message_status(BLMessageStatus(sentMessageGUID: id, onService: service, forChatGUID: chat.blChatGUID, correlation_id: chat.correlationIdentifier, sender_correlation_id: senderCorrelationID))))
             case .failed(id: let id, service: let service, chat: let chat, code: let code, senderCorrelationID: let senderCorrelationID):

@@ -103,6 +103,7 @@ class BarcelonaMautrix {
 
         // Only correlate chats if mautrix wants us to merge them
         CBFeatureFlags.correlateChats = MXFeatureFlags.shared.mergedChats
+        log.info("mergedChats flag: \(MXFeatureFlags.shared.mergedChats)")
     }
     
     // starts the bridge state interval
