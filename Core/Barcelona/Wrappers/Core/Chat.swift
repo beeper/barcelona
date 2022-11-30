@@ -161,8 +161,23 @@ internal extension IMChat {
         }
         
         let (identifiers, services) = querySpecifiers
-        
-        IMDaemonController.shared().markRead(
+
+        // We should figure this out better, but the situation for now is:
+        // IMDaemonController.shared() returns an IMDaemonController.
+        // IMDaemonController.sharedInstance() returns an IMDistributingProxy. What is that? Who knows. What does it do? Who knows.
+        // But on Ventura,
+        // IMDaemonController.shared().responds(to: #selector(IMRemoteDaemonProtocol.markRead(forIDs:style:onServices:messages:clientUnreadCount:)) == false, and
+        // IMDaemonController.sharedInstance().responds(to: #selector(IMRemoteDaemonProtocol.markRead(forIDs:style:onServices:messages:clientUnreadCount:)) == true
+        // We can also see this in the decompilation of `-[IMChatRegistry _chat_sendReadReceiptForAllMessages:]`, where it calls IMDaemonController.sharedInstance().markRead(...)
+        var controller: IMRemoteDaemonProtocol {
+            if #available(macOS 13.0, iOS 16, *) {
+                return IMDaemonController.sharedInstance()
+            } else {
+                return IMDaemonController.shared()
+            }
+        }
+
+        controller.markRead(
             forIDs: identifiers,
             style: chatStyle.rawValue,
             onServices: services,
