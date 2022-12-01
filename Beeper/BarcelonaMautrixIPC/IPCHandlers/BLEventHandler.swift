@@ -1,5 +1,5 @@
 //
-//  BLEventHandler.swift
+//  self.ipcChannel.writePayload.swift
 //  BarcelonaMautrixIPC
 //
 //  Created by Eric Rabil on 6/14/21.
@@ -11,7 +11,7 @@ import IMCore
 import IDS
 import Swog
 
-fileprivate let log = Logger(category: "BLEventHandler")
+fileprivate let log = Logger(category: "self.ipcChannel.writePayload")
 
 private extension ChatItemOwned {
     var mautrixFriendlyGUID: String {
@@ -70,12 +70,16 @@ private extension BLContact {
 }
 
 public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
-    public static let shared = BLEventHandler()
-    
     private let fifoQueue = FifoQueue<Void>()
     
+    private let ipcChannel: MautrixIPCChannel
+    
+    public init(ipcChannel: MautrixIPCChannel) {
+        self.ipcChannel = ipcChannel
+    }
+    
     internal func send(_ command: IPCCommand) {
-        BLWritePayload(.init(command: command))
+        ipcChannel.writePayload(.init(command: command))
     }
     
     @_spi(unitTestInternals) public func receiveTyping(_ chat: String, _ typing: Bool) {
@@ -104,7 +108,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
 
             log.debug("Processing read receipt from \(String(describing: change.sender)) in \(change.chat.blChatGUID)")
 
-            BLWritePayload(.init(command: .read_receipt(BLReadReceipt(sender_guid: change.mautrixFriendlyGUID, is_from_me: change.fromMe, chat_guid: change.chat.blChatGUID, read_up_to: change.messageID, correlation_id: change.chat.correlationIdentifier, sender_correlation_id: change.senderCorrelationID))))
+            self.ipcChannel.writePayload(.init(command: .read_receipt(BLReadReceipt(sender_guid: change.mautrixFriendlyGUID, is_from_me: change.fromMe, chat_guid: change.chat.blChatGUID, read_up_to: change.messageID, correlation_id: change.chat.correlationIdentifier, sender_correlation_id: change.senderCorrelationID))))
         }
         
         BLMessageExpert.shared.eventPipeline.pipe { event in
@@ -116,7 +120,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 if CBPurgedAttachmentController.shared.enabled {
                     if message.fileTransferIDs.count > 0 {
                         CBPurgedAttachmentController.shared.process(transferIDs: message.fileTransferIDs).then { [message] in
-                            BLWritePayload(.init(command: .message(BLMessage(message: message.refresh()))))
+                            self.ipcChannel.writePayload(.init(command: .message(BLMessage(message: message.refresh()))))
                         }
                         return
                     }
@@ -129,11 +133,11 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 #endif
                 let blMessage = BLMessage(message: message)
                 log.debug("Sending message payload \(blMessage.guid) \(blMessage.chat_guid) \(blMessage.sender_guid ?? "nil") \(blMessage.sender_correlation_id ?? "nil") \(blMessage.service)")
-                BLWritePayload(.init(command: .message(blMessage)))
+                self.ipcChannel.writePayload(.init(command: .message(blMessage)))
             case .sent(id: let id, service: let service, chat: let chat, time: _, senderCorrelationID: let senderCorrelationID):
-                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(sentMessageGUID: id, onService: service, forChatGUID: chat.blChatGUID, correlation_id: chat.correlationIdentifier, sender_correlation_id: senderCorrelationID))))
+                self.ipcChannel.writePayload(.init(command: .send_message_status(BLMessageStatus(sentMessageGUID: id, onService: service, forChatGUID: chat.blChatGUID, correlation_id: chat.correlationIdentifier, sender_correlation_id: senderCorrelationID))))
             case .failed(id: let id, service: let service, chat: let chat, code: let code, senderCorrelationID: let senderCorrelationID):
-                BLWritePayload(.init(command: .send_message_status(BLMessageStatus(guid: id, chatGUID: chat.blChatGUID, status: .failed, service: service, message: code.localizedDescription, statusCode: code.description, correlation_id: chat.correlationIdentifier, sender_correlation_id: senderCorrelationID))))
+                self.ipcChannel.writePayload(.init(command: .send_message_status(BLMessageStatus(guid: id, chatGUID: chat.blChatGUID, status: .failed, service: service, message: code.localizedDescription, statusCode: code.description, correlation_id: chat.correlationIdentifier, sender_correlation_id: senderCorrelationID))))
             default:
                 break
             }
@@ -146,7 +150,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
             guard let blContact = BLContact.blContact(for: contact) else {
                 return
             }
-            BLWritePayload(.init(command: .contact(blContact)))
+            self.ipcChannel.writePayload(.init(command: .contact(blContact)))
         }
         
         NotificationCenter.default.addObserver(forName: "IMCSChangeHistoryUpdateContactEventNotification", object: nil, queue: nil, using: handleAddOrChangeContactNotification(_:))
@@ -154,7 +158,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         
         // There's no way Apple-native way to know which handle IDs are being cleared out, without avoiding false positives.
         CBDaemonListener.shared.resetHandlePipeline.pipe { handleIDs in
-            BLWritePayloads(handleIDs.map(BLContact.emptyContact(for:)).map { IPCPayload(command: .contact($0)) })
+            self.ipcChannel.writePayloads(handleIDs.map(BLContact.emptyContact(for:)).map { IPCPayload(command: .contact($0)) })
         }
         
         var nicknamesLoadedAt: Date? = nil, lastNicknamePayloads: [String: BLContact] = [:]
@@ -185,12 +189,12 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 return
             }
             
-            BLWritePayloads(payloads)
+            self.ipcChannel.writePayloads(payloads)
         }
     }
     
     public func purgedTransferFailed(_ transfer: IMFileTransfer) {
-        BLWritePayload(.init(id: nil, command: .error(.init(code: "file-transfer-failure", message: "Failed to download file transfer: \(transfer.errorDescription ?? transfer.error.description) (\(transfer.error.description))"))))
+        self.ipcChannel.writePayload(.init(id: nil, command: .error(.init(code: "file-transfer-failure", message: "Failed to download file transfer: \(transfer.errorDescription ?? transfer.error.description) (\(transfer.error.description))"))))
     }
 }
 

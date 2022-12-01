@@ -11,8 +11,8 @@ import IMCore
 
 public struct GetContactListResponse: Codable {
     public struct Runner: Runnable {
-        public func run(payload: IPCPayload) {
-            payload.reply(withResponse: .contacts(GetContactListResponse(contacts: BMXGenerateContactList(omitAvatars: true))))
+        public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
+            payload.reply(withResponse: .contacts(GetContactListResponse(contacts: BMXGenerateContactList(omitAvatars: true))), ipcChannel: ipcChannel)
         }
     }
     

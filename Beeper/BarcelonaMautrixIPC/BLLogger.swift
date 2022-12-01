@@ -29,12 +29,14 @@ private extension LoggingLevel {
 }
 
 public class BLMautrixSTDOutDriver: LoggingDriver {
-    public static let shared = BLMautrixSTDOutDriver()
+    private let ipcChannel: MautrixIPCChannel
     
-    private init() {}
+    public init(ipcChannel: MautrixIPCChannel) {
+        self.ipcChannel = ipcChannel
+    }
     
     public func log(level: LoggingLevel, fileID: StaticString, line: Int, function: StaticString, dso: UnsafeRawPointer, category: StaticString, message: StaticString, args: [CVarArg]) {
-        BLWritePayload(.init(id: nil, command: .log(LogCommand(level: level.ipcLevel, module: String(category), message: String(format: String(message), arguments: args), metadata: [
+        self.ipcChannel.writePayload(.init(id: nil, command: .log(LogCommand(level: level.ipcLevel, module: String(category), message: String(format: String(message), arguments: args), metadata: [
             "fileID": fileID.description,
             "function": function.description,
             "line": line.description
@@ -42,11 +44,11 @@ public class BLMautrixSTDOutDriver: LoggingDriver {
     }
     
     public func log(level: LoggingLevel, module: String, message: BackportedOSLogMessage, metadata: [String: Encodable]) {
-        BLWritePayload(.init(id: nil, command: .log(LogCommand(level: level.ipcLevel, module: module, message: message.render(level: BLRuntimeConfiguration.privacyLevel), metadata: metadata))))
+        self.ipcChannel.writePayload(.init(id: nil, command: .log(LogCommand(level: level.ipcLevel, module: module, message: message.render(level: BLRuntimeConfiguration.privacyLevel), metadata: metadata))))
     }
     
     public func log(level: LoggingLevel, fileID: StaticString, line: Int, function: StaticString, dso: UnsafeRawPointer, category: StaticString, message: BackportedOSLogMessage, metadata: MetadataValue) {
-        BLWritePayload(.init(id: nil, command: .log(LogCommand(level: level.ipcLevel, module: String(category), message: message.render(level: BLRuntimeConfiguration.privacyLevel), metadata: [
+        self.ipcChannel.writePayload(.init(id: nil, command: .log(LogCommand(level: level.ipcLevel, module: String(category), message: message.render(level: BLRuntimeConfiguration.privacyLevel), metadata: [
             "fileID": fileID.description,
             "function": function.description,
             "line": line.description

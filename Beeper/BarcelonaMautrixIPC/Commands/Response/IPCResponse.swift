@@ -10,8 +10,8 @@ import Foundation
 import Swog
 
 public extension IPCPayload {
-    func respond(_ response: IPCResponse) {
-        self.reply(withCommand: .response(response))
+    func respond(_ response: IPCResponse, ipcChannel: MautrixIPCChannel) {
+        self.reply(withCommand: .response(response), ipcChannel: ipcChannel)
     }
 }
 

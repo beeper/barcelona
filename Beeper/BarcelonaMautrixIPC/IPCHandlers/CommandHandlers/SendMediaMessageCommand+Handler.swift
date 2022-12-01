@@ -12,22 +12,22 @@ import IMCore
 import Sentry
 
 public protocol Runnable {
-    func run(payload: IPCPayload)
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel)
 }
 
 public protocol AuthenticatedAsserting {}
 
 extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
-    public func run(payload: IPCPayload) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         guard let chat = cbChat else {
-            return payload.fail(strategy: .chat_not_found)
+            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
         
         let transaction = SentrySDK.startTransaction(name: "send-message", operation: "send-media-message")
         
         let transfer = CBInitializeFileTransfer(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
         guard let guid = transfer.guid else {
-            return payload.fail(strategy: .internal_error("created transfer was not assigned a guid!!!"))
+            return payload.fail(strategy: .internal_error("created transfer was not assigned a guid!!!"), ipcChannel: ipcChannel)
         }
         var messageCreation = CreateMessage(parts: [
             .init(type: .attachment, details: guid)
@@ -80,7 +80,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                     transaction.finish(status: .unknownError)
                 }
                 if !success && shouldCancel {
-                    BLWritePayload(.init(command: .send_message_status(.init(guid: message.id, chatGUID: chat.blChatGUID, status: .failed, service: resolveMessageService(), message: failureCode?.localizedDescription, statusCode: failureCode?.description))))
+                    ipcChannel.writePayload(.init(command: .send_message_status(.init(guid: message.id, chatGUID: chat.blChatGUID, status: .failed, service: resolveMessageService(), message: failureCode?.localizedDescription, statusCode: failureCode?.description))))
                 }
                 if !success && shouldCancel {
                     chat.imChat.cancel(message)
@@ -92,14 +92,14 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             
             transaction.setData(value: message?.guid, key: "message_guid")
             
-            payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message!.id, service: resolveMessageService(), timestamp: Date().timeIntervalSinceNow)))
+            payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: message!.id, service: resolveMessageService(), timestamp: Date().timeIntervalSinceNow)), ipcChannel: ipcChannel)
         } catch {
             SentrySDK.capture(error: error) { scope in
                 scope.span = transaction
             }
             transaction.finish(status: .internalError)
             CLFault("BLMautrix", "failed to send media message: %@", error as NSError)
-            payload.fail(code: "internal_error", message: "Sorry, we're having trouble processing your attachment upload.")
+            payload.fail(code: "internal_error", message: "Sorry, we're having trouble processing your attachment upload.", ipcChannel: ipcChannel)
         }
     }
 }

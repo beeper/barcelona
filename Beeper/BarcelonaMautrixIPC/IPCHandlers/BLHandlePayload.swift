@@ -50,19 +50,19 @@ private extension IPCPayload {
     }
 }
 
-public func BLHandlePayload(_ payload: IPCPayload) {
+public func BLHandlePayload(_ payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
     guard let runnable = payload.runnable else {
         return IPCLog.warn("Received unhandleable payload type \(payload.command.name)")
     }
     
     if runnable is AuthenticatedAsserting {
         guard IMAccountController.shared.accounts.contains(where: \.canSendMessages) else {
-            payload.reply(withCommand: .error(.init(code: BLHealthTicker.shared.latestStatus.state_event.rawValue, message: "You must be signed in to do that.")))
+            payload.reply(withCommand: .error(.init(code: BLHealthTicker.shared.latestStatus.state_event.rawValue, message: "You must be signed in to do that.")), ipcChannel: ipcChannel)
             return
         }
     }
     
     DispatchQueue.main.async {
-        runnable.run(payload: payload)
+        runnable.run(payload: payload, ipcChannel: ipcChannel)
     }
 }

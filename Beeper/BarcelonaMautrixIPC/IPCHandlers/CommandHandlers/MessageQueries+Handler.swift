@@ -10,9 +10,9 @@ import Foundation
 import Barcelona
 
 extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
-    public func run(payload: IPCPayload) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         if MXFeatureFlags.shared.mergedChats, chat_guid.starts(with: "SMS;") {
-            return payload.respond(.messages([]))
+            return payload.respond(.messages([]), ipcChannel: ipcChannel)
         }
         
         #if DEBUG
@@ -23,7 +23,7 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
             #if DEBUG
             IPCLog.debug("Unknown chat with guid %@", chat_guid)
             #endif
-            return payload.fail(strategy: .chat_not_found)
+            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
         
         let siblings = chat.siblings
@@ -33,31 +33,31 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
             #if DEBUG
             IPCLog.debug("Not processing get_messages_after because chats last message timestamp %f is before req.timestamp %f", lastMessageTime, timestamp)
             #endif
-            return payload.respond(.messages([]))
+            return payload.respond(.messages([]), ipcChannel: ipcChannel)
         }
         
         
         
         BLLoadChatItems(withChatIdentifiers: siblings.compactMap(\.chatIdentifier), onServices: .CBMessageServices, afterDate: date, limit: limit).then(\.blMessages).then {
-            payload.respond(.messages($0))
+            payload.respond(.messages($0), ipcChannel: ipcChannel)
         }
     }
 }
 
 extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
-    public func run(payload: IPCPayload) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         if MXFeatureFlags.shared.mergedChats, chat_guid.starts(with: "SMS;") {
-            return payload.respond(.messages([]))
+            return payload.respond(.messages([]), ipcChannel: ipcChannel)
         }
         
         guard let chat = chat else {
-            return payload.fail(strategy: .chat_not_found)
+            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
         
         let siblings = chat.siblings
         
         BLLoadChatItems(withChatIdentifiers: siblings.compactMap(\.chatIdentifier), onServices: .CBMessageServices, limit: limit).then(\.blMessages).then {
-            payload.respond(.messages($0))
+            payload.respond(.messages($0), ipcChannel: ipcChannel)
         }
     }
 }

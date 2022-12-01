@@ -85,23 +85,23 @@ public struct IPCPayload: Codable {
         self.command = command
     }
     
-    public func reply(withCommand command: IPCCommand) {
+    public func reply(withCommand command: IPCCommand, ipcChannel: MautrixIPCChannel) {
         guard let id = id else {
             return CLDebug("Mautrix", "Reply issued for a command that had no ID. Inbound name: %@ Outbound name: %@", self.command.name.rawValue, self.command.name.rawValue)
         }
         
-        BLWritePayload(IPCPayload(id: id, command: command))
+        ipcChannel.writePayload(IPCPayload(id: id, command: command))
     }
     
-    public func reply(withResponse response: IPCResponse) {
-        reply(withCommand: .response(response))
+    public func reply(withResponse response: IPCResponse, ipcChannel: MautrixIPCChannel) {
+        reply(withCommand: .response(response), ipcChannel: ipcChannel)
     }
     
-    public func fail(code: String, message: String) {
-        reply(withCommand: .error(.init(code: code, message: message)))
+    public func fail(code: String, message: String, ipcChannel: MautrixIPCChannel) {
+        reply(withCommand: .error(.init(code: code, message: message)), ipcChannel: ipcChannel)
     }
     
-    public func fail(strategy: ErrorStrategy) {
-        reply(withCommand: strategy.asCommand)
+    public func fail(strategy: ErrorStrategy, ipcChannel: MautrixIPCChannel) {
+        reply(withCommand: strategy.asCommand, ipcChannel: ipcChannel)
     }
 }

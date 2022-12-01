@@ -31,9 +31,9 @@ extension Array where Element == String {
 }
 
 extension GetChatsCommand: Runnable {
-    public func run(payload: IPCPayload) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         if min_timestamp <= 0 {
-            return payload.reply(withResponse: .chats_resolved(IMChatRegistry.shared.allChats.map(\.blChatGUID)))
+            return payload.reply(withResponse: .chats_resolved(IMChatRegistry.shared.allChats.map(\.blChatGUID)), ipcChannel: ipcChannel)
         }
         
         DBReader.shared.latestMessageTimestamps().then { timestamps in
@@ -43,29 +43,29 @@ extension GetChatsCommand: Runnable {
         }.filter { chatID, pair in
             pair.0 > min_timestamp
         }.map(\.value.1).then { guids in
-            payload.reply(withResponse: .chats_resolved(guids.dedupeChatGUIDs()))
+            payload.reply(withResponse: .chats_resolved(guids.dedupeChatGUIDs()), ipcChannel: ipcChannel)
         }
     }
 }
 
 extension GetGroupChatInfoCommand: Runnable {
-    public func run(payload: IPCPayload) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         CLInfo("MautrixIPC", "Getting chat with id %@", chat_guid)
         
         guard let chat = blChat else {
-            return payload.fail(strategy: .chat_not_found)
+            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
         
-        payload.respond(.chat_resolved(chat))
+        payload.respond(.chat_resolved(chat), ipcChannel: ipcChannel)
     }
 }
 
 extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
-    public func run(payload: IPCPayload) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         CLInfo("MautrixIPC", "Sending read receipt to %@", String(describing: cbChat?.blChatGUID))
 
         guard let chat = cbChat else {
-            return payload.fail(strategy: .chat_not_found)
+            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
 
         chat.markMessageAsRead(withID: read_up_to)
@@ -73,9 +73,9 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
 }
 
 extension SendTypingCommand: Runnable, AuthenticatedAsserting {
-    public func run(payload: IPCPayload) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         guard let chat = cbChat else {
-            return payload.fail(strategy: .chat_not_found)
+            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
         
         chat.setTyping(typing)
@@ -83,11 +83,11 @@ extension SendTypingCommand: Runnable, AuthenticatedAsserting {
 }
 
 extension GetGroupChatAvatarCommand: Runnable {
-    public func run(payload: IPCPayload) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         guard let chat = chat, let groupPhotoID = chat.groupPhotoID else {
-            return payload.respond(.chat_avatar(nil))
+            return payload.respond(.chat_avatar(nil), ipcChannel: ipcChannel)
         }
         
-        payload.respond(.chat_avatar(BLAttachment(guid: groupPhotoID)))
+        payload.respond(.chat_avatar(BLAttachment(guid: groupPhotoID)), ipcChannel: ipcChannel)
     }
 }
