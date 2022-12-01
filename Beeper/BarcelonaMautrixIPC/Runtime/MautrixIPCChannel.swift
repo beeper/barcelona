@@ -7,13 +7,14 @@
 
 import Barcelona
 import Combine
+import OpenCombine
 import ERBufferedStream
 import Foundation
 
 let TERMINATOR = Data("\n".utf8)
 
 public class MautrixIPCChannel {
-    public var receivedPayloads = PassthroughSubject<IPCPayload, Never>()
+    public var receivedPayloads = Combine.PassthroughSubject<IPCPayload, Never>()
     
     private let inputHandle: FileHandle
     private let outputHandle: FileHandle
@@ -26,7 +27,7 @@ public class MautrixIPCChannel {
     
     var pongedOnce = false
     
-    private var cancellables = Set<AnyCancellable>()
+    private var cancellables = Set<OpenCombine.AnyCancellable>()
     
     public init(inputHandle: FileHandle, outputHandle: FileHandle) {
         self.inputHandle = inputHandle
@@ -36,9 +37,7 @@ public class MautrixIPCChannel {
         
         inputHandle.handleDataAsynchronously(sharedBarcelonaStream.receive(data:))
         
-        // unsafeBitCast is needed because sharedBarcelonaStream is actually an OpenCombine stream as opposed to a
-        // Combine stream, but it still has a store property we can call
-        unsafeBitCast(sharedBarcelonaStream.subject
+        sharedBarcelonaStream.subject
             .sink { result in
                 switch result {
                 case .failure(let error):
@@ -79,7 +78,7 @@ public class MautrixIPCChannel {
                     
                     self.receivedPayloads.send(payload)
                 }
-            }, to: AnyCancellable.self)
+            }
             .store(in: &cancellables)
     }
     

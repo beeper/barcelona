@@ -1,5 +1,5 @@
 //
-//  self.ipcChannel.writePayload.swift
+//  BLEventHandler.swift
 //  BarcelonaMautrixIPC
 //
 //  Created by Eric Rabil on 6/14/21.
