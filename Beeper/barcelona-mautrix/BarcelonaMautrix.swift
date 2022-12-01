@@ -21,10 +21,18 @@ private let trace = Tracer(log, true)
 class BarcelonaMautrix {
     static let shared = BarcelonaMautrix()
     
-    let reader = BLPayloadReader()
+    private let mautrixIPCChannel: MautrixIPCChannel
+    private let reader: BLPayloadReader
+    private let eventHandler: BLEventHandler
+    
+    init() {
+        mautrixIPCChannel = MautrixIPCChannel(inputHandle: FileHandle.standardInput, outputHandle: FileHandle.standardOutput)
+        reader = BLPayloadReader(ipcChannel: mautrixIPCChannel)
+        eventHandler = BLEventHandler(ipcChannel: mautrixIPCChannel)
+    }
     
     static func main() {
-        LoggingDrivers = [BLMautrixSTDOutDriver.shared, OSLogDriver.shared]
+        LoggingDrivers = [BLMautrixSTDOutDriver(ipcChannel: shared.mautrixIPCChannel), OSLogDriver.shared]
         
         CFPreferencesSetAppValue("Log" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
         CFPreferencesSetAppValue("Log.All" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
@@ -65,8 +73,6 @@ class BarcelonaMautrix {
     }
     
     func bootstrap() {
-        reader.callback = BLHandlePayload(_:)
-
         log.info("Bootstrapping")
         
         BarcelonaManager.shared.bootstrap().catch { error in
@@ -83,10 +89,10 @@ class BarcelonaMautrix {
             BLHealthTicker.shared.pinnedBridgeState = nil
             
             CBPurgedAttachmentController.shared.enabled = true
-            CBPurgedAttachmentController.shared.delegate = BLEventHandler.shared
+            CBPurgedAttachmentController.shared.delegate = self.eventHandler
             
             // starts the imessage notification processor
-            BLEventHandler.shared.run()
+            self.eventHandler.run()
             
             log.info("BLMautrix is ready")
             
@@ -109,7 +115,7 @@ class BarcelonaMautrix {
     // starts the bridge state interval
     func startHealthTicker() {
         BLHealthTicker.shared.subscribeForever { command in
-            BLWritePayload(IPCPayload(command: .bridge_status(command)))
+            self.mautrixIPCChannel.writePayload(IPCPayload(command: .bridge_status(command)))
         }
         
         BLHealthTicker.shared.run(schedulingNext: true)

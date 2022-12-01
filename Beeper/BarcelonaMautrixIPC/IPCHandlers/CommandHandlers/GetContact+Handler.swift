@@ -347,7 +347,7 @@ extension BLContact {
 }
 
 extension GetContactCommand: Runnable {
-    public func run(payload: IPCPayload) {
-        payload.respond(.contact(BLContact.blContact(forHandleID: normalizedHandleID, assertCorrelationID: true)))
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
+        payload.respond(.contact(BLContact.blContact(forHandleID: normalizedHandleID, assertCorrelationID: true)), ipcChannel: ipcChannel)
     }
 }

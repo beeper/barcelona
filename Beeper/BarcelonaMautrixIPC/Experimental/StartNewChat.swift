@@ -23,13 +23,13 @@ public struct GUIDResponse: Codable {
 }
 
 extension ResolveIdentifierCommand: Runnable {
-    public func run(payload: IPCPayload) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         ChatLocator.senderGUID(for: identifier).then { result in
             switch result {
             case .guid(let guid):
-                payload.respond(.guid(.init(guid)))
+                payload.respond(.guid(.init(guid)), ipcChannel: ipcChannel)
             case .failed(let message):
-                payload.fail(code: "err_destination_unreachable", message: message)
+                payload.fail(code: "err_destination_unreachable", message: message, ipcChannel: ipcChannel)
             }
         }
     }
@@ -40,7 +40,7 @@ public struct PrepareDMCommand: Codable {
 }
 
 extension PrepareDMCommand: Runnable {
-    public func run(payload: IPCPayload) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         let transaction = SentrySDK.startTransaction(name: "prepare_dm", operation: "prepare_dm")
         
         let parsed = ParsedGUID(rawValue: guid)
@@ -51,14 +51,14 @@ extension PrepareDMCommand: Runnable {
         } else {
             guard let service = parsed.service.flatMap(IMServiceStyle.init(rawValue:)) else {
                 transaction.setData(value: "err_invalid_service", key: "error")
-                return payload.fail(code: "err_invalid_service", message: "The service provided does not exist.")
+                return payload.fail(code: "err_invalid_service", message: "The service provided does not exist.", ipcChannel: ipcChannel)
             }
             
             let chat = Chat.directMessage(withHandleID: parsed.last, service: service)
             CLInfo("PrepareDM", "Prepared chat \(chat.id) on service \(service.rawValue)")
         }
         
-        payload.respond(.ack)
+        payload.respond(.ack, ipcChannel: ipcChannel)
         transaction.finish(status: .ok)
     }
 }

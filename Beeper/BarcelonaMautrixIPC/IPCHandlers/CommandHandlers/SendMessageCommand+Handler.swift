@@ -11,14 +11,14 @@ import Barcelona
 import IMCore
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
-    public func run(payload: IPCPayload) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         guard let chat = cbChat else {
-            return payload.fail(strategy: .chat_not_found)
+            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
         
         if BLUnitTests.shared.forcedConditions.contains(.messageFailure) {
             Timer.scheduledTimer(withTimeInterval: 2, repeats: false) { _ in
-                payload.fail(code: "idk", message: "couldnt send message lol")
+                payload.fail(code: "idk", message: "couldnt send message lol", ipcChannel: ipcChannel)
             }
             return
         }
@@ -83,15 +83,15 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                 finalMessage = try chat.send(message: messageCreation)
             }
             
-            payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: finalMessage.id, service: finalMessage.service.rawValue, timestamp: finalMessage.time)))
+            payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: finalMessage.id, service: finalMessage.service.rawValue, timestamp: finalMessage.time)), ipcChannel: ipcChannel)
         } catch {
             // girl fuck
             CLFault("BLMautrix", "failed to send text message: %@", error as NSError)
             switch error {
             case let error as BarcelonaError:
-                payload.fail(code: error.code.description, message: error.message)
+                payload.fail(code: error.code.description, message: error.message, ipcChannel: ipcChannel)
             case let error as NSError:
-                payload.fail(code: error.code.description, message: error.localizedDescription)
+                payload.fail(code: error.code.description, message: error.localizedDescription, ipcChannel: ipcChannel)
             }
         }
     }
