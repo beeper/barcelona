@@ -19,7 +19,7 @@ let CBCreateItemsFromSerializedArray: IMCreateItemsFromSerializedArray_t = CBWea
 
 let CBCreateSerializedItemsFromArray: IMCreateSerializedItemsFromArray_t = CBWeakLink(
     against: .privateFramework(name: "IMSharedUtilities"),
-    .init(constraints: [.preVentura], symbol: "FZCreateSerializedIMMessageItemsFromArray"),
+    .init(constraints: [.preVentura], symbol: "FZCreateSerializedIMMessageItemsfromArray"),
     .init(constraints: [.ventura],    symbol: "IMCreateSerializedItemsFromArray")
 )!
 
