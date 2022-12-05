@@ -66,7 +66,6 @@ public final class BLRuntimeConfiguration {
     public static let criticalHealthTTL = int(forKey: "BEEPER_CRITICAL_HEALTH_TTL", defaultValue: 60)
     public static let loggingLevel: LoggingLevel = assume(forKey: "BARCELONA_LOGGING_LEVEL", defaultValue: .debug)
     public static let privacyLevel: BackportedOSLogPrivacy = assume(forKey: "BARCELONA_PRIVACY_LEVEL", defaultValue: OSLogPrivacyConfiguration.auto).privacy
-    public static let jsIPC: Bool = bool(forKey: "BARCELONA_JS_IPC", defaultValue: false)
     
     private class func assume<P: RawRepresentable>(forKey key: String, defaultValue: P) -> P where P.RawValue == String {
         ProcessInfo.processInfo.environment[key].assume(orElse: defaultValue)

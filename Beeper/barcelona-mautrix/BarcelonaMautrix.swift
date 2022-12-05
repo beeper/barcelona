@@ -10,7 +10,6 @@ import Foundation
 import Barcelona
 import BarcelonaMautrixIPC
 import IMCore
-import BarcelonaJS
 import SwiftCLI
 import Sentry
 
@@ -65,9 +64,6 @@ class BarcelonaMautrix {
     func run() {
         checkArguments()
         bootstrap()
-        if BLRuntimeConfiguration.jsIPC {
-            startJSContext()
-        }
         
         RunLoop.main.run()
     }
@@ -119,15 +115,5 @@ class BarcelonaMautrix {
         }
         
         BLHealthTicker.shared.run(schedulingNext: true)
-    }
-    
-    // starts a js ipc server for hot debugging
-    func startJSContext() {
-        Thread {
-            let thread = JBLCreateJSContext()
-            let server = BarcelonaJSIPCServer(context: thread)
-            
-            RunLoop.current.run()
-        }.start()
     }
 }
