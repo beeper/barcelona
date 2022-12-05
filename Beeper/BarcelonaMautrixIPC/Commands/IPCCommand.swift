@@ -32,14 +32,12 @@ public enum IPCCommand {
     case get_chats(GetChatsCommand)
     case get_chat(GetGroupChatInfoCommand)
     case get_chat_avatar(GetGroupChatAvatarCommand)
-    case get_contact(GetContactCommand)
     case get_messages_after(GetMessagesAfterCommand)
     case get_recent_messages(GetRecentMessagesCommand)
     case message(BLMessage)
     case read_receipt(BLReadReceipt)
     case typing(BLTypingNotification)
     case chat(BLChat)
-    case contact(BLContact)
     case send_message_status(BLMessageStatus)
     case error(ErrorCommand)
     case log(LogCommand)
@@ -47,10 +45,8 @@ public enum IPCCommand {
     case bridge_status(BridgeStatusCommand)
     case resolve_identifier(ResolveIdentifierCommand)
     case prepare_dm(PrepareDMCommand)
-    case contacts(GetContactListResponse)
     case ping
     case pre_startup_sync
-    case get_contact_list
 }
 
 public struct IPCPayload: Codable {

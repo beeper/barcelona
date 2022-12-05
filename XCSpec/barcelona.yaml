@@ -51,19 +51,6 @@ targets:
       - package: BarcelonaFoundation
       - package: Sentry
       - package: Swog
-  BarcelonaJS:
-    group: Core
-    templates:
-      - BLFramework
-    sources:
-      - ../Core/BarcelonaJS
-    dependencies:
-      - package: BarcelonaIPC
-      - package: BarcelonaFoundation
-      - package: SwiftyJavaScriptCore
-      - target: Barcelona
-        embed: true
-        link: true
   # Tools
   grapple:
     group: Tools
@@ -86,9 +73,6 @@ targets:
       - package: LineNoise
       - package: Yammit
       - target: Barcelona
-        embed: true
-        link: true
-      - target: BarcelonaJS
         embed: true
         link: true
       - target: BarcelonaMautrixIPC

@@ -46,9 +46,6 @@ targets:
       - target: BarcelonaMautrixIPC
         embed: true
         link: true
-      - target: BarcelonaJS
-        embed: true
-        link: true
       - package: SwiftCLI
       - package: Sentry
   barcelona-mautrix-tests:
@@ -66,9 +63,6 @@ targets:
         embed: true
         link: true
       - target: BarcelonaMautrixIPC
-        embed: true
-        link: true
-      - target: BarcelonaJS
         embed: true
         link: true
   barcelona-mautrix-tests-host:

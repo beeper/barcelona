@@ -19,14 +19,11 @@ struct ChatDiagnostics: Codable {
         
         return chat.messages(before: nil, limit: 50, beforeDate: nil).then { messages in
             let handles = chat.participants.map(Handle.init(id:))
-            let contacts = handles.compactDictionary(keyedBy: \.id, valuedBy: \.contact)
-            
+
             return ChatDiagnostics(chat: chat,
                                    blChat: chat.blChat,
                                    myHandle: chat.imChat.lastAddressedHandleID,
                                    participants: chat.participants.map(Handle.init(id:)),
-                                   contacts: contacts,
-                                   blContacts: handles.dictionary(keyedBy: \.id).mapValues(\.id).mapValues { BLContact.blContact(forHandleID: $0) },
                                    recentBLMessages: messages.map(BLMessage.init(message:)),
                                    recentMessages: messages)
         }
@@ -37,9 +34,7 @@ struct ChatDiagnostics: Codable {
     
     var myHandle: String
     var participants: [Handle]
-    var contacts: [String: Contact]
-    var blContacts: [String: BLContact]
-    
+
     var recentBLMessages: [BLMessage]
     var recentMessages: [Message]
 }
@@ -47,6 +42,7 @@ struct ChatDiagnostics: Codable {
 struct AccountDiagnostics: Codable {
     init(account: IMAccount) {
         activeAliases = account.aliases
+        // Ignore the Xcode warning, I think we're just not confident it'll actually return an array of strings
         allAliases = account.vettedAliases.compactMap { $0 as? String }
         serviceID = account.serviceName
         registered = account.isRegistered

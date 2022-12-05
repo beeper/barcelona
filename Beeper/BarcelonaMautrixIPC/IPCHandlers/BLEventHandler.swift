@@ -57,18 +57,6 @@ extension IMChatRegistry {
     }
 }
 
-private extension BLContact {
-    static func emptyContact(for handleID: String) -> BLContact {
-        if handleID.isEmail {
-            return BLContact(phones: [], emails: [handleID], user_guid: "iMessage;-;\(handleID)")
-        } else if handleID.isPhoneNumber {
-            return BLContact(phones: [handleID], emails: [], user_guid: "iMessage;-;\(handleID)")
-        } else {
-            return BLContact(phones: [], emails: [], user_guid: "iMessage;-;\(handleID)")
-        }
-    }
-}
-
 public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
     private let fifoQueue = FifoQueue<Void>()
     
@@ -141,55 +129,6 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
             default:
                 break
             }
-        }
-        
-        func handleAddOrChangeContactNotification(_ notification: Notification) {
-            guard let contact = notification.userInfo?["__kIMCSChangeHistoryContactKey"] as? CNContact else {
-                return
-            }
-            guard let blContact = BLContact.blContact(for: contact) else {
-                return
-            }
-            self.ipcChannel.writePayload(.init(command: .contact(blContact)))
-        }
-        
-        NotificationCenter.default.addObserver(forName: "IMCSChangeHistoryUpdateContactEventNotification", object: nil, queue: nil, using: handleAddOrChangeContactNotification(_:))
-        NotificationCenter.default.addObserver(forName: "IMCSChangeHistoryAddContactEventNotification", object: nil, queue: nil, using: handleAddOrChangeContactNotification(_:))
-        
-        // There's no way Apple-native way to know which handle IDs are being cleared out, without avoiding false positives.
-        CBDaemonListener.shared.resetHandlePipeline.pipe { handleIDs in
-            self.ipcChannel.writePayloads(handleIDs.map(BLContact.emptyContact(for:)).map { IPCPayload(command: .contact($0)) })
-        }
-        
-        var nicknamesLoadedAt: Date? = nil, lastNicknamePayloads: [String: BLContact] = [:]
-        NotificationCenter.default.addObserver(forName: .IMNicknameControllerDidLoad, object: nil, queue: nil) { notification in
-            nicknamesLoadedAt = Date()
-        }
-        
-        NotificationCenter.default.addObserver(forName: .IMNicknameDidChange, object: nil, queue: nil) { notification in
-            guard let dict = notification.object as? [AnyHashable: Any], let handleIDs = dict["handleIDs"] as? [String] else {
-                return
-            }
-            
-            let payloads: [IPCPayload] = handleIDs.map { BLContact.blContact(forHandleID: $0, assertCorrelationID: false) }.filter { contact in
-                if lastNicknamePayloads[contact.user_guid] == contact {
-                    return false
-                }
-                lastNicknamePayloads[contact.user_guid] = contact
-                return true
-            }.map {
-                .init(command: .contact($0))
-            }
-            
-            guard let nicknamesLoadedAt = nicknamesLoadedAt, nicknamesLoadedAt.distance(to: Date()) > 1 else {
-                return
-            }
-            
-            if payloads.isEmpty {
-                return
-            }
-            
-            self.ipcChannel.writePayloads(payloads)
         }
     }
     

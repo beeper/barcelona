@@ -353,7 +353,6 @@ public class CBDaemonListener: ERBaseDaemonListener {
     public let phantomPipeline              = CBPipeline<PhantomChatItem>()
     public let messageStatusPipeline        = CBPipeline<CBMessageStatusChange>()
     public let chatConfigurationPipeline    = CBPipeline<ChatConfiguration>()
-    public let resetHandlePipeline          = CBPipeline<[String]>()
     public let disconnectPipeline: CBPipeline<Void> = {
         let pipeline = CBPipeline<Void>()
         
@@ -375,7 +374,6 @@ public class CBDaemonListener: ERBaseDaemonListener {
         phantomPipeline.pipe(PipelineEvent.phantom(_:))
         messageStatusPipeline.pipe(PipelineEvent.messageStatus(_:))
         chatConfigurationPipeline.pipe(PipelineEvent.configuration(_:))
-        resetHandlePipeline.pipe(PipelineEvent.resetHandle(ids:))
     }
     
     private override init() {

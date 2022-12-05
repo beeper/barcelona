@@ -47,13 +47,6 @@ public extension DBReader {
         let handleProvider = Optional(handleProvider ?? IMHandleRegistrar.sharedInstance())
         #endif
         
-        /// Resolves contact IDs to all handles associated
-        if let contacts = params.contacts, let handleProvider = handleProvider {
-            handles.append(contentsOf: contacts.flatMap (
-                handleProvider.handleIDs(forCNIdentifier:)
-            ))
-        }
-        
         /// Resolve the ROWIDs of any provided chat identifiers
         return chatRowIDQuery.then { ROWIDs -> Promise<ArraySlice<RawMessage>> in
             /// Get database handle
