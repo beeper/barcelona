@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import Contacts
 import IMCore
 import IMFoundation
 
@@ -59,16 +58,4 @@ public struct Handle: Codable, Hashable, Equatable {
     
     public var id: String
     public var format: HandleIDStyle
-}
-
-public extension Handle {
-    var contact: Contact? {
-        for handle in IMHandleRegistrar.sharedInstance().getIMHandles(forID: id) {
-            if let contact = handle.cnContact {
-                return Contact(contact)
-            }
-        }
-        
-        return nil
-    }
 }

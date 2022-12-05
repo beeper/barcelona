@@ -74,18 +74,6 @@ public func BLSetup() -> Bool {
     controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
     controller.blockUntilConnected()
     
-    #if DEBUG
-    log.debug("Connected to daemon. Fetching nicknames...")
-    #endif
-    
-    controller.fetchNicknames()
-    
-    #if DEBUG
-    log.debug("Fetched nicknames. Setting up IMContactStore...")
-    #endif
-    
-    IMContactStore.sharedInstance().checkForContactStoreChanges()
-    
     log("Connected.")
     
     ifDebugBuild {
@@ -143,18 +131,6 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
         controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
         controller.blockUntilConnected()
         operation.end("Connected to daemon.")
-        
-        #if DEBUG
-        log.debug("Fetching nicknames...")
-        #endif
-        
-        controller.fetchNicknames()
-        
-        #if DEBUG
-        log.debug("Fetched nicknames. Setting up IMContactStore...")
-        #endif
-        
-        IMContactStore.sharedInstance().checkForContactStoreChanges()
         
         #if DEBUG
         log.debug("Set up IMContactStore. Loading correlation controller...")

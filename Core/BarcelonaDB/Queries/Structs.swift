@@ -37,7 +37,6 @@ public struct MessageQueryParameters: QueryParameters {
     
     public var chats: [String]?
     public var handles: [String]?
-    public var contacts: [String]?
     public var from_me: Bool?
     
     public var limit: Int?

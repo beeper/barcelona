@@ -212,16 +212,8 @@ extension NSObject: Encodable {
         default:
             var container = encoder.container(keyedBy: StringLiteralCodingKey.self)
             
-            var properties = properties
-            
             var result: Any?
-            switch self {
-            case let contact as CNContact:
-                properties = properties.filter(contact.isKeyAvailable(_:))
-            default:
-                break
-            }
-            
+
             let valueForKey = value(forKey:)
             for key in properties {
                 do {

@@ -10,7 +10,6 @@ import Foundation
 import InterposeKit
 import IMCore
 import OSLog
-import Contacts
 import IMSharedUtilities
 
 private let log = Logger(category: "Hooks")
@@ -38,22 +37,6 @@ private let PNCopyBestGuessCountryCodeForNumber: (
     @convention(c) (CFString) -> Unmanaged<CFString> // retained
 ) = CBWeakLink(against: .privateFramework(name: "CorePhoneNumbers"), .symbol("PNCopyBestGuessCountryCodeForNumber"))!
 
-private func IMHandleRegistrarHooks() throws -> Interpose {
-    return try Interpose(IMHandleRegistrar.self) {
-        try $0.prepareHook(#selector(IMHandleRegistrar._handleDeleteContactChangeHistoryEvent(_:))) { (store: TypedHook<@convention(c) (AnyObject, Selector, AnyObject) -> Int, @convention(block) (IMHandleRegistrar, NSNotification) -> Int>) in
-            { _self, notification in
-                if let contactIdentifier = notification.userInfo?["__kIMCSChangeHistoryContactIdentifierKey"] as? String {
-                    if let handleIDs = IMContactStore.sharedInstance().handleIDs(forCNID: contactIdentifier) as? [String] {
-                        // emit the handle IDs whose information is being reset due to an address book change
-                        CBDaemonListener.shared.resetHandlePipeline.send(handleIDs)
-                    }
-                }
-                return store.original(_self, store.selector, notification)
-            } as @convention(block) (IMHandleRegistrar, NSNotification) -> Int
-        }
-    }
-}
-
 private func IMHandleHooks() throws -> Interpose {
     return try Interpose(IMHandle.self) {
         try $0.prepareHook(#selector(getter: IMHandle.countryCode)) { (store: TypedHook<@convention(c) (AnyObject, Selector) -> String, @convention(block) (IMHandle) -> String>) in
@@ -65,42 +48,6 @@ private func IMHandleHooks() throws -> Interpose {
                 }
                 
                 return (PNCopyBestGuessCountryCodeForNumber(id as CFString).takeRetainedValue() as String).uppercased()
-            }
-        }
-        let contactLogging = Logger(category: "ContactFuzzing")
-        
-        try $0.prepareHook(#selector(getter: IMHandle.cnContact)) { (store: TypedHook<@convention(c) (AnyObject, Selector) -> CNContact, @convention(block) (IMHandle) -> CNContact>) in
-            { handle in
-                let id = handle.id, countryCode = handle.countryCode.lowercased()
-                
-                guard id.isPhoneNumber, CBFeatureFlags.ifNot(\.ignoresSameCountryCodeAssertion, countryCode == IMAccountController.shared.iMessageAccount?.countryCode, else: true) else {
-                    return store.original(handle, store.selector)
-                }
-                
-                let originalRetval = store.original(handle, store.selector)
-                if originalRetval.value(forKey: "hasBeenPersisted") as? Bool == true {
-                    return originalRetval
-                }
-                
-                var contact: CNContact?
-                
-                if CBFeatureFlags.contactFuzzEnumerator {
-                    contact = try? CNContact.contact(matchingHandleID: id, countryCode: countryCode)
-                } else {
-                    contact = try? IMContactStore.sharedInstance().contactStore.unifiedContacts(matching: CNContact.predicateForContacts(matchingHandleID: id, countryCode: countryCode), keysToFetch: IMContactStore.keysForCNContact() as! [CNKeyDescriptor]).first
-                }
-                
-                if let contact = contact {
-                    ifDebugBuild {
-                        contactLogging.info("choosing \(contact.debugDescription) for fuzzing result against handleID \(id)")
-                    }
-                    
-                    IMContactStore.sharedInstance().addContact(contact, withID: id)
-                    handle.setValue(contact, forKey: "cnContact")
-                    return contact
-                }
-                
-                return store.original(handle, store.selector)
             }
         }
     }
@@ -176,7 +123,7 @@ private func IMIDSHooks() throws -> Interpose {
 public class HookManager {
     public static let shared = HookManager()
     
-    let hooks = [IMChatHooks, IMIDSHooks, CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks, IMHandleRegistrarHooks]
+    let hooks = [IMChatHooks, IMIDSHooks, CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks]
     private var appliedHooks: [Interpose]?
     
     public func apply() throws {

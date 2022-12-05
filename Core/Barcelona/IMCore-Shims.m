@@ -81,13 +81,3 @@ NSXPCListener* ERConstructXPCListener(NSString* machServiceName) {
     
 }
 @end
-
-@implementation IMContactStore (AlwaysCache)
-+(BOOL)isContactsCachingEnabled {
-    return NO;
-}
-
-+(BOOL)isContactsBatchingEnabled {
-    return YES;
-}
-@end

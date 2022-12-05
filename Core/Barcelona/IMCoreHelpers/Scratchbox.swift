@@ -18,7 +18,6 @@ import IMCore
 import IMSharedUtilities
 import IMFoundation
 import IDS
-import Contacts
 
 @_spi(scratchbox) public func _scratchboxMain() {
     

@@ -8,12 +8,7 @@
 
 import Foundation
 import Barcelona
-import Contacts
 import IMCore
-
-public protocol ContactResolvable {
-    var user_guid: String { get set }
-}
 
 public struct ParsedGUID: Codable, CustomStringConvertible {
     public var service: String?
@@ -43,15 +38,5 @@ public struct ParsedGUID: Codable, CustomStringConvertible {
             return last
         }
         return "\(service);\(style);\(last)"
-    }
-}
-
-public extension ContactResolvable {
-    var normalizedHandleID: String {
-        guard user_guid.contains(";"), let last = user_guid.split(separator: ";").last else {
-            return user_guid
-        }
-        
-        return String(last)
     }
 }

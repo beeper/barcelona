@@ -31,16 +31,6 @@ func _CSDBCheckResultWithStatement(_ a: UnsafeRawPointer, _ b: UnsafeRawPointer,
     
 }
 
-extension BLContactSuggestionData: TextTableRepresentable {
-    public var tableValues: [CustomStringConvertible] {
-        [firstName ?? "nil", lastName ?? "nil", image != nil]
-    }
-    
-    public static var columnHeaders: [String] {
-        ["firstName", "lastName", "hasAvatar"]
-    }
-}
-
 private extension Encodable {
     var dump: String {
         let encoder = JSONEncoder()
@@ -75,7 +65,6 @@ class DebugCommands: CommandGroup {
                 controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
                 controller.blockUntilConnected()
                 controller.fetchNicknames()
-                IMContactStore.sharedInstance().checkForContactStoreChanges()
             }
             RunLoop.main.run()
         }
@@ -151,30 +140,6 @@ class DebugCommands: CommandGroup {
             chat.messages().then {
                 print($0)
             }
-        }
-    }
-    
-    class NicknameTest: EphemeralBarcelonaCommand {
-        let name = "nickname-test"
-        
-        @Param
-        var handleID: String
-        
-        var normalizedHandleID: String {
-            guard handleID.contains(";") else {
-                return handleID
-            }
-            
-            return String(handleID.split(separator: ";").last!)
-        }
-        
-        func execute() throws {
-            guard let suggestion = BLResolveContactSuggestionData(forHandleID: normalizedHandleID) else {
-                print("nil")
-                return
-            }
-            
-            print(TextTable(objects: [suggestion]).render())
         }
     }
     

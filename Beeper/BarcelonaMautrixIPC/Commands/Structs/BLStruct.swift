@@ -18,8 +18,7 @@ public enum BLStruct: Codable {
     case readReceipt(BLReadReceipt)
     case typing(BLTypingNotification)
     case chat(BLChat)
-    case contact(BLContact)
-    
+
     private enum CodingKeys: CodingKey, CaseIterable {
         case type
     }
@@ -33,7 +32,6 @@ public enum BLStruct: Codable {
         case readReceipt
         case typing
         case chat
-        case contact
     }
 
     private var structName: BLStructName {
@@ -46,7 +44,6 @@ public enum BLStruct: Codable {
         case .readReceipt(_): return .readReceipt
         case .typing(_): return .typing
         case .chat(_): return .chat
-        case .contact(_): return .contact
         }
     }
 
@@ -71,8 +68,6 @@ public enum BLStruct: Codable {
         case .typing(let object):
             try object.encode(to: encoder)
         case .chat(let object):
-            try object.encode(to: encoder)
-        case .contact(let object):
             try object.encode(to: encoder)
         }
     }
@@ -99,8 +94,6 @@ public enum BLStruct: Codable {
             self = .typing(try BLTypingNotification(from: decoder))
         case .chat:
             self = .chat(try BLChat(from: decoder))
-        case .contact:
-            self = .contact(try BLContact(from: decoder))
         }
     }
 }

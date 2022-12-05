@@ -32,14 +32,10 @@ private extension IPCPayload {
             return req
         case .get_chat_avatar(let req):
             return req
-        case .get_contact(let req):
-            return req
         case .get_messages_after(let req):
             return req
         case .get_recent_messages(let req):
             return req
-        case .get_contact_list:
-            return GetContactListResponse.Runner()
         case .resolve_identifier(let req):
             return req
         case .prepare_dm(let req):

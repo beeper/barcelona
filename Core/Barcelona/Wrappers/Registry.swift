@@ -32,14 +32,6 @@ public class Registry {
         }
     }
     
-    public func imHandles(forContact contact: CNContact) -> [IMHandle] {
-        Array(IMHandleRegistrar.sharedInstance().handles(forCNIdentifier: contact.id))
-    }
-    
-    public func imHandleIDs(forContact contact: CNContact) -> [String] {
-        imHandles(forContact: contact).map(\.id).unique
-    }
-
     public var allMeHandles: [IMHandle] {
         allAccounts.flatMap { account in
             account.aliases.compactMap(account.imHandle(withID:))

@@ -2,33 +2,29 @@
 
 extension IPCCommand: Codable {
     public enum IPCCommandName: String, Codable {
-    	case send_message
-    	case send_media
-    	case send_tapback
-    	case send_read_receipt
-    	case set_typing
-    	case get_chats
-    	case get_chat
-    	case get_chat_avatar
-    	case get_contact
-    	case get_messages_after
-    	case get_recent_messages
-    	case message
-    	case read_receipt
-    	case typing
-    	case chat
-    	case contact
-    	case send_message_status
-    	case error
-    	case log
-    	case response
-    	case bridge_status
+        case send_message
+        case send_media
+        case send_tapback
+        case send_read_receipt
+        case set_typing
+        case get_chats
+        case get_chat
+        case get_chat_avatar
+        case get_messages_after
+        case get_recent_messages
+        case message
+        case read_receipt
+        case typing
+        case chat
+        case send_message_status
+        case error
+        case log
+        case response
+        case bridge_status
         case resolve_identifier
         case prepare_dm
         case ping
         case pre_startup_sync
-        case get_contact_list
-        case contacts
     }
     
     private enum CodingKeys: CodingKey, CaseIterable {
@@ -38,48 +34,44 @@ extension IPCCommand: Codable {
 
     public var name: IPCCommandName {
         switch self {
-    	case .send_message:
-			return .send_message
-    	case .send_media:
-			return .send_media
-    	case .send_tapback:
-			return .send_tapback
-    	case .send_read_receipt:
-			return .send_read_receipt
-    	case .set_typing:
-			return .set_typing
-    	case .get_chats:
-			return .get_chats
-    	case .get_chat:
-			return .get_chat
-    	case .get_chat_avatar:
-			return .get_chat_avatar
-    	case .get_contact:
-			return .get_contact
-    	case .get_messages_after:
-			return .get_messages_after
-    	case .get_recent_messages:
-			return .get_recent_messages
-    	case .message:
-			return .message
-    	case .read_receipt:
-			return .read_receipt
-    	case .typing:
-			return .typing
-    	case .chat:
-			return .chat
-    	case .contact:
-			return .contact
-    	case .send_message_status:
-			return .send_message_status
-    	case .error:
-			return .error
-    	case .log:
-			return .log
-    	case .response:
-			return .response
-    	case .bridge_status:
-			return .bridge_status
+        case .send_message:
+            return .send_message
+        case .send_media:
+            return .send_media
+        case .send_tapback:
+            return .send_tapback
+        case .send_read_receipt:
+            return .send_read_receipt
+        case .set_typing:
+            return .set_typing
+        case .get_chats:
+            return .get_chats
+        case .get_chat:
+            return .get_chat
+        case .get_chat_avatar:
+            return .get_chat_avatar
+        case .get_messages_after:
+            return .get_messages_after
+        case .get_recent_messages:
+            return .get_recent_messages
+        case .message:
+            return .message
+        case .read_receipt:
+            return .read_receipt
+        case .typing:
+            return .typing
+        case .chat:
+            return .chat
+        case .send_message_status:
+            return .send_message_status
+        case .error:
+            return .error
+        case .log:
+            return .log
+        case .response:
+            return .response
+        case .bridge_status:
+            return .bridge_status
         case .resolve_identifier:
             return .resolve_identifier
         case .ping:
@@ -88,10 +80,6 @@ extension IPCCommand: Codable {
             return .pre_startup_sync
         case .prepare_dm:
             return .prepare_dm
-        case .get_contact_list:
-            return .get_contact_list
-        case .contacts:
-            return .contacts
         }
     }
 
@@ -117,8 +105,6 @@ extension IPCCommand: Codable {
 			try container.encode(data, forKey: .data)
     	case .get_chat_avatar(let data):
 			try container.encode(data, forKey: .data)
-    	case .get_contact(let data):
-			try container.encode(data, forKey: .data)
     	case .get_messages_after(let data):
 			try container.encode(data, forKey: .data)
     	case .get_recent_messages(let data):
@@ -130,8 +116,6 @@ extension IPCCommand: Codable {
     	case .typing(let data):
 			try container.encode(data, forKey: .data)
     	case .chat(let data):
-			try container.encode(data, forKey: .data)
-    	case .contact(let data):
 			try container.encode(data, forKey: .data)
     	case .send_message_status(let data):
 			try container.encode(data, forKey: .data)
@@ -151,10 +135,6 @@ extension IPCCommand: Codable {
             try container.encodeNil(forKey: .data)
         case .pre_startup_sync:
             try container.encodeNil(forKey: .data)
-        case .get_contact_list:
-            try container.encodeNil(forKey: .data)
-        case .contacts(let contacts):
-            try container.encode(contacts, forKey: .data)
         }
     }
 
@@ -180,8 +160,6 @@ extension IPCCommand: Codable {
 			self = .get_chat(try container.decode(GetGroupChatInfoCommand.self, forKey: .data))
     	case .get_chat_avatar:
 			self = .get_chat_avatar(try container.decode(GetGroupChatAvatarCommand.self, forKey: .data))
-    	case .get_contact:
-			self = .get_contact(try container.decode(GetContactCommand.self, forKey: .data))
     	case .get_messages_after:
 			self = .get_messages_after(try container.decode(GetMessagesAfterCommand.self, forKey: .data))
     	case .get_recent_messages:
@@ -194,8 +172,6 @@ extension IPCCommand: Codable {
 			self = .typing(try container.decode(BLTypingNotification.self, forKey: .data))
     	case .chat:
 			self = .chat(try container.decode(BLChat.self, forKey: .data))
-    	case .contact:
-			self = .contact(try container.decode(BLContact.self, forKey: .data))
     	case .send_message_status:
 			self = .send_message_status(try container.decode(BLMessageStatus.self, forKey: .data))
     	case .error:
@@ -204,20 +180,16 @@ extension IPCCommand: Codable {
             self = .ping
         case .pre_startup_sync:
             self = .pre_startup_sync
-    	case .log:
+        case .log:
             throw BLIPCError.some(errorMessage: "log cannot be decoded (yet)")
-    	case .response:
+        case .response:
             throw BLIPCError.some(errorMessage: "response cannot be decoded (yet)")
-    	case .bridge_status:
-			self = .bridge_status(try container.decode(BridgeStatusCommand.self, forKey: .data))
+        case .bridge_status:
+            self = .bridge_status(try container.decode(BridgeStatusCommand.self, forKey: .data))
         case .resolve_identifier:
             self = .resolve_identifier(try container.decode(ResolveIdentifierCommand.self, forKey: .data))
         case .prepare_dm:
             self = .prepare_dm(try container.decode(PrepareDMCommand.self, forKey: .data))
-        case .get_contact_list:
-            self = .get_contact_list
-        case .contacts:
-            self = .contacts(try container.decode(GetContactListResponse.self, forKey: .data))
         }
     }
     

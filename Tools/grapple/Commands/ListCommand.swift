@@ -18,11 +18,7 @@ class ListCommand: CommandGroup {
     
     var children: [Routable] = [ListAccountsCommand()]
     
-    init() {
-        #if DEBUG
-        children = children + [ListContactsCommand()]
-        #endif
-    }
+    init() {}
     
     class ListAccountsCommand: EphemeralBarcelonaCommand {
         let name = "accounts"
@@ -33,17 +29,6 @@ class ListCommand: CommandGroup {
             print(IMAccountController.__sharedInstance().accounts.renderTextTable(), accounts)
         }
     }
-    
-    #if DEBUG
-    class ListContactsCommand: EphemeralBarcelonaCommand {
-        let name = "contacts"
-        
-        func execute() throws {
-            let data = try JSONEncoder().encode(BMXGenerateContactList(omitAvatars: true))
-            print(data.count)
-        }
-    }
-    #endif
 }
 
 class TransferCommands: CommandGroup {
