@@ -182,5 +182,5 @@ class DebugCommands: CommandGroup {
         }
     }
     
-    var children: [Routable] = [DebugEventsCommand(), IMDTest(), NicknameTest(), AlwaysRead(), Pong(), ChatRegistry()]
+    var children: [Routable] = [DebugEventsCommand(), IMDTest(), AlwaysRead(), Pong(), ChatRegistry()]
 }

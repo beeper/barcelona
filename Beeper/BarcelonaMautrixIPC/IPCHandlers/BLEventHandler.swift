@@ -94,7 +94,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 return
             }
 
-            log.debug("Processing read receipt from \(String(describing: change.sender)) in \(change.chat.blChatGUID)")
+            log.debug("Processing read receipt from \(String(describing: change.mautrixFriendlyGUID)) in \(change.chat.blChatGUID) for \(change.messageID)")
 
             self.ipcChannel.writePayload(.init(command: .read_receipt(BLReadReceipt(sender_guid: change.mautrixFriendlyGUID, is_from_me: change.fromMe, chat_guid: change.chat.blChatGUID, read_up_to: change.messageID, correlation_id: change.chat.correlationIdentifier, sender_correlation_id: change.senderCorrelationID))))
         }

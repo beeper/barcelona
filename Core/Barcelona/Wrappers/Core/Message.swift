@@ -355,10 +355,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         subject = message.subject?.id
         messageSubject = backing?.subject ?? message.messageSubject?.string
         isSOS = backing?.isSOS ?? message.isSOS
-        isTypingMessage = backing?.isTypingMessage ?? message.isTypingMessage ?? chatItems.contains {
-            $0 is TypingItem
-        }
-        
+        isTypingMessage = backing?.isTypingMessage ?? message.isTypingMessage
         isCancelTypingMessage = backing?.isCancelTypingMessage() ?? false
         isDelivered = backing?.isDelivered ?? message.isDelivered
         isAudioMessage = backing?.isAudioMessage ?? message.isAudioMessage
@@ -372,7 +369,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         failureDescription = failureCode.description
         
         if let chat = IMChat.resolve(withIdentifier: chatID) {
-            description = try? message.description(forPurpose: .conversationList, in: chat)
+            description = message.description(forPurpose: .conversationList, in: chat)
         }
         
         // load timestamps
