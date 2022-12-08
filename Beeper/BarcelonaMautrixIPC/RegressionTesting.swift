@@ -11,5 +11,5 @@ import Barcelona
 
 // Used to be used for testing contact stuff; we don't want that anymore so this is empty for now
 public struct RegressionTesting {
-    public static let tests = [String: (Bool) -> Void]()
+    public static let tests = [String: () -> Void]()
 }

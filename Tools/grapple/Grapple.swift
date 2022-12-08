@@ -86,7 +86,7 @@ class Grapple {
         CBFeatureFlags.overrideWithholdPartialFailures = false
         CBFeatureFlags.overrideWithholdDupes = false
         let cli = CLI(name: "grapple", commands: [
-            SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), JSCommand(), IDSCommand(), AccountManagement(), Grudge.shared, QueryCommand(), DiagsCommand(), MessageCommand(), ScratchboxCommand(), TransferCommands(), RegressionTestingCommand(), CBCorrelationCommands()
+            SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), IDSCommand(), AccountManagement(), Grudge.shared, QueryCommand(), DiagsCommand(), MessageCommand(), ScratchboxCommand(), TransferCommands(), RegressionTestingCommand(), CBCorrelationCommands()
         ])
         LoggingDrivers.append(OSLogDriver.shared)
         if !GrappleFlags.shared.enableLogging {
@@ -116,8 +116,6 @@ class Grapple {
                         exit(0)
                     }
                 }
-            case let command as JSCommand.RemoteREPLCommand:
-                try command.execute()
             case let command:
                 try command.execute()
                 
