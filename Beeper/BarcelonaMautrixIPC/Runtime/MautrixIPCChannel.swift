@@ -55,6 +55,12 @@ public class MautrixIPCChannel {
                         self.writePayload(.init(id: 1, command: .response(.ack)))
                     }
 
+                    if payload.command.name == .unknown {
+                        // We don't still have the command that we were given, so we can't return it in the string
+                        payload.fail(strategy: .command_not_found(""), ipcChannel: self)
+                        return
+                    }
+
                     switch payload.command {
                     case .ping:
                         self.pongedOnce = true

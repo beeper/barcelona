@@ -47,6 +47,7 @@ public enum IPCCommand {
     case prepare_dm(PrepareDMCommand)
     case ping
     case pre_startup_sync
+    case unknown
 }
 
 public struct IPCPayload: Codable {
