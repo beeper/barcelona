@@ -481,10 +481,11 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
             CLDebug("ReadState", "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because time read is non-zero")
             return true
         }
-        if isRead {
+        /// BRI-4711: `isRead` may be erroneously true; use `timeRead` as the source of truth for now
+        /*if isRead {
             CLDebug("ReadState", "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because isRead == true")
             return true
-        }
+        }*/
         if CBFeatureFlags.useSMSReadBuffer && CBDaemonListener.shared.smsReadBuffer.contains(id) {
             CLDebug("ReadState", "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because read buffer contains ID")
             return true
