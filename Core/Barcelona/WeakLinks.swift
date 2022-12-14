@@ -30,20 +30,10 @@ let CBCreateSerializedItemsFromArray: IMCreateSerializedItemsFromArray_t = CBWea
 
 import IMCore
 
-func CBGeneratePreviewStringForAcknowledgmentItem(_ item: IMMessage) -> String! {
-    // Xcode 14.1 shipped with 5.7.1, while Xcode 14.0.1 contains 5.7.
-    // Xcode 14.1 was the first one to contain the Ventura SDK, which contains symbols to link against to call item.tapback(),
-    // so we conditionally compile against it to only compile this when available.
-#if compiler(>=5.7.1)
-    if #available(macOS 13, iOS 16, watchOS 9, *) {
-        guard let tapback = item.tapback() else {
-            return nil
-        }
-        return tapback.previewString(withMessageSummaryInfo: item.messageSummaryInfo, senderDisplayName: item.sender?._displayNameWithAbbreviation, isFromMe: item.isFromMe)
-    }
-#endif // Compiler check
-
+@available(macOS, obsoleted: 13.0, message: "Only relevant for sending tapbacks; use IMTapbackSender instead")
+@available(iOS, obsoleted: 16.0, message: "Only relevant for sending tapbacks; use IMTapbackSender instead")
+func CBGeneratePreviewStringForAcknowledgmentType(_ associatedType: Int64, summaryInfo: [AnyHashable: Any]) -> String? {
     return NSClassFromString("IMMessageAcknowledgmentStringHelper").map {
         unsafeBitCast($0, to: IMMessageAcknowledgmentStringHelper_t.Type.self)
-    }?.generateBackwardCompatibilityString(forMessageAcknowledgmentType: item.associatedMessageType, messageSummaryInfo: item.messageSummaryInfo)
+    }?.generateBackwardCompatibilityString(forMessageAcknowledgmentType: associatedType, messageSummaryInfo: summaryInfo)
 }

@@ -24,6 +24,7 @@ extension TapbackCommand: Runnable, AuthenticatedAsserting {
         } catch {
             // girl fuck
             CLFault("BLMautrix", "failed to send tapback: %@", error as NSError)
+            payload.fail(strategy: .internal_error(error.localizedDescription), ipcChannel: ipcChannel)
         }
     }
 }

@@ -17,61 +17,103 @@ public extension IMChat {
     /**
      Sends a tapback for a given message, calling back with a Vapor abort if the operation fails. This must be invoked on the main thread.
      */
-    func tapback(message: IMMessage, itemGUID: String, type: Int, overridingItemType: UInt8?, metadata: Message.Metadata? = nil) throws -> IMMessage {
-        guard Thread.isMainThread else {
-            preconditionFailure("IMChat.tapback() must be invoked on the main thread")
-        }
-        
-        if itemGUID == message.id, let subpart = message.subpart(at: 0) {
-            return try tapback(message: message, itemGUID: subpart.id, type: type, overridingItemType: overridingItemType)
-        }
-        
-        guard let subpart = message.subpart(with: itemGUID) as? IMMessagePartChatItem else {
-            throw BarcelonaError(code: 404, message: "Unknown subpart")
-        }
-        
-        let rawType = Int64(type)
-        
-//        sendMessageAcknowledgment(Int64(type), forChatItem: subpart, withMessageSummaryInfo: )
-        guard let summaryInfo = subpart.summaryInfo(for: message, in: self, itemTypeOverride: overridingItemType),
-              let compatibilityString = CBGeneratePreviewStringForAcknowledgmentItem(message),
-              let superFormat = IMCreateSuperFormatStringFromPlainTextString(compatibilityString) else {
-            throw BarcelonaError(code: 500, message: "Internal server error")
-        }
-        
-        let adjustedSummaryInfo = IMChat.__im_adjustMessageSummaryInfo(forSending: summaryInfo)
-        let guid = subpart.guid
-        let range = subpart.messagePartRange
-        
-        var message: IMMessage!
-        
-        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
-            message = IMMessage.instantMessage(withAssociatedMessageContent: superFormat, flags: 0, associatedMessageGUID: guid, associatedMessageType: rawType, associatedMessageRange: range, messageSummaryInfo: adjustedSummaryInfo, threadIdentifier: nil)
-        } else {
-            message = IMMessage.instantMessage(withAssociatedMessageContent: superFormat, flags: 0, associatedMessageGUID: guid, associatedMessageType: rawType, associatedMessageRange: range, messageSummaryInfo: adjustedSummaryInfo)
-        }
-        
-        guard message != nil else {
-            throw BarcelonaError(code: 500, message: "Couldn't create tapback message")
-        }
-        
-        if let metadata = metadata {
-            message.metadata = metadata
-        }
-        
-        send(message)
-        
-        return message
-    }
-    
-    /**
-     Sends a tapback for a given message, calling back with a Vapor abort if the operation fails
-     */
     func tapback(guid: String, itemGUID: String, type: Int, overridingItemType: UInt8?, metadata: Message.Metadata? = nil) throws -> IMMessage {
         guard let message = BLLoadIMMessage(withGUID: guid) else {
             throw BarcelonaError(code: 404, message: "Unknown message: \(guid)")
         }
-        
-        return try self.tapback(message: message, itemGUID: itemGUID, type: type, overridingItemType: overridingItemType, metadata: metadata)
+
+        guard Thread.isMainThread else {
+            preconditionFailure("IMChat.tapback() must be invoked on the main thread")
+        }
+
+        let correctGUID: String = {
+            if itemGUID == message.id, let subpart = message.subpart(at: 0) {
+                return subpart.id
+            } else {
+                return itemGUID
+            }
+        }()
+
+        guard let subpart = message.subpart(with: correctGUID) as? IMMessagePartChatItem,
+              let summaryInfo = subpart.summaryInfo(for: message, in: self, itemTypeOverride: overridingItemType) as? [AnyHashable: Any] else {
+            throw BarcelonaError(code: 404, message: "Unknown subpart")
+        }
+
+        let rawType = Int64(type)
+
+        if #available(macOS 13, iOS 16.0, *) {
+            return try venturaTapback(associatedMessageType: rawType, messageSummaryInfo: summaryInfo, messagePartChatItem: subpart)
+        } else {
+            return try preVenturaTapback(type: rawType, overridingItemType: overridingItemType, subpart: subpart, summaryInfo: summaryInfo)
+        }
+    }
+
+    @available(macOS 13.0, *)
+    @available(iOS 13.0, *)
+    func venturaTapback(associatedMessageType: Int64, messageSummaryInfo: [AnyHashable: Any], messagePartChatItem: IMMessagePartChatItem) throws -> IMMessage {
+        guard let tapback = IMTapback(associatedMessageType: associatedMessageType, messageSummaryInfo: messageSummaryInfo) else {
+            throw BarcelonaError(code: 500, message: "Can't create tapback")
+        }
+        guard let sender = IMTapbackSender(tapback: tapback, chat: self, messagePartChatItem: messagePartChatItem) else {
+            throw BarcelonaError(code: 500, message: "Couldn't create sender for the tapback")
+        }
+
+        // This is a simplified implementation of IMTapbackSender's `send` method, but the thing is that we need
+        // to return the IMMessage that is being sent, and the `send` method just returns void, so we can't use it
+
+        guard let message = IMMessage.instantMessage(
+            withAssociatedMessageContent: sender.attributedContentString(),
+            flags: 0,
+            associatedMessageGUID: sender.messageGUID(),
+            associatedMessageType: associatedMessageType,
+            associatedMessageRange: sender.messagePartRange(),
+            messageSummaryInfo: sender.messageSummaryInfo(),
+            threadIdentifier: sender.threadIdentifier()
+        ) else {
+            throw BarcelonaError(code: 500, message: "Couldn't create instantMessage to send in chat")
+        }
+
+        send(message)
+
+        return message
+    }
+
+    @available(macOS, obsoleted: 13.0, message: "Use venturaTapback instead")
+    @available(iOS, obsoleted: 16.0, message: "Use venturaTapback instead")
+    func preVenturaTapback(
+        type: Int64,
+        overridingItemType: UInt8?,
+        subpart: IMMessagePartChatItem,
+        summaryInfo: [AnyHashable: Any],
+        metadata: Message.Metadata? = nil
+    ) throws -> IMMessage {
+        guard let compatibilityString = CBGeneratePreviewStringForAcknowledgmentType(type, summaryInfo: summaryInfo),
+              let superFormat = IMCreateSuperFormatStringFromPlainTextString(compatibilityString) else {
+            throw BarcelonaError(code: 500, message: "Internal server error")
+        }
+
+        let adjustedSummaryInfo = IMChat.__im_adjustMessageSummaryInfo(forSending: summaryInfo)
+        let guid = subpart.guid
+        let range = subpart.messagePartRange
+
+        var toSendMessage: IMMessage?
+
+        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+            toSendMessage = IMMessage.instantMessage(withAssociatedMessageContent: superFormat, flags: 0, associatedMessageGUID: guid, associatedMessageType: type, associatedMessageRange: range, messageSummaryInfo: adjustedSummaryInfo, threadIdentifier: nil)
+        } else {
+            toSendMessage = IMMessage.instantMessage(withAssociatedMessageContent: superFormat, flags: 0, associatedMessageGUID: guid, associatedMessageType: type, associatedMessageRange: range, messageSummaryInfo: adjustedSummaryInfo)
+        }
+
+        guard let toSendMessage else {
+            throw BarcelonaError(code: 500, message: "Couldn't create tapback message")
+        }
+
+        if let metadata {
+            toSendMessage.metadata = metadata
+        }
+
+        send(toSendMessage)
+
+        return toSendMessage
     }
 }

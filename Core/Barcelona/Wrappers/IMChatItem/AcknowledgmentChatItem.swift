@@ -8,6 +8,7 @@
 
 import Foundation
 import IMCore
+import Swog
 
 extension IMChatItem {
     var resolvedSenderID: String? {
@@ -29,7 +30,10 @@ public struct AcknowledgmentChatItem: ChatItemAssociable, ChatItemOwned, Hashabl
         time = item.effectiveTime
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
-        acknowledgmentType = item.messageAcknowledgmentType
+        acknowledgmentType = item.acknowledmentType
+        if acknowledgmentType == 0 {
+            CLDebug("AcknowledgmentChatItem", "tapback is nil for id %@ on ventura; this is very unexpected", id)
+        }
         sender = item.resolvedSenderID
         associatedID = item.associatedMessageGUID
     }
@@ -46,5 +50,15 @@ public struct AcknowledgmentChatItem: ChatItemAssociable, ChatItemOwned, Hashabl
     
     public var type: ChatItemType {
         .acknowledgment
+    }
+}
+
+public extension IMMessageAcknowledgmentChatItem {
+    var acknowledmentType: Int64 {
+        if #available(macOS 13, iOS 16.0, *) {
+            return tapback?.associatedMessageType ?? 0
+        } else {
+            return messageAcknowledgmentType
+        }
     }
 }
