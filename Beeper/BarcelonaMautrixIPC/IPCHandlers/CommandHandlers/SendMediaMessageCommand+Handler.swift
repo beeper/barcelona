@@ -34,11 +34,9 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         ])
         messageCreation.metadata = metadata
         
-        if CBFeatureFlags.permitAudioOverMautrix {
-            if is_audio_message == true {
-                messageCreation.isAudioMessage = true
-                transaction.setData(value: true, key: "audio_message")
-            }
+        if CBFeatureFlags.permitAudioOverMautrix && is_audio_message == true {
+            messageCreation.isAudioMessage = true
+            transaction.setData(value: true, key: "audio_message")
         }
         
         do {

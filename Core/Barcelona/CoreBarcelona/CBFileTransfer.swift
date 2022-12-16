@@ -27,7 +27,7 @@ public func CBInitializeFileTransfer(filename: String, path: URL) -> IMFileTrans
             do {
                 try FileManager.default.createDirectory(at: persistentURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
                 try FileManager.default.copyItem(at: path, to: persistentURL)
-                IMFileTransferCenter.sharedInstance().retargetTransfer(transfer, toPath: persistentPath)
+                IMFileTransferCenter.sharedInstance().cbRetargetTransfer(transfer, toPath: persistentPath)
                 transfer.localURL = persistentURL
                 CLInfo("CBFileTransfer", "Retargeted file transfer \(guid) from \(path) to \(persistentURL)")
             } catch {
@@ -40,4 +40,14 @@ public func CBInitializeFileTransfer(filename: String, path: URL) -> IMFileTrans
         IMFileTransferCenter.sharedInstance().registerTransfer(withDaemon: guid)
     }
     return transfer
+}
+
+public extension IMFileTransferCenter {
+    func cbRetargetTransfer(_ transfer: IMFileTransfer, toPath path: String) {
+        if #available(macOS 13.0, iOS 16.0, *) {
+            retargetTransfer(transfer.guid, toPath: path)
+        } else {
+            retargetTransfer(transfer, toPath: path)
+        }
+    }
 }
