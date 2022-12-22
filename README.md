@@ -5,7 +5,7 @@ A Swift framework for interacting with iMessage.
 
 | Host  | Grapple  | Mautrix  |
 |-------|----------|----------|
-| macOS | [Download](https://nightly.link/beeper/barcelona/workflows/build/main/darwin-grapple.zip) | [Download](https://nightly.link/beeper/barcelona/workflows/build/main/darwin-barcelona-mautrix.zip) |
+| macOS | Unavailable | [Download](https://nightly.link/beeper/barcelona/workflows/build/main/darwin-barcelona-mautrix.zip) |
 | iOS   | Unavailable | Unavailable |
 
 ## Getting Started
