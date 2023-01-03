@@ -65,6 +65,16 @@ public extension FileHandle {
     }
 }
 
+extension FileHandle: MautrixIPCInputChannel {
+    public func listen(_ cb: @escaping (Data) -> ()) {
+        self.handleDataAsynchronously(cb)
+    }
+}
+
+extension FileHandle: MautrixIPCOutputChannel {
+    
+}
+
 private extension Data {
     func split(separator: Data) -> [Data] {
         var chunks: [Data] = []

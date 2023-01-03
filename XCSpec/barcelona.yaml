@@ -17,6 +17,7 @@ targets:
       - package: FeatureFlags
       - package: SwiftCLI
       - package: Sentry
+      - package: Socket
       - package: Paris
         product: CommunicationsFilter
       - package: Paris

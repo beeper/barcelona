@@ -13,11 +13,22 @@ import Foundation
 
 let TERMINATOR = Data("\n".utf8)
 
+public protocol MautrixIPCInputChannel {
+    func listen(_ cb: @escaping (Data) -> ())
+}
+
+public protocol MautrixIPCOutputChannel {
+   func write(_ data: Data)
+}
+
 public class MautrixIPCChannel {
     public var receivedPayloads = Combine.PassthroughSubject<IPCPayload, Never>()
     
-    private let inputHandle: FileHandle
-    private let outputHandle: FileHandle
+    // Send writes through this subject to serialize writes
+    private let writeSubject = Combine.PassthroughSubject<Data, Never>()
+    
+    private let inputHandle: MautrixIPCInputChannel
+    private let outputHandle: MautrixIPCOutputChannel
     
     let sharedBarcelonaStream: ERBufferedStream<IPCPayload> = {
         let stream = ERBufferedStream<IPCPayload>()
@@ -27,15 +38,16 @@ public class MautrixIPCChannel {
     
     var pongedOnce = false
     
-    private var cancellables = Set<OpenCombine.AnyCancellable>()
+    private var openCombineCancellables = Set<OpenCombine.AnyCancellable>()
+    private var combineCancellables = Set<Combine.AnyCancellable>()
     
-    public init(inputHandle: FileHandle, outputHandle: FileHandle) {
+    public init(inputHandle: MautrixIPCInputChannel, outputHandle: MautrixIPCOutputChannel) {
         self.inputHandle = inputHandle
         self.outputHandle = outputHandle
         
         // Set up our reading pipeline
         
-        inputHandle.handleDataAsynchronously(sharedBarcelonaStream.receive(data:))
+        inputHandle.listen(sharedBarcelonaStream.receive(data:))
         
         sharedBarcelonaStream.subject
             .sink { result in
@@ -85,7 +97,13 @@ public class MautrixIPCChannel {
                     self.receivedPayloads.send(payload)
                 }
             }
-            .store(in: &cancellables)
+            .store(in: &openCombineCancellables)
+        
+        let sendDispatchQueue = DispatchQueue(label: "com.barcelona.MautrixIPCChannelSendQueue")
+        writeSubject
+            .receive(on: sendDispatchQueue)
+            .sink { self.outputHandle.write($0) }
+            .store(in: &combineCancellables)
     }
     
     private let encoder: JSONEncoder = {
@@ -127,15 +145,13 @@ public class MautrixIPCChannel {
             data += TERMINATOR
         }
         
-        outputHandle.performOnThread {
-            self.outputHandle.write(data)
-            
-            #if DEBUG
-            if BLMetricStore.shared.get(key: .shouldDebugPayloads) ?? false {
-                self.outputHandle.write(TERMINATOR)
-            }
-            #endif
+        self.writeSubject.send(data)
+        
+        #if DEBUG
+        if BLMetricStore.shared.get(key: .shouldDebugPayloads) ?? false {
+            self.writeSubject.send(TERMINATOR)
         }
+        #endif
     }
     
 }

@@ -18,23 +18,17 @@ private let trace = Tracer(log, true)
 
 @main
 class BarcelonaMautrix {
-    static let shared = BarcelonaMautrix()
-    
     private let mautrixIPCChannel: MautrixIPCChannel
     private let reader: BLPayloadReader
     private let eventHandler: BLEventHandler
     
-    init() {
-        mautrixIPCChannel = MautrixIPCChannel(inputHandle: FileHandle.standardInput, outputHandle: FileHandle.standardOutput)
+    public init(_ mautrixIPCChannel: MautrixIPCChannel) {
+        self.mautrixIPCChannel = mautrixIPCChannel
         reader = BLPayloadReader(ipcChannel: mautrixIPCChannel)
         eventHandler = BLEventHandler(ipcChannel: mautrixIPCChannel)
     }
     
-    static func main() {
-        LoggingDrivers = [BLMautrixSTDOutDriver(ipcChannel: shared.mautrixIPCChannel), OSLogDriver.shared]
-        
-        CFPreferencesSetAppValue("Log" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
-        CFPreferencesSetAppValue("Log.All" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
+    static func configureSentry() {
         if let configurator = IMCSharedSentryConfigurator() {
             CLInfo("CoreSentry", "Setting up CoreSentry-flavored Sentry integration")
             configurator.productName = "barcelona-mautrix"
@@ -57,8 +51,37 @@ class BarcelonaMautrix {
         } else {
             CLInfo("CoreSentry", "Starting without setting up Sentry")
         }
+    }
+    
+    static func getUnixSocketPath() -> Optional<String> {
+        let index = ProcessInfo.processInfo.arguments.firstIndex(of: "--unix-socket")
+        if let index {
+            return ProcessInfo.processInfo.arguments[index + 1]
+        }
+        return nil
+    }
+    
+    static func main() {
+        var mautrixIPCChannel: MautrixIPCChannel
+        if let unixSocketPath = getUnixSocketPath() {
+            let unixMautrixIPCChannel = UnixSocketMautrixIPCChannel(unixSocketPath)
+            mautrixIPCChannel = MautrixIPCChannel(inputHandle: unixMautrixIPCChannel, outputHandle: unixMautrixIPCChannel)
+            
+            LoggingDrivers = [OSLogDriver.shared, ConsoleDriver.shared]
+        } else {
+            mautrixIPCChannel = MautrixIPCChannel(inputHandle: FileHandle.standardInput, outputHandle: FileHandle.standardOutput)
+            
+            LoggingDrivers = [BLMautrixSTDOutDriver(ipcChannel: mautrixIPCChannel), OSLogDriver.shared]
+        }
         
-        shared.run()
+        let barcelonaMautrix = BarcelonaMautrix(mautrixIPCChannel)
+        
+        CFPreferencesSetAppValue("Log" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
+        CFPreferencesSetAppValue("Log.All" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
+        
+        configureSentry()
+        
+        barcelonaMautrix.run()
     }
     
     func run() {
