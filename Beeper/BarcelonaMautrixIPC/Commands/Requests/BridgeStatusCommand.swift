@@ -27,6 +27,7 @@ public enum BridgeState: String, Codable {
 public struct BridgeStatusCommand: Codable, Equatable {
     public var state_event: BridgeState
     public var ttl: TimeInterval
+    public var has_error: Bool
     public var error: String?
     public var message: String?
     public var remote_id: String?
@@ -146,12 +147,12 @@ private extension IMAccountController {
         // If we are registered, logged in, and have no account error, we are connected.
         if isRegistered && isLoggedIn && !hasAccountError {
             return .connected
-        // Otherwise, if we are probably about to register, then we are connecting.
-        } else if isProbablyAboutToRegister {
-            return .connecting
         // Otherwise, if there is any kind of account error, we are in bad credentials.
         } else if hasAccountError {
             return .badCredentials
+        // Otherwise, if we are probably about to register, then we are connecting.
+        } else if isProbablyAboutToRegister {
+            return .connecting
         // Otherwise, we don't know what state we're in, but it isn't good.
         } else {
             return .unknownError
@@ -253,7 +254,7 @@ public extension BridgeStatusCommand {
         
         switch remoteID {
         case .none, "unknown", "":
-            return BridgeStatusCommand(state_event: .unconfigured, ttl: 240, error: nil, message: nil, remote_id: nil, remote_name: nil, info: [:])
+            return BridgeStatusCommand(state_event: .unconfigured, ttl: 240, has_error: false, error: nil, message: nil, remote_id: nil, remote_name: nil, info: [:])
         default:
             break
         }
@@ -283,6 +284,7 @@ public extension BridgeStatusCommand {
         return BridgeStatusCommand(
             state_event: state,
             ttl: state == .connected ? 3600 : 240,
+            has_error: IMAccountController.shared.error != nil,
             error: IMAccountController.shared.error,
             message: IMAccountController.shared.message,
             remote_id: remoteID, // Apple ID – absent when unconfigured. logged out includes the remote id, and then goes to unconfigured. everything else must include the remote ID

@@ -47,7 +47,7 @@ public class BLHealthTicker {
     }
     
     @Published
-    public private(set) var latestStatus: BridgeStatusCommand = .init(state_event: .unconfigured, ttl: .infinity, info: [:])
+    public private(set) var latestStatus: BridgeStatusCommand = .init(state_event: .unconfigured, ttl: .infinity, has_error: false, info: [:])
     
     /**
      Publishes the current bridge status and optionally schedules the next update
