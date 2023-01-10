@@ -10,6 +10,8 @@ import Foundation
 import Barcelona
 import Combine
 
+fileprivate let log = Logger(category: "BLHealthTicker")
+
 public class BLHealthTicker {
     public static let shared = BLHealthTicker()
     
@@ -18,6 +20,7 @@ public class BLHealthTicker {
     
     public init() {
         NotificationCenter.default.subscribe(toNotificationsNamed: [.IMAccountLoginStatusChanged, .IMAccountRegistrationStatusChanged, .IMAccountNoLongerJustLoggedIn, .IMAccountLoggedIn, .IMAccountLoggedOut, .IMAccountActivated, .IMAccountDeactivated, .IMAccountAuthorizationIDChanged, .IMAccountControllerOperationalAccountsChanged, .IMAccountVettedAliasesChanged, .IMAccountDisplayNameChanged, .IMDaemonDidConnect]) { notification, subscription in
+            log.info("Received notification \(notification), updating bridge state to \(self.status.state_event)")
             self.run(schedulingNext: true)
         }
     }
