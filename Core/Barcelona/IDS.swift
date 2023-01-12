@@ -164,13 +164,17 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
         }
     }
     
-    func FetchCached(_ destinations: [String], _ callback: @escaping (_ cached: [String: IDSState], _ needed: [String]) -> ()) {
-        guard destinations.count > 0 else {
-            return callback([:], [])
+    if options.contains(.ignoringCache) {
+        FetchLatest(destinations) { resolved in
+            callback(resolved.mapKeys(\.idsURIStripped))
         }
-        
+    } else {
+        guard destinations.count > 0 else {
+            return
+        }
+
         log.info("Requesting ID status from cache for destinations \(destinations.joined(separator: ","), privacy: .auto) on service \(service.idsIdentifier ?? "nil", privacy: .public)")
-        
+
         let (cached, uncached) = destinations.splitReduce(intoLeft: [String: IDSState](), intoRight: [String]()) { cached, uncached, destination in
             if let status = BLIDSIDQueryCache.shared.result(for: destination) {
                 cached[destination] = status
@@ -178,23 +182,13 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
                 uncached.append(destination)
             }
         }
-        
-        callback(cached, uncached)
-    }
-    
-    if options.contains(.ignoringCache) {
-        FetchLatest(destinations) { resolved in
-            callback(resolved.mapKeys(\.idsURIStripped))
-        }
-    } else {
-        FetchCached(destinations) { cached, needed in
-            FetchLatest(needed) { resolved in
-                lazy var now = Date()
-                callback(resolved.reduce(into: cached) { masterResult, pair in
-                    BLIDSIDQueryCache.shared.cache(pair.value, for: pair.key, time: now)
-                    masterResult[pair.key] = pair.value
-                }.mapKeys(\.idsURIStripped))
-            }
+
+        FetchLatest(uncached) { resolved in
+            lazy var now = Date()
+            callback(resolved.reduce(into: cached) { masterResult, pair in
+                BLIDSIDQueryCache.shared.cache(pair.value, for: pair.key, time: now)
+                masterResult[pair.key] = pair.value
+            }.mapKeys(\.idsURIStripped))
         }
     }
 }
