@@ -147,7 +147,7 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
         } else {
             controller.loadChats(withChatID: "all")
         }
-        
+
         ifDebugBuild {
             if CBFeatureFlags.scratchbox && !_scratchboxIsEmpty {
                 _scratchboxMain()

@@ -9,6 +9,7 @@ import Foundation
 import Barcelona
 import Swog
 import Sentry
+import IMCore
 
 public struct ResolveIdentifierCommand: Codable {
     public var identifier: String
@@ -24,13 +25,24 @@ public struct GUIDResponse: Codable {
 
 extension ResolveIdentifierCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
-        ChatLocator.senderGUID(for: identifier).then { result in
+        do {
+            let result = try ChatLocator.senderGUID(for: identifier).wait(upTo: .now() + .seconds(20))
             switch result {
             case .guid(let guid):
                 payload.respond(.guid(.init(guid)), ipcChannel: ipcChannel)
+                return
             case .failed(let message):
-                payload.fail(code: "err_destination_unreachable", message: message, ipcChannel: ipcChannel)
+                CLWarn("ResolveIdentifier", "Resolving identifier for \(identifier) failed with message: \(message)")
             }
+        } catch {
+            CLWarn("ResolveIdentifier", "Resolving identifier for \(identifier) timed out in 20 seconds")
+        }
+
+        if IMServiceImpl.smsEnabled() {
+            CLInfo("ResolveIdentifier", "Responding that \(identifier) is available on SMS due to availability of forwarding")
+            payload.respond(.guid(.init("SMS;-;\(identifier)")), ipcChannel: ipcChannel)
+        } else {
+            payload.fail(code: "err_destination_unreachable", message: "Identifier resolution failed and SMS service is unavailable", ipcChannel: ipcChannel)
         }
     }
 }

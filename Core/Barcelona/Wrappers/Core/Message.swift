@@ -433,7 +433,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     public var threadOriginator: String?
     public var threadOriginatorPart: Int?
     public var metadata: Metadata?
-    
+
     public var isFinished: Bool {
         flags.contains(.finished)
     }
