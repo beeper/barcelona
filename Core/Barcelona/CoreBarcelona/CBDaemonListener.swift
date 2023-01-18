@@ -16,6 +16,7 @@ import Swexy
 import Swog
 import CommunicationsFilter
 @_spi(synchronousQueries) import BarcelonaDB
+import IMDaemonCore
 import IMSharedUtilities
 import IMFoundation
 
@@ -187,7 +188,33 @@ internal extension CBDaemonListener {
                 self.pushToSMSReadBuffer(status.messageID)
             }
         }
-        
+
+        // Apparently in Ventura, macOS started ignoring certain chats to make the iMessage
+        // service more lean, so we have to manually tell the system to listen to all of the
+        // conversations that exist.
+        // We're not 100% certain what will do this (listen to a conversation), so we're trying
+        // all of these to see if any of them do the trick and will update later.
+        if #available(macOS 13, *) {
+            IMDMessageStore.sharedInstance().setSuppressDatabaseUpdates(false)
+
+            for chat in IMChatRegistry.shared.allChats {
+                chat.beginObservingHandleAvailability()
+
+                guard let account = chat.account else {
+                    log.warn("Chat \(chat.guid) has no account associated with it, can't watch participants")
+                    continue
+                }
+
+                guard let participants = chat.participants else {
+                    log.warn("Chat \(chat.guid) participants is nil, can't watch them")
+                    continue
+                }
+
+                // Watch all the people who are in the chat
+                participants.forEach(account.startWatchingIMHandle)
+            }
+        }
+
         NotificationCenter.default.addObserver(forName: .IMAccountPrivacySettingsChanged, object: nil, queue: nil) { notification in
             guard let account = notification.object as? IMAccount else {
                 return
@@ -431,7 +458,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
                 }
             }
         }
-        
+
         guard ProcessInfo.processInfo.environment["BLNoBlocklist"] == nil else {
             return
         }

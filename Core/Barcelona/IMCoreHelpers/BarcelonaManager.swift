@@ -11,7 +11,6 @@ import InterposeKit
 import BarcelonaFoundation
 import OSLog
 import IMCore
-import IMDaemonCore
 import IMDPersistence
 import IMSharedUtilities
 
@@ -147,27 +146,6 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
             controller.loadAllChats()
         } else {
             controller.loadChats(withChatID: "all")
-        }
-
-        // Apparently in Ventura, macOS started ignoring certain chats to make the iMessage
-        // service more lean, so we have to manually tell the system to listen to all of the
-        // conversations that exist.
-        // We're not 100% certain what will do this (listen to a conversation), so we're trying
-        // all of these to see if any of them do the trick and will update later.
-        if #available(macOS 13, *) {
-            IMDMessageStore.sharedInstance().setSuppressDatabaseUpdates(false)
-
-            for chat in IMChatRegistry.shared.allChats {
-                chat.beginObservingHandleAvailability()
-            }
-
-            if let accounts = IMAccountController.shared.activeAccounts {
-                for account in accounts {
-                    for handle in account.arrayOfAllIMHandles {
-                        account.startWatchingIMHandle(handle)
-                    }
-                }
-            }
         }
 
         ifDebugBuild {
