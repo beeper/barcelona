@@ -158,6 +158,16 @@ private extension IMAccountController {
             return .unknownError
         }
     }
+
+    var registrationFailureAlertInfo: Dictionary<AnyHashable, Any>? {
+        guard let account = iMessageAccount else {
+            return nil
+        }
+        guard let alertInfo = account.registrationFailureAlertInfo else {
+            return nil
+        }
+        return alertInfo
+    }
     
     /// Translates IMCore enum to string error messages
     var error: String? {
@@ -166,18 +176,6 @@ private extension IMAccountController {
         }
         
         let registrationFailureReason = account.registrationFailureReason
-        
-        if registrationFailureReason == .irreparableFailure, CBFeatureFlags.beeper {
-            return "An error occurred while activating iMessage. Please contact Beeper support to resolve this issue."
-        }
-        
-        if let alertInfo = account.registrationFailureAlertInfo, var body = alertInfo["body"] as? String {
-            if let action = alertInfo["action"] as? [AnyHashable: Any], let url = action["url"] as? String {
-                body += " " + url
-            }
-            
-            return body
-        }
         
         switch registrationFailureReason {
         case .noError:
@@ -237,7 +235,7 @@ private extension IMAccountController {
         case .irreparableFailure:
             return "irreparable_failure"
         @unknown default:
-            return "unknown_error"
+            return "unknown_error_\(registrationFailureReason)"
         }
     }
     
@@ -298,7 +296,8 @@ public extension BridgeStatusCommand {
                 "alias_count": allAddresses.count,
                 "phone_number_count": allAddresses.filter(\.isPhoneNumber).count,
                 "email_count": allAddresses.filter(\.isEmail).count,
-                "loginStatusMessage": account?.loginStatusMessage
+                "loginStatusMessage": account?.loginStatusMessage,
+                "registration_failure_alert_info": IMAccountController.shared.registrationFailureAlertInfo,
             ].mapValues(AnyCodable.init(_:))
         )
     }
