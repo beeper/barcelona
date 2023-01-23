@@ -225,7 +225,7 @@ public extension CBChat {
     var serviceForSending: IMService {
         chatForSending()?.account.service ?? .sms()
     }
-    
+
     func validRecipients(on service: IMServiceImpl = .iMessage()) -> [IMHandle] {
         guard style == .instantMessage else {
             log.error("Ignoring request to query best recipient in a group chat")
@@ -233,7 +233,7 @@ public extension CBChat {
         }
         var recipientsByID: [String: IMHandle] = [:]
         let deduplicatedRecipientIDs: [String] = Array(mergedRecipientIDs)
-        lazy var statuses: [String: IDSState] = {
+        let statuses: [String: IDSState] = {
             do {
                 return try BLResolveIDStatusForIDs(deduplicatedRecipientIDs, onService: service.id)
             } catch {
@@ -278,28 +278,10 @@ public extension CBChat {
     func bestRecipient(on service: IMServiceImpl = .iMessage()) -> IMHandle? {
         validRecipients(on: service).first
     }
-    
+
     func chatForSending(on service: CBServiceName = .iMessage) -> IMChat? {
-        let IMChats = IMChats, service = service.service!
-        if style == .instantMessage {
-            func findValidRecipients() -> [IMHandle] {
-                let recipients = validRecipients(on: service)
-                if recipients.isEmpty {
-                    if service == .iMessage(), IMAccountController.shared.activeSMSAccount?.canSendMessages == true, let recipient = bestRecipient(on: .sms()) {
-                        log.info("Can't reach \(self.mergedID) over \(service.name ?? "nil"), but SMS is working. Retargeting!")
-                        return [recipient]
-                    }
-                    log.fault("Failed to determine best recipient in chat \(self.mergedID) for service \(service.name ?? "nil", privacy: .public)")
-                    return []
-                }
-                return recipients
-            }
-            let recipients = findValidRecipients()
-            let chats = recipients.compactMap(\.chat)
-            return chats.sorted(usingKey: \.lastMessage?.time, withDefaultValue: .distantPast, by: >).first
-        } else {
-            return IMChats.first(where: { $0.account.service == service }) ?? IMChats.first
-        }
+        let service = service.service!
+        return IMChats.first(where: { $0.account.service == service })
     }
 }
 
@@ -323,17 +305,13 @@ public extension CBChat {
         send(message: IMMessage(fromIMMessageItem: message, sender: nil, subject: nil), chat: chat)
     }
     
-    func send(message: CreateMessage) throws -> IMMessage {
-        guard let chat = chatForSending() else {
+    func send(message: CreateMessage, service: CBServiceName) throws -> IMMessage {
+        guard let chat = chatForSending(on: service) else {
             throw BarcelonaError(code: 400, message: "You can't send messages to this chat. If this is an SMS, make sure forwarding is still enabled. If this is an iMessage, check your connection to Apple.")
         }
         let message = try message.imMessage(inChat: chat.chatIdentifier)
         _ = send(message: message, chat: chat)
         return message
-    }
-    
-    func send(message: String) throws -> IMMessage {
-        try send(message: CreateMessage(parts: [.init(type: .text, details: message)]))
     }
 }
 #endif

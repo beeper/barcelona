@@ -87,7 +87,7 @@ public extension Chat {
     func sendReturningRaw(message createMessage: CreateMessage, from: String? = nil) throws -> IMMessage {
         if CBFeatureFlags.useSendingV2, let cbChat = cbChat {
             CLInfo("MessageSending", "Using CBChat for sending per feature flags")
-            return try cbChat.send(message: createMessage)
+            return try cbChat.send(message: createMessage, service: CBServiceName(style: service ?? .iMessage))
         }
         
         imChat.refreshServiceForSendingIfNeeded()
