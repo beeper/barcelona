@@ -8,6 +8,7 @@
 import Foundation
 import IMCore
 import LinkPresentation
+import LinkPresentationPrivate
 import IMSharedUtilities
 import Swog
 
@@ -17,25 +18,14 @@ internal extension IMBalloonPluginManager {
     }
 }
 
-@objc private protocol RichLink: NSObjectProtocol {
-    @objc var metadata: LPLinkMetadata { get set }
-    @objc var placeholder: Bool {
-        @objc(isPlaceholder) get
-        @objc(setPlaceholder:) set
-    }
-    @objc var needsCompleteFetch: Bool { get set }
-    @objc var needsSubresourceFetch: Bool { get set }
-    @objc(dataRepresentationWithOutOfLineAttachments:)
-    func dataRepresentation(withOutOfLineAttachments: AutoreleasingUnsafeMutablePointer<NSArray?>) -> Data
-}
-
 @objc private protocol RichLinkPluginDataSource: NSObjectProtocol {
-    func _didFetchMetadata(_ metadata: LPLinkMetadata!, error: UnsafeMutablePointer<NSError?>?)
+    @objc(_didFetchMetadata:error:)
+    func _didFetchMetadata(_ metadata: LPLinkMetadata!, error: NSErrorPointer)
     @objc(updateRichLinkWithFetchedMetadata:)
     func updateRichLink(with fetchedMetadata: LPLinkMetadata)
     func _startFetchingMetadata()
-    @objc func dispatchDidReceiveMetadataToAllClients()
-    @objc var richLink: RichLink { get }
+    func dispatchMetadataUpdate()
+    @objc var richLink: LPMessagesPayload { get }
     @objc(setValue:forKey:) func setValue(_ value: Any!, forKey: String)
     @objc func createEmptyMetadataWithOriginalURL()
 }
@@ -50,7 +40,7 @@ internal extension IMBalloonPluginDataSource {
         guard bundleID == IMBalloonPluginManager.sharedInstance().richLinkPlugin?.identifier else {
             return nil
         }
-        return unsafeBitCast(self, to: RichLinkPluginDataSource.self)
+        return self
     }
     
     func provideArbitraryLinkMetadata(_ metadata: LPLinkMetadata) throws {
@@ -65,6 +55,16 @@ internal extension IMBalloonPluginDataSource {
         richLinkDataSource._didFetchMetadata(metadata, error: &error)
         if let error = error {
             throw error
+        }
+    }
+}
+
+extension IMBalloonPluginDataSource: RichLinkPluginDataSource {
+    func dispatchMetadataUpdate() {
+        if #available(macOS 13.0, *) {
+            self.dispatchMetadataUpdateToAllClients()
+        } else {
+            self.dispatchDidReceiveMetadataToAllClients()
         }
     }
 }
@@ -160,7 +160,7 @@ public extension IMMessage {
         func _load() {
             let metadata = LPLinkMetadata()
             metadata.originalURL = url
-            richLinkDataSource.richLink.placeholder = true
+            richLinkDataSource.richLink.isPlaceholder = true
             richLinkDataSource.richLink.metadata = metadata
             richLinkDataSource.richLink.needsCompleteFetch = true
             richLinkDataSource.richLink.needsSubresourceFetch = true
@@ -234,12 +234,13 @@ public extension IMMessage {
         CLInfo("LPLink", "RichLinkDataSource for message %@ willSendFromShelf", guid)
         dataSource.payloadWillSendFromShelf()
         payloadData = dataSource.messagePayloadDataForSending
-        CLInfo("LPLink", "RichLinkDataSource for message %@ placeholder payload is %d", guid, payloadData.count)
+        CLInfo("LPLink", "RichLinkDataSource for message %@ placeholder payload is %d", guid, payloadData?.count ?? 0)
         dataSource.payloadInShelf = false
         return {
             CLInfo("LPLink", "RichLinkDataSource for message %@ was sent. Time for more!", self.guid)
+
             richLinkDataSource.updateRichLink(with: metadata)
-            richLinkDataSource.dispatchDidReceiveMetadataToAllClients()
+            richLinkDataSource.dispatchMetadataUpdate()
             var attachments: NSArray?
             let data = richLinkDataSource.richLink.dataRepresentation(withOutOfLineAttachments: &attachments)
             CLInfo("LPLink", "RichLinkDataSource for message %@ sending packaged payload with size %d and attachment count %d", self.guid, data.count, attachments?.count ?? 0)

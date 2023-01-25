@@ -19,7 +19,7 @@ public struct RichLinkMetadata: Codable, Hashable {
             case url(URL)
             /// Inline asset data
             case data(Data)
-            
+
             public init(from decoder: Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
                 if container.allKeys.contains(.data) {
@@ -65,6 +65,31 @@ public struct RichLinkMetadata: Codable, Hashable {
             var cg: CGSize {
                 CGSize(width: CGFloat(width), height: CGFloat(height))
             }
+        }
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            mimeType = try? container.decodeIfPresent(String.self, forKey: .mimeType)
+            accessibilityText = try? container.decodeIfPresent(String.self, forKey: .accessibilityText)
+            source = try? container.decodeIfPresent(Source.self, forKey: .source)
+            if let urlString = try? container.decodeIfPresent(String.self, forKey: .originalURL) {
+                originalURL = Foundation.URL(string: urlString)
+            }
+            size = try? container.decodeIfPresent(Size.self, forKey: .size)
+        }
+
+        public init(
+            mimeType: String?,
+            accessibilityText: String?,
+            source: Source?,
+            originalURL: URL?,
+            size: Size?
+        ) {
+            self.mimeType = mimeType
+            self.accessibilityText = accessibilityText
+            self.source = source
+            self.originalURL = originalURL
+            self.size = size
         }
         
         public var mimeType: String?
