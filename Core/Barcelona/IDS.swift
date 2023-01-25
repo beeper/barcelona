@@ -159,8 +159,11 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
         
         log.info("Requesting ID status from server for destinations \(destinations.joined(separator: ","), privacy: .auto) on service \(service.idsIdentifier ?? "nil", privacy: .public)")
         
-        IDSIDQueryController.sharedInstance()!.forceRefreshIDStatus(forDestinations: destinations, service: service.idsIdentifier!, listenerID: IDSListenerID, queue: HandleQueue) {
-            callback($0.mapValues { IDSState(rawValue: $0.intValue) })
+        IDSIDQueryController.sharedInstance()!.forceRefreshIDStatus(forDestinations: destinations, service: service.idsIdentifier!, listenerID: IDSListenerID, queue: HandleQueue) { states in
+            let mappedStates = states.mapValues { IDSState(rawValue: $0.intValue) }
+            
+            log.debug("forceRefreshIDStatus completed with result: \(mappedStates)")
+            callback(mappedStates)
         }
     }
     

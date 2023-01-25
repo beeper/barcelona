@@ -87,7 +87,7 @@ public extension Chat {
     func sendReturningRaw(message createMessage: CreateMessage, from: String? = nil) throws -> IMMessage {
         if CBFeatureFlags.useSendingV2, let cbChat = cbChat {
             CLInfo("MessageSending", "Using CBChat for sending per feature flags")
-            return try cbChat.send(message: createMessage)
+            return try cbChat.send(message: createMessage, guid: imChat.guid)
         }
         
         imChat.refreshServiceForSendingIfNeeded()
@@ -108,43 +108,11 @@ public extension Chat {
         return message
     }
     
-    func send(message options: CreatePluginMessage) throws -> Message {
-        if CBFeatureFlags.useSendingV2, let cbChat = cbChat {
-            CLInfo("MessageSending", "Using CBChat for sending per feature flags")
-            let message = try options.imMessage(inChat: id)
-            cbChat.send(message: message)
-            return Message(ingesting: message, context: .init(chatID: id))!
-        }
-        
-        imChat.refreshServiceForSendingIfNeeded()
-        
-        let message = try options.imMessage(inChat: self.id)
-        
-        Chat.delegate?.chat(self, willSendMessages: [message], fromCreatePluginMessage: options)
-        
-        Thread.main.sync {
-            markAsRead()
-            imChat.send(message)
-        }
-        
-        return Message(messageItem: message._imMessageItem, chatID: imChat.id)
-    }
-    
     func send(message createMessage: CreateMessage, from: String? = nil) throws -> Message {
         return Message(messageItem: try sendReturningRaw(message: createMessage, from: from)._imMessageItem, chatID: imChat.id)
     }
     
     func tapback(_ creation: TapbackCreation, metadata: Message.Metadata? = nil) throws -> Message {
-        func chatForSending() -> IMChat {
-            if CBFeatureFlags.useSendingV2, let cbChat = cbChat {
-                CLInfo("MessageSending", "Using CBChat for sending per feature flags")
-                return cbChat.chatForSending(on: .iMessage) ?? self.imChat
-            } else {
-                return self.imChat
-            }
-        }
-        let imChat = chatForSending()
-        
         markAsRead()
         let message = try imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil, metadata: metadata)
         

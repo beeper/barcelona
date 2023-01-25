@@ -411,14 +411,7 @@ public extension CBMessage {
         log.info("The best service for sending \(id, privacy: .public) is currently \(service.rawValue, privacy: .public)")
         return service
     }
-    
-    func resendIfNeeded() {
-        guard eligibleToResend else {
-            return
-        }
-        resend()
-    }
-    
+
     func resend() {
         guard let message = loadIMMessageItem() else {
             return
@@ -435,16 +428,17 @@ public extension CBMessage {
             return
         }
         log.info("Located origin chat for \(id, privacy: .public)")
-        let service = serviceForResending
-        guard let serviceChat = chat.chatForSending(on: service) else {
-            log.info("Can't resend \(message.id, privacy: .public) because we have no way to reach them via \(service.rawValue)")
+
+        guard let imChat = chat.IMChats.first(where: { $0.hasStoredMessage(withGUID: id) }) else {
+            log.info("Can't resend \(message.id, privacy: .public) because all IMChats claim to not contain this message")
             #if canImport(IMFoundation) && canImport(BarcelonaDB)
             // only if we have CBDaemonListener
             CBDaemonListener.shared.messagePipeline.send(Message(messageItem: message, chatID: DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id) ?? chat.chatIdentifiers[0]))
             #endif
             return
         }
-        log.info("I will re-send \(id, privacy: .public) on \(serviceChat.guid, privacy: .public)")
+
+        log.info("I will re-send \(id, privacy: .public) on \(imChat.guid, privacy: .public)")
         if service == .SMS {
             var messageFlags = IMMessageFlags(rawValue: message.flags)
             messageFlags.insert(.downgraded)
@@ -463,11 +457,11 @@ public extension CBMessage {
             IMDaemonController.sharedInstance().updateMessage(message)
             log.debug("Changed service for message \(id, privacy: .public) to \(serviceName)")
         }
-        guard serviceChat.account.serviceName == service.IMServiceStyle.service?.name else {
+        guard imChat.account.serviceName == service.IMServiceStyle.service?.name else {
             log.fault("Misaligned IMChat/IMMessage/CBChat service when trying to re-send message \(id, privacy: .public)!!!!!!")
             return
         }
-        log.info("Re-sending message \(id, privacy: .public) on chat \(serviceChat.guid, privacy: .public)")
-        chat.send(message: message, chat: serviceChat)
+        log.info("Re-sending message \(id, privacy: .public) on chat \(imChat.guid, privacy: .public)")
+        chat.send(message: message, chat: imChat)
     }
 }
