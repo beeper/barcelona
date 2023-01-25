@@ -221,10 +221,6 @@ public extension CBChat {
     var senderLastAddressedSIMID: String? {
         mostRecentChat?.lastAddressedSIMID
     }
-    
-    var serviceForSending: IMService {
-        IMChats.contains { $0.account.service == .iMessage() } ? .iMessage() : .sms()
-    }
 
     func validRecipients(on service: IMServiceImpl = .iMessage()) -> [IMHandle] {
         guard style == .instantMessage else {
