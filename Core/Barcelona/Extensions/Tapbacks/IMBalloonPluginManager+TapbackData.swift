@@ -38,8 +38,12 @@ extension IMBalloonPluginManager {
         if let bundleID = message.balloonBundleID {
             var data = TapbackData()
             let manager = sharedInstance()!
-            
-            let decoded = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: legalArchiverClasses, from: message.payloadData)
+
+            guard let payloadData = message.payloadData else {
+                return nil
+            }
+
+            let decoded = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: legalArchiverClasses, from: payloadData)
             
             if let dict = decoded as? NSDictionary {
                 if let applicationName = dict.value(forKey: "an") as? String {
