@@ -160,13 +160,7 @@ private extension IMAccountController {
     }
 
     var registrationFailureAlertInfo: [String: Any?] {
-        guard let account = iMessageAccount else {
-            return [:]
-        }
-        guard let alertInfo = account.registrationFailureAlertInfo else {
-            return [:]
-        }
-        return alertInfo as? [String: Any?] ?? [:]
+        iMessageAccount?.registrationFailureAlertInfo as? [String: Any?] ?? [:]
     }
     
     /// Translates IMCore enum to string error messages

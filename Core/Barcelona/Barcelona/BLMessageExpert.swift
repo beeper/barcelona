@@ -151,6 +151,11 @@ public class BLMessageExpert {
             *log.debug("Dropping message \(message.debugDescription, privacy: .public): from me and not sent!")
             return
         }
+
+        if #available(macOS 13.0, *) {
+            message.imChat?.watchAllHandles()
+        }
+
         send(.message(message))
     }
 }

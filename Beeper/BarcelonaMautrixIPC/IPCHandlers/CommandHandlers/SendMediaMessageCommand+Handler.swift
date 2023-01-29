@@ -83,7 +83,8 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                 if !success && shouldCancel {
                     chat.imChat.cancel(message)
                 }
-                monitor = nil
+                
+                withExtendedLifetime(monitor) { monitor = nil }
             }
             
             message = try chat.sendReturningRaw(message: messageCreation)

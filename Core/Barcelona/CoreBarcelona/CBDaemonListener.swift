@@ -198,20 +198,7 @@ internal extension CBDaemonListener {
             IMDMessageStore.sharedInstance().setSuppressDatabaseUpdates(false)
 
             for chat in IMChatRegistry.shared.allChats {
-                chat.beginObservingHandleAvailability()
-
-                guard let account = chat.account else {
-                    log.warn("Chat \(chat.guid) has no account associated with it, can't watch participants")
-                    continue
-                }
-
-                guard let participants = chat.participants else {
-                    log.warn("Chat \(chat.guid) participants is nil, can't watch them")
-                    continue
-                }
-
-                // Watch all the people who are in the chat
-                participants.forEach(account.startWatchingIMHandle)
+                chat.watchAllHandles()
             }
         }
 
@@ -241,6 +228,10 @@ internal extension CBDaemonListener {
             }
             
             self.chatConfigurationPipeline.send(chat.configurationBits)
+        }
+
+        NotificationCenter.default.addObserver(forName: .init("__kIMBuddyPropertiesChangedNotification"), object: nil, queue: nil) { notification in
+            log.debug("Buddy properties changed: \(notification.object.debugDescription, privacy: .public)")
         }
     }
 }
@@ -598,6 +589,14 @@ public class CBDaemonListener: ERBaseDaemonListener {
     
     public override func fileTransfer(_ guid: String!, updatedWithProperties properties: [AnyHashable : Any]!) {
         _ = CBPurgedAttachmentController.shared.process(transferIDs: [guid])
+    }
+
+    public func account(_ accountUniqueID: String?, buddyPropertiesChanged properties: Any?) {
+        *log.debug("account buddyPropertiesChanged \(properties.debugDescription, privacy: .public)")
+    }
+
+    public func account(_ accountUniqueID: String?, buddyProperties: Any?, buddyPictures: Any?) {
+        *log.debug("account buddyProperties \(buddyProperties.debugDescription, privacy: .public) buddyPictures \(buddyPictures.debugDescription, privacy: .public)")
     }
 }
 
