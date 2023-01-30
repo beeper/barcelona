@@ -5,7 +5,9 @@ targets:
     templates:
       - BLFramework
     sources:
-      - ../Beeper/BarcelonaMautrixIPC
+      - path: ../Beeper/BarcelonaMautrixIPC
+        excludes:
+          - "**/*_Tests.swift"
     scheme:
       testTargets:
         - barcelona-mautrix-tests
@@ -21,7 +23,7 @@ targets:
   barcelona-mautrix:
     group: Beeper
     type: tool
-    platform: [macOS,iOS]
+    platform: [macOS, iOS]
     platformSuffix: -${platform}
     productNameFromSettings: true
     sources:
@@ -71,4 +73,17 @@ targets:
       - BLTestHost
     templateAttributes:
       entitlements: Beeper/BarcelonaTest/entitlements.plist
-
+  BarcelonaMautrixIPCTests:
+    type: bundle.unit-test
+    platform: macOS
+    settings:
+      base:
+        MACOSX_DEPLOYMENT_TARGET: "13.0"
+    dependencies:
+      - target: BarcelonaMautrixIPC
+        embed: true
+        link: true
+    sources:
+      - path: ../Beeper/BarcelonaMautrixIPC
+        includes:
+          - "**/*_Tests.swift"
