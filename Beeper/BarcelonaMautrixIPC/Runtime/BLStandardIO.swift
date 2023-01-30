@@ -72,7 +72,7 @@ extension FileHandle: MautrixIPCInputChannel {
 }
 
 extension FileHandle: MautrixIPCOutputChannel {
-    
+    // FileHandle implements func write(_ data: Data) already.
 }
 
 private extension Data {
