@@ -53,12 +53,13 @@ class BarcelonaMautrix {
         }
     }
     
-    static func getUnixSocketPath() -> Optional<String> {
-        let index = ProcessInfo.processInfo.arguments.firstIndex(of: "--unix-socket")
-        if let index {
-            return ProcessInfo.processInfo.arguments[index + 1]
+    static func getUnixSocketPath() -> String? {
+        guard let index = ProcessInfo.processInfo.arguments.firstIndex(of: "--unix-socket"),
+            ProcessInfo.processInfo.arguments.count > index + 1
+        else {
+            return nil
         }
-        return nil
+        return ProcessInfo.processInfo.arguments[index + 1]
     }
     
     static func main() {
