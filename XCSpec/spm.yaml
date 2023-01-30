@@ -62,6 +62,6 @@ packages:
   Paris:
     url: https://github.com/EricRabil/Paris
     revision: "be1e5335cdea99f86f4ebd25200ed37eea7dd831"
-  Socket:
-    url: https://github.com/Kitura/BlueSocket
-    from: 2.0.2
+  SwiftNIO:
+    url: https://github.com/apple/swift-nio
+    from: 2.0.0

@@ -1,83 +1,74 @@
 import Foundation
-import Socket
+import NIO
+import NIOFoundationCompat
 import Swog
 
-fileprivate let log = Logger(category: "UnixSocketMautrixIPCChannel")
-
+/// Handles sending and receiving data from the Mautrix UNIX socket.
 public class UnixSocketMautrixIPCChannel: MautrixIPCInputChannel, MautrixIPCOutputChannel {
-    private let socket: Socket
-    private var readThread: Thread? = nil
-    private var readRunLoop: CFRunLoop? = nil
-    private var readCallback: ((Data) -> ())? = nil
-    
+
+    // MARK: - Properties
+
+    private let channel: Channel
+
+    private let log = Logger(category: "UnixSocketMautrixIPCChannel")
+
+    // MARK: - Initializers
+
     public init(_ socketPath: String) {
         do {
-            try socket = Socket.create(family:.unix)
-            try socket.connect(to: socketPath)
-            log.info("Connected to unix socket \(socketPath)")
+            let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+            let client = ClientBootstrap(group: group)
+            channel = try client.connect(unixDomainSocketPath: socketPath).wait()
         } catch let error {
             fatalError("Failed to connect unix socket \(error)")
         }
     }
-    
-    private func setupReadThread() {
-        readThread = Thread {
-            self.readRunLoop = CFRunLoopGetCurrent()
-            
-            RunLoop.current.schedule {
-                do {
-                    var shouldKeepRunning = true
-                    
-                    repeat {
-                        log.info("Waiting for data")
-                        var readData = Data(capacity: 4096)
-                        let bytesRead = try self.socket.read(into: &readData)
-                        log.info("Read \(bytesRead) bytes from the unix socket")
-                        
-                        if bytesRead > 0 {
-                            if let readCallback = self.readCallback {
-                                readCallback(readData)
-                            }
-                        }
-                        
-                        if bytesRead == 0 {
-                            shouldKeepRunning = false
-                            break
-                        }
-                    } while shouldKeepRunning
-                } catch let error {
-                    log.error("Failed to read payload from unix socket: \(String(describing: error))")
-                }
-            }
-            
-            RunLoop.current.run()
+
+    // MARK: - Methods
+
+    public func listen(_ cb: @escaping (Data) -> Void) {
+        do {
+            try channel.pipeline.addHandler(ClosureReadHandler(readCallback: cb)).wait()
+        } catch {
+            log.error("Failed to start listening to unix socket: \(error.localizedDescription)")
         }
     }
-    
-    func performOnThread(_ callback: @escaping () -> ()) {
-        guard let runLoop = readRunLoop else {
-            // Thread not yet started, just call it immediately
-            callback()
-            return
-        }
-        CFRunLoopPerformBlock(runLoop, CFRunLoopMode.commonModes.rawValue, callback)
-        CFRunLoopWakeUp(runLoop)
-    }
-    
-    public func listen(_ cb: @escaping (Data) -> ()) {
-        self.readCallback = cb
-        if readThread == nil {
-            setupReadThread()
-        }
-        readThread!.start()
-    }
-    
+
     public func write(_ data: Data) {
         do {
             log.info("Writing \(data.count) bytes to the unix socket")
-            try socket.write(from: data)
-        } catch let error {
-            log.error("Failed to write payload to unix socket: \(String(describing: error))")
+            let bytes = ByteBuffer(bytes: data)
+            try channel.writeAndFlush(bytes).wait()
+        } catch {
+            log.error("Failed to write payload to unix socket: \(error.localizedDescription)")
         }
+    }
+}
+
+/// Calls the given closure when receiving data from the channel.
+private class ClosureReadHandler: ChannelInboundHandler {
+
+    // MARK: - Types
+
+    typealias InboundIn = ByteBuffer
+
+    // MARK: - Properties
+
+    private let readCallback: (Data) -> Void
+
+    // MARK: - Initializers
+
+    /// Create a handler with a read callback.
+    /// - Parameter readCallback: Closure to call when data is available.
+    init(readCallback: @escaping (Data) -> Void) {
+        self.readCallback = readCallback
+    }
+
+    func channelRead(context: ChannelHandlerContext, data: NIOAny) {
+        var bytes = unwrapInboundIn(data)
+        guard let data = bytes.readData(length: bytes.readableBytes) else {
+            return
+        }
+        readCallback(data)
     }
 }
