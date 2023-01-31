@@ -41,7 +41,7 @@ extension ResolveIdentifierCommand: Runnable {
         // I don't know how promises ensure that they aren't deallocated and thus cancelled before completing (or if they do)
         // so we just ensure here the promise doesn't die before it could potentially complete
         withExtendedLifetime(promise) {
-            let timeout = 20
+            let timeout = 12
             if semaphore.wait(timeout: .now() + .seconds(timeout)) != .success {
                 CLWarn("ResolveIdentifier", "Resolving identifier for \(identifier) timed out in \(timeout) seconds")
             }
