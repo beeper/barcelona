@@ -57,7 +57,7 @@ public func BLHandlePayload(_ payload: IPCPayload, ipcChannel: MautrixIPCChannel
             return
         }
     }
-    
+
     DispatchQueue.main.async {
         runnable.run(payload: payload, ipcChannel: ipcChannel)
     }

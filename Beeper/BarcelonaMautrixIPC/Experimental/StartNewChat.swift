@@ -25,20 +25,31 @@ public struct GUIDResponse: Codable {
 
 extension ResolveIdentifierCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
-        do {
-            let result = try ChatLocator.senderGUID(for: identifier).wait(upTo: .now() + .seconds(20))
+        let semaphore = DispatchSemaphore(value: 0)
+        var retrievedGuid: GUIDResponse? = nil
+
+        let promise = ChatLocator.senderGUID(for: identifier).then { result in
             switch result {
             case .guid(let guid):
-                payload.respond(.guid(.init(guid)), ipcChannel: ipcChannel)
-                return
+                retrievedGuid = .init(guid)
             case .failed(let message):
                 CLWarn("ResolveIdentifier", "Resolving identifier for \(identifier) failed with message: \(message)")
             }
-        } catch {
-            CLWarn("ResolveIdentifier", "Resolving identifier for \(identifier) timed out in 20 seconds")
+            semaphore.signal()
         }
 
-        if IMServiceImpl.smsEnabled() {
+        // I don't know how promises ensure that they aren't deallocated and thus cancelled before completing (or if they do)
+        // so we just ensure here the promise doesn't die before it could potentially complete
+        withExtendedLifetime(promise) {
+            let timeout = 20
+            if semaphore.wait(timeout: .now() + .seconds(timeout)) != .success {
+                CLWarn("ResolveIdentifier", "Resolving identifier for \(identifier) timed out in \(timeout) seconds")
+            }
+        }
+
+        if let retrievedGuid {
+            payload.respond(.guid(retrievedGuid), ipcChannel: ipcChannel)
+        } else if IMServiceImpl.smsEnabled() {
             CLInfo("ResolveIdentifier", "Responding that \(identifier) is available on SMS due to availability of forwarding")
             payload.respond(.guid(.init("SMS;-;\(identifier)")), ipcChannel: ipcChannel)
         } else {

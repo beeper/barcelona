@@ -173,7 +173,7 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
         }
     } else {
         guard destinations.count > 0 else {
-            return
+            return callback([:])
         }
 
         log.info("Requesting ID status from cache for destinations \(destinations.joined(separator: ","), privacy: .auto) on service \(service.idsIdentifier ?? "nil", privacy: .public)")
