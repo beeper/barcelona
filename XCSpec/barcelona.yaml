@@ -17,6 +17,10 @@ targets:
       - package: FeatureFlags
       - package: SwiftCLI
       - package: Sentry
+      - package: SwiftNIO
+        product: NIO
+      - package: SwiftNIO
+        product: NIOFoundationCompat
       - package: Paris
         product: CommunicationsFilter
       - package: Paris
@@ -55,7 +59,7 @@ targets:
   grapple:
     group: Tools
     type: tool
-    platform: [macOS,iOS]
+    platform: [macOS, iOS]
     platformSuffix: -${platform}
     productNameFromSettings: true
     sources:
