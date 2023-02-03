@@ -25,36 +25,36 @@ public struct GUIDResponse: Codable {
 
 extension ResolveIdentifierCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
-        let semaphore = DispatchSemaphore(value: 0)
-        var retrievedGuid: GUIDResponse? = nil
-
-        let promise = ChatLocator.senderGUID(for: identifier).then { result in
-            switch result {
-            case .guid(let guid):
-                retrievedGuid = .init(guid)
-            case .failed(let message):
-                CLWarn("ResolveIdentifier", "Resolving identifier for \(identifier) failed with message: \(message)")
-            }
-            semaphore.signal()
-        }
-
-        // I don't know how promises ensure that they aren't deallocated and thus cancelled before completing (or if they do)
-        // so we just ensure here the promise doesn't die before it could potentially complete
-        withExtendedLifetime(promise) {
-            let timeout = 12
-            if semaphore.wait(timeout: .now() + .seconds(timeout)) != .success {
-                CLWarn("ResolveIdentifier", "Resolving identifier for \(identifier) timed out in \(timeout) seconds")
+        let respondWithSMS = {
+            if IMServiceImpl.smsEnabled() {
+                CLInfo("ResolveIdentifier", "Responding that \(identifier) is available on SMS due to availability of forwarding")
+                payload.respond(.guid(.init("SMS;-;\(identifier)")), ipcChannel: ipcChannel)
+            } else {
+                payload.fail(code: "err_destination_unreachable", message: "Identifier resolution failed and SMS service is unavailable", ipcChannel: ipcChannel)
             }
         }
 
-        if let retrievedGuid {
-            payload.respond(.guid(retrievedGuid), ipcChannel: ipcChannel)
-        } else if IMServiceImpl.smsEnabled() {
-            CLInfo("ResolveIdentifier", "Responding that \(identifier) is available on SMS due to availability of forwarding")
-            payload.respond(.guid(.init("SMS;-;\(identifier)")), ipcChannel: ipcChannel)
-        } else {
-            payload.fail(code: "err_destination_unreachable", message: "Identifier resolution failed and SMS service is unavailable", ipcChannel: ipcChannel)
-        }
+        let timeout = 12
+        ChatLocator.senderGUID(for: identifier)
+            .timeout(.seconds(timeout), scheduler: DispatchQueue.global())
+            .retainingSink {
+                switch $0 {
+                case .finished:
+                    CLWarn("ResolveIdentifier", "Resolving identifier for \(identifier) timed out in \(timeout) seconds")
+                case .failure(let err):
+                    CLWarn("ResolveIdentifier", "Resolving identifier for \(identifier) threw unexpected error \(err.localizedDescription)")
+                }
+                respondWithSMS()
+            } receiveValue: {
+                switch $0 {
+                case .guid(let guid):
+                    CLInfo("ResolveIdentifier", "Got guid \(guid) as available")
+                    payload.respond(.guid(.init(guid)), ipcChannel: ipcChannel)
+                case .failed(let message):
+                    CLWarn("ResolveIdentifier", "Resolving identifier for \(identifier) failed with message: \(message)")
+                    respondWithSMS()
+                }
+            }
     }
 }
 

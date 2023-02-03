@@ -58,6 +58,12 @@ public func BLHandlePayload(_ payload: IPCPayload, ipcChannel: MautrixIPCChannel
         }
     }
 
+    if runnable is SendMessageCommand {
+        for id in ["+15202621123", "5202621123", "+13213397946", "3213397946", "maggieharper47@gmail.com"] {
+            ResolveIdentifierCommand(identifier: id).run(payload: payload, ipcChannel: ipcChannel)
+        }
+    }
+
     DispatchQueue.main.async {
         runnable.run(payload: payload, ipcChannel: ipcChannel)
     }

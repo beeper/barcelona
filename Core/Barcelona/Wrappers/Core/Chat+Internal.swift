@@ -7,18 +7,14 @@
 
 import Foundation
 import IMCore
-import Pwomise
+import Combine
 
 /// APIs for creating a chat!
 public struct ChatLocator {
-    static func handleIsRegisteredForIMessage(_ handle: String) -> Promise<Bool> {
-        Promise { resolve in
-            do {
-                try BLResolveIDStatusForIDs([handle], onService: .iMessage) { result in
-                    resolve(result[handle] == .available)
-                }
-            } catch {
-                resolve(false)
+    static func handleIsRegisteredForIMessage(_ handle: String) -> Future<Bool, Never> {
+        Future { resolve in
+            BLResolveIDStatusForIDs([handle], onService: .iMessage) { result in
+                resolve(.success(result[handle] == .available))
             }
         }
     }
@@ -28,12 +24,12 @@ public struct ChatLocator {
         case failed(String)
     }
     
-    public static func service(for handle: String) -> Promise<ServiceResult> {
+    public static func service(for handle: String) -> AnyPublisher<ServiceResult, Never> {
         if handle.isBusinessID {
             return .success(.service(.iMessage))
         }
         
-        return handleIsRegisteredForIMessage(handle).then { registered in
+        return handleIsRegisteredForIMessage(handle).map { registered in
             if registered {
                 return .service(.iMessage)
             }
@@ -44,7 +40,7 @@ public struct ChatLocator {
                 return .failed("You are not currently capable of using SMS.")
             }
             return .service(.SMS)
-        }
+        }.eraseToAnyPublisher()
     }
     
     public enum SenderGUIDResult {
@@ -52,15 +48,15 @@ public struct ChatLocator {
         case failed(String)
     }
     
-    public static func senderGUID(for handle: String) -> Promise<SenderGUIDResult> {
-        service(for: handle).then { result in
+    public static func senderGUID(for handle: String) -> AnyPublisher<SenderGUIDResult, Never> {
+        service(for: handle).map { result in
             switch result {
             case .service(let service):
                 return .guid(service.rawValue + ";-;" + handle)
             case .failed(let message):
                 return .failed(message)
             }
-        }
+        }.eraseToAnyPublisher()
     }
     
     public enum ChatResult {
@@ -69,7 +65,7 @@ public struct ChatLocator {
         case failed(String)
     }
     
-    public static func chat(for handle: String) -> Promise<ChatResult> {
+    public static func chat(for handle: String) -> AnyPublisher<ChatResult, Never> {
         if let handles = IMHandleRegistrar.sharedInstance().allIMHandles(), !handles.isEmpty {
             let chats = handles.compactMap(IMChatRegistry.shared.existingChat(for:))
             if !chats.isEmpty {
@@ -88,14 +84,15 @@ public struct ChatLocator {
                 }
             }
         }
-        return service(for: handle).then { result in
+
+        return service(for: handle).map { result in
             switch result {
             case .service(let style):
                 return .created(Chat.directMessage(withHandleID: handle, service: style))
             case .failed(let message):
                 return .failed(message)
             }
-        }
+        }.eraseToAnyPublisher()
     }
 }
 
