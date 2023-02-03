@@ -36,7 +36,6 @@ public class UnixSocketMautrixIPCChannel: MautrixIPCInputChannel, MautrixIPCOutp
 
     public func write(_ data: Data) {
         do {
-            log.info("Writing \(data.count) bytes to the unix socket")
             let bytes = ByteBuffer(bytes: data)
             try channel.writeAndFlush(bytes).wait()
         } catch {
