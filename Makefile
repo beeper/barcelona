@@ -23,7 +23,7 @@ init:
 refresh: init
 
 scheme:
-	xcodebuild \
+	env NSUnbufferedIO=YES xcodebuild \
 		-project barcelona.xcodeproj \
 		-scheme "$(SCHEME)" \
 		-parallelizeTargets \
@@ -31,7 +31,7 @@ scheme:
 		-destination "$(DESTINATION)" \
 		-configuration Release \
 		-derivedDataPath $(DERIVED_DIR) \
-		-ONLY_ACTIVE_ARCH=NO | xcpretty
+		-ONLY_ACTIVE_ARCH=NO | xcbeautify --quieter
 
 scheme-macos:
 	$(MAKE) scheme DESTINATION=$(MACOS_DESTINATION) DERIVED_DIR=$(MACOS_DERIVED_DIR)
