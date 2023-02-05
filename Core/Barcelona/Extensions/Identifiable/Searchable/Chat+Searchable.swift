@@ -227,10 +227,6 @@ extension Chat: Searchable {
             return .success([])
         }
         
-        #if DEBUG
-        os_log("Performing chat search with parameters %@", parameters)
-        #endif
-        
         var chats = IMChatRegistry.shared.allChats.filter {
             parameters.test($0)
         }.map(Chat.init(_:))

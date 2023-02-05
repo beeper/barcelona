@@ -7,7 +7,7 @@
 
 import Foundation
 import IMCore
-import Swog
+import Logging
 import Combine
 import BarcelonaDB
 import IMDPersistence
@@ -30,6 +30,9 @@ extension Encodable {
 }
 
 extension IMChat {
+    var log: Logging.Logger {
+        Logger(label: "IMChat")
+    }
     /// Stored instance variable on IMChat
     private var hasRefreshedServiceForSending: Bool {
         get { value(forKey: "_hasRefreshedServiceForSending") as! Bool }
@@ -50,7 +53,7 @@ extension IMChat {
            let messageAccount = serviceStyle.account,
            self.account != messageAccount {
             // We are targeted to iMessage, but we don't really know why. Let's retarget to iMessage and see what IDS thinks.
-            CLInfo("ERChat", "Previous message on service \(serviceStyle.rawValue) appears to have been successful, but my service is \(self.account?.serviceName ?? "nil"). I'm going to try my best to refresh the ID query.")
+            log.info("Previous message on service \(serviceStyle.rawValue) appears to have been successful, but my service is \(self.account?.serviceName ?? "nil"). I'm going to try my best to refresh the ID query.", source: "ERChat")
             _setAccount(messageAccount, locally: true)
         } else if !forceRefresh && hasRefreshedServiceForSending {
             if let lastMessageItem = lastMessage?._imMessageItem, lastMessageItem.serviceStyle == account.service?.id {
@@ -68,7 +71,7 @@ extension IMChat {
         hasRefreshedServiceForSending = false
         refreshServiceForSending()
         let id = self.id, serviceName = account.serviceName ?? "nil"
-        CLInfo("ERChat", "The resolved service for \(id) is currently \(serviceName)")
+        log.info("The resolved service for \(id) is currently \(serviceName)", source: "ERChat")
     }
 }
 
@@ -85,8 +88,9 @@ public extension Chat {
     }
     
     func sendReturningRaw(message createMessage: CreateMessage, from: String? = nil) throws -> IMMessage {
+        let log = Logger(label: "Chat")
         if CBFeatureFlags.useSendingV2, let cbChat = cbChat {
-            CLInfo("MessageSending", "Using CBChat for sending per feature flags")
+            log.info("Using CBChat for sending per feature flags", source: "MessageSending")
             return try cbChat.send(message: createMessage, guid: imChat.guid)
         }
         

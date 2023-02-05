@@ -56,20 +56,21 @@ public func ERRepairAttributedLinkString(_ link: NSAttributedString) -> NSAttrib
 
 import IMDaemonCore
 import Sentry
-import Swog
+import Logging
 
 /// For rich link messages, repairs their attributed string by replacing all IMLinkAttributeName:NSString to IMLinkAttributeName:NSURL
 public func ERRepairIMMessageItem(_ message: IMMessageItem) -> IMMessageItem {
+    let log = Logger(label: "ERRepairIMMessageItem")
     guard message.balloonBundleID == IMBalloonPluginIdentifierRichLinks else {
         return message
     }
     guard let text = message.body, let repaired = ERRepairAttributedLinkString(text) else {
-        CLInfo("ERRepairIMMessage", "Not repairing message %@", message.guid)
+        log.info("Not repairing message \(message.guid)", source: "ERRepairIMMessage")
         return message
     }
     message.body = repaired
     let newMessageItem = IMDMessageStore.sharedInstance().storeMessage(message, forceReplace: true, modifyError: false, modifyFlags: false, flagMask: 0, updateMessageCache: true, calculateUnreadCount: false)
-    CLInfo("ERRepairIMMessage", "Repaired corrupted rich link message with GUID %@", message.guid)
+    log.info("Repaired corrupted rich link message with GUID \(message.guid)", source: "ERRepairIMMessage")
     SentrySDK.capture(message: "Repaired corrupted rich link message") { scope in
         scope.setTag(value: "guid", key: message.guid)
     }

@@ -8,7 +8,7 @@
 import Foundation
 import IMCore
 import IMFoundation
-import Swog
+import Logging
 import Combine
 import BarcelonaDB
 import IMDPersistence
@@ -23,7 +23,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     var messageIDReverseLookup: [String: CBChatIdentifier] = [:]
     private var subscribers: Set<AnyCancellable> = Set()
     
-    private let log = Logger(category: "CBChatRegistry", subsystem: "com.ericrabil.barcelona.CBChatRegistry")
+    private let log = Logger(label: "CBChatRegistry")
     
     override init() {
         super.init()
@@ -36,7 +36,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
                 _ = handle(chat: chat)
             }
         } else {
-            log.warn("Did not receive personMergedChats in setup info")
+            log.warning("Did not receive personMergedChats in setup info")
         }
     }
     
@@ -372,14 +372,14 @@ public extension CBChatRegistry {
                     continue
                 }
                 if self.chats[identifier] === chat {
-                    self.log.warn("Forgetting \(String(describing: identifier))")
+                    self.log.warning("Forgetting \(String(describing: identifier))")
                     self.chats[identifier] = nil
                 }
             }
             for identifier in newIdentifiers {
                 if let chat = self.chats[identifier] {
                     if chat !== chat {
-                        self.log.warn("Encountered two different CBChats with the same identifier \(String(describing: identifier))")
+                        self.log.warning("Encountered two different CBChats with the same identifier \(String(describing: identifier))")
                     }
                     continue
                 }
@@ -394,7 +394,7 @@ public extension CBChatRegistry {
 public extension CBChatRegistry {
     func handle(chat: [AnyHashable: Any], item: IMItem) -> Bool {
         guard let identifier = handle(chat: chat).1 else {
-            log.warn("cant handle message \(item) via chat dictionary: couldnt find a chat for it")
+            log.warning("cant handle message \(item) via chat dictionary: couldnt find a chat for it")
             return false
         }
         handle(chat: identifier, item: item)

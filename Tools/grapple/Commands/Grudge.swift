@@ -8,7 +8,7 @@
 import Foundation
 import SwiftCLI
 import Yammit
-import Swog
+import Logging
 
 struct GrudgeConfiguration: Codable, Configuration {
     static var path: String = ""

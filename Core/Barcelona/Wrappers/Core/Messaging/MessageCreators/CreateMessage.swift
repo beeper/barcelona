@@ -9,7 +9,7 @@
 import Foundation
 import IMSharedUtilities
 import IMCore
-import Swog
+import Logging
 
 private func additionalFlags(forCreation creation: CreateMessage) -> IMMessageFlags {
     if let _ = creation.ballonBundleID { return .hasDDResults }

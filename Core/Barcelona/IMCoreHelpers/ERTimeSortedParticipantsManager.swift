@@ -11,8 +11,9 @@ import IMCore
 import os.log
 import BarcelonaDB
 import IMSharedUtilities
+import Logging
 
-private let ManagerLog = OSLog(subsystem: "CoreBarcelona", category: "ParticipantsManager")
+private let log = Logger(label: "ParticipantsManager")
 
 public struct ParticipantSortRule: Equatable, Hashable {
     var handleID: String
@@ -142,9 +143,9 @@ public class ERTimeSortedParticipantsManager {
     
     private func ingest(bootstrapNotification notification: Notification) {
         if let chat = notification.chat {
-            os_log("Recomputing sorted participants with chat ID %@ per notification %@", log: ManagerLog, chat.id, notification.name.rawValue)
+            log.info("Recomputing sorted participants with chat ID \(chat.id) per notification \(notification.name.rawValue)")
             self.bootstrap(chat: chat).then {
-                os_log("Finished recomputing sorted participants with chat ID %@ per notification %@", log: ManagerLog, chat.id, notification.name.rawValue)
+                log.info("Finished recomputing sorted participants with chat ID \(chat.id) per notification \(notification.name.rawValue)")
             }
         }
     }

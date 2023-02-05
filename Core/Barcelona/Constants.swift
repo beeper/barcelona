@@ -10,13 +10,6 @@ import Foundation
 
 public let HandleQueue = DispatchQueue.init(label: "HandleIDS")
 
-internal struct Logging {
-    static let Registry = Logger(category: "Registry")
-    static let Database = Logger(category: "Database")
-    static let Ingestor = Logger(category: "BLIndeterminateIngestor")
-    static let Shared = Logger(category: "Barcelona")
-}
-
 /**
  Imma be real witchu idk why this is the attachment string but IMCore uses this
  */

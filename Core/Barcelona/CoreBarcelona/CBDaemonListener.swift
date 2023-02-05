@@ -13,14 +13,14 @@
 import Foundation
 import IMCore
 import Swexy
-import Swog
+import Logging
 import CommunicationsFilter
 @_spi(synchronousQueries) import BarcelonaDB
 import IMDaemonCore
 import IMSharedUtilities
 import IMFoundation
 
-private let log = Logger(category: "ERDaemonListener")
+private let log = Logger(label: "ERDaemonListener")
 
 // set to false and the logging conditions (probably) wont even compile, but they will be disabled
 #if DEBUG
@@ -425,7 +425,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
     private var chatIdentifierCache = OrderedDictionary<String, String>(maximumCapacity: 100)
     
     private func disconnectedFromDaemon() {
-        log.warn("Disconnected from daemon, reconnecting.")
+        log.warning("Disconnected from daemon, reconnecting.")
         
         IMDaemonController.shared().connectToDaemon(withLaunch: true, capabilities: FZListenerCapabilities.defaults_, blockUntilConnected: true)
         IMDaemonController.shared().listener.addHandler(self)
@@ -686,7 +686,7 @@ private extension CBDaemonListener {
     
     func process(sentMessage message: IMMessageItem, sentTime: Double) {
         guard let chatID = chatIdentifierCache[message.id] ?? DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id) else {
-            log.fault("Failed to resolve chat identifier for sent message \(message.id)")
+            log.error("Failed to resolve chat identifier for sent message \(message.id)")
             return
         }
         messageStatusPipeline.send(CBMessageStatusChange(type: .sent, service: message.service, time: sentTime, sender: nil, fromMe: true, chatID: chatID, messageID: message.id, context: .init(message: message)))
@@ -698,21 +698,21 @@ private extension CBDaemonListener {
         switch failedMessage.errorCode {
         case .remoteUserDoesNotExist:
             guard failedMessage.serviceStyle == .iMessage else {
-                log.info("Message %@ failed with remoteUserDoesNotExist but it is not on iMessage. I can't fix this.", failedMessage.id)
+                log.info("Message \(failedMessage.id) failed with remoteUserDoesNotExist but it is not on iMessage. I can't fix this.")
                 return false
             }
             guard let chat = chat, chat.participantHandleIDs().allSatisfy ({ $0.isPhoneNumber || $0.isEmail }) else {
-                log.info("Message %@ failed with remoteUserDoesNotExist but I could not guarantee that the chat is downgradeable. I won't fix this.", failedMessage.id)
+                log.info("Message \(failedMessage.id) failed with remoteUserDoesNotExist but I could not guarantee that the chat is downgradeable. I won't fix this.")
                 return false
             }
-            log.info("Downgrading failed message %@ to SMS", failedMessage.id)
+            log.info("Downgrading failed message \(failedMessage.id) to SMS")
             if chat.participants.count == 1 {
                 let manualDowngradesCount = chat._consecutiveDowngradeAttempts(viaManualDowngrades: true) as? Int ?? 0
                 if manualDowngradesCount > 5 {
-                    log.info("Chat %@ has had five consecutive downgrade attempts, persisting the downgrade.", chatIdentifier)
+                    log.info("Chat \(chatIdentifier) has had five consecutive downgrade attempts, persisting the downgrade.")
                     chat._updateDowngradeState(true, checkAgainInterval: 10)
                 } else {
-                    log.info("Incrementing downgrade counter for chat %@", chatIdentifier)
+                    log.info("Incrementing downgrade counter for chat \(chatIdentifier)")
                     chat._setAndIncrementDowngradeMarkers(forManual: true)
                 }
             }
@@ -732,7 +732,7 @@ private extension CBDaemonListener {
     
     func process(newMessage: IMItem, chatIdentifier: String) {
         if !preflight(message: newMessage) {
-            log.warn("withholding message \(newMessage.guid): preflight failure")
+            log.warning("withholding message \(newMessage.guid): preflight failure")
             return
         }
         
@@ -916,7 +916,7 @@ internal extension CBDaemonListener {
         guard CBFeatureFlags.useSMSReadBuffer, !smsReadBuffer.contains(guid) else {
             return
         }
-        CLDebug("ReadState", "Adding \(guid) to sms read buffer")
+        log.debug("Adding \(guid) to sms read buffer", source: "ReadState")
         smsReadBuffer.append(guid)
         if smsReadBuffer.count > smsReadBufferCapacity {
             smsReadBuffer = smsReadBuffer.suffix(smsReadBufferCapacity)

@@ -9,7 +9,7 @@
 import Foundation
 import IMCore
 import IMSharedUtilities
-import Swog
+import Logging
 
 public protocol CreateMessageBase: Codable {
     var threadIdentifier: String? { get set }

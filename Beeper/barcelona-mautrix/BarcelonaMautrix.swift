@@ -12,8 +12,9 @@ import BarcelonaMautrixIPC
 import IMCore
 import SwiftCLI
 import Sentry
+import Logging
 
-private let log = Logger(category: "ERBarcelonaManager", subsystem: "com.beeper.imc.barcelona-mautrix")
+private let log = Logger(label: "ERBarcelonaManager")
 
 @main
 class BarcelonaMautrix {
@@ -29,12 +30,12 @@ class BarcelonaMautrix {
     
     static func configureSentry() {
         if let configurator = IMCSharedSentryConfigurator() {
-            CLInfo("CoreSentry", "Setting up CoreSentry-flavored Sentry integration")
+            log.info("Setting up CoreSentry-flavored Sentry integration", source: "CoreSentry")
             configurator.productName = "barcelona-mautrix"
             // even if CoreSentry is a release build we might be a debug build
             configurator.debug = ProcessInfo.processInfo.environment.keys.contains("DEBUG_SENTRY")
             if !configurator.knownProduct {
-                CLWarn("CoreSentry", "CoreSentry has no DSN for us!")
+                log.warning("CoreSentry has no DSN for us!", source: "CoreSentry")
             }
             configurator.startSentry()
             if ProcessInfo.processInfo.arguments.count > 1, ProcessInfo.processInfo.arguments[1] == "sentry" {
@@ -43,12 +44,12 @@ class BarcelonaMautrix {
                 cli.goAndExit()
             }
         } else if let dsn = ProcessInfo.processInfo.environment["SENTRY_DSN"] {
-            CLInfo("CoreSentry", "Setting up fallback sentry using DSN \(dsn)")
+            log.info("Setting up fallback sentry using DSN \(dsn)", source: "CoreSentry")
             SentrySDK.start { options in
                 options.dsn = dsn
             }
         } else {
-            CLInfo("CoreSentry", "Starting without setting up Sentry")
+            log.info("Starting without setting up Sentry", source: "CoreSentry")
         }
     }
     
@@ -66,12 +67,8 @@ class BarcelonaMautrix {
         if let unixSocketPath = getUnixSocketPath() {
             let unixMautrixIPCChannel = UnixSocketMautrixIPCChannel(unixSocketPath)
             mautrixIPCChannel = MautrixIPCChannel(inputHandle: unixMautrixIPCChannel, outputHandle: unixMautrixIPCChannel)
-            
-            LoggingDrivers = [OSLogDriver.shared, ConsoleDriver.shared]
         } else {
             mautrixIPCChannel = MautrixIPCChannel(inputHandle: FileHandle.standardInput, outputHandle: FileHandle.standardOutput)
-            
-            LoggingDrivers = [BLMautrixSTDOutDriver(ipcChannel: mautrixIPCChannel), OSLogDriver.shared]
         }
         
         let barcelonaMautrix = BarcelonaMautrix(mautrixIPCChannel)
@@ -95,7 +92,7 @@ class BarcelonaMautrix {
         log.info("Bootstrapping")
         
         BarcelonaManager.shared.bootstrap().catch { error in
-            log.fault("fatal error while setting up barcelona: \(String(describing: error))")
+            log.error("fatal error while setting up barcelona: \(String(describing: error))")
             exit(197)
         }.then { success in
             guard success else {

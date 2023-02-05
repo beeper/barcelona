@@ -7,7 +7,7 @@
 
 import Foundation
 import Barcelona
-import Swog
+import Logging
 
 struct BlockScheduler {
     var block: () -> ()
@@ -87,7 +87,7 @@ class AutomatedMessageSender: GrappleDebugger {
         }
     }
     
-    let log = Logger(category: "Sender")
+    let log = Logger(label: "Sender")
     
     var configuration = Configuration()
     lazy var scheduler = BlockScheduler(block: sendNext)
@@ -127,7 +127,7 @@ class AutomatedMessageSender: GrappleDebugger {
         if configuration.trackNonAutomated {
             nonAutomatedPipeline = CBDaemonListener.shared.messagePipeline.pipe { message in
                 if message.fromMe && !self.sentMessages.keys.contains(message.id) {
-                    self.log.warn("Got an untracked message fromMe:")
+                    self.log.warning("Got an untracked message fromMe:")
                     message.printOut()
                 }
             }
@@ -152,7 +152,7 @@ class AutomatedMessageSender: GrappleDebugger {
         
         for (messageID, messageData) in sentMessages {
             guard let statusChanges = statusChanges[messageID] else {
-                log.warn("[\(messageData.timestamp)] [\(messageID)] no statuses! text=\(messageData.text)")
+                log.warning("[\(messageData.timestamp)] [\(messageID)] no statuses! text=\(messageData.text)")
                 continue
             }
             
@@ -183,7 +183,7 @@ class AutomatedMessageSender: GrappleDebugger {
                         sentTapbacks.append(message.id)
                         
                     } catch {
-                        log.fault("Failed to send tapback to \(statusChange.messageID): \((error as NSError).debugDescription)")
+                        log.error("Failed to send tapback to \(statusChange.messageID): \((error as NSError).debugDescription)")
                     }
                 }
             }
@@ -222,7 +222,7 @@ class AutomatedMessageSender: GrappleDebugger {
                 return
             }
         } catch {
-            log.fault("Failed to send text{ \(text) }: \((error as NSError).debugDescription)")
+            log.error("Failed to send text{ \(text) }: \((error as NSError).debugDescription)")
         }
         
         scheduler.schedule(milliseconds: configuration.delay)

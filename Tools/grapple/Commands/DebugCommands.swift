@@ -9,7 +9,7 @@
 import Foundation
 @_spi(EncodingBoxInternals) import Barcelona
 import SwiftCLI
-import OSLog
+import Logging
 import IMDPersistence
 import SwiftyTextTable
 import IMCore
@@ -112,14 +112,14 @@ class DebugCommands: CommandGroup {
                 if self.logAsMautrix {
                     switch event {
                     case .message(let message):
-                        CLInfo("BLEvents", "\(json(BLMessage(message: message)))")
+                        log.info("\(json(BLMessage(message: message)))", source: "BLEvents")
                         return
                     default:
                         break
                     }
                 }
                 
-                CLInfo("BLEvents", "\(json(event))")
+                log.info("\(json(event))", source: "BLEvents")
             }
         }
     }

@@ -9,9 +9,9 @@
 import Foundation
 import JavaScriptCore
 import Barcelona
-import OSLog
+import Logging
 import SwiftCLI
-import Swog
+import Logging
 import FeatureFlags
 @_spi(featureFlags) @_spi(scratchbox) import Barcelona
 import IMCore
@@ -66,7 +66,7 @@ class Grapple {
     
     static func main() throws {
         if ProcessInfo.processInfo.environment["RAVIOLI"] == "RAVIOLI" || isDebugBuild {
-            CLInfo("Grapple", "Forcing internal install for enhanced logging")
+            log.info("Forcing internal install for enhanced logging", source: "Grapple")
             func ERForceInternalInstall() -> Bool {
                 let isInternalInstall_imp = imp_implementationWithBlock({ _ in
                     true

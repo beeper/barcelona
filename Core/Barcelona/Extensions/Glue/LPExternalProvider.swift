@@ -10,7 +10,7 @@ import IMCore
 import LinkPresentation
 import LinkPresentationPrivate
 import IMSharedUtilities
-import Swog
+import Logging
 
 internal extension IMBalloonPluginManager {
     var richLinkPlugin: IMBalloonPlugin? {
@@ -211,15 +211,16 @@ public extension IMMessage {
     }
     
     func provideLinkMetadata(_ metadata: @autoclosure () -> LPLinkMetadata) throws -> () -> () {
+        let log = Logger(label: "IMMessage")
         let payload = IMPluginPayload()
         payload.messageGUID = guid
         payload.pluginBundleID = IMBalloonPluginIdentifierRichLinks
         guard let dataSource = IMBalloonPluginManager.sharedInstance().dataSource(for: payload) else {
-            CLWarn("LPLink", "Plugin manager returned no data source for rich link plugin payload")
+            log.warning("Plugin manager returned no data source for rich link plugin payload", source: "LPLink")
             throw IMBalloonPluginDataSource.LPBalloonPluginError.unsupported
         }
         guard let richLinkDataSource = dataSource.richLinkDataSource else {
-            CLWarn("LPLink", "Rich link data sources have changed, fixme!")
+            log.warning("Rich link data sources have changed, fixme!", source: "LPLink")
             throw IMBalloonPluginDataSource.LPBalloonPluginError.unsupported
         }
         let metadata = metadata()
@@ -228,22 +229,22 @@ public extension IMMessage {
         richLinkDataSource.createEmptyMetadataWithOriginalURL()
         richLinkDataSource.richLink.needsCompleteFetch = false
         richLinkDataSource.richLink.needsSubresourceFetch = false
-        CLInfo("LPLink", "Initialized a RichLinkDataSource for message \(self.guid) for URL \(metadata.originalURL?.absoluteString ?? "nil")")
-        CLInfo("LPLink", "RichLinkDataSource for message %@ willEnterShelf", guid)
+        log.info("Initialized a RichLinkDataSource for message \(self.guid) for URL \(metadata.originalURL?.absoluteString ?? "nil")", source: "LPLink")
+        log.info("RichLinkDataSource for message \(guid) willEnterShelf", source: "LPLink")
         dataSource.payloadWillEnterShelf()
-        CLInfo("LPLink", "RichLinkDataSource for message %@ willSendFromShelf", guid)
+        log.info("RichLinkDataSource for message \(guid) willSendFromShelf", source: "LPLink")
         dataSource.payloadWillSendFromShelf()
         payloadData = dataSource.messagePayloadDataForSending
-        CLInfo("LPLink", "RichLinkDataSource for message %@ placeholder payload is %d", guid, payloadData?.count ?? 0)
+        log.info("RichLinkDataSource for message \(guid) placeholder payload is \(payloadData?.count ?? 0)", source: "LPLink")
         dataSource.payloadInShelf = false
         return {
-            CLInfo("LPLink", "RichLinkDataSource for message %@ was sent. Time for more!", self.guid)
+            log.info("RichLinkDataSource for message \(self.guid) was sent. Time for more!", source: "LPLink")
 
             richLinkDataSource.updateRichLink(with: metadata)
             richLinkDataSource.dispatchMetadataUpdate()
             var attachments: NSArray?
             let data = richLinkDataSource.richLink.dataRepresentation(withOutOfLineAttachments: &attachments)
-            CLInfo("LPLink", "RichLinkDataSource for message %@ sending packaged payload with size %d and attachment count %d", self.guid, data.count, attachments?.count ?? 0)
+            log.info("RichLinkDataSource for message \(self.guid) sending packaged payload with size \(data.count) and attachment count \(attachments?.count ?? 0)", source: "LPLink")
             IMDaemonController.sharedInstance().sendBalloonPayload(data, attachments: attachments as! [Any]?, withMessageGUID: self.guid, bundleID: IMBalloonPluginIdentifierRichLinks)
         }
     }

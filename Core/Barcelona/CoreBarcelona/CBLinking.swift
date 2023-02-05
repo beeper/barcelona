@@ -8,9 +8,9 @@
 //
 
 import Foundation
-import Swog
+import Logging
 
-private let log = Logger(category: "CBLinking")
+private let log = Logger(label: "CBLinking")
 
 /// A constraint that will either qualify or disqualify a symbol from being selected during reconciliation
 public enum CBLinkerConstraint: Hashable, Equatable, CustomDebugStringConvertible {
@@ -154,7 +154,7 @@ private func cast<T>(_ pointer: UnsafeMutableRawPointer) -> T {
 /// If no symbol is safe to use, or the target cannot be opened, nil is returned.
 public func CBWeakLink<T>(against target: CBLinkingTarget, options: [LinkingOption]) -> T? {
     guard let handle = dlopen(target.path, RTLD_LAZY) else {
-        log.warn("Failed to open CBLinkingTarget at path \(target.path)")
+        log.warning("Failed to open CBLinkingTarget at path \(target.path)")
         return nil
     }
     
@@ -170,7 +170,7 @@ public func CBWeakLink<T>(against target: CBLinkingTarget, options: [LinkingOpti
         }
     }
     
-    log.warn("No viable linking option was found in target \(target.path) from options \(options.map(\.debugDescription).joined(separator: ", "))")
+    log.warning("No viable linking option was found in target \(target.path) from options \(options.map(\.debugDescription).joined(separator: ", "))")
     
     return nil
 }

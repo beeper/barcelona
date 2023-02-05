@@ -8,7 +8,9 @@
 
 import Foundation
 import IMCore
-import os.log
+import Logging
+
+private let log = Logger(label: "PhantomChatItem")
 
 public struct PhantomChatItem: ChatItem, Hashable {
     public static let ingestionClasses: [NSObject.Type] = []
@@ -40,7 +42,7 @@ public struct PhantomChatItem: ChatItem, Hashable {
             break
         }
         
-        os_log("PhantomChatItem created with unknown item: %@", log: .default, type: .error, className)
+        log.error("PhantomChatItem created with unknown item: \(className)")
     }
     
     public var id: String

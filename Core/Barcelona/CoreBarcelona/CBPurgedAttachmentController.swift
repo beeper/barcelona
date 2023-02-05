@@ -13,7 +13,7 @@ import IMFoundation
 import IMDPersistence
 import IMDaemonCore
 import IMCore
-import Swog
+import Logging
 import Pwomise
 
 public protocol CBPurgedAttachmentControllerDelegate {
@@ -45,13 +45,15 @@ private extension IMFileTransfer {
     }
 }
 
+
 public extension Notification {
     func decodeObject<P>(to: P.Type) -> P? {
+        let log = Logger(label: "Notifications")
         guard let object = object else {
             return nil
         }
         guard let object = object as? P else {
-            CLFault("Notifications", "Notified about \(name.rawValue) but the object was \(String(describing: type(of: object))) instead of \(String(describing: P.self))")
+            log.error("Notified about \(name.rawValue) but the object was \(String(describing: type(of: object))) instead of \(String(describing: P.self))", source: "Notifications")
             return nil
         }
         return object
@@ -72,7 +74,7 @@ public class CBFileTransferCenter {
     
     public private(set) var transfers: [String: IMFileTransfer] = [:]
     
-    private let log = Logger(category: "FileTransfers")
+    private let log = Logger(label: "FileTransfers")
     
     private func transferForID(_ id: String) -> IMFileTransfer? {
         if let transfer = transfers[id] {
@@ -91,9 +93,9 @@ public class CBFileTransferCenter {
         Promise { resolve in
             if !transfer.isTrulyFinished {
                 let timer = DispatchSource.makeTimerSource(flags: .strict, queue: queue)
-                timer.setEventHandler {
+                timer.setEventHandler { [unowned self] in
                     if transfer.isTrulyFinished {
-                        CLInfo("CBFileTransferCenter", "Transfer \(transfer.guid ?? "nil") is truly finished!")
+                        log.info("Transfer \(transfer.guid ?? "nil") is truly finished!", source: "CBFileTransferCenter")
                         resolve(())
                         timer.cancel()
                     } else {
@@ -130,7 +132,7 @@ public class CBFileTransferCenter {
             return
         }
         guard let guid = transfer.guid else {
-            log.warn("Notified that a transfer was created but the transfer has no GUID.")
+            log.warning("Notified that a transfer was created but the transfer has no GUID.")
             return
         }
         transfers[guid] = transfer
@@ -144,7 +146,7 @@ public class CBFileTransferCenter {
             return
         }
         guard let guid = transfer.guid else {
-            log.warn("Notified that a transfer was updated but the transfer has no GUID.")
+            log.warning("Notified that a transfer was updated but the transfer has no GUID.")
             return
         }
         transfers[guid] = transfer
@@ -156,7 +158,7 @@ public class CBFileTransferCenter {
     
     private func transferFinished(_ transfer: IMFileTransfer) {
         guard let transferGUID = transfer.guid else {
-            log.warn("Witnessed transferFinished for a transfer with no GUID")
+            log.warning("Witnessed transferFinished for a transfer with no GUID")
             return
         }
         transfers[transferGUID] = transfer
@@ -193,10 +195,15 @@ public class CBFileTransferCenter {
 }
 
 public extension IMFileTransfer {
+
+    var log: Logging.Logger {
+        Logger(label: "IMFileTransfer")
+    }
+
     var inSandboxedLocation: Bool {
         localPath.hasPrefix("/var/folders")
     }
-    
+
     var isTrulyFinished: Bool {
         isFinished && existsAtLocalPath && !inSandboxedLocation
     }
@@ -209,7 +216,7 @@ public extension IMFileTransfer {
         switch state {
         case .finished:
             if inSandboxedLocation {
-                CLDebug("IMFileTransfer", "Waiting for \(self.guid ?? "nil") to move to the final attachments folder")
+                log.debug("Waiting for \(self.guid ?? "nil") to move to the final attachments folder", source: "IMFileTransfer")
                 return nil
             }
             return .success(())
@@ -224,17 +231,17 @@ public extension IMFileTransfer {
     
     func completionPromise() -> Promise<Void> {
         Promise<Void> { resolve, reject in
-            NotificationCenter.default.addObserver(forName: .IMFileTransferUpdated, object: nil, queue: .main) { notification, unsubscribe in
+            NotificationCenter.default.addObserver(forName: .IMFileTransferUpdated, object: nil, queue: .main) { [unowned self] notification, unsubscribe in
                 guard let object = notification.object as? IMFileTransfer, let guid = object.guid, object.guid == self.guid else {
                     return
                 }
                 
-                CLDebug("IMFileTransfer", "transfer \(guid) moved to state \(object.state)")
+                log.debug("transfer \(guid) moved to state \(object.state)", source: "IMFileTransfer")
                 
                 switch object.state {
                 case .finished:
                     if object.inSandboxedLocation {
-                        CLDebug("IMFileTransfer", "Waiting for \(guid) to move to the final attachments folder")
+                        log.debug("Waiting for \(guid) to move to the final attachments folder", source: "IMFileTransfer")
                         return
                     }
                     unsubscribe()
@@ -261,7 +268,7 @@ public class CBPurgedAttachmentController {
     public var enabled: Bool = false
     public var delegate: CBPurgedAttachmentControllerDelegate?
     
-    private let log = Logger(category: "PurgedAttachments")
+    private let log = Logger(label: "PurgedAttachments")
     private var processingTransfers: [String: Promise<Void>] = [:] // used to mux together purged transfers, to prevent a race in which two operations are both fetching a transfer
     
     public func process(transferIDs: [String]) -> Promise<Void> {
@@ -290,11 +297,11 @@ public class CBPurgedAttachmentController {
             return .success(())
         }
         
-        log("fetching \(transfers.count) guids from cloudkit")
+        log.info("fetching \(transfers.count) guids from cloudkit")
         
         return Promise.all(supplemented + transfers.map { transfer in
             guard let guid = transfer.guid else {
-                log.fault("Transfers were filtered out to only the ones with GUIDs, but encountered a transfer without one.")
+                log.error("Transfers were filtered out to only the ones with GUIDs, but encountered a transfer without one.")
                 return Promise.success(())
             }
             
@@ -321,10 +328,10 @@ public class CBPurgedAttachmentController {
             case .timedOut:
                 let unavailableTransfers = transfers.filter { !$0.isTrulyFinished }
                 if unavailableTransfers.isEmpty {
-                    self.log.fault("File transfer completion promise never fired, but all attachments seem to have finished.")
+                    self.log.error("File transfer completion promise never fired, but all attachments seem to have finished.")
                 } else {
                     let transferIDS = unavailableTransfers.map(\.guid)
-                    self.log.warn("Continuing message processing despite unsuccessful attachment loading! The following transfers are incomplete/unavailable: \(transferIDS)")
+                    self.log.warning("Continuing message processing despite unsuccessful attachment loading! The following transfers are incomplete/unavailable: \(transferIDS)")
                 }
             default:
                 break

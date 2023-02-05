@@ -11,8 +11,9 @@ import IMDPersistence
 import BarcelonaDB
 import IMCore
 import IMSharedUtilities
+import Logging
 
-private let IMDLog = Logger(category: "IMDPersistenceQueries")
+private let log = Logger(label: "IMDPersistenceQueries")
 
 #if DEBUG
 private var IMDWithinBlock = false
@@ -20,7 +21,7 @@ private var IMDWithinBlock = false
 private let IMDQueue: DispatchQueue = {
     atexit {
         if IMDWithinBlock {
-            IMDLog.warn("IMDPersistence tried to exit! Let's talk about that.")
+            log.warning("IMDPersistence tried to exit! Let's talk about that.")
         }
     }
     
@@ -57,21 +58,15 @@ private func BLCreateIMItemFromIMDMessageRecordRefs(_ refs: NSArray) -> [IMItem]
     }
     
     #if DEBUG
-    let operation = IMDLog.operation(named: "ERCreateIMItemFromIMDMessageRecordRefs").begin("converting %ld refs", refs.count)
+    log.debug("converting \(refs.count) refs")
     #endif
     
     if refs.count == 0 {
         #if DEBUG
-        operation.end("early-exit, zero refs")
+        log.debug("early-exit, zero refs")
         #endif
         return []
     }
-    
-    #if DEBUG
-    defer {
-        operation.end()
-    }
-    #endif
     
     return refs.compactMap {
         withinIMDQueue(IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve_imp($0, nil, false, nil))?.takeRetainedValue()
@@ -82,27 +77,26 @@ private func BLCreateIMItemFromIMDMessageRecordRefs(_ refs: NSArray) -> [IMItem]
 /// - Parameter guids: guids of the messages to load
 /// - Returns: an array of the IMDMessageRecordRefs
 private func BLLoadIMDMessageRecordRefsWithGUIDs(_ guids: [String]) -> NSArray {
-    let operation = IMDLog.operation(named: "ERLoadIMDMessageRecordRefsWithGUIDs")
     #if DEBUG
-    operation.begin("loading %ld guids", guids.count)
+    log.debug("loading \(guids.count) guids")
     #endif
     
     if guids.count == 0 {
         #if DEBUG
-        operation.end("early-exit: 0 guids provided")
+        log.debug("early-exit: 0 guids provided")
         #endif
         return []
     }
     
     guard let results = withinIMDQueue(IMDMessageRecordCopyMessagesForGUIDs(guids as CFArray)) else {
         #if DEBUG
-        operation.end("could not copy messages from IMDPersistance. guids: %@", guids)
+        log.debug("could not copy messages from IMDPersistance. guids: \(guids)")
         #endif
         return []
     }
     
     #if DEBUG
-    operation.end("loaded %ld guids", guids.count)
+    log.debug("loaded \(guids.count) guids")
     #endif
     
     return results as NSArray
@@ -111,12 +105,12 @@ private func BLLoadIMDMessageRecordRefsWithGUIDs(_ guids: [String]) -> NSArray {
 // MARK: - Helpers
 private func ERCreateIMMessageFromIMItem(_ items: [IMItem]) -> [IMMessage] {
     #if DEBUG
-    let operation = IMDLog.operation(named: "ERConvertIMDMessageRecordRefsToIMMessage").begin("converting %ld IMItems to IMMessage", items.count)
+    log.debug("converting \(items.count) IMItems to IMMessage")
     #endif
     
     guard items.count > 0 else {
         #if DEBUG
-        operation.end("early-exit: empty array passed for conversion")
+        log.debug("early-exit: empty array passed for conversion")
         #endif
         return []
     }
@@ -127,7 +121,7 @@ private func ERCreateIMMessageFromIMItem(_ items: [IMItem]) -> [IMMessage] {
     
     guard items.count > 0 else {
         #if DEBUG
-        operation.end("early-exit: no IMMessageItem found")
+        log.debug("early-exit: no IMMessageItem found")
         #endif
         return []
     }
@@ -137,7 +131,7 @@ private func ERCreateIMMessageFromIMItem(_ items: [IMItem]) -> [IMMessage] {
     }
     
     #if DEBUG
-    operation.end("loaded %ld IMMessages from %ld items", messages.count, items.count)
+    log.debug("loaded \(messages.count) IMMessages from \(items.count) items")
     #endif
     
     return messages
@@ -166,8 +160,7 @@ private func BLIngestIMDMessageRecordRefs(_ refs: NSArray, in chat: String? = ni
 
 internal func ERResolveGUIDsForChats(withChatIdentifiers chatIdentifiers: [String], afterDate: Date? = nil, beforeDate: Date? = nil, afterGUID: String? = nil, beforeGUID: String? = nil, limit: Int? = nil) -> Promise<[(messageID: String, chatID: String)]> {
     #if DEBUG
-    let operation = IMDLog.operation(named: "ERResolveGUIDsForChat")
-    operation.begin("Resolving GUIDs for chat %@ before time %@ before guid %@ limit %@", chatIdentifiers, (beforeDate?.timeIntervalSince1970 ?? 0).description, beforeGUID ?? "(nil)", (limit ?? -1).description)
+    log.debug("Resolving GUIDs for chat \(chatIdentifiers) before time \((beforeDate?.timeIntervalSince1970 ?? 0).description) before guid \( beforeGUID ?? "(nil)") limit \((limit ?? -1).description)")
     #endif
     
     let result = DBReader.shared.newestMessageGUIDs(forChatIdentifiers: chatIdentifiers, beforeDate: beforeDate, afterDate: afterDate, beforeMessageGUID: beforeGUID, afterMessageGUID: afterGUID, limit: limit)
@@ -175,9 +168,9 @@ internal func ERResolveGUIDsForChats(withChatIdentifiers chatIdentifiers: [Strin
     result.observeAlways { result in
         switch result {
         case .success(let GUIDs):
-            operation.end("Got %ld GUIDs", GUIDs.count)
+            log.debug("Got \(GUIDs.count) GUIDs")
         case .failure(let error):
-            operation.end("Failed to load newest GUIDs: %@", error as NSError)
+            log.debug("Failed to load newest GUIDs: \(error as NSError)")
         }
     }
     #endif

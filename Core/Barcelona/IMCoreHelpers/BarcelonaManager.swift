@@ -9,12 +9,12 @@
 import Foundation
 import InterposeKit
 import BarcelonaFoundation
-import OSLog
+import Logging
 import IMCore
 import IMDPersistence
 import IMSharedUtilities
 
-private let log = Logger(category: "BarcelonaManager")
+private let log = Logger(label: "BarcelonaManager")
 
 public let BLListenerIdentifier = "com.ericrabil.imessage-rest"
 public let BLIsSimulation = IMCoreSimulatedEnvironmentEnabled()
@@ -53,7 +53,7 @@ func BLSwizzleDaemonController() -> Bool {
         
         return true
     } catch {
-        log.fault("failed to swizzle daemon controller: %@", String(describing: error))
+        log.error("failed to swizzle daemon controller: \(String(describing: error))")
         return false
     }
 }
@@ -62,19 +62,19 @@ public func BLSetup() -> Bool {
     do {
         try HookManager.shared.apply()
     } catch {
-        log.fault("Failed to apply hooks: %@", String(describing: error))
+        log.error("Failed to apply hooks: \(String(describing: error))")
         return false
     }
     
     let controller = IMDaemonController.sharedInstance()
     controller.listener.addHandler(CBDaemonListener.shared)
     
-    log("Connecting to daemon...")
+    log.info("Connecting to daemon...")
     
     controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
     controller.blockUntilConnected()
     
-    log("Connected.")
+    log.info("Connected.")
     
     ifDebugBuild {
         if CBFeatureFlags.scratchbox && !_scratchboxIsEmpty {
@@ -93,7 +93,7 @@ public func BLTeardown() {
     let controller = IMDaemonController.sharedInstance()
     controller.listener.removeHandler(CBDaemonListener.shared)
     
-    log("Disconnecting from daemon...")
+    log.info("Disconnecting from daemon...")
     
     controller.disconnectFromDaemon()
 }
@@ -114,7 +114,7 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
     do {
         try HookManager.shared.apply()
     } catch {
-        log.fault("Failed to apply hooks: %@", String(describing: error))
+        log.error("Failed to apply hooks: \(String(describing: error))")
         return false
     }
     
@@ -127,10 +127,10 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
     _ = CBChatRegistry.shared
     
     RunLoop.main.schedule {
-        let operation = log.operation(named: "daemon-connect").begin("Connecting to daemon...")
+        log.info("Connecting to daemon...")
         controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
         controller.blockUntilConnected()
-        operation.end("Connected to daemon.")
+        log.info("Connected to daemon.")
         
         #if DEBUG
         log.debug("Set up IMContactStore. Loading correlation controller...")

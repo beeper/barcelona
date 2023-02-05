@@ -11,8 +11,9 @@ import IMSharedUtilities
 import BarcelonaDB
 import IMCore
 import IMFoundation
+import Logging
 
-private let log = Logger(category: "Chat")
+private let log = Logger(label: "Chat")
 
 public protocol ChatConfigurationRepresentable {
     var id: String { get }
@@ -268,7 +269,7 @@ public extension Chat {
             }.sorted(usingKey: \.time, by: >)
         }
         
-        log("Querying IMD for recent messages using chat fast-path")
+        log.info("Querying IMD for recent messages using chat fast-path")
         
         return BLLoadChatItems(withChatIdentifiers: [self.id], onServices: [.iMessage, .SMS], beforeGUID: before, limit: limit).compactMap {
             $0 as? Message

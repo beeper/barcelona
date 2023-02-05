@@ -8,52 +8,53 @@
 
 import Foundation
 import BarcelonaFoundation
+import Logging
 
-private let BLIngestObjectsLog = Logger(category: "BLIngestObjects")
+private let log = Logger(label: "BLIngestObjects")
 
 // MARK: - Public API
 public func BLIngestObjects(_ objects: [NSObject], inChat chat: String? = nil) -> Promise<[ChatItem]> {
     guard objects.count > 0 else {
-        *BLIngestObjectsLog.debug("Early-exit BLIngest because objects is empty")
+        *log.debug("Early-exit BLIngest because objects is empty")
         return .success([])
     }
     
     guard let chat = chat else {
-        *BLIngestObjectsLog.debug("inferring chat ids before ingestion because chat id was not provided")
+        *log.debug("inferring chat ids before ingestion because chat id was not provided")
         
         return _BLResolveChatIDs(forObjects: objects)
             .then { chatIDs -> Promise<[ChatItem]> in
-                *BLIngestObjectsLog.debug("got %ld chat IDs from database", chatIDs.count)
+                *log.debug("got \(chatIDs.count) chat IDs from database")
                 
                 if _fastPath(chatIDs.allSatisfy { $0 == chatIDs.first }) {
-                    *BLIngestObjectsLog.debug("taking fast-path for inferred chat IDs because they're all the same (%@)", chatIDs.first ?? "")
+                    *log.debug("taking fast-path for inferred chat IDs because they're all the same (\(chatIDs.first ?? "")")
                     
                     return BLIngestObjects(objects, inChat: chatIDs.first)
                 }
                 
-                *BLIngestObjectsLog.debug("found mismatched identifiers, ingesting them in chunks (%@)", chatIDs.joined(separator: ", "))
+                *log.debug("found mismatched identifiers, ingesting them in chunks (\(chatIDs.joined(separator: ", "))")
                 
                 // Loads file transfers in one batch to reduce database calls
                 return _BLLoadFileTransfers(forObjects: objects).observeFailure { error in
-                    *BLIngestObjectsLog.error("failed to load file transfers: %@", error as NSError)
+                    *log.error("failed to load file transfers: \(error as NSError)")
                 }.then {
                     Promise.all(objects.enumerated().map { index, object in
                         BLIngestObject(object, inChat: chatIDs[index])
                     })
                 }.observeOutput { items in
-                    *BLIngestObjectsLog.info("aggregated ingestion got %ld items", items.count)
+                    *log.info("aggregated ingestion got \(items.count) items")
                 }
             }
     }
     
     return _BLLoadFileTransfers(forObjects: objects).then { () -> [ChatItem] in
-        *BLIngestObjectsLog.debug("file transfers loaded. parsing objects")
+        *log.debug("file transfers loaded. parsing objects")
         return _BLParseObjects(objects, inChat: chat)
     }.then { items -> Promise<[ChatItem]> in
-        *BLIngestObjectsLog.debug("objects parsed. loading tapbacks")
+        *log.debug("objects parsed. loading tapbacks")
         return _BLLoadTapbacks(forItems: items, inChat: chat)
     }.observeOutput { items in
-        *BLIngestObjectsLog.info("ingested %ld items", items.count)
+        *log.info("ingested \(items.count) items")
     }
 }
 

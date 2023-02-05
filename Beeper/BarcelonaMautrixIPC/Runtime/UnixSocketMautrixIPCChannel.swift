@@ -1,7 +1,7 @@
 import Foundation
 import NIO
 import NIOFoundationCompat
-import Swog
+import Logging
 
 /// Handles sending and receiving data from the Mautrix UNIX socket.
 public class UnixSocketMautrixIPCChannel: MautrixIPCInputChannel, MautrixIPCOutputChannel {
@@ -10,7 +10,7 @@ public class UnixSocketMautrixIPCChannel: MautrixIPCInputChannel, MautrixIPCOutp
 
     private let channel: Channel
 
-    private let log = Logger(category: "UnixSocketMautrixIPCChannel")
+    private let log = Logger(label: "UnixSocketMautrixIPCChannel")
 
     // MARK: - Initializers
 

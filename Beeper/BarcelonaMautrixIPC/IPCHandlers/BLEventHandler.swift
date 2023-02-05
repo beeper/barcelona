@@ -9,9 +9,9 @@
 import Barcelona
 import IMCore
 import IDS
-import Swog
+import Logging
 
-fileprivate let log = Logger(category: "self.ipcChannel.writePayload")
+fileprivate let log = Logger(label: "self.ipcChannel.writePayload")
 
 private extension CBMessageStatusChange {
     var mautrixFriendlyGUID: String? {
@@ -80,7 +80,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 #if DEBUG
                 if NSUserName() == "ericrabil" || NSUserName() == "3AFBF1C7-8088-4ACF-B998-BC84C6947233" {
                     let message = BLLoadIMMessage(withGUID: message.id)
-                    CLDebug("", "%@", message.debugDescription)
+                    log.debug("\(message.debugDescription)", source: "")
                 }
                 #endif
                 let blMessage = BLMessage(message: message)

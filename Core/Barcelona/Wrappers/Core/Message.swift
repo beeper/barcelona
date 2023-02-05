@@ -10,7 +10,7 @@ import Foundation
 import IMCore
 import IMSharedUtilities
 import BarcelonaDB
-import Swog
+import Logging
 import IMFoundation
 
 public extension Array where Element == String {
@@ -43,8 +43,6 @@ private func CBExtractThreadOriginatorAndPartFromIdentifier(_ identifier: String
 
 private extension IngestionContext {
     func ingest(_ items: [NSObject]) -> [ChatItem] {
-        CBLoggingFlags.if(\.ingestion, CLDebug("IngestionContext", "Ingesting items: \(items)"))
-        
         return items.map {
             ChatItemType.ingest(object: $0, context: self)
         }
@@ -473,12 +471,13 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     }
     
     public var isReadByMe: Bool {
+        let log = Logger(label: "Message")
         if fromMe {
-            CLDebug("ReadState", "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because it is from me")
+            log.debug("\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because it is from me", source: "ReadState")
             return true
         }
         if timeRead > 0 {
-            CLDebug("ReadState", "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because time read is non-zero")
+            log.debug("\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because time read is non-zero", source: "ReadState")
             return true
         }
         /// BRI-4711: `isRead` may be erroneously true; use `timeRead` as the source of truth for now
@@ -487,7 +486,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
             return true
         }*/
         if CBFeatureFlags.useSMSReadBuffer && CBDaemonListener.shared.smsReadBuffer.contains(id) {
-            CLDebug("ReadState", "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because read buffer contains ID")
+            log.debug("\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because read buffer contains ID", source: "ReadState")
             return true
         }
         return false

@@ -9,7 +9,7 @@ import Foundation
 import GRDB
 import IDS
 import IMCore
-import Swog
+import Logging
 import Pwomise
 import IMSharedUtilities
 
@@ -115,6 +115,7 @@ private prefix func ~(_ expression: @autoclosure () -> ()) {
 /// Tracks the correlation of different sender IDs to a single, unique identity representing an Apple ID
 public class CBSenderCorrelationController {
     private class Stack {
+        let log = Logger(label: "CBSenderCorrelationController.Stack")
         static let stack = Stack()
         
         static func storeURL() throws -> URL {
@@ -167,13 +168,13 @@ public class CBSenderCorrelationController {
             }
             
             if let oldURL = try? Self.oldStoreURL(), FileManager.default.fileExists(atPath: oldURL.path), !migratedDatabase {
-                CLInfo("Correlation", "Found old correlation database, attempting to import")
+                log.info("Found old correlation database, attempting to import", source: "Correlation")
                 do {
                     let queue = try DatabaseQueue(path: oldURL.path)
                     try queue.read { database in
                         var stmt = try database.makeSelectStatement(sql: "SELECT identifier FROM grdb_migrations where identifier = 'v4';")
                         guard try String.fetchOne(stmt) != nil else {
-                            CLWarn("Correlation", "Correlation database was not upgraded to v4, I will not be migrating it.")
+                            log.warning("Correlation database was not upgraded to v4, I will not be migrating it.", source: "Correlation")
                             return
                         }
                         stmt = try database.makeSelectStatement(sql: "SELECT correlation_identifier, sender_id FROM correlation")
@@ -185,18 +186,18 @@ public class CBSenderCorrelationController {
                                     continue
                                 }
                                 let sender_id: String = row["sender_id"]
-                                CLDebug("Correlation", "Importing correlation of \(sender_id)/\(correl_id)")
+                                log.debug("Importing correlation of \(sender_id)/\(correl_id)", source: "Correlation")
                                 try database2.execute(literal: """
                                                                INSERT OR IGNORE INTO correlation (correl_id, sender_id) VALUES (\(correl_id), \(sender_id))
                                                                """)
                             }
                         }
-                        CLInfo("Correlation", "Migrated correlation database!")
+                        log.info("Migrated correlation database!", source: "Correlation")
                         try FileManager.default.removeItem(at: oldURL)
                     }
                     migratedDatabase = true
                 } catch {
-                    CLFault("Correlation", "Failed to migrate old correlation database: \((error as NSError).debugDescription)")
+                    log.error("Failed to migrate old correlation database: \((error as NSError).debugDescription)", source: "Correlation")
                 }
             }
         }
@@ -298,7 +299,7 @@ public class CBSenderCorrelationController {
         reset()
     }
     
-    private let log = Logger(category: "CBSenderCorrelation")
+    private let log = Logger(label: "CBSenderCorrelation")
     private static let queue = DispatchQueue(label: "CBSenderCorrelation")
     
     /// this dictionary tracks the latest optionality to avoid redundant db hits for correlation IDs that we don't have
@@ -610,7 +611,7 @@ extension IMChat {
                 siblings.insert(self, at: 0)
             }
             #if DEBUG
-            CLDebug("Correlation", "Siblings for \(self.id) are \(siblings.map(\.debugDescription))")
+            log.debug("Siblings for \(self.id) are \(siblings.map(\.debugDescription))", source: "Correlation")
             #endif
             return siblings
         }

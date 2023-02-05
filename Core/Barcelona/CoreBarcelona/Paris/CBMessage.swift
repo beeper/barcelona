@@ -6,13 +6,13 @@
 //
 
 import Foundation
-import Swog
+import Logging
 @_spi(synchronousQueries) import BarcelonaDB
 import IMCore
 import IMSharedUtilities
 import IMFoundation
 
-fileprivate let log = Logger(category: "CBMessage", subsystem: "com.beeper.imc.paris")
+fileprivate let log = Logger(label: "CBMessage")
 
 public struct CBMessage: Codable, CustomDebugStringConvertible {
     /// The chat this message originated from
@@ -354,7 +354,7 @@ public extension CBMessage {
         case .some(let message):
             return message
         case .none:
-            log.warn("Failed to locate message \(id)")
+            log.warning("Failed to locate message \(id)")
             return nil
         }
     }
@@ -366,7 +366,7 @@ extension CBMessage {
         case .some(let chat):
             return chat
         case .none:
-            log.warn("Failed to locate chat \(chat.rawValue)")
+            log.warning("Failed to locate chat \(chat.rawValue)")
             return nil
         }
     }
@@ -451,14 +451,14 @@ public extension CBMessage {
                 message.accountID = newAccountID
                 log.debug("Changed account ID for message \(id) to \(newAccountID)")
             } else {
-                log.warn("Failed to find valid account ID for re-sending message \(id), this is not good...")
+                log.warning("Failed to find valid account ID for re-sending message \(id), this is not good...")
             }
             message.service = serviceName
             IMDaemonController.sharedInstance().updateMessage(message)
             log.debug("Changed service for message \(id) to \(serviceName)")
         }
         guard imChat.account.serviceName == service.IMServiceStyle.service?.name else {
-            log.fault("Misaligned IMChat/IMMessage/CBChat service when trying to re-send message \(id)!!!!!!")
+            log.error("Misaligned IMChat/IMMessage/CBChat service when trying to re-send message \(id)!!!!!!")
             return
         }
         log.info("Re-sending message \(id) on chat \(imChat.guid)")

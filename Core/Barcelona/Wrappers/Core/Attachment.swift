@@ -10,6 +10,7 @@ import Foundation
 import BarcelonaDB
 import CoreGraphics
 import IMCore
+import Logging
 
 public struct Size: Codable, Hashable {
     public var width: Float
@@ -55,7 +56,7 @@ public extension IMFileTransfer {
         if let guid = guid {
             return guid
         } else {
-            CLFault("IMFileTransfer+Barcelona", "Encountered an IMFileTransfer with no GUID. Returning a fake GUID for compatibility.")
+            Logger(label: "IMFileTransfer").error("Encountered an IMFileTransfer with no GUID. Returning a fake GUID for compatibility.", source: "IMFileTransfer+Barcelona")
             return compatibilityGUIDKey
         }
     }

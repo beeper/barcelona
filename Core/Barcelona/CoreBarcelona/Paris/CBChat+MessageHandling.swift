@@ -6,10 +6,13 @@
 //
 
 import Foundation
+import Logging
 
 #if canImport(IMSharedUtilities)
 import IMSharedUtilities
 #endif
+
+private let log = Logger(label: "CBChat")
 
 public extension CBChat {
     enum MessageInput: CustomDebugStringConvertible, CustomStringConvertible {
@@ -71,7 +74,7 @@ public extension CBChat {
     
     @discardableResult func handle(leaf: CBChatIdentifier, input item: MessageInput) -> CBMessage? {
         guard let id = item.guid else {
-            log.warn("dropping message \(item.debugDescription) as it has an invalid guid?!")
+            log.warning("dropping message \(item.debugDescription) as it has an invalid guid?!")
             return nil
         }
         let message = item.handle(message: &messages[id], leaf: leaf)

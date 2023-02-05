@@ -9,10 +9,11 @@ import Foundation
 import Combine
 import IMFoundation
 import IMSharedUtilities
+import Logging
 
 /// An entity tracking a single logical conversation comprised of potentially several different chats
 public class CBChat {
-    private static let log = Logger(category: "CBChat", subsystem: "com.beeper.imc.paris")
+    private let log = Logger(label: "CBChat")
     /// All cached messages for this chat
     public internal(set) var messages: [String: CBMessage] = [:]
     /// The style of this chat
@@ -104,10 +105,6 @@ public class CBChat {
         }
         leaves[guid, default: CBChatLeaf()].handle(dictionary: dictionary)
     }
-}
-
-extension CBChat {
-    @_transparent var log: Logger { CBChat.log }
 }
 
 public struct CBChatParticipant {
@@ -233,7 +230,7 @@ public extension CBChat {
             do {
                 return try BLResolveIDStatusForIDs(deduplicatedRecipientIDs, onService: service.id)
             } catch {
-                log.fault("Error while resolving ID status for \(deduplicatedRecipientIDs.joined(separator: ",")) in \(self.mergedID): \(String(describing: error))")
+                log.error("Error while resolving ID status for \(deduplicatedRecipientIDs.joined(separator: ",")) in \(self.mergedID): \(String(describing: error))")
                 return [:]
             }
         }()

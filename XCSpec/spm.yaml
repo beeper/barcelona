@@ -14,9 +14,6 @@ packages:
   Swime:
     url: https://github.com/sendyhalim/Swime
     from: 3.0.7
-  Swog:
-    url: https://github.com/EricRabil/Swog
-    from: 1.0.7
   Pwomise:
     url: https://github.com/EricRabil/Pwomise
     from: 1.1.1

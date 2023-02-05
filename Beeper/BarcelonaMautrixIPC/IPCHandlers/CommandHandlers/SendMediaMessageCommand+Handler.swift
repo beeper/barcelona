@@ -10,6 +10,7 @@ import Foundation
 import Barcelona
 import IMCore
 import Sentry
+import Logging
 
 protocol Runnable {
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel)
@@ -18,6 +19,9 @@ protocol Runnable {
 protocol AuthenticatedAsserting {}
 
 extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
+    var log: Logging.Logger {
+        Logger(label: "SendMediaMessageCommand")
+    }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         guard let chat = cbChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
@@ -97,7 +101,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                 scope.span = transaction
             }
             transaction.finish(status: .internalError)
-            CLFault("BLMautrix", "failed to send media message: %@", error as NSError)
+            log.error("failed to send media message: \(error as NSError)", source: "BLMautrix")
             payload.fail(code: "internal_error", message: "Sorry, we're having trouble processing your attachment upload.", ipcChannel: ipcChannel)
         }
     }

@@ -10,9 +10,7 @@ import Foundation
 import IMCore
 import BarcelonaDB
 import IMSharedUtilities
-
-@usableFromInline
-internal let BLIngestLog = Logger(category: "BLIngest-Internal")
+import Logging
 
 @usableFromInline
 internal protocol IMItemIDResolvable {
@@ -34,25 +32,22 @@ extension IMMessage: IMItemIDResolvable {
     var itemGUID: String? { guid }
 }
 
+
 // MARK: - IMFileTransfer Preload
 @inlinable
 internal func _BLLoadFileTransfers(forObjects objects: [NSObject]) -> Promise<Void> {
-    let operation = BLIngestLog.operation(named: "BLLoadFileTransfers").begin()
-    
+    let log = Logger(label: "_BLLoadFileTransfers")
     let unloadedFileTransferGUIDs = objects.compactMap {
         $0 as? IMFileTransferContainer
     }.flatMap(\.unloadedFileTransferGUIDs)
     
     guard unloadedFileTransferGUIDs.count > 0 else {
-        operation.end()
         return .success(())
     }
     
-    *operation.event("loading %ld transfers", unloadedFileTransferGUIDs.count)
+    log.info("loading \(unloadedFileTransferGUIDs.count) transfers")
     
-    return DBReader.shared.attachments(withGUIDs: unloadedFileTransferGUIDs).endingOperation(operation) { attachments in
-        operation.end()
-    }.compactMap(\.attachment).forEach {
+    return DBReader.shared.attachments(withGUIDs: unloadedFileTransferGUIDs).compactMap(\.attachment).forEach {
         $0.initializeFileTransferIfNeeded()
     }
 }
@@ -69,6 +64,7 @@ internal func _BLLoadAcknowledgmentChatItems(withMessageGUIDs messageGUIDs: [Str
 // MARK: - Associated Resolution
 @inlinable
 internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -> Promise<[ChatItem]> {
+    let log = Logger(label: "_BLLoadTapbacks")
     guard items.count > 0 else {
         return .success([])
     }
@@ -94,7 +90,7 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -
     }.observeAlways { completion in
         switch completion {
         case .failure(let error):
-            BLIngestLog.fault("failed to load with error %@", error as NSError)
+            log.error("failed to load with error \(error as NSError)")
         default: break
         }
     }.then { ledger -> [ChatItem] in

@@ -8,6 +8,7 @@
 import Foundation
 import IMCore
 import IMFoundation
+import Logging
 
 /// The BLMessageExpert offers a simplified API for monitoring message state events
 public class BLMessageExpert {
@@ -82,7 +83,7 @@ public class BLMessageExpert {
         }
     }
     
-    private let log = Logger(category: "BLMessageExpert")
+    private let log = Logger(label: "BLMessageExpert")
     
     /// The pipeline where BLMessageExpert sends message events
     public let eventPipeline = CBPipeline<BLMessageEvent>()
@@ -106,7 +107,14 @@ public class BLMessageExpert {
         if seenMessages[event.id]?.event == event {
             return
         }
-        event.tryLog()
+        switch event {
+        case .delivered(id: let deliveredMessageID, service: _, chat: _, time: let time, _):
+            log.info("Message \(deliveredMessageID) was delivered at \(time?.description ?? "null")")
+        case .failed(id: let failedMessageID, service: _, chat: _, code: let failureCode, _):
+            log.warning("Message \(failedMessageID) failed with failure code \(failureCode.description)")
+        default:
+            return
+        }
         seenMessages[event.id] = BLMessageEventReceipt(event: event, counter: counter)
         if seenMessages.count > 100 {
             seenMessages.sorted(usingKey: \.value.counter, by: <).dropLast(100).forEach { key, _ in
@@ -160,20 +168,6 @@ public class BLMessageExpert {
     }
 }
 
-extension BLMessageExpert.BLMessageEvent {
-    @_transparent var log: Logger { BLMessageExpert.shared.log }
-    func tryLog() {
-        switch self {
-        case .delivered(id: let deliveredMessageID, service: _, chat: _, time: let time, _):
-            log.info("Message %@ was delivered at %@", deliveredMessageID, time.map(NSNumber.init(value:)) ?? "null")
-        case .failed(id: let failedMessageID, service: _, chat: _, code: let failureCode, _):
-            log.warn("Message %@ failed with failure code %@", failedMessageID, failureCode.description)
-        default:
-            return
-        }
-    }
-}
-
 @_spi(messageExpertControlFlow) public extension BLMessageExpert {
     func process(failedMessageID: String, service: String, chat: IMChat, failureCode: FZErrorType, senderCorrelationID: String?) {
         send(.failed(id: failedMessageID, service: service, chat: chat, code: failureCode, senderCorrelationID: senderCorrelationID))
@@ -183,7 +177,7 @@ extension BLMessageExpert.BLMessageEvent {
 fileprivate extension BLMessageExpert {
     func process(failedMessageID: String, service: String, chat: IMChat, senderCorrelationID: String?) {
         guard let message = BLLoadIMMessageItem(withGUID: failedMessageID) else {
-            log.fault("Failed to process failed message ID %@ because its IMMessageItem could not be loaded", failedMessageID)
+            log.error("Failed to process failed message ID \(failedMessageID) because its IMMessageItem could not be loaded")
             return
         }
         process(failedMessageID: failedMessageID, service: service, chat: chat, failureCode: message.errorCode, senderCorrelationID: senderCorrelationID)

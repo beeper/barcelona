@@ -8,7 +8,7 @@
 
 import Foundation
 import IMCore
-import Swog
+import Logging
 import IMSharedUtilities
 
 private let chatItemGUIDExtractor = try! NSRegularExpression(pattern: "(?:\\w+:\\d+)\\/([\\w-]+)")

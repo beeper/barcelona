@@ -9,6 +9,7 @@
 import Foundation
 import BarcelonaFoundation
 import GRDB
+import Logging
 
 public protocol IMCNHandleBridgingProvider {
     func handleIDs(forCNIdentifier arg1: String) -> [String]
@@ -30,6 +31,9 @@ extension IMHandleRegistrar: IMCNHandleBridgingProvider {
 #endif
 
 public extension DBReader {
+    var log: Logging.Logger {
+        Logger(label: "DBReader")
+    }
     func queryMessages(withParameters params: MessageQueryParameters, handleProvider: IMCNHandleBridgingProvider? = nil) -> Promise<[(chatID: String, messageID: String)]> {
         let limit = params.limit ?? 20
         
@@ -52,7 +56,7 @@ public extension DBReader {
             /// Get database handle
             self.read { db in
                 #if DEBUG
-                DBLog("Performing message query with chat identifiers %@ handles %@ text %@ limit %ld", params.chats ?? [], handles, params.search ?? "<<no search>>", params.limit ?? 20)
+                log.info("Performing message query with chat identifiers \(params.chats ?? []) handles \(handles) text \(params.search ?? "<<no search>>") limit \(params.limit ?? 20)")
                 #endif
                 
                 /// Performs a query for either me or not me (IMCore handle that are associated with an account function differently)

@@ -59,35 +59,26 @@ public func ERTextParts(from string: NSAttributedString?) -> [TextPart] {
     
     var results: [TextPart] = []
     
-    let textTracking = Logging.Shared.signpost("ERTextParts Computation")
-    
+
     string.split(MessageAttributes.writingDirection).forEach { substring in
         var textPart: TextPart!
         
         if substring.hasAttribute(forKey: MessageAttributes.link) {
-            let textLink = Logging.Shared.signpost("ERTextParts .link")
             textPart = ERTextPart(fromLink: substring)
-            textLink()
         } else if substring.hasAttribute(forKey: MessageAttributes.calendarData) {
-            let calMatch = Logging.Shared.signpost("ERTextParts .calendarData")
             textPart = ERTextPart(fromCalendar: substring)
-            calMatch()
         } else if substring.hasAttribute(forKey: MessageAttributes.breadcrumbOptions) {
             textPart = ERTextPart(fromBreadcrumb: substring)
         } else if #available(iOS 14, macOS 10.16, watchOS 7, *), substring.hasAttribute(forKey: MessageAttributes.mentionName) {
             textPart = ERTextPart(fromMention: substring)
         } else {
-            let textMatch = Logging.Shared.signpost("ERTextParts .text")
             textPart = ERTextPart(fromText: substring)
-            textMatch()
         }
         
         ERInsertAttributesForTextPart(&textPart, string: substring)
         
         results.append(textPart)
     }
-    
-    textTracking()
     
     return results
 }
