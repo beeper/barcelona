@@ -51,7 +51,7 @@ public extension Notification {
             return nil
         }
         guard let object = object as? P else {
-            CLFault("Notifications", "Notified about \(name.rawValue, privacy: .public) but the object was \(String(describing: type(of: object)), privacy: .public) instead of \(String(describing: P.self), privacy: .public)")
+            CLFault("Notifications", "Notified about \(name.rawValue) but the object was \(String(describing: type(of: object))) instead of \(String(describing: P.self))")
             return nil
         }
         return object
@@ -148,7 +148,7 @@ public class CBFileTransferCenter {
             return
         }
         transfers[guid] = transfer
-        log.debug("Transfer \(guid, privacy: .public) has updated! isFinished \(transfer.isFinished, privacy: .public) state \(transfer.actualState.description, privacy: .public) error \(transfer.errorDescription ?? "nil", privacy: .public)")
+        log.debug("Transfer \(guid) has updated! isFinished \(transfer.isFinished) state \(transfer.actualState.description) error \(transfer.errorDescription ?? "nil")")
         if transfer.isFinished {
             transferFinished(transfer)
         }
@@ -290,7 +290,7 @@ public class CBPurgedAttachmentController {
             return .success(())
         }
         
-        log("fetching \(transfers.count, privacy: .public) guids from cloudkit")
+        log("fetching \(transfers.count) guids from cloudkit")
         
         return Promise.all(supplemented + transfers.map { transfer in
             guard let guid = transfer.guid else {
@@ -324,7 +324,7 @@ public class CBPurgedAttachmentController {
                     self.log.fault("File transfer completion promise never fired, but all attachments seem to have finished.")
                 } else {
                     let transferIDS = unavailableTransfers.map(\.guid)
-                    self.log.warn("Continuing message processing despite unsuccessful attachment loading! The following transfers are incomplete/unavailable: \(transferIDS, privacy: .public)")
+                    self.log.warn("Continuing message processing despite unsuccessful attachment loading! The following transfers are incomplete/unavailable: \(transferIDS)")
                 }
             default:
                 break

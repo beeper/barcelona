@@ -39,7 +39,7 @@ public extension Tracer {
             let stop = Date()
             let diff = start.distance(to: stop)
             let name = name()
-            log.debug("\(name, privacy: .public) took \(diff, privacy: .public) seconds")
+            log.debug("\(name) took \(diff) seconds")
         }
         return callback()
     }

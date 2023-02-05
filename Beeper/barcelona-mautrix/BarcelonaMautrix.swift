@@ -43,7 +43,7 @@ class BarcelonaMautrix {
                 cli.goAndExit()
             }
         } else if let dsn = ProcessInfo.processInfo.environment["SENTRY_DSN"] {
-            CLInfo("CoreSentry", "Setting up fallback sentry using DSN \(dsn, privacy: .public)")
+            CLInfo("CoreSentry", "Setting up fallback sentry using DSN \(dsn)")
             SentrySDK.start { options in
                 options.dsn = dsn
             }

@@ -157,7 +157,7 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
             return callback([:])
         }
         
-        log.info("Requesting ID status from server for destinations \(destinations.joined(separator: ","), privacy: .auto) on service \(service.idsIdentifier ?? "nil", privacy: .public)")
+        log.info("Requesting ID status from server for destinations \(destinations.joined(separator: ",")) on service \(service.idsIdentifier ?? "nil")")
         
         IDSIDQueryController.sharedInstance()!.forceRefreshIDStatus(forDestinations: destinations, service: service.idsIdentifier!, listenerID: IDSListenerID, queue: HandleQueue) { states in
             let mappedStates = states.mapValues { IDSState(rawValue: $0.intValue) }
@@ -176,7 +176,7 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
             return callback([:])
         }
 
-        log.info("Requesting ID status from cache for destinations \(destinations.joined(separator: ","), privacy: .auto) on service \(service.idsIdentifier ?? "nil", privacy: .public)")
+        log.info("Requesting ID status from cache for destinations \(destinations.joined(separator: ",")) on service \(service.idsIdentifier ?? "nil")")
 
         let (cached, uncached) = destinations.splitReduce(intoLeft: [String: IDSState](), intoRight: [String]()) { cached, uncached, destination in
             if let status = BLIDSIDQueryCache.shared.result(for: destination) {

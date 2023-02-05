@@ -231,7 +231,7 @@ internal extension CBDaemonListener {
         }
 
         NotificationCenter.default.addObserver(forName: .init("__kIMBuddyPropertiesChangedNotification"), object: nil, queue: nil) { notification in
-            log.debug("Buddy properties changed: \(notification.object.debugDescription, privacy: .public)")
+            log.debug("Buddy properties changed: \(notification.object.debugDescription)")
         }
     }
 }
@@ -465,27 +465,27 @@ public class CBDaemonListener: ERBaseDaemonListener {
     
     // Properties were changed
     public override func chat(_ persistentIdentifier: String, updated updateDictionary: [AnyHashable : Any]) {
-        *log.debug("chat:\(persistentIdentifier, privacy: .public) updated:\(updateDictionary.debugDescription, privacy: .public)")
+        *log.debug("chat:\(persistentIdentifier) updated:\(updateDictionary.debugDescription)")
         apply(serializedChat: updateDictionary, emitIfNeeded: true)
     }
     
     // Group name changed
     public override func chat(_ persistentIdentifier: String!, displayNameUpdated displayName: String?) {
-        *log.debug("chat:\(persistentIdentifier, privacy: .public) displayNameUpdated:\(displayName ?? "nil", privacy: .public)")
+        *log.debug("chat:\(persistentIdentifier) displayNameUpdated:\(displayName ?? "nil")")
         chatNamePipeline.send((persistentIdentifier.bl_mergedID, displayName))
     }
     
     public override func leftChat(_ persistentIdentifier: String!) {
-        *log.debug("leftChat:\(persistentIdentifier, privacy: .public)")
+        *log.debug("leftChat:\(persistentIdentifier)")
     }
     
     public override func loadedChats(_ chats: [[AnyHashable : Any]]!) {
-        *log.debug("loadedChats:\(chats.count, privacy: .public)")
+        *log.debug("loadedChats:\(chats.count)")
     }
     
     // A new chat has been created
     public override func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) {
-        *log.debug("chatLoaded:\(chatIdentifier, privacy: .public), dicts:\(chatDictionaries.count, privacy: .public)")
+        *log.debug("chatLoaded:\(chatIdentifier), dicts:\(chatDictionaries.count)")
         for chat in chatDictionaries {
             guard let dict = chat as? [AnyHashable: Any] else {
                 continue
@@ -499,25 +499,25 @@ public class CBDaemonListener: ERBaseDaemonListener {
     
     // Invoked when we send a message, either here or elsewhere
     public override func account(_ accountUniqueID: String, chat chatIdentifier: String, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any], groupID: String, chatPersonCentricID personCentricID: String!, messageSent msg: IMMessageItem) {
-        *log.debug("messageSent: \(msg.debugDescription, privacy: .public)")
+        *log.debug("messageSent: \(msg.debugDescription)")
         chatIdentifierCache[msg.id] = chatIdentifier
         process(newMessage: msg, chatIdentifier: chatIdentifier)
     }
     
     // Invoked when we sent a message *locally*
     public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, notifySentMessage msg: IMMessageItem!, sendTime: NSNumber!) {
-        *log.debug("notifySentMessage: \(msg.debugDescription, privacy: .public)")
+        *log.debug("notifySentMessage: \(msg.debugDescription)")
         process(sentMessage: msg, sentTime: (msg.clientSendTime ?? msg.time ?? Date()).timeIntervalSince1970)
     }
     
     public override func account(_ accountUniqueID: String, chat chatIdentifier: String, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any], groupID: String, chatPersonCentricID personCentricID: String, messageReceived msg: IMItem) {
-        *log.debug("messageReceived: \(msg.debugDescription, privacy: .public)")
+        *log.debug("messageReceived: \(msg.debugDescription)")
         
         process(newMessage: msg, chatIdentifier: chatIdentifier)
     }
     
     public override func account(_ accountUniqueID: String, chat chatIdentifier: String, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any], groupID: String, chatPersonCentricID personCentricID: String, messagesReceived messages: [IMItem], messagesComingFromStorage fromStorage: Bool) {
-        *log.debug("messagesReceived: \(messages.debugDescription, privacy: .public)")
+        *log.debug("messagesReceived: \(messages.debugDescription)")
         
         for message in messages {
             process(newMessage: message, chatIdentifier: chatIdentifier)
@@ -525,7 +525,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
     }
     
     public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, groupID: String!, chatPersonCentricID personCentricID: String!, messagesReceived messages: [IMItem]!) {
-        *log.debug("messagesReceived: \(messages.debugDescription, privacy: .public)")
+        *log.debug("messagesReceived: \(messages.debugDescription)")
         
         for message in messages {
             process(newMessage: message, chatIdentifier: chatIdentifier)
@@ -534,7 +534,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
     
     // Invoked for status updates (read/deliver/play/save/edit etc)
     public override func service(_ serviceID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, messagesUpdated messages: [[AnyHashable: Any]]!) {
-        *log.debug("messagesUpdated[service]: \(messages.debugDescription, privacy: .public)")
+        *log.debug("messagesUpdated[service]: \(messages.debugDescription)")
         
         for message in CBCreateItemsFromSerializedArray(messages) {
             switch message {
@@ -551,14 +551,14 @@ public class CBDaemonListener: ERBaseDaemonListener {
     }
     
     public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, messagesUpdated messages: [NSObject]!) {
-        *log.debug("messagesUpdated[account]: \(messages.debugDescription, privacy: .public)")
+        *log.debug("messagesUpdated[account]: \(messages.debugDescription)")
         
         for message in messages as? [IMItem] ?? CBCreateItemsFromSerializedArray(messages) {
             switch message {
             case let message as IMMessageItem:
                 // This listener call is only for failed messages that are not otherwise caught.
                 guard message.errorCode != .noError else {
-                    *log.debug("messagesUpdated[account]: ignoring message \(message.id, privacy: .public) because it has no error. it will flow through another handler.")
+                    *log.debug("messagesUpdated[account]: ignoring message \(message.id) because it has no error. it will flow through another handler.")
                     continue
                 }
                 guard let chatIdentifier = chatIdentifier ?? DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id) else {
@@ -592,11 +592,11 @@ public class CBDaemonListener: ERBaseDaemonListener {
     }
 
     public func account(_ accountUniqueID: String?, buddyPropertiesChanged properties: Any?) {
-        *log.debug("account buddyPropertiesChanged \(properties.debugDescription, privacy: .public)")
+        *log.debug("account buddyPropertiesChanged \(properties.debugDescription)")
     }
 
     public func account(_ accountUniqueID: String?, buddyProperties: Any?, buddyPictures: Any?) {
-        *log.debug("account buddyProperties \(buddyProperties.debugDescription, privacy: .public) buddyPictures \(buddyPictures.debugDescription, privacy: .public)")
+        *log.debug("account buddyProperties \(buddyProperties.debugDescription) buddyPictures \(buddyPictures.debugDescription)")
     }
 }
 
@@ -620,7 +620,7 @@ private extension CBDaemonListener {
     func apply(serializedChat dict: [AnyHashable: Any], emitIfNeeded: Bool = true) {
         guard let chatIdentifier = dict["chatIdentifier"] as? String else {
             log.debug("couldn't find chatIdentifier in serialized chat!")
-            *log.debug("\(dict.debugDescription, privacy: .public)")
+            *log.debug("\(dict.debugDescription)")
             return
         }
         
@@ -686,7 +686,7 @@ private extension CBDaemonListener {
     
     func process(sentMessage message: IMMessageItem, sentTime: Double) {
         guard let chatID = chatIdentifierCache[message.id] ?? DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id) else {
-            log.fault("Failed to resolve chat identifier for sent message \(message.id, privacy: .public)")
+            log.fault("Failed to resolve chat identifier for sent message \(message.id)")
             return
         }
         messageStatusPipeline.send(CBMessageStatusChange(type: .sent, service: message.service, time: sentTime, sender: nil, fromMe: true, chatID: chatID, messageID: message.id, context: .init(message: message)))

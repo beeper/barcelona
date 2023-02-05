@@ -41,6 +41,8 @@ targets:
         product: IMFoundation
       - package: Paris
         product: IMDPersistence
+      - package: swift-log
+        product: Logging
       - target: BarcelonaDB
         embed: true
         link: true
@@ -55,6 +57,8 @@ targets:
       - package: BarcelonaFoundation
       - package: Sentry
       - package: Swog
+      - package: swift-log
+        product: Logging
   # Tools
   grapple:
     group: Tools

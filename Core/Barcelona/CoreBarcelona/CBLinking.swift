@@ -154,7 +154,7 @@ private func cast<T>(_ pointer: UnsafeMutableRawPointer) -> T {
 /// If no symbol is safe to use, or the target cannot be opened, nil is returned.
 public func CBWeakLink<T>(against target: CBLinkingTarget, options: [LinkingOption]) -> T? {
     guard let handle = dlopen(target.path, RTLD_LAZY) else {
-        log.warn("Failed to open CBLinkingTarget at path \(target.path, privacy: .public)")
+        log.warn("Failed to open CBLinkingTarget at path \(target.path)")
         return nil
     }
     
@@ -170,7 +170,7 @@ public func CBWeakLink<T>(against target: CBLinkingTarget, options: [LinkingOpti
         }
     }
     
-    log.warn("No viable linking option was found in target \(target.path, privacy: .public) from options \(options.map(\.debugDescription).joined(separator: ", "), privacy: .public)")
+    log.warn("No viable linking option was found in target \(target.path) from options \(options.map(\.debugDescription).joined(separator: ", "))")
     
     return nil
 }

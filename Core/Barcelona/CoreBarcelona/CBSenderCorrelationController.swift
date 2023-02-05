@@ -185,7 +185,7 @@ public class CBSenderCorrelationController {
                                     continue
                                 }
                                 let sender_id: String = row["sender_id"]
-                                CLDebug("Correlation", "Importing correlation of \(sender_id, privacy: .private)/\(correl_id, privacy: .private)")
+                                CLDebug("Correlation", "Importing correlation of \(sender_id)/\(correl_id)")
                                 try database2.execute(literal: """
                                                                INSERT OR IGNORE INTO correlation (correl_id, sender_id) VALUES (\(correl_id), \(sender_id))
                                                                """)
@@ -333,7 +333,7 @@ public class CBSenderCorrelationController {
         if let correlationID = cachedCorrelation(for: senderID) {
             return correlationID
         }
-        ~log.debug("Looking up correlation ID for \(senderID, privacy: .public)")
+        ~log.debug("Looking up correlation ID for \(senderID)")
         let semaphore = DispatchSemaphore(value: 1)
         var semaphoreLocked: Bool {
             if semaphore.wait(timeout: .now()) == .success {
@@ -406,16 +406,16 @@ public class CBSenderCorrelationController {
                                     self.log.debug("Correlation ID is equal to the sender ID? \(senderID) == \(correlationID)")
                                     continue
                                 }
-                                self.log.info("IDS says the correlation identifier for \(senderID) is \(correlationID, privacy: .auto)")
+                                self.log.info("IDS says the correlation identifier for \(senderID) is \(correlationID)")
                                 correlations[senderID] = correlationID
                                 break
                             } else {
-                                ~self.log.debug("\(senderID, privacy: .public) has no correlationID")
+                                ~self.log.debug("\(senderID) has no correlationID")
                             }
                         }
                     }
                 } else {
-                    ~self.log.debug("IDSIDQueryController returned no results for ID query, confused. \(senderIDs, privacy: .public)")
+                    ~self.log.debug("IDSIDQueryController returned no results for ID query, confused. \(senderIDs)")
                 }
                 resolve(correlations)
             }
@@ -436,14 +436,14 @@ public class CBSenderCorrelationController {
         let cachedCorrelations = loadCachedCorrelations(senderIDs: senders, hitDatabase: hitDatabase)
         if cachedCorrelations.count == senders.count {
             // all correlations are stored
-            ~log.debug("Cache hit when querying \(senders.count, privacy: .public) senders, returning immediately")
+            ~log.debug("Cache hit when querying \(senders.count) senders, returning immediately")
             return cachedCorrelations.values.mostPopulousElement ?? nil
         } else if case .some(.some(let mostPopulousCorrelationID)) = cachedCorrelations.values.mostPopulousElement {
             // some correlations are stored, but not all
             for sender in senders {
                 if cachedCorrelations[sender] == nil {
                     // this sender has no correlation, set it to the correlation ID with the highest count
-                    ~log.debug("Cloning correlation of \(mostPopulousCorrelationID, privacy: .auto) to \(sender, privacy: .auto)")
+                    ~log.debug("Cloning correlation of \(mostPopulousCorrelationID) to \(sender)")
                     correlate(senderID: sender, correlationID: mostPopulousCorrelationID)
                 }
             }
@@ -454,7 +454,7 @@ public class CBSenderCorrelationController {
             if correlations.isEmpty {
                 // there's truly no correlations, set caches to nil and return
                 for sender in senders {
-                    ~log.debug("\(sender, privacy: .auto) has no correlation ID, caching a nil value")
+                    ~log.debug("\(sender) has no correlation ID, caching a nil value")
                     senderIDToCorrelationID[sender] = .some(.none)
                 }
                 return nil
@@ -464,7 +464,7 @@ public class CBSenderCorrelationController {
                 for sender in senders {
                     if correlations[sender] == nil {
                         // this sender has no correlation, set it to the correlation ID with the highest count
-                        ~log.debug("Cloning correlation of \(mostPopulousCorrelationID, privacy: .auto) to \(sender, privacy: .auto)")
+                        ~log.debug("Cloning correlation of \(mostPopulousCorrelationID) to \(sender)")
                         correlate(senderID: sender, correlationID: mostPopulousCorrelationID)
                     }
                 }

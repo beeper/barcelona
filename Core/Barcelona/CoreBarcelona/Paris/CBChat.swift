@@ -255,7 +255,7 @@ public extension CBChat {
         }
         let recipients = Array(recipientsByID.values)
         let recipientCount = recipients.count
-        log.info("There are \(recipientCount, privacy: .public) recipients to choose from: \(recipientsByID.keys.joined(separator: ","))")
+        log.info("There are \(recipientCount) recipients to choose from: \(recipientsByID.keys.joined(separator: ","))")
         func compareHandles(_ handle1: IMHandle, _ handle2: IMHandle) -> Bool {
             lazy var handle1PN = handle1.id.isPhoneNumber
             lazy var handle2PN = handle2.id.isPhoneNumber

@@ -68,7 +68,7 @@ extension IMChat {
         hasRefreshedServiceForSending = false
         refreshServiceForSending()
         let id = self.id, serviceName = account.serviceName ?? "nil"
-        CLInfo("ERChat", "The resolved service for \(id) is currently \(serviceName, privacy: .public)")
+        CLInfo("ERChat", "The resolved service for \(id) is currently \(serviceName)")
     }
 }
 

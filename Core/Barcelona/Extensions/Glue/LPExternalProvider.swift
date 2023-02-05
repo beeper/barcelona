@@ -228,7 +228,7 @@ public extension IMMessage {
         richLinkDataSource.createEmptyMetadataWithOriginalURL()
         richLinkDataSource.richLink.needsCompleteFetch = false
         richLinkDataSource.richLink.needsSubresourceFetch = false
-        CLInfo("LPLink", "Initialized a RichLinkDataSource for message \(self.guid, privacy: .public) for URL \(metadata.originalURL?.absoluteString ?? "nil", privacy: .private)")
+        CLInfo("LPLink", "Initialized a RichLinkDataSource for message \(self.guid) for URL \(metadata.originalURL?.absoluteString ?? "nil")")
         CLInfo("LPLink", "RichLinkDataSource for message %@ willEnterShelf", guid)
         dataSource.payloadWillEnterShelf()
         CLInfo("LPLink", "RichLinkDataSource for message %@ willSendFromShelf", guid)
