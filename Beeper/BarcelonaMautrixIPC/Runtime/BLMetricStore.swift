@@ -23,14 +23,6 @@ public class BLMetricStore {
         metrics[key] = value
     }
     
-    public func get(valueForKey key: BLMetricKey) -> Any? {
-        metrics[key]
-    }
-    
-    public func get<P: Codable>(typedValue type: P.Type, forKey key: BLMetricKey) -> P? {
-        metrics[key] as? P
-    }
-    
     public func get<P>(key: BLMetricKey) -> P? {
         metrics[key] as? P
     }

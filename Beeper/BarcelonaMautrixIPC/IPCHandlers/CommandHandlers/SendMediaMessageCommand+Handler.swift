@@ -11,11 +11,11 @@ import Barcelona
 import IMCore
 import Sentry
 
-public protocol Runnable {
+protocol Runnable {
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel)
 }
 
-public protocol AuthenticatedAsserting {}
+protocol AuthenticatedAsserting {}
 
 extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {

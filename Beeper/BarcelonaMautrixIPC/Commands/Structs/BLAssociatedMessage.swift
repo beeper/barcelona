@@ -8,18 +8,18 @@
 
 import Foundation
 
-public class BLAssociatedMessage: Codable {
-    public init(target_guid: String, type: Int) {
+class BLAssociatedMessage: Codable {
+    init(target_guid: String, type: Int) {
         self.target_guid = target_guid
         self.type = type
     }
     
-    public var target_guid: String
-    public var type: Int
+    var target_guid: String
+    var type: Int
 }
 
-public class BLTapback: BLAssociatedMessage {
-    public init(chat_guid: String, target_guid: String, target_part: Int, type: Int) {
+class BLTapback: BLAssociatedMessage {
+    init(chat_guid: String, target_guid: String, target_part: Int, type: Int) {
         self.chat_guid = chat_guid
         self.target_part = target_part
         super.init(target_guid: target_guid, type: type)
@@ -38,10 +38,10 @@ public class BLTapback: BLAssociatedMessage {
         try super.init(from: decoder)
     }
     
-    public var chat_guid: String
-    public var target_part: Int
+    var chat_guid: String
+    var target_part: Int
     
-    public override func encode(to encoder: Encoder) throws {
+    override func encode(to encoder: Encoder) throws {
         try super.encode(to: encoder)
         
         var container = encoder.container(keyedBy: CodingKeys.self)

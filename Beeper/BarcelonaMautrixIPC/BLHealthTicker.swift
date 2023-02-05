@@ -75,12 +75,4 @@ public class BLHealthTicker {
         }
         semaphore.wait()
     }
-    
-    /**
-     Terminates the current update loop
-     */
-    public func stop() {
-        timer?.invalidate()
-        timer = nil
-    }
 }

@@ -21,22 +21,6 @@ public struct BLMessageStatus: Codable {
         self.senderCorrelationID = sender_correlation_id
     }
     
-    public init?(event: CBMessageStatusChange) {
-        switch event.type {
-        case .notDelivered:
-            guid = event.messageID
-            chatGUID = event.chat.blChatGUID
-            status = .failed
-            message = event.message.errorCode.localizedDescription
-            statusCode = event.message.errorCode.description
-            service = event.service
-            correlationID = event.chat.correlationIdentifier
-            senderCorrelationID = event.senderCorrelationID
-        default:
-            return nil
-        }
-    }
-    
     public init(sentMessageGUID: String, onService: String, forChatGUID: String, correlation_id: String? = nil, sender_correlation_id: String? = nil) {
         guid = sentMessageGUID
         chatGUID = forChatGUID

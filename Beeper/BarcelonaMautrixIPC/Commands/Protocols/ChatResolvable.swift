@@ -10,11 +10,11 @@ import Foundation
 import Barcelona
 import IMCore
 
-public protocol ChatResolvable {
+protocol ChatResolvable {
     var chat_guid: String { get set }
 }
 
-public extension ChatResolvable {
+extension ChatResolvable {
     var chat: IMChat? {
         if let chat = IMChatRegistry.shared.existingChat(withGUID: chat_guid) {
             return chat
@@ -31,10 +31,6 @@ public extension ChatResolvable {
                 return IMChatRegistry.shared.existingChat(withGUID: parsed.description)
             }
         }
-    }
-    
-    var cbChat2: CBChat? {
-        CBChatRegistry.shared.chats[.guid(chat_guid)]
     }
     
     var cbChat: Chat? {

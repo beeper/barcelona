@@ -85,7 +85,7 @@ public struct BLMessage: Codable, ChatResolvable {
     public var thread_originator_guid: String?
     public var thread_originator_part: Int
     public var attachments: [BLAttachment]?
-    public var associated_message: BLAssociatedMessage?
+    var associated_message: BLAssociatedMessage?
     public var group_action_type: Int?
     public var new_group_title: String?
     public var is_audio_message: Bool?
@@ -156,29 +156,7 @@ public struct BLMessage: Codable, ChatResolvable {
         }
     }
     
-    public init(message: Message, phantoms: inout [PhantomChatItem]) {
-        self.init(message: message)
-        
-        for item in message.items {
-            if let phantom = item.item as? PhantomChatItem {
-                phantoms.append(phantom)
-            }
-        }
-    }
-    
     public static func < (left: BLMessage, right: BLMessage) -> Bool {
         left.timestamp < right.timestamp
-    }
-    
-    public static func > (left: BLMessage, right: BLMessage) -> Bool {
-        left.timestamp < right.timestamp
-    }
-    
-    public static func <= (left: BLMessage, right: BLMessage) -> Bool {
-        left.timestamp <= right.timestamp
-    }
-    
-    public static func >= (left: BLMessage, right: BLMessage) -> Bool {
-        left.timestamp >= right.timestamp
     }
 }

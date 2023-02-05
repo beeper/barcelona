@@ -13,9 +13,6 @@ public class MXFeatureFlags: FlagProvider {
     
     public let suiteName: String = "com.beeper.mautrix-imessage"
     
-    @FeatureFlag("read-helper", defaultValue: true)
-    public var enableReadHelpers: Bool
-    
     @FeatureFlag("merged-chats", defaultValue: false)
     public var mergedChats: Bool
 }

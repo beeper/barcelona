@@ -9,8 +9,6 @@
 import Foundation
 import BarcelonaFoundation
 
-private let BLDefaultModule = ""
-
 private extension LoggingLevel {
     var ipcLevel: IPCLoggingLevel {
         switch self {
@@ -42,11 +40,7 @@ public class BLMautrixSTDOutDriver: LoggingDriver {
             "line": line.description
         ]))), log: false)
     }
-    
-    public func log(level: LoggingLevel, module: String, message: BackportedOSLogMessage, metadata: [String: Encodable]) {
-        self.ipcChannel.writePayload(.init(id: nil, command: .log(LogCommand(level: level.ipcLevel, module: module, message: message.render(level: BLRuntimeConfiguration.privacyLevel), metadata: metadata))))
-    }
-    
+
     public func log(level: LoggingLevel, fileID: StaticString, line: Int, function: StaticString, dso: UnsafeRawPointer, category: StaticString, message: BackportedOSLogMessage, metadata: MetadataValue) {
         self.ipcChannel.writePayload(.init(id: nil, command: .log(LogCommand(level: level.ipcLevel, module: String(category), message: message.render(level: BLRuntimeConfiguration.privacyLevel), metadata: [
             "fileID": fileID.description,
