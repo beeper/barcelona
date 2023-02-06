@@ -9,10 +9,10 @@
 import Foundation
 import InterposeKit
 import IMCore
-import OSLog
+import Logging
 import IMSharedUtilities
 
-private let log = Logger(category: "Hooks")
+private let log = Logger(label: "Hooks")
 
 internal struct BLMessageStatusChange {
     let message: IMMessage
@@ -137,7 +137,7 @@ public class HookManager {
         
         for (index, hook) in hooks.enumerated() {
             #if DEBUG
-            log.debug("Applying hook %ld of %ld", index + 1, hooks.count)
+            log.debug("Applying hook \(index + 1) of \(hooks.count)")
             #endif
             
             if let interpose = try hook() {
@@ -161,7 +161,7 @@ public class HookManager {
         
         for (index, hook) in appliedHooks.enumerated() {
             #if DEBUG
-            log.debug("Reverting hook %ld of %ld", index + 1, hooks.count)
+            log.debug("Reverting hook \(index + 1) of \(hooks.count)")
             #endif
             
             try hook.revert()

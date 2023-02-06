@@ -9,6 +9,7 @@
 import Foundation
 @_spi(matrix) import Barcelona
 import IMCore
+import Logging
 
 internal extension Chat {
     var blChatGUID: String {
@@ -98,6 +99,7 @@ public struct BLMessage: Codable, ChatResolvable {
     public var correlation_id: String?
     
     public init(message: Message) {
+        let log = Logger(label: "Message")
         guid = message.id
         timestamp = message.time / 1000 // mautrix-imessage expects this to be seconds
         subject = message.subject
@@ -131,7 +133,7 @@ public struct BLMessage: Codable, ChatResolvable {
                 self.item_type = IMItemType.groupAction.rawValue
             case let acknowledgment as AcknowledgmentChatItem:
                 guard let parsedID = CBMessageItemIdentifierData(rawValue: acknowledgment.associatedID) else {
-                    CLFault("BLMessage", "Failed to parse associatedID %@", acknowledgment.associatedID)
+                    log.error("Failed to parse associatedID \(acknowledgment.associatedID)", source: "BLMessage")
                     continue
                 }
                 

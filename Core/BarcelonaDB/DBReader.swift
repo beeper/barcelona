@@ -9,8 +9,9 @@
 import Foundation
 import BarcelonaFoundation
 import GRDB
+import Logging
 
-internal let DBLog = Logger(category: "Database")
+internal let log = Logger(label: "Database")
 
 extension Configuration {
     init(trace: TraceFunction?) {
@@ -23,7 +24,7 @@ extension Configuration {
 
 #if DB_LOGGING
 private var dbConfiguration = Configuration { db in
-    DBLog.debug("Executing query: %@", db)
+    log.debug("Executing query: %@", db)
 }
 #else
 private var dbConfiguration = Configuration(trace: nil)

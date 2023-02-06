@@ -9,6 +9,7 @@
 import Foundation
 import BarcelonaFoundation
 import GRDB
+import Logging
 
 public typealias HandleTimestampRecord = (handle_id: String, date: Int64, chat_id: String)
 
@@ -51,8 +52,6 @@ public extension DBReader {
     /// - Returns: array of handle/timestamp pairs
     func handleTimestampRecords(forChatIdentifiers chatIDs: [String]) -> Promise<[HandleTimestampRecord]> {
         read { db in
-            let operation = Logger(category: "Database").operation(named: "Query time-sorted participants").begin()
-            
             let query: SQLRequest<HandleTimestampSynthesized> = """
             SELECT DISTINCT handle.id AS handle_id, MAX(message.date) AS date, chat.chat_identifier AS chat_id FROM message
             INNER JOIN handle ON message.handle_id = handle.ROWID
@@ -60,10 +59,6 @@ public extension DBReader {
             INNER JOIN chat ON chat_message_join.chat_id = chat.ROWID AND chat.chat_identifier IN \(chatIDs)
             GROUP BY handle_id, chat_identifier ORDER BY message.date DESC
             """
-            
-            defer {
-                operation.end()
-            }
             
             return try query.fetchAll(db).map(\.record)
         }

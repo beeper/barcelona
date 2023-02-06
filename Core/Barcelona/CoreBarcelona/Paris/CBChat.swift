@@ -9,10 +9,11 @@ import Foundation
 import Combine
 import IMFoundation
 import IMSharedUtilities
+import Logging
 
 /// An entity tracking a single logical conversation comprised of potentially several different chats
 public class CBChat {
-    private static let log = Logger(category: "CBChat", subsystem: "com.beeper.imc.paris")
+    private let log = Logger(label: "CBChat")
     /// All cached messages for this chat
     public internal(set) var messages: [String: CBMessage] = [:]
     /// The style of this chat
@@ -104,10 +105,6 @@ public class CBChat {
         }
         leaves[guid, default: CBChatLeaf()].handle(dictionary: dictionary)
     }
-}
-
-extension CBChat {
-    @_transparent var log: Logger { CBChat.log }
 }
 
 public struct CBChatParticipant {
@@ -233,7 +230,7 @@ public extension CBChat {
             do {
                 return try BLResolveIDStatusForIDs(deduplicatedRecipientIDs, onService: service.id)
             } catch {
-                log.fault("Error while resolving ID status for \(deduplicatedRecipientIDs.joined(separator: ",")) in \(self.mergedID): \(String(describing: error))")
+                log.error("Error while resolving ID status for \(deduplicatedRecipientIDs.joined(separator: ",")) in \(self.mergedID): \(String(describing: error))")
                 return [:]
             }
         }()
@@ -255,7 +252,7 @@ public extension CBChat {
         }
         let recipients = Array(recipientsByID.values)
         let recipientCount = recipients.count
-        log.info("There are \(recipientCount, privacy: .public) recipients to choose from: \(recipientsByID.keys.joined(separator: ","))")
+        log.info("There are \(recipientCount) recipients to choose from: \(recipientsByID.keys.joined(separator: ","))")
         func compareHandles(_ handle1: IMHandle, _ handle2: IMHandle) -> Bool {
             lazy var handle1PN = handle1.id.isPhoneNumber
             lazy var handle2PN = handle2.id.isPhoneNumber

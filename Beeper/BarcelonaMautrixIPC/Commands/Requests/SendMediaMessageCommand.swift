@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import enum Swog.MetadataValue
+
 import struct Barcelona.Message
 
 public struct SendMediaMessageCommand: Codable, ChatResolvable {

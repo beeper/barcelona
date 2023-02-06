@@ -8,11 +8,12 @@
 import Foundation
 import IMCore
 import IMSharedUtilities
-import Swog
+import Logging
 
 /// Registers a file transfer with imagent for the given filename and path.
 /// The returned file transfer is ready to be sent by including its GUID in a message.
 public func CBInitializeFileTransfer(filename: String, path: URL) -> IMFileTransfer {
+    let log = Logger(label: "CBInitializeFileTransfer")
     var transfer: IMFileTransfer!
     Thread.main.sync {
         var guid: String
@@ -29,9 +30,9 @@ public func CBInitializeFileTransfer(filename: String, path: URL) -> IMFileTrans
                 try FileManager.default.copyItem(at: path, to: persistentURL)
                 IMFileTransferCenter.sharedInstance().cbRetargetTransfer(transfer, toPath: persistentPath)
                 transfer.localURL = persistentURL
-                CLInfo("CBFileTransfer", "Retargeted file transfer \(guid) from \(path) to \(persistentURL)")
+                log.info("Retargeted file transfer \(guid) from \(path) to \(persistentURL)", source: "CBFileTransfer")
             } catch {
-                CLFault("CBFileTransfer", "Failed to retarget file transfer \(guid) from \(path) to \(persistentURL): \(String(describing: error))")
+                log.error("Failed to retarget file transfer \(guid) from \(path) to \(persistentURL): \(String(describing: error))", source: "CBFileTransfer")
             }
         }
         

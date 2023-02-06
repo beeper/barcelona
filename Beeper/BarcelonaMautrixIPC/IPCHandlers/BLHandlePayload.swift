@@ -9,9 +9,9 @@
 import Foundation
 import Barcelona
 import IMCore
-import Swog
+import Logging
 
-internal let IPCLog = Logger(category: "BLIPC")
+private let log = Logger(label: "BLIPC")
 
 private extension IPCPayload {
     var runnable: Runnable? {
@@ -48,7 +48,7 @@ private extension IPCPayload {
 
 func BLHandlePayload(_ payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
     guard let runnable = payload.runnable else {
-        return IPCLog.warn("Received unhandleable payload type \(payload.command.name)")
+        return log.warning("Received unhandleable payload type \(payload.command.name)")
     }
     
     if runnable is AuthenticatedAsserting {

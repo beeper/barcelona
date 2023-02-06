@@ -7,9 +7,9 @@
 
 import Foundation
 import IDS
-import Swog
+import Logging
 
-fileprivate let log = Logger(category: "imagent")
+fileprivate let log = Logger(label: "imagent")
 
 extension DispatchQueue {
     static let IDSProcessingQueue = DispatchQueue(label: "com.barcelona.imagent.IDSProcessingQueue")

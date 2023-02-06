@@ -12,7 +12,7 @@ import IMSharedUtilities
 import AnyCodable
 import Gzip
 import Swime
-import Swog
+import Logging
 import UniformTypeIdentifiers
 
 private let UnarchivingClasses = [
@@ -235,6 +235,9 @@ public struct MessageExtensionsData: Codable, Hashable {
 }
 
 public extension RichLinkMetadata {
+    var log: Logging.Logger {
+        Logger(label: "RichLinkMetadata")
+    }
     init?(extensionData: MessageExtensionsData, attachments: [Attachment], fallbackText: inout String) {
         if let appIcon = extensionData.appIcon, let iconData = Data(base64Encoded: appIcon) {
             icon = RichLinkAsset(mimeType: nil, accessibilityText: nil, source: .data(iconData), originalURL: nil, size: .init(cg: .zero))
@@ -271,27 +274,27 @@ public extension RichLinkMetadata {
             for attachment in attachments {
                 if let transfer = attachment.existingFileTransfer {
                     guard let guid = transfer.guid else {
-                        CLDebug("LPLink+MSExt", "Skipping transfer %@ because it has no GUID?!", transfer)
+                        log.debug("Skipping transfer \(transfer) because it has no GUID?!", source: "LPLink+MSExt")
                         continue
                     }
-                    CLInfo("LPLink+MSExt", "Transfer %@ mime %@ isAuxImage %d", guid, transfer.mimeType ?? "nil", transfer.isAuxImage)
+                    log.info("Transfer \(guid) mime \(transfer.mimeType ?? "nil") isAuxImage \(transfer.isAuxImage)", source: "LPLink+MSExt")
                     guard let type = transfer.type else {
-                        CLDebug("LPLink+MSExt", "Skip transfer %@ because it is missing a UTI", guid)
+                        log.debug("Skip transfer \(guid) because it is missing a UTI", source: "LPLink+MSExt")
                         continue
                     }
                     guard UTTypeConformsTo(type as CFString, kUTTypeImage) else {
-                        CLDebug("LPLink+MSExt", "Skip transfer %@ because it is not an image", guid)
+                        log.debug("Skip transfer \(guid) because it is not an image", source: "LPLink+MSExt")
                         continue
                     }
                     guard let localURL = transfer.localURL else {
-                        CLInfo("LPLink+MSExt", "Skip transfer %@ because it has no local URL", guid)
+                        log.info("Skip transfer \(guid) because it has no local URL", source: "LPLink+MSExt")
                         continue
                     }
                     guard let data = CBTranscoding.toJPEG(contentsOf: localURL) else {
-                        CLWarn("LPLink+MSExt", "Failed to transcode image to JPEG from %@", localURL.absoluteString)
+                        log.warning("Failed to transcode image to JPEG from \(localURL.absoluteString)", source: "LPLink+MSExt")
                         continue
                     }
-                    CLInfo("LPLink+MSExt", "Selecting transfer %@ for extension data translation", guid)
+                    log.info("Selecting transfer \(guid) for extension data translation", source: "LPLink+MSExt")
                     let size = transfer.mediaSize.map {
                         RichLinkMetadata.RichLinkAsset.Size(width: Double($0.width), height: Double($0.height))
                     }

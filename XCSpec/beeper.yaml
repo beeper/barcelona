@@ -20,6 +20,8 @@ targets:
         embed: true
         link: true
       - package: SwiftyContacts
+      - package: swift-log
+        product: Logging
   barcelona-mautrix:
     group: Beeper
     type: tool
@@ -50,6 +52,8 @@ targets:
         link: true
       - package: SwiftCLI
       - package: Sentry
+      - package: swift-log
+        product: Logging
   barcelona-mautrix-tests:
     group: Beeper
     templates:

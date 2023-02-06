@@ -8,10 +8,10 @@
 
 import Foundation
 import BarcelonaFoundation
-import Swog
+import Logging
 import GRDB
 
-private let logger = Logger(category: "MessagesDB")
+private let logger = Logger(label: "MessagesDB")
 
 // MARK: - Messages.swift
 public extension DBReader {
@@ -62,7 +62,7 @@ public extension DBReader {
                     .fetchOne(database)?.service
             }
         } catch {
-            logger.fault("Failed to query database when fetching the service of IMMessage[guid=\(guid)]: \(String(describing: error))")
+            logger.error("Failed to query database when fetching the service of IMMessage[guid=\(guid)]: \(String(describing: error))")
             return nil
         }
     }

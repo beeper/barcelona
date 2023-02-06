@@ -8,8 +8,8 @@
 import Barcelona
 import Foundation
 import IMCore
+import Logging
 import Sentry
-import Swog
 
 public struct ResolveIdentifierCommand: Codable {
     public var identifier: String
@@ -30,6 +30,7 @@ enum ResolveIdentifierCommandError: Error {
 extension ResolveIdentifierCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         Task {
+            let log = Logger(label: "ResolveIdentifierCommand")
             var retrievedGuid: GUIDResponse? = nil
 
             let result = try await withThrowingTaskGroup(of: ChatLocator.SenderGUIDResult.self) { group in
@@ -39,9 +40,9 @@ extension ResolveIdentifierCommand: Runnable {
                 group.addTask {
                     let timeout: UInt64 = 12
                     try await Task.sleep(nanoseconds: timeout * 1_000_000_000)
-                    CLWarn(
-                        "ResolveIdentifier",
-                        "Resolving identifier for \(identifier) timed out in \(timeout) seconds"
+                    log.warning(
+                        "Resolving identifier for \(identifier) timed out in \(timeout) seconds",
+                        source: "ResolveIdentifier"
                     )
                     throw ResolveIdentifierCommandError.timeout
                 }
@@ -54,15 +55,18 @@ extension ResolveIdentifierCommand: Runnable {
             case .guid(let guid):
                 retrievedGuid = .init(guid)
             case .failed(let message):
-                CLWarn("ResolveIdentifier", "Resolving identifier for \(identifier) failed with message: \(message)")
+                log.warning(
+                    "Resolving identifier for \(identifier) failed with message: \(message)",
+                    source: "ResolveIdentifier"
+                )
             }
 
             if let retrievedGuid {
                 payload.respond(.guid(retrievedGuid), ipcChannel: ipcChannel)
             } else if IMServiceImpl.smsEnabled() {
-                CLInfo(
-                    "ResolveIdentifier",
-                    "Responding that \(identifier) is available on SMS due to availability of forwarding"
+                log.info(
+                    "Responding that \(identifier) is available on SMS due to availability of forwarding",
+                    source: "ResolveIdentifier"
                 )
                 payload.respond(.guid(.init("SMS;-;\(identifier)")), ipcChannel: ipcChannel)
             } else {
@@ -82,13 +86,14 @@ public struct PrepareDMCommand: Codable {
 
 extension PrepareDMCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
+        let log = Logger(label: "ResolveIdentifierCommand")
         let transaction = SentrySDK.startTransaction(name: "prepare_dm", operation: "prepare_dm")
 
         let parsed = ParsedGUID(rawValue: guid)
 
         if MXFeatureFlags.shared.mergedChats {
             let chat = Chat.directMessage(withHandleID: parsed.last, service: .iMessage)
-            CLInfo("PrepareDM", "Prepared chat \(chat.id)")
+            log.info("Prepared chat \(chat.id)", source: "PrepareDM")
         } else {
             guard let service = parsed.service.flatMap(IMServiceStyle.init(rawValue:)) else {
                 transaction.setData(value: "err_invalid_service", key: "error")
@@ -100,7 +105,7 @@ extension PrepareDMCommand: Runnable {
             }
 
             let chat = Chat.directMessage(withHandleID: parsed.last, service: service)
-            CLInfo("PrepareDM", "Prepared chat \(chat.id) on service \(service.rawValue)")
+            log.info("Prepared chat \(chat.id) on service \(service.rawValue)", source: "PrepareDM")
         }
 
         payload.respond(.ack, ipcChannel: ipcChannel)

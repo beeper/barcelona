@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Swog
+import Logging
 
 public extension IPCPayload {
     func respond(_ response: IPCResponse, ipcChannel: MautrixIPCChannel) {
@@ -22,7 +22,7 @@ public enum IPCResponse: Encodable {
     case chat_avatar(BLAttachment?)
     case message_receipt(BLPartialMessage)
     case guid(GUIDResponse)
-    case arbitrary(MetadataValue)
+    case arbitrary(any Codable)
     case ack
     case none
     

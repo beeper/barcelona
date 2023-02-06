@@ -9,7 +9,7 @@ import Foundation
 import GRDB
 import IDS
 import IMCore
-import Swog
+import Logging
 import Pwomise
 import IMSharedUtilities
 
@@ -115,6 +115,7 @@ private prefix func ~(_ expression: @autoclosure () -> ()) {
 /// Tracks the correlation of different sender IDs to a single, unique identity representing an Apple ID
 public class CBSenderCorrelationController {
     private class Stack {
+        let log = Logger(label: "CBSenderCorrelationController.Stack")
         static let stack = Stack()
         
         static func storeURL() throws -> URL {
@@ -167,13 +168,13 @@ public class CBSenderCorrelationController {
             }
             
             if let oldURL = try? Self.oldStoreURL(), FileManager.default.fileExists(atPath: oldURL.path), !migratedDatabase {
-                CLInfo("Correlation", "Found old correlation database, attempting to import")
+                log.info("Found old correlation database, attempting to import", source: "Correlation")
                 do {
                     let queue = try DatabaseQueue(path: oldURL.path)
                     try queue.read { database in
                         var stmt = try database.makeSelectStatement(sql: "SELECT identifier FROM grdb_migrations where identifier = 'v4';")
                         guard try String.fetchOne(stmt) != nil else {
-                            CLWarn("Correlation", "Correlation database was not upgraded to v4, I will not be migrating it.")
+                            log.warning("Correlation database was not upgraded to v4, I will not be migrating it.", source: "Correlation")
                             return
                         }
                         stmt = try database.makeSelectStatement(sql: "SELECT correlation_identifier, sender_id FROM correlation")
@@ -185,18 +186,18 @@ public class CBSenderCorrelationController {
                                     continue
                                 }
                                 let sender_id: String = row["sender_id"]
-                                CLDebug("Correlation", "Importing correlation of \(sender_id, privacy: .private)/\(correl_id, privacy: .private)")
+                                log.debug("Importing correlation of \(sender_id)/\(correl_id)", source: "Correlation")
                                 try database2.execute(literal: """
                                                                INSERT OR IGNORE INTO correlation (correl_id, sender_id) VALUES (\(correl_id), \(sender_id))
                                                                """)
                             }
                         }
-                        CLInfo("Correlation", "Migrated correlation database!")
+                        log.info("Migrated correlation database!", source: "Correlation")
                         try FileManager.default.removeItem(at: oldURL)
                     }
                     migratedDatabase = true
                 } catch {
-                    CLFault("Correlation", "Failed to migrate old correlation database: \((error as NSError).debugDescription)")
+                    log.error("Failed to migrate old correlation database: \((error as NSError).debugDescription)", source: "Correlation")
                 }
             }
         }
@@ -298,7 +299,7 @@ public class CBSenderCorrelationController {
         reset()
     }
     
-    private let log = Logger(category: "CBSenderCorrelation")
+    private let log = Logger(label: "CBSenderCorrelation")
     private static let queue = DispatchQueue(label: "CBSenderCorrelation")
     
     /// this dictionary tracks the latest optionality to avoid redundant db hits for correlation IDs that we don't have
@@ -333,7 +334,7 @@ public class CBSenderCorrelationController {
         if let correlationID = cachedCorrelation(for: senderID) {
             return correlationID
         }
-        ~log.debug("Looking up correlation ID for \(senderID, privacy: .public)")
+        ~log.debug("Looking up correlation ID for \(senderID)")
         let semaphore = DispatchSemaphore(value: 1)
         var semaphoreLocked: Bool {
             if semaphore.wait(timeout: .now()) == .success {
@@ -406,16 +407,16 @@ public class CBSenderCorrelationController {
                                     self.log.debug("Correlation ID is equal to the sender ID? \(senderID) == \(correlationID)")
                                     continue
                                 }
-                                self.log.info("IDS says the correlation identifier for \(senderID) is \(correlationID, privacy: .auto)")
+                                self.log.info("IDS says the correlation identifier for \(senderID) is \(correlationID)")
                                 correlations[senderID] = correlationID
                                 break
                             } else {
-                                ~self.log.debug("\(senderID, privacy: .public) has no correlationID")
+                                ~self.log.debug("\(senderID) has no correlationID")
                             }
                         }
                     }
                 } else {
-                    ~self.log.debug("IDSIDQueryController returned no results for ID query, confused. \(senderIDs, privacy: .public)")
+                    ~self.log.debug("IDSIDQueryController returned no results for ID query, confused. \(senderIDs)")
                 }
                 resolve(correlations)
             }
@@ -436,14 +437,14 @@ public class CBSenderCorrelationController {
         let cachedCorrelations = loadCachedCorrelations(senderIDs: senders, hitDatabase: hitDatabase)
         if cachedCorrelations.count == senders.count {
             // all correlations are stored
-            ~log.debug("Cache hit when querying \(senders.count, privacy: .public) senders, returning immediately")
+            ~log.debug("Cache hit when querying \(senders.count) senders, returning immediately")
             return cachedCorrelations.values.mostPopulousElement ?? nil
         } else if case .some(.some(let mostPopulousCorrelationID)) = cachedCorrelations.values.mostPopulousElement {
             // some correlations are stored, but not all
             for sender in senders {
                 if cachedCorrelations[sender] == nil {
                     // this sender has no correlation, set it to the correlation ID with the highest count
-                    ~log.debug("Cloning correlation of \(mostPopulousCorrelationID, privacy: .auto) to \(sender, privacy: .auto)")
+                    ~log.debug("Cloning correlation of \(mostPopulousCorrelationID) to \(sender)")
                     correlate(senderID: sender, correlationID: mostPopulousCorrelationID)
                 }
             }
@@ -454,7 +455,7 @@ public class CBSenderCorrelationController {
             if correlations.isEmpty {
                 // there's truly no correlations, set caches to nil and return
                 for sender in senders {
-                    ~log.debug("\(sender, privacy: .auto) has no correlation ID, caching a nil value")
+                    ~log.debug("\(sender) has no correlation ID, caching a nil value")
                     senderIDToCorrelationID[sender] = .some(.none)
                 }
                 return nil
@@ -464,7 +465,7 @@ public class CBSenderCorrelationController {
                 for sender in senders {
                     if correlations[sender] == nil {
                         // this sender has no correlation, set it to the correlation ID with the highest count
-                        ~log.debug("Cloning correlation of \(mostPopulousCorrelationID, privacy: .auto) to \(sender, privacy: .auto)")
+                        ~log.debug("Cloning correlation of \(mostPopulousCorrelationID) to \(sender)")
                         correlate(senderID: sender, correlationID: mostPopulousCorrelationID)
                     }
                 }
@@ -610,7 +611,7 @@ extension IMChat {
                 siblings.insert(self, at: 0)
             }
             #if DEBUG
-            CLDebug("Correlation", "Siblings for \(self.id) are \(siblings.map(\.debugDescription))")
+            log.debug("Siblings for \(self.id) are \(siblings.map(\.debugDescription))", source: "Correlation")
             #endif
             return siblings
         }

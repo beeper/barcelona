@@ -9,8 +9,9 @@
 import Foundation
 import Barcelona
 import Combine
+import Logging
 
-fileprivate let log = Logger(category: "BLHealthTicker")
+fileprivate let log = Logger(label: "BLHealthTicker")
 
 public class BLHealthTicker {
     public static let shared = BLHealthTicker()

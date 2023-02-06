@@ -16,7 +16,7 @@ public extension DBReader {
     }
     
     func attachments(withGUIDs guids: [String]) -> Promise<[RawAttachment]> {
-        DBLog.debug("DBReader selecting attachments with GUIDs %@", guids)
+        log.debug("DBReader selecting attachments with GUIDs \(guids)")
         
         if guids.count == 0 { return .success([]) }
         

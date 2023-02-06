@@ -8,12 +8,14 @@
 
 import Foundation
 import IMCore
+import Logging
 
 private let SIMULATION_OUTGOING_ID = "+15555648583"
 private let SIMULATION_INCOMING_IDS = ["iMessage"]
 private let SIMULATION_MESSAGE_OFFSET = 0xc3500
 
 class ERIMSimulationTools {
+    static let log = Logger(label: "ERIMSimulationTools")
     private static var _sharedInstance: ERIMSimulationTools!
     
     static var sharedInstance: ERIMSimulationTools {
@@ -25,7 +27,7 @@ class ERIMSimulationTools {
     }
     
     static func bootstrap() {
-        CLInfo("ERIMSimulationTools", "initialized with chat GUID %@", SIMULATION_OUTGOING_ID)
+        log.info("initialized with chat GUID \(SIMULATION_OUTGOING_ID)", source: "ERIMSimulationTools")
     }
     
     private let iMessageAccount: IMSimulatedAccount

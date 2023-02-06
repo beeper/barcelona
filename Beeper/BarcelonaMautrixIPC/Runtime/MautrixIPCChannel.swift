@@ -10,6 +10,7 @@ import Combine
 import OpenCombine
 import ERBufferedStream
 import Foundation
+import Logging
 
 let TERMINATOR = Data("\n".utf8)
 
@@ -20,6 +21,8 @@ public protocol MautrixIPCInputChannel {
 public protocol MautrixIPCOutputChannel {
    func write(_ data: Data)
 }
+
+private let log = Logger(label: "MautrixIPCChannel")
 
 public class MautrixIPCChannel {
     public var receivedPayloads = Combine.PassthroughSubject<IPCPayload, Never>()
@@ -53,13 +56,13 @@ public class MautrixIPCChannel {
             .sink { result in
                 switch result {
                 case .failure(let error):
-                    CLWarn("MautrixIPC", "Failed to decode payload: %@", "\(error)")
+                    log.warning("Failed to decode payload: \("\(error)")", source: "MautrixIPC")
                     #if DEBUG
-                    CLInfo("MautrixIPC", "Raw payload: %@", String(decoding: error.rawData, as: UTF8.self))
+                    log.info("Raw payload: \(String(decoding: error.rawData, as: UTF8.self))", source: "MautrixIPC")
                     #endif
                 case .success(let payload):
                     #if DEBUG
-                    CLInfo("BLStandardIO", "Incoming! %@ %ld", payload.command.name.rawValue, payload.id ?? -1)
+                    log.info("Incoming! \(payload.command.name.rawValue) \(payload.id ?? -1)", source: "BLStandardIO")
                     #endif
                     
                     if payload.command.name != .ping, let id = payload.id, id > 1, !self.pongedOnce {
@@ -118,19 +121,16 @@ public class MautrixIPCChannel {
     }()
     
     public func writePayload(_ payload: @autoclosure () -> IPCPayload, log: Bool = true) {
-        self.writePayloads([payload()], log: log)
+        self.writePayloads([payload()])
     }
     
-    public func writePayloads(_ payloads: [IPCPayload], log: Bool = true) {
+    public func writePayloads(_ payloads: [IPCPayload]) {
         var data = Data()
         
         for payload in payloads {
-            if !CBFeatureFlags.runningFromXcode && log {
+            if !CBFeatureFlags.runningFromXcode {
                 func printIt() {
-                    CLInfo(
-                        "BLStandardIO",
-                        "Outgoing! %@ %ld", payload.command.name.rawValue, payload.id ?? -1
-                    )
+                    log.info("Outgoing! \(payload.command.name.rawValue) \(payload.id ?? -1)", source: "BLStandardIO")
                 }
                 #if DEBUG
                 printIt()

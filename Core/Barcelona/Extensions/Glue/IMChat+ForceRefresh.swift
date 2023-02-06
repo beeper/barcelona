@@ -7,7 +7,9 @@
 
 import Foundation
 import IMCore
-import Swog
+import Logging
+
+private let log = Logger(label: "IMChat")
 
 public extension IMChat {
     /// Returns true if the next message sent will be sent over SMS
@@ -29,12 +31,12 @@ public extension IMChat {
         beginObservingHandleAvailability()
 
         guard let account else {
-            CLWarn("IMChat", "Chat \(self.guid) has no account associated with it, can't watch participants")
+            log.warning("Chat \(self.guid) has no account associated with it, can't watch participants", source: "IMChat")
             return
         }
 
         guard let participants else {
-            CLWarn("IMChat", "Chat \(self.guid) participants is nil, can't watch them")
+            log.warning("Chat \(self.guid) participants is nil, can't watch them", source: "IMChat")
             return
         }
 

@@ -9,6 +9,7 @@
 import Foundation
 import BarcelonaFoundation
 import Barcelona
+import Logging
 
 /// Need to update the enums codable data? Paste the cases at the top into IPCCommand.codegen.js and then paste the output of that below the CodingKeys declaration
 public enum IPCCommand {
@@ -37,6 +38,8 @@ public enum IPCCommand {
     case pre_startup_sync
     case unknown
 }
+
+private let log = Logger(label: "IPCPayload")
 
 public struct IPCPayload: Codable {
     public var command: IPCCommand
@@ -72,7 +75,7 @@ public struct IPCPayload: Codable {
     
     public func reply(withCommand command: IPCCommand, ipcChannel: MautrixIPCChannel) {
         guard let id = id else {
-            return CLDebug("Mautrix", "Reply issued for a command that had no ID. Inbound name: %@ Outbound name: %@", self.command.name.rawValue, self.command.name.rawValue)
+            return log.debug("Reply issued for a command that had no ID. Inbound name: \(self.command.name.rawValue) Outbound name: \(self.command.name.rawValue)", source: "Mautrix")
         }
         
         ipcChannel.writePayload(IPCPayload(id: id, command: command))

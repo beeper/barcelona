@@ -8,7 +8,7 @@
 
 import Foundation
 import IMCore
-import Swog
+import Logging
 
 extension IMChatItem {
     var resolvedSenderID: String? {
@@ -16,9 +16,11 @@ extension IMChatItem {
     }
 }
 
+private let log = Logger(label: "AcknowledgmentChatItem")
+
 public struct AcknowledgmentChatItem: ChatItemAssociable, ChatItemOwned, Hashable {
     public static let ingestionClasses: [NSObject.Type] = [IMMessageAcknowledgmentChatItem.self]
-    
+
     public init(ingesting item: NSObject, context: IngestionContext) {
         self.init(item as! IMMessageAcknowledgmentChatItem, chatID: context.chatID)
     }
@@ -32,7 +34,7 @@ public struct AcknowledgmentChatItem: ChatItemAssociable, ChatItemOwned, Hashabl
         threadOriginator = item.threadOriginatorID
         acknowledgmentType = item.acknowledmentType
         if acknowledgmentType == 0 {
-            CLDebug("AcknowledgmentChatItem", "tapback is nil for id %@ on ventura; this is very unexpected", id)
+            log.debug("tapback is nil for id \(id) on ventura; this is very unexpected", source: "AcknowledgmentChatItem")
         }
         sender = item.resolvedSenderID
         associatedID = item.associatedMessageGUID

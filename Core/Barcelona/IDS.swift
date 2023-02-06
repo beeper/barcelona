@@ -7,9 +7,9 @@
 
 import Foundation
 import IDS
-import Swog
+import Logging
 
-fileprivate let log = Logger(category: "IDS", subsystem: "com.beeper.imc.IDS")
+fileprivate let log = Logger(label: "IDS")
 
 public enum IDStatusError: Error, CustomDebugStringConvertible {
     case malformedID
@@ -149,7 +149,7 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
     let destinations = ids.compactMap(\.destination)
     
     if destinations.count != ids.count {
-        log.warn("Some IDs are malformed and will not be queried, partial results will be returned")
+        log.warning("Some IDs are malformed and will not be queried, partial results will be returned")
     }
     
     func FetchLatest(_ destinations: [String], _ callback: @escaping ([String: IDSState]) -> ()) {
@@ -157,7 +157,7 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
             return callback([:])
         }
         
-        log.info("Requesting ID status from server for destinations \(destinations.joined(separator: ","), privacy: .auto) on service \(service.idsIdentifier ?? "nil", privacy: .public)")
+        log.info("Requesting ID status from server for destinations \(destinations.joined(separator: ",")) on service \(service.idsIdentifier ?? "nil")")
         
         IDSIDQueryController.sharedInstance()!.forceRefreshIDStatus(forDestinations: destinations, service: service.idsIdentifier!, listenerID: IDSListenerID, queue: HandleQueue) { states in
             let mappedStates = states.mapValues { IDSState(rawValue: $0.intValue) }
@@ -176,7 +176,7 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
             return callback([:])
         }
 
-        log.info("Requesting ID status from cache for destinations \(destinations.joined(separator: ","), privacy: .auto) on service \(service.idsIdentifier ?? "nil", privacy: .public)")
+        log.info("Requesting ID status from cache for destinations \(destinations.joined(separator: ",")) on service \(service.idsIdentifier ?? "nil")")
 
         let (cached, uncached) = destinations.splitReduce(intoLeft: [String: IDSState](), intoRight: [String]()) { cached, uncached, destination in
             if let status = BLIDSIDQueryCache.shared.result(for: destination) {
@@ -219,7 +219,7 @@ fileprivate extension String {
         case .businessID: return IDSCopyIDForBusinessID(self as CFString)
         case .phoneNumber: return IDSCopyIDForPhoneNumber(self as CFString)
         case .unknown:
-            log.warn("\(self) will not be queried because it is an unrecognized address")
+            log.warning("\(self) will not be queried because it is an unrecognized address")
             return nil
         }
     }

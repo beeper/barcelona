@@ -8,9 +8,9 @@
 
 import Foundation
 import IMCore
-import Swog
+import Logging
 
-let log_IMChat = Logger(category: "IMChat+Queries")
+let log_IMChat = Logger(label: "IMChat+Queries")
 
 @_transparent
 @_optimize(speed)

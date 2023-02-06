@@ -10,6 +10,7 @@ import Foundation
 import Barcelona
 import IMCore
 import BarcelonaDB
+import Logging
 
 extension Array where Element == String {
     /// Given self is an array of chat GUIDs, masks the GUIDs to iMessage service and returns the deduplicated result
@@ -49,8 +50,11 @@ extension GetChatsCommand: Runnable {
 }
 
 extension GetGroupChatInfoCommand: Runnable {
+    var log: Logging.Logger {
+        Logger(label: "TapbackCommand")
+    }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
-        CLInfo("MautrixIPC", "Getting chat with id %@", chat_guid)
+        log.info("Getting chat with id \(chat_guid)", source: "MautrixIPC")
         
         guard let chat = blChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
@@ -61,8 +65,11 @@ extension GetGroupChatInfoCommand: Runnable {
 }
 
 extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
+    var log: Logging.Logger {
+        Logger(label: "TapbackCommand")
+    }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
-        CLInfo("MautrixIPC", "Sending read receipt to %@", String(describing: cbChat?.blChatGUID))
+        log.info("Sending read receipt to \(String(describing: cbChat?.blChatGUID))", source: "MautrixIPC")
 
         guard let chat = cbChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)

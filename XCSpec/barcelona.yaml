@@ -12,7 +12,6 @@ targets:
       - package: Gzip
       - package: InterposeKit
       - package: BarcelonaFoundation
-      - package: Swog
       - package: Pwomise
       - package: FeatureFlags
       - package: SwiftCLI
@@ -41,6 +40,8 @@ targets:
         product: IMFoundation
       - package: Paris
         product: IMDPersistence
+      - package: swift-log
+        product: Logging
       - target: BarcelonaDB
         embed: true
         link: true
@@ -54,7 +55,8 @@ targets:
       - package: GRDB
       - package: BarcelonaFoundation
       - package: Sentry
-      - package: Swog
+      - package: swift-log
+        product: Logging
   # Tools
   grapple:
     group: Tools

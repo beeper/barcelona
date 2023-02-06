@@ -7,7 +7,7 @@
 
 import Foundation
 import Barcelona
-import Swog
+import Logging
 
 extension Message {
     var isRead: Bool {
@@ -26,7 +26,7 @@ class ReadReceiptTester: GrappleDebugger {
     var messagePipeline: CBPipeline<Void>? { didSet { oldValue?.cancel() } }
     var statusPipeline: CBPipeline<Void>? { didSet { oldValue?.cancel() } }
     
-    let log = Logger(category: "ReadReceipts")
+    let log = Logger(label: "ReadReceipts")
     
     var config = Configuration()
     
@@ -58,7 +58,7 @@ class ReadReceiptTester: GrappleDebugger {
         }
         
         guard !message.isRead else {
-            log.warn("received message \(message.id) but it is already read")
+            log.warning("received message \(message.id) but it is already read")
             message.printOut()
             return
         }

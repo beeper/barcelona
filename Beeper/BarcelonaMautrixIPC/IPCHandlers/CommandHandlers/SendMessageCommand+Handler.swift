@@ -9,6 +9,9 @@
 import Foundation
 import Barcelona
 import IMCore
+import Logging
+
+private let log = Logger(label: "SendMessageCommand")
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
@@ -40,7 +43,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
             if isRichLink, let url = rich_link?.originalURL ?? rich_link?.URL ?? richLinkURL {
                 var threadError: Error?
                 Thread.main.sync ({
-                    CLDebug("BLMautrix", "I am processing a rich link! text '\(text, privacy: .private)'")
+                    log.debug("I am processing a rich link! text '\(text)'", source: "BLMautrix")
                     
                     let message = ERCreateBlankRichLinkMessage(text.trimmingCharacters(in: [" "]), url) { item in
                         if #available(macOS 11.0, *), let replyToGUID = reply_to {
@@ -54,7 +57,8 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                     if CBFeatureFlags.adHocRichLinks, let richLink = rich_link {
                         do {
                             #if DEBUG
-                            CLInfo("AdHocLinks", "mautrix-imessage gave me %@", try String(decoding: JSONEncoder().encode(richLink), as: UTF8.self))
+
+                            log.info("mautrix-imessage gave me \(richLink)", source: "AdHocLinks")
                             #endif
                             afterSend = try message.provideLinkMetadata(richLink)
                         } catch {
@@ -86,7 +90,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
             payload.reply(withResponse: .message_receipt(BLPartialMessage(guid: finalMessage.id, service: finalMessage.service.rawValue, timestamp: finalMessage.time)), ipcChannel: ipcChannel)
         } catch {
             // girl fuck
-            CLFault("BLMautrix", "failed to send text message: %@", error as NSError)
+            log.error("failed to send text message: \(error as NSError)", source: "BLMautrix")
             switch error {
             case let error as BarcelonaError:
                 payload.fail(code: error.code.description, message: error.message, ipcChannel: ipcChannel)

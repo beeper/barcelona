@@ -7,7 +7,7 @@
 
 import Foundation
 import Barcelona
-import Swog
+import Logging
 
 protocol GrappleDebugger: AnyObject {
     func start()
@@ -23,7 +23,7 @@ class DuplicateMessageAggregator: GrappleDebugger {
     var messages: [String: Message] = [:]
     var duplicates: [String: [Message]] = [:]
     
-    let log = Logger(category: "Aggregator")
+    let log = Logger(label: "Aggregator")
     
     private var pipeline: CBPipeline<Void>?
     
@@ -60,7 +60,7 @@ class DuplicateMessageAggregator: GrappleDebugger {
     func record(message: Message) {
         if let existing = messages[message.id] {
             duplicates[message.id, default: [existing]].append(message)
-            log.warn("Found duplicate message for \(message.id)")
+            log.warning("Found duplicate message for \(message.id)")
         } else {
             messages[message.id] = message
         }

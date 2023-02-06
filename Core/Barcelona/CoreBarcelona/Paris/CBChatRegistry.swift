@@ -8,7 +8,7 @@
 import Foundation
 import IMCore
 import IMFoundation
-import Swog
+import Logging
 import Combine
 import BarcelonaDB
 import IMDPersistence
@@ -23,7 +23,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     var messageIDReverseLookup: [String: CBChatIdentifier] = [:]
     private var subscribers: Set<AnyCancellable> = Set()
     
-    private let log = Logger(category: "CBChatRegistry", subsystem: "com.ericrabil.barcelona.CBChatRegistry")
+    private let log = Logger(label: "CBChatRegistry")
     
     override init() {
         super.init()
@@ -36,7 +36,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
                 _ = handle(chat: chat)
             }
         } else {
-            log.warn("Did not receive personMergedChats in setup info")
+            log.warning("Did not receive personMergedChats in setup info")
         }
     }
     
@@ -96,7 +96,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     
     private func trace(_ chatIdentifier: String!, _ personCentricID: String!, _ message: String, _ function: StaticString = #function) {
         defer { visited = Set() }
-        log.debug("chat \(chatIdentifier ?? "nil", privacy: .public) pcID \(personCentricID ?? "nil", privacy: .public) \(message, privacy: .private): \(function.description, privacy: .public)")
+        log.debug("chat \(chatIdentifier ?? "nil") pcID \(personCentricID ?? "nil") \(message): \(function.description)")
     }
     
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, groupID: String!, chatPersonCentricID personCentricID: String!, messagesReceived messages: [IMItem]!, messagesComingFromStorage fromStorage: Bool) {
@@ -315,7 +315,7 @@ public extension CBChatRegistry {
             try leaf.forEachIdentifier { identifier in
                 if let cbChat = self.chats[identifier] {
                     cbChat.handle(dictionary: chat)
-//                    log.debug("Notifying CBChat of updated chat \(String(describing: identifier), privacy: .public)")
+//                    log.debug("Notifying CBChat of updated chat \(String(describing: identifier))")
                     throw FoundError.found(cbChat)
                 }
             }
@@ -372,18 +372,18 @@ public extension CBChatRegistry {
                     continue
                 }
                 if self.chats[identifier] === chat {
-                    self.log.warn("Forgetting \(String(describing: identifier), privacy: .public)")
+                    self.log.warning("Forgetting \(String(describing: identifier))")
                     self.chats[identifier] = nil
                 }
             }
             for identifier in newIdentifiers {
                 if let chat = self.chats[identifier] {
                     if chat !== chat {
-                        self.log.warn("Encountered two different CBChats with the same identifier \(String(describing: identifier), privacy: .public)")
+                        self.log.warning("Encountered two different CBChats with the same identifier \(String(describing: identifier))")
                     }
                     continue
                 }
-//                self.log.info("Storing \(String(describing: identifier), privacy: .public)")
+//                self.log.info("Storing \(String(describing: identifier))")
                 self.chats[identifier] = chat
             }
         }.store(in: &subscribers)
@@ -394,7 +394,7 @@ public extension CBChatRegistry {
 public extension CBChatRegistry {
     func handle(chat: [AnyHashable: Any], item: IMItem) -> Bool {
         guard let identifier = handle(chat: chat).1 else {
-            log.warn("cant handle message \(item, privacy: .auto) via chat dictionary: couldnt find a chat for it")
+            log.warning("cant handle message \(item) via chat dictionary: couldnt find a chat for it")
             return false
         }
         handle(chat: identifier, item: item)

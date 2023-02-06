@@ -9,10 +9,10 @@ import Foundation
 import IMCore
 import IMFoundation
 import Combine
-import Swog
+import Logging
 @_spi(synchronousQueries) import BarcelonaDB
 
-fileprivate let log = Logger(category: "MessageMonitor")
+fileprivate let log = Logger(label: "MessageMonitor")
 
 public class BLMediaMessageMonitor {
     public let messageID: () -> String
@@ -32,18 +32,18 @@ public class BLMediaMessageMonitor {
         self.callback = callback
         self.transferStates = transferGUIDs.map { ($0, IMFileTransfer.IMFileTransferState.unknown) }.dictionary(keyedBy: \.0, valuedBy: \.1)
         var monitor: BLMessageExpert.BLMessageObserver?
-        log.debug("Set up monitoring for message %@ and transfers %@", messageID(), transferGUIDs)
+        log.debug("Set up monitoring for message \(messageID()) and transfers \(transferGUIDs)")
         monitor = BLMessageExpert.shared.observer(forMessage: messageID()) { [weak self, messageID, monitor] event in
             guard let self = self else {
-                log.info("Destroying message observer for dealloc'd monitor of %@", messageID())
+                log.info("Destroying message observer for dealloc'd monitor of \(messageID())")
                 monitor?.cancel()
                 return
             }
             if case .message = event {
-                log.debug("Ignoring message event for %@, I want lifecycle only", messageID())
+                log.debug("Ignoring message event for \(messageID()), I want lifecycle only")
                 return
             }
-            log.debug("Processing message event %@ for message %@", event.name.rawValue, messageID())
+            log.debug("Processing message event \(event.name.rawValue) for message \(messageID())")
             self.latestMessageEvent = event
         }
         self.monitor = monitor
@@ -73,7 +73,7 @@ public class BLMediaMessageMonitor {
         monitor?.cancel()
         observer?.unsubscribe()
         timeout?.cancel()
-        log.debug("Deallocating message monitor for message %@ and transfers %@", messageID(), transferGUIDs)
+        log.debug("Deallocating message monitor for message \(messageID()) and transfers \(transferGUIDs)")
     }
     
     public private(set) var result: (Bool, FZErrorType?, Bool)?
@@ -114,7 +114,7 @@ public class BLMediaMessageMonitor {
                 return
             }
             #if DEBUG
-            log.debug("%@; errorCode=%@", message.debugDescription, message.errorCode.description)
+            log.debug("\(message.debugDescription); errorCode=\(message.errorCode.description)")
             #endif
             if message.isSent && message.isFinished {
                 if message._imMessageItem.serviceStyle == .SMS {
@@ -143,7 +143,7 @@ public class BLMediaMessageMonitor {
         guard let guid = transfer.guid, transferGUIDs.contains(guid) else {
             return
         }
-        log.info("Processing transfer state %@ for transfer %@ for message %@", transfer.state.description, guid, messageID())
+        log.info("Processing transfer state \(transfer.state.description) for transfer \(guid) for message \(messageID())")
         transferStates[guid] = transfer.state
     }
 }
@@ -156,7 +156,7 @@ private extension BLMediaMessageMonitor {
                 return
             }
             let messageID = self.messageID()
-            log.warn("Failed to send message %@ with attachments %@ in a timely manner! This is very, very sad.", messageID, self.transferGUIDs)
+            log.warning("Failed to send message \(messageID) with attachments \(self.transferGUIDs) in a timely manner! This is very, very sad.")
             self.snap(success: false, code: .attachmentUploadFailure, shouldCancel: true)
         }
         timer.schedule(deadline: .now().advanced(by: .seconds(60)))
