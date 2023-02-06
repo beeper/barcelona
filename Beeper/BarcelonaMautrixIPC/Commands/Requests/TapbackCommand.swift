@@ -9,7 +9,7 @@
 import Foundation
 import Barcelona
 
-public struct TapbackCommand: Codable, ChatResolvable, TargetResolvable {
+public struct TapbackCommand: Codable, ChatResolvable {
     public var chat_guid: String
     public var target_guid: String
     public var type: Int

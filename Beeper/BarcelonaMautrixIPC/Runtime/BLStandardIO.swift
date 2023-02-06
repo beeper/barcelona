@@ -75,29 +75,6 @@ extension FileHandle: MautrixIPCOutputChannel {
     // FileHandle implements func write(_ data: Data) already.
 }
 
-private extension Data {
-    func split(separator: Data) -> [Data] {
-        var chunks: [Data] = []
-        var pos = startIndex
-        // Find next occurrence of separator after current position:
-        while let r = self[pos...].range(of: separator) {
-            // Append if non-empty:
-            if r.lowerBound > pos {
-                chunks.append(self[pos..<r.lowerBound])
-            }
-            // Update current position:
-            pos = r.upperBound
-        }
-        // Append final chunk, if non-empty:
-        if pos < endIndex {
-            chunks.append(self[pos..<endIndex])
-        }
-        return chunks
-    }
-}
-
-private let BLPayloadSeparator = "\n".data(using: .utf8)!
-
 extension Formatter {
     static let iso8601withFractionalSeconds: DateFormatter = {
         let formatter = DateFormatter()
@@ -115,16 +92,3 @@ extension JSONEncoder.DateEncodingStrategy {
         try container.encode(Formatter.iso8601withFractionalSeconds.string(from: $0))
     }
 }
-
-extension JSONDecoder.DateDecodingStrategy {
-    static let iso8601withFractionalSeconds = custom {
-        let container = try $0.singleValueContainer()
-        let string = try container.decode(String.self)
-        guard let date = Formatter.iso8601withFractionalSeconds.date(from: string) else {
-            throw DecodingError.dataCorruptedError(in: container,
-                  debugDescription: "Invalid date: " + string)
-        }
-        return date
-    }
-}
-

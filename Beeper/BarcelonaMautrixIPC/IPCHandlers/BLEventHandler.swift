@@ -13,30 +13,7 @@ import Swog
 
 fileprivate let log = Logger(category: "self.ipcChannel.writePayload")
 
-private extension ChatItemOwned {
-    var mautrixFriendlyGUID: String {
-        "\(chat.service!.rawValue);\(chat.imChat.isGroup ? "+" : "-");\(sender!)"
-    }
-    
-    var chat: Chat {
-        Chat.resolve(withIdentifier: chatID)!
-    }
-}
-
 private extension CBMessageStatusChange {
-    var senderHandle: IMHandle? {
-        guard let service = IMServiceAgent.shared().service(withName: service) else {
-            return nil
-        }
-        guard let account = IMAccountController.shared.bestAccount(forService: service) else {
-            return nil
-        }
-        guard let sender = sender else {
-            return nil
-        }
-        return account.imHandle(withID: sender)
-    }
-    
     var mautrixFriendlyGUID: String? {
         guard let sender = sender else {
             return nil
@@ -45,21 +22,8 @@ private extension CBMessageStatusChange {
     }
 }
 
-extension IMChatRegistry {
-    func existingChat(forHandleID handleID: String) -> IMChat? {
-        for account in IMAccountController.shared.accounts {
-            let handle = account.imHandle(withID: handleID)
-            if let chat = existingChat(for: handle) {
-                return chat
-            }
-        }
-        return nil
-    }
-}
-
 public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
-    private let fifoQueue = FifoQueue<Void>()
-    
+
     private let ipcChannel: MautrixIPCChannel
     
     public init(ipcChannel: MautrixIPCChannel) {
@@ -134,11 +98,5 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
     
     public func purgedTransferFailed(_ transfer: IMFileTransfer) {
         self.ipcChannel.writePayload(.init(id: nil, command: .error(.init(code: "file-transfer-failure", message: "Failed to download file transfer: \(transfer.errorDescription ?? transfer.error.description) (\(transfer.error.description))"))))
-    }
-}
-
-extension Chat {
-    var lastMessageID: String? {
-        imChat.lastMessage?.guid
     }
 }

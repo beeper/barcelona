@@ -16,12 +16,6 @@ public extension IMChat {
     }
 }
 
-public extension Chat {
-    var blChat: BLChat {
-        BLChat(chat_guid: blChatGUID, title: displayName, members: participants, correlation_id: imChat.correlationIdentifier)
-    }
-}
-
 public struct BLChat: Codable, ChatResolvable {
     public var chat_guid: String
     public var title: String?

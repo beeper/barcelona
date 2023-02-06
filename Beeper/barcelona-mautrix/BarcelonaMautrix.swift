@@ -14,7 +14,6 @@ import SwiftCLI
 import Sentry
 
 private let log = Logger(category: "ERBarcelonaManager", subsystem: "com.beeper.imc.barcelona-mautrix")
-private let trace = Tracer(log, true)
 
 @main
 class BarcelonaMautrix {
@@ -22,7 +21,7 @@ class BarcelonaMautrix {
     private let reader: BLPayloadReader
     private let eventHandler: BLEventHandler
     
-    public init(_ mautrixIPCChannel: MautrixIPCChannel) {
+    init(_ mautrixIPCChannel: MautrixIPCChannel) {
         self.mautrixIPCChannel = mautrixIPCChannel
         reader = BLPayloadReader(ipcChannel: mautrixIPCChannel)
         eventHandler = BLEventHandler(ipcChannel: mautrixIPCChannel)

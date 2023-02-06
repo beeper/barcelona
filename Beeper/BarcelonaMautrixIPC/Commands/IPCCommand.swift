@@ -10,18 +10,6 @@ import Foundation
 import BarcelonaFoundation
 import Barcelona
 
-public struct IPCError: Error {
-    public let message: String?
-    
-    public init(_ message: String? = nil) {
-        self.message = message
-    }
-    
-    public var localizedDescription: String {
-        self.message ?? "An unknown error occurred"
-    }
-}
-
 /// Need to update the enums codable data? Paste the cases at the top into IPCCommand.codegen.js and then paste the output of that below the CodingKeys declaration
 public enum IPCCommand {
     case send_message(SendMessageCommand)

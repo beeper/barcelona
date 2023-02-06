@@ -10,10 +10,10 @@ import Foundation
 import Barcelona
 import IMCore
 
-public struct ParsedGUID: Codable, CustomStringConvertible {
-    public var service: String?
-    public var style: String?
-    public var last: String
+struct ParsedGUID: Codable, CustomStringConvertible {
+    var service: String?
+    var style: String?
+    var last: String
     
     init(rawValue: String) {
         guard rawValue.contains(";") else {
@@ -33,7 +33,7 @@ public struct ParsedGUID: Codable, CustomStringConvertible {
         last = String(split[2])
     }
     
-    public var description: String {
+    var description: String {
         guard let service = service, let style = style else {
             return last
         }

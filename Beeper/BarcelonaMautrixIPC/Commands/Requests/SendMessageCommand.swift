@@ -9,14 +9,7 @@
 import Foundation
 import Barcelona
 
-public protocol SendMessageCommandBase {
-    var chat_guid: String { get set }
-    var reply_to: String? { get set }
-    var reply_to_part: Int? { get set }
-    var metadata: Message.Metadata? { get set }
-}
-
-public struct SendMessageCommand: Codable, ChatResolvable, SendMessageCommandBase {
+public struct SendMessageCommand: Codable, ChatResolvable {
     public var chat_guid: String
     public var text: String
     public var reply_to: String?

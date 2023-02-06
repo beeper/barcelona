@@ -8,7 +8,7 @@
 import Foundation
 import Sentry
 
-@objc public protocol SentryCommand {
+@objc protocol SentryCommand {
     @objc var name: String { get }
     @objc func execute() throws
 }
@@ -24,10 +24,6 @@ import Sentry
     @objc static var shared: IMCSentryConfiguratorProtocol { get }
     /// Whether the current productName has an assigned DSN.
     @objc var knownProduct: Bool { get }
-    /// The hostname you're operating under, default is `UserDefaults.standard.string(forKey: "com.beeper.environment") ?? "beeper.com"`
-    @objc var environment: String? { get set }
-    /// Default is canary, if you have a release you can set it
-    @objc var version: String { get set }
     /// Default is `ProcessInfo.processInfo.processName`, used for release identification and which DSN you use
     @objc var productName: String { get set }
     /// Default is true when running on a debug root
@@ -39,7 +35,7 @@ import Sentry
 }
 
 /** Resolves the sentry configurator by weak linking against potential paths */
-public func IMCSharedSentryConfigurator() -> IMCSentryConfiguratorProtocol? {
+func IMCSharedSentryConfigurator() -> IMCSentryConfiguratorProtocol? {
     if ProcessInfo.processInfo.environment.keys.contains("DIE_SENTRY") {
         return nil
     }
@@ -66,30 +62,30 @@ public func IMCSharedSentryConfigurator() -> IMCSentryConfiguratorProtocol? {
 #if true
 import SwiftCLI
 
-public class SentryCLICommandGroup: CommandGroup {
-    public var name: String { group.name }
-    public var shortDescription: String { group.shortDescription }
+class SentryCLICommandGroup: CommandGroup {
+    var name: String { group.name }
+    var shortDescription: String { group.shortDescription }
     
     private let group: SentryCommandGroup
     
-    public class SentryCLICommand: Command {
-        public var name: String { command.name }
+    class SentryCLICommand: Command {
+        var name: String { command.name }
         
         private let command: SentryCommand
         
-        public init(_ command: SentryCommand) {
+        init(_ command: SentryCommand) {
             self.command = command
         }
         
-        public func execute() throws {
+        func execute() throws {
             try command.execute()
         }
     }
     
-    public init(_ group: SentryCommandGroup) {
+    init(_ group: SentryCommandGroup) {
         self.group = group
     }
     
-    public private(set) lazy var children: [Routable] = group.children.map { unsafeBitCast($0, to: SentryCommand.self) }.map(SentryCLICommand.init(_:))
+    private(set) lazy var children: [Routable] = group.children.map { unsafeBitCast($0, to: SentryCommand.self) }.map(SentryCLICommand.init(_:))
 }
 #endif

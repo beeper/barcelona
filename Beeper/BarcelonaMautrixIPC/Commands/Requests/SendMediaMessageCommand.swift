@@ -10,7 +10,7 @@ import Foundation
 import enum Swog.MetadataValue
 import struct Barcelona.Message
 
-public struct SendMediaMessageCommand: Codable, ChatResolvable, SendMessageCommandBase {
+public struct SendMediaMessageCommand: Codable, ChatResolvable {
     public var chat_guid: String
     public var path_on_disk: String
     public var file_name: String
