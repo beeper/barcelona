@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '14.1'
+          xcode-version: "14.1"
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -25,6 +25,9 @@ jobs:
             $GITHUB_WORKSPACE/macos_build
             /Users/runner/Library/Developer/Xcode/DerivedData
           key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+      - name: Install xcbeautify
+        run: |
+          brew install xcbeautify
 
       - name: Build Barcelona for macOS
         run: make mautrix-macos
