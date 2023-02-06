@@ -49,10 +49,7 @@ public class _CBFeatureFlags: FlagProvider {
     @FeatureFlag("any-country", defaultValue: false)
     public var ignoresSameCountryCodeAssertion: Bool
     
-    @FeatureFlag("scratchbox", domain: .debugging, defaultValue: false)
-    public var scratchbox: Bool
-    
-    @FeatureFlag("exit-after-scratchbox", domain: .debugging, defaultValue: true)
+    @FeatureFlag("exit-after-scratchbox", domain: .debugging, defaultValue: false)
     public var exitAfterScratchbox: Bool
     
     @FeatureFlag("prewarm-item-rules", defaultValue: true)

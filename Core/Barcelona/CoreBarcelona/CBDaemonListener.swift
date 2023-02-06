@@ -233,6 +233,16 @@ internal extension CBDaemonListener {
         NotificationCenter.default.addObserver(forName: .init("__kIMBuddyPropertiesChangedNotification"), object: nil, queue: nil) { notification in
             log.debug("Buddy properties changed: \(notification.object.debugDescription)")
         }
+
+        ifDebugBuild {
+            if !_scratchboxIsEmpty {
+                _scratchboxMain()
+
+                if CBFeatureFlags.exitAfterScratchbox {
+                    exit(0)
+                }
+            }
+        }
     }
 }
 

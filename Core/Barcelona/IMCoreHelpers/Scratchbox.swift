@@ -18,12 +18,8 @@ import IMCore
 import IMSharedUtilities
 import IMFoundation
 import IDS
+#endif
 
 @_spi(scratchbox) public func _scratchboxMain() {
-    
+
 }
-#else
-@_spi(scratchbox) public func _scratchboxMain() {
-    
-}
-#endif

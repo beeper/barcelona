@@ -76,16 +76,6 @@ public func BLSetup() -> Bool {
     
     log.info("Connected.")
     
-    ifDebugBuild {
-        if CBFeatureFlags.scratchbox && !_scratchboxIsEmpty {
-            _scratchboxMain()
-            
-            if CBFeatureFlags.exitAfterScratchbox {
-                exit(0)
-            }
-        }
-    }
-    
     return true
 }
 
@@ -146,16 +136,6 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
             controller.loadAllChats()
         } else {
             controller.loadChats(withChatID: "all")
-        }
-
-        ifDebugBuild {
-            if CBFeatureFlags.scratchbox && !_scratchboxIsEmpty {
-                _scratchboxMain()
-                
-                if CBFeatureFlags.exitAfterScratchbox {
-                    exit(0)
-                }
-            }
         }
     }
     
