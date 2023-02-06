@@ -113,7 +113,7 @@ public class BLMessageExpert {
         case .failed(id: let failedMessageID, service: _, chat: _, code: let failureCode, _):
             log.warning("Message \(failedMessageID) failed with failure code \(failureCode.description)")
         default:
-            return
+            break
         }
         seenMessages[event.id] = BLMessageEventReceipt(event: event, counter: counter)
         if seenMessages.count > 100 {
