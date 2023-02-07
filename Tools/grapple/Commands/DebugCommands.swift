@@ -107,12 +107,14 @@ class DebugCommands: CommandGroup {
                 NotificationCenter.default.addObserver(forName: .IMFileTransferUpdated, object: nil, queue: nil, using: handleTransferNotification)
                 NotificationCenter.default.addObserver(forName: .IMFileTransferCreated, object: nil, queue: nil, using: handleTransferNotification)
             }
+
+            let log = Logger(label: "DebugEventsCommand")
             
             CBDaemonListener.shared.aggregatePipeline.pipe { event in
                 if self.logAsMautrix {
                     switch event {
                     case .message(let message):
-                        log.info("\(json(BLMessage(message: message)))", source: "BLEvents")
+                        log.info("\(json(BLMessage(message: message)))", metadata: nil, source: "BLEvents")
                         return
                     default:
                         break
@@ -147,10 +149,11 @@ class DebugCommands: CommandGroup {
         let name = "always-read"
         
         @Flag("-e", "--enable-read-receipts", description: "forcibly enable sending read receipts for this chat") var enableReadReceipts: Bool
+        @Flag("-s", "--sms", description: "Find chat on SMS service (will find on iMessage otherwise)") var sms: Bool
         @Param var chatID: String
         
         func execute() throws {
-            if enableReadReceipts, let chat = IMChat.resolve(withIdentifier: chatID) {
+            if enableReadReceipts, let chat = IMChat.chat(withIdentifier: chatID, onService: sms ? .SMS : .iMessage, style: nil) {
                 chat.userToggledReadReceiptSwitch(true)
                 chat.markAllMessagesAsRead()
             }
@@ -158,7 +161,7 @@ class DebugCommands: CommandGroup {
                 guard chatID == self.chatID else {
                     return
                 }
-                guard let chat = IMChat.resolve(withIdentifier: chatID) else {
+                guard let chat = IMChat.chat(withIdentifier: chatID, onService: self.sms ? .SMS : .iMessage, style: nil) else {
                     return
                 }
                 chat.markAllMessagesAsRead()

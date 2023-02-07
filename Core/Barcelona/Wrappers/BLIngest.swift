@@ -13,13 +13,13 @@ import Logging
 private let log = Logger(label: "BLIngestObjects")
 
 // MARK: - Public API
-public func BLIngestObjects(_ objects: [NSObject], inChat chat: String? = nil) -> Promise<[ChatItem]> {
+public func BLIngestObjects(_ objects: [NSObject], inChat chatId: String? = nil, service: IMServiceStyle) -> Promise<[ChatItem]> {
     guard objects.count > 0 else {
         *log.debug("Early-exit BLIngest because objects is empty")
         return .success([])
     }
     
-    guard let chat = chat else {
+    guard let chatId else {
         *log.debug("inferring chat ids before ingestion because chat id was not provided")
         
         return _BLResolveChatIDs(forObjects: objects)
@@ -29,7 +29,7 @@ public func BLIngestObjects(_ objects: [NSObject], inChat chat: String? = nil) -
                 if _fastPath(chatIDs.allSatisfy { $0 == chatIDs.first }) {
                     *log.debug("taking fast-path for inferred chat IDs because they're all the same (\(chatIDs.first ?? "")")
                     
-                    return BLIngestObjects(objects, inChat: chatIDs.first)
+                    return BLIngestObjects(objects, inChat: chatIDs.first, service: service)
                 }
                 
                 *log.debug("found mismatched identifiers, ingesting them in chunks (\(chatIDs.joined(separator: ", "))")
@@ -39,7 +39,7 @@ public func BLIngestObjects(_ objects: [NSObject], inChat chat: String? = nil) -
                     *log.error("failed to load file transfers: \(error as NSError)")
                 }.then {
                     Promise.all(objects.enumerated().map { index, object in
-                        BLIngestObject(object, inChat: chatIDs[index])
+                        BLIngestObject(object, inChat: chatIDs[index], service: service)
                     })
                 }.observeOutput { items in
                     *log.info("aggregated ingestion got \(items.count) items")
@@ -49,24 +49,24 @@ public func BLIngestObjects(_ objects: [NSObject], inChat chat: String? = nil) -
     
     return _BLLoadFileTransfers(forObjects: objects).then { () -> [ChatItem] in
         *log.debug("file transfers loaded. parsing objects")
-        return _BLParseObjects(objects, inChat: chat)
+        return _BLParseObjects(objects, inChat: chatId, service: service)
     }.then { items -> Promise<[ChatItem]> in
         *log.debug("objects parsed. loading tapbacks")
-        return _BLLoadTapbacks(forItems: items, inChat: chat)
+        return _BLLoadTapbacks(forItems: items, inChat: chatId, service: service)
     }.observeOutput { items in
         *log.info("ingested \(items.count) items")
     }
 }
 
-public func BLIngestObject(_ object: NSObject, inChat chat: String? = nil) -> Promise<ChatItem> {
-    guard let chat = chat else {
+public func BLIngestObject(_ object: NSObject, inChat chatId: String? = nil, service: IMServiceStyle) -> Promise<ChatItem> {
+    guard let chatId else {
         return _BLResolveChatID(forObject: object)
-            .then { chat in
-                BLIngestObject(object, inChat: chat)
+            .then { chatId in
+                BLIngestObject(object, inChat: chatId, service: service)
             }
     }
     
-    return BLIngestObjects([object], inChat: chat).then {
+    return BLIngestObjects([object], inChat: chatId, service: service).then {
         $0.first!
     }
 }

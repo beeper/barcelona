@@ -86,7 +86,7 @@ internal extension Chat {
     }
     
     static var smsAccount: IMAccount {
-        IMAccountController.shared.activeSMSAccount ?? IMAccount(service: IMServiceStyle.SMS.service!)!
+        IMAccountController.shared.activeSMSAccount ?? IMAccount(service: IMServiceStyle.SMS.service)!
     }
     
     static func homogenousHandles(forIDs ids: [String]) -> [IMHandle] {

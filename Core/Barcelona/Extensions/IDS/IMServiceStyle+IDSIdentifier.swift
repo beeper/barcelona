@@ -10,7 +10,7 @@ import Foundation
 import IDS
 
 extension IMServiceStyle {
-    public var idsIdentifier: String? {
+    public var idsIdentifier: String {
         switch self {
         case .iMessage: return IDSServiceNameiMessage
         #if IDS_IMESSAGE_BIZ
@@ -19,7 +19,6 @@ extension IMServiceStyle {
         case .SMS: return IDSServiceNameSMSRelay
         case .Phone: return IDSServiceNameCalling
         case .FaceTime: return IDSServiceNameFaceTime
-        case .None: return nil
         }
     }
 }

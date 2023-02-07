@@ -13,12 +13,6 @@ import BarcelonaDB
 import Logging
 import IMFoundation
 
-public extension Array where Element == String {
-    func er_chatItems(in chat: String) -> Promise<[ChatItem]> {
-        IMMessage.messages(withGUIDs: self)
-    }
-}
-
 private func CBExtractThreadOriginatorAndPartFromIdentifier(_ identifier: String) -> (String, Int)? {
     let parts = identifier.split(separator: ",")
     
@@ -251,7 +245,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         self.threadOriginatorPart = threadOriginatorPart
     }
     
-    static func message(withGUID guid: String, in chatID: String? = nil) -> Promise<Message?> {
+    /*static func message(withGUID guid: String, in chatID: String? = nil) -> Promise<Message?> {
         IMMessage.message(withGUID: guid, in: chatID).then {
             $0 as? Message
         }
@@ -267,7 +261,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         DBReader.shared.messages(matching: query, limit: limit)
             .then { guids in BLLoadChatItems(withGUIDs: guids) }
             .compactMap { $0 as? Message }
-    }
+    }*/
     
     public static let ingestionClasses: [NSObject.Type] = [IMItem.self, IMMessage.self, IMMessageItem.self, IMAssociatedMessageItem.self]
     
@@ -275,19 +269,19 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         switch item {
         case let item as IMMessageItem:
             if let message = context.message {
-                self.init(item, message: message, items: context.items(forMessageItem: item), chatID: context.chatID)
+                self.init(item, message: message, items: context.items(forMessageItem: item), chatID: context.chatID, service: context.service)
             } else {
-                self.init(item, items: context.items(forMessageItem: item), chatID: context.chatID)
+                self.init(item, items: context.items(forMessageItem: item), chatID: context.chatID, service: context.service)
             }
         case let message as IMMessage:
-            self.init(message, items: context.items(forMessage: message), chatID: context.chatID)
+            self.init(message, items: context.items(forMessage: message), chatID: context.chatID, service: context.service)
         default:
             return nil
         }
     }
     
     // SPI for CBDaemonListener ONLY
-    init(messageItem item: IMMessageItem, chatID: String, items: [AnyChatItem]? = nil) {
+    init(messageItem item: IMMessageItem, chatID: String, service: IMServiceStyle, items: [AnyChatItem]? = nil) {
         id = item.id
         self.chatID = chatID
         fromMe = item.isFromMe()
@@ -302,14 +296,14 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         isAudioMessage = item.isAudioMessage
         isRead = item.isRead
         flags = .init(rawValue: item.flags)
-        self.items = items ?? IngestionContext(chatID: chatID).ingest(item.chatItems).map {
+        self.items = items ?? IngestionContext(chatID: chatID, service: service).ingest(item.chatItems).map {
             $0.eraseToAnyChatItem()
         }
-        service = item.resolveServiceStyle(inChat: chatID)
+        self.service = service
         sender = item.resolveSenderID(inService: service)
         associatedMessageID = item.associatedMessageGUID()
         fileTransferIDs = item.fileTransferGUIDs
-        description = item.message()?.description(forPurpose: .SPI, in: IMChat.resolve(withIdentifier: chatID), senderDisplayName: nil)
+        description = item.message()?.description(forPurpose: .SPI, in: IMChat.chat(withIdentifier: chatID, onService: service, style: nil), senderDisplayName: nil)
         failureCode = item.errorCode
         failed = failureCode != .noError
         failureDescription = failureCode.description
@@ -317,7 +311,13 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         metadata = item.metadata
     }
 
-    init(_ item: IMItem, transcriptRepresentation: ChatItem, chatID: String? = nil, additionalFileTransferGUIDs: [String] = []) {
+    init(
+        _ item: IMItem,
+        transcriptRepresentation: ChatItem,
+        service: IMServiceStyle,
+        chatID: String? = nil,
+        additionalFileTransferGUIDs: [String] = []
+    ) {
         id = item.id
         self.chatID = chatID ?? transcriptRepresentation.chatID
         fromMe = item.isFromMe
@@ -333,7 +333,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         isRead = false
         flags = 0x5
         items = [transcriptRepresentation.eraseToAnyChatItem()]
-        service = item.resolveServiceStyle(inChat: chatID)
+        self.service = service
         sender = item.resolveSenderID(inService: service)
         associatedMessageID = item.associatedMessageGUID()
         fileTransferIDs = additionalFileTransferGUIDs
@@ -343,12 +343,12 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         item.bareReceipt.assign(toMessage: &self)
     }
     
-    init(_ backing: IMMessageItem?, message: IMMessage, items chatItems: [ChatItem], chatID: String) {
+    init(_ backing: IMMessageItem?, message: IMMessage, items chatItems: [ChatItem], chatID: String, service: IMServiceStyle) {
         id = message.id
         self.chatID = chatID
         fromMe = message.isFromMe
         time = message.effectiveTime
-        service = backing?.resolveServiceStyle(inChat: chatID) ?? message.resolveServiceStyle(inChat: chatID)
+        self.service = service
         sender = message.resolveSenderID(inService: service)
         subject = message.subject?.id
         messageSubject = backing?.subject ?? message.messageSubject?.string
@@ -366,7 +366,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         failed = failureCode != .noError
         failureDescription = failureCode.description
         
-        if let chat = IMChat.resolve(withIdentifier: chatID) {
+        if let chat = IMChat.chat(withIdentifier: chatID, onService: service, style: nil) {
             description = message.description(forPurpose: .conversationList, in: chat)
         }
         
@@ -376,16 +376,16 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         metadata = backing?.metadata ?? message.metadata
     }
     
-    init(_ backing: IMMessageItem, items: [ChatItem], chatID: String) {
+    init(_ backing: IMMessageItem, items: [ChatItem], chatID: String, service: IMServiceStyle) {
         if let message = backing.message() ?? IMMessage.message(fromUnloadedItem: backing) {
-            self.init(backing, message: message, items: items, chatID: chatID)
+            self.init(backing, message: message, items: items, chatID: chatID, service: service)
         } else {
-            self.init(messageItem: backing, chatID: chatID, items: items.map { $0.eraseToAnyChatItem() })
+            self.init(messageItem: backing, chatID: chatID, service: service, items: items.map { $0.eraseToAnyChatItem() })
         }
     }
     
-    init(_ message: IMMessage, items: [ChatItem], chatID: String) {
-        self.init(message._imMessageItem, message: message, items: items, chatID: chatID)
+    init(_ message: IMMessage, items: [ChatItem], chatID: String, service: IMServiceStyle) {
+        self.init(message._imMessageItem, message: message, items: items, chatID: chatID, service: service)
     }
     
     private mutating func load(message: IMMessage?, backing: IMMessageItem?) {
@@ -453,7 +453,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     }
     
     public var imChat: IMChat! {
-        IMChat.resolve(withIdentifier: chatID)
+        IMChat.chat(withIdentifier: chatID, onService: service, style: nil)
     }
     
     public var chat: Chat! {
@@ -500,7 +500,7 @@ public extension Message {
             return self
         }
         
-        return Message(messageItem: item, chatID: chatID)
+        return Message(messageItem: item, chatID: chatID, service: service)
     }
 }
 

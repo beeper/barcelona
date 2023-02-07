@@ -53,25 +53,21 @@ internal func CBResolveMessageService(guid: String) -> IMServiceStyle {
     DBReader.shared.rawService(forMessage: guid)?.service?.id ?? .SMS
 }
 
-internal func CBResolveService(originalService: IMServiceStyle?, messageGUID: String, type: IMItemType, chatID: String?) -> IMServiceStyle {
-    if let service = originalService {
-        return service
+internal func CBResolveService(originalService: IMServiceStyle?, messageGUID: String, type: IMItemType) -> IMServiceStyle {
+    if let originalService {
+        return originalService
     }
     
     if type != .message {
         return .iMessage
     } else {
-        guard let chatID = chatID, let chat = IMChat.resolve(withIdentifier: chatID), let serviceStyle = chat.account?.service?.id else {
+        guard let chat = IMChat.chat(forMessage: messageGUID, onService: nil),
+              let serviceStyle = chat.account.service?.id else {
             return CBResolveMessageService(guid: messageGUID)
         }
         
         return serviceStyle
     }
-}
-
-protocol SenderServiceResolvable {
-    func resolveSenderID(inService service: IMServiceStyle?) -> String?
-    func resolveServiceStyle(inChat chat: String?) -> IMServiceStyle
 }
 
 extension IMItem {
@@ -80,22 +76,22 @@ extension IMItem {
     }
 }
 
-extension IMMessage: SenderServiceResolvable {
+extension IMMessage {
     func resolveSenderID(inService service: IMServiceStyle? = nil) -> String? {
         CBResolveSenderHandle(originalHandle: sender?.idWithoutResource, isFromMe: isFromMe, service: service ?? _imMessageItem?.serviceStyle)
     }
     
-    func resolveServiceStyle(inChat chat: String?) -> IMServiceStyle {
-        _imMessageItem?.serviceStyle ?? CBResolveService(originalService: _imMessageItem?.serviceStyle, messageGUID: guid, type: _imMessageItem?.type ?? .message, chatID: chat)
+    func resolveServiceStyle(inChat chat: String?) -> IMServiceStyle? {
+        _imMessageItem?.serviceStyle ?? CBResolveService(originalService: nil, messageGUID: self.guid, type: _imMessageItem?.type ?? .message)
     }
 }
 
-extension IMItem: SenderServiceResolvable {
+extension IMItem {
     func resolveSenderID(inService service: IMServiceStyle? = nil) -> String? {
         CBResolveSenderHandle(originalHandle: sender, isFromMe: isFromMe, service: service ?? self.service?.service?.id)
     }
     
-    func resolveServiceStyle(inChat chat: String?) -> IMServiceStyle {
-        serviceStyle ?? CBResolveService(originalService: serviceStyle, messageGUID: guid, type: type, chatID: chat)
+    func resolveServiceStyle(inChat chat: String?) -> IMServiceStyle? {
+        serviceStyle ?? CBResolveService(originalService: serviceStyle, messageGUID: guid, type: type)
     }
 }

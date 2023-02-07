@@ -18,7 +18,7 @@ private extension CBMessageStatusChange {
         guard let sender = sender else {
             return nil
         }
-        return "\(message.service ?? "iMessage");\(chat.isGroup ? "+" : "-");\(sender)"
+        return "\(message.service ?? "iMessage");\(chat?.isGroup ?? false ? "+" : "-");\(sender)"
     }
 }
 
@@ -34,12 +34,18 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         ipcChannel.writePayload(.init(command: command))
     }
     
-    @_spi(unitTestInternals) public func receiveTyping(_ chat: String, _ typing: Bool) {
-        if let chat = IMChat.resolve(withIdentifier: chat), chat.isSingle, let recipientID = chat.recipient?.id, BLBlocklistController.shared.isSenderBlocked(recipientID) {
+    @_spi(unitTestInternals) public func receiveTyping(_ chat: String, service: IMServiceStyle, _ typing: Bool) {
+        guard let chat = IMChat.chat(withIdentifier: chat, onService: service, style: nil) else {
+            return
+        }
+
+        if chat.isSingle,
+           let recipientID = chat.recipient?.id,
+           BLBlocklistController.shared.isSenderBlocked(recipientID) {
             return
         }
         
-        send(.typing(.init(chat_guid: Chat.resolve(withIdentifier: chat)!.imChat.blChatGUID, typing: typing)))
+        send(.typing(.init(chat_guid: chat.blChatGUID, typing: typing)))
     }
     
     @_spi(unitTestInternals) public func unreadCountChanged(_ chat: String, _ count: Int) {
@@ -58,12 +64,17 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 return
             }
 
-            log.debug("Processing read receipt from \(String(describing: change.mautrixFriendlyGUID)) in \(change.chat.blChatGUID) for \(change.messageID)")
+            guard let chat = change.chat else {
+                log.error("change \(change.chatID), \(change.messageID) can't resolve its IMChat; can't process")
+                return
+            }
 
-            self.ipcChannel.writePayload(.init(command: .read_receipt(BLReadReceipt(sender_guid: change.mautrixFriendlyGUID, is_from_me: change.fromMe, chat_guid: change.chat.blChatGUID, read_up_to: change.messageID, correlation_id: change.chat.correlationIdentifier, sender_correlation_id: change.senderCorrelationID))))
+            log.debug("Processing read receipt from \(String(describing: change.mautrixFriendlyGUID)) in \(chat.blChatGUID) for \(change.messageID)")
+
+            self.ipcChannel.writePayload(.init(command: .read_receipt(BLReadReceipt(sender_guid: change.mautrixFriendlyGUID, is_from_me: change.fromMe, chat_guid: chat.blChatGUID, read_up_to: change.messageID, correlation_id: chat.correlationIdentifier, sender_correlation_id: change.senderCorrelationID))))
         }
         
-        BLMessageExpert.shared.eventPipeline.pipe { event in
+        BLMessageExpert.shared.eventPipeline.pipe { event -> () in
             switch event {
             case .message(let message):
                 if let senderID = message.senderID, BLBlocklistController.shared.isSenderBlocked(senderID) {
@@ -87,9 +98,19 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 log.debug("Sending message payload \(blMessage.guid) \(blMessage.chat_guid) \(blMessage.sender_guid ?? "nil") \(blMessage.sender_correlation_id ?? "nil") \(blMessage.service)")
                 self.ipcChannel.writePayload(.init(command: .message(blMessage)))
             case .sent(id: let id, service: let service, chat: let chat, time: _, senderCorrelationID: let senderCorrelationID):
-                self.ipcChannel.writePayload(.init(command: .send_message_status(BLMessageStatus(sentMessageGUID: id, onService: service, forChatGUID: chat.blChatGUID, correlation_id: chat.correlationIdentifier, sender_correlation_id: senderCorrelationID))))
+                guard let chat else {
+                    log.error(".sent event \(event.id), \(event.service) can't resolve its IMChat; can't pass to mautrix.")
+                    return
+                }
+
+                self.ipcChannel.writePayload(.init(command: .send_message_status(BLMessageStatus(sentMessageGUID: id, onService: service.rawValue, forChatGUID: chat.blChatGUID, correlation_id: chat.correlationIdentifier, sender_correlation_id: senderCorrelationID))))
             case .failed(id: let id, service: let service, chat: let chat, code: let code, senderCorrelationID: let senderCorrelationID):
-                self.ipcChannel.writePayload(.init(command: .send_message_status(BLMessageStatus(guid: id, chatGUID: chat.blChatGUID, status: .failed, service: service, message: code.localizedDescription, statusCode: code.description, correlation_id: chat.correlationIdentifier, sender_correlation_id: senderCorrelationID))))
+                guard let chat else {
+                    log.error(".failed event \(event.id), \(event.service) can't resolve its IMChat; can't pass to mautrix.")
+                    return
+                }
+
+                self.ipcChannel.writePayload(.init(command: .send_message_status(BLMessageStatus(guid: id, chatGUID: chat.blChatGUID, status: .failed, service: service.rawValue, message: code.localizedDescription, statusCode: code.description, correlation_id: chat.correlationIdentifier, sender_correlation_id: senderCorrelationID))))
             default:
                 break
             }

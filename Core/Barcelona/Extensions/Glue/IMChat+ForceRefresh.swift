@@ -14,7 +14,7 @@ private let log = Logger(label: "IMChat")
 public extension IMChat {
     /// Returns true if the next message sent will be sent over SMS
     var willSendSMS: Bool {
-        account?.service?.id == .SMS
+        account.service?.id == .SMS
     }
     
     /// Returns true if there are data inconsistencies warranting a service refresh
@@ -30,13 +30,8 @@ public extension IMChat {
     func watchAllHandles() {
         beginObservingHandleAvailability()
 
-        guard let account else {
-            log.warning("Chat \(self.guid) has no account associated with it, can't watch participants", source: "IMChat")
-            return
-        }
-
         guard let participants else {
-            log.warning("Chat \(self.guid) participants is nil, can't watch them", source: "IMChat")
+            log.warning("Chat \(String(describing: self.guid)) participants is nil, can't watch them", source: "IMChat")
             return
         }
 

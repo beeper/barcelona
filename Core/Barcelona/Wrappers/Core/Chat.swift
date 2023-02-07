@@ -73,20 +73,13 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
         participants = backing.recentParticipantHandleIDs
         unreadMessageCount = backing.unreadMessageCount
         messageFailureCount = backing.messageFailureCount
-        service = backing.account?.service?.id
+        service = backing.account.service?.id
         lastMessage = backing.lastFinishedMessage?.description(forPurpose: .conversationList, in: backing, senderDisplayName: backing.lastMessage?.sender._displayNameWithAbbreviation)
         lastMessageTime = (backing.lastFinishedMessage?.time.timeIntervalSince1970 ?? 0) * 1000
         style = backing.chatStyle
         readReceipts = backing.readReceipts
         ignoreAlerts = backing.ignoreAlerts
         groupPhotoID = backing.groupPhotoID
-    }
-    
-    /// Resolves the chat an IMMessage was sent from
-    public static func chat(forMessage id: String) -> Promise<Chat?> {
-        IMChat.chat(forMessage: id).maybeMap { chat in
-            Chat(chat)
-        }
     }
     
     public var id: String
@@ -111,8 +104,12 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     }
     
     /// The underlying IMChat this Chat was created from
-    public var imChat: IMChat {
-        IMChat.resolve(withIdentifier: id)!
+    public var imChat: IMChat? {
+        let chat = service.flatMap { IMChat.chat(withIdentifier: id, onService: $0, style: style.CBChat) }
+        if chat == nil {
+            log.warning("IMChat.chat(withIdentifier: \(id), onService: \(String(describing: service)), style: \(style.CBChat)) returned nil")
+        }
+        return chat
     }
 }
 
@@ -130,6 +127,10 @@ public extension Chat {
         /*
          {"handles":["1234","eric@net.com"]}
          */
+        guard let imChat else {
+            return []
+        }
+
         let handles = participants.compactMap { Registry.sharedInstance.imHandle(withID: $0, onAccount: imChat.account) }
         
         var reasonMessage: IMMessage!
@@ -191,13 +192,13 @@ internal extension IMChat {
 public extension Chat {
     /// Marks a series of messages as read
     func markMessagesRead(withIDs messageIDs: [String]) {
-        imChat.markDirectRead(items: BLLoadIMMessageItems(withGUIDs: messageIDs))
+        imChat?.markDirectRead(items: BLLoadIMMessageItems(withGUIDs: messageIDs))
     }
     
     func markMessageAsRead(withID messageID: String) {
         BLLoadIMMessageItem(withGUID: messageID)
             .map { message in
-                imChat.markDirectRead(items: [message])
+                imChat?.markDirectRead(items: [message])
             }
     }
 }
@@ -253,8 +254,13 @@ public extension Thread {
 // MARK: - Message Sending
 public extension Chat {
     func messages(before: String? = nil, limit: Int? = nil, beforeDate: Date? = nil) -> Promise<[Message]> {
+        guard let service else {
+            log.warning("Cannot get messages(before: \(String(describing: before))) because service is nil; would not know what chat to check")
+            return .failure(BarcelonaError(code: 500, message: "Chat.service is nil"))
+        }
+
         if BLIsSimulation {
-            let guids: [String] = imChat.chatItemRules._items().compactMap { item in
+            let guids: [String] = imChat?.chatItemRules._items().compactMap { item in
                 if let chatItem = item as? IMChatItem {
                     return chatItem._item()?.guid
                 } else if let item = item as? IMItem {
@@ -262,16 +268,16 @@ public extension Chat {
                 }
                 
                 return nil
-            }
-            
-            return IMMessage.messages(withGUIDs: guids, in: self.id).compactMap { message -> Message? in
+            } ?? []
+
+            return IMMessage.messages(withGUIDs: guids, in: self.id, service: service).compactMap { message -> Message? in
                 message as? Message
             }.sorted(usingKey: \.time, by: >)
         }
         
         log.info("Querying IMD for recent messages using chat fast-path")
         
-        return BLLoadChatItems(withChatIdentifiers: [self.id], onServices: [.iMessage, .SMS], beforeGUID: before, limit: limit).compactMap {
+        return BLLoadChatItems(withChats: [(self.id, service)], beforeGUID: before, limit: limit).compactMap {
             $0 as? Message
         }
     }

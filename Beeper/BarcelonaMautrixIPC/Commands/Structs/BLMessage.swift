@@ -12,8 +12,8 @@ import IMCore
 import Logging
 
 internal extension Chat {
-    var blChatGUID: String {
-        imChat.blChatGUID
+    var blChatGUID: String? {
+        imChat?.blChatGUID
     }
 }
 
@@ -45,7 +45,7 @@ private extension Message {
     }
     
     var isGroup: Bool {
-        IMChat.resolve(withIdentifier: chatID)!.isGroup
+        IMChat.chat(withIdentifier: chatID, onService: service, style: nil)!.isGroup
     }
     
     var textContent: String {

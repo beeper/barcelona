@@ -9,10 +9,6 @@
 import Foundation
 import Barcelona
 
-internal extension Array where Element == IMServiceStyle {
-    static let CBMessageServices: [IMServiceStyle] = [.iMessage, .SMS]
-}
-
 internal extension Collection where Element == ChatItem {
     var messages: [Message] {
         compactMap {

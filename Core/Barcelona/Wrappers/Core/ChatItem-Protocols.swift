@@ -108,17 +108,17 @@ public enum ChatItemType: String, Codable, CaseIterable {
 
 public struct IngestionContext {
     
-    public init(chatID: String) {
+    public init(chatID: String, service: IMServiceStyle) {
         self.chatID = chatID
+        self.service = service
     }
     
     public let chatID: String
+    public let service: IMServiceStyle
     public let attachment: Attachment? = nil
     public let textParts: [TextPart]? = nil
     public let text: String? = nil
     public let message: IMMessage? = nil
-    
-    
 }
 
 internal extension Optional where Wrapped == String {

@@ -11,12 +11,6 @@ import IMCore
 import os.log
 import IMSharedUtilities
 
-extension Array where Element == IMMessage {
-    func bulkRepresentation(in chat: String) -> Promise<[Message]> {
-        BLIngestObjects(self, inChat: chat).compactMap { $0 as? Message }
-    }
-}
-
 private let message_log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "IMMessage+SPI")
 
 public extension IMMessage {
@@ -42,11 +36,11 @@ public extension IMMessage {
         message(fromUnloadedItem: item, withSubject: nil)
     }
     
-    static func message(withGUID guid: String, in chat: String? = nil) -> Promise<ChatItem?> {
-        return messages(withGUIDs: [guid], in: chat).then(\.first)
+    static func message(withGUID guid: String, in chat: String? = nil, service: IMServiceStyle) -> Promise<ChatItem?> {
+        return messages(withGUIDs: [guid], in: chat, service: service).then(\.first)
     }
     
-    static func messages(withGUIDs guids: [String], in chat: String? = nil) -> Promise<[ChatItem]> {
+    static func messages(withGUIDs guids: [String], in chat: String? = nil, service: IMServiceStyle) -> Promise<[ChatItem]> {
         if guids.count == 0 {
             return .success([])
         }
@@ -55,10 +49,10 @@ public extension IMMessage {
             return IMChatHistoryController.sharedInstance()!.loadMessages(withGUIDs: guids)
                     .compactMap(\._imMessageItem)
                     .then { items -> Promise<[ChatItem]> in
-                        BLIngestObjects(items, inChat: chat)
+                        BLIngestObjects(items, inChat: chat, service: service)
                     }
         } else {
-            return BLLoadChatItems(withGUIDs: guids, chatID: chat)
+            return BLLoadChatItems(withGUIDs: guids, chatID: chat, service: service)
         }
     }
 }

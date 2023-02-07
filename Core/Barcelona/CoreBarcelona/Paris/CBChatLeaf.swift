@@ -14,7 +14,7 @@ public struct CBChatLeaf {
     /// The chat identifier for this chat
     public var chatIdentifier: String = ""
     /// The service for this chat
-    public var service: CBServiceName = .None
+    public var service: CBServiceName? = nil
     /// Whether a valid IDS availability response has been gathered for this chat
     public var hasHadSuccessfulQuery: Bool = false
     /// Whether messages should be sent as SMS in this chat

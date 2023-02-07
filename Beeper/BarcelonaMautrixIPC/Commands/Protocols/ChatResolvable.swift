@@ -32,6 +32,10 @@ extension ChatResolvable {
             }
         }
     }
+
+    var service: IMServiceStyle {
+        ParsedGUID(rawValue: chat_guid).service == "iMessage" ? IMServiceStyle.iMessage : .SMS
+    }
     
     var cbChat: Chat? {
         guard let chat = chat else {

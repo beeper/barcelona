@@ -36,7 +36,7 @@ public class CBIDSListener: ERBaseIDSListener {
     }()
     
     public let senderCorrelationPipeline = CBPipeline<(senderID: String, correlationID: String)>()
-    public let reflectedReadReceiptPipeline = CBPipeline<(guid: String, service: String, time: Date)>()
+    public let reflectedReadReceiptPipeline = CBPipeline<(guid: String, service: IMServiceStyle, time: Date)>()
     
     private var myDestinationURIs: [String] {
         IMAccountController.shared.iMessageAccount?.aliases.map { IDSDestination(uri: $0).uri().prefixedURI } ?? []
@@ -65,16 +65,16 @@ public class CBIDSListener: ERBaseIDSListener {
             return
         }
         
-        var serviceName: String {
+        let serviceName: IMServiceStyle = {
             switch topic {
             case "com.apple.madrid", "com.apple.iMessage":
-                return IMService.iMessage().name
+                return .iMessage
             case "com.apple.private.alloy.sms", "com.apple.SMS":
-                return IMService.sms().name
+                return .SMS
             default:
-                return IMService.iMessage().name
+                return .iMessage
             }
-        }
+        }()
         
         var uris: [String] = []
         if let sender = payload["sP"] as? String {

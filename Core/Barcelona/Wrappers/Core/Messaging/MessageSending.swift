@@ -53,7 +53,7 @@ extension IMChat {
            let messageAccount = serviceStyle.account,
            self.account != messageAccount {
             // We are targeted to iMessage, but we don't really know why. Let's retarget to iMessage and see what IDS thinks.
-            log.info("Previous message on service \(serviceStyle.rawValue) appears to have been successful, but my service is \(self.account?.serviceName ?? "nil"). I'm going to try my best to refresh the ID query.", source: "ERChat")
+            log.info("Previous message on service \(serviceStyle.rawValue) appears to have been successful, but my service is \(String(describing: self.account.serviceName)). I'm going to try my best to refresh the ID query.", source: "ERChat")
             _setAccount(messageAccount, locally: true)
         } else if !forceRefresh && hasRefreshedServiceForSending {
             if let lastMessageItem = lastMessage?._imMessageItem, lastMessageItem.serviceStyle == account.service?.id {
@@ -80,23 +80,27 @@ public extension Chat {
         if ProcessInfo.processInfo.environment.keys.contains("BARCELONA_GHOST_REPLIES") {
             return
         }
-        imChat.markAllMessagesAsRead()
+        imChat?.markAllMessagesAsRead()
     }
     
     private var cbChat: CBChat? {
-        CBChatRegistry.shared.chats[.guid(imChat.guid)]
+        imChat.flatMap { CBChatRegistry.shared.chats[.guid($0.guid)] }
     }
-    
+
     func sendReturningRaw(message createMessage: CreateMessage, from: String? = nil) throws -> IMMessage {
+        guard let imChat, let service else {
+            throw BarcelonaError(code: 500, message: "No imChat or service to send with for \(self.id)")
+        }
+
         let log = Logger(label: "Chat")
         if CBFeatureFlags.useSendingV2, let cbChat = cbChat {
             log.info("Using CBChat for sending per feature flags", source: "MessageSending")
-            return try cbChat.send(message: createMessage, guid: imChat.guid)
+            return try cbChat.send(message: createMessage, guid: imChat.guid, service: service)
         }
         
         imChat.refreshServiceForSendingIfNeeded()
         
-        let message = try createMessage.imMessage(inChat: self.id)
+        let message = try createMessage.imMessage(inChat: self.id, service: service)
         
         Chat.delegate?.chat(self, willSendMessages: [message], fromCreateMessage: createMessage)
         
@@ -113,13 +117,21 @@ public extension Chat {
     }
     
     func send(message createMessage: CreateMessage, from: String? = nil) throws -> Message {
-        return Message(messageItem: try sendReturningRaw(message: createMessage, from: from)._imMessageItem, chatID: imChat.id)
+        guard let imChat, let service else {
+            throw BarcelonaError(code: 500, message: "No IMChat or service for \(id)")
+        }
+
+        return Message(messageItem: try sendReturningRaw(message: createMessage, from: from)._imMessageItem, chatID: imChat.id, service: service)
     }
     
     func tapback(_ creation: TapbackCreation, metadata: Message.Metadata? = nil) throws -> Message {
         markAsRead()
+        guard let imChat, let service else {
+            throw BarcelonaError(code: 500, message: "No IMChat or service for \(id)")
+        }
+
         let message = try imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil, metadata: metadata)
         
-        return Message(messageItem: message._imMessageItem, chatID: imChat.id)
+        return Message(messageItem: message._imMessageItem, chatID: imChat.id, service: service)
     }
 }

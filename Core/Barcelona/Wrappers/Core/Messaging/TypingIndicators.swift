@@ -10,7 +10,7 @@ import Foundation
 public extension Chat {
     var isTyping: Bool {
         get {
-            imChat.localUserIsTyping
+            imChat?.localUserIsTyping ?? false
         }
         set {
             setTyping(newValue)
@@ -18,6 +18,6 @@ public extension Chat {
     }
     
     func setTyping(_ typing: Bool) {
-        imChat.localUserIsTyping = typing
+        imChat?.localUserIsTyping = typing
     }
 }

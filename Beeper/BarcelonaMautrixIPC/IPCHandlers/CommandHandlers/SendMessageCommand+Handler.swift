@@ -15,7 +15,7 @@ private let log = Logger(label: "SendMessageCommand")
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
-        guard let chat = cbChat else {
+        guard let chat = cbChat, let imChat = chat.imChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
         
@@ -47,7 +47,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                     
                     let message = ERCreateBlankRichLinkMessage(text.trimmingCharacters(in: [" "]), url) { item in
                         if #available(macOS 11.0, *), let replyToGUID = reply_to {
-                            item.setThreadIdentifier(IMChatItem.resolveThreadIdentifier(forMessageWithGUID: replyToGUID, part: reply_to_part ?? 0, chat: chat.imChat))
+                            item.setThreadIdentifier(IMChatItem.resolveThreadIdentifier(forMessageWithGUID: replyToGUID, part: reply_to_part ?? 0, chat: imChat))
                         }
                     }
                     if let metadata = metadata {
@@ -68,9 +68,9 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                     } else if !CBFeatureFlags.adHocRichLinks, let url = richLinkURL, IMMessage.supportedRichLinkURL(url, additionalSupportedSchemes: []) {
                         message.loadLinkMetadata(at: url)
                     }
-                    chat.imChat.send(message)
+                    imChat.send(message)
                     afterSend()
-                    finalMessage = Message(ingesting: message, context: IngestionContext(chatID: chat.id))!
+                    finalMessage = Message(ingesting: message, context: IngestionContext(chatID: chat.id, service: service))!
                 } as @convention(block) () -> ())
                 if let threadError = threadError {
                     throw threadError
