@@ -14,7 +14,7 @@ import SwiftCLI
 import Sentry
 import Logging
 
-private let log = Logger(label: "ERBarcelonaManager")
+private let log = Logger(label: "BarcelonaMautrix")
 
 @main
 class BarcelonaMautrix {
@@ -28,28 +28,13 @@ class BarcelonaMautrix {
         eventHandler = BLEventHandler(ipcChannel: mautrixIPCChannel)
     }
     
-    static func configureSentry() {
-        if let configurator = IMCSharedSentryConfigurator() {
-            log.info("Setting up CoreSentry-flavored Sentry integration", source: "CoreSentry")
-            configurator.productName = "barcelona-mautrix"
-            // even if CoreSentry is a release build we might be a debug build
-            configurator.debug = ProcessInfo.processInfo.environment.keys.contains("DEBUG_SENTRY")
-            if !configurator.knownProduct {
-                log.warning("CoreSentry has no DSN for us!", source: "CoreSentry")
+    static private func configureSentry(dsn: String) {
+        SentrySDK.start { options in
+            options.dsn = dsn
+            if #available(macOS 12.0, *) {
+                options.enableMetricKit = true
             }
-            configurator.startSentry()
-            if ProcessInfo.processInfo.arguments.count > 1, ProcessInfo.processInfo.arguments[1] == "sentry" {
-                let cli = CLI(name: "barcelona-mautrix")
-                cli.commands = [SentryCLICommandGroup(configurator.commandGroup)]
-                cli.goAndExit()
-            }
-        } else if let dsn = ProcessInfo.processInfo.environment["SENTRY_DSN"] {
-            log.info("Setting up fallback sentry using DSN \(dsn)", source: "CoreSentry")
-            SentrySDK.start { options in
-                options.dsn = dsn
-            }
-        } else {
-            log.info("Starting without setting up Sentry", source: "CoreSentry")
+            options.sendDefaultPii = true
         }
     }
     
@@ -63,6 +48,14 @@ class BarcelonaMautrix {
     }
     
     static func main() {
+        if let dsn = ProcessInfo.processInfo.environment["BARCELONA_SENTRY_DSN"] {
+            log.info("Enabling Sentry")
+            configureSentry(dsn: dsn)
+        } else if ProcessInfo.processInfo.environment["SENTRY_DSN"] != nil {
+            log.warning("Got SENTRY_DSN but expected BARCELONA_SENTRY_DSN, check that the provided DSN is correct")
+        } else {
+            log.info("Starting without setting up Sentry")
+        }
         var mautrixIPCChannel: MautrixIPCChannel
         if let unixSocketPath = getUnixSocketPath() {
             let unixMautrixIPCChannel = UnixSocketMautrixIPCChannel(unixSocketPath)
@@ -75,8 +68,6 @@ class BarcelonaMautrix {
         
         CFPreferencesSetAppValue("Log" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
         CFPreferencesSetAppValue("Log.All" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
-        
-        configureSentry()
         
         barcelonaMautrix.run()
     }
