@@ -48,6 +48,12 @@ class BarcelonaMautrix {
     }
     
     static func main() {
+        LoggingSystem.bootstrap { label in
+            var handler = StreamLogHandler.standardOutput(label: label)
+            handler.logLevel = .debug
+            return handler
+        }
+
         if let dsn = ProcessInfo.processInfo.environment["BARCELONA_SENTRY_DSN"] {
             log.info("Enabling Sentry")
             configureSentry(dsn: dsn)
@@ -56,6 +62,7 @@ class BarcelonaMautrix {
         } else {
             log.info("Starting without setting up Sentry")
         }
+
         var mautrixIPCChannel: MautrixIPCChannel
         if let unixSocketPath = getUnixSocketPath() {
             let unixMautrixIPCChannel = UnixSocketMautrixIPCChannel(unixSocketPath)
