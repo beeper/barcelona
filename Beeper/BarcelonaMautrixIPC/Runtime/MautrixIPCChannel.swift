@@ -112,11 +112,6 @@ public class MautrixIPCChannel {
     private let encoder: JSONEncoder = {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601withFractionalSeconds
-        
-        if CBFeatureFlags.runningFromXcode {
-            encoder.outputFormatting = .prettyPrinted
-        }
-        
         return encoder
     }()
     
@@ -128,30 +123,13 @@ public class MautrixIPCChannel {
         var data = Data()
         
         for payload in payloads {
-            if !CBFeatureFlags.runningFromXcode {
-                func printIt() {
-                    log.info("Outgoing! \(payload.command.name.rawValue) \(payload.id ?? -1)", source: "BLStandardIO")
-                }
-                #if DEBUG
-                printIt()
-                #else
-                if payload.command.name == .message {
-                    printIt()
-                }
-                #endif
+            if payload.command.name == .message {
+                log.info("Outgoing! \(payload.command.name.rawValue) \(payload.id ?? -1)")
             }
-            
             data += try! encoder.encode(payload)
             data += TERMINATOR
         }
         
         self.writeSubject.send(data)
-        
-        #if DEBUG
-        if BLMetricStore.shared.get(key: .shouldDebugPayloads) ?? false {
-            self.writeSubject.send(TERMINATOR)
-        }
-        #endif
     }
-    
 }
