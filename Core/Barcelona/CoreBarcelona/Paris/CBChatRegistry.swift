@@ -41,12 +41,12 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     }
     
     public func chat(_ persistentIdentifier: String!, updated updateDictionary: [AnyHashable : Any]!) {
-        trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) updated \(((updateDictionary ?? [:]) as NSDictionary).prettyJSON)")
+        trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) updated \(((updateDictionary ?? [:]) as NSDictionary))")
         _ = handle(chat: updateDictionary)
     }
     
     public func chat(_ persistentIdentifier: String!, propertiesUpdated properties: [AnyHashable : Any]!) {
-        trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) properties \(((properties ?? [:]) as NSDictionary).prettyJSON)")
+        trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) properties \(((properties ?? [:]) as NSDictionary))")
         _ = handle(chat: [
             "guid": persistentIdentifier,
             "properties": properties
@@ -64,7 +64,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     var loadedChatsByChatIdentifierCallback: [String: [([IMChat]) -> ()]] = [:]
     
     public func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) {
-        trace(chatIdentifier, nil, "chats loaded: \((chatDictionaries as NSArray).prettyJSON)")
+        trace(chatIdentifier, nil, "chats loaded: \((chatDictionaries as NSArray))")
         guard let callbacks = loadedChatsByChatIdentifierCallback.removeValue(forKey: chatIdentifier) else {
             return
         }
@@ -75,11 +75,11 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     }
     
     public func lastMessage(forAllChats chatIDToLastMessageDictionary: [AnyHashable : Any]!) {
-        trace(nil, nil, "loaded last message for all chats \((chatIDToLastMessageDictionary as NSDictionary).prettyJSON)")
+        trace(nil, nil, "loaded last message for all chats \((chatIDToLastMessageDictionary as NSDictionary))")
     }
     
     public func service(_ serviceID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, messagesUpdated messages: [[AnyHashable: Any]]!) {
-        trace(chatIdentifier, nil, "messages updated \((messages as! NSArray).prettyJSON)")
+        trace(chatIdentifier, nil, "messages updated \(messages.debugDescription)")
         messages.forEach {
             handle(chat: .chatIdentifier(chatIdentifier), item: $0)
         }
@@ -90,17 +90,16 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     }
     
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, notifySentMessage msg: IMMessageItem!, sendTime: NSNumber!) {
-        trace(chatIdentifier, nil, "sent message \(msg.guid ?? "nil") \(msg.prettyJSON)")
+        trace(chatIdentifier, nil, "sent message \(msg.guid ?? "nil") \(msg.debugDescription)")
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
     }
     
     private func trace(_ chatIdentifier: String!, _ personCentricID: String!, _ message: String, _ function: StaticString = #function) {
-        defer { visited = Set() }
         log.debug("chat \(chatIdentifier ?? "nil") pcID \(personCentricID ?? "nil") \(message): \(function.description)")
     }
     
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, groupID: String!, chatPersonCentricID personCentricID: String!, messagesReceived messages: [IMItem]!, messagesComingFromStorage fromStorage: Bool) {
-        trace(chatIdentifier, personCentricID, "received \(messages!.prettyJSON) from storage \(fromStorage)")
+        trace(chatIdentifier, personCentricID, "received \(messages!) from storage \(fromStorage)")
         messages.forEach {
             handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: $0)
         }
@@ -111,14 +110,14 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     }
     
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, groupID: String!, chatPersonCentricID personCentricID: String!, messagesReceived messages: [IMItem]!) {
-        trace(chatIdentifier, personCentricID, "received \(messages!.prettyJSON)")
+        trace(chatIdentifier, personCentricID, "received \(messages!)")
         messages.forEach {
             handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: $0)
         }
     }
     
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, groupID: String!, chatPersonCentricID personCentricID: String!, messageReceived msg: IMItem!) {
-        trace(chatIdentifier, personCentricID, "received message \(msg.prettyJSON)")
+        trace(chatIdentifier, personCentricID, "received message \(msg.debugDescription)")
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
     }
     
@@ -185,21 +184,21 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     }
     
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, groupID: String!, chatPersonCentricID personCentricID: String!, messageSent msg: IMMessageItem!) {
-        trace(chatIdentifier, personCentricID, "sent message \(msg.prettyJSON)")
+        trace(chatIdentifier, personCentricID, "sent message \(msg)")
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
     }
     
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, updateProperties update: [AnyHashable : Any]!) {
-        trace(chatIdentifier, nil, "properties \(((properties ?? [:]) as NSDictionary).prettyJSON) updated to \(((update ?? [:]) as NSDictionary).prettyJSON)")
+        trace(chatIdentifier, nil, "properties \(((properties ?? [:]) as NSDictionary)) updated to \(((update ?? [:]) as NSDictionary))")
     }
     
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, messageUpdated msg: IMItem!) {
-        trace(chatIdentifier, nil, "message updated \(msg.prettyJSON)")
+        trace(chatIdentifier, nil, "message updated \(msg)")
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
     }
     
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, messagesUpdated messages: [NSObject]!) {
-        trace(chatIdentifier, nil, "messages updated \((messages! as NSArray).prettyJSON)")
+        trace(chatIdentifier, nil, "messages updated \((messages! as NSArray))")
         messages.forEach {
             handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: $0)
         }

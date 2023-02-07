@@ -26,9 +26,6 @@ packages:
   Yammit:
     url: https://github.com/EricRabil/Yammit
     from: 1.0.2
-  Swexy:
-    url: https://github.com/EricRabil/Swexy
-    from: 1.0.12
   SwiftyTextTable:
     url: https://github.com/scottrhoyt/SwiftyTextTable
     from: 0.9.0
