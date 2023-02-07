@@ -9,7 +9,7 @@ import Foundation
 import IMFoundation
 import IMCore
 
-public enum CBChatStyle: UInt8 {
+public enum CBChatStyle: UInt8, CaseIterable {
     case group = 43
     case instantMessage = 45
 }
@@ -44,13 +44,11 @@ extension IMChatStyle {
 public enum CBServiceName: String, Codable {
     case iMessage
     case SMS
-    case None
-    
-    var service: IMServiceImpl? {
+
+    var service: IMServiceImpl {
         switch self {
         case .iMessage: return .iMessage()
         case .SMS: return .sms()
-        case .None: return nil
         }
     }
 }
@@ -58,9 +56,8 @@ public enum CBServiceName: String, Codable {
 public extension CBServiceName {
     init(style: IMServiceStyle) {
         switch style {
-        case .iMessage: self = .iMessage
-        case .SMS: self = .SMS
-        default: self = .None
+        case .iMessage, .FaceTime: self = .iMessage
+        case .SMS, .Phone: self = .SMS
         }
     }
     
@@ -68,7 +65,6 @@ public extension CBServiceName {
         switch self {
         case .iMessage: return .iMessage
         case .SMS: return .SMS
-        default: return .None
         }
     }
 }

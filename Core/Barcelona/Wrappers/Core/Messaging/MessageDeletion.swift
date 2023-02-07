@@ -20,16 +20,16 @@ public extension Chat {
             if fullMessage {
                 IMDaemonController.shared().deleteMessage(withGUIDs: [messageID], queryID: NSString.stringGUID())
             } else {
-                let chatItems = self.imChat.chatItems(for: [message._imMessageItem]) ?? []
-                
-                let items: [IMChatItem] = parts.compactMap {
-                    if chatItems.count <= $0 { return nil }
-                    return chatItems[$0]
+                if let imChat = self.imChat, let chatItems = imChat.chatItems(for: [message._imMessageItem]) {
+                    let items: [IMChatItem] = parts.compactMap {
+                        if chatItems.count <= $0 { return nil }
+                        return chatItems[$0]
+                    }
+
+                    let newItem = imChat.chatItemRules._item(withChatItemsDeleted: items, fromItem: message._imMessageItem)
+
+                    IMDaemonController.shared().updateMessage(newItem)
                 }
-                
-                let newItem = self.imChat.chatItemRules._item(withChatItemsDeleted: items, fromItem: message._imMessageItem)!
-                
-                IMDaemonController.shared().updateMessage(newItem)
             }
         }
     }

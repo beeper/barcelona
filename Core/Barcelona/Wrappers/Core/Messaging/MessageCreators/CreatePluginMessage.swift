@@ -65,12 +65,12 @@ public func ERRepairIMMessageItem(_ message: IMMessageItem) -> IMMessageItem {
         return message
     }
     guard let text = message.body, let repaired = ERRepairAttributedLinkString(text) else {
-        log.info("Not repairing message \(message.guid)", source: "ERRepairIMMessage")
+        log.info("Not repairing message \(String(describing: message.guid))", source: "ERRepairIMMessage")
         return message
     }
     message.body = repaired
     let newMessageItem = IMDMessageStore.sharedInstance().storeMessage(message, forceReplace: true, modifyError: false, modifyFlags: false, flagMask: 0, updateMessageCache: true, calculateUnreadCount: false)
-    log.info("Repaired corrupted rich link message with GUID \(message.guid)", source: "ERRepairIMMessage")
+    log.info("Repaired corrupted rich link message with GUID \(String(describing: message.guid))", source: "ERRepairIMMessage")
     SentrySDK.capture(message: "Repaired corrupted rich link message") { scope in
         scope.setTag(value: "guid", key: message.guid)
     }

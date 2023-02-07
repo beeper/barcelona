@@ -219,59 +219,6 @@ public extension CBChat {
         mostRecentChat?.lastAddressedSIMID
     }
 
-    func validRecipients(on service: IMServiceImpl = .iMessage()) -> [IMHandle] {
-        guard style == .instantMessage else {
-            log.error("Ignoring request to query best recipient in a group chat")
-            return []
-        }
-        var recipientsByID: [String: IMHandle] = [:]
-        let deduplicatedRecipientIDs: [String] = Array(mergedRecipientIDs)
-        let statuses: [String: IDSState] = {
-            do {
-                return try BLResolveIDStatusForIDs(deduplicatedRecipientIDs, onService: service.id)
-            } catch {
-                log.error("Error while resolving ID status for \(deduplicatedRecipientIDs.joined(separator: ",")) in \(self.mergedID): \(String(describing: error))")
-                return [:]
-            }
-        }()
-        for (recipientID, status) in statuses {
-            guard !recipientsByID.keys.contains(recipientID) else {
-                log.debug("Skip recipient \(recipientID): already visited")
-                continue
-            }
-            guard status == .available else {
-                log.info("Skip recipient \(recipientID): IDS status is \(status.description)")
-                continue
-            }
-            guard let handle = IMAccountController.shared.bestAccount(forService: service)?.imHandle(withID: recipientID) else {
-                log.debug("Skip recipient \(recipientID): can't find a handle")
-                continue
-            }
-            log.info("\(recipientID) is available on \(service.name)")
-            recipientsByID[recipientID] = handle
-        }
-        let recipients = Array(recipientsByID.values)
-        let recipientCount = recipients.count
-        log.info("There are \(recipientCount) recipients to choose from: \(recipientsByID.keys.joined(separator: ","))")
-        func compareHandles(_ handle1: IMHandle, _ handle2: IMHandle) -> Bool {
-            lazy var handle1PN = handle1.id.isPhoneNumber
-            lazy var handle2PN = handle2.id.isPhoneNumber
-            if handle1PN {
-                if handle2PN {
-                    return false
-                }
-                return true
-            } else {
-                return false
-            }
-        }
-        return recipients.sorted(by: compareHandles(_:_:))
-    }
-    
-    func bestRecipient(on service: IMServiceImpl = .iMessage()) -> IMHandle? {
-        validRecipients(on: service).first
-    }
-
     func chatForSending(with guid: String) -> IMChat? {
         IMChats.first(where: { $0.guid == guid })
     }
@@ -279,7 +226,7 @@ public extension CBChat {
 
 private extension IMHandle {
     var chat: IMChat? {
-        IMChatRegistry.shared._existingChat(withIdentifier: id, style: 0x2d, account: service.internalName) as? IMChat ?? IMChatRegistry.shared.chat(for: self)
+        IMChatRegistry.shared._existingChat(withIdentifier: id, style: 0x2d, account: service.internalName) ?? IMChatRegistry.shared.chat(for: self)
     }
 }
 
@@ -293,11 +240,11 @@ public extension CBChat {
         send(message: IMMessage(fromIMMessageItem: message, sender: nil, subject: nil), chat: chat)
     }
     
-    func send(message: CreateMessage, guid: String) throws -> IMMessage {
+    func send(message: CreateMessage, guid: String, service: IMServiceStyle) throws -> IMMessage {
         guard let chat = chatForSending(with: guid) else {
             throw BarcelonaError(code: 400, message: "You can't send messages to this chat. If this is an SMS, make sure forwarding is still enabled. If this is an iMessage, check your connection to Apple.")
         }
-        let message = try message.imMessage(inChat: chat.chatIdentifier)
+        let message = try message.imMessage(inChat: chat.chatIdentifier, service: service)
         send(message: message, chat: chat)
         return message
     }

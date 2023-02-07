@@ -17,7 +17,7 @@ public protocol CreateMessageBase: Codable {
     var replyToPart: Int? { get set }
     var metadata: Message.Metadata? { get set }
     
-    func imMessage(inChat chatIdentifier: String) throws -> IMMessage
+    func imMessage(inChat chatIdentifier: String, service: IMServiceStyle) throws -> IMMessage
     func parseToAttributed() -> MessagePartParseResult
     func createIMMessageItem(withThreadIdentifier threadIdentifier: String?, withChatIdentifier chatIdentifier: String, withParseResult parseResult: MessagePartParseResult) throws -> (IMMessageItem, NSMutableAttributedString?)
 }
@@ -49,19 +49,25 @@ extension CreateMessageBase {
         
         return message
     }
-    
-    public func imMessage(inChat chatIdentifier: String) throws -> IMMessage {
+
+    public func imMessage(inChat chatIdentifier: String, service: IMServiceStyle) throws -> IMMessage {
         let parseResult = parseToAttributed()
         
         let (imMessageItem, subject) = try createIMMessageItem(withThreadIdentifier: nil, withChatIdentifier: chatIdentifier, withParseResult: parseResult)
         
         imMessageItem.fileTransferGUIDs = parseResult.transferGUIDs
-        let chat = IMChat.resolve(withIdentifier: chatIdentifier)!
+        guard let chat = IMChat.chat(withIdentifier: chatIdentifier, onService: service, style: nil) else {
+            throw CreateMessageError.noIMChatForIdAndService
+        }
         imMessageItem.service = chat.account.serviceName
         imMessageItem.accountID = chat.account.uniqueID
         
         return try finalize(imMessageItem: imMessageItem, chat: chat, withSubject: subject)
     }
+}
+
+enum CreateMessageError: Error {
+    case noIMChatForIdAndService
 }
 
 extension Promise {

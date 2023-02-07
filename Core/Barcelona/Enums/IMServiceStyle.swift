@@ -19,8 +19,7 @@ public enum IMServiceStyle: String, CaseIterable, Codable, Hashable {
     case SMS
     case FaceTime
     case Phone
-    case None
-    
+
     public init?(service: IMService) {
         guard let style = IMServiceStyle.allCases.first(where: {
             $0.service == service
@@ -38,8 +37,19 @@ public enum IMServiceStyle: String, CaseIterable, Codable, Hashable {
         
         self.init(service: service)
     }
+
+    // Normally used from init'ting from `IMItem.service`
+    public init?(name: String) {
+        switch name {
+        case "iMessage": self = .iMessage
+        case "SMS": self = .SMS
+        case "FaceTime": self = .FaceTime
+        case "Phone": self = .Phone
+        default: return nil
+        }
+    }
     
-    public var service: IMServiceImpl? {
+    public var service: IMServiceImpl {
         switch self {
         #if IDS_IMESSAGE_BIZ
         case .iMessageBiz:
@@ -53,19 +63,15 @@ public enum IMServiceStyle: String, CaseIterable, Codable, Hashable {
             return IMService.facetime()
         case .SMS:
             return IMService.sms()
-        case .None:
-            return nil
         }
     }
     
     public var account: IMAccount? {
-        guard let service = service else { return nil }
-        return IMAccountController.shared.bestAccount(forService: service)
+        IMAccountController.shared.bestAccount(forService: service)
     }
     
     public var handle: IMHandle? {
-        guard let service = service else { return nil }
-        return Registry.sharedInstance.suitableHandle(for: service)
+        Registry.sharedInstance.suitableHandle(for: service)
     }
     
     public static var services: [IMServiceImpl] {

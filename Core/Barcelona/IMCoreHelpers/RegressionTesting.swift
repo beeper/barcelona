@@ -65,8 +65,13 @@ public extension BLRegressionTesting {
                                 guard chat.scheme == .chatIdentifier else {
                                     preconditionFailure()
                                 }
-                                let message = Message(messageItem: message, chatID: chat.value)
-                                guard message.imChat != nil else {
+                                // here we can just try both iMessage and SMS and see if either of them comes up with a valid chat
+                                // since we don't really care about being super efficient and correct (or else we'd find some way
+                                // to query from the DB the service that they're on).
+                                let iMessage = Message(messageItem: message, chatID: chat.value, service: .iMessage)
+                                let sms = Message(messageItem: message, chatID: chat.value, service: .SMS)
+
+                                if iMessage.imChat == nil && sms.imChat == nil {
                                     preconditionFailure("Failed to resolve IMChat[\(chat.scheme):\(chat.value)] for message \(message.id)")
                                 }
                             }.always { result in

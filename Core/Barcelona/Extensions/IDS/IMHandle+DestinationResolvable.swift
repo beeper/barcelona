@@ -13,7 +13,11 @@ import IDS
 
 public extension IMHandle {
     var idsStatus: IDSState {
-        (try? BLResolveIDStatusForIDs([id], onService: service.id))?.first?.value ?? .unknown
+        guard let serviceId = service.id else {
+            return .unknown
+        }
+
+        return (try? BLResolveIDStatusForIDs([id], onService: serviceId))?.first?.value ?? .unknown
     }
     
     func lazyIDSStatus() -> Promise<IDSState> {

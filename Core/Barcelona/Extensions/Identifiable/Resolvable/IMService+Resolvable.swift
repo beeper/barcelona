@@ -10,9 +10,9 @@ import Foundation
 import IMCore
 
 extension IMService: Resolvable, _ConcreteBasicResolvable {
-    public static func resolve(withIdentifiers identifiers: [IMServiceStyle]) -> [IMService] {
+    public static func resolve(withIdentifiers identifiers: [IMServiceStyle?]) -> [IMService] {
         identifiers.compactMap { style in
-            style.service
+            style?.service
         }
     }
 }

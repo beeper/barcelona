@@ -39,10 +39,8 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
             #endif
             return payload.respond(.messages([]), ipcChannel: ipcChannel)
         }
-        
-        
-        
-        BLLoadChatItems(withChatIdentifiers: siblings.compactMap(\.chatIdentifier), onServices: .CBMessageServices, afterDate: date, limit: limit).then(\.blMessages).then {
+
+        BLLoadChatItems(withChats: siblings.compactMap(\.chatIdentifier).map({ ($0, service) }), afterDate: date, limit: limit).then(\.blMessages).then {
             payload.respond(.messages($0), ipcChannel: ipcChannel)
         }
     }
@@ -59,8 +57,8 @@ extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
         }
         
         let siblings = chat.siblings
-        
-        BLLoadChatItems(withChatIdentifiers: siblings.compactMap(\.chatIdentifier), onServices: .CBMessageServices, limit: limit).then(\.blMessages).then {
+
+        BLLoadChatItems(withChats: siblings.compactMap(\.chatIdentifier).map({ ($0, service) }), limit: limit).then(\.blMessages).then {
             payload.respond(.messages($0), ipcChannel: ipcChannel)
         }
     }

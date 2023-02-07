@@ -255,7 +255,8 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
             }
             if let guid = guid {
                 chatGUIDToChatMap[guid] = imChat
-                if let IMCopyThreadNameForChat = IMCopyThreadNameForChat, let chatIdentifier = chat["chatIdentifier"] as? String, let accountID = imChat.account?.uniqueID {
+                if let IMCopyThreadNameForChat = IMCopyThreadNameForChat, let chatIdentifier = chat["chatIdentifier"] as? String,
+                   let accountID = imChat.account.uniqueID {
                     let threadName = IMCopyThreadNameForChat(chatIdentifier, accountID, imChat.chatStyle)
                     if chatGUIDToCurrentThreadMap[guid] == nil {
                         chatGUIDToCurrentThreadMap[guid] = threadName

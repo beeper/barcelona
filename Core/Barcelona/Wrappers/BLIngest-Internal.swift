@@ -53,8 +53,12 @@ internal func _BLLoadFileTransfers(forObjects objects: [NSObject]) -> Promise<Vo
 }
 
 @inlinable
-internal func _BLLoadAcknowledgmentChatItems(withMessageGUIDs messageGUIDs: [String], inChat chat: String) -> [String: [AcknowledgmentChatItem]] {
-    _BLParseObjects(BLLoadIMMessages(withGUIDs: messageGUIDs), inChat: chat).compactMap {
+internal func _BLLoadAcknowledgmentChatItems(
+    withMessageGUIDs messageGUIDs: [String],
+    inChat chat: String,
+    service: IMServiceStyle
+) -> [String: [AcknowledgmentChatItem]] {
+    _BLParseObjects(BLLoadIMMessages(withGUIDs: messageGUIDs), inChat: chat, service: service).compactMap {
         $0 as? Message
     }.flatMap(\.items).map(\.item).compactMap {
         $0 as? AcknowledgmentChatItem
@@ -63,7 +67,7 @@ internal func _BLLoadAcknowledgmentChatItems(withMessageGUIDs messageGUIDs: [Str
 
 // MARK: - Associated Resolution
 @inlinable
-internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -> Promise<[ChatItem]> {
+internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String, service: IMServiceStyle) -> Promise<[ChatItem]> {
     let log = Logger(label: "_BLLoadTapbacks")
     guard items.count > 0 else {
         return .success([])
@@ -86,7 +90,7 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -
             return [:]
         }
                 
-        return _BLLoadAcknowledgmentChatItems(withMessageGUIDs: associations.flatMap(\.value), inChat: chat)
+        return _BLLoadAcknowledgmentChatItems(withMessageGUIDs: associations.flatMap(\.value), inChat: chat, service: service)
     }.observeAlways { completion in
         switch completion {
         case .failure(let error):
@@ -116,9 +120,9 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String) -
 
 // MARK: - Translation
 @inlinable
-internal func _BLParseObjects(_ objects: [NSObject], inChat chat: String) -> [ChatItem] {
+internal func _BLParseObjects(_ objects: [NSObject], inChat chatId: String, service: IMServiceStyle) -> [ChatItem] {
     objects.map {
-        ChatItemType.ingest(object: $0, context: IngestionContext(chatID: chat))
+        ChatItemType.ingest(object: $0, context: IngestionContext(chatID: chatId, service: service))
     }
 }
 

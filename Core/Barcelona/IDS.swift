@@ -137,8 +137,6 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
                 ($0, $0.isPhoneNumber ? IDSState.available : IDSState.unavailable)
             }.dictionary(keyedBy: \.0, valuedBy: \.1)
         )
-    case .None:
-        return callback(allUnavailable)
     // only imessage and facetime will return results from IDS
     case .iMessage:
         break
@@ -157,9 +155,9 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
             return callback([:])
         }
         
-        log.info("Requesting ID status from server for destinations \(destinations.joined(separator: ",")) on service \(service.idsIdentifier ?? "nil")")
+        log.info("Requesting ID status from server for destinations \(destinations.joined(separator: ",")) on service \(service.idsIdentifier)")
         
-        IDSIDQueryController.sharedInstance()!.forceRefreshIDStatus(forDestinations: destinations, service: service.idsIdentifier!, listenerID: IDSListenerID, queue: HandleQueue) { states in
+        IDSIDQueryController.sharedInstance()!.forceRefreshIDStatus(forDestinations: destinations, service: service.idsIdentifier, listenerID: IDSListenerID, queue: HandleQueue) { states in
             let mappedStates = states.mapValues { IDSState(rawValue: $0.intValue) }
             
             log.debug("forceRefreshIDStatus completed with result: \(mappedStates)")
@@ -176,7 +174,7 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
             return callback([:])
         }
 
-        log.info("Requesting ID status from cache for destinations \(destinations.joined(separator: ",")) on service \(service.idsIdentifier ?? "nil")")
+        log.info("Requesting ID status from cache for destinations \(destinations.joined(separator: ",")) on service \(service.idsIdentifier)")
 
         let (cached, uncached) = destinations.splitReduce(intoLeft: [String: IDSState](), intoRight: [String]()) { cached, uncached, destination in
             if let status = BLIDSIDQueryCache.shared.result(for: destination) {

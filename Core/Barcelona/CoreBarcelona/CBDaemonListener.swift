@@ -88,7 +88,7 @@ public struct CBMessageStatusChange: Codable, Hashable {
         false
     }
     
-    fileprivate init(type: CBMessageStatusType, service: String, time: Double, sender: String? = nil, fromMe: Bool, chatID: String, messageID: String, context: CBMessageStatusChangeContext = .init()) {
+    fileprivate init(type: CBMessageStatusType, service: IMServiceStyle, time: Double, sender: String? = nil, fromMe: Bool, chatID: String, messageID: String, context: CBMessageStatusChangeContext = .init()) {
         self.type = type
         self.service = service
         self.time = time
@@ -100,7 +100,7 @@ public struct CBMessageStatusChange: Codable, Hashable {
     }
     
     public var type: CBMessageStatusType
-    public var service: String
+    public var service: IMServiceStyle
     public var time: Double
     public var sender: String?
     public var fromMe: Bool
@@ -110,8 +110,8 @@ public struct CBMessageStatusChange: Codable, Hashable {
     // backing storage for the message object used to create this
     private var context: CBMessageStatusChangeContext = .init()
     
-    public var chat: IMChat {
-        IMChat.resolve(withIdentifier: chatID) ?? IMChat()
+    public var chat: IMChat? {
+        IMChat.chat(withIdentifier: chatID, onService: service, style: nil)
     }
     
     public var hasFullMessage: Bool {
@@ -159,10 +159,10 @@ internal extension CBDaemonListener {
 
                 log.debug("reflectedReadReceiptPipeline received guid \(guid) in chat \(String(describing: chatIdentifier))")
 
-                guard let chatIdentifier = chatIdentifier else {
+                guard let chatIdentifier else {
                     return
                 }
-                
+
                 self.messageStatusPipeline.send(CBMessageStatusChange(type: .read, service: service, time: time.timeIntervalSince1970, fromMe: true, chatID: chatIdentifier, messageID: guid))
             }
         }
@@ -176,15 +176,13 @@ internal extension CBDaemonListener {
                 guard status.type == .read, status.fromMe else {
                     return
                 }
-                
-                guard let chat = IMChat.resolve(withIdentifier: status.chatID) else {
+
+                // Since this is only processing things on the SMS Read Buffer, we only want to continue
+                // if we have a chat for this chatID on SMS
+                guard IMChat.chat(withIdentifier: status.chatID, onService: .SMS, style: nil) != nil else {
                     return
                 }
-                
-                guard chat.account?.service == .sms() else {
-                    return
-                }
-                
+
                 self.pushToSMSReadBuffer(status.messageID)
             }
         }
@@ -339,7 +337,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
     
     public enum PipelineEvent: Codable {
         case unreadCount(chat: String, count: Int)
-        case typing(chat: String, typing: Bool)
+        case typing(chat: String, service: IMServiceStyle, typing: Bool)
         case chatName(chat: String, name: String?)
         case chatParticipants(chat: String, participants: [String])
         case blocklist(entries: [String])
@@ -370,7 +368,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
     }
     
     public let unreadCountPipeline          = CBPipeline<(chat: String, count: Int)>()
-    public let typingPipeline               = CBPipeline<(chat: String, typing: Bool)>()
+    public let typingPipeline               = CBPipeline<(chat: String, service: IMServiceStyle, typing: Bool)>()
     public let chatNamePipeline             = CBPipeline<(chat: String, name: String?)>()
     public let chatParticipantsPipeline     = CBPipeline<(chat: String, participants: [String])>()
     public let blocklistPipeline            = CBPipeline<[String]>()
@@ -391,7 +389,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
     
     public private(set) lazy var aggregatePipeline: CBPipeline<PipelineEvent> = createPipelineGlob {
         unreadCountPipeline.pipe(PipelineEvent.unreadCount(chat:count:))
-        typingPipeline.pipe(PipelineEvent.typing(chat:typing:))
+        typingPipeline.pipe(PipelineEvent.typing(chat:service:typing:))
         chatNamePipeline.pipe(PipelineEvent.chatName(chat:name:))
         chatParticipantsPipeline.pipe(PipelineEvent.chatParticipants(chat:participants:))
         blocklistPipeline.pipe(PipelineEvent.blocklist(entries:))
@@ -699,7 +697,13 @@ private extension CBDaemonListener {
             log.error("Failed to resolve chat identifier for sent message \(message.id)")
             return
         }
-        messageStatusPipeline.send(CBMessageStatusChange(type: .sent, service: message.service, time: sentTime, sender: nil, fromMe: true, chatID: chatID, messageID: message.id, context: .init(message: message)))
+
+        guard let service = IMServiceStyle(name: message.service) else {
+            log.error("Cannot process sentMessage \(message): service is not a known value")
+            return
+        }
+
+        messageStatusPipeline.send(CBMessageStatusChange(type: .sent, service: service, time: sentTime, sender: nil, fromMe: true, chatID: chatID, messageID: message.id, context: .init(message: message)))
     }
     
     func recover(failedMessage: IMMessageItem, chatIdentifier: String) -> Bool {
@@ -742,20 +746,25 @@ private extension CBDaemonListener {
     
     func process(newMessage: IMItem, chatIdentifier: String) {
         if !preflight(message: newMessage) {
-            log.warning("withholding message \(newMessage.guid): preflight failure")
+            log.warning("withholding message \(String(describing: newMessage.guid)): preflight failure")
             return
         }
-        
+
+        guard let serv = newMessage.service, let service = IMServiceStyle(name: serv) else {
+            log.warning("Couldn't form relevant service from \(String(describing: newMessage.service)); ignoring message \(String(describing: newMessage.guid))")
+            return
+        }
+
         var currentlyTyping: Bool {
             get { self.currentlyTyping.contains(chatIdentifier) }
             set {
                 if newValue {
                     if self.currentlyTyping.insert(chatIdentifier).inserted {
-                        typingPipeline.send((chatIdentifier, true))
+                        typingPipeline.send((chatIdentifier, service, true))
                     }
                 } else {
                     if self.currentlyTyping.remove(chatIdentifier) != nil {
-                        typingPipeline.send((chatIdentifier, false))
+                        typingPipeline.send((chatIdentifier, service, false))
                     }
                 }
             }
@@ -767,21 +776,21 @@ private extension CBDaemonListener {
 
             // typing messages are not part of the timeline anymore
             if item.isTypingMessage {
-                log.debug("ignoring message \(item.guid): typing doesnt flow through here")
+                log.debug("ignoring message \(String(describing: item.guid)): typing doesnt flow through here")
                 return
             }
             
             if CBFeatureFlags.dropSpamMessages, item.isSpam {
-                log.debug("ignoring message \(item.guid): flagged as spam")
+                log.debug("ignoring message \(String(describing: item.guid)): flagged as spam")
                 return
             }
             
             if item.errorCode == .remoteUserDoesNotExist {
                 return
             }
-            
-            log.debug("sending message \(item.guid) \(item.service) \(chatIdentifier) down the pipeline")
-            messagePipeline.send(Message(messageItem: item, chatID: chatIdentifier))
+
+            log.debug("sending message \(String(describing: item.guid)) \(String(describing: item.service)) \(chatIdentifier) down the pipeline")
+            messagePipeline.send(Message(messageItem: item, chatID: chatIdentifier, service: service))
         case let item:
             // wrap non-message items and send them as transcript actions
             switch transcriptRepresentation(item, chatID: chatIdentifier) {
@@ -805,14 +814,15 @@ private extension CBDaemonListener {
                         apply(chatIdentifier: chatIdentifier, participants: chatParticipants, emitIfNeeded: true)
                     }
                 case let groupAction as GroupActionItem:
-                    if groupAction.actionType.rawValue == 1, let groupPhoto = IMChat.resolve(withIdentifier: chatIdentifier)?.groupPhotoID {
+                    if groupAction.actionType.rawValue == 1,
+                       let groupPhoto = IMChat.chat(withIdentifier: chatIdentifier, onService: service, style: nil)?.groupPhotoID {
                         additionalFileTransfers.append(groupPhoto)
                     }
                 default:
                     break
                 }
                 
-                messagePipeline.send(Message(item, transcriptRepresentation: representation, additionalFileTransferGUIDs: additionalFileTransfers))
+                messagePipeline.send(Message(item, transcriptRepresentation: representation, service: service, additionalFileTransferGUIDs: additionalFileTransfers))
             }
         }
     }
@@ -853,7 +863,7 @@ private extension IMMessageItem {
     }
     
     func statusChange(inChat chat: String, style: IMChatStyle) -> CBMessageStatusChange? {
-        guard let payload = statusPayload else {
+        guard let payload = statusPayload, let service = IMServiceStyle(name: service) else {
             return nil
         }
         

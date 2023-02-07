@@ -23,10 +23,10 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         Logger(label: "SendMediaMessageCommand")
     }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
-        guard let chat = cbChat else {
+        guard let chat = cbChat, let imChat = chat.imChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
-        
+
         let transaction = SentrySDK.startTransaction(name: "send-message", operation: "send-media-message")
         
         let transfer = CBInitializeFileTransfer(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
@@ -59,10 +59,10 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                         return "SMS"
                     }
                 }
-                if chat.imChat.isDowngraded() {
+                if imChat.isDowngraded() {
                     return "SMS"
                 }
-                return chat.imChat.account.serviceName
+                return imChat.account.serviceName
             }
             
             monitor = BLMediaMessageMonitor(messageID: message?.id ?? "", transferGUIDs: [guid]) { success, failureCode, shouldCancel in
@@ -82,10 +82,11 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                     transaction.finish(status: .unknownError)
                 }
                 if !success && shouldCancel {
-                    ipcChannel.writePayload(.init(command: .send_message_status(.init(guid: message.id, chatGUID: chat.blChatGUID, status: .failed, service: resolveMessageService(), message: failureCode?.localizedDescription, statusCode: failureCode?.description))))
+                    let chatGuid = imChat.blChatGUID
+                    ipcChannel.writePayload(.init(command: .send_message_status(.init(guid: message.id, chatGUID: chatGuid, status: .failed, service: resolveMessageService(), message: failureCode?.localizedDescription, statusCode: failureCode?.description))))
                 }
                 if !success && shouldCancel {
-                    chat.imChat.cancel(message)
+                    imChat.cancel(message)
                 }
                 
                 withExtendedLifetime(monitor) { monitor = nil }
