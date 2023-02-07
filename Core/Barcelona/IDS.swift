@@ -70,8 +70,6 @@ public struct BLIDSResolutionOptions: OptionSet {
     public static let none: BLIDSResolutionOptions = []
 }
 
-import Swexy
-
 class BLIDSIDQueryCache {
     static let shared = BLIDSIDQueryCache()
     

@@ -12,7 +12,6 @@
 
 import Foundation
 import IMCore
-import Swexy
 import Logging
 import CommunicationsFilter
 @_spi(synchronousQueries) import BarcelonaDB
