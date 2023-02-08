@@ -49,9 +49,9 @@ extension IMChat {
            lastMessageItem.isFinished, // message must be finished
            lastMessageItem.errorCode == .noError, // message must have no error
            let serviceStyle = lastMessageItem.serviceStyle,
-           serviceStyle == .iMessage,
+           serviceStyle == .iMessage, // last item must have been sent on iMessage
            let messageAccount = serviceStyle.account,
-           self.account != messageAccount {
+           self.account != messageAccount { // The self.account must not be equal to the iMessage account
             // We are targeted to iMessage, but we don't really know why. Let's retarget to iMessage and see what IDS thinks.
             log.info("Previous message on service \(serviceStyle.rawValue) appears to have been successful, but my service is \(String(describing: self.account.serviceName)). I'm going to try my best to refresh the ID query.", source: "ERChat")
             _setAccount(messageAccount, locally: true)
@@ -93,13 +93,27 @@ public extension Chat {
         }
 
         let log = Logger(label: "Chat")
+
         if CBFeatureFlags.useSendingV2, let cbChat = cbChat {
+            // If we're targeting the SMS service and call imChat.refreshServiceForSending(), it'll probably retarget to iMessage,
+            // which we distinctly don't want it to do. Plus, we're implementing this to solve BE-7179, which has only happened
+            // over iMessage as far as we can tell, so we don't need to work with SMS
+            if service == .iMessage {
+                imChat.refreshServiceForSending()
+
+                let newService = imChat.account.service?.id
+                if newService != service {
+                    log.error("Refreshing IMChat \(String(describing: imChat.guid)) caused service to change from \(service) to \(String(describing: newService)); IMChat should not be used for sending. Bailing.")
+                    throw BarcelonaError(code: 500, message: "IMChat retargeted to incorrect service")
+                }
+            }
+
             log.info("Using CBChat for sending per feature flags", source: "MessageSending")
             return try cbChat.send(message: createMessage, guid: imChat.guid, service: service)
         }
-        
+
         imChat.refreshServiceForSendingIfNeeded()
-        
+
         let message = try createMessage.imMessage(inChat: self.id, service: service)
         
         Chat.delegate?.chat(self, willSendMessages: [message], fromCreateMessage: createMessage)
