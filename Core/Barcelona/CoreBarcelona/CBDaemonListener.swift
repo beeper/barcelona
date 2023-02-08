@@ -144,6 +144,7 @@ extension Notification.Name: ExpressibleByStringLiteral {
 
 import Combine
 
+@MainActor
 internal extension CBDaemonListener {
     static var didStartListening = false
     func startListening() {
@@ -448,11 +449,13 @@ public class CBDaemonListener: ERBaseDaemonListener {
                 apply(serializedChat: dict, emitIfNeeded: false)
             }
         }
-        
-        if CBFeatureFlags.prewarmItemRules {
-            DispatchQueue.global(qos: .background).async {
-                for chat in IMChatRegistry.shared.allChats {
-                    _ = chat.chatItemRules
+
+        DispatchQueue.main.async {
+            if CBFeatureFlags.prewarmItemRules {
+                DispatchQueue.global(qos: .background).async {
+                    for chat in IMChatRegistry.shared.allChats {
+                        _ = chat.chatItemRules
+                    }
                 }
             }
         }
@@ -508,47 +511,59 @@ public class CBDaemonListener: ERBaseDaemonListener {
     public override func account(_ accountUniqueID: String, chat chatIdentifier: String, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any], groupID: String, chatPersonCentricID personCentricID: String!, messageSent msg: IMMessageItem) {
         *log.debug("messageSent: \(msg.debugDescription)")
         chatIdentifierCache[msg.id] = chatIdentifier
-        process(newMessage: msg, chatIdentifier: chatIdentifier)
+        DispatchQueue.main.sync {
+            process(newMessage: msg, chatIdentifier: chatIdentifier)
+        }
     }
     
     // Invoked when we sent a message *locally*
     public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, notifySentMessage msg: IMMessageItem!, sendTime: NSNumber!) {
         *log.debug("notifySentMessage: \(msg.debugDescription)")
-        process(sentMessage: msg, sentTime: (msg.clientSendTime ?? msg.time ?? Date()).timeIntervalSince1970)
+        DispatchQueue.main.sync {
+            process(sentMessage: msg, sentTime: (msg.clientSendTime ?? msg.time ?? Date()).timeIntervalSince1970)
+        }
     }
     
     public override func account(_ accountUniqueID: String, chat chatIdentifier: String, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any], groupID: String, chatPersonCentricID personCentricID: String, messageReceived msg: IMItem) {
         *log.debug("messageReceived: \(msg.debugDescription)")
-        
-        process(newMessage: msg, chatIdentifier: chatIdentifier)
+
+        DispatchQueue.main.sync {
+            process(newMessage: msg, chatIdentifier: chatIdentifier)
+        }
     }
     
     public override func account(_ accountUniqueID: String, chat chatIdentifier: String, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any], groupID: String, chatPersonCentricID personCentricID: String, messagesReceived messages: [IMItem], messagesComingFromStorage fromStorage: Bool) {
         *log.debug("messagesReceived: \(messages.debugDescription)")
         
-        for message in messages {
-            process(newMessage: message, chatIdentifier: chatIdentifier)
+        DispatchQueue.main.sync {
+            for message in messages {
+                process(newMessage: message, chatIdentifier: chatIdentifier)
+            }
         }
     }
     
     public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, groupID: String!, chatPersonCentricID personCentricID: String!, messagesReceived messages: [IMItem]!) {
         *log.debug("messagesReceived: \(messages.debugDescription)")
-        
-        for message in messages {
-            process(newMessage: message, chatIdentifier: chatIdentifier)
+
+        DispatchQueue.main.sync {
+            for message in messages {
+                process(newMessage: message, chatIdentifier: chatIdentifier)
+            }
         }
     }
     
     // Invoked for status updates (read/deliver/play/save/edit etc)
     public override func service(_ serviceID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, messagesUpdated messages: [[AnyHashable: Any]]!) {
         *log.debug("messagesUpdated[service]: \(messages.debugDescription)")
-        
-        for message in CBCreateItemsFromSerializedArray(messages) {
-            switch message {
-            case let message as IMMessageItem:
-                self.process(serviceMessage: message, chatIdentifier: chatIdentifier, chatStyle: chatStyle)
-            default:
-                return
+
+        DispatchQueue.main.sync {
+            for message in CBCreateItemsFromSerializedArray(messages) {
+                switch message {
+                case let message as IMMessageItem:
+                    self.process(serviceMessage: message, chatIdentifier: chatIdentifier, chatStyle: chatStyle)
+                default:
+                    return
+                }
             }
         }
     }
@@ -559,21 +574,23 @@ public class CBDaemonListener: ERBaseDaemonListener {
     
     public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, messagesUpdated messages: [NSObject]!) {
         *log.debug("messagesUpdated[account]: \(messages.debugDescription)")
-        
-        for message in messages as? [IMItem] ?? CBCreateItemsFromSerializedArray(messages) {
-            switch message {
-            case let message as IMMessageItem:
-                // This listener call is only for failed messages that are not otherwise caught.
-                guard message.errorCode != .noError else {
-                    *log.debug("messagesUpdated[account]: ignoring message \(message.id) because it has no error. it will flow through another handler.")
+
+        DispatchQueue.main.sync {
+            for message in messages as? [IMItem] ?? CBCreateItemsFromSerializedArray(messages) {
+                switch message {
+                case let message as IMMessageItem:
+                    // This listener call is only for failed messages that are not otherwise caught.
+                    guard message.errorCode != .noError else {
+                        *log.debug("messagesUpdated[account]: ignoring message \(message.id) because it has no error. it will flow through another handler.")
+                        continue
+                    }
+                    guard let chatIdentifier = chatIdentifier ?? DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id) else {
+                        continue
+                    }
+                    self.process(newMessage: message, chatIdentifier: chatIdentifier)
+                default:
                     continue
                 }
-                guard let chatIdentifier = chatIdentifier ?? DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id) else {
-                    continue
-                }
-                self.process(newMessage: message, chatIdentifier: chatIdentifier)
-            default:
-                continue
             }
         }
     }
@@ -663,6 +680,7 @@ private extension CBDaemonListener {
 
 // MARK: - Message Handling
 
+@MainActor
 private extension CBDaemonListener {
     private func preflight(message: IMItem) -> Bool {
         lazy var messageItem: IMMessageItem? = message as? IMMessageItem
@@ -912,6 +930,7 @@ private extension IMMessageItem {
     }
 }
 
+@MainActor
 private extension CBDaemonListener {
     func process(serviceMessage message: IMMessageItem, chatIdentifier: String, chatStyle: IMChatStyle) {
         guard let messageStatus = message.statusChange(inChat: chatIdentifier, style: chatStyle) else {
@@ -926,6 +945,7 @@ private extension CBDaemonListener {
     }
 }
 
+@MainActor
 internal extension CBDaemonListener {
     func flushSMSReadBuffer() {
         smsReadBuffer.removeAll()

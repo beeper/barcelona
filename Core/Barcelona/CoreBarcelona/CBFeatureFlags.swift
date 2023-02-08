@@ -16,6 +16,7 @@ private let isDebugBuild = false
 
 // to enable something off by default, --enable-
 // to disable, --disable-
+@MainActor
 public class _CBFeatureFlags: FlagProvider {
     // Supported way of overriding defaults, manipulate this early on since things are cached agressively
     public struct Defaults {
@@ -125,6 +126,7 @@ extension String {
 }
 
 @dynamicMemberLookup
+@MainActor
 public class _CBLoggingFlags: FlagProvider {
     private var cache: [String: FeatureFlag] = [:]
 
@@ -144,9 +146,12 @@ public class _CBLoggingFlags: FlagProvider {
     }
 }
 
+@MainActor
 public let CBFeatureFlags = _CBFeatureFlags()
+@MainActor
 public let CBLoggingFlags = _CBLoggingFlags()
 
+@MainActor
 @_transparent internal func ifInternal(_ block: () -> ()) {
     if CBFeatureFlags.internalDiagnostics {
         block()

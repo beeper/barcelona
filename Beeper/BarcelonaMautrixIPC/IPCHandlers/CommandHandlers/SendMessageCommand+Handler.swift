@@ -14,6 +14,7 @@ import Logging
 private let log = Logger(label: "SendMessageCommand")
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
+    @MainActor
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         guard let chat = cbChat, let imChat = chat.imChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
@@ -42,7 +43,6 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
             
             if isRichLink, let url = rich_link?.originalURL ?? rich_link?.URL ?? richLinkURL {
                 var threadError: Error?
-                Thread.main.sync ({
                     log.debug("I am processing a rich link! text '\(text)'", source: "BLMautrix")
                     
                     let message = ERCreateBlankRichLinkMessage(text.trimmingCharacters(in: [" "]), url) { item in
@@ -71,7 +71,6 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                     imChat.send(message)
                     afterSend()
                     finalMessage = Message(ingesting: message, context: IngestionContext(chatID: chat.id, service: service))!
-                } as @convention(block) () -> ())
                 if let threadError = threadError {
                     throw threadError
                 }

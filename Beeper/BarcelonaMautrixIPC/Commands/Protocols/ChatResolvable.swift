@@ -15,6 +15,7 @@ protocol ChatResolvable {
 }
 
 extension ChatResolvable {
+    @MainActor
     var chat: IMChat? {
         if let chat = IMChatRegistry.shared.existingChat(withGUID: chat_guid) {
             return chat
@@ -36,7 +37,8 @@ extension ChatResolvable {
     var service: IMServiceStyle {
         ParsedGUID(rawValue: chat_guid).service == "iMessage" ? IMServiceStyle.iMessage : .SMS
     }
-    
+
+    @MainActor
     var cbChat: Chat? {
         guard let chat = chat else {
             return nil
@@ -45,6 +47,7 @@ extension ChatResolvable {
         return Chat(chat)
     }
     
+    @MainActor
     var blChat: BLChat? {
         chat?.blChat
     }

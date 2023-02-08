@@ -22,6 +22,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
     var log: Logging.Logger {
         Logger(label: "SendMediaMessageCommand")
     }
+    @MainActor
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         guard let chat = cbChat, let imChat = chat.imChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)

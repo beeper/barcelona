@@ -89,6 +89,7 @@ public func BLTeardown() {
 }
 
 @_cdecl("BLBootstrapController")
+@MainActor
 public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = nil, _ callbackSwift: ((Bool) -> ())? = nil) -> Bool {
     guard BLSwizzleDaemonController() else {
         callbackC?(false)
@@ -155,6 +156,7 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
     return true
 }
 
+@MainActor
 public class BarcelonaManager {
     public static let shared = BarcelonaManager()
     
