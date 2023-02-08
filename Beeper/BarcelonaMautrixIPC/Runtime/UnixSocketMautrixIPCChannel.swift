@@ -8,27 +8,28 @@ public class UnixSocketMautrixIPCChannel: MautrixIPCInputChannel, MautrixIPCOutp
 
     // MARK: - Properties
 
-    private let channel: Channel
+    private var channel: Channel?
+    private let socketPath: String
 
     private let log = Logger(label: "UnixSocketMautrixIPCChannel")
 
     // MARK: - Initializers
 
     public init(_ socketPath: String) {
-        do {
-            let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-            let client = ClientBootstrap(group: group)
-            channel = try client.connect(unixDomainSocketPath: socketPath).wait()
-        } catch let error {
-            fatalError("Failed to connect unix socket \(error)")
-        }
+        self.socketPath = socketPath
     }
 
     // MARK: - Methods
 
     public func listen(_ cb: @escaping (Data) -> Void) {
         do {
-            try channel.pipeline.addHandler(ClosureReadHandler(readCallback: cb)).wait()
+            let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+            let client = ClientBootstrap(group: group)
+            channel = try client.channelInitializer { channel in
+                channel.pipeline.addHandler(ClosureReadHandler(readCallback: cb))
+            }
+            .connect(unixDomainSocketPath: socketPath)
+            .wait()
         } catch {
             log.error("Failed to start listening to unix socket: \(error.localizedDescription)")
         }
@@ -37,7 +38,7 @@ public class UnixSocketMautrixIPCChannel: MautrixIPCInputChannel, MautrixIPCOutp
     public func write(_ data: Data) {
         do {
             let bytes = ByteBuffer(bytes: data)
-            try channel.writeAndFlush(bytes).wait()
+            try channel?.writeAndFlush(bytes).wait()
         } catch {
             log.error("Failed to write payload to unix socket: \(error.localizedDescription)")
         }
