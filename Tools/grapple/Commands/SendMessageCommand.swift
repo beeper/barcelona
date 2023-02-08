@@ -45,11 +45,15 @@ extension ChatCommandLike {
     
     var chat: Chat {
         if isID {
-            guard let chat = Chat.resolve(withIdentifier: destination) else {
-                fatalError("Unknown chat with identifier \(destination)")
+            if _sms {
+                guard let chat = IMChat.chat(withIdentifier: destination, onService: .SMS, style: nil).map(Chat.init) else {
+                    fatalError("Unknown chat with identifier \(destination)")
+                }
+
+                return chat
             }
             
-            return chat
+            return Chat.firstChatRegardlessOfService(withId: destination)!
         }
         
         if let self = self as? ChatCommandGUIDSupporting, self.isGUID {
@@ -71,7 +75,7 @@ extension ChatCommandLike {
             return Chat(chat)
         }
         
-        return Chat.chat(withHandleIDs: destination.split(separator: ",").map(String.init), service: _sms ? .SMS : nil)
+        return Chat.chat(withHandleIDs: destination.split(separator: ",").map(String.init), service: _sms ? .SMS : .iMessage)
     }
 }
 
@@ -107,7 +111,7 @@ class MessageCommand: CommandGroup {
             }
             
             func execute() throws {
-                BLLoadChatItems(withChatIdentifiers: [chat], onServices: [.iMessage, .SMS], afterDate: nil, beforeDate: nil, afterGUID: nil, beforeGUID: nil, limit: limit ?? 100).then(
+                BLLoadChatItems(withChats: [(chat, .iMessage), (chat, .SMS)], afterDate: nil, beforeDate: nil, afterGUID: nil, beforeGUID: nil, limit: limit ?? 100).then(
                     onlyIDs ? { chatItems in
                         print(chatItems.map { MessageIdentifier(messageID: $0.id, chatID: $0.chatID) }.jsonString)
                     } : { chatItems in
@@ -129,7 +133,7 @@ class MessageCommand: CommandGroup {
             }
             
             func execute() throws {
-                BLLoadChatItems(withGUIDs: ids).then { items in
+                BLLoadChatItems(withGUIDs: ids, service: .iMessage).then { items in
                     if self.mautrix {
                         print(items.compactMap { $0 as? Message }.map { BLMessage(message: $0) }.prettyJSON)
                     } else {
@@ -174,7 +178,7 @@ class MessageCommand: CommandGroup {
                     print(success, error?.description, cancel)
                     self.monitor = nil
                 }
-                chat.imChat.send(message)
+                chat.imChat!.send(message)
                 afterSend()
             }
         }
@@ -311,19 +315,19 @@ class SendMessageCommand: BarcelonaCommand {
     @Param var destination: String
     @Param var message: String
     
-    @Flag("-i", "--id", description: "treat the destination as a chat ID")
-    var isID: Bool
-    
+    @Flag("-i", "--id", description: "treat the destination as a chat ID") var isID: Bool
+    @Flag("-s", "--sms", description: "Send over SMS (will send on iMessage instead") var sms: Bool
+
     var chat: Chat {
         if isID {
-            guard let chat = Chat.resolve(withIdentifier: destination) else {
+            guard let chat = IMChat.chat(withIdentifier: destination, onService: sms ? .SMS : .iMessage, style: nil).map(Chat.init) else {
                 fatalError("Unknown chat with identifier \(destination)")
             }
             
             return chat
         }
         
-        return Chat.chat(withHandleIDs: destination.split(separator: ",").map(String.init))
+        return Chat.chat(withHandleIDs: destination.split(separator: ",").map(String.init), service: sms ? .SMS : .iMessage)
     }
     
     func execute() throws {

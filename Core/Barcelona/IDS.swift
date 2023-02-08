@@ -105,7 +105,7 @@ class BLIDSIDQueryCache {
 }
 
 /// Asynchronously resolves the latest IDS status for a set of handles on a given service, defaulting to iMessage.
-public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServiceStyle = IMServiceStyle.iMessage, options: BLIDSResolutionOptions = .none, _ callback: @escaping ([String: IDSState]) -> ()) throws {
+public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServiceStyle, options: BLIDSResolutionOptions = .none, _ callback: @escaping ([String: IDSState]) -> ()) throws {
     var allUnavailable: [String: IDSState] {
         ids.map {
             ($0, IDSState.unavailable)
@@ -192,8 +192,8 @@ public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServic
     }
 }
 
-/// Synchronously resolves the latest IDS status for a set of handles on a given service, defaulting to iMessage.
-public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServiceStyle = IMServiceStyle.iMessage, options: BLIDSResolutionOptions = .none) throws -> [String: IDSState] {
+/// Synchronously resolves the latest IDS status for a set of handles on a given service.
+public func BLResolveIDStatusForIDs(_ ids: [String], onService service: IMServiceStyle, options: BLIDSResolutionOptions = .none) throws -> [String: IDSState] {
     let semaphore = DispatchSemaphore(value: 0)
     var results: [String: IDSState] = [:]
     

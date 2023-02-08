@@ -37,17 +37,6 @@ public enum IMServiceStyle: String, CaseIterable, Codable, Hashable {
         
         self.init(service: service)
     }
-
-    // Normally used from init'ting from `IMItem.service`
-    public init?(name: String) {
-        switch name {
-        case "iMessage": self = .iMessage
-        case "SMS": self = .SMS
-        case "FaceTime": self = .FaceTime
-        case "Phone": self = .Phone
-        default: return nil
-        }
-    }
     
     public var service: IMServiceImpl {
         switch self {

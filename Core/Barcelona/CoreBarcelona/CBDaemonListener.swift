@@ -697,7 +697,7 @@ private extension CBDaemonListener {
             return
         }
 
-        guard let service = IMServiceStyle(name: message.service) else {
+        guard let service = IMServiceStyle(rawValue: message.service) else {
             log.error("Cannot process sentMessage \(message): service is not a known value")
             return
         }
@@ -749,7 +749,7 @@ private extension CBDaemonListener {
             return
         }
 
-        guard let serv = newMessage.service, let service = IMServiceStyle(name: serv) else {
+        guard let serv = newMessage.service, let service = IMServiceStyle(rawValue: serv) else {
             log.warning("Couldn't form relevant service from \(String(describing: newMessage.service)); ignoring message \(String(describing: newMessage.guid))")
             return
         }
@@ -862,7 +862,7 @@ private extension IMMessageItem {
     }
     
     func statusChange(inChat chat: String, style: IMChatStyle) -> CBMessageStatusChange? {
-        guard let payload = statusPayload, let service = IMServiceStyle(name: service) else {
+        guard let payload = statusPayload, let service = IMServiceStyle(rawValue: service) else {
             return nil
         }
         

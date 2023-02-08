@@ -45,7 +45,7 @@ private extension Message {
     }
     
     var isGroup: Bool {
-        IMChat.chat(withIdentifier: chatID, onService: service, style: nil)!.isGroup
+        imChat.isGroup
     }
     
     var textContent: String {

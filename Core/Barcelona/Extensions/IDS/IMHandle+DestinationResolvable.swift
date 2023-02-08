@@ -23,7 +23,7 @@ public extension IMHandle {
     func lazyIDSStatus() -> Promise<IDSState> {
         Promise { resolve, reject in
             do {
-                try BLResolveIDStatusForIDs([self.id]) {
+                try BLResolveIDStatusForIDs([self.id], onService: .iMessage) {
                     resolve($0.first?.value ?? .unknown)
                 }
             } catch {

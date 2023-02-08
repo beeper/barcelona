@@ -18,7 +18,7 @@ private extension CBMessageStatusChange {
         guard let sender = sender else {
             return nil
         }
-        return "\(message.service ?? "iMessage");\(chat?.isGroup ?? false ? "+" : "-");\(sender)"
+        return "\(service.rawValue);\(chat?.isGroup ?? false ? "+" : "-");\(sender)"
     }
 }
 

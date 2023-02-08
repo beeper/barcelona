@@ -10,6 +10,7 @@ import Foundation
 import Barcelona
 import SwiftCLI
 import SwiftyTextTable
+import IMCore
 
 class ChatCommands: CommandGroup {
     let name = "chat"
@@ -38,7 +39,7 @@ class ChatCommands: CommandGroup {
         @Param var id: String
         
         func execute() throws {
-            BLLoadChatItems(withChatIdentifiers: [id], onServices: [.iMessage, .SMS], limit: 20).then {
+            BLLoadChatItems(withChats: [.iMessage, .SMS].map { (id, $0) }, limit: 20).then {
                 print($0)
                 exit(0)
             }
@@ -56,7 +57,7 @@ class ChatCommands: CommandGroup {
             @CollectedParam var participants: [String]
             
             func execute() throws {
-                guard let chat = Chat.resolve(withIdentifier: chatID) else {
+                guard let chat = IMChat.chat(withIdentifier: chatID, onService: .iMessage, style: nil).map(Chat.init) else {
                     return print("unknown chatID")
                 }
                 
@@ -69,9 +70,9 @@ class ChatCommands: CommandGroup {
             
             @Param var chatID: String
             @CollectedParam var participants: [String]
-            
+
             func execute() throws {
-                guard let chat = Chat.resolve(withIdentifier: chatID) else {
+                guard let chat = IMChat.chat(withIdentifier: chatID, onService: .iMessage, style: nil).map(Chat.init) else {
                     return print("unknown chatID")
                 }
                 
