@@ -11,6 +11,8 @@ import Foundation
 import IMCore
 import Logging
 
+fileprivate let log = Logger(label: "BLMessage")
+
 internal extension Chat {
     var blChatGUID: String? {
         imChat?.blChatGUID
@@ -37,15 +39,15 @@ private extension Message {
             return nil
         }
         
-        return "\(service.rawValue);\(isGroup ? "+" : "-");\(sender)"
+        return "\(service.rawValue);\(isGroup == true ? "+" : "-");\(sender)"
     }
     
-    var blChatGUID: String {
-        imChat.blChatGUID
+    var blChatGUID: String? {
+        imChat?.blChatGUID
     }
     
-    var isGroup: Bool {
-        imChat.isGroup
+    var isGroup: Bool? {
+        imChat?.isGroup
     }
     
     var textContent: String {
@@ -99,12 +101,16 @@ public struct BLMessage: Codable, ChatResolvable {
     public var correlation_id: String?
     
     public init(message: Message) {
-        let log = Logger(label: "Message")
         guid = message.id
         timestamp = message.time / 1000 // mautrix-imessage expects this to be seconds
         subject = message.subject
         text = message.textContent
-        chat_guid = message.blChatGUID
+
+        if (message.imChat == nil) {
+            log.warning("Creating BLMessage from Message with a nil imChat \(message.debugDescription)")
+        }
+
+        chat_guid = message.blChatGUID ?? "unknown"
         sender_guid = message.blSenderGUID
         service = message.service.rawValue
         is_from_me = message.fromMe
@@ -127,7 +133,7 @@ public struct BLMessage: Codable, ChatResolvable {
             case let action as ParticipantChangeItem:
                 self.group_action_type = Int(action.changeType)
                 self.item_type = IMItemType.participantChange.rawValue
-                self.target = action.blTargetGUID(on: service, isGroup: message.imChat.isGroup)
+                self.target = action.blTargetGUID(on: service, isGroup: message.imChat?.isGroup == true)
             case let item as GroupActionItem:
                 self.group_action_type = Int(item.actionType.rawValue)
                 self.item_type = IMItemType.groupAction.rawValue
