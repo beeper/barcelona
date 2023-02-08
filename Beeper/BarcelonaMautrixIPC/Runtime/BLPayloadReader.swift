@@ -40,7 +40,6 @@ public class BLPayloadReader {
     public var ready = false {
         didSet {
             let queue = queue
-            self.queue = []
             
             queue.forEach { BLHandlePayload($0, ipcChannel: self.ipcChannel) }
         }

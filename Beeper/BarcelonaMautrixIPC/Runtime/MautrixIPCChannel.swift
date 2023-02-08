@@ -48,10 +48,6 @@ public class MautrixIPCChannel {
         self.inputHandle = inputHandle
         self.outputHandle = outputHandle
         
-        // Set up our reading pipeline
-        
-        inputHandle.listen(sharedBarcelonaStream.receive(data:))
-        
         sharedBarcelonaStream.subject
             .sink { result in
                 switch result {
@@ -101,7 +97,9 @@ public class MautrixIPCChannel {
                 }
             }
             .store(in: &openCombineCancellables)
-        
+
+        inputHandle.listen(sharedBarcelonaStream.receive(data:))
+
         let sendDispatchQueue = DispatchQueue(label: "com.barcelona.MautrixIPCChannelSendQueue")
         writeSubject
             .receive(on: sendDispatchQueue)
