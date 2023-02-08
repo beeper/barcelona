@@ -87,7 +87,6 @@ public struct PrepareDMCommand: Codable {
 extension PrepareDMCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         let log = Logger(label: "ResolveIdentifierCommand")
-        let transaction = SentrySDK.startTransaction(name: "prepare_dm", operation: "prepare_dm")
 
         let parsed = ParsedGUID(rawValue: guid)
 
@@ -109,6 +108,5 @@ extension PrepareDMCommand: Runnable {
         }
 
         payload.respond(.ack, ipcChannel: ipcChannel)
-        transaction.finish(status: .ok)
     }
 }
