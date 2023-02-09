@@ -470,6 +470,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         .message
     }
     
+    @MainActor
     public var isReadByMe: Bool {
         let log = Logger(label: "Message")
         if fromMe {

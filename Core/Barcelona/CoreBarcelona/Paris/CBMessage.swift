@@ -35,6 +35,7 @@ public struct CBMessage: Codable, CustomDebugStringConvertible {
     public var flags: Flags = .none
     
     /// Initializes the message from a dictionary representation
+    @MainActor
     public init?(dictionary: [AnyHashable: Any], chat: CBChatIdentifier) {
         guard let id = dictionary["guid"] as? String else {
             return nil
@@ -45,6 +46,7 @@ public struct CBMessage: Codable, CustomDebugStringConvertible {
     }
     
     /// Updates the sender and timestamps according to the person who triggered the update
+    @MainActor
     public mutating func handle(time: Date?, timeDelivered: Date?, timeRead: Date?, sender deltaSender: CBSender) -> CBMessage {
         if flags.contains(.fromMe) {
             if deltaSender.scheme != .me {
@@ -65,6 +67,7 @@ public struct CBMessage: Codable, CustomDebugStringConvertible {
     }
     
     /// Updates the message using a dictionary representation
+    @MainActor
     @discardableResult public mutating func handle(dictionary: [AnyHashable: Any]) -> CBMessage {
         service = (dictionary["service"] as? String).flatMap(CBServiceName.init(rawValue:)) ?? service
         error = (dictionary["error"] as? UInt32).flatMap(FZErrorType.init(rawValue:)) ?? error
@@ -75,6 +78,7 @@ public struct CBMessage: Codable, CustomDebugStringConvertible {
         return handle(time: extractTime("time"), timeDelivered: extractTime("timeDelivered"), timeRead: extractTime("timeRead"), sender: CBSender(dictionary: dictionary))
     }
     
+    @MainActor
     private mutating func updated() -> CBMessage {
         if eligibleToResend {
             let id = id
@@ -309,6 +313,7 @@ extension CBMessage.Flags {
     
 }
 
+@MainActor
 public extension CBMessage {
     /// Initializes the message using an `IMItem` instance
     @_disfavoredOverload init(item: IMItem, chat: CBChatIdentifier) {
@@ -372,6 +377,7 @@ extension CBMessage {
     }
 }
 
+@MainActor
 public extension CBMessage {
     var eligibleToResend: Bool {
         guard flags.contains(.fromMe) else {

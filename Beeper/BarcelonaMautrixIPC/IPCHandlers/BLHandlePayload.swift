@@ -46,6 +46,7 @@ private extension IPCPayload {
     }
 }
 
+@MainActor
 func BLHandlePayload(_ payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
     guard let runnable = payload.runnable else {
         return log.warning("Received unhandleable payload type \(payload.command.name)")
@@ -58,7 +59,5 @@ func BLHandlePayload(_ payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         }
     }
 
-    DispatchQueue.main.async {
-        runnable.run(payload: payload, ipcChannel: ipcChannel)
-    }
+    runnable.run(payload: payload, ipcChannel: ipcChannel)
 }

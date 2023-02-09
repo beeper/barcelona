@@ -29,6 +29,7 @@ extension Encodable {
     }
 }
 
+@MainActor
 extension IMChat {
     var log: Logging.Logger {
         Logger(label: "IMChat")
@@ -87,6 +88,7 @@ public extension Chat {
         imChat.flatMap { CBChatRegistry.shared.chats[.guid($0.guid)] }
     }
 
+    @MainActor
     func sendReturningRaw(message createMessage: CreateMessage, from: String? = nil) throws -> IMMessage {
         guard let imChat, let service else {
             throw BarcelonaError(code: 500, message: "No imChat or service to send with for \(self.id)")
@@ -118,18 +120,16 @@ public extension Chat {
         
         Chat.delegate?.chat(self, willSendMessages: [message], fromCreateMessage: createMessage)
         
-        Thread.main.sync {
-            markAsRead()
-            let imChat = imChat
-            if let from = from {
-                imChat.lastAddressedHandleID = from
-            }
-            imChat.send(message)
+        markAsRead()
+        if let from = from {
+            imChat.lastAddressedHandleID = from
         }
-        
+        imChat.send(message)
+
         return message
     }
-    
+
+    @MainActor
     func send(message createMessage: CreateMessage, from: String? = nil) throws -> Message {
         guard let imChat, let service else {
             throw BarcelonaError(code: 500, message: "No IMChat or service for \(id)")
@@ -137,7 +137,8 @@ public extension Chat {
 
         return Message(messageItem: try sendReturningRaw(message: createMessage, from: from)._imMessageItem, chatID: imChat.id, service: service)
     }
-    
+
+    @MainActor
     func tapback(_ creation: TapbackCreation, metadata: Message.Metadata? = nil) throws -> Message {
         markAsRead()
         guard let imChat, let service else {

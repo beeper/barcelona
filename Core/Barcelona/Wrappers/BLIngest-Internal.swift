@@ -35,6 +35,7 @@ extension IMMessage: IMItemIDResolvable {
 
 // MARK: - IMFileTransfer Preload
 @inlinable
+@MainActor
 internal func _BLLoadFileTransfers(forObjects objects: [NSObject]) -> Promise<Void> {
     let log = Logger(label: "_BLLoadFileTransfers")
     let unloadedFileTransferGUIDs = objects.compactMap {

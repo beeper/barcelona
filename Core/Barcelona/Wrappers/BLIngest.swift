@@ -13,6 +13,7 @@ import Logging
 private let log = Logger(label: "BLIngestObjects")
 
 // MARK: - Public API
+@MainActor
 public func BLIngestObjects(_ objects: [NSObject], inChat chatId: String? = nil, service: IMServiceStyle) -> Promise<[ChatItem]> {
     guard objects.count > 0 else {
         *log.debug("Early-exit BLIngest because objects is empty")
@@ -58,6 +59,7 @@ public func BLIngestObjects(_ objects: [NSObject], inChat chatId: String? = nil,
     }
 }
 
+@MainActor
 public func BLIngestObject(_ object: NSObject, inChat chatId: String? = nil, service: IMServiceStyle) -> Promise<ChatItem> {
     guard let chatId else {
         return _BLResolveChatID(forObject: object)

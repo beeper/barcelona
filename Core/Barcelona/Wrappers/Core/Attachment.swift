@@ -123,6 +123,7 @@ public struct Attachment: Codable, Hashable {
     }
     
     @discardableResult
+    @MainActor
     public func initializeFileTransferIfNeeded() -> IMFileTransfer? {
         if let transfer = existingFileTransfer {
             return transfer

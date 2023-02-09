@@ -17,7 +17,8 @@ public extension Chat {
     enum AtEveryoneError: Error {
         case textTooShort
     }
-    
+
+    @MainActor
     func pingEveryone(text: String) throws -> Message {
         let targetParticipants = participants.filter {
             !$0.cb_isOneOfMyHandles

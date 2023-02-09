@@ -14,6 +14,7 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
     var log: Logging.Logger {
         Logger(label: "GetMessagesAfterCommand")
     }
+    @MainActor
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         log.debug("Getting messages for chat guid \(chat_guid) after time \(timestamp)")
         
@@ -37,6 +38,7 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
 }
 
 extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
+    @MainActor
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         if MXFeatureFlags.shared.mergedChats, chat_guid.starts(with: "SMS;") {
             return payload.respond(.messages([]), ipcChannel: ipcChannel)

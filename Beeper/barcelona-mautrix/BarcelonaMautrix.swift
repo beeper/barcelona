@@ -17,11 +17,13 @@ import Logging
 private let log = Logger(label: "BarcelonaMautrix")
 
 @main
+@MainActor
 class BarcelonaMautrix {
     private let mautrixIPCChannel: MautrixIPCChannel
     private let reader: BLPayloadReader
     private let eventHandler: BLEventHandler
-    
+
+    @MainActor
     init(_ mautrixIPCChannel: MautrixIPCChannel) {
         self.mautrixIPCChannel = mautrixIPCChannel
         reader = BLPayloadReader(ipcChannel: mautrixIPCChannel)
@@ -78,14 +80,14 @@ class BarcelonaMautrix {
         
         barcelonaMautrix.run()
     }
-    
+
     func run() {
         checkArguments()
         bootstrap()
         
         RunLoop.main.run()
     }
-    
+
     func bootstrap() {
         log.info("Bootstrapping")
         

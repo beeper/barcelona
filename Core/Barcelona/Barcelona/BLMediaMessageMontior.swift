@@ -14,6 +14,7 @@ import Logging
 
 fileprivate let log = Logger(label: "MessageMonitor")
 
+@MainActor
 public class BLMediaMessageMonitor {
     public let messageID: () -> String
     public let transferGUIDs: [String]

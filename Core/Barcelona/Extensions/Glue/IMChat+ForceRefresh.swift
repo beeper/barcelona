@@ -11,6 +11,7 @@ import Logging
 
 private let log = Logger(label: "IMChat")
 
+@MainActor
 public extension IMChat {
     /// Returns true if the next message sent will be sent over SMS
     var willSendSMS: Bool {

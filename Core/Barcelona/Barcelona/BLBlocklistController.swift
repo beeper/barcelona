@@ -11,6 +11,7 @@ public class BLBlocklistController {
     @_spi(unitTestInternals) public var testingOverride: Set<String> = Set()
 }
 
+@MainActor
 public extension BLBlocklistController {
     static let shared = BLBlocklistController()
     
