@@ -65,7 +65,6 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     /// Useful for adding application-specific behavior, allows you to hook into different APIs on Chat (like sending)
     public static var delegate: ChatDelegate?
     
-    @MainActor
     public init(_ backing: IMChat) {
         joinState = backing.joinState
         roomName = backing.roomName
@@ -211,19 +210,16 @@ public extension Chat {
     }
     
     /// Returns a chat targeted at the appropriate service for a handleID
-    @MainActor
     static func directMessage(withHandleID handleID: String) -> Chat {
         Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID)))
     }
     
     /// Returns a chat targeted at the appropriate service for a handleID
-    @MainActor
     static func directMessage(withHandleID handleID: String, service: IMServiceStyle) -> Chat {
         Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service)))
     }
     
     /// Returns a chat targeted at the appropriate service for a set of handleIDs
-    @MainActor
     static func chat(withHandleIDs handleIDs: [String], service: IMServiceStyle) -> Chat {
         guard handleIDs.count > 0 else {
             preconditionFailure("chat(withHandleIDs) requires at least one handle ID to be non-null return type")
@@ -240,7 +236,6 @@ public extension Chat {
         }
     }
 
-    @MainActor
     static func firstChatRegardlessOfService(withId chatId: String) -> Chat? {
         for service in [IMServiceStyle.iMessage, IMServiceStyle.SMS] {
             if let chat = IMChat.chat(withIdentifier: chatId, onService: service, style: nil) {
@@ -263,7 +258,6 @@ public extension Thread {
 
 // MARK: - Message Sending
 public extension Chat {
-    @MainActor
     func messages(before: String? = nil, limit: Int? = nil, beforeDate: Date? = nil) -> Promise<[Message]> {
         guard let service else {
             log.warning("Cannot get messages(before: \(String(describing: before))) because service is nil; would not know what chat to check")

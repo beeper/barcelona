@@ -175,16 +175,14 @@ public class ERTimeSortedParticipantsManager {
                     "Finished recomputing sorted participants with chat ID \(chat.id) per notification \(notification.name.rawValue)"
                 )
             } catch {
-                log.error("Error \(error)")
+                log.error("Error ")
             }
         }
     }
 
-    @MainActor
     private var chatToParticipantSortRules: [String: [ParticipantSortRule]] = [:]
 
 
-    @MainActor
     public func sortedParticipants(forChat chat: String) -> [String] {
         chatToParticipantSortRules[chat]?.map(\.handleID) ?? []
     }

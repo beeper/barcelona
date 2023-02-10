@@ -24,14 +24,12 @@ extension Array where Element: Hashable {
 }
 
 public extension IMChat {
-    @MainActor
     fileprivate var cachedRecentParticipantHandleIDs: [String] {
         ERTimeSortedParticipantsManager.sharedInstance.sortedParticipants(forChat: self.id)
             .filter(self.participantHandleIDs().contains)
             .removingDuplicates()
     }
     
-    @MainActor
     var recentParticipantHandleIDs: [String] {
         var cachedRecent = cachedRecentParticipantHandleIDs
         

@@ -105,7 +105,6 @@ public extension CBSenderCorrelationController {
 prefix operator ~
 
 @_transparent
-@MainActor
 private prefix func ~(_ expression: @autoclosure () -> ()) {
     if _fastPath(!CBSenderCorrelationController.debug) {
         return
@@ -114,7 +113,6 @@ private prefix func ~(_ expression: @autoclosure () -> ()) {
 }
 
 /// Tracks the correlation of different sender IDs to a single, unique identity representing an Apple ID
-@MainActor
 public class CBSenderCorrelationController {
     private class Stack {
         let log = Logger(label: "CBSenderCorrelationController.Stack")
@@ -592,7 +590,6 @@ extension Message: CBSenderTargetable {
     }
 }
 
-@MainActor
 extension IMChat {
     /// Returns other chats with the same sender correlation ID
     public var siblings: [IMChat] {
@@ -653,7 +650,6 @@ internal extension CBCorrelationOverrideController {
 
 import SwiftCLI
 
-@MainActor
 public class CBCorrelationCommands: CommandGroup {
     public let name: String = "correlation"
     public let shortDescription: String = "interact with the correlation subsystem"
@@ -669,9 +665,7 @@ public class CBCorrelationCommands: CommandGroup {
         @Param public var sender: String
         
         public func execute() throws {
-            DispatchQueue.main.sync {
-                print(CBSenderCorrelationController.shared.correlate(senderID: sender))
-            }
+            print(CBSenderCorrelationController.shared.correlate(senderID: sender))
         }
     }
     

@@ -34,7 +34,6 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         ipcChannel.writePayload(.init(command: command))
     }
     
-    @MainActor
     @_spi(unitTestInternals) public func receiveTyping(_ chat: String, service: IMServiceStyle, _ typing: Bool) {
         guard let chat = IMChat.chat(withIdentifier: chat, onService: service, style: nil) else {
             return
@@ -52,12 +51,9 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
     @_spi(unitTestInternals) public func unreadCountChanged(_ chat: String, _ count: Int) {
     }
     
-    @MainActor
     public func run() {
         CBDaemonListener.shared.unreadCountPipeline.pipe(unreadCountChanged)
-        CBDaemonListener.shared.typingPipeline.pipe { [unowned self] chat, service, typing in
-            receiveTyping(chat, service: service, typing)
-        }
+        CBDaemonListener.shared.typingPipeline.pipe(receiveTyping)
         
         CBDaemonListener.shared.messageStatusPipeline.pipe { change in
             guard change.type == .read else {

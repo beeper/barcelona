@@ -14,9 +14,7 @@ import IMSharedUtilities
 
 private let log = Logger(label: "CBChat")
 
-@MainActor
 public extension CBChat {
-
     enum MessageInput: CustomDebugStringConvertible, CustomStringConvertible {
         #if canImport(IMSharedUtilities)
         case item(IMItem)
@@ -32,7 +30,6 @@ public extension CBChat {
             }
         }
         
-        @MainActor
         public func handle(message: inout CBMessage?, leaf: CBChatIdentifier) -> CBMessage {
             switch self {
                 #if canImport(IMSharedUtilities)

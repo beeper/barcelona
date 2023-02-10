@@ -85,7 +85,6 @@ public struct PrepareDMCommand: Codable {
 }
 
 extension PrepareDMCommand: Runnable {
-    @MainActor
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         let log = Logger(label: "ResolveIdentifierCommand")
 

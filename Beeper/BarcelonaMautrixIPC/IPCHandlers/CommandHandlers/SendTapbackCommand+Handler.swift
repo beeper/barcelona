@@ -14,7 +14,6 @@ extension TapbackCommand: Runnable, AuthenticatedAsserting {
     var log: Logging.Logger {
         Logger(label: "TapbackCommand")
     }
-    @MainActor
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         guard let chat = cbChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)

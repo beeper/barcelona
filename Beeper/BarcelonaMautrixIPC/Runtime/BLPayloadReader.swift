@@ -16,8 +16,7 @@ public class BLPayloadReader {
     private var queue = [IPCPayload]()
     
     private var bag = Set<AnyCancellable>()
-
-    @MainActor
+    
     public init(ipcChannel: MautrixIPCChannel) {
         self.ipcChannel = ipcChannel
         
@@ -37,8 +36,7 @@ public class BLPayloadReader {
             self.ready = true
         }
     }
-
-    @MainActor
+    
     public var ready = false {
         didSet {
             let queue = queue

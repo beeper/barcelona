@@ -30,7 +30,6 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         IMDaemonController.shared().listener.addHandler(self)
     }
     
-    @MainActor
     public func setupComplete(_ success: Bool, info: [AnyHashable : Any]!) {
         if let chats = info["personMergedChats"] as? [[AnyHashable: Any]] {
             for chat in chats {
@@ -41,13 +40,11 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         }
     }
     
-    @MainActor
     public func chat(_ persistentIdentifier: String!, updated updateDictionary: [AnyHashable : Any]!) {
         trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) updated \(((updateDictionary ?? [:]) as NSDictionary))")
         _ = handle(chat: updateDictionary)
     }
-
-    @MainActor
+    
     public func chat(_ persistentIdentifier: String!, propertiesUpdated properties: [AnyHashable : Any]!) {
         trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) properties \(((properties ?? [:]) as NSDictionary))")
         _ = handle(chat: [
@@ -66,7 +63,6 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     
     var loadedChatsByChatIdentifierCallback: [String: [([IMChat]) -> ()]] = [:]
     
-    @MainActor
     public func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) {
         trace(chatIdentifier, nil, "chats loaded: \((chatDictionaries as NSArray))")
         guard let callbacks = loadedChatsByChatIdentifierCallback.removeValue(forKey: chatIdentifier) else {
@@ -82,7 +78,6 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         trace(nil, nil, "loaded last message for all chats \((chatIDToLastMessageDictionary as NSDictionary))")
     }
     
-    @MainActor
     public func service(_ serviceID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, messagesUpdated messages: [[AnyHashable: Any]]!) {
         trace(chatIdentifier, nil, "messages updated \(messages.debugDescription)")
         messages.forEach {
@@ -94,7 +89,6 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         trace(chatIdentifier, nil, "error \((error as NSError).debugDescription)")
     }
     
-    @MainActor
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, notifySentMessage msg: IMMessageItem!, sendTime: NSNumber!) {
         trace(chatIdentifier, nil, "sent message \(msg.guid ?? "nil") \(msg.debugDescription)")
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
@@ -104,7 +98,6 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         log.debug("chat \(chatIdentifier ?? "nil") pcID \(personCentricID ?? "nil") \(message): \(function.description)")
     }
     
-    @MainActor
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, groupID: String!, chatPersonCentricID personCentricID: String!, messagesReceived messages: [IMItem]!, messagesComingFromStorage fromStorage: Bool) {
         trace(chatIdentifier, personCentricID, "received \(messages!) from storage \(fromStorage)")
         messages.forEach {
@@ -116,7 +109,6 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         
     }
     
-    @MainActor
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, groupID: String!, chatPersonCentricID personCentricID: String!, messagesReceived messages: [IMItem]!) {
         trace(chatIdentifier, personCentricID, "received \(messages!)")
         messages.forEach {
@@ -124,13 +116,11 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         }
     }
     
-    @MainActor
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, groupID: String!, chatPersonCentricID personCentricID: String!, messageReceived msg: IMItem!) {
         trace(chatIdentifier, personCentricID, "received message \(msg.debugDescription)")
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
     }
     
-    @MainActor
     private func handle(chatIdentifier: String?, properties: [AnyHashable: Any]?, groupID: String?, item: NSObject) {
         lazy var guid: String? = {
             switch item {
@@ -193,7 +183,6 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         handle(chat: chatID, item: item)
     }
     
-    @MainActor
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, groupID: String!, chatPersonCentricID personCentricID: String!, messageSent msg: IMMessageItem!) {
         trace(chatIdentifier, personCentricID, "sent message \(msg)")
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
@@ -203,13 +192,11 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         trace(chatIdentifier, nil, "properties \(((properties ?? [:]) as NSDictionary)) updated to \(((update ?? [:]) as NSDictionary))")
     }
     
-    @MainActor
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, messageUpdated msg: IMItem!) {
         trace(chatIdentifier, nil, "message updated \(msg)")
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
     }
     
-    @MainActor
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, messagesUpdated messages: [NSObject]!) {
         trace(chatIdentifier, nil, "messages updated \((messages! as NSArray))")
         messages.forEach {
@@ -219,7 +206,6 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     
     var queryCallbacks: [String: [() -> ()]] = [:]
     
-    @MainActor
     private func internalize(chats: [[AnyHashable: Any]]) -> [IMChat] {
         func getMutableDictionary(_ key: String) -> NSMutableDictionary {
             if let dict = IMChatRegistry.shared.value(forKey: key) as? NSMutableDictionary {
@@ -286,7 +272,6 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         }
     }
     
-    @MainActor
     public func loadedChats(_ chats: [[AnyHashable : Any]]!, queryID: String!) {
         guard queryCallbacks.keys.contains(queryID) else {
             return
@@ -300,7 +285,6 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     var hasLoadedChats = false
     @Atomic var loadedChatsCallbacks: [() -> ()] = []
     
-    @MainActor
     public func loadedChats(_ chats: [[AnyHashable : Any]]!) {
         _ = internalize(chats: chats)
         let loadedChatsCallbacks = self.loadedChatsCallbacks
@@ -319,7 +303,6 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     }
 }
 
-@MainActor
 public extension CBChatRegistry {
     static let shared = CBChatRegistry()
     
@@ -408,7 +391,6 @@ public extension CBChatRegistry {
 }
 
 #if canImport(IMSharedUtilities)
-@MainActor
 public extension CBChatRegistry {
     func handle(chat: [AnyHashable: Any], item: IMItem) -> Bool {
         guard let identifier = handle(chat: chat).1 else {

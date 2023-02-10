@@ -12,7 +12,6 @@ import IMSharedUtilities
 import Logging
 
 /// An entity tracking a single logical conversation comprised of potentially several different chats
-@MainActor
 public class CBChat {
     private let log = Logger(label: "CBChat")
     /// All cached messages for this chat

@@ -11,7 +11,6 @@ import IMFoundation
 import Logging
 
 /// The BLMessageExpert offers a simplified API for monitoring message state events
-@MainActor
 public class BLMessageExpert {
     public static let shared = BLMessageExpert()
     
@@ -90,8 +89,8 @@ public class BLMessageExpert {
     public let eventPipeline = CBPipeline<BLMessageEvent>()
     
     public init() {
-        CBDaemonListener.shared.messageStatusPipeline.pipe { change in  { self.process(change: change) } }
-        CBDaemonListener.shared.messagePipeline.pipe { message in { self.process(message: message) } }
+        CBDaemonListener.shared.messageStatusPipeline.pipe { change in self.queue.async { self.process(change: change) } }
+        CBDaemonListener.shared.messagePipeline.pipe { message in self.queue.async { self.process(message: message) } }
         seenMessages.reserveCapacity(100)
     }
     
@@ -102,7 +101,8 @@ public class BLMessageExpert {
     
     private var counter: Int = 0
     private var seenMessages: [String: BLMessageEventReceipt] = [:]
-
+    private let queue: DispatchQueue = DispatchQueue(label: "BLMessageExpert")
+    
     private func send(_ event: BLMessageEvent) {
         if seenMessages[event.id]?.event == event {
             return

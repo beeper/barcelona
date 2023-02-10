@@ -148,7 +148,6 @@ private func BLCreateIMMessageFromIMDMessageRecordRefs(_ refs: NSArray) -> [IMMe
 ///   - refs: the refs to parse
 ///   - chat: the ID of the chat the messages reside in. if omitted, the chat ID will be resolved at ingestion
 /// - Returns: An NIO future of ChatItems
-@MainActor
 private func BLIngestIMDMessageRecordRefs(_ refs: NSArray, in chat: String? = nil, service: IMServiceStyle) -> Promise<[ChatItem]> {
     if refs.count == 0 {
         return .success([])
@@ -214,7 +213,6 @@ public func BLLoadIMMessage(withGUID guid: String) -> IMMessage? {
 ///   - guids: GUIDs of messages to load
 ///   - chat: ID of the chat to load. if omitted, it will be resolved at ingestion.
 /// - Returns: NIO future of ChatItems
-@MainActor
 public func BLLoadChatItems(withGUIDs guids: [String], chatID: String? = nil, service: IMServiceStyle) -> Promise<[ChatItem]> {
     if guids.count == 0 {
         return .success([])
@@ -231,7 +229,6 @@ public func BLLoadChatItems(withGUIDs guids: [String], chatID: String? = nil, se
     return IMDPersistenceMarshal.putBuffers(guids, BLIngestIMDMessageRecordRefs(refs, in: chatID, service: service)) + buffer
 }
 
-@MainActor
 public func BLLoadChatItems(withGraph graph: [String: ([String], IMServiceStyle)]) -> Promise<[ChatItem]> {
     if graph.count == 0 {
         return .success([])
@@ -264,7 +261,6 @@ public func BLLoadChatItems(withGraph graph: [String: ([String], IMServiceStyle)
 ///   - beforeGUID: GUID of the message all messages must precede
 ///   - limit: max number of messages to return
 /// - Returns: NIO future of ChatItems
-@MainActor
 public func BLLoadChatItems(withChats chats: [(id: String, service: IMServiceStyle)], afterDate: Date? = nil, beforeDate: Date? = nil, afterGUID: String? = nil, beforeGUID: String? = nil, limit: Int? = nil) -> Promise<[ChatItem]> {
     // We turn the list of chats into just a list of chatIdentifiers
     let chatIdentifiers = chats.map(\.0)

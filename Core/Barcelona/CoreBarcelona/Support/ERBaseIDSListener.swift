@@ -114,10 +114,11 @@ enum IDSCommandID: NSInteger, CaseIterable, Codable {
     case commandResponse = 255
 }
 
-public class ERBaseIDSListener: NSObject, IDSDaemonListenerProtocol {
-    @MainActor
+public class ERBaseIDSListener: NSObject, IDSDaemonListenerProtocol {    
     public func daemonConnected() {
-        BLDaemon.shared.initialize()
+        DispatchQueue.main.async {
+            BLDaemon.shared.initialize()
+        }
     }
     
     public func messageReceived(_ arg1: [AnyHashable : Any]!, withGUID arg2: String!, withPayload arg3: [AnyHashable : Any]!, forTopic arg4: String!, toIdentifier arg5: String!, fromID arg6: String!, context arg7: [AnyHashable : Any]!) {

@@ -92,8 +92,3 @@ targets:
       - path: ../Beeper/BarcelonaMautrixIPC
         includes:
           - "**/*_Tests.swift"
-aggregateTargets:
-  periphery:
-    buildScripts:
-      - script: |
-          /opt/homebrew/bin/periphery scan --config ${SRCROOT}/.periphery.yml

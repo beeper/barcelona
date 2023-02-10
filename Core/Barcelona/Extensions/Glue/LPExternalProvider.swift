@@ -148,8 +148,7 @@ public extension IMMessage {
             }
         }
     }
-
-    @MainActor
+    
     func loadLinkMetadata(at url: URL) {
         guard let dataSource = decodePluginDataSource() else {
             return
@@ -157,20 +156,54 @@ public extension IMMessage {
         guard let richLinkDataSource = dataSource.richLinkDataSource else {
             return
         }
-
-        let metadata = LPLinkMetadata()
-        metadata.originalURL = url
-        richLinkDataSource.richLink.isPlaceholder = true
-        richLinkDataSource.richLink.metadata = metadata
-        richLinkDataSource.richLink.needsCompleteFetch = true
-        richLinkDataSource.richLink.needsSubresourceFetch = true
-        dataSource.setValue(url, forKey: "originalURL")
-        dataSource.payloadWillSendFromShelf()
-        richLinkDataSource._startFetchingMetadata()
-        IMMessage.retains[self] = .init(arrayLiteral: metadata, dataSource)
-        onceSent().then {
-            IMMessage.retains.removeValue(forKey: self)
+        
+        func _load() {
+            let metadata = LPLinkMetadata()
+            metadata.originalURL = url
+            richLinkDataSource.richLink.isPlaceholder = true
+            richLinkDataSource.richLink.metadata = metadata
+            richLinkDataSource.richLink.needsCompleteFetch = true
+            richLinkDataSource.richLink.needsSubresourceFetch = true
+            dataSource.setValue(url, forKey: "originalURL")
+            dataSource.payloadWillSendFromShelf()
+            richLinkDataSource._startFetchingMetadata()
+            IMMessage.retains[self] = .init(arrayLiteral: metadata, dataSource)
+            onceSent().then {
+                IMMessage.retains.removeValue(forKey: self)
+            }
         }
+
+        if Thread.isMainThread {
+            _load()
+        } else {
+            DispatchQueue.main.sync(execute: _load)
+        }
+        
+//        let sentPromise = onceSent()
+//        DispatchQueue.main.async {
+//            guard let provider = LPMetadataProvider() else {
+//                return
+//            }
+//            IMMessage.fetchers[self] = provider
+//            provider.startFetchingMetadata(for: url) { metadata, error in
+//                IMMessage.fetchers.removeValue(forKey: self)
+//                guard let metadata = metadata else {
+//                    return
+//                }
+//                sentPromise.then {
+//                    richLinkDataSource.updateRichLink(with: metadata)
+//                    richLinkDataSource.dispatchDidReceiveMetadataToAllClients()
+//                    var attachments: NSArray?
+//                    self.payloadData = richLinkDataSource.richLink.dataRepresentation(withOutOfLineAttachments: &attachments)
+//                    dataSource.sendPayload(self.payloadData, attachments: attachments)
+//                    if let attachments = attachments {
+//                        let transferGUIDs = IMFileTransferCenter.sharedInstance().guids(forStoredAttachmentPayloadData: attachments, messageGUID: self.guid) as? [String] ?? []
+//                        self.fileTransferGUIDs = transferGUIDs
+//                        self._imMessageItem.fileTransferGUIDs = transferGUIDs
+//                    }
+//                }
+//            }
+//        }
     }
     
     func provideLinkMetadata(_ metadata: RichLinkMetadata) throws -> () -> () {

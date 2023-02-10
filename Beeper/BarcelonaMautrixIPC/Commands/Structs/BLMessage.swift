@@ -99,8 +99,7 @@ public struct BLMessage: Codable, ChatResolvable {
     public var metadata: Message.Metadata?
     public var sender_correlation_id: String?
     public var correlation_id: String?
-
-    @MainActor
+    
     public init(message: Message) {
         guid = message.id
         timestamp = message.time / 1000 // mautrix-imessage expects this to be seconds

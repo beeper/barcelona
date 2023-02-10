@@ -12,7 +12,6 @@ import Logging
 
 /// Registers a file transfer with imagent for the given filename and path.
 /// The returned file transfer is ready to be sent by including its GUID in a message.
-@MainActor
 public func CBInitializeFileTransfer(filename: String, path: URL) -> IMFileTransfer {
     let log = Logger(label: "CBInitializeFileTransfer")
     var transfer: IMFileTransfer!

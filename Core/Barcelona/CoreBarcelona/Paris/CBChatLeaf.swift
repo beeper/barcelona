@@ -8,7 +8,6 @@
 import Foundation
 
 /// Metadata for a single chat tracked by a logical conversation
-@MainActor
 public struct CBChatLeaf {
     /// The GUID for this chat
     public var guid: String = ""

@@ -35,13 +35,11 @@ public extension IMMessage {
     static func message(fromUnloadedItem item: IMMessageItem) -> IMMessage? {
         message(fromUnloadedItem: item, withSubject: nil)
     }
-
-    @MainActor
+    
     static func message(withGUID guid: String, in chat: String? = nil, service: IMServiceStyle) -> Promise<ChatItem?> {
         return messages(withGUIDs: [guid], in: chat, service: service).then(\.first)
     }
-
-    @MainActor
+    
     static func messages(withGUIDs guids: [String], in chat: String? = nil, service: IMServiceStyle) -> Promise<[ChatItem]> {
         if guids.count == 0 {
             return .success([])

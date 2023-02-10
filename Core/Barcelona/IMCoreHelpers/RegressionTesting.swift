@@ -34,7 +34,6 @@ public extension BLRegressionTesting {
 }
 
 // Testing methods
-@MainActor
 fileprivate extension IMChat {
     func forceToSMS() {
         _setAccount(IMAccountController.shared.activeSMSAccount, locally: false)
@@ -46,7 +45,6 @@ fileprivate extension IMChat {
 
 import IMCore
 
-@MainActor
 public extension BLRegressionTesting {
     static let tests: [String: () -> ()] = [
         "BRI4482": BRI4482,
@@ -61,7 +59,7 @@ public extension BLRegressionTesting {
                     queue.schedule {
                         let group = DispatchGroup()
                         group.enter()
-                        DispatchQueue.main.async {
+                        DispatchQueue.global().async {
                             print(">>> Raw history query for \(chat.chatIdentifiers.joined(separator: ","))")
                             chat.rawHistoryQuery(limit: 10).forEach { chat, message in
                                 guard chat.scheme == .chatIdentifier else {
@@ -111,7 +109,7 @@ public extension BLRegressionTesting {
             print(chat.chatForSending(with: guid).debugDescription)
         }
     ]
-
+    
     static func BRI4482() {
         guard let smsEmailHandle = handles.first(where: {
             $0.id.isEmail && $0.service?.id == .SMS
