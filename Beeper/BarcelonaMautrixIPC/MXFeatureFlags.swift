@@ -8,7 +8,6 @@
 import Foundation
 import FeatureFlags
 
-@MainActor
 public class MXFeatureFlags: FlagProvider {
     public static let shared = MXFeatureFlags()
     

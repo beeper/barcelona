@@ -12,7 +12,6 @@ import IMCore
 import BarcelonaDB
 import Logging
 
-@MainActor
 extension Array where Element == String {
     /// Given self is an array of chat GUIDs, masks the GUIDs to iMessage service and returns the deduplicated result
     func dedupeChatGUIDs() -> [String] {
@@ -33,7 +32,6 @@ extension Array where Element == String {
 }
 
 extension GetChatsCommand: Runnable {
-    @MainActor
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
         if min_timestamp <= 0 {
             return payload.reply(withResponse: .chats_resolved(IMChatRegistry.shared.allChats.map(\.blChatGUID)), ipcChannel: ipcChannel)
