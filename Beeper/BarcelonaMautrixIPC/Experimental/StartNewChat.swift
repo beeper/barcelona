@@ -96,7 +96,6 @@ extension PrepareDMCommand: Runnable {
             log.info("Prepared chat \(chat.id)", source: "PrepareDM")
         } else {
             guard let service = parsed.service.flatMap(IMServiceStyle.init(rawValue:)) else {
-                transaction.setData(value: "err_invalid_service", key: "error")
                 return payload.fail(
                     code: "err_invalid_service",
                     message: "The service provided does not exist.",
