@@ -10,6 +10,7 @@ import Foundation
 import Barcelona
 import IMCore
 
+@MainActor
 public extension IMChat {
     var blChat: BLChat {
         BLChat(chat_guid: blChatGUID, title: displayName, members: participants.map(\.id), correlation_id: correlationIdentifier)
