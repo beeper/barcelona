@@ -118,7 +118,16 @@ extension NotificationCenter {
 }
 
 public class ERTimeSortedParticipantsManager {
+
+    // MARK: - Properties
+
     public static let sharedInstance = ERTimeSortedParticipantsManager()
+
+    private let lock = NSRecursiveLock()
+
+    private var chatToParticipantSortRules: [String: [ParticipantSortRule]] = [:]
+
+    // MARK: - Initializers
 
     private init() {
         Task {
@@ -126,141 +135,45 @@ public class ERTimeSortedParticipantsManager {
         }
     }
 
-    @MainActor
-    func listen() async {
-        Task {
-            for await notification in NotificationCenter.default.notifications(named: ERChatMessagesReceivedNotification) {
-                if let ingestible = notification.object as? [ERTimeSortedParticipantsManagerIngestible] {
-                    ingest(items: ingestible, inChat: notification.userInfo!["chat"] as! String)
-                }
-            }
-        }
-
-        Task {
-            for await notification in NotificationCenter.default.notifications(named: ERChatMessageReceivedNotification) {
-                if let ingestible = notification.object as? ERTimeSortedParticipantsManagerIngestible {
-                    ingest(item: ingestible, inChat: notification.userInfo!["chat"] as! String)
-                }
-            }
-        }
-
-        Task {
-            for await notification in NotificationCenter.default.notifications(named: .IMChatRegistryDidRegisterChat) {
-                ingest(bootstrapNotification: notification)
-            }
-        }
-
-        Task {
-            for await notification in NotificationCenter.default.notifications(named: .IMChatRegistryDidUnregisterChat) {
-                ingest(bootstrapNotification: notification)
-            }
-        }
-
-        Task {
-            for await notification in NotificationCenter.default.notifications(named: .IMChatParticipantsDidChange) {
-                ingest(bootstrapNotification: notification)
-            }
-        }
-    }
-
-    @MainActor
-    private func ingest(bootstrapNotification notification: Notification) {
-        if let chat = notification.chat {
-            do {
-                log.info(
-                    "Recomputing sorted participants with chat ID \(chat.id) per notification \(notification.name.rawValue)"
-                )
-                try bootstrap(chat: chat)
-                log.info(
-                    "Finished recomputing sorted participants with chat ID \(chat.id) per notification \(notification.name.rawValue)"
-                )
-            } catch {
-                log.error("Error ")
-            }
-        }
-    }
-
-    private var chatToParticipantSortRules: [String: [ParticipantSortRule]] = [:]
-
+    // MARK: - Methods
 
     public func sortedParticipants(forChat chat: String) -> [String] {
-        chatToParticipantSortRules[chat]?.map(\.handleID) ?? []
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        return chatToParticipantSortRules[chat]?.map(\.handleID) ?? []
     }
 
-    @MainActor
     public func ingest(item: IMItem, inChat chat: String) {
         self.ingest(item: item as ERTimeSortedParticipantsManagerIngestible, inChat: chat)
     }
 
-    @MainActor
     public func ingest(item: IMMessageItem, inChat chat: String) {
         self.ingest(item: item as ERTimeSortedParticipantsManagerIngestible, inChat: chat)
     }
 
-    @MainActor
     public func ingest(item: IMMessage, inChat chat: String) {
         self.ingest(item: item as ERTimeSortedParticipantsManagerIngestible, inChat: chat)
     }
 
-    @MainActor
-    func ingest(item: ERTimeSortedParticipantsManagerIngestible, inChat chat: String) {
-        guard let sortRule = item.sortRule else {
-            return
-        }
-
-        self.ingest(rule: sortRule, inChat: chat)
-    }
-
-    @MainActor
-    func ingest(items: [ERTimeSortedParticipantsManagerIngestible], inChat chat: String) {
-        var rules = items.compactMap(\.sortRule)
-
-        rules.sort { r1, r2 in
-            r1.lastSentMessageTime > r2.lastSentMessageTime
-        }
-
-        rules = rules.removingDuplicates()
-
-        rules.forEach {
-            self.ingest(rule: $0, inChat: chat)
-        }
-    }
-
-    @MainActor
-    func ingest(rule: ParticipantSortRule, inChat chat: String) {
-        if chatToParticipantSortRules[chat] == nil {
-            return
-        }
-
-        chatToParticipantSortRules[chat] = chatToParticipantSortRules[chat]!
-            .filter {
-                $0.handleID != rule.handleID ? true : $0.lastSentMessageTime > rule.lastSentMessageTime
-            }
-            .appending(rule)
-
-        self.sortParticipants(forChat: chat)
-    }
-
-    @MainActor
-    private func sortParticipants(forChat chat: String) {
-        self.chatToParticipantSortRules[chat]?
-            .sort(by: { r1, r2 in
-                r1.lastSentMessageTime > r2.lastSentMessageTime
-            })
-    }
-
-    @MainActor
     public func unload(chatID: String) {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
         self.chatToParticipantSortRules[chatID] = nil
     }
 
-    @MainActor
     public func bootstrap(chat: IMChat) throws {
         try bootstrap(chats: [chat])
     }
 
-    @MainActor
     public func bootstrap(chats: [IMChat]) throws {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
         let records = try DBReader.shared.handleTimestampRecords(
             forChatIdentifiers: chats.compactMap { $0.chatIdentifier }
         )
@@ -280,4 +193,118 @@ public class ERTimeSortedParticipantsManager {
             sortParticipants(forChat: chat)
         }
     }
+
+    private func listen() async {
+        Task {
+            for await notification in NotificationCenter.default.notifications(
+                named: ERChatMessagesReceivedNotification
+            ) {
+                if let ingestible = notification.object as? [ERTimeSortedParticipantsManagerIngestible] {
+                    ingest(items: ingestible, inChat: notification.userInfo!["chat"] as! String)
+                }
+            }
+        }
+
+        Task {
+            for await notification in NotificationCenter.default.notifications(
+                named: ERChatMessageReceivedNotification
+            ) {
+                if let ingestible = notification.object as? ERTimeSortedParticipantsManagerIngestible {
+                    ingest(item: ingestible, inChat: notification.userInfo!["chat"] as! String)
+                }
+            }
+        }
+
+        Task {
+            for await notification in NotificationCenter.default.notifications(
+                named: .IMChatRegistryDidRegisterChat
+            ) {
+                ingest(bootstrapNotification: notification)
+            }
+        }
+
+        Task {
+            for await notification in NotificationCenter.default.notifications(
+                named: .IMChatRegistryDidUnregisterChat
+            ) {
+                ingest(bootstrapNotification: notification)
+            }
+        }
+
+        Task {
+            for await notification in NotificationCenter.default.notifications(
+                named: .IMChatParticipantsDidChange
+            ) {
+                ingest(bootstrapNotification: notification)
+            }
+        }
+    }
+
+    private func ingest(bootstrapNotification notification: Notification) {
+        if let chat = notification.chat {
+            do {
+                log.info(
+                    "Recomputing sorted participants with chat ID \(chat.id) per notification \(notification.name.rawValue)"
+                )
+                try bootstrap(chat: chat)
+                log.info(
+                    "Finished recomputing sorted participants with chat ID \(chat.id) per notification \(notification.name.rawValue)"
+                )
+            } catch {
+                log.error("Error ")
+            }
+        }
+    }
+
+    private func sortParticipants(forChat chat: String) {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        self.chatToParticipantSortRules[chat]?
+            .sort(by: { r1, r2 in
+                r1.lastSentMessageTime > r2.lastSentMessageTime
+            })
+    }
+
+    private func ingest(item: ERTimeSortedParticipantsManagerIngestible, inChat chat: String) {
+        guard let sortRule = item.sortRule else {
+            return
+        }
+
+        self.ingest(rule: sortRule, inChat: chat)
+    }
+
+    private func ingest(items: [ERTimeSortedParticipantsManagerIngestible], inChat chat: String) {
+        var rules = items.compactMap(\.sortRule)
+
+        rules.sort { r1, r2 in
+            r1.lastSentMessageTime > r2.lastSentMessageTime
+        }
+
+        rules = rules.removingDuplicates()
+
+        rules.forEach {
+            self.ingest(rule: $0, inChat: chat)
+        }
+    }
+
+    private func ingest(rule: ParticipantSortRule, inChat chat: String) {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        if chatToParticipantSortRules[chat] == nil {
+            return
+        }
+
+        chatToParticipantSortRules[chat] = chatToParticipantSortRules[chat]!
+            .filter {
+                $0.handleID != rule.handleID ? true : $0.lastSentMessageTime > rule.lastSentMessageTime
+            }
+            .appending(rule)
+
+        self.sortParticipants(forChat: chat)
+    }
+
 }
