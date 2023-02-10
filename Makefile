@@ -23,7 +23,7 @@ init:
 refresh: init
 
 scheme:
-	env NSUnbufferedIO=YES xcodebuild \
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild \
 		-project barcelona.xcodeproj \
 		-scheme "$(SCHEME)" \
 		-parallelizeTargets \

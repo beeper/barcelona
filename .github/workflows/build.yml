@@ -25,9 +25,6 @@ jobs:
             $GITHUB_WORKSPACE/macos_build
             /Users/runner/Library/Developer/Xcode/DerivedData
           key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
-      - name: Install xcbeautify
-        run: |
-          brew install xcbeautify
 
       - name: Build Barcelona for macOS
         run: make mautrix-macos
