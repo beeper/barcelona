@@ -13,12 +13,14 @@ import Logging
 
 fileprivate let log = Logger(label: "BLMessage")
 
+@MainActor
 internal extension Chat {
     var blChatGUID: String? {
         imChat?.blChatGUID
     }
 }
 
+@MainActor
 internal extension IMChat {
     var blFacingService: String {
         if MXFeatureFlags.shared.mergedChats {
@@ -33,6 +35,7 @@ internal extension IMChat {
     }
 }
 
+@MainActor
 private extension Message {
     var blSenderGUID: String? {
         guard let sender = sender, !fromMe else {

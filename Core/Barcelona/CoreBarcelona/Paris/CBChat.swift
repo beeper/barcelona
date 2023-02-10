@@ -232,6 +232,7 @@ private extension IMHandle {
 }
 
 // MARK: - Message sending
+@MainActor
 public extension CBChat {
     func send(message: IMMessage, chat: IMChat) {
         chat.send(message)
