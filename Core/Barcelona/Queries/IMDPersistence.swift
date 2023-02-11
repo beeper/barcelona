@@ -186,12 +186,7 @@ public func BLLoadIMMessageItems(withGUIDs guids: [String]) -> [IMMessageItem] {
     
     return autoreleasepool {
         BLCreateIMItemFromIMDMessageRecordRefs(BLLoadIMDMessageRecordRefsWithGUIDs(guids)).compactMap {
-            switch $0 {
-            case let item as IMMessageItem:
-                return item
-            case let unknown:
-                return nil
-            }
+            $0 as? IMMessageItem
         }
     }
 }

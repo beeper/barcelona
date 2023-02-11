@@ -103,8 +103,14 @@ public extension Chat {
 
                 let newService = imChat.account.service?.id
                 if newService != service {
-                    log.error("Refreshing IMChat \(String(describing: imChat.guid)) caused service to change from \(service) to \(String(describing: newService)); IMChat should not be used for sending. Bailing.")
-                    throw BarcelonaError(code: 500, message: "IMChat retargeted to incorrect service")
+                    log.warning("Refreshing IMChat \(String(describing: imChat.guid)) caused service to change from \(service) to \(String(describing: newService)); forcibly retargeting to iMessage")
+                    
+                    guard let account = IMAccountController.shared.__activeIMessageAccount else {
+                        log.warning("Couldn't get IMAccount for iMessage and thus couldn't retarget IMChat \(String(describing: imChat.guid)) to iMessage instead of SMS. Bailing.")
+                        throw BarcelonaError(code: 500, message: "Your iMessage account claims to not exist; please contact support.")
+                    }
+                    
+                    imChat._setAccount(account, locally: true)
                 }
             }
 
