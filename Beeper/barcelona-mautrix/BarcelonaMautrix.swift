@@ -31,10 +31,12 @@ class BarcelonaMautrix {
     static private func configureSentry(dsn: String) {
         SentrySDK.start { options in
             options.dsn = dsn
-            if #available(macOS 12.0, *) {
-                options.enableMetricKit = true
-            }
+            options.enableMetricKit = true
             options.sendDefaultPii = true
+            options.enableAppHangTracking = false
+            options.enableAutoSessionTracking = false
+            options.profilesSampleRate = 0.1
+            options.tracesSampleRate = 0.1
         }
     }
     
