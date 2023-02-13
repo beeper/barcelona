@@ -227,8 +227,8 @@ internal extension CBDaemonListener {
             self.chatConfigurationPipeline.send(chat.configurationBits)
         }
 
-        NotificationCenter.default.addObserver(forName: .init("__kIMBuddyPropertiesChangedNotification"), object: nil, queue: nil) { notification in
-            log.debug("Buddy properties changed: \(notification.object.debugDescription)")
+        NotificationCenter.default.addObserver(forName: .init("__kIMPeopleAddedNotification"), object: nil, queue: nil) { notification in
+            log.debug("People were added: \(notification.object.debugDescription)")
         }
 
         ifDebugBuild {
@@ -596,14 +596,6 @@ public class CBDaemonListener: ERBaseDaemonListener {
     
     public override func fileTransfer(_ guid: String!, updatedWithProperties properties: [AnyHashable : Any]!) {
         _ = CBPurgedAttachmentController.shared.process(transferIDs: [guid])
-    }
-
-    public func account(_ accountUniqueID: String?, buddyPropertiesChanged properties: Any?) {
-        *log.debug("account buddyPropertiesChanged \(properties.debugDescription)")
-    }
-
-    public func account(_ accountUniqueID: String?, buddyProperties: Any?, buddyPictures: Any?) {
-        *log.debug("account buddyProperties \(buddyProperties.debugDescription) buddyPictures \(buddyPictures.debugDescription)")
     }
 }
 
