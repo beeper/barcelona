@@ -193,7 +193,7 @@ internal extension CBDaemonListener {
         // We're not 100% certain what will do this (listen to a conversation), so we're trying
         // all of these to see if any of them do the trick and will update later.
         if #available(macOS 13, *) {
-            // IMDMessageStore.sharedInstance().setSuppressDatabaseUpdates(false)
+            IMDMessageStore.sharedInstance().setSuppressDatabaseUpdates(false)
 
             for chat in IMChatRegistry.shared.allChats {
                 chat.watchAllHandles()
