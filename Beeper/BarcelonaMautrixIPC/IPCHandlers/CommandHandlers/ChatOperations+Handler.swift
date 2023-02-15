@@ -36,15 +36,21 @@ extension GetChatsCommand: Runnable {
         if min_timestamp <= 0 {
             return payload.reply(withResponse: .chats_resolved(IMChatRegistry.shared.allChats.map(\.blChatGUID)), ipcChannel: ipcChannel)
         }
-        
-        DBReader.shared.latestMessageTimestamps().then { timestamps in
-            timestamps.mapValues { timestamp, guid in
-                (IMDPersistenceTimestampToUnixSeconds(timestamp: timestamp), guid)
+
+        Task {
+            do {
+                let timestamps = try await DBReader.shared.latestMessageTimestamps()
+
+                let guids = timestamps.mapValues { timestamp, guid in
+                    (IMDPersistenceTimestampToUnixSeconds(timestamp: timestamp), guid)
+                }.filter { chatID, pair in
+                    pair.0 > min_timestamp
+                }.map(\.value.1)
+
+                payload.reply(withResponse: .chats_resolved(guids.dedupeChatGUIDs()), ipcChannel: ipcChannel)
+            } catch {
+                payload.fail(strategy: .internal_error(error.localizedDescription), ipcChannel: ipcChannel)
             }
-        }.filter { chatID, pair in
-            pair.0 > min_timestamp
-        }.map(\.value.1).then { guids in
-            payload.reply(withResponse: .chats_resolved(guids.dedupeChatGUIDs()), ipcChannel: ipcChannel)
         }
     }
 }

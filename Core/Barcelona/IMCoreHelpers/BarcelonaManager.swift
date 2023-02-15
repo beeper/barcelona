@@ -95,7 +95,17 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
         callbackSwift?(false)
         return false
     }
-    
+
+    // This is called with imagentd but, just to make sure that it's all good when we're running barcelona, call it here as well
+    typealias CObjcBoolToVoid = @convention(c) (ObjCBool) -> Void
+    if let _IMLogForceWriteToStdout: CObjcBoolToVoid = CBWeakLink(against: .privateFramework(name: "IMFoundation"), .init(constraints: [], symbol: "_IMLogForceWriteToStdout")) {
+        _IMLogForceWriteToStdout(true)
+    }
+    if let _IMLogForceEnableEverything: CObjcBoolToVoid = CBWeakLink(against: .privateFramework(name: "IMFoundation"), .init(constraints: [], symbol: "_IMLogForceEnableEverything")) {
+        _IMLogForceEnableEverything(true)
+    }
+
+
     // As long as we do single-threaded, READ-ONLY access to IMDPersistence, this is not an issue.
     // Again, please, I am BEGGING you, never use IMDPersistence for write operations.
     // Even if we were properly using it, we should only perform mutating operations using the IMCore apis to prevent corrupted state

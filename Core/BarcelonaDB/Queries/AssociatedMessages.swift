@@ -15,10 +15,10 @@ public extension DBReader {
     ///   - guids: GUIDs of messages to resolve associations
     ///   - chat: ID of the chat the messages reside in. if omitted, they will be resolved at ingestion
     /// - Returns: Dictionary of GUIDs from the guids parameter to an array of associated messages
-    func associatedMessageGUIDs(with guids: [String]) -> Promise<[String: [String]]> {
-        if guids.count == 0 { return .success([:]) }
+    func associatedMessageGUIDs(with guids: [String]) async throws ->  [String: [String]] {
+        if guids.count == 0 { return [:] }
         
-        return read { db in
+        return try await read { db in
             try RawMessage
                 .select(RawMessage.Columns.guid, RawMessage.Columns.associated_message_guid, RawMessage.Columns.ROWID)
                 .filter(guids.contains(RawMessage.Columns.associated_message_guid))
@@ -29,8 +29,8 @@ public extension DBReader {
     /// Resolves associated messages with the given GUID
     /// - Parameter guid: GUID of the message to load associations
     /// - Returns: array of Messages
-    func associatedMessageGUIDs(forGUID guid: String) -> Promise<[String]> {
-        read { db in
+    func associatedMessageGUIDs(forGUID guid: String) async throws -> [String] {
+        try await read { db in
             try RawMessage
                 .select(RawMessage.Columns.guid, as: String.self)
                 .filter(sql: "associated_message_guid = ?", arguments: [guid])

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Combine
 
 private extension Dictionary {
     func merge(into dictionary: inout Dictionary) {
@@ -34,10 +35,10 @@ internal extension OperationBuffer {
 
 public class OperationBuffer<Output, Discriminator: Hashable> {
     @usableFromInline
-    typealias RawBuffer = Promise<[Output]>
+    typealias RawBuffer = Future<[Output], Never>
     
     @usableFromInline
-    typealias LazyBuffer = Promise<[Discriminator: Output]>
+    typealias LazyBuffer = Future<[Discriminator: Output], Never>
     
     @usableFromInline
     internal var rawBuffers = [[Discriminator]: RawBuffer]()
@@ -59,13 +60,19 @@ public class OperationBuffer<Output, Discriminator: Hashable> {
         guard let rawBuffer = rawBuffers[ids] else {
             return nil
         }
-        
-        let lazyBuffer = rawBuffer.dictionary(keyedBy: discriminatorKeyPath)
+
+        let lazyBuffer = rawBuffer.map {
+            $0.dictionary(keyedBy: self.discriminatorKeyPath)
+        }.toFuture()
         
         self.performLocked {
-            self.lazyBuffers[ids] = lazyBuffer.observeAlways { _ in
-                self.performLocked {
-                    self.lazyBuffers[ids] = nil
+            self.lazyBuffers[ids] = Future<[Discriminator: Output], Never> { resolve in
+                Task {
+                    let values = await lazyBuffer.value
+                    self.performLocked {
+                        _ = self.lazyBuffers.removeValue(forKey: ids)
+                    }
+                    resolve(.success(values))
                 }
             }
         }
@@ -73,26 +80,27 @@ public class OperationBuffer<Output, Discriminator: Hashable> {
         return lazyBuffer
     }
     
-    private func directBuffer(_ ids: [Discriminator]) -> Promise<[Output]>? {
+    private func directBuffer(_ ids: [Discriminator]) -> Future<[Output], Never>? {
         rawBuffers[ids]
     }
     
-    @discardableResult
     @inlinable
-    func putBuffers(_ ids: [Discriminator], _ pending: Promise<[Output]>) -> Promise<[Output]> {
+    func putBuffers(_ ids: [Discriminator], _ pending: Future<[Output], Never>) {
         performLocked {
-            rawBuffers[ids] = pending.observeAlways { _ in
-                self.performLocked {
-                    self.rawBuffers[ids] = nil
+            rawBuffers[ids] = Future<[Output], Never> { resolve in
+                Task {
+                    let values = await pending.value
+                    _ = self.performLocked {
+                        self.rawBuffers.removeValue(forKey: ids)
+                    }
+                    resolve(.success(values))
                 }
             }
         }
-        
-        return pending
     }
     
     @usableFromInline
-    func partialBuffer(_ ids: [Discriminator]) -> (Promise<[Output]>, remaining: [Discriminator]?) {
+    func partialBuffer(_ ids: [Discriminator]) -> (Future<[Output], Never>, remaining: [Discriminator]?) {
         if let directBuffer = directBuffer(ids) {
             return (directBuffer, nil)
         }
@@ -135,16 +143,32 @@ public class OperationBuffer<Output, Discriminator: Hashable> {
         }
         
         return (
-            Promise.all(using)
-                // flatten entries
-                .flatten()
-                // unique the values by key
-                .dictionary(keyedBy: \.key, valuedBy: \.value)
-                // only use the ones we need
-                .filter {
-                    ids.contains($0.key)
+            Future<[Output], Never> { resolve in
+                // We need this to access the captured var `using` in concurrent code
+                let getValues: () async -> [Discriminator: Output] = {
+                    var values = [Discriminator: Output]()
+                    // Get all the values from the buffers that we're trying to use
+                    for fut in using {
+                        let newVals = await fut.value
+                        for val in newVals {
+                            values[val.key] = val.value
+                        }
+                    }
+
+                    return values
                 }
-                .map(\.value),
+
+                Task {
+                    let resolved = await getValues()
+                        .dictionary(keyedBy: \.key, valuedBy: \.value)
+                        .filter {
+                            ids.contains($0.key)
+                        }
+                        .map(\.value)
+
+                    resolve(.success(resolved))
+                }
+            },
             remaining: needed.count == 0 ? nil : needed
         )
     }

@@ -35,19 +35,19 @@ extension IMMessage: IMItemIDResolvable {
 
 // MARK: - IMFileTransfer Preload
 @inlinable
-internal func _BLLoadFileTransfers(forObjects objects: [NSObject]) -> Promise<Void> {
+internal func _BLLoadFileTransfers(forObjects objects: [NSObject]) async throws {
     let log = Logger(label: "_BLLoadFileTransfers")
     let unloadedFileTransferGUIDs = objects.compactMap {
         $0 as? IMFileTransferContainer
     }.flatMap(\.unloadedFileTransferGUIDs)
     
     guard unloadedFileTransferGUIDs.count > 0 else {
-        return .success(())
+        return
     }
     
     log.info("loading \(unloadedFileTransferGUIDs.count) transfers")
     
-    return DBReader.shared.attachments(withGUIDs: unloadedFileTransferGUIDs).compactMap(\.attachment).forEach {
+    try await DBReader.shared.attachments(withGUIDs: unloadedFileTransferGUIDs).compactMap(\.attachment).forEach {
         $0.initializeFileTransferIfNeeded()
     }
 }
@@ -58,7 +58,11 @@ internal func _BLLoadAcknowledgmentChatItems(
     inChat chat: String,
     service: IMServiceStyle
 ) -> [String: [AcknowledgmentChatItem]] {
-    _BLParseObjects(BLLoadIMMessages(withGUIDs: messageGUIDs), inChat: chat, service: service).compactMap {
+    if messageGUIDs.isEmpty {
+        return [:]
+    }
+
+    return _BLParseObjects(BLLoadIMMessages(withGUIDs: messageGUIDs), inChat: chat, service: service).compactMap {
         $0 as? Message
     }.flatMap(\.items).map(\.item).compactMap {
         $0 as? AcknowledgmentChatItem
@@ -67,10 +71,10 @@ internal func _BLLoadAcknowledgmentChatItems(
 
 // MARK: - Associated Resolution
 @inlinable
-internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String, service: IMServiceStyle) -> Promise<[ChatItem]> {
+internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String, service: IMServiceStyle) async throws -> [ChatItem] {
     let log = Logger(label: "_BLLoadTapbacks")
     guard items.count > 0 else {
-        return .success([])
+        return []
     }
     
     let messages = items.compactMap { $0 as? Message }.dictionary(keyedBy: \.id)
@@ -82,39 +86,33 @@ internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String, s
     }.dictionary(keyedBy: \.itemID, valuedBy: \.messageID)
     
     guard associatedLedger.count > 0 else {
-        return .success(items)
+        return items
     }
-    
-    return DBReader.shared.associatedMessageGUIDs(with: messages.values.flatMap(\.associableItemIDs)).then { associations -> [String: [AcknowledgmentChatItem]] in
-        if associations.count == 0 {
-            return [:]
-        }
-                
-        return _BLLoadAcknowledgmentChatItems(withMessageGUIDs: associations.flatMap(\.value), inChat: chat, service: service)
-    }.observeAlways { completion in
-        switch completion {
-        case .failure(let error):
-            log.error("failed to load with error \(error as NSError)")
-        default: break
-        }
-    }.then { ledger -> [ChatItem] in
+
+    do {
+        let associations = try await DBReader.shared.associatedMessageGUIDs(with: messages.values.flatMap(\.associableItemIDs))
+        let ledger = _BLLoadAcknowledgmentChatItems(withMessageGUIDs: associations.flatMap(\.value), inChat: chat, service: service)
+
         if ledger.values.flatten().count > 0 {
             ledger.forEach { itemID, tapbacks -> Void in
                 guard let messageID = associatedLedger[itemID], let message = messages[messageID] else {
                     return
                 }
-                
+
                 guard let item = message.items.first(where: { $0.id == itemID }), item.isAcknowledgable else {
                     return
                 }
-                
+
                 item.acknowledgments = tapbacks
             }
-            
+
             return Array(messages.values) + items.filter { $0.type != .message }
         } else {
             return items
         }
+    } catch {
+        log.error("failed to load with error \(error as NSError)")
+        throw error
     }
 }
 
@@ -128,19 +126,22 @@ internal func _BLParseObjects(_ objects: [NSObject], inChat chatId: String, serv
 
 // MARK: - Chat ID resolution
 @inlinable
-internal func _BLResolveChatID(forObject object: NSObject) -> Promise<String> {
-    if let object = object as? IMItemIDResolvable, let guid = object.itemGUID {
-        return DBReader.shared.chatIdentifier(forMessageGUID: guid)
-            .assert(BarcelonaError(code: 500, message: "Failed to resolve item IDs during ingestion"))
-    } else {
-        return .failure(BarcelonaError(code: 500, message: "Failed to resolve item IDs during ingestion"))
+internal func _BLResolveChatID(forObject object: NSObject) async throws -> String {
+    guard let object = object as? IMItemIDResolvable, let guid = object.itemGUID else {
+        throw BarcelonaError(code: 500, message: "Failed to resolve item IDs during ingestion")
     }
+
+    guard let chatId = try await DBReader.shared.chatIdentifier(forMessageGUID: guid) else {
+        throw BarcelonaError(code: 500, message: "Failed to resolve item IDs during ingestion")
+    }
+
+    return chatId
 }
 
 @inlinable
-internal func _BLResolveChatIDs(forObjects objects: [NSObject]) -> Promise<[String]> {
+internal func _BLResolveChatIDs(forObjects objects: [NSObject]) async throws -> [String] {
     guard objects.count > 0 else {
-        return .success([])
+        return []
     }
     
     let ids = objects.compactMap {
@@ -148,8 +149,8 @@ internal func _BLResolveChatIDs(forObjects objects: [NSObject]) -> Promise<[Stri
     }
     
     guard ids.count == objects.count else {
-        return .failure(BarcelonaError(code: 500, message: "Failed to resolve item IDs during ingestion"))
+        throw BarcelonaError(code: 500, message: "Failed to resolve item IDs during ingestion")
     }
     
-    return DBReader.shared.chatIdentifiers(forMessageGUIDs: ids)
+    return try await DBReader.shared.chatIdentifiers(forMessageGUIDs: ids)
 }

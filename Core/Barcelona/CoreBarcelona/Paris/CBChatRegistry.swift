@@ -41,12 +41,12 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     }
     
     public func chat(_ persistentIdentifier: String!, updated updateDictionary: [AnyHashable : Any]!) {
-        trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) updated \(((updateDictionary ?? [:]) as NSDictionary))")
+        trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) updated \(updateDictionary)")
         _ = handle(chat: updateDictionary)
     }
     
     public func chat(_ persistentIdentifier: String!, propertiesUpdated properties: [AnyHashable : Any]!) {
-        trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) properties \(((properties ?? [:]) as NSDictionary))")
+        trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) properties \(properties)")
         _ = handle(chat: [
             "guid": persistentIdentifier,
             "properties": properties

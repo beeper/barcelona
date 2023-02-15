@@ -36,23 +36,20 @@ public extension IMMessage {
         message(fromUnloadedItem: item, withSubject: nil)
     }
     
-    static func message(withGUID guid: String, in chat: String? = nil, service: IMServiceStyle) -> Promise<ChatItem?> {
-        return messages(withGUIDs: [guid], in: chat, service: service).then(\.first)
+    static func message(withGUID guid: String, in chat: String? = nil, service: IMServiceStyle) async throws -> ChatItem? {
+        try await messages(withGUIDs: [guid], in: chat, service: service).first
     }
     
-    static func messages(withGUIDs guids: [String], in chat: String? = nil, service: IMServiceStyle) -> Promise<[ChatItem]> {
+    static func messages(withGUIDs guids: [String], in chat: String? = nil, service: IMServiceStyle) async throws -> [ChatItem] {
         if guids.count == 0 {
-            return .success([])
+            return []
         }
         
         if BLIsSimulation {
-            return IMChatHistoryController.sharedInstance()!.loadMessages(withGUIDs: guids)
-                    .compactMap(\._imMessageItem)
-                    .then { items -> Promise<[ChatItem]> in
-                        BLIngestObjects(items, inChat: chat, service: service)
-                    }
+            let items = await IMChatHistoryController.sharedInstance()!.loadMessages(withGUIDs: guids).compactMap(\._imMessageItem)
+            return try await BLIngestObjects(items, inChat: chat, service: service)
         } else {
-            return BLLoadChatItems(withGUIDs: guids, chatID: chat, service: service)
+            return try await BLLoadChatItems(withGUIDs: guids, chatID: chat, service: service)
         }
     }
 }

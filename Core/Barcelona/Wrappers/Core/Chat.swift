@@ -258,10 +258,10 @@ public extension Thread {
 
 // MARK: - Message Sending
 public extension Chat {
-    func messages(before: String? = nil, limit: Int? = nil, beforeDate: Date? = nil) -> Promise<[Message]> {
+    func messages(before: String? = nil, limit: Int? = nil, beforeDate: Date? = nil) async throws -> [Message] {
         guard let service else {
             log.warning("Cannot get messages(before: \(String(describing: before))) because service is nil; would not know what chat to check")
-            return .failure(BarcelonaError(code: 500, message: "Chat.service is nil"))
+            throw BarcelonaError(code: 500, message: "Chat.service is nil")
         }
 
         if BLIsSimulation {
@@ -275,14 +275,14 @@ public extension Chat {
                 return nil
             } ?? []
 
-            return IMMessage.messages(withGUIDs: guids, in: self.id, service: service).compactMap { message -> Message? in
+            return try await IMMessage.messages(withGUIDs: guids, in: self.id, service: service).compactMap { message -> Message? in
                 message as? Message
             }.sorted(usingKey: \.time, by: >)
         }
         
         log.info("Querying IMD for recent messages using chat fast-path")
         
-        return BLLoadChatItems(withChats: [(self.id, service)], beforeGUID: before, limit: limit).compactMap {
+        return try await BLLoadChatItems(withChats: [(self.id, service)], beforeGUID: before, limit: limit).compactMap {
             $0 as? Message
         }
     }

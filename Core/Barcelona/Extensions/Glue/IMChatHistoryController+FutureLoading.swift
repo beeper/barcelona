@@ -10,15 +10,17 @@ import Foundation
 import IMCore
 
 extension IMChatHistoryController {
-    func loadMessage(withGUID guid: String) -> Promise<IMMessage?> {
-        Promise { resolve in
+    func loadMessage(withGUID guid: String) async -> IMMessage? {
+        await withCheckedContinuation { continuation in
             self.loadMessage(withGUID: guid) { message in
-                resolve(message)
+                continuation.resume(returning: message)
             }
         }
     }
     
-    func loadMessages(withGUIDs guids: [String]) -> Promise<[IMMessage]> {
-        return Promise.all(guids.map(loadMessage(withGUID:))).nonnull
+    func loadMessages(withGUIDs guids: [String]) async -> [IMMessage] {
+        await guids.asyncMap {
+            await self.loadMessage(withGUID: $0)
+        }.compactMap { $0 }
     }
 }
