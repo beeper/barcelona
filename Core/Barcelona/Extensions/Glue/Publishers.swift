@@ -32,33 +32,6 @@ extension Publisher {
 
         return cancellable
     }
-
-    @discardableResult
-    func retainingAwaitSingleOutput(_ onComplete: @escaping (Result<Output, Failure>) -> Void) -> AnyCancellable? {
-        var cancellable: AnyCancellable?
-        cancellable = retainingSink {
-            if case let .failure(error) = $0 {
-                onComplete(.failure(error))
-            }
-        } receiveValue: {
-            onComplete(.success($0))
-            cancellable?.cancel()
-        }
-
-        return cancellable
-    }
-}
-
-extension Publisher where Failure == Never {
-    @discardableResult
-    func retainingAwaitSingleOutput(_ onComplete: @escaping (Output) -> Void) -> AnyCancellable? {
-        retainingAwaitSingleOutput {
-            // We know that this is fine since the failure can't be constructed
-            if case let .success(output) = $0 {
-                onComplete(output)
-            }
-        }
-    }
 }
 
 extension Sequence {
