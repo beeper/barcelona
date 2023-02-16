@@ -79,7 +79,11 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     }
     
     public func service(_ serviceID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, messagesUpdated messages: [[AnyHashable: Any]]!) {
+        #if DEBUG
         trace(chatIdentifier, nil, "messages updated \(messages.debugDescription)")
+        #else
+        trace(chatIdentifier, nil, "\(messages.count) messages updated in")
+        #endif
         messages.forEach {
             handle(chat: .chatIdentifier(chatIdentifier), item: $0)
         }
@@ -90,7 +94,11 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     }
     
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, notifySentMessage msg: IMMessageItem!, sendTime: NSNumber!) {
+        #if DEBUG
         trace(chatIdentifier, nil, "sent message \(msg.guid ?? "nil") \(msg.debugDescription)")
+        #else
+        trace(chatIdentifier, nil, "sent message \(msg.guid ?? "nil")")
+        #endif
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
     }
     
@@ -117,7 +125,11 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     }
     
     public func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, groupID: String!, chatPersonCentricID personCentricID: String!, messageReceived msg: IMItem!) {
+        #if DEBUG
         trace(chatIdentifier, personCentricID, "received message \(msg.debugDescription)")
+        #else
+        trace(chatIdentifier, personCentricID, "received message \(msg.id)")
+        #endif
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
     }
     
