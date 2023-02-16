@@ -28,16 +28,6 @@ private let log = Logger(label: "ERDaemonListener")
 @usableFromInline internal let verboseLoggingEnabled = true
 #endif
 
-prefix operator *
-
-@_transparent @usableFromInline
-internal prefix func *(_ expression: @autoclosure () -> ()) {
-    // TODO: replace with compilation condition to have this compile to nothing
-    if _slowPath(verboseLoggingEnabled) {
-        expression()
-    }
-}
-
 private extension String {
     var bl_mergedID: String {
         if let lastIndex = lastIndex(of: ";") {
@@ -467,32 +457,32 @@ public class CBDaemonListener: ERBaseDaemonListener {
     // MARK: - Chat events
     
     public override func groupPhotoUpdated(forChatIdentifier chatIdentifier: String!, style: IMChatStyle, account: String!, userInfo: [AnyHashable : Any]! = [:]) {
-        *log.debug("chat:\(chatIdentifier) groupPhotoUpdated")
+        log.debug("chat:\(String(describing: chatIdentifier)) groupPhotoUpdated")
     }
     
     // Properties were changed
     public override func chat(_ persistentIdentifier: String, updated updateDictionary: [AnyHashable : Any]) {
-        *log.debug("chat:\(persistentIdentifier) updated:\(updateDictionary.debugDescription)")
+        log.debug("chat:\(persistentIdentifier) updated:\(updateDictionary.debugDescription)")
         apply(serializedChat: updateDictionary, emitIfNeeded: true)
     }
     
     // Group name changed
     public override func chat(_ persistentIdentifier: String!, displayNameUpdated displayName: String?) {
-        *log.debug("chat:\(persistentIdentifier) displayNameUpdated:\(displayName ?? "nil")")
+        log.debug("chat:\(String(describing: persistentIdentifier)) displayNameUpdated:\(displayName ?? "nil")")
         chatNamePipeline.send((persistentIdentifier.bl_mergedID, displayName))
     }
     
     public override func leftChat(_ persistentIdentifier: String!) {
-        *log.debug("leftChat:\(persistentIdentifier)")
+        log.debug("leftChat:\(String(describing: persistentIdentifier))")
     }
     
     public override func loadedChats(_ chats: [[AnyHashable : Any]]!) {
-        *log.debug("loadedChats:\(chats.count)")
+        log.debug("loadedChats:\(chats.count)")
     }
     
     // A new chat has been created
     public override func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) {
-        *log.debug("chatLoaded:\(chatIdentifier), dicts:\(chatDictionaries.count)")
+        log.debug("chatLoaded:\(String(describing: chatIdentifier)), dicts:\(chatDictionaries.count)")
         for chat in chatDictionaries {
             guard let dict = chat as? [AnyHashable: Any] else {
                 continue
@@ -506,25 +496,41 @@ public class CBDaemonListener: ERBaseDaemonListener {
     
     // Invoked when we send a message, either here or elsewhere
     public override func account(_ accountUniqueID: String, chat chatIdentifier: String, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any], groupID: String, chatPersonCentricID personCentricID: String!, messageSent msg: IMMessageItem) {
-        *log.debug("messageSent: \(msg.debugDescription)")
+        #if DEBUG
+        log.debug("messageSent: \(msg.debugDescription)")
+        #else
+        log.debug("messageSent: \(msg.id)")
+        #endif
         chatIdentifierCache[msg.id] = chatIdentifier
         process(newMessage: msg, chatIdentifier: chatIdentifier)
     }
     
     // Invoked when we sent a message *locally*
     public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, notifySentMessage msg: IMMessageItem!, sendTime: NSNumber!) {
-        *log.debug("notifySentMessage: \(msg.debugDescription)")
+        #if DEBUG
+        log.debug("notifySentMessage: \(msg.debugDescription)")
+        #else
+        log.debug("notifySentMessage: \(msg.id)")
+        #endif
         process(sentMessage: msg, sentTime: (msg.clientSendTime ?? msg.time ?? Date()).timeIntervalSince1970)
     }
     
     public override func account(_ accountUniqueID: String, chat chatIdentifier: String, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any], groupID: String, chatPersonCentricID personCentricID: String, messageReceived msg: IMItem) {
-        *log.debug("messageReceived: \(msg.debugDescription)")
+        #if DEBUG
+        log.debug("messageReceived: \(msg.debugDescription)")
+        #else
+        log.debug("messageReceived: \(msg.id)")
+        #endif
         
         process(newMessage: msg, chatIdentifier: chatIdentifier)
     }
     
     public override func account(_ accountUniqueID: String, chat chatIdentifier: String, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any], groupID: String, chatPersonCentricID personCentricID: String, messagesReceived messages: [IMItem], messagesComingFromStorage fromStorage: Bool) {
-        *log.debug("messagesReceived: \(messages.debugDescription)")
+        #if DEBUG
+        log.debug("messagesReceived: \(messages.debugDescription)")
+        #else
+        log.debug("messagesReceived in \(chatIdentifier): \(messages.count) messages")
+        #endif
         
         for message in messages {
             process(newMessage: message, chatIdentifier: chatIdentifier)
@@ -532,7 +538,11 @@ public class CBDaemonListener: ERBaseDaemonListener {
     }
     
     public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, groupID: String!, chatPersonCentricID personCentricID: String!, messagesReceived messages: [IMItem]!) {
-        *log.debug("messagesReceived: \(messages.debugDescription)")
+        #if DEBUG
+        log.debug("messagesReceived: \(messages.debugDescription)")
+        #else
+        log.debug("messagesReceived in \(chatIdentifier): \(messages.count) messages")
+        #endif
         
         for message in messages {
             process(newMessage: message, chatIdentifier: chatIdentifier)
@@ -541,8 +551,12 @@ public class CBDaemonListener: ERBaseDaemonListener {
     
     // Invoked for status updates (read/deliver/play/save/edit etc)
     public override func service(_ serviceID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, messagesUpdated messages: [[AnyHashable: Any]]!) {
-        *log.debug("messagesUpdated[service]: \(messages.debugDescription)")
-        
+        #if DEBUG
+        log.debug("messagesUpdated[service]: \(messages.debugDescription)")
+        #else
+        log.debug("messagesUpdated[service] in \(chatIdentifier): \(messages.count) messages")
+        #endif
+
         for message in CBCreateItemsFromSerializedArray(messages) {
             switch message {
             case let message as IMMessageItem:
@@ -558,14 +572,18 @@ public class CBDaemonListener: ERBaseDaemonListener {
     }
     
     public override func account(_ accountUniqueID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, chatProperties properties: [AnyHashable : Any]!, messagesUpdated messages: [NSObject]!) {
-        *log.debug("messagesUpdated[account]: \(messages.debugDescription)")
+        #if DEBUG
+        log.debug("messagesUpdated[account]: \(messages.debugDescription)")
+        #else
+        log.debug("messagesUpdated[account] in \(chatIdentifier): \(messages.count) messages")
+        #endif
         
         for message in messages as? [IMItem] ?? CBCreateItemsFromSerializedArray(messages) {
             switch message {
             case let message as IMMessageItem:
                 // This listener call is only for failed messages that are not otherwise caught.
                 guard message.errorCode != .noError else {
-                    *log.debug("messagesUpdated[account]: ignoring message \(message.id) because it has no error. it will flow through another handler.")
+                    log.debug("messagesUpdated[account]: ignoring message \(message.id) because it has no error. it will flow through another handler.")
                     continue
                 }
                 guard let chatIdentifier = chatIdentifier ?? DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id) else {
@@ -619,7 +637,7 @@ private extension CBDaemonListener {
     func apply(serializedChat dict: [AnyHashable: Any], emitIfNeeded: Bool = true) {
         guard let chatIdentifier = dict["chatIdentifier"] as? String else {
             log.debug("couldn't find chatIdentifier in serialized chat!")
-            *log.debug("\(dict.debugDescription)")
+            log.debug("\(dict.debugDescription)")
             return
         }
         
@@ -663,8 +681,7 @@ private extension CBDaemonListener {
         if CBFeatureFlags.withholdDupes, nonces.contains(message.nonce) {
             // only let failed messages emit more than once, as failed messages may not first fail with their error code
             guard sendProgress == .failed else {
-//                nonces.remove(message.nonce)
-                log.debug("withholding message \(message.guid): dedupe")
+                log.debug("withholding message \(String(describing: message.guid)): dedupe")
                 return false
             }
         }
@@ -676,7 +693,7 @@ private extension CBDaemonListener {
         }
         
         if sendProgress == .failed, message.errorCode == .noError, CBFeatureFlags.withholdPartialFailures {
-            log.debug("withholding message \(message.guid): missing error code, message is either still in progress or the error code is coming soon")
+            log.debug("withholding message \(String(describing: message.guid)): missing error code, message is either still in progress or the error code is coming soon")
             return false
         }
         

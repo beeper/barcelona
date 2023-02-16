@@ -156,7 +156,7 @@ public class BLMessageExpert {
             break
         }
         if message.fromMe && !message.isSent && (message.hasTranscriptItems ? message.failed : true) {
-            *log.debug("Dropping message \(message.debugDescription): from me and not sent!")
+            log.debug("Dropping message \(message.debugDescription): from me and not sent!")
             return
         }
 
