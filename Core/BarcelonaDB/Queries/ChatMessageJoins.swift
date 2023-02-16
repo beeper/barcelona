@@ -12,7 +12,7 @@ import GRDB
 
 // MARK: - ChatMessageJoins.swift
 public extension DBReader {
-    func chatIdentifiers(forMessageGUIDs guids: [String]) -> Promise<[String]> {
+    func chatIdentifiers(forMessageGUIDs guids: [String]) async throws -> [String] {
         let join: SQLRequest<ChatIdentifierCursor> = """
         SELECT chat.chat_identifier
         FROM message
@@ -21,7 +21,7 @@ public extension DBReader {
         WHERE message.guid IN \(guids)
         """
         
-        return read { database in
+        return try await read { database in
             try join.fetchAll(database).map(\.chat_identifier)
         }
     }
@@ -48,8 +48,8 @@ public extension DBReader {
     /// Returns the chat id for a message with the given GUID
     /// - Parameter guid: guid of the message to query
     /// - Returns: identifier of the chat the message resides in
-    func chatIdentifier(forMessageGUID guid: String) -> Promise<String?> {
-        return read { database in
+    func chatIdentifier(forMessageGUID guid: String) async throws -> String? {
+        return try await read { database in
             try chatIdentifierQuery(forMessageGUID: guid).fetchOne(database)?.chat_identifier
         }
     }
@@ -63,7 +63,7 @@ public extension DBReader {
     /// Returns the chat id for a message with the given ROWID
     /// - Parameter ROWID: ROWID of the message to query
     /// - Returns: identifier of the chat the message resides in
-    func chatIdentifier(forMessageRowID ROWID: Int64) -> Promise<String?> {
+    func chatIdentifier(forMessageRowID ROWID: Int64) async throws -> String? {
         let join: SQLRequest<ChatIdentifierCursor> = """
         SELECT chat.chat_identifier from message
         LEFT JOIN chat_message_join ON chat_message_join.message_id = message.ROWID
@@ -72,7 +72,7 @@ public extension DBReader {
         LIMIT 1;
         """
         
-        return read { database in
+        return try await read { database in
             try join.fetchOne(database)?.chat_identifier
         }
     }
@@ -91,7 +91,7 @@ public extension DBReader {
     /// Resolves the identifiers for chats with the given identifiers
     /// - Parameter ROWIDs: message ROWIDs to resolve
     /// - Returns: ledger of message ROWID to chat identifier
-    func chatIdentifiers(forMessageRowIDs ROWIDs: [Int64]) -> Promise<[Int64: String]> {
+    func chatIdentifiers(forMessageRowIDs ROWIDs: [Int64]) async throws -> [Int64: String] {
         let join: SQLRequest<MessageChatIdentifierCursor> = """
         SELECT message.ROWID AS message_id, chat.chat_identifier from message
         LEFT JOIN chat_message_join ON chat_message_join.message_id = message.ROWID
@@ -99,7 +99,7 @@ public extension DBReader {
         WHERE message.ROWID IN \(ROWIDs);
         """
         
-        return read { database in
+        return try await read { database in
             try join.fetchAll(database).reduce(into: [Int64: String]()) { dict, join in
                 dict[join.message_id] = join.chat_identifier
             }
@@ -112,8 +112,15 @@ public extension DBReader {
     ///   - beforeMessageGUID: message GUID to load messages before
     ///   - limit: max number of results to return
     /// - Returns: array of message GUIDs matching the query
-    func newestMessageGUIDs(forChatIdentifiers chatIdentifiers: [String], beforeDate: Date? = nil, afterDate: Date? = nil, beforeMessageGUID: String? = nil, afterMessageGUID: String? = nil, limit: Int? = nil) -> Promise<[(messageID: String, chatID: String)]> {
-        read { db in
+    func newestMessageGUIDs(
+        forChatIdentifiers chatIdentifiers: [String],
+        beforeDate: Date? = nil,
+        afterDate: Date? = nil,
+        beforeMessageGUID: String? = nil,
+        afterMessageGUID: String? = nil,
+        limit: Int? = nil
+    ) async throws -> [(messageID: String, chatID: String)] {
+        try await read { db in
             class MessageGUIDCursor: GRDB.Record {
                 required init(row: Row) {
                     guid = row["guid"]
@@ -194,8 +201,8 @@ private class TimestampView: GRDB.Record {
 public extension DBReader {
     typealias RawTimestampView = [Int64: (message_date: Int64, chat_guid: String)]
     
-    @_optimize(speed) func latestMessageTimestamps() -> Promise<RawTimestampView> {
-        read { database in
+    @_optimize(speed) func latestMessageTimestamps() async throws -> RawTimestampView {
+        return try await read { database in
             try TimestampView.fetchCursor(database, sql: latestTimestamps)
                 .reduce(into: RawTimestampView()) { dictionary, join in
                     dictionary[join.chat_id] = (join.message_date, join.guid)

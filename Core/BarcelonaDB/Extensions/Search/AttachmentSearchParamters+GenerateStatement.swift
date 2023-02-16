@@ -73,13 +73,12 @@ fileprivate extension AttachmentSearchParameters {
 }
 
 internal extension AttachmentSearchParameters {
-    func loadRawAttachments() -> Promise<[RawAttachment]> {
-        chatROWIDs().then { ROWIDs in
-            self.statement(forChatROWIDs: ROWIDs)
-        }.then { stmt in
-            DBReader.shared.read { db in
-                try RawAttachment.fetchAll(db, sql: stmt.sql, arguments: stmt.arguments, adapter: nil)
-            }
+    func loadRawAttachments() async throws -> [RawAttachment] {
+        let rowids = try await chatROWIDs()
+        let stmt = statement(forChatROWIDs: rowids)
+
+        return try await DBReader.shared.read { db in
+            try RawAttachment.fetchAll(db, sql: stmt.sql, arguments: stmt.arguments, adapter: nil)
         }
     }
 }

@@ -11,8 +11,8 @@ import BarcelonaFoundation
 
 /// These extensions are used for the search APIs
 public extension DBReader {
-    func messages(matching text: String, limit: Int) -> Promise<[String]> {
-        read { db in
+    func messages(matching text: String, limit: Int) async throws -> [String] {
+        try await read { db in
             try RawMessage
                 .select(RawMessage.Columns.guid, as: String.self)
                 .filter(RawMessage.Columns.text.uppercased.like("%\(text)%"))

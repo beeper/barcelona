@@ -10,11 +10,11 @@ import Foundation
 import BarcelonaFoundation
 
 internal extension QueryParametersChatNarrowable {
-    func chatROWIDs() -> Promise<[Int64]> {
-        if let chats = chats, chats.count > 0 {
-            return DBReader.shared.rowIDs(forIdentifiers: chats).values.flatten()
-        } else {
-            return .success([])
+    func chatROWIDs() async throws -> [Int64] {
+        guard let chats, !chats.isEmpty else {
+            return []
         }
+
+        return try await DBReader.shared.rowIDs(forIdentifiers: chats).values.flatten()
     }
 }

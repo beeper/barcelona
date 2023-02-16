@@ -30,8 +30,13 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
             return payload.respond(.messages([]), ipcChannel: ipcChannel)
         }
 
-        BLLoadChatItems(withChats: siblings.compactMap(\.chatIdentifier).map({ ($0, service) }), afterDate: date, limit: limit).then(\.blMessages).then {
-            payload.respond(.messages($0), ipcChannel: ipcChannel)
+        Task { @MainActor in
+            do {
+                let messages = try await BLLoadChatItems(withChats: siblings.compactMap(\.chatIdentifier).map({ ($0, service) }), afterDate: date, limit: limit).blMessages
+                payload.respond(.messages(messages), ipcChannel: ipcChannel)
+            } catch {
+                payload.fail(strategy: .internal_error(error.localizedDescription), ipcChannel: ipcChannel)
+            }
         }
     }
 }
@@ -48,8 +53,13 @@ extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
         
         let siblings = chat.siblings
 
-        BLLoadChatItems(withChats: siblings.compactMap(\.chatIdentifier).map({ ($0, service) }), limit: limit).then(\.blMessages).then {
-            payload.respond(.messages($0), ipcChannel: ipcChannel)
+        Task {
+            do {
+                let messages = try await BLLoadChatItems(withChats: siblings.compactMap(\.chatIdentifier).map({ ($0, service) }), limit: limit).blMessages
+                payload.respond(.messages(messages), ipcChannel: ipcChannel)
+            } catch {
+                payload.fail(strategy: .internal_error(error.localizedDescription), ipcChannel: ipcChannel)
+            }
         }
     }
 }

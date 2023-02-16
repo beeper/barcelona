@@ -11,8 +11,6 @@
 
 import Foundation
 
-internal let _scratchboxIsEmpty = true
-
 #if DEBUG
 import IMCore
 import IMSharedUtilities

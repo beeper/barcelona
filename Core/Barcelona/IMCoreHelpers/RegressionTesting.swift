@@ -59,29 +59,32 @@ public extension BLRegressionTesting {
                     queue.schedule {
                         let group = DispatchGroup()
                         group.enter()
-                        DispatchQueue.global().async {
+                        Task { @MainActor in
                             print(">>> Raw history query for \(chat.chatIdentifiers.joined(separator: ","))")
-                            chat.rawHistoryQuery(limit: 10).forEach { chat, message in
-                                guard chat.scheme == .chatIdentifier else {
-                                    preconditionFailure()
-                                }
-                                // here we can just try both iMessage and SMS and see if either of them comes up with a valid chat
-                                // since we don't really care about being super efficient and correct (or else we'd find some way
-                                // to query from the DB the service that they're on).
-                                let iMessage = Message(messageItem: message, chatID: chat.value, service: .iMessage)
-                                let sms = Message(messageItem: message, chatID: chat.value, service: .SMS)
+                            do {
+                                let chats = try await chat.rawHistoryQuery(limit: 10)
+                                for (chat, message) in chats {
+                                    guard chat.scheme == .chatIdentifier else {
+                                        preconditionFailure()
+                                    }
 
-                                if iMessage.imChat == nil && sms.imChat == nil {
-                                    preconditionFailure("Failed to resolve IMChat[\(chat.scheme):\(chat.value)] for message \(message.id)")
+                                    // here we can just try both iMessage and SMS and see if either of them comes up with a valid chat
+                                    // since we don't really care about being super efficient and correct (or else we'd find some way
+                                    // to query from the DB the service that they're on).
+                                    let iMessage = Message(messageItem: message, chatID: chat.value, service: .iMessage)
+                                    let sms = Message(messageItem: message, chatID: chat.value, service: .SMS)
+
+                                    if iMessage.imChat == nil && sms.imChat == nil {
+                                        preconditionFailure("Failed to resolve IMChat[\(chat.scheme):\(chat.value)] for message \(message.id)")
+                                    }
                                 }
-                            }.always { result in
-                                if case .failure(let error) = result {
-                                    preconditionFailure("Failed to do history query on on chat \(chat.IMChats.map(\.debugDescription))")
-                                } else {
-                                    print(">>> Raw history query for \(chat.chatIdentifiers.joined(separator: ",")) completed")
-                                }
-                                group.leave()
+                                
+                                print(">>> Raw history query for \(chat.chatIdentifiers.joined(separator: ",")) completed")
+                            } catch {
+                                preconditionFailure("Failed to do history query on on chat \(chat.IMChats.map(\.debugDescription)): \(error.localizedDescription)")
                             }
+
+                            group.leave()
                         }
                         group.wait()
                     }

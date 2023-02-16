@@ -15,8 +15,8 @@ private let logger = Logger(label: "MessagesDB")
 
 // MARK: - Messages.swift
 public extension DBReader {
-    func chatRowIDs(forMessageGUIDs guids: [String]) -> Promise<[Int64]> {
-        read { db in
+    func chatRowIDs(forMessageGUIDs guids: [String]) async throws -> [Int64] {
+        try await read { db in
             try RawMessage
                 .select(RawMessage.Columns.ROWID, as: Int64.self)
                 .filter(guids.contains(RawMessage.Columns.guid))
@@ -27,8 +27,8 @@ public extension DBReader {
     /// Returns the chat ROWID for a message with the given GUID
     /// - Parameter guid: guid of the message to query
     /// - Returns: ROWID of the chat the message resides in
-    func chatRowID(forMessageGUID guid: String) -> Promise<Int64?> {
-        read { db in
+    func chatRowID(forMessageGUID guid: String) async throws -> Int64? {
+        try await read { db in
             try RawMessage
                 .select(RawMessage.Columns.ROWID, as: Int64.self)
                 .filter(RawMessage.Columns.guid == guid)
@@ -39,12 +39,12 @@ public extension DBReader {
     /// Resolves the ROWID for a message with the given GUID
     /// - Parameter guid: GUID of the message to resolve
     /// - Returns: ROWID of the message
-    func rowID(forMessageGUID guid: String) -> Promise<Int64?> {
-        rowIDs(forMessageGUIDs: [guid]).values.first
+    func rowID(forMessageGUID guid: String) async throws -> Int64? {
+        try await rowIDs(forMessageGUIDs: [guid]).values.first
     }
     
-    func rowIDs(forMessageGUIDs guids: [String]) -> Promise<[String: Int64]> {
-        read { db in
+    func rowIDs(forMessageGUIDs guids: [String]) async throws -> [String: Int64] {
+        try await read { db in
             try RawMessage
                 .select(RawMessage.Columns.ROWID, RawMessage.Columns.guid)
                 .filter(guids.contains(RawMessage.Columns.guid))

@@ -50,22 +50,23 @@ public struct DBReader {
     private init(pool: DatabasePool = databasePool) {
         self.pool = pool
     }
-    
-    internal func read<R>(_ cb: @escaping (Database) throws -> R) -> Promise<R> {
-        Promise { resolve, reject in
+
+    @MainActor
+    internal func read<R>(_ cb: @escaping (Database) throws -> R) async throws -> R {
+        try await withCheckedThrowingContinuation { continuation in
             pool.asyncRead { result in
                 switch result {
                 case .success(let db):
                     do {
-                        try resolve(cb(db))
+                        try continuation.resume(returning: cb(db))
                     } catch {
-                        reject(error)
+                        continuation.resume(throwing: error)
                     }
                 case .failure(let error):
-                    reject(error)
+                    continuation.resume(throwing: error)
                 }
             }
-        }.resolving(on: DispatchQueue.main)
+        }
     }
     
     internal func read<R: PromiseConvertible>(_ cb: @escaping (Database) throws -> R) -> Promise<R.Output> {
