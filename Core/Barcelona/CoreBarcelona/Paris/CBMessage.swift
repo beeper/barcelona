@@ -482,6 +482,8 @@ extension CBMessage {
             return
         }
         log.info("Re-sending message \(id) on chat \(String(describing: imChat.guid))")
-        chat.send(message: message, chat: imChat)
+        Task {
+            await chat.send(message: message, chat: imChat)
+        }
     }
 }

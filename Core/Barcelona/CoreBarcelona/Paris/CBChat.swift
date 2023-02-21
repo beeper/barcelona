@@ -237,15 +237,16 @@ extension IMHandle {
 
 // MARK: - Message sending
 extension CBChat {
+    @MainActor
     public func send(message: IMMessage, chat: IMChat) {
         chat.send(message)
     }
 
-    public func send(message: IMMessageItem, chat: IMChat) {
-        send(message: IMMessage(fromIMMessageItem: message, sender: nil, subject: nil), chat: chat)
+    public func send(message: IMMessageItem, chat: IMChat) async {
+        await send(message: IMMessage(fromIMMessageItem: message, sender: nil, subject: nil), chat: chat)
     }
 
-    public func send(message: CreateMessage, guid: String, service: IMServiceStyle) throws -> IMMessage {
+    public func send(message: CreateMessage, guid: String, service: IMServiceStyle) async throws -> IMMessage {
         guard let chat = chatForSending(with: guid) else {
             throw BarcelonaError(
                 code: 400,
@@ -254,7 +255,7 @@ extension CBChat {
             )
         }
         let message = try message.imMessage(inChat: chat.chatIdentifier, service: service)
-        send(message: message, chat: chat)
+        await send(message: message, chat: chat)
         return message
     }
 }

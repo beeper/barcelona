@@ -18,7 +18,7 @@ extension Chat {
         case textTooShort
     }
 
-    public func pingEveryone(text: String) throws -> Message {
+    public func pingEveryone(text: String) async throws -> Message {
         let targetParticipants = participants.filter {
             !$0.cb_isOneOfMyHandles
         }
@@ -36,6 +36,6 @@ extension Chat {
                 )
             }
         }
-        return try send(message: .init(parts: parts))
+        return try await send(message: .init(parts: parts))
     }
 }

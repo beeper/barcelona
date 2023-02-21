@@ -97,7 +97,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                 messageCreation.replyToPart = reply_to_part
                 messageCreation.metadata = metadata
 
-                finalMessage = try chat.send(message: messageCreation)
+                finalMessage = try await chat.send(message: messageCreation)
             }
 
             payload.reply(

@@ -92,7 +92,7 @@ extension Chat {
         imChat.flatMap { CBChatRegistry.shared.chats[.guid($0.guid)] }
     }
 
-    public func sendReturningRaw(message createMessage: CreateMessage, from: String? = nil) throws -> IMMessage {
+    public func sendReturningRaw(message createMessage: CreateMessage, from: String? = nil) async throws -> IMMessage {
         guard let imChat, let service else {
             throw BarcelonaError(code: 500, message: "No imChat or service to send with for \(self.id)")
         }
@@ -127,7 +127,7 @@ extension Chat {
             }
 
             log.info("Using CBChat for sending per feature flags", source: "MessageSending")
-            return try cbChat.send(message: createMessage, guid: imChat.guid, service: service)
+            return try await cbChat.send(message: createMessage, guid: imChat.guid, service: service)
         }
 
         imChat.refreshServiceForSendingIfNeeded()
@@ -148,13 +148,13 @@ extension Chat {
         return message
     }
 
-    public func send(message createMessage: CreateMessage, from: String? = nil) throws -> Message {
+    public func send(message createMessage: CreateMessage, from: String? = nil) async throws -> Message {
         guard let imChat, let service else {
             throw BarcelonaError(code: 500, message: "No IMChat or service for \(id)")
         }
 
         return Message(
-            messageItem: try sendReturningRaw(message: createMessage, from: from)._imMessageItem,
+            messageItem: try await sendReturningRaw(message: createMessage, from: from)._imMessageItem,
             chatID: imChat.id,
             service: service
         )
