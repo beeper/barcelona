@@ -6,13 +6,13 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
-import IMDPersistence
 import BarcelonaDB
+import Combine
+import Foundation
 import IMCore
+import IMDPersistence
 import IMSharedUtilities
 import Logging
-import Combine
 
 private let log = Logger(label: "IMDPersistenceQueries")
 
@@ -25,7 +25,7 @@ private let IMDQueue: DispatchQueue = {
             log.warning("IMDPersistence tried to exit! Let's talk about that.")
         }
     }
-    
+
     return DispatchQueue(label: "com.barcelona.IMDPersistence")
 }()
 #else
@@ -33,13 +33,13 @@ private let IMDQueue: DispatchQueue = DispatchQueue(label: "com.barcelona.IMDPer
 #endif
 
 @_transparent
-private func withinIMDQueue<R>(_ exp: @autoclosure() -> R) -> R {
+private func withinIMDQueue<R>(_ exp: @autoclosure () -> R) -> R {
     #if DEBUG
     IMDQueue.sync {
         IMDWithinBlock = true
-        
+
         defer { IMDWithinBlock = false }
-        
+
         return exp()
     }
     #else
@@ -47,30 +47,38 @@ private func withinIMDQueue<R>(_ exp: @autoclosure() -> R) -> R {
     #endif
 }
 
-private let IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve_imp: (@convention(c) (Any?, Any?, Bool, Any?) -> Unmanaged<IMItem>?)? = CBWeakLink(against: .privateFramework(name: "IMDPersistence"), options: [
-    .symbol("IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve").preMonterey,
-    .symbol("IMDCreateIMItemFromIMDMessageRecordRefWithAccountLookup").monterey
-])
+private let IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve_imp:
+    (@convention(c) (Any?, Any?, Bool, Any?) -> Unmanaged<IMItem>?)? = CBWeakLink(
+        against: .privateFramework(name: "IMDPersistence"),
+        options: [
+            .symbol("IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve").preMonterey,
+            .symbol("IMDCreateIMItemFromIMDMessageRecordRefWithAccountLookup").monterey,
+        ]
+    )
 
 // MARK: - IMDPersistence
 private func BLCreateIMItemFromIMDMessageRecordRefs(_ refs: NSArray) -> [IMItem] {
-    guard let IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve_imp = IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve_imp else {
+    guard
+        let IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve_imp =
+            IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve_imp
+    else {
         return []
     }
-    
+
     #if DEBUG
     log.debug("converting \(refs.count) refs")
     #endif
-    
+
     if refs.count == 0 {
         #if DEBUG
         log.debug("early-exit, zero refs")
         #endif
         return []
     }
-    
+
     return refs.compactMap {
-        withinIMDQueue(IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve_imp($0, nil, false, nil))?.takeRetainedValue()
+        withinIMDQueue(IMDCreateIMItemFromIMDMessageRecordRefWithServiceResolve_imp($0, nil, false, nil))?
+            .takeRetainedValue()
     }
 }
 
@@ -81,25 +89,25 @@ private func BLLoadIMDMessageRecordRefsWithGUIDs(_ guids: [String]) -> NSArray {
     #if DEBUG
     log.debug("loading \(guids.count) guids")
     #endif
-    
+
     if guids.count == 0 {
         #if DEBUG
         log.debug("early-exit: 0 guids provided")
         #endif
         return []
     }
-    
+
     guard let results = withinIMDQueue(IMDMessageRecordCopyMessagesForGUIDs(guids as CFArray)) else {
         #if DEBUG
         log.debug("could not copy messages from IMDPersistance. guids: \(guids)")
         #endif
         return []
     }
-    
+
     #if DEBUG
     log.debug("loaded \(guids.count) guids")
     #endif
-    
+
     return results as NSArray
 }
 
@@ -108,33 +116,33 @@ private func ERCreateIMMessageFromIMItem(_ items: [IMItem]) -> [IMMessage] {
     #if DEBUG
     log.debug("converting \(items.count) IMItems to IMMessage")
     #endif
-    
+
     guard items.count > 0 else {
         #if DEBUG
         log.debug("early-exit: empty array passed for conversion")
         #endif
         return []
     }
-    
+
     let items = items.compactMap {
         $0 as? IMMessageItem
     }
-    
+
     guard items.count > 0 else {
         #if DEBUG
         log.debug("early-exit: no IMMessageItem found")
         #endif
         return []
     }
-    
+
     let messages = items.compactMap {
         IMMessage.message(fromUnloadedItem: $0)
     }
-    
+
     #if DEBUG
     log.debug("loaded \(messages.count) IMMessages from \(items.count) items")
     #endif
-    
+
     return messages
 }
 
@@ -149,13 +157,17 @@ private func BLCreateIMMessageFromIMDMessageRecordRefs(_ refs: NSArray) -> [IMMe
 ///   - refs: the refs to parse
 ///   - chat: the ID of the chat the messages reside in. if omitted, the chat ID will be resolved at ingestion
 /// - Returns: An NIO future of ChatItems
-private func BLIngestIMDMessageRecordRefs(_ refs: NSArray, in chat: String? = nil, service: IMServiceStyle) async throws -> [ChatItem] {
+private func BLIngestIMDMessageRecordRefs(
+    _ refs: NSArray,
+    in chat: String? = nil,
+    service: IMServiceStyle
+) async throws -> [ChatItem] {
     if refs.count == 0 {
         return []
     }
-    
+
     let items = BLCreateIMItemFromIMDMessageRecordRefs(refs)
-    
+
     return try await BLIngestObjects(items, inChat: chat, service: service)
 }
 
@@ -168,11 +180,20 @@ internal func ERResolveGUIDsForChats(
     limit: Int? = nil
 ) async throws -> [(messageID: String, chatID: String)] {
     #if DEBUG
-    log.debug("Resolving GUIDs for chat \(chatIdentifiers) before time \((beforeDate?.timeIntervalSince1970 ?? 0).description) before guid \( beforeGUID ?? "(nil)") limit \((limit ?? -1).description)")
+    log.debug(
+        "Resolving GUIDs for chat \(chatIdentifiers) before time \((beforeDate?.timeIntervalSince1970 ?? 0).description) before guid \( beforeGUID ?? "(nil)") limit \((limit ?? -1).description)"
+    )
     #endif
 
     do {
-        let guids = try await DBReader.shared.newestMessageGUIDs(forChatIdentifiers: chatIdentifiers, beforeDate: beforeDate, afterDate: afterDate, beforeMessageGUID: beforeGUID, afterMessageGUID: afterGUID, limit: limit)
+        let guids = try await DBReader.shared.newestMessageGUIDs(
+            forChatIdentifiers: chatIdentifiers,
+            beforeDate: beforeDate,
+            afterDate: afterDate,
+            beforeMessageGUID: beforeGUID,
+            afterMessageGUID: afterGUID,
+            limit: limit
+        )
         #if DEBUG
         log.debug("Got \(guids.count) GUIDs")
         #endif
@@ -189,11 +210,12 @@ public func BLLoadIMMessageItems(withGUIDs guids: [String]) -> [IMMessageItem] {
     if guids.count == 0 {
         return []
     }
-    
+
     return autoreleasepool {
-        BLCreateIMItemFromIMDMessageRecordRefs(BLLoadIMDMessageRecordRefsWithGUIDs(guids)).compactMap {
-            $0 as? IMMessageItem
-        }
+        BLCreateIMItemFromIMDMessageRecordRefs(BLLoadIMDMessageRecordRefsWithGUIDs(guids))
+            .compactMap {
+                $0 as? IMMessageItem
+            }
     }
 }
 
@@ -214,31 +236,33 @@ public func BLLoadIMMessage(withGUID guid: String) -> IMMessage? {
 ///   - guids: GUIDs of messages to load
 ///   - chat: ID of the chat to load. if omitted, it will be resolved at ingestion.
 /// - Returns: NIO future of ChatItems
-public func BLLoadChatItems(withGUIDs guids: [String], chatID: String? = nil, service: IMServiceStyle) async throws -> [ChatItem] {
+public func BLLoadChatItems(
+    withGUIDs guids: [String],
+    chatID: String? = nil,
+    service: IMServiceStyle
+) async throws -> [ChatItem] {
     if guids.count == 0 {
         return []
     }
-    
+
     let (buffer, remaining) = IMDPersistenceMarshal.partialBuffer(guids)
 
     guard let guids = remaining else {
         return await buffer.value
     }
-    
+
     let refs = BLLoadIMDMessageRecordRefsWithGUIDs(guids)
 
-    let ingestFut = Future<[ChatItem], Never> { resolve in
-        Task {
-            do {
-                resolve(.success(try await BLIngestIMDMessageRecordRefs(refs, in: chatID, service: service)))
-            } catch {
-                resolve(.success([]))
-            }
+    let ingestFut = Task<[ChatItem], Never> {
+        do {
+            return try await BLIngestIMDMessageRecordRefs(refs, in: chatID, service: service)
+        } catch {
+            return []
         }
     }
 
     IMDPersistenceMarshal.putBuffers(guids, ingestFut)
-    
+
     let buffers = await ingestFut.value
     let bufVal = await buffer.value
 
@@ -249,14 +273,14 @@ public func BLLoadChatItems(withGraph graph: [String: ([String], IMServiceStyle)
     if graph.count == 0 {
         return []
     }
-    
+
     let guids = graph.values.flatMap(\.0)
     let (buffer, remaining) = IMDPersistenceMarshal.partialBuffer(guids)
-    
+
     guard let guids = remaining else {
         return await buffer.value
     }
-    
+
     let refs = BLCreateIMItemFromIMDMessageRecordRefs(BLLoadIMDMessageRecordRefsWithGUIDs(guids))
     let items = refs.dictionary(keyedBy: \.id)
 
@@ -264,15 +288,15 @@ public func BLLoadChatItems(withGraph graph: [String: ([String], IMServiceStyle)
         (guids.compactMap { items[$0] }, service)
     }
 
-    let pendingIngestion = Future<[ChatItem], Never> { resolve in
-        Task {
-            let results: [ChatItem] = await values.asyncMap {
+    let pendingIngestion = Task<[ChatItem], Never> {
+        let results: [ChatItem] =
+            await values.asyncMap {
                 let (chatID, (items, service)) = $0
                 return (try? await BLIngestObjects(items, inChat: chatID, service: service)) ?? []
-            }.flatten()
+            }
+            .flatten()
 
-            resolve(.success(results))
-        }
+        return results
     }
 
     IMDPersistenceMarshal.putBuffers(guids, pendingIngestion)
@@ -299,7 +323,14 @@ public func BLLoadChatItems(
     let chatIdentifiers = chats.map(\.0)
 
     // Then we load the messages in those chats with the specified guid bounds
-    let messages = try await ERResolveGUIDsForChats(withChatIdentifiers: chatIdentifiers, afterDate: afterDate, beforeDate: beforeDate, afterGUID: afterGUID, beforeGUID: beforeGUID, limit: limit)
+    let messages = try await ERResolveGUIDsForChats(
+        withChatIdentifiers: chatIdentifiers,
+        afterDate: afterDate,
+        beforeDate: beforeDate,
+        afterGUID: afterGUID,
+        beforeGUID: beforeGUID,
+        limit: limit
+    )
 
     // Once we've got the messages, we turn them into the graph form that the other function wants
     let graph = messages.reduce(into: [String: ([String], IMServiceStyle)]()) { dict, value in
@@ -323,18 +354,23 @@ public func BLLoadChatItems(
 
 typealias IMFileTransferFromIMDAttachmentRecordRefType = @convention(c) (_ record: Any) -> IMFileTransfer?
 
-private let IMDaemonCore = "/System/Library/PrivateFrameworks/IMDaemonCore.framework/IMDaemonCore".withCString({
-    dlopen($0, RTLD_LAZY)
-})!
+private let IMDaemonCore = "/System/Library/PrivateFrameworks/IMDaemonCore.framework/IMDaemonCore"
+    .withCString({
+        dlopen($0, RTLD_LAZY)
+    })!
 
-private let _IMFileTransferFromIMDAttachmentRecordRef = "IMFileTransferFromIMDAttachmentRecordRef".withCString ({ dlsym(IMDaemonCore, $0) })
-private let IMFileTransferFromIMDAttachmentRecordRef = unsafeBitCast(_IMFileTransferFromIMDAttachmentRecordRef, to: IMFileTransferFromIMDAttachmentRecordRefType.self)
+private let _IMFileTransferFromIMDAttachmentRecordRef = "IMFileTransferFromIMDAttachmentRecordRef"
+    .withCString({ dlsym(IMDaemonCore, $0) })
+private let IMFileTransferFromIMDAttachmentRecordRef = unsafeBitCast(
+    _IMFileTransferFromIMDAttachmentRecordRef,
+    to: IMFileTransferFromIMDAttachmentRecordRefType.self
+)
 
 public func BLLoadFileTransfer(withGUID guid: String) -> IMFileTransfer? {
     guard let attachment = IMDAttachmentRecordCopyAttachmentForGUID(guid as CFString) else {
         return nil
     }
-    
+
     return IMFileTransferFromIMDAttachmentRecordRef(attachment)
 }
 
