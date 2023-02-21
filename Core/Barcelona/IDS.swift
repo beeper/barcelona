@@ -74,12 +74,13 @@ class BLIDSIDQueryCache {
     static let shared = BLIDSIDQueryCache()
     
     let defaults = UserDefaults(suiteName: "com.ericrabil.barcelona.id-query")!
-    @Atomic private var results: [String: (Date, IDSState)] = [:]
+    private var results: [String: (Date, IDSState)] = [:]
+    private let resultsLock = NSRecursiveLock()
     
     static let queryValidityDuration: TimeInterval = 1 * 60 * 60 * 1.5
     
     func result(for destination: String) -> IDSState? {
-        if let (date, result) = results[destination] {
+        if let (date, result) = resultsLock.withLock({ results[destination] }) {
             if abs(date.timeIntervalSinceNow) < Self.queryValidityDuration {
                 return result
             }
@@ -89,7 +90,9 @@ class BLIDSIDQueryCache {
            abs(date.timeIntervalSinceNow) < Self.queryValidityDuration,
            let result = dict["result"] as? IDSState.RawValue {
             let state = IDSState(rawValue: result)
-            results[destination] = (date, state)
+            resultsLock.withLock {
+                results[destination] = (date, state)
+            }
             return state
         }
         return nil
@@ -100,7 +103,9 @@ class BLIDSIDQueryCache {
             "result": result.rawValue,
             "date": time
         ], forKey: destination)
-        results[destination] = (time, result)
+        resultsLock.withLock {
+            results[destination] = (time, result)
+        }
     }
 }
 

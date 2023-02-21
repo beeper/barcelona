@@ -291,14 +291,17 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     }
     
     var hasLoadedChats = false
-    @Atomic var loadedChatsCallbacks: [() -> ()] = []
+    var loadedChatsCallbacks: [() -> ()] = []
+    private let loadedChatsCallbacksLock = NSRecursiveLock()
     
     public func loadedChats(_ chats: [[AnyHashable : Any]]!) {
         _ = internalize(chats: chats)
-        let loadedChatsCallbacks = self.loadedChatsCallbacks
-        self.loadedChatsCallbacks = []
-        for callback in loadedChatsCallbacks {
-            callback()
+        loadedChatsCallbacksLock.withLock {
+            let loadedChatsCallbacks = loadedChatsCallbacks
+            self.loadedChatsCallbacks = []
+            for callback in loadedChatsCallbacks {
+                callback()
+            }
         }
     }
     
@@ -306,7 +309,9 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         if hasLoadedChats {
             callback()
         } else {
-            loadedChatsCallbacks.append(callback)
+            loadedChatsCallbacksLock.withLock {
+                loadedChatsCallbacks.append(callback)
+            }
         }
     }
 }
