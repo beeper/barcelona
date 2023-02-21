@@ -9,8 +9,8 @@
 import Foundation
 import IMCore
 
-public extension IMFileTransfer {
-    enum IMFileTransferState: NSInteger {
+extension IMFileTransfer {
+    public enum IMFileTransferState: NSInteger {
         case archiving = -1
         case waitingForAccept = 0
         case accepted = 1
@@ -21,11 +21,11 @@ public extension IMFileTransfer {
         case error = 6
         case recoverableError = 7
         case unknown
-        
+
         fileprivate init(transfer: IMFileTransfer) {
             self = .init(rawValue: transfer.value(forKey: "transferState") as! NSInteger) ?? .unknown
         }
-        
+
         var description: String {
             switch self {
             case .archiving: return "archiving"
@@ -41,8 +41,8 @@ public extension IMFileTransfer {
             }
         }
     }
-    
-    var state: IMFileTransferState {
+
+    public var state: IMFileTransferState {
         IMFileTransferState(transfer: self)
     }
 }

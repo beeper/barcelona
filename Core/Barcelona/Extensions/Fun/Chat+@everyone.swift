@@ -7,18 +7,18 @@
 
 import Foundation
 
-internal extension String {
+extension String {
     var cb_isOneOfMyHandles: Bool {
         Registry.sharedInstance.allMeHandles.map(\.id).contains(self)
     }
 }
 
-public extension Chat {
-    enum AtEveryoneError: Error {
+extension Chat {
+    public enum AtEveryoneError: Error {
         case textTooShort
     }
-    
-    func pingEveryone(text: String) throws -> Message {
+
+    public func pingEveryone(text: String) throws -> Message {
         let targetParticipants = participants.filter {
             !$0.cb_isOneOfMyHandles
         }
@@ -31,7 +31,9 @@ public extension Chat {
             if index == targetParticipants.count - 1 {
                 parts.append(.init(type: .text, details: textStorage, attributes: [.mention(participant)]))
             } else {
-                parts.append(.init(type: .text, details: String(textStorage.removeFirst()), attributes: [.mention(participant)]))
+                parts.append(
+                    .init(type: .text, details: String(textStorage.removeFirst()), attributes: [.mention(participant)])
+                )
             }
         }
         return try send(message: .init(parts: parts))

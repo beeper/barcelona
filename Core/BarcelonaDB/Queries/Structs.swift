@@ -24,7 +24,7 @@ public struct AttachmentSearchParameters: QueryParameters, QueryParametersChatNa
     /// uti and likeUTI are mutually exclusive
     public var uti: [String]?
     public var likeUTI: String?
-    
+
     public var name: String?
     public var chats: [String]?
     public var limit: Int?
@@ -34,11 +34,11 @@ public struct AttachmentSearchParameters: QueryParameters, QueryParametersChatNa
 public struct MessageQueryParameters: QueryParameters {
     public var search: String?
     public var bundle_id: String?
-    
+
     public var chats: [String]?
     public var handles: [String]?
     public var from_me: Bool?
-    
+
     public var limit: Int?
     public var page: Int?
 }

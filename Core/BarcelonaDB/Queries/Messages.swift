@@ -6,16 +6,16 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import BarcelonaFoundation
-import Logging
+import Foundation
 import GRDB
+import Logging
 
 private let logger = Logger(label: "MessagesDB")
 
 // MARK: - Messages.swift
-public extension DBReader {
-    func chatRowIDs(forMessageGUIDs guids: [String]) async throws -> [Int64] {
+extension DBReader {
+    public func chatRowIDs(forMessageGUIDs guids: [String]) async throws -> [Int64] {
         try await read { db in
             try RawMessage
                 .select(RawMessage.Columns.ROWID, as: Int64.self)
@@ -23,11 +23,11 @@ public extension DBReader {
                 .fetchAll(db)
         }
     }
-    
+
     /// Returns the chat ROWID for a message with the given GUID
     /// - Parameter guid: guid of the message to query
     /// - Returns: ROWID of the chat the message resides in
-    func chatRowID(forMessageGUID guid: String) async throws -> Int64? {
+    public func chatRowID(forMessageGUID guid: String) async throws -> Int64? {
         try await read { db in
             try RawMessage
                 .select(RawMessage.Columns.ROWID, as: Int64.self)
@@ -35,15 +35,15 @@ public extension DBReader {
                 .fetchOne(db)
         }
     }
-    
+
     /// Resolves the ROWID for a message with the given GUID
     /// - Parameter guid: GUID of the message to resolve
     /// - Returns: ROWID of the message
-    func rowID(forMessageGUID guid: String) async throws -> Int64? {
+    public func rowID(forMessageGUID guid: String) async throws -> Int64? {
         try await rowIDs(forMessageGUIDs: [guid]).values.first
     }
-    
-    func rowIDs(forMessageGUIDs guids: [String]) async throws -> [String: Int64] {
+
+    public func rowIDs(forMessageGUIDs guids: [String]) async throws -> [String: Int64] {
         try await read { db in
             try RawMessage
                 .select(RawMessage.Columns.ROWID, RawMessage.Columns.guid)
@@ -52,17 +52,20 @@ public extension DBReader {
                 .dictionary(keyedBy: \.guid, valuedBy: \.ROWID)
         }
     }
-    
-    func rawService(forMessage guid: String) -> String? {
+
+    public func rawService(forMessage guid: String) -> String? {
         do {
             return try pool.read { database in
                 try RawMessage
                     .select(RawMessage.Columns.guid, RawMessage.Columns.service)
                     .filter(RawMessage.Columns.guid == guid)
-                    .fetchOne(database)?.service
+                    .fetchOne(database)?
+                    .service
             }
         } catch {
-            logger.error("Failed to query database when fetching the service of IMMessage[guid=\(guid)]: \(String(describing: error))")
+            logger.error(
+                "Failed to query database when fetching the service of IMMessage[guid=\(guid)]: \(String(describing: error))"
+            )
             return nil
         }
     }

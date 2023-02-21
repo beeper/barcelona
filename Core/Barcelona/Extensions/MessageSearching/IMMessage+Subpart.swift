@@ -10,10 +10,10 @@ import Foundation
 import IMCore
 import IMSharedUtilities
 
-public extension IMMessageItem {
-    var chatItems: [IMChatItem] {
+extension IMMessageItem {
+    public var chatItems: [IMChatItem] {
         let items = _newChatItems()
-        
+
         switch items {
         case let items as [IMChatItem]:
             return items
@@ -32,16 +32,17 @@ extension IMMessage {
     func subpart(at index: Int) -> IMChatItem? {
         guard let parts = _imMessageItem?.chatItems else { return nil }
         if (parts.count - 1) < index { return nil }
-        
+
         return parts[index]
     }
-    
+
     func subpart(with guid: String) -> IMChatItem? {
-        _imMessageItem?.chatItems.first(where: {
-            guard let part = $0 as? IMMessagePartChatItem else {
-                return false
-            }
-            return part.guid == guid
-        })
+        _imMessageItem?.chatItems
+            .first(where: {
+                guard let part = $0 as? IMMessagePartChatItem else {
+                    return false
+                }
+                return part.guid == guid
+            })
     }
 }

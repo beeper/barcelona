@@ -10,20 +10,20 @@ import Foundation
 import IMFoundation
 
 /// Helper variables when processing string IDs into IDS destinations
-public extension String {
-    var isEmail: Bool {
+extension String {
+    public var isEmail: Bool {
         IMStringIsEmail(self)
     }
-    
-    var isBusinessID: Bool {
+
+    public var isBusinessID: Bool {
         IMStringIsBusinessID(self)
     }
-    
-    var isPhoneNumber: Bool {
+
+    public var isPhoneNumber: Bool {
         IMStringIsPhoneNumber(self)
     }
-    
-    var style: HandleIDStyle {
+
+    public var style: HandleIDStyle {
         switch true {
         case isEmail: return .email
         case isPhoneNumber: return .phoneNumber

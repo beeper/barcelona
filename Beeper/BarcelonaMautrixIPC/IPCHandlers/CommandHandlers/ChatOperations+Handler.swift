@@ -6,10 +6,10 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import Barcelona
-import IMCore
 import BarcelonaDB
+import Foundation
+import IMCore
 import Logging
 
 extension Array where Element == String {
@@ -34,17 +34,23 @@ extension Array where Element == String {
 extension GetChatsCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         if min_timestamp <= 0 {
-            return payload.reply(withResponse: .chats_resolved(IMChatRegistry.shared.allChats.map(\.blChatGUID)), ipcChannel: ipcChannel)
+            return payload.reply(
+                withResponse: .chats_resolved(IMChatRegistry.shared.allChats.map(\.blChatGUID)),
+                ipcChannel: ipcChannel
+            )
         }
 
         do {
             let timestamps = try await DBReader.shared.latestMessageTimestamps()
 
-            let guids = timestamps.mapValues { timestamp, guid in
-                (IMDPersistenceTimestampToUnixSeconds(timestamp: timestamp), guid)
-            }.filter { chatID, pair in
-                pair.0 > min_timestamp
-            }.map(\.value.1)
+            let guids =
+                timestamps.mapValues { timestamp, guid in
+                    (IMDPersistenceTimestampToUnixSeconds(timestamp: timestamp), guid)
+                }
+                .filter { chatID, pair in
+                    pair.0 > min_timestamp
+                }
+                .map(\.value.1)
 
             payload.reply(withResponse: .chats_resolved(guids.dedupeChatGUIDs()), ipcChannel: ipcChannel)
         } catch {
@@ -59,11 +65,11 @@ extension GetGroupChatInfoCommand: Runnable {
     }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         log.info("Getting chat with id \(chat_guid)", source: "MautrixIPC")
-        
+
         guard let chat = blChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
-        
+
         payload.respond(.chat_resolved(chat), ipcChannel: ipcChannel)
     }
 }
@@ -88,7 +94,7 @@ extension SendTypingCommand: Runnable, AuthenticatedAsserting {
         guard let chat = cbChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
-        
+
         chat.setTyping(typing)
     }
 }
@@ -98,7 +104,7 @@ extension GetGroupChatAvatarCommand: Runnable {
         guard let chat = chat, let groupPhotoID = chat.groupPhotoID else {
             return payload.respond(.chat_avatar(nil), ipcChannel: ipcChannel)
         }
-        
+
         payload.respond(.chat_avatar(BLAttachment(guid: groupPhotoID)), ipcChannel: ipcChannel)
     }
 }

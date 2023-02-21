@@ -10,12 +10,12 @@ import Foundation
 import IMCore
 
 extension IMGroupActionType: Codable {
-    
+
 }
 
 public struct GroupActionItem: ChatItemOwned, Hashable {
     public static let ingestionClasses: [NSObject.Type] = [IMGroupActionChatItem.self, IMGroupActionItem.self]
-    
+
     public init?(ingesting item: NSObject, context: IngestionContext) {
         switch item {
         case let item as IMGroupActionChatItem:
@@ -26,7 +26,7 @@ public struct GroupActionItem: ChatItemOwned, Hashable {
             return nil
         }
     }
-    
+
     init(_ item: IMGroupActionChatItem, chatID: String) {
         id = item.id
         self.chatID = chatID
@@ -37,7 +37,7 @@ public struct GroupActionItem: ChatItemOwned, Hashable {
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
     }
-    
+
     init(_ item: IMGroupActionItem, chatID: String) {
         id = item.id
         self.chatID = chatID
@@ -48,7 +48,7 @@ public struct GroupActionItem: ChatItemOwned, Hashable {
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
     }
-    
+
     public var id: String
     public var chatID: String
     public var fromMe: Bool
@@ -57,7 +57,7 @@ public struct GroupActionItem: ChatItemOwned, Hashable {
     public var threadOriginator: String?
     public var actionType: IMGroupActionType
     public var sender: String?
-    
+
     public var type: ChatItemType {
         .groupAction
     }

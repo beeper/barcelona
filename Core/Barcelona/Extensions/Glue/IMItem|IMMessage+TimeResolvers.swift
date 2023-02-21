@@ -15,36 +15,36 @@ public struct TimeReceipt {
     public var timeDelivered: Double = 0
     public var timeRead: Double = 0
     public var timePlayed: Double = 0
-    
+
     public var asTuple: (Double, Double, Double, Double) {
         (time, timeDelivered, timeRead, timePlayed)
     }
-    
+
     public mutating func merge(receipt: TimeReceipt) {
         if time == 0 {
             time = receipt.time
         }
-        
+
         if timeDelivered == 0 {
             timeDelivered = receipt.timeDelivered
         }
-        
+
         if timeRead == 0 {
             timeRead = receipt.timeRead
         }
-        
+
         if timePlayed == 0 {
             timePlayed = receipt.timePlayed
         }
     }
-    
+
     public func merging(receipt: TimeReceipt) -> TimeReceipt {
         var receipt = self
         receipt.merge(receipt: receipt)
-        
+
         return receipt
     }
-    
+
     public func assign(toMessage message: inout Message) {
         message.time = time
         message.timeDelivered = timeDelivered

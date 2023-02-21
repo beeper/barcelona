@@ -27,7 +27,7 @@ extension IPCCommand: Codable {
         case pre_startup_sync
         case unknown
     }
-    
+
     private enum CodingKeys: CodingKey, CaseIterable {
         case command
         case data
@@ -199,7 +199,7 @@ extension IPCCommand: Codable {
             self = .unknown
         }
     }
-    
+
     public enum BLIPCError: Error {
         case some(errorMessage: String)
     }

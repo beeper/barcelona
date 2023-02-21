@@ -6,12 +6,12 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import BarcelonaFoundation
+import Foundation
 
 /// These extensions are used for the search APIs
-public extension DBReader {
-    func messages(matching text: String, limit: Int) async throws -> [String] {
+extension DBReader {
+    public func messages(matching text: String, limit: Int) async throws -> [String] {
         try await read { db in
             try RawMessage
                 .select(RawMessage.Columns.guid, as: String.self)

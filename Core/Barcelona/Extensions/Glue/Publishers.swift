@@ -5,18 +5,24 @@
 //  Created by June Welker on 2/15/23.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 extension Publisher {
     @discardableResult
-    func retainingSink(receiveCompletion: @escaping (Subscribers.Completion<Failure>) -> Void, receiveValue: @escaping (Output) -> Void) -> AnyCancellable? {
+    func retainingSink(
+        receiveCompletion: @escaping (Subscribers.Completion<Failure>) -> Void,
+        receiveValue: @escaping (Output) -> Void
+    ) -> AnyCancellable? {
         var cancellable: AnyCancellable?
-        cancellable = sink(receiveCompletion: {
-            receiveCompletion($0)
+        cancellable = sink(
+            receiveCompletion: {
+                receiveCompletion($0)
 
-            withExtendedLifetime(cancellable) { cancellable = nil }
-        }, receiveValue: receiveValue)
+                withExtendedLifetime(cancellable) { cancellable = nil }
+            },
+            receiveValue: receiveValue
+        )
 
         return cancellable
     }

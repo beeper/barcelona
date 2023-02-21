@@ -11,20 +11,20 @@ import Foundation
 #if canImport(UIKit)
 import UIKit
 
-public extension Data {
-    var pngRepresentation: Data? {
+extension Data {
+    public var pngRepresentation: Data? {
         UIImage(data: self)?.pngData()
     }
 }
 #elseif canImport(AppKit)
 import AppKit
 
-public extension Data {
-    var pngRepresentation: Data? {
+extension Data {
+    public var pngRepresentation: Data? {
         guard let cgImage = NSImage(data: self)?.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
             return nil
         }
-        
+
         return NSBitmapImageRep(cgImage: cgImage).representation(using: .png, properties: .init())
     }
 }

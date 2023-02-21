@@ -11,16 +11,16 @@ import Foundation
 public protocol _HashableViaEncoding {}
 
 extension _HashableViaEncoding where Self: Encodable {
-    public static func ==(lhs: Self, rhs: Self) -> Bool {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.hashValue == rhs.hashValue
     }
-    
+
     public var hashValue: Int {
         var hasher = Hasher()
         hash(into: &hasher)
         return hasher.finalize()
     }
-    
+
     public func hash(into hasher: inout Hasher) {
         hasher.combine(try! JSONEncoder().encode(self))
     }
@@ -35,7 +35,7 @@ extension DigitalTouchMessage: Codable, _HashableViaEncoding, Hashable {
         case anger
         case kiss
     }
-    
+
     private var type: DigitalTouchType {
         switch self {
         case .anger(_):
@@ -52,17 +52,17 @@ extension DigitalTouchMessage: Codable, _HashableViaEncoding, Hashable {
             return .video
         }
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case type
         case payload
     }
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
+
         let itemType = try container.decode(DigitalTouchType.self, forKey: .type)
-        
+
         switch itemType {
         case .anger:
             self = .anger(try container.decode(ETAngerData.self, forKey: .payload))
@@ -78,12 +78,12 @@ extension DigitalTouchMessage: Codable, _HashableViaEncoding, Hashable {
             self = .video(try container.decode(ETVideoData.self, forKey: .payload))
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        
+
         try container.encode(self.type, forKey: .type)
-        
+
         switch self {
         case .anger(let item):
             try container.encode(item, forKey: .payload)

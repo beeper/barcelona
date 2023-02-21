@@ -6,13 +6,18 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import Barcelona
+import Foundation
 import IMCore
 
-public extension IMChat {
-    var blChat: BLChat {
-        BLChat(chat_guid: blChatGUID, title: displayName, members: participants.map(\.id), correlation_id: correlationIdentifier)
+extension IMChat {
+    public var blChat: BLChat {
+        BLChat(
+            chat_guid: blChatGUID,
+            title: displayName,
+            members: participants.map(\.id),
+            correlation_id: correlationIdentifier
+        )
     }
 }
 

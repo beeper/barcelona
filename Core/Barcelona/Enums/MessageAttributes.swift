@@ -11,7 +11,7 @@ import IMCore
 import IMFoundation
 import IMSharedUtilities
 
-/** Various attributes in an IMMessage attributed string. Some are no longer used by iMessage. */
+/// Various attributes in an IMMessage attributed string. Some are no longer used by iMessage.
 public struct MessageAttributes {
     static let link = NSAttributedString.Key(rawValue: IMLinkAttributeName)
     static let writingDirection = NSAttributedString.Key(rawValue: IMBaseWritingDirectionAttributeName)
@@ -28,7 +28,7 @@ public struct MessageAttributes {
     static let calendarData = NSAttributedString.Key(rawValue: IMCalendarEventAttributeName)
     static let breadcrumbOptions = NSAttributedString.Key(rawValue: IMBreadcrumbTextOptionFlags)
     static let breadcrumbMarker = NSAttributedString.Key(rawValue: IMBreadcrumbTextMarkerAttributeName)
-    
+
     @available(iOS 14, macOS 10.16, watchOS 7, *)
     static let mentionName = NSAttributedString.Key(rawValue: IMMentionConfirmedMention)
 }

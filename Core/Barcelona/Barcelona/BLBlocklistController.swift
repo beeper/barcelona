@@ -11,10 +11,10 @@ public class BLBlocklistController {
     @_spi(unitTestInternals) public var testingOverride: Set<String> = Set()
 }
 
-public extension BLBlocklistController {
-    static let shared = BLBlocklistController()
-    
-    func isSenderBlocked(_ sender: String) -> Bool {
+extension BLBlocklistController {
+    public static let shared = BLBlocklistController()
+
+    public func isSenderBlocked(_ sender: String) -> Bool {
         guard CBFeatureFlags.enableBlocklist else {
             return false
         }

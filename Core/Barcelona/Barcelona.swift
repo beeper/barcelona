@@ -6,5 +6,5 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 @_exported import BarcelonaFoundation
+import Foundation

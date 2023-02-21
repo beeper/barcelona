@@ -12,9 +12,12 @@ import IMSharedUtilities
 
 extension IMItem {
     var imAccount: IMAccount? {
-        if let accountID = accountID, let preferredAccount = IMAccountController.shared.account(forUniqueID: accountID) {
+        if let accountID = accountID, let preferredAccount = IMAccountController.shared.account(forUniqueID: accountID)
+        {
             return preferredAccount
-        } else if let serviceID = service, let service = serviceID.service, let alternateAccount = IMAccountController.shared.bestAccount(forService: service) {
+        } else if let serviceID = service, let service = serviceID.service,
+            let alternateAccount = IMAccountController.shared.bestAccount(forService: service)
+        {
             return alternateAccount
         } else {
             return nil

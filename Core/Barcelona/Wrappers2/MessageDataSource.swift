@@ -7,8 +7,8 @@
 
 import Foundation
 import IMCore
-import IMSharedUtilities
 import IMFoundation
+import IMSharedUtilities
 
 public protocol MessageDataSource {
     var id: String { get }
@@ -34,7 +34,7 @@ public enum MessageSendProgress {
     case sending
     case sent
     case failed
-    
+
     public init?(_ message: MessageDataSource) {
         guard message.isFromMe else {
             return nil
@@ -53,20 +53,20 @@ public enum MessageSendProgress {
     }
 }
 
-public extension MessageDataSource {
-    var sendProgress: MessageSendProgress? {
+extension MessageDataSource {
+    public var sendProgress: MessageSendProgress? {
         MessageSendProgress(self)
     }
-    
-    var isSending: Bool {
+
+    public var isSending: Bool {
         sendProgress == .sending
     }
-    
-    var isUnsent: Bool {
+
+    public var isUnsent: Bool {
         sendProgress == .failed
     }
-    
-    func refreshedErrorCode() -> FZErrorType {
+
+    public func refreshedErrorCode() -> FZErrorType {
         BLLoadIMMessageItem(withGUID: id)?.errorCode ?? .noError
     }
 }

@@ -6,8 +6,8 @@
 //  Copyright © 2020 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import BarcelonaDB
+import Foundation
 import IMCore
 import IMFoundation
 
@@ -18,14 +18,16 @@ import os.log
 extension IMChatJoinState: Codable {
     public init(from decoder: Decoder) throws {
         let rawValue = try decoder.singleValueContainer().decode(RawValue.self)
-        
+
         guard let state = IMChatJoinState(rawValue: rawValue) else {
-            throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "Invalid IMChatJoinState", underlyingError: nil))
+            throw DecodingError.dataCorrupted(
+                .init(codingPath: decoder.codingPath, debugDescription: "Invalid IMChatJoinState", underlyingError: nil)
+            )
         }
-        
+
         self = state
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(rawValue)
@@ -33,7 +35,21 @@ extension IMChatJoinState: Codable {
 }
 
 public struct ChatSearchParameters: QueryParameters {
-    public init(identifiers: [String]? = nil, participants: [String]? = nil, display_name: String? = nil, read_receipts: Bool? = nil, ignore_alerts: Bool? = nil, style: IMChatStyle? = nil, join_state: IMChatJoinState? = nil, services: [IMServiceStyle]? = nil, has_unread: Bool? = nil, has_failed: Bool? = nil, last_message_text: String? = nil, limit: Int? = nil, page: Int? = nil) {
+    public init(
+        identifiers: [String]? = nil,
+        participants: [String]? = nil,
+        display_name: String? = nil,
+        read_receipts: Bool? = nil,
+        ignore_alerts: Bool? = nil,
+        style: IMChatStyle? = nil,
+        join_state: IMChatJoinState? = nil,
+        services: [IMServiceStyle]? = nil,
+        has_unread: Bool? = nil,
+        has_failed: Bool? = nil,
+        last_message_text: String? = nil,
+        limit: Int? = nil,
+        page: Int? = nil
+    ) {
         self.identifiers = identifiers
         self.participants = participants
         self.display_name = display_name
@@ -48,7 +64,7 @@ public struct ChatSearchParameters: QueryParameters {
         self.limit = limit
         self.page = page
     }
-    
+
     /// Narrow the results to a subset of chat identifiers
     public var identifiers: [String]?
     /// Narrow the results to a subset of participants
@@ -74,60 +90,60 @@ public struct ChatSearchParameters: QueryParameters {
     /// Max number of results to return
     public var limit: Int?
     public var page: Int?
-    
+
     fileprivate var parameters: [ChatSearchParameter] {
         var parameters: [ChatSearchParameter] = []
-        
+
         if let identifiers = identifiers {
             parameters.append(.identifiers(identifiers))
         }
-        
+
         if let participants = participants {
             parameters.append(.participants(participants))
         }
-        
+
         if let displayName = display_name {
             parameters.append(.displayName(displayName.lowercased()))
         }
-        
+
         if let readReceipts = read_receipts {
             parameters.append(.readReceipts(readReceipts))
         }
-        
+
         if let ignoreAlerts = ignore_alerts {
             parameters.append(.ignoreAlerts(ignoreAlerts))
         }
-        
+
         if let style = style {
             parameters.append(.style(style))
         }
-        
+
         if let joinState = join_state {
             parameters.append(.joinState(joinState))
         }
-        
+
         if let services = services {
             parameters.append(.services(services))
         }
-        
+
         if let hasUnread = has_unread {
             parameters.append(.hasUnread(hasUnread))
         }
-        
+
         if let hasFailed = has_failed {
             parameters.append(.hasFailed(hasFailed))
         }
-        
+
         if let lastMessageText = last_message_text {
             parameters.append(.lastMessageText(lastMessageText.lowercased()))
         }
-        
+
         return parameters
     }
 }
 
-private extension IMChat {
-    var handleIDs: [String] {
+extension IMChat {
+    fileprivate var handleIDs: [String] {
         participants.map(\.id)
     }
 }
@@ -206,12 +222,12 @@ extension ChatSearchParameter: SearchParameter {
                 return false
             }
         }
-        
+
         return true
     }
 }
 
-extension Array where Element : Equatable {
+extension Array where Element: Equatable {
     func contains(items: [Element]) -> Bool {
         items.allSatisfy {
             self.contains($0)
@@ -222,23 +238,25 @@ extension Array where Element : Equatable {
 extension Chat: Searchable {
     public static func resolve(withParameters rawParameters: ChatSearchParameters) -> Promise<[Chat]> {
         let parameters = rawParameters.parameters
-        
+
         if parameters.count == 0 {
             return .success([])
         }
-        
-        var chats = IMChatRegistry.shared.allChats.filter {
-            parameters.test($0)
-        }.map(Chat.init(_:))
-        
+
+        var chats = IMChatRegistry.shared.allChats
+            .filter {
+                parameters.test($0)
+            }
+            .map(Chat.init(_:))
+
         chats.sort { chat1, chat2 in
             chat1.lastMessageTime > chat2.lastMessageTime
         }
-        
+
         if let limit = rawParameters.limit {
             chats = Array(chats.prefix(limit))
         }
-        
+
         return .success(chats)
     }
 }

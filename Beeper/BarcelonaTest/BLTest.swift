@@ -5,11 +5,11 @@
 //  Created by Eric Rabil on 4/15/22.
 //
 
-import XCTest
-import IMCore
-@_spi(unitTestInternals) import BarcelonaMautrixIPC
 @_spi(unitTestInternals) import Barcelona
 import BarcelonaIPC
+@_spi(unitTestInternals) import BarcelonaMautrixIPC
+import IMCore
+import XCTest
 
 class SmokeTests: XCTestCase {
     override func setUpWithError() throws {
@@ -32,7 +32,27 @@ class SmokeTests: XCTestCase {
                 }
             }
         }
-        BLEventHandler.shared.receiveMessage(Message.init(id: id, chatID: id, fromMe: false, time: 0, sender: "+123456", isSOS: false, isTypingMessage: false, isCancelTypingMessage: false, isDelivered: true, isAudioMessage: false, flags: .finished, failed: false, failureCode: .noError, failureDescription: "", items: [], service: .iMessage, fileTransferIDs: []))
+        BLEventHandler.shared.receiveMessage(
+            Message.init(
+                id: id,
+                chatID: id,
+                fromMe: false,
+                time: 0,
+                sender: "+123456",
+                isSOS: false,
+                isTypingMessage: false,
+                isCancelTypingMessage: false,
+                isDelivered: true,
+                isAudioMessage: false,
+                flags: .finished,
+                failed: false,
+                failureCode: .noError,
+                failureDescription: "",
+                items: [],
+                service: .iMessage,
+                fileTransferIDs: []
+            )
+        )
         wait(for: [blockExpectation], timeout: 3)
     }
 }
@@ -43,13 +63,12 @@ class MessageIntegrityTests: XCTestCase {
             fatalError("Can't setup Barcelona")
         }
     }
-    
+
     class override func tearDown() {
         BLTeardown()
     }
-    
+
     func testASDF() throws {
-        
-        
+
     }
 }

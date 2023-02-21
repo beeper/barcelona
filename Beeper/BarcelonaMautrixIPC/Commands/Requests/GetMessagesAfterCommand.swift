@@ -12,7 +12,7 @@ public struct GetMessagesAfterCommand: Codable, ChatResolvable {
     public var chat_guid: String
     public var timestamp: Double
     public var limit: Int?
-    
+
     public var date: Date {
         Date(timeIntervalSince1970: timestamp)
     }

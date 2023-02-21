@@ -6,20 +6,20 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 @_spi(matrix) import Barcelona
+import Foundation
 import IMCore
 import Logging
 
-fileprivate let log = Logger(label: "BLMessage")
+private let log = Logger(label: "BLMessage")
 
-internal extension Chat {
+extension Chat {
     var blChatGUID: String? {
         imChat?.blChatGUID
     }
 }
 
-internal extension IMChat {
+extension IMChat {
     var blFacingService: String {
         if MXFeatureFlags.shared.mergedChats {
             return "iMessage"
@@ -27,51 +27,53 @@ internal extension IMChat {
             return account.serviceName
         }
     }
-    
+
     var blChatGUID: String {
         "\(blFacingService);\(isGroup ? "+" : "-");\(id)"
     }
 }
 
-private extension Message {
-    var blSenderGUID: String? {
+extension Message {
+    fileprivate var blSenderGUID: String? {
         guard let sender = sender, !fromMe else {
             return nil
         }
-        
+
         return "\(service.rawValue);\(isGroup == true ? "+" : "-");\(sender)"
     }
-    
-    var blChatGUID: String? {
+
+    fileprivate var blChatGUID: String? {
         imChat?.blChatGUID
     }
-    
-    var isGroup: Bool? {
+
+    fileprivate var isGroup: Bool? {
         imChat?.isGroup
     }
-    
-    var textContent: String {
-        items.map(\.item).reduce(into: [String]()) { text, item in
-            switch item {
-            case let item as TextChatItem:
-                text.append(item.text)
-            case let item as PluginChatItem:
-                if let fallbackText = item.fallback?.text {
-                    text.append(fallbackText)
+
+    fileprivate var textContent: String {
+        items.map(\.item)
+            .reduce(into: [String]()) { text, item in
+                switch item {
+                case let item as TextChatItem:
+                    text.append(item.text)
+                case let item as PluginChatItem:
+                    if let fallbackText = item.fallback?.text {
+                        text.append(fallbackText)
+                    }
+                default:
+                    break
                 }
-            default:
-                break
             }
-        }.joined(separator: " ")
+            .joined(separator: " ")
     }
 }
 
-private extension ParticipantChangeItem {
-    func blTargetGUID(on service: String, isGroup: Bool) -> String? {
+extension ParticipantChangeItem {
+    fileprivate func blTargetGUID(on service: String, isGroup: Bool) -> String? {
         guard let targetID = targetID else {
             return nil
         }
-        
+
         return "\(service);\(isGroup ? "+" : "-");\(targetID)"
     }
 }
@@ -99,14 +101,14 @@ public struct BLMessage: Codable, ChatResolvable {
     public var metadata: Message.Metadata?
     public var sender_correlation_id: String?
     public var correlation_id: String?
-    
+
     public init(message: Message) {
         guid = message.id
-        timestamp = message.time / 1000 // mautrix-imessage expects this to be seconds
+        timestamp = message.time / 1000  // mautrix-imessage expects this to be seconds
         subject = message.subject
         text = message.textContent
 
-        if (message.imChat == nil) {
+        if message.imChat == nil {
             log.warning("Creating BLMessage from Message with a nil imChat \(message.debugDescription)")
         }
 
@@ -124,7 +126,7 @@ public struct BLMessage: Codable, ChatResolvable {
         metadata = message.metadata
         correlation_id = message.imChat?.correlationIdentifier
         sender_correlation_id = message.senderCorrelationID
-        
+
         for item in message.items {
             switch item.item {
             case let changeItem as GroupTitleChangeItem:
@@ -142,18 +144,29 @@ public struct BLMessage: Codable, ChatResolvable {
                     log.error("Failed to parse associatedID \(acknowledgment.associatedID)", source: "BLMessage")
                     continue
                 }
-                
-                self.associated_message = BLTapback(chat_guid: chat_guid, target_guid: acknowledgment.associatedID, target_part: parsedID.part ?? 0, type: Int(acknowledgment.acknowledgmentType))
+
+                self.associated_message = BLTapback(
+                    chat_guid: chat_guid,
+                    target_guid: acknowledgment.associatedID,
+                    target_part: parsedID.part ?? 0,
+                    type: Int(acknowledgment.acknowledgmentType)
+                )
             case let plugin as PluginChatItem:
-                attachments = message.fileTransferIDs.filter { id in
-                    !plugin.attachments.map(\.id).contains(id)
-                }.compactMap {
-                    BLAttachment(guid: $0)
-                }
+                attachments = message.fileTransferIDs
+                    .filter { id in
+                        !plugin.attachments.map(\.id).contains(id)
+                    }
+                    .compactMap {
+                        BLAttachment(guid: $0)
+                    }
                 if let richLink = plugin.richLink {
                     rich_link = richLink
                 } else if let extensionData = plugin.extension {
-                    rich_link = RichLinkMetadata(extensionData: extensionData, attachments: plugin.attachments, fallbackText: &text)
+                    rich_link = RichLinkMetadata(
+                        extensionData: extensionData,
+                        attachments: plugin.attachments,
+                        fallbackText: &text
+                    )
                 }
                 if rich_link?.usableForMatrix == false {
                     rich_link = nil
@@ -163,7 +176,7 @@ public struct BLMessage: Codable, ChatResolvable {
             }
         }
     }
-    
+
     public static func < (left: BLMessage, right: BLMessage) -> Bool {
         left.timestamp < right.timestamp
     }

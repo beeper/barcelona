@@ -9,8 +9,8 @@
 import Foundation
 import IMCore
 
-public extension String {
-    var service: IMService? {
+extension String {
+    public var service: IMService? {
         Registry.sharedInstance.resolve(service: self)
     }
 }

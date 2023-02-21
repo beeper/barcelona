@@ -21,23 +21,25 @@ public enum IMServiceStyle: String, CaseIterable, Codable, Hashable {
     case Phone
 
     public init?(service: IMService) {
-        guard let style = IMServiceStyle.allCases.first(where: {
-            $0.service == service
-        }) else {
+        guard
+            let style = IMServiceStyle.allCases.first(where: {
+                $0.service == service
+            })
+        else {
             return nil
         }
-        
+
         self = style
     }
-    
+
     public init?(account: IMAccount) {
         guard let service = account.service else {
             return nil
         }
-        
+
         self.init(service: service)
     }
-    
+
     public var service: IMServiceImpl {
         switch self {
         #if IDS_IMESSAGE_BIZ
@@ -54,15 +56,15 @@ public enum IMServiceStyle: String, CaseIterable, Codable, Hashable {
             return IMService.sms()
         }
     }
-    
+
     public var account: IMAccount? {
         IMAccountController.shared.bestAccount(forService: service)
     }
-    
+
     public var handle: IMHandle? {
         Registry.sharedInstance.suitableHandle(for: service)
     }
-    
+
     public static var services: [IMServiceImpl] {
         allCases.compactMap {
             $0.service

@@ -5,18 +5,18 @@
 //  Created by Eric Rabil on 11/2/21.
 //
 
+import BarcelonaDB
+import Combine
 import Foundation
 import IMCore
-import Logging
-import Combine
-import BarcelonaDB
 import IMDPersistence
+import Logging
 
 extension Date {
     static func now() -> Date { Date() }
 }
 
-internal extension IMChat {
+extension IMChat {
     static var regressionTesting_disableServiceRefresh = false
 }
 
@@ -24,7 +24,7 @@ extension Encodable {
     var prettyJSON: String {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
-        
+
         return try! String(decoding: encoder.encode(encode(to:)), as: UTF8.self)
     }
 }
@@ -38,7 +38,7 @@ extension IMChat {
         get { value(forKey: "_hasRefreshedServiceForSending") as! Bool }
         set { setValue(false, forKey: "_hasRefreshedServiceForSending") }
     }
-    
+
     /// Refreshes the chat service for sending, runs once per chat.
     /// This is a no-op unless `CBFeatureFlags.refreshChatServices` is enabled.
     func refreshServiceForSendingIfNeeded() {
@@ -46,14 +46,18 @@ extension IMChat {
             return
         }
         if let lastMessageItem = lastFinishedMessageItem,
-           lastMessageItem.isFinished, // message must be finished
-           lastMessageItem.errorCode == .noError, // message must have no error
-           let serviceStyle = lastMessageItem.serviceStyle,
-           serviceStyle == .iMessage, // last item must have been sent on iMessage
-           let messageAccount = serviceStyle.account,
-           self.account != messageAccount { // The self.account must not be equal to the iMessage account
+            lastMessageItem.isFinished,  // message must be finished
+            lastMessageItem.errorCode == .noError,  // message must have no error
+            let serviceStyle = lastMessageItem.serviceStyle,
+            serviceStyle == .iMessage,  // last item must have been sent on iMessage
+            let messageAccount = serviceStyle.account,
+            self.account != messageAccount
+        {  // The self.account must not be equal to the iMessage account
             // We are targeted to iMessage, but we don't really know why. Let's retarget to iMessage and see what IDS thinks.
-            log.info("Previous message on service \(serviceStyle.rawValue) appears to have been successful, but my service is \(String(describing: self.account.serviceName)). I'm going to try my best to refresh the ID query.", source: "ERChat")
+            log.info(
+                "Previous message on service \(serviceStyle.rawValue) appears to have been successful, but my service is \(String(describing: self.account.serviceName)). I'm going to try my best to refresh the ID query.",
+                source: "ERChat"
+            )
             _setAccount(messageAccount, locally: true)
         } else if !forceRefresh && hasRefreshedServiceForSending {
             if let lastMessageItem = lastMessage?._imMessageItem, lastMessageItem.serviceStyle == account.service?.id {
@@ -64,30 +68,31 @@ extension IMChat {
                 case .remoteUserDoesNotExist, .remoteUserInvalid, .remoteUserRejected, .remoteUserIncompatible:
                     break
                 default:
-                     return
+                    return
                 }
             }
         }
         hasRefreshedServiceForSending = false
         refreshServiceForSending()
-        let id = self.id, serviceName = account.serviceName ?? "nil"
+        let id = self.id
+        let serviceName = account.serviceName ?? "nil"
         log.info("The resolved service for \(id) is currently \(serviceName)", source: "ERChat")
     }
 }
 
-public extension Chat {
+extension Chat {
     private func markAsRead() {
         if ProcessInfo.processInfo.environment.keys.contains("BARCELONA_GHOST_REPLIES") {
             return
         }
         imChat?.markAllMessagesAsRead()
     }
-    
+
     private var cbChat: CBChat? {
         imChat.flatMap { CBChatRegistry.shared.chats[.guid($0.guid)] }
     }
 
-    func sendReturningRaw(message createMessage: CreateMessage, from: String? = nil) throws -> IMMessage {
+    public func sendReturningRaw(message createMessage: CreateMessage, from: String? = nil) throws -> IMMessage {
         guard let imChat, let service else {
             throw BarcelonaError(code: 500, message: "No imChat or service to send with for \(self.id)")
         }
@@ -103,13 +108,20 @@ public extension Chat {
 
                 let newService = imChat.account.service?.id
                 if newService != service {
-                    log.warning("Refreshing IMChat \(String(describing: imChat.guid)) caused service to change from \(service) to \(String(describing: newService)); forcibly retargeting to iMessage")
-                    
+                    log.warning(
+                        "Refreshing IMChat \(String(describing: imChat.guid)) caused service to change from \(service) to \(String(describing: newService)); forcibly retargeting to iMessage"
+                    )
+
                     guard let account = IMAccountController.shared.__activeIMessageAccount else {
-                        log.warning("Couldn't get IMAccount for iMessage and thus couldn't retarget IMChat \(String(describing: imChat.guid)) to iMessage instead of SMS. Bailing.")
-                        throw BarcelonaError(code: 500, message: "Your iMessage account claims to not exist; please contact support.")
+                        log.warning(
+                            "Couldn't get IMAccount for iMessage and thus couldn't retarget IMChat \(String(describing: imChat.guid)) to iMessage instead of SMS. Bailing."
+                        )
+                        throw BarcelonaError(
+                            code: 500,
+                            message: "Your iMessage account claims to not exist; please contact support."
+                        )
                     }
-                    
+
                     imChat._setAccount(account, locally: true)
                 }
             }
@@ -121,9 +133,9 @@ public extension Chat {
         imChat.refreshServiceForSendingIfNeeded()
 
         let message = try createMessage.imMessage(inChat: self.id, service: service)
-        
+
         Chat.delegate?.chat(self, willSendMessages: [message], fromCreateMessage: createMessage)
-        
+
         Thread.main.sync {
             markAsRead()
             let imChat = imChat
@@ -132,26 +144,36 @@ public extension Chat {
             }
             imChat.send(message)
         }
-        
+
         return message
     }
-    
-    func send(message createMessage: CreateMessage, from: String? = nil) throws -> Message {
+
+    public func send(message createMessage: CreateMessage, from: String? = nil) throws -> Message {
         guard let imChat, let service else {
             throw BarcelonaError(code: 500, message: "No IMChat or service for \(id)")
         }
 
-        return Message(messageItem: try sendReturningRaw(message: createMessage, from: from)._imMessageItem, chatID: imChat.id, service: service)
+        return Message(
+            messageItem: try sendReturningRaw(message: createMessage, from: from)._imMessageItem,
+            chatID: imChat.id,
+            service: service
+        )
     }
-    
-    func tapback(_ creation: TapbackCreation, metadata: Message.Metadata? = nil) throws -> Message {
+
+    public func tapback(_ creation: TapbackCreation, metadata: Message.Metadata? = nil) throws -> Message {
         markAsRead()
         guard let imChat, let service else {
             throw BarcelonaError(code: 500, message: "No IMChat or service for \(id)")
         }
 
-        let message = try imChat.tapback(guid: creation.message, itemGUID: creation.item, type: creation.type, overridingItemType: nil, metadata: metadata)
-        
+        let message = try imChat.tapback(
+            guid: creation.message,
+            itemGUID: creation.item,
+            type: creation.type,
+            overridingItemType: nil,
+            metadata: metadata
+        )
+
         return Message(messageItem: message._imMessageItem, chatID: imChat.id, service: service)
     }
 }

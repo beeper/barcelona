@@ -18,7 +18,7 @@ extension IMTranscriptPluginChatItem: IMFileTransferContainer {
                 return components[components.count - 2]
             }
         }
-        
+
         return []
     }
 }

@@ -9,7 +9,7 @@
 import Foundation
 import GRDB
 
-internal extension QueryInterfaceRequest where T == RawMessage {
+extension QueryInterfaceRequest where T == RawMessage {
     func joiningOnHandlesWhenNotEmpty(handles: [String]) -> Self {
         /// the handle_id is the recipient when from_me is 0, other_handle is the recipient when from_me is 1
         if handles.count > 0 {
@@ -18,7 +18,7 @@ internal extension QueryInterfaceRequest where T == RawMessage {
             return self
         }
     }
-    
+
     func filterTextWhenNotEmpty(text: String?) -> Self {
         if let text = text, text.count > 0 {
             return filter(RawMessage.Columns.text.uppercased.like("%\(text)%"))
@@ -26,7 +26,7 @@ internal extension QueryInterfaceRequest where T == RawMessage {
             return self
         }
     }
-    
+
     func filterBundleIDWhenNotEmpty(bundleID: String?) -> Self {
         if let bundleID = bundleID, bundleID.count > 0 {
             return filter(RawMessage.Columns.balloon_bundle_id == bundleID)

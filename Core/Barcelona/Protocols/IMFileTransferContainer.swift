@@ -23,7 +23,7 @@ extension IMFileTransferContainer {
             Attachment(guid: $0) == nil
         }
     }
-    
+
     @usableFromInline
     var attachments: [Attachment] {
         fileTransferGUIDs.compactMap {

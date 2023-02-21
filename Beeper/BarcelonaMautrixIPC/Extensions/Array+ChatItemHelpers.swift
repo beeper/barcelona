@@ -6,21 +6,21 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import Barcelona
+import Foundation
 
-internal extension Collection where Element == ChatItem {
+extension Collection where Element == ChatItem {
     var messages: [Message] {
         compactMap {
             $0 as? Message
         }
     }
-    
+
     var blMessages: [BLMessage] {
         var messages = messages.map(BLMessage.init(message:))
-        
+
         messages.sort(by: <)
-        
+
         return messages
     }
 }

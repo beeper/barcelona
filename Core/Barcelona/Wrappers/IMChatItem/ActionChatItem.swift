@@ -20,7 +20,7 @@ extension IMMessageActionItem: IMMessageActionItemParseable {
     var resolvedSenderID: String? {
         resolveSenderID()
     }
-    
+
     var otherHandleID: String? {
         otherHandle
     }
@@ -30,7 +30,7 @@ extension IMMessageActionChatItem: IMMessageActionItemParseable {
     var senderID: String? {
         sender?.id
     }
-    
+
     var otherHandleID: String? {
         otherHandle?.id
     }
@@ -38,7 +38,7 @@ extension IMMessageActionChatItem: IMMessageActionItemParseable {
 
 public struct ActionChatItem: ChatItemOwned, Hashable {
     public static let ingestionClasses: [NSObject.Type] = [IMMessageActionItem.self, IMMessageActionChatItem.self]
-    
+
     public init?(ingesting item: NSObject, context: IngestionContext) {
         switch item {
         case let item as IMMessageActionItem:
@@ -49,7 +49,7 @@ public struct ActionChatItem: ChatItemOwned, Hashable {
             return nil
         }
     }
-    
+
     init(_ item: IMMessageActionItemParseable, chat: String) {
         id = item.id
         chatID = chat
@@ -61,7 +61,7 @@ public struct ActionChatItem: ChatItemOwned, Hashable {
         sender = item.resolvedSenderID
         otherHandle = item.otherHandleID
     }
-    
+
     public var id: String
     public var chatID: String
     public var fromMe: Bool
@@ -71,7 +71,7 @@ public struct ActionChatItem: ChatItemOwned, Hashable {
     public var sender: String?
     public var otherHandle: String?
     public var actionType: Int64
-    
+
     public var type: ChatItemType {
         .action
     }

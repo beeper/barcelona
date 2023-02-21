@@ -5,16 +5,18 @@
 //  Created by Eric Rabil on 6/8/22.
 //
 
-import Foundation
 import CoreImage
+import Foundation
 
 public struct CBTranscoding {
 }
 
-public extension CBTranscoding {
-    static func toJPEG(contentsOf url: URL) -> Data? {
+extension CBTranscoding {
+    public static func toJPEG(contentsOf url: URL) -> Data? {
         let context = CIContext(options: nil)
-        let options = [CIImageRepresentationOption.init(rawValue: kCGImageDestinationLossyCompressionQuality as String):1.0]
+        let options = [
+            CIImageRepresentationOption.init(rawValue: kCGImageDestinationLossyCompressionQuality as String): 1.0
+        ]
         guard let image = CIImage(contentsOf: url) else {
             return nil
         }

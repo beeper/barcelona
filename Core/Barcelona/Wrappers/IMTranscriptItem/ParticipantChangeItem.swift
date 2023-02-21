@@ -19,7 +19,7 @@ extension IMParticipantChangeChatItem: IMParticipantChangeParseable {
     var initiatorID: String? {
         sender?.id
     }
-    
+
     var targetID: String? {
         otherHandle?.id
     }
@@ -29,15 +29,17 @@ extension IMParticipantChangeItem: IMParticipantChangeParseable {
     var initiatorID: String? {
         sender
     }
-    
+
     var targetID: String? {
         otherHandle
     }
 }
 
 public struct ParticipantChangeItem: ChatItem, Hashable {
-    public static let ingestionClasses: [NSObject.Type] = [IMParticipantChangeChatItem.self, IMParticipantChangeItem.self]
-    
+    public static let ingestionClasses: [NSObject.Type] = [
+        IMParticipantChangeChatItem.self, IMParticipantChangeItem.self,
+    ]
+
     public init?(ingesting item: NSObject, context: IngestionContext) {
         switch item {
         case let item as IMParticipantChangeChatItem:
@@ -48,7 +50,7 @@ public struct ParticipantChangeItem: ChatItem, Hashable {
             return nil
         }
     }
-    
+
     init(_ item: IMParticipantChangeParseable, chatID: String) {
         id = item.id
         self.chatID = chatID
@@ -60,7 +62,7 @@ public struct ParticipantChangeItem: ChatItem, Hashable {
         targetID = item.targetID
         changeType = item.changeType
     }
-    
+
     public var id: String
     public var chatID: String
     public var fromMe: Bool
@@ -70,7 +72,7 @@ public struct ParticipantChangeItem: ChatItem, Hashable {
     public var initiatorID: String?
     public var targetID: String?
     public var changeType: Int64
-    
+
     public var type: ChatItemType {
         .participantChange
     }

@@ -6,12 +6,12 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
-import SwiftCLI
 import Barcelona
-import IMCore
 import BarcelonaMautrixIPC
+import Foundation
+import IMCore
 import IMSharedUtilities
+import SwiftCLI
 
 extension IMAssociatedMessageType: ConvertibleFromString {
     public init?(input: String) {
@@ -42,20 +42,21 @@ extension ChatCommandLike {
         }
         return false
     }
-    
+
     var chat: Chat {
         if isID {
             if _sms {
-                guard let chat = IMChat.chat(withIdentifier: destination, onService: .SMS, style: nil).map(Chat.init) else {
+                guard let chat = IMChat.chat(withIdentifier: destination, onService: .SMS, style: nil).map(Chat.init)
+                else {
                     fatalError("Unknown chat with identifier \(destination)")
                 }
 
                 return chat
             }
-            
+
             return Chat.firstChatRegardlessOfService(withId: destination)!
         }
-        
+
         if let self = self as? ChatCommandGUIDSupporting, self.isGUID {
             guard let chat = IMChatRegistry.shared.existingChat(withGUID: destination) else {
                 let components = destination.split(separator: ";")
@@ -64,28 +65,33 @@ extension ChatCommandLike {
                     let group = components[1]
                     let identifier = components[2]
                     if group == "-" {
-                        if let service = IMServiceStyle(rawValue: String(service))?.service, let account = IMAccountController.shared.bestAccount(forService: service) {
+                        if let service = IMServiceStyle(rawValue: String(service))?.service,
+                            let account = IMAccountController.shared.bestAccount(forService: service)
+                        {
                             return Chat(IMChatRegistry.shared.chat(for: account.imHandle(withID: String(identifier))))
                         }
                     }
                 }
                 fatalError("unknown chat with GUID \(destination)")
             }
-            
+
             return Chat(chat)
         }
-        
-        return Chat.chat(withHandleIDs: destination.split(separator: ",").map(String.init), service: _sms ? .SMS : .iMessage)
+
+        return Chat.chat(
+            withHandleIDs: destination.split(separator: ",").map(String.init),
+            service: _sms ? .SMS : .iMessage
+        )
     }
 }
 
 private let encoder = JSONEncoder()
-private extension Encodable {
-    var json: Data {
+extension Encodable {
+    fileprivate var json: Data {
         try! encoder.encode(self)
     }
-    
-    var jsonString: String {
+
+    fileprivate var jsonString: String {
         String(decoding: json, as: UTF8.self)
     }
 }
@@ -93,88 +99,104 @@ private extension Encodable {
 class MessageCommand: CommandGroup {
     let name = "message"
     let shortDescription = "do message things"
-    
+
     class Get: CommandGroup {
         let name = "get"
         let shortDescription = "get messages"
-        
+
         class RecentMessages: BarcelonaCommand {
             let name = "recents"
-            
+
             @Param var chat: String
             @Key("-l", "--limit", description: "Max number of results to return, default 100") var limit: Int?
             @Flag("-i", "--id", description: "Only return the message and chat IDs") var onlyIDs: Bool
-            
+
             private struct MessageIdentifier: Codable {
                 var messageID: String
                 var chatID: String
             }
-            
+
             func execute() throws {
-                BLLoadChatItems(withChats: [(chat, .iMessage), (chat, .SMS)], afterDate: nil, beforeDate: nil, afterGUID: nil, beforeGUID: nil, limit: limit ?? 100).then(
-                    onlyIDs ? { chatItems in
-                        print(chatItems.map { MessageIdentifier(messageID: $0.id, chatID: $0.chatID) }.jsonString)
-                    } : { chatItems in
-                        print(chatItems.map { $0.eraseToAnyChatItem() }.jsonString)
-                    }
-                ).observeAlways { _ in
+                BLLoadChatItems(
+                    withChats: [(chat, .iMessage), (chat, .SMS)],
+                    afterDate: nil,
+                    beforeDate: nil,
+                    afterGUID: nil,
+                    beforeGUID: nil,
+                    limit: limit ?? 100
+                )
+                .then(
+                    onlyIDs
+                        ? { chatItems in
+                            print(chatItems.map { MessageIdentifier(messageID: $0.id, chatID: $0.chatID) }.jsonString)
+                        }
+                        : { chatItems in
+                            print(chatItems.map { $0.eraseToAnyChatItem() }.jsonString)
+                        }
+                )
+                .observeAlways { _ in
                     exit(0)
                 }
             }
         }
-        
+
         class Exact: BarcelonaCommand {
             let name = "exact"
-            
+
             @CollectedParam var ids: [String]
-            
+
             var mautrix: Bool {
                 ids.contains(where: { $0 == "-m" || $0 == "--mautrix" })
             }
-            
+
             func execute() throws {
-                BLLoadChatItems(withGUIDs: ids, service: .iMessage).then { items in
-                    if self.mautrix {
-                        print(items.compactMap { $0 as? Message }.map { BLMessage(message: $0) }.prettyJSON)
-                    } else {
-                        print(items.map { $0.eraseToAnyChatItem() }.prettyJSON)
+                BLLoadChatItems(withGUIDs: ids, service: .iMessage)
+                    .then { items in
+                        if self.mautrix {
+                            print(items.compactMap { $0 as? Message }.map { BLMessage(message: $0) }.prettyJSON)
+                        } else {
+                            print(items.map { $0.eraseToAnyChatItem() }.prettyJSON)
+                        }
                     }
-                }
             }
         }
-        
+
         var children: [Routable] = [RecentMessages(), Exact()]
     }
-    
+
     class Send: CommandGroup {
         let name = "send"
         let shortDescription = "send messages"
-        
+
         /// send ad-hoc link metadata
         class Link: BarcelonaCommand, ChatCommandLike, ChatSMSForcingCapable, ChatCommandGUIDSupporting {
             let name = "link"
-            
+
             @Param var destination: String
-            
+
             @Param var text: String
             @Param var jsonPath: String
-            
+
             @Flag("-i", "--id", description: "treat the destination as a chat ID")
             var isID: Bool
-            
+
             @Flag("-g", "--guid", description: "treat the destination as a chat GUID")
             var isGUID: Bool
-            
+
             @Flag("-s") var sms: Bool
             @Flag("-f") var force: Bool
-            
+
             var monitor: BLMediaMessageMonitor?
-            
+
             func execute() throws {
-                let metadata = try! JSONDecoder().decode(RichLinkMetadata.self, from: Data(contentsOf: URL(fileURLWithPath: jsonPath)))
+                let metadata = try! JSONDecoder()
+                    .decode(RichLinkMetadata.self, from: Data(contentsOf: URL(fileURLWithPath: jsonPath)))
                 let message = ERCreateBlankRichLinkMessage(text, URL(string: "https://google.com")!)
                 let afterSend = try message.provideLinkMetadata(metadata)
-                monitor = BLMediaMessageMonitor(messageID: message.id, transferGUIDs: message._imMessageItem?.fileTransferGUIDs ?? []) { success, error, cancel in
+                monitor = BLMediaMessageMonitor(
+                    messageID: message.id,
+                    transferGUIDs: message._imMessageItem?.fileTransferGUIDs ?? []
+                ) { success, error, cancel in
                     print(success, error?.description, cancel)
                     self.monitor = nil
                 }
@@ -182,62 +204,77 @@ class MessageCommand: CommandGroup {
                 afterSend()
             }
         }
-        
+
         class Text: BarcelonaCommand, ChatCommandLike, ChatSMSForcingCapable, ChatCommandGUIDSupporting {
             let name = "text"
-            
+
             @Param var destination: String
             @CollectedParam var message: [String]
-            
-            
-            
+
             @Flag("-e", "--everyone", description: "ping everyone because you crave attention")
             var pingEveryone: Bool
-            
+
             @Flag("-i", "--id", description: "treat the destination as a chat ID")
             var isID: Bool
-            
+
             @Flag("-g", "--guid", description: "treat the destination as a chat GUID")
             var isGUID: Bool
-            
+
             @Flag("-s") var sms: Bool
-            
+
             @Flag("-r") var autoReply: Bool
-            
+
             @Flag("-f") var force: Bool
-            
+
             @Key("--from") var from: String?
-            
+
             static func ERSendIMessage(to: String, text: String, _ sms: Bool) throws -> Message {
                 let chat = Chat.directMessage(withHandleID: to, service: sms ? .SMS : .iMessage)
                 let message = try chat.send(message: CreateMessage(parts: [.init(type: .text, details: text)]))
                 return message
             }
-            
+
             var text: String {
                 message.joined(separator: " ")
             }
-            
+
             func execute() throws {
                 IMChatRegistry.shared._postMessageSentNotifications = true
-                
+
                 var message: Message! = nil
-                
-                NotificationCenter.default.addObserver(forName: .IMChatRegistryMessageSent, object: nil, queue: nil) { notification in
-                    guard let sentMessage = notification.userInfo?["__kIMChatRegistryMessageSentMessageKey"] as? IMMessage else {
+
+                NotificationCenter.default.addObserver(forName: .IMChatRegistryMessageSent, object: nil, queue: nil) {
+                    notification in
+                    guard
+                        let sentMessage = notification.userInfo?["__kIMChatRegistryMessageSentMessageKey"] as? IMMessage
+                    else {
                         return
                     }
-                    
+
                     guard message?.id == sentMessage.id else {
                         return
                     }
-                    
+
                     print(sentMessage.debugDescription)
-                    
+
                     if self.autoReply {
                         if #available(macOS 11.0, *) {
-                            let create = CreateMessage(subject: nil, parts: [.init(type: .text, details: "asdf")], isAudioMessage: nil, flags: nil, ballonBundleID: nil, payloadData: nil, expressiveSendStyleID: nil, threadIdentifier: sentMessage.threadIdentifier(), replyToPart: 0, replyToGUID: sentMessage.guid)
-                            let chat = Chat.directMessage(withHandleID: self.destination, service: self.sms ? .SMS : .iMessage)
+                            let create = CreateMessage(
+                                subject: nil,
+                                parts: [.init(type: .text, details: "asdf")],
+                                isAudioMessage: nil,
+                                flags: nil,
+                                ballonBundleID: nil,
+                                payloadData: nil,
+                                expressiveSendStyleID: nil,
+                                threadIdentifier: sentMessage.threadIdentifier(),
+                                replyToPart: 0,
+                                replyToGUID: sentMessage.guid
+                            )
+                            let chat = Chat.directMessage(
+                                withHandleID: self.destination,
+                                service: self.sms ? .SMS : .iMessage
+                            )
                             try! chat.send(message: create)
                         } else {
                             // Fallback on earlier versions
@@ -245,52 +282,58 @@ class MessageCommand: CommandGroup {
                     } else {
                         exit(0)
                     }
-                    
+
                     exit(0)
                 }
-                
+
                 if force {
                     message = try Self.ERSendIMessage(to: destination, text: text, sms)
                 } else {
                     if pingEveryone {
                         message = try chat.pingEveryone(text: text)
                     } else {
-                        message = try chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: text)]), from: from)
+                        message = try chat.send(
+                            message: CreateMessage(parts: [MessagePart(type: .text, details: text)]),
+                            from: from
+                        )
                     }
                 }
             }
         }
-        
+
         class Tapback: BarcelonaCommand, ChatCommandLike {
             let name = "tapback"
-            
+
             @Param var destination: String
             @Param var id: String
             @Param var part: Int
             @Param var type: IMAssociatedMessageType
-            
+
             @Flag("-i", "--id", description: "treat the destination as a chat ID")
             var isID: Bool
-            
+
             func execute() throws {
                 IMChatRegistry.shared._postMessageSentNotifications = true
-                
+
                 var message: Message! = nil
-                
-                NotificationCenter.default.addObserver(forName: .IMChatRegistryMessageSent, object: nil, queue: nil) { notification in
-                    guard let sentMessage = notification.userInfo?["__kIMChatRegistryMessageSentMessageKey"] as? IMMessage else {
+
+                NotificationCenter.default.addObserver(forName: .IMChatRegistryMessageSent, object: nil, queue: nil) {
+                    notification in
+                    guard
+                        let sentMessage = notification.userInfo?["__kIMChatRegistryMessageSentMessageKey"] as? IMMessage
+                    else {
                         return
                     }
-                    
+
                     guard message?.id == sentMessage.id else {
                         return
                     }
-                    
+
                     print(sentMessage.debugDescription)
-                    
+
                     exit(0)
                 }
-                
+
                 guard let targetMessage = BLLoadIMMessage(withGUID: id) else {
                     fatalError("Unknown message")
                 }
@@ -298,57 +341,68 @@ class MessageCommand: CommandGroup {
                 guard parts.indices.contains(part) else {
                     fatalError("Out of bounds. Message has these parts: \(parts.indices)")
                 }
-                message = try chat.tapback(.init(item: parts[part].id, message: targetMessage.id, type: Int(type.rawValue)))
+                message = try chat.tapback(
+                    .init(item: parts[part].id, message: targetMessage.id, type: Int(type.rawValue))
+                )
             }
         }
-        
+
         var children: [Routable] = [Text(), Tapback(), Transfer(), Link()]
     }
-    
+
     var children: [Routable] = [Send(), Get()]
 }
 
 class SendMessageCommand: BarcelonaCommand {
     let name = "send-message"
-    let shortDescription = "send a textual message to a chat with either a comma-delimited set of recipients or a chat identifier"
-    
+    let shortDescription =
+        "send a textual message to a chat with either a comma-delimited set of recipients or a chat identifier"
+
     @Param var destination: String
     @Param var message: String
-    
+
     @Flag("-i", "--id", description: "treat the destination as a chat ID") var isID: Bool
     @Flag("-s", "--sms", description: "Send over SMS (will send on iMessage instead") var sms: Bool
 
     var chat: Chat {
         if isID {
-            guard let chat = IMChat.chat(withIdentifier: destination, onService: sms ? .SMS : .iMessage, style: nil).map(Chat.init) else {
+            guard
+                let chat = IMChat.chat(withIdentifier: destination, onService: sms ? .SMS : .iMessage, style: nil)
+                    .map(Chat.init)
+            else {
                 fatalError("Unknown chat with identifier \(destination)")
             }
-            
+
             return chat
         }
-        
-        return Chat.chat(withHandleIDs: destination.split(separator: ",").map(String.init), service: sms ? .SMS : .iMessage)
+
+        return Chat.chat(
+            withHandleIDs: destination.split(separator: ",").map(String.init),
+            service: sms ? .SMS : .iMessage
+        )
     }
-    
+
     func execute() throws {
         IMChatRegistry.shared._postMessageSentNotifications = true
-        
+
         var message: Message! = nil
-        
-        NotificationCenter.default.addObserver(forName: .IMChatRegistryMessageSent, object: nil, queue: nil) { notification in
-            guard let sentMessage = notification.userInfo?["__kIMChatRegistryMessageSentMessageKey"] as? IMMessage else {
+
+        NotificationCenter.default.addObserver(forName: .IMChatRegistryMessageSent, object: nil, queue: nil) {
+            notification in
+            guard let sentMessage = notification.userInfo?["__kIMChatRegistryMessageSentMessageKey"] as? IMMessage
+            else {
                 return
             }
-            
+
             guard message?.id == sentMessage.id else {
                 return
             }
-            
+
             print(sentMessage.debugDescription)
-            
+
             exit(0)
         }
-        
+
         message = try chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: self.message)]))
     }
 }

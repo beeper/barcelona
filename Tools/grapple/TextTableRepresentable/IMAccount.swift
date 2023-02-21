@@ -7,14 +7,17 @@
 //
 
 import Foundation
-import SwiftyTextTable
 import IMCore
+import SwiftyTextTable
 
 extension IMAccount: TextTableRepresentable {
     public static var columnHeaders: [String] {
-        ["service", "uniqueID", "loginID", "loginHandleID", "connected", "active", "registered", "operational", "asleep", "allowsSMSRelay", "isSMSRelayCapable"]
+        [
+            "service", "uniqueID", "loginID", "loginHandleID", "connected", "active", "registered", "operational",
+            "asleep", "allowsSMSRelay", "isSMSRelayCapable",
+        ]
     }
-    
+
     public var tableValues: [CustomStringConvertible] {
         [
             service?.id.rawValue ?? "nil",
@@ -27,7 +30,7 @@ extension IMAccount: TextTableRepresentable {
             isOperational,
             isAsleep,
             allowsSMSRelay,
-            isSMSRelayCapable
+            isSMSRelayCapable,
         ]
     }
 }

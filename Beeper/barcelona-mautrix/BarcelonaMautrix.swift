@@ -6,13 +6,13 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import Barcelona
 import BarcelonaMautrixIPC
+import Foundation
 import IMCore
-import SwiftCLI
-import Sentry
 import Logging
+import Sentry
+import SwiftCLI
 
 private let log = Logger(label: "BarcelonaMautrix")
 
@@ -21,13 +21,13 @@ class BarcelonaMautrix {
     private let mautrixIPCChannel: MautrixIPCChannel
     private let reader: BLPayloadReader
     private let eventHandler: BLEventHandler
-    
+
     init(_ mautrixIPCChannel: MautrixIPCChannel) {
         self.mautrixIPCChannel = mautrixIPCChannel
         reader = BLPayloadReader(ipcChannel: mautrixIPCChannel)
         eventHandler = BLEventHandler(ipcChannel: mautrixIPCChannel)
     }
-    
+
     static private func configureSentry(dsn: String) {
         SentrySDK.start { options in
             options.dsn = dsn
@@ -41,7 +41,7 @@ class BarcelonaMautrix {
             options.tracesSampleRate = 0.1
         }
     }
-    
+
     static func getUnixSocketPath() -> String? {
         guard let index = ProcessInfo.processInfo.arguments.firstIndex(of: "--unix-socket"),
             ProcessInfo.processInfo.arguments.count > index + 1
@@ -50,7 +50,7 @@ class BarcelonaMautrix {
         }
         return ProcessInfo.processInfo.arguments[index + 1]
     }
-    
+
     static func main() {
         LoggingSystem.bootstrap { label in
             var handler = StreamLogHandler.standardOutput(label: label)
@@ -70,58 +70,67 @@ class BarcelonaMautrix {
         var mautrixIPCChannel: MautrixIPCChannel
         if let unixSocketPath = getUnixSocketPath() {
             let unixMautrixIPCChannel = UnixSocketMautrixIPCChannel(unixSocketPath)
-            mautrixIPCChannel = MautrixIPCChannel(inputHandle: unixMautrixIPCChannel, outputHandle: unixMautrixIPCChannel)
+            mautrixIPCChannel = MautrixIPCChannel(
+                inputHandle: unixMautrixIPCChannel,
+                outputHandle: unixMautrixIPCChannel
+            )
         } else {
-            mautrixIPCChannel = MautrixIPCChannel(inputHandle: FileHandle.standardInput, outputHandle: FileHandle.standardOutput)
+            mautrixIPCChannel = MautrixIPCChannel(
+                inputHandle: FileHandle.standardInput,
+                outputHandle: FileHandle.standardOutput
+            )
         }
-        
+
         let barcelonaMautrix = BarcelonaMautrix(mautrixIPCChannel)
-        
+
         CFPreferencesSetAppValue("Log" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
         CFPreferencesSetAppValue("Log.All" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
-        
+
         barcelonaMautrix.run()
     }
-    
+
     func run() {
         checkArguments()
         bootstrap()
-        
+
         RunLoop.main.run()
     }
-    
+
     func bootstrap() {
         log.info("Bootstrapping")
-        
-        BarcelonaManager.shared.bootstrap().catch { error in
-            log.error("fatal error while setting up barcelona: \(String(describing: error))")
-            exit(197)
-        }.then { success in
-            guard success else {
-                log.error("Failed to bootstrap")
-                exit(-1)
+
+        BarcelonaManager.shared.bootstrap()
+            .catch { error in
+                log.error("fatal error while setting up barcelona: \(String(describing: error))")
+                exit(197)
             }
-            
-            // allow payloads to start flowing
-            self.reader.ready = true
-            BLHealthTicker.shared.pinnedBridgeState = nil
-            
-            CBPurgedAttachmentController.shared.enabled = true
-            CBPurgedAttachmentController.shared.delegate = self.eventHandler
-            
-            // starts the imessage notification processor
-            self.eventHandler.run()
-            
-            log.info("BLMautrix is ready")
-            
-            self.startHealthTicker()
-        }
+            .then { success in
+                guard success else {
+                    log.error("Failed to bootstrap")
+                    exit(-1)
+                }
+
+                // allow payloads to start flowing
+                self.reader.ready = true
+                BLHealthTicker.shared.pinnedBridgeState = nil
+
+                CBPurgedAttachmentController.shared.enabled = true
+                CBPurgedAttachmentController.shared.delegate = self.eventHandler
+
+                // starts the imessage notification processor
+                self.eventHandler.run()
+
+                log.info("BLMautrix is ready")
+
+                self.startHealthTicker()
+            }
     }
-    
+
     func checkArguments() {
         // apply debug overlays for easier log reading
         if ProcessInfo.processInfo.arguments.contains("-d") {
-            LoggingDrivers = CBFeatureFlags.runningFromXcode ? [OSLogDriver.shared] : [OSLogDriver.shared, ConsoleDriver.shared]
+            LoggingDrivers =
+                CBFeatureFlags.runningFromXcode ? [OSLogDriver.shared] : [OSLogDriver.shared, ConsoleDriver.shared]
             BLMetricStore.shared.set(true, forKey: .shouldDebugPayloads)
         }
 
@@ -129,13 +138,13 @@ class BarcelonaMautrix {
         CBFeatureFlags.correlateChats = MXFeatureFlags.shared.mergedChats
         log.info("mergedChats flag: \(MXFeatureFlags.shared.mergedChats)")
     }
-    
+
     // starts the bridge state interval
     func startHealthTicker() {
         BLHealthTicker.shared.subscribeForever { command in
             self.mautrixIPCChannel.writePayload(IPCPayload(command: .bridge_status(command)))
         }
-        
+
         BLHealthTicker.shared.run(schedulingNext: true)
     }
 }

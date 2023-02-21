@@ -7,14 +7,14 @@
 
 import Foundation
 import IMCore
-import IMSharedUtilities
 import IMFoundation
+import IMSharedUtilities
 
-public extension IMFileTransfer {
+extension IMFileTransfer {
     /// Whether the transfer will automatically be downloaded by imagent
-    var canAutoDownload: Bool {
-        var x = ObjCBool(false) // we dont care about the inout value it provides
-        
+    public var canAutoDownload: Bool {
+        var x = ObjCBool(false)  // we dont care about the inout value it provides
+
         return IMiMessageMaxFileSizeForUTI(type, &x) > totalBytes
     }
 }

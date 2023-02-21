@@ -11,7 +11,7 @@ import Foundation
 public protocol LazilyResolvable: Identifiable {
     associatedtype instancetype
     typealias BulkResult = Promise<[instancetype]>
-    
+
     static func lazyResolve(withIdentifier identifier: ID) -> Promise<instancetype?>
     static func lazyResolve(withIdentifiers identifiers: [ID]) -> BulkResult
 }

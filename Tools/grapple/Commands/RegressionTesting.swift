@@ -5,28 +5,31 @@
 //  Created by Eric Rabil on 8/3/22.
 //
 
-import Foundation
-import SwiftCLI
 import Barcelona
 import BarcelonaMautrixIPC
+import Foundation
+import SwiftCLI
 
 class RegressionTestingCommand: CommandGroup {
     let name = "rgt"
     let shortDescription = "reproducible tests for specific tickets"
-    
+
     class BarcelonaRG: EphemeralBarcelonaCommand {
         let name = "bl"
         let shortDescription = "regression tests for barcelona"
-        
+
         @CollectedParam var ids: [String]
-        
+
         func execute() throws {
             if ids.isEmpty {
                 print(Barcelona.BLRegressionTesting.tests.keys.map { "- \($0)" }.joined(separator: "\n"))
                 exit(0)
             }
             for id in ids {
-                guard let test = Barcelona.BLRegressionTesting.tests[id] ?? Barcelona.BLRegressionTesting.tests[id.uppercased()] else {
+                guard
+                    let test = Barcelona.BLRegressionTesting.tests[id]
+                        ?? Barcelona.BLRegressionTesting.tests[id.uppercased()]
+                else {
                     print("skipping \(id): unknown test")
                     continue
                 }
@@ -34,13 +37,13 @@ class RegressionTestingCommand: CommandGroup {
             }
         }
     }
-    
+
     class MautrixRG: EphemeralBarcelonaCommand {
         let name = "mx"
         let shortDescription: String = "regression tests for the mautrix layer"
-        
+
         @CollectedParam var ids: [String]
-        
+
         func execute() throws {
             if ids.isEmpty {
                 print(BarcelonaMautrixIPC.RegressionTesting.tests.keys.map { "- \($0)" }.joined(separator: "\n"))
@@ -55,6 +58,6 @@ class RegressionTestingCommand: CommandGroup {
             }
         }
     }
-    
+
     let children: [Routable] = [BarcelonaRG(), MautrixRG()]
 }

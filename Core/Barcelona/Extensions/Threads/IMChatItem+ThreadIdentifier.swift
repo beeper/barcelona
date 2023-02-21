@@ -15,7 +15,7 @@ extension IMChatItem {
         guard let subpart = BLLoadIMMessage(withGUID: guid)?.subpart(at: part) as? IMMessagePartChatItem else {
             return nil
         }
-        
+
         return subpart.threadIdentifier() ?? IMCreateThreadIdentifierForMessagePartChatItem(subpart)
     }
 }

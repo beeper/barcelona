@@ -21,7 +21,7 @@ public struct BulkHandleRepresentation: Codable {
     public init(_ handles: [IMHandle]) {
         self.handles = handles.map(Handle.init)
     }
-    
+
     public var handles: [Handle]
 }
 
@@ -33,7 +33,7 @@ public struct BulkHandleIDRepresentation: Codable, Hashable, BulkHandleIDReprese
     public init(handles: [String]) {
         self.handles = handles
     }
-    
+
     public var handles: [String]
 }
 
@@ -41,21 +41,21 @@ public struct Handle: Codable, Hashable, Equatable {
     public static func == (lhs: Handle, rhs: Handle) -> Bool {
         return lhs.id == rhs.id
     }
-    
+
     public static func === (lhs: Handle, rhs: Handle) -> Bool {
         return lhs.id == rhs.id
     }
-    
+
     public init(_ handle: IMHandle) {
         id = handle.id
         format = id.style
     }
-    
+
     public init(id: String) {
         self.id = id
         self.format = id.style
     }
-    
+
     public var id: String
     public var format: HandleIDStyle
 }

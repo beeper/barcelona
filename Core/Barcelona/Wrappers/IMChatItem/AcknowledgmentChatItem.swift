@@ -24,7 +24,7 @@ public struct AcknowledgmentChatItem: ChatItemAssociable, ChatItemOwned, Hashabl
     public init(ingesting item: NSObject, context: IngestionContext) {
         self.init(item as! IMMessageAcknowledgmentChatItem, chatID: context.chatID)
     }
-    
+
     init(_ item: IMMessageAcknowledgmentChatItem, chatID: String) {
         id = item.id
         self.chatID = chatID
@@ -34,12 +34,15 @@ public struct AcknowledgmentChatItem: ChatItemAssociable, ChatItemOwned, Hashabl
         threadOriginator = item.threadOriginatorID
         acknowledgmentType = item.acknowledmentType
         if acknowledgmentType == 0 {
-            log.debug("tapback is nil for id \(id) on ventura; this is very unexpected", source: "AcknowledgmentChatItem")
+            log.debug(
+                "tapback is nil for id \(id) on ventura; this is very unexpected",
+                source: "AcknowledgmentChatItem"
+            )
         }
         sender = item.resolvedSenderID
         associatedID = item.associatedMessageGUID
     }
-    
+
     public var id: String
     public var chatID: String
     public var fromMe: Bool
@@ -49,14 +52,14 @@ public struct AcknowledgmentChatItem: ChatItemAssociable, ChatItemOwned, Hashabl
     public var sender: String?
     public var acknowledgmentType: Int64
     public var associatedID: String
-    
+
     public var type: ChatItemType {
         .acknowledgment
     }
 }
 
-public extension IMMessageAcknowledgmentChatItem {
-    var acknowledmentType: Int64 {
+extension IMMessageAcknowledgmentChatItem {
+    public var acknowledmentType: Int64 {
         if #available(macOS 13, iOS 16.0, *) {
             return tapback?.associatedMessageType ?? 0
         } else {

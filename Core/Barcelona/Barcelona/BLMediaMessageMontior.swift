@@ -5,32 +5,37 @@
 //  Created by Eric Rabil on 4/30/22.
 //
 
+@_spi(synchronousQueries) import BarcelonaDB
+import Combine
 import Foundation
 import IMCore
 import IMFoundation
-import Combine
 import Logging
-@_spi(synchronousQueries) import BarcelonaDB
 
-fileprivate let log = Logger(label: "MessageMonitor")
+private let log = Logger(label: "MessageMonitor")
 
 public class BLMediaMessageMonitor {
     public let messageID: () -> String
     public let transferGUIDs: [String]
-    
+
     private var monitor: BLMessageExpert.BLMessageObserver?
     @Published public private(set) var latestMessageEvent: BLMessageExpert.BLMessageEvent?
     @Published public private(set) var transferStates: [String: IMFileTransfer.IMFileTransferState]
     private var completionMonitor: AnyCancellable?
     private var observer: NotificationSubscription?
     private var timeout: DispatchSourceTimer?
-    private let callback: (Bool, FZErrorType?, Bool) -> ()
-    
-    public init(messageID: @autoclosure @escaping () -> String, transferGUIDs: [String], callback: @escaping (Bool, FZErrorType?, Bool) -> ()) {
+    private let callback: (Bool, FZErrorType?, Bool) -> Void
+
+    public init(
+        messageID: @autoclosure @escaping () -> String,
+        transferGUIDs: [String],
+        callback: @escaping (Bool, FZErrorType?, Bool) -> Void
+    ) {
         self.messageID = messageID
         self.transferGUIDs = transferGUIDs
         self.callback = callback
-        self.transferStates = transferGUIDs.map { ($0, IMFileTransfer.IMFileTransferState.unknown) }.dictionary(keyedBy: \.0, valuedBy: \.1)
+        self.transferStates = transferGUIDs.map { ($0, IMFileTransfer.IMFileTransferState.unknown) }
+            .dictionary(keyedBy: \.0, valuedBy: \.1)
         var monitor: BLMessageExpert.BLMessageObserver?
         log.debug("Set up monitoring for message \(messageID()) and transfers \(transferGUIDs)")
         monitor = BLMessageExpert.shared.observer(forMessage: messageID()) { [weak self, messageID, monitor] event in
@@ -48,36 +53,40 @@ public class BLMediaMessageMonitor {
         }
         self.monitor = monitor
         if !transferGUIDs.isEmpty {
-            observer = NotificationCenter.default.subscribe(toNotificationsNamed: [.IMFileTransferUpdated, .IMFileTransferFinished]) { [weak self] notification, subscription in
+            observer = NotificationCenter.default.subscribe(toNotificationsNamed: [
+                .IMFileTransferUpdated, .IMFileTransferFinished,
+            ]) { [weak self] notification, subscription in
                 guard let self = self else {
                     return subscription.unsubscribe()
                 }
                 self.handle(transferNotification: notification, subscription: subscription)
             }
         }
-        completionMonitor = Publishers.CombineLatest(
-            $latestMessageEvent.removeDuplicates(),
-            $transferStates.removeDuplicates()
-        ).sink { [weak self] latestEvent, latestStates in
-            guard let self = self else {
-                return
+        completionMonitor =
+            Publishers.CombineLatest(
+                $latestMessageEvent.removeDuplicates(),
+                $transferStates.removeDuplicates()
+            )
+            .sink { [weak self] latestEvent, latestStates in
+                guard let self = self else {
+                    return
+                }
+                self.handle(updatedEvent: latestEvent, updatedStates: latestStates)
             }
-            self.handle(updatedEvent: latestEvent, updatedStates: latestStates)
-        }
         if CBFeatureFlags.mediaMonitorTimeout {
             startTimer()
         }
     }
-    
+
     deinit {
         monitor?.cancel()
         observer?.unsubscribe()
         timeout?.cancel()
         log.debug("Deallocating message monitor for message \(messageID()) and transfers \(transferGUIDs)")
     }
-    
+
     public private(set) var result: (Bool, FZErrorType?, Bool)?
-    
+
     private func snap(success: Bool, code: FZErrorType?, shouldCancel: Bool = false) {
         guard result == nil else {
             return
@@ -87,8 +96,11 @@ public class BLMediaMessageMonitor {
         result = (success, code, shouldCancel)
         self.callback(success, code, shouldCancel)
     }
-    
-    private func handle(updatedEvent latestEvent: BLMessageExpert.BLMessageEvent?, updatedStates latestStates: [String: IMFileTransfer.IMFileTransferState]) {
+
+    private func handle(
+        updatedEvent latestEvent: BLMessageExpert.BLMessageEvent?,
+        updatedStates latestStates: [String: IMFileTransfer.IMFileTransferState]
+    ) {
         var finishedCount = 0
         for state in latestStates.values {
             switch state {
@@ -135,7 +147,7 @@ public class BLMediaMessageMonitor {
             return
         }
     }
-    
+
     private func handle(transferNotification notification: Notification, subscription: NotificationSubscription) {
         guard let transfer = notification.decodeObject(to: IMFileTransfer.self) else {
             return
@@ -143,20 +155,24 @@ public class BLMediaMessageMonitor {
         guard let guid = transfer.guid, transferGUIDs.contains(guid) else {
             return
         }
-        log.info("Processing transfer state \(transfer.state.description) for transfer \(guid) for message \(messageID())")
+        log.info(
+            "Processing transfer state \(transfer.state.description) for transfer \(guid) for message \(messageID())"
+        )
         transferStates[guid] = transfer.state
     }
 }
 
-private extension BLMediaMessageMonitor {
-    func startTimer() {
+extension BLMediaMessageMonitor {
+    fileprivate func startTimer() {
         let timer = DispatchSource.makeTimerSource(flags: [], queue: .global(qos: .userInitiated))
         timer.setEventHandler { [weak self] in
             guard let self = self else {
                 return
             }
             let messageID = self.messageID()
-            log.warning("Failed to send message \(messageID) with attachments \(self.transferGUIDs) in a timely manner! This is very, very sad.")
+            log.warning(
+                "Failed to send message \(messageID) with attachments \(self.transferGUIDs) in a timely manner! This is very, very sad."
+            )
             self.snap(success: false, code: .attachmentUploadFailure, shouldCancel: true)
         }
         timer.schedule(deadline: .now().advanced(by: .seconds(60)))

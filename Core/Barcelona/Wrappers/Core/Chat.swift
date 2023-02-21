@@ -6,11 +6,11 @@
 //  Copyright © 2020 Eric Rabil. All rights reserved.
 //
 
-import Foundation
-import IMSharedUtilities
 import BarcelonaDB
+import Foundation
 import IMCore
 import IMFoundation
+import IMSharedUtilities
 import Logging
 
 private let log = Logger(label: "Chat")
@@ -22,8 +22,8 @@ public protocol ChatConfigurationRepresentable {
     var groupPhotoID: String? { get set }
 }
 
-public extension ChatConfigurationRepresentable {
-    var configurationBits: ChatConfiguration {
+extension ChatConfigurationRepresentable {
+    public var configurationBits: ChatConfiguration {
         ChatConfiguration(id: id, readReceipts: readReceipts, ignoreAlerts: ignoreAlerts, groupPhotoID: groupPhotoID)
     }
 }
@@ -36,15 +36,19 @@ public struct ChatConfiguration: Codable, Hashable, ChatConfigurationRepresentab
 }
 
 public protocol ChatDelegate {
-    func chat(_ chat: Chat, willSendMessages messages: [IMMessage], fromCreateMessage createMessage: CreateMessage) -> Void
-    func chat(_ chat: Chat, willSendMessages messages: [IMMessage], fromCreatePluginMessage createPluginMessage: CreatePluginMessage) -> Void
+    func chat(_ chat: Chat, willSendMessages messages: [IMMessage], fromCreateMessage createMessage: CreateMessage)
+    func chat(
+        _ chat: Chat,
+        willSendMessages messages: [IMMessage],
+        fromCreatePluginMessage createPluginMessage: CreatePluginMessage
+    )
 }
 
 extension IMChatStyle: Codable {
     public init(from decoder: Decoder) throws {
         self.init(rawValue: try RawValue.init(from: decoder))!
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         try rawValue.encode(to: encoder)
     }
@@ -54,7 +58,7 @@ extension IMChatStyle: Hashable {
     public static func == (lhs: IMChatStyle, rhs: IMChatStyle) -> Bool {
         lhs.rawValue == rhs.rawValue
     }
-    
+
     public func hash(into hasher: inout Hasher) {
         rawValue.hash(into: &hasher)
     }
@@ -64,7 +68,7 @@ extension IMChatStyle: Hashable {
 public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     /// Useful for adding application-specific behavior, allows you to hook into different APIs on Chat (like sending)
     public static var delegate: ChatDelegate?
-    
+
     public init(_ backing: IMChat) {
         joinState = backing.joinState
         roomName = backing.roomName
@@ -74,14 +78,19 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
         unreadMessageCount = backing.unreadMessageCount
         messageFailureCount = backing.messageFailureCount
         service = backing.account.service?.id
-        lastMessage = backing.lastFinishedMessage?.description(forPurpose: .conversationList, in: backing, senderDisplayName: backing.lastMessage?.sender._displayNameWithAbbreviation)
+        lastMessage = backing.lastFinishedMessage?
+            .description(
+                forPurpose: .conversationList,
+                in: backing,
+                senderDisplayName: backing.lastMessage?.sender._displayNameWithAbbreviation
+            )
         lastMessageTime = (backing.lastFinishedMessage?.time.timeIntervalSince1970 ?? 0) * 1000
         style = backing.chatStyle
         readReceipts = backing.readReceipts
         ignoreAlerts = backing.ignoreAlerts
         groupPhotoID = backing.groupPhotoID
     }
-    
+
     public var id: String
     public var joinState: IMChatJoinState
     public var roomName: String?
@@ -96,34 +105,37 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
     public var readReceipts: Bool
     public var ignoreAlerts: Bool
     public var groupPhotoID: String?
-    
+
     mutating func setTimeSortedParticipants(participants: [HandleTimestampRecord]) {
-        self.participants = participants
+        self.participants =
+            participants
             .map(\.handle_id)
             .filter(self.participants.contains)
     }
-    
+
     /// The underlying IMChat this Chat was created from
     public var imChat: IMChat? {
         let chat = service.flatMap { IMChat.chat(withIdentifier: id, onService: $0, style: style.CBChat) }
         if chat == nil {
-            log.warning("IMChat.chat(withIdentifier: \(id), onService: \(String(describing: service)), style: \(style.CBChat)) returned nil")
+            log.warning(
+                "IMChat.chat(withIdentifier: \(id), onService: \(String(describing: service)), style: \(style.CBChat)) returned nil"
+            )
         }
         return chat
     }
 }
 
 // MARK: - Participants
-public extension Chat {
-    func addParticipants(_ participants: [String]) -> [String] {
+extension Chat {
+    public func addParticipants(_ participants: [String]) -> [String] {
         toggleParticipants(participants, add: true)
     }
-    
-    func removeParticipants(_ participants: [String]) -> [String] {
+
+    public func removeParticipants(_ participants: [String]) -> [String] {
         toggleParticipants(participants, add: false)
     }
-    
-    func toggleParticipants(_ participants: [String], add: Bool) -> [String] {
+
+    public func toggleParticipants(_ participants: [String], add: Bool) -> [String] {
         /*
          {"handles":["1234","eric@net.com"]}
          */
@@ -131,18 +143,29 @@ public extension Chat {
             return []
         }
 
-        let handles = participants.compactMap { Registry.sharedInstance.imHandle(withID: $0, onAccount: imChat.account) }
-        
-        var reasonMessage: IMMessage!
-        
-        let inviteText = add ? "Get in my van, kid." : "Goodbye, skank."
-        
-        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
-            reasonMessage = IMMessage.instantMessage(withText: NSAttributedString(string: inviteText), messageSubject: nil, flags: 0x5, threadIdentifier: nil)
-        } else {
-            reasonMessage = IMMessage.instantMessage(withText: NSAttributedString(string: inviteText), messageSubject: nil, flags: 0x5)
+        let handles = participants.compactMap {
+            Registry.sharedInstance.imHandle(withID: $0, onAccount: imChat.account)
         }
-        
+
+        var reasonMessage: IMMessage!
+
+        let inviteText = add ? "Get in my van, kid." : "Goodbye, skank."
+
+        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+            reasonMessage = IMMessage.instantMessage(
+                withText: NSAttributedString(string: inviteText),
+                messageSubject: nil,
+                flags: 0x5,
+                threadIdentifier: nil
+            )
+        } else {
+            reasonMessage = IMMessage.instantMessage(
+                withText: NSAttributedString(string: inviteText),
+                messageSubject: nil,
+                flags: 0x5
+            )
+        }
+
         if add {
             if imChat.canAddParticipants(handles) {
                 imChat.inviteParticipantsToiMessageChat(handles, reason: reasonMessage)
@@ -150,18 +173,18 @@ public extension Chat {
         } else {
             imChat.removeParticipantsFromiMessageChat(handles, reason: reasonMessage)
         }
-        
+
         return imChat.participantHandleIDs()
     }
 }
 
 // MARK: - Read Receipts
-internal extension IMChat {
+extension IMChat {
     func markDirectRead(items: [IMMessageItem]) {
         guard let serialized = CBCreateSerializedItemsFromArray(items), serialized.count > 0 else {
             return
         }
-        
+
         let (identifiers, services) = querySpecifiers
 
         // We should figure this out better, but the situation for now is:
@@ -189,13 +212,13 @@ internal extension IMChat {
     }
 }
 
-public extension Chat {
+extension Chat {
     /// Marks a series of messages as read
-    func markMessagesRead(withIDs messageIDs: [String]) {
+    public func markMessagesRead(withIDs messageIDs: [String]) {
         imChat?.markDirectRead(items: BLLoadIMMessageItems(withGUIDs: messageIDs))
     }
-    
-    func markMessageAsRead(withID messageID: String) {
+
+    public func markMessageAsRead(withID messageID: String) {
         BLLoadIMMessageItem(withGUID: messageID)
             .map { message in
                 imChat?.markDirectRead(items: [message])
@@ -204,27 +227,27 @@ public extension Chat {
 }
 
 // MARK: - Querying
-public extension Chat {
-    static var allChats: [Chat] {
+extension Chat {
+    public static var allChats: [Chat] {
         IMChatRegistry.shared.allChats.lazy.map(Chat.init(_:))
     }
-    
+
     /// Returns a chat targeted at the appropriate service for a handleID
-    static func directMessage(withHandleID handleID: String) -> Chat {
+    public static func directMessage(withHandleID handleID: String) -> Chat {
         Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID)))
     }
-    
+
     /// Returns a chat targeted at the appropriate service for a handleID
-    static func directMessage(withHandleID handleID: String, service: IMServiceStyle) -> Chat {
+    public static func directMessage(withHandleID handleID: String, service: IMServiceStyle) -> Chat {
         Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service)))
     }
-    
+
     /// Returns a chat targeted at the appropriate service for a set of handleIDs
-    static func chat(withHandleIDs handleIDs: [String], service: IMServiceStyle) -> Chat {
+    public static func chat(withHandleIDs handleIDs: [String], service: IMServiceStyle) -> Chat {
         guard handleIDs.count > 0 else {
             preconditionFailure("chat(withHandleIDs) requires at least one handle ID to be non-null return type")
         }
-        
+
         if handleIDs.count == 1 {
             return directMessage(withHandleID: handleIDs.first!, service: service)
         } else {
@@ -236,7 +259,7 @@ public extension Chat {
         }
     }
 
-    static func firstChatRegardlessOfService(withId chatId: String) -> Chat? {
+    public static func firstChatRegardlessOfService(withId chatId: String) -> Chat? {
         for service in [IMServiceStyle.iMessage, IMServiceStyle.SMS] {
             if let chat = IMChat.chat(withIdentifier: chatId, onService: service, style: nil) {
                 return Chat(chat)
@@ -246,54 +269,61 @@ public extension Chat {
     }
 }
 
-public extension Thread {
-    func sync(_ block: @convention(block) @escaping () -> ()) {
+extension Thread {
+    public func sync(_ block: @convention(block) @escaping () -> Void) {
         __im_performBlock(block, waitUntilDone: true)
     }
-    
-    func async(_ block: @convention(block) @escaping () -> ()) {
+
+    public func async(_ block: @convention(block) @escaping () -> Void) {
         __im_performBlock(block, waitUntilDone: false)
     }
 }
 
 // MARK: - Message Sending
-public extension Chat {
-    func messages(before: String? = nil, limit: Int? = nil, beforeDate: Date? = nil) async throws -> [Message] {
+extension Chat {
+    public func messages(before: String? = nil, limit: Int? = nil, beforeDate: Date? = nil) async throws -> [Message] {
         guard let service else {
-            log.warning("Cannot get messages(before: \(String(describing: before))) because service is nil; would not know what chat to check")
+            log.warning(
+                "Cannot get messages(before: \(String(describing: before))) because service is nil; would not know what chat to check"
+            )
             throw BarcelonaError(code: 500, message: "Chat.service is nil")
         }
 
         if BLIsSimulation {
-            let guids: [String] = imChat?.chatItemRules._items().compactMap { item in
-                if let chatItem = item as? IMChatItem {
-                    return chatItem._item()?.guid
-                } else if let item = item as? IMItem {
-                    return item.guid
-                }
-                
-                return nil
-            } ?? []
+            let guids: [String] =
+                imChat?.chatItemRules._items()
+                .compactMap { item in
+                    if let chatItem = item as? IMChatItem {
+                        return chatItem._item()?.guid
+                    } else if let item = item as? IMItem {
+                        return item.guid
+                    }
 
-            return try await IMMessage.messages(withGUIDs: guids, in: self.id, service: service).compactMap { message -> Message? in
-                message as? Message
-            }.sorted(usingKey: \.time, by: >)
+                    return nil
+                } ?? []
+
+            return try await IMMessage.messages(withGUIDs: guids, in: self.id, service: service)
+                .compactMap { message -> Message? in
+                    message as? Message
+                }
+                .sorted(usingKey: \.time, by: >)
         }
-        
+
         log.info("Querying IMD for recent messages using chat fast-path")
-        
-        return try await BLLoadChatItems(withChats: [(self.id, service)], beforeGUID: before, limit: limit).compactMap {
-            $0 as? Message
-        }
+
+        return try await BLLoadChatItems(withChats: [(self.id, service)], beforeGUID: before, limit: limit)
+            .compactMap {
+                $0 as? Message
+            }
     }
 }
 
-public extension Chat {
-    var participantIDs: BulkHandleIDRepresentation {
+extension Chat {
+    public var participantIDs: BulkHandleIDRepresentation {
         BulkHandleIDRepresentation(handles: participants)
     }
 
-    var participantNames: [String] {
+    public var participantNames: [String] {
         participants.map {
             Registry.sharedInstance.imHandle(withID: $0)?.name ?? $0
         }

@@ -13,7 +13,7 @@ public struct CBChatIdentifier: Hashable, Equatable {
         self.scheme = scheme
         self.value = value
     }
-    
+
     public enum Scheme: String {
         case correlationID = "correlation"
         case handleID = "handle"
@@ -22,7 +22,7 @@ public struct CBChatIdentifier: Hashable, Equatable {
         case groupID = "gid"
         case originalGroupID = "ogid"
     }
-    
+
     /// The property this identifier matches against
     public var scheme: Scheme
     /// The value to be used during matching
@@ -42,7 +42,7 @@ extension CBChatIdentifier: RawRepresentable {
         scheme = parsedScheme
         value = components.dropFirst().first.map(String.init(_:)) ?? ""
     }
-    
+
     public var rawValue: String {
         "\(scheme.rawValue):\(value)"
     }
@@ -53,7 +53,7 @@ extension CBChatIdentifier: Codable {
     public func encode(to encoder: Encoder) throws {
         try scheme.rawValue.appending(":").appending(value).encode(to: encoder)
     }
-    
+
     public init(from decoder: Decoder) throws {
         let str = try String(from: decoder)
         let components = str.split(separator: ":")
@@ -61,7 +61,13 @@ extension CBChatIdentifier: Codable {
             throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "missing scheme"))
         }
         guard let parsedScheme = Scheme(rawValue: rawScheme) else {
-            throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "unexpected scheme \"\(rawScheme)\"", underlyingError: nil))
+            throw DecodingError.dataCorrupted(
+                .init(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "unexpected scheme \"\(rawScheme)\"",
+                    underlyingError: nil
+                )
+            )
         }
         scheme = parsedScheme
         value = components.dropFirst().first.map(String.init(_:)) ?? ""
@@ -69,28 +75,28 @@ extension CBChatIdentifier: Codable {
 }
 
 // MARK: - Convenience
-public extension CBChatIdentifier {
-    static func correlationID(_ value: String) -> CBChatIdentifier {
+extension CBChatIdentifier {
+    public static func correlationID(_ value: String) -> CBChatIdentifier {
         CBChatIdentifier(scheme: .correlationID, value: value)
     }
-    
-    static func handleID(_ value: String) -> CBChatIdentifier {
+
+    public static func handleID(_ value: String) -> CBChatIdentifier {
         CBChatIdentifier(scheme: .handleID, value: value)
     }
-    
-    static func chatIdentifier(_ value: String) -> CBChatIdentifier {
+
+    public static func chatIdentifier(_ value: String) -> CBChatIdentifier {
         CBChatIdentifier(scheme: .chatIdentifier, value: value)
     }
-    
-    static func guid(_ value: String) -> CBChatIdentifier {
+
+    public static func guid(_ value: String) -> CBChatIdentifier {
         CBChatIdentifier(scheme: .guid, value: value)
     }
-    
-    static func groupID(_ value: String) -> CBChatIdentifier {
+
+    public static func groupID(_ value: String) -> CBChatIdentifier {
         CBChatIdentifier(scheme: .groupID, value: value)
     }
-    
-    static func originalGroupID(_ value: String) -> CBChatIdentifier {
+
+    public static func originalGroupID(_ value: String) -> CBChatIdentifier {
         CBChatIdentifier(scheme: .originalGroupID, value: value)
     }
 }
@@ -99,11 +105,12 @@ public extension CBChatIdentifier {
 import IMCore
 import BarcelonaDB
 
-public extension CBChatIdentifier {
-    var IMChat: IMChat? {
+extension CBChatIdentifier {
+    public var IMChat: IMChat? {
         switch scheme {
         case .chatIdentifier: return IMChatRegistry.shared.existingChat(withChatIdentifier: value)
-        case .guid: return (IMChatRegistry.shared.value(forKey: "_chatGUIDToChatMap") as! NSMutableDictionary)[value] as? IMChat
+        case .guid:
+            return (IMChatRegistry.shared.value(forKey: "_chatGUIDToChatMap") as! NSMutableDictionary)[value] as? IMChat
         case .groupID: return IMChatRegistry.shared.existingChat(withGroupID: value)
         case .handleID: return IMChatRegistry.shared.existingChat(withChatIdentifier: value)
         default: return nil

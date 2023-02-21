@@ -11,14 +11,14 @@ import UIKit
 
 extension UIImage {
     func image(scaledToSize newSize: CGSize) -> UIImage {
-        UIGraphicsBeginImageContextWithOptions(newSize, false, 0.0);
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 0.0)
         draw(in: CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height))
         let newImage: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        
+
         return newImage!
     }
-    
+
     func resize(w: Int, h: Int) -> UIImage {
         image(scaledToSize: .init(width: w / 3, height: h / 3))
     }
@@ -32,7 +32,12 @@ extension NSImage {
         let destSize = NSMakeSize(CGFloat(w), CGFloat(h))
         let newImage = NSImage(size: destSize)
         newImage.lockFocus()
-        image.draw(in: NSMakeRect(0, 0, destSize.width, destSize.height), from: NSMakeRect(0, 0, image.size.width, image.size.height), operation: .sourceOver, fraction: CGFloat(1))
+        image.draw(
+            in: NSMakeRect(0, 0, destSize.width, destSize.height),
+            from: NSMakeRect(0, 0, image.size.width, image.size.height),
+            operation: .sourceOver,
+            fraction: CGFloat(1)
+        )
         newImage.unlockFocus()
         newImage.size = destSize
         return newImage.tiffRepresentation

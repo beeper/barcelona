@@ -17,10 +17,11 @@ extension IMChatHistoryController {
             }
         }
     }
-    
+
     func loadMessages(withGUIDs guids: [String]) async -> [IMMessage] {
         await guids.asyncMap {
             await self.loadMessage(withGUID: $0)
-        }.compactMap { $0 }
+        }
+        .compactMap { $0 }
     }
 }

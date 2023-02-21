@@ -12,7 +12,7 @@ import LinkPresentationPrivate
 /// Wire-serializable struct for rich links
 public struct RichLinkMetadata: Codable, Hashable {
     public typealias RichLinkImage = RichLinkAsset.Source
-    
+
     public struct RichLinkAsset: Codable, Hashable {
         public enum Source: Codable, Hashable {
             /// Where is the asset downloaded to
@@ -27,14 +27,18 @@ public struct RichLinkMetadata: Codable, Hashable {
                 } else if container.allKeys.contains(.url) {
                     let urlString = try container.decode(String.self, forKey: .url)
                     guard let url = Foundation.URL(string: urlString) else {
-                        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "attempt to decode malformed URL"))
+                        throw DecodingError.dataCorrupted(
+                            .init(codingPath: decoder.codingPath, debugDescription: "attempt to decode malformed URL")
+                        )
                     }
                     self = .url(url)
                 } else {
-                    throw DecodingError.dataCorrupted(.init(codingPath: container.codingPath, debugDescription: "no valid matches"))
+                    throw DecodingError.dataCorrupted(
+                        .init(codingPath: container.codingPath, debugDescription: "no valid matches")
+                    )
                 }
             }
-            
+
             public func encode(to encoder: Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
                 switch self {
@@ -42,26 +46,26 @@ public struct RichLinkMetadata: Codable, Hashable {
                 case .data(let data): try container.encode(data.base64EncodedString(), forKey: .data)
                 }
             }
-            
+
             private enum CodingKeys: String, CodingKey {
                 case url, data
             }
         }
-        
+
         public struct Size: Codable, Hashable {
             public var width: Double
             public var height: Double
-            
+
             public init(cg: CGSize) {
                 width = Double(cg.width)
                 height = Double(cg.height)
             }
-            
+
             public init(width: Double, height: Double) {
                 self.width = width
                 self.height = height
             }
-            
+
             var cg: CGSize {
                 CGSize(width: CGFloat(width), height: CGFloat(height))
             }
@@ -91,7 +95,7 @@ public struct RichLinkMetadata: Codable, Hashable {
             self.originalURL = originalURL
             self.size = size
         }
-        
+
         public var mimeType: String?
         public var accessibilityText: String?
         public var source: Source?
@@ -99,14 +103,14 @@ public struct RichLinkMetadata: Codable, Hashable {
         public var originalURL: URL?
         public var size: Size?
     }
-    
+
     public struct RichLinkVideoAsset: Codable, Hashable {
         public var hasAudio: Bool?
         public var youTubeURL: URL?
         public var streamingURL: URL?
         public var asset: RichLinkAsset
     }
-    
+
     /// Converts an LPLinkMetadata object to wire format to be sent to arbitrary consumers
     public init(metadata: LPLinkMetadata) {
         originalURL = metadata.originalURL ?? metadata.url
@@ -141,11 +145,11 @@ public struct RichLinkMetadata: Codable, Hashable {
             audios = nil
         }
     }
-    
+
     public init() {
-        
+
     }
-    
+
     public var originalURL: URL?
     public var URL: URL?
     public var title: String?
@@ -165,7 +169,7 @@ public struct RichLinkMetadata: Codable, Hashable {
     public var videos: [RichLinkAsset]?
     public var streamingVideos: [RichLinkAsset]?
     public var audios: [RichLinkAsset]?
-    
+
     /// Rebuilds an LPLinkMetadata object from wire format to be sent over iMessage
     public func createLinkMetadata() -> LPLinkMetadata {
         let metadata = LPLinkMetadata()
@@ -231,8 +235,8 @@ extension LPAudioMetadata: LPSolidAssetMetadataConforming {
     }
 }
 
-private extension LPSolidAssetMetadataConforming {
-    var canHaveASize: Bool {
+extension LPSolidAssetMetadataConforming {
+    fileprivate var canHaveASize: Bool {
         switch self {
         case is LPIconMetadata, is LPAudioMetadata:
             return false
@@ -243,8 +247,8 @@ private extension LPSolidAssetMetadataConforming {
 }
 
 /// From LP
-private extension RichLinkMetadata.RichLinkAsset {
-    init?(solid: LPSolidAssetConforming?, metadata: LPSolidAssetMetadataConforming?) {
+extension RichLinkMetadata.RichLinkAsset {
+    fileprivate init?(solid: LPSolidAssetConforming?, metadata: LPSolidAssetMetadataConforming?) {
         if solid == nil, metadata == nil {
             return nil
         }
@@ -264,8 +268,8 @@ private extension RichLinkMetadata.RichLinkAsset {
 
 // MARK: - LPImage, LPAudio, LPVideo, LPImageMetadata, LPAudioMetadata, LPVideoMetadata, LPIconMetadata
 
-fileprivate extension RichLinkMetadata.RichLinkVideoAsset {
-    init?(solid: LPVideo?, metadata: LPVideoMetadata?) {
+extension RichLinkMetadata.RichLinkVideoAsset {
+    fileprivate init?(solid: LPVideo?, metadata: LPVideoMetadata?) {
         guard let asset = RichLinkMetadata.RichLinkAsset(solid: solid, metadata: metadata) else {
             return nil
         }
@@ -274,15 +278,15 @@ fileprivate extension RichLinkMetadata.RichLinkVideoAsset {
         streamingURL = solid?.streamingURL
         self.asset = asset
     }
-    
+
     private var lpVideoProperties: LPVideoProperties {
         let properties = LPVideoProperties()
         properties.accessibilityText = asset.accessibilityText
         properties.hasAudio = hasAudio ?? true
         return properties
     }
-    
-    var lpVideo: LPVideo? {
+
+    fileprivate var lpVideo: LPVideo? {
         if let youTubeURL = youTubeURL {
             return LPVideo(youTubeURL: youTubeURL, properties: lpVideoProperties)
         }
@@ -300,8 +304,8 @@ fileprivate extension RichLinkMetadata.RichLinkVideoAsset {
     }
 }
 
-fileprivate extension RichLinkMetadata.RichLinkAsset {
-    var lpImageProperties: LPImageProperties? {
+extension RichLinkMetadata.RichLinkAsset {
+    fileprivate var lpImageProperties: LPImageProperties? {
         guard let accessibilityText = accessibilityText else {
             return nil
         }
@@ -309,8 +313,8 @@ fileprivate extension RichLinkMetadata.RichLinkAsset {
         properties.accessibilityText = accessibilityText
         return properties
     }
-    
-    var lpImage: LPImage? {
+
+    fileprivate var lpImage: LPImage? {
         switch source {
         case .url(let url):
             if let lpImageProperties = lpImageProperties {
@@ -328,8 +332,8 @@ fileprivate extension RichLinkMetadata.RichLinkAsset {
             return nil
         }
     }
-    
-    var lpAudioProperties: LPAudioProperties? {
+
+    fileprivate var lpAudioProperties: LPAudioProperties? {
         guard let accessibilityText = accessibilityText else {
             return nil
         }
@@ -337,8 +341,8 @@ fileprivate extension RichLinkMetadata.RichLinkAsset {
         properties.accessibilityText = accessibilityText
         return properties
     }
-    
-    var lpAudio: LPAudio? {
+
+    fileprivate var lpAudio: LPAudio? {
         switch source {
         case .url(let url):
             return LPAudio(byReferencingFileURL: url, mimeType: mimeType, properties: lpAudioProperties)
@@ -346,8 +350,8 @@ fileprivate extension RichLinkMetadata.RichLinkAsset {
             return nil
         }
     }
-    
-    var lpVideoMetadata: LPVideoMetadata? {
+
+    fileprivate var lpVideoMetadata: LPVideoMetadata? {
         guard let size = size else {
             return nil
         }
@@ -357,15 +361,15 @@ fileprivate extension RichLinkMetadata.RichLinkAsset {
         metadata.accessibilityText = accessibilityText
         return metadata
     }
-    
-    var lpAudioMetadata: LPAudioMetadata {
+
+    fileprivate var lpAudioMetadata: LPAudioMetadata {
         let metadata = LPAudioMetadata()
         metadata.url = originalURL
         metadata.accessibilityText = accessibilityText
         return metadata
     }
-    
-    var lpImageMetadata: LPImageMetadata? {
+
+    fileprivate var lpImageMetadata: LPImageMetadata? {
         guard let size = size else {
             return nil
         }
@@ -375,8 +379,8 @@ fileprivate extension RichLinkMetadata.RichLinkAsset {
         metadata.accessibilityText = accessibilityText
         return metadata
     }
-    
-    var lpIconMetadata: LPIconMetadata {
+
+    fileprivate var lpIconMetadata: LPIconMetadata {
         let metadata = LPIconMetadata()
         metadata.url = originalURL
         metadata.accessibilityText = accessibilityText
@@ -385,8 +389,8 @@ fileprivate extension RichLinkMetadata.RichLinkAsset {
 }
 
 // MARK: - Introspection
-public extension RichLinkMetadata {
-    @_spi(matrix) var usableForMatrix: Bool {
+extension RichLinkMetadata {
+    @_spi(matrix) public var usableForMatrix: Bool {
         if originalURL == nil && URL == nil {
             return false
         }

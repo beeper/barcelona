@@ -8,15 +8,16 @@
 import Foundation
 import IMCore
 
-public extension IMAccountController {
-    static var shared: IMAccountController {
+extension IMAccountController {
+    public static var shared: IMAccountController {
         __sharedInstance()
     }
-    
+
     /// Returns an iMessage account
-    var iMessageAccount: IMAccount? {
-        __activeIMessageAccount ?? accounts.first(where: {
-            $0.service?.id == .iMessage
-        })
+    public var iMessageAccount: IMAccount? {
+        __activeIMessageAccount
+            ?? accounts.first(where: {
+                $0.service?.id == .iMessage
+            })
     }
 }

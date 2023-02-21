@@ -13,11 +13,11 @@ extension IMMessage: LazilyResolvable, ConcreteLazilyBasicResolvable {
     public static func resolveSync(withIdentifiers identifiers: [String]) -> [IMMessage] {
         BLLoadIMMessages(withGUIDs: identifiers)
     }
-    
+
     public static func resolveSync(withIdentifier identifier: String) -> IMMessage? {
         resolveSync(withIdentifiers: [identifier]).first
     }
-    
+
     public static func lazyResolve(withIdentifiers identifiers: [String]) -> Promise<[IMMessage]> {
         .success(resolveSync(withIdentifiers: identifiers))
     }

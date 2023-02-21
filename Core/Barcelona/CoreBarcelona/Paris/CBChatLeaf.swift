@@ -29,7 +29,7 @@ public struct CBChatLeaf {
     public var participants: [CBChatParticipant] = []
     /// The sender correlation identifier for this chat
     public var correlationID: String = ""
-    
+
     /// Returns the identifier with the most specificity for this chat
     public var mostUniqueIdentifier: CBChatIdentifier? {
         if !guid.isEmpty {
@@ -49,9 +49,9 @@ public struct CBChatLeaf {
         }
         return nil
     }
-    
+
     /// Invokes a callback with all identifiers present on this chat
-    public func forEachIdentifier(_ callback: (CBChatIdentifier) throws -> ()) rethrows {
+    public func forEachIdentifier(_ callback: (CBChatIdentifier) throws -> Void) rethrows {
         if !guid.isEmpty {
             try callback(.guid(guid))
         }
@@ -68,7 +68,7 @@ public struct CBChatLeaf {
             try callback(.correlationID(correlationID))
         }
     }
-    
+
     /// Updates the struct with only the identifiable information from the provided dictionary
     @discardableResult mutating func handle(identifiable dictionary: [AnyHashable: Any]) -> Self {
         guid = dictionary["guid"] as? String ?? guid
@@ -81,7 +81,7 @@ public struct CBChatLeaf {
         }
         return self
     }
-    
+
     /// Updates the struct with data from the provided dictionary
     @discardableResult public mutating func handle(dictionary: [AnyHashable: Any]) -> Self {
         handle(identifiable: dictionary)
@@ -92,7 +92,7 @@ public struct CBChatLeaf {
         }
         return self
     }
-    
+
     /// Updates the struct with data from the provided properties
     @discardableResult public mutating func handle(properties: [AnyHashable: Any]) -> Self {
         lastSentMesageDate = properties["LSMD"] as? Date ?? lastSentMesageDate
@@ -104,8 +104,8 @@ public struct CBChatLeaf {
 #if canImport(IMCore)
 import IMCore
 
-public extension CBChatLeaf {
-    var IMChat: IMChat? {
+extension CBChatLeaf {
+    public var IMChat: IMChat? {
         return mostUniqueIdentifier?.IMChat
     }
 }

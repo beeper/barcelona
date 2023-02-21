@@ -12,12 +12,13 @@ import IMCore
 /// Represents an attachment item
 public struct AttachmentChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
     public static let ingestionClasses: [NSObject.Type] = [IMAttachmentMessagePartChatItem.self]
-    
+
     public init(ingesting item: NSObject, context: IngestionContext) {
         self.init(item as! IMAttachmentMessagePartChatItem, metadata: context.attachment, chatID: context.chatID)
     }
-    
-    init(_ item: IMAttachmentMessagePartChatItem, metadata attachmentRepresentation: Attachment? = nil, chatID: String) {
+
+    init(_ item: IMAttachmentMessagePartChatItem, metadata attachmentRepresentation: Attachment? = nil, chatID: String)
+    {
         id = item.id
         self.chatID = chatID
         fromMe = item.isFromMe
@@ -25,7 +26,7 @@ public struct AttachmentChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
         transferID = item.transferGUID
         metadata = attachmentRepresentation ?? Attachment(guid: item.transferGUID)
     }
-    
+
     public var id: String
     public var chatID: String
     public var fromMe: Bool
@@ -35,7 +36,7 @@ public struct AttachmentChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
     public var transferID: String
     public var metadata: Attachment?
     public var acknowledgments: [AcknowledgmentChatItem]?
-    
+
     public var type: ChatItemType {
         .attachment
     }

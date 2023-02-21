@@ -6,8 +6,8 @@
 //  Copyright © 2020 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import BarcelonaFoundation
+import Foundation
 import GRDB
 import Logging
 
@@ -33,20 +33,21 @@ private var dbConfiguration = Configuration(trace: nil)
 #if os(iOS)
 let databasePool = try! DatabasePool(path: "/var/mobile/Library/SMS/sms.db", configuration: dbConfiguration)
 #else
-let databasePool = try! DatabasePool(path: ("~/Library/Messages/chat.db" as NSString).expandingTildeInPath, configuration: dbConfiguration)
+let databasePool = try! DatabasePool(
+    path: ("~/Library/Messages/chat.db" as NSString).expandingTildeInPath,
+    configuration: dbConfiguration
+)
 #endif
 
-/**
- Interface for reading the chat.db file.
- 
- DO NOT MAKE WRITES! THIS IS FOR READING ONLY!
- */
+/// Interface for reading the chat.db file.
+///
+/// DO NOT MAKE WRITES! THIS IS FOR READING ONLY!
 // MARK: - I REPEAT DO NOT MAKE WRITES TO THE DATABASE DIRECTLY! THIS IS FOR READING ONLY!
 public struct DBReader {
     internal var pool: DatabasePool
-    
+
     public static let shared: DBReader = DBReader(pool: databasePool)
-    
+
     private init(pool: DatabasePool = databasePool) {
         self.pool = pool
     }
@@ -68,7 +69,7 @@ public struct DBReader {
             }
         }
     }
-    
+
     internal func read<R: PromiseConvertible>(_ cb: @escaping (Database) throws -> R) -> Promise<R.Output> {
         Promise { resolve, reject in
             pool.asyncRead { result in
@@ -83,6 +84,7 @@ public struct DBReader {
                     reject(error)
                 }
             }
-        }.resolve(on: DispatchQueue.main)
+        }
+        .resolve(on: DispatchQueue.main)
     }
 }

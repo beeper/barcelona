@@ -9,8 +9,8 @@
 import Foundation
 import Logging
 
-public extension IPCPayload {
-    func respond(_ response: IPCResponse, ipcChannel: MautrixIPCChannel) {
+extension IPCPayload {
+    public func respond(_ response: IPCResponse, ipcChannel: MautrixIPCChannel) {
         self.reply(withCommand: .response(response), ipcChannel: ipcChannel)
     }
 }
@@ -25,10 +25,10 @@ public enum IPCResponse: Encodable {
     case arbitrary(any Codable)
     case ack
     case none
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        
+
         switch self {
         case .chats_resolved(let data):
             try container.encode(data)

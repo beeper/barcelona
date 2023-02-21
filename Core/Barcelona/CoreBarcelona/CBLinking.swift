@@ -26,7 +26,7 @@ public enum CBLinkerConstraint: Hashable, Equatable, CustomDebugStringConvertibl
     case preBigSur
     /// macOS 11, iOS 14, watchOS 7
     case bigSur
-    
+
     /// Whether the current environment satisfies the constraint
     public var applies: Bool {
         switch self {
@@ -56,7 +56,7 @@ public enum CBLinkerConstraint: Hashable, Equatable, CustomDebugStringConvertibl
             }
         }
     }
-    
+
     public var debugDescription: String {
         switch self {
         case .preVentura:
@@ -83,14 +83,14 @@ public enum CBLinkingTarget {
     case privateFramework(name: String)
     /// An arbitrary path
     case other(path: String)
-    
+
     var path: String {
         switch self {
-        case .framework(name: let name):
+        case .framework(let name):
             return "/System/Library/Frameworks/\(name).framework/\(name)"
-        case .privateFramework(name: let name):
+        case .privateFramework(let name):
             return "/System/Library/PrivateFrameworks/\(name).framework/\(name)"
-        case .other(path: let path):
+        case .other(let path):
             return path
         }
     }
@@ -101,37 +101,37 @@ public struct LinkingOption: CustomDebugStringConvertible {
     public static func symbol(_ symbol: String) -> LinkingOption {
         LinkingOption(constraints: [], symbol: symbol)
     }
-    
+
     /// Constraints that must be met for this symbol to be used
     public var constraints: [CBLinkerConstraint]
     /// The symbol name as it would be passed to dlopen
     public var symbol: String
-    
+
     /// Whether this option is safe to use in the given environment
     public var safe: Bool {
         constraints.allSatisfy(\.applies)
     }
-    
+
     /// Constraints the symbol to preMonterey
     public var preMonterey: LinkingOption {
         LinkingOption(constraints: constraints + [.preMonterey], symbol: symbol)
     }
-    
+
     /// Constraints the symbol to monterey or newer
     public var monterey: LinkingOption {
         LinkingOption(constraints: constraints + [.monterey], symbol: symbol)
     }
-    
+
     /// Constrains the symbol to preBigSur
     public var preBigSur: LinkingOption {
         LinkingOption(constraints: constraints + [.preBigSur], symbol: symbol)
     }
-    
+
     /// Constraints the symbol to big sur or newer
     public var bigSur: LinkingOption {
         LinkingOption(constraints: constraints + [.bigSur], symbol: symbol)
     }
-    
+
     public var debugDescription: String {
         if constraints.count == 0 {
             return symbol
@@ -157,21 +157,23 @@ public func CBWeakLink<T>(against target: CBLinkingTarget, options: [LinkingOpti
         log.warning("Failed to open CBLinkingTarget at path \(target.path)")
         return nil
     }
-    
+
     defer { dlclose(handle) }
-    
+
     for option in options {
         if option.safe, let symbol = dlsym(handle, option.symbol) {
             #if DEBUG
             log.debug("Selecting \(option.symbol) for linker candidate")
             #endif
-            
+
             return cast(symbol) as T
         }
     }
-    
-    log.warning("No viable linking option was found in target \(target.path) from options \(options.map(\.debugDescription).joined(separator: ", "))")
-    
+
+    log.warning(
+        "No viable linking option was found in target \(target.path) from options \(options.map(\.debugDescription).joined(separator: ", "))"
+    )
+
     return nil
 }
 
@@ -193,6 +195,6 @@ public func CBSelectLinkingPath<Output>(_ paths: [[CBLinkerConstraint]: Output])
             return paths[option]!
         }
     }
-    
+
     return nil
 }

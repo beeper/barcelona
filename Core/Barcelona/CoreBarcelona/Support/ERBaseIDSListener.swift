@@ -9,7 +9,7 @@ import Foundation
 import IDS
 import Logging
 
-fileprivate let log = Logger(label: "imagent")
+private let log = Logger(label: "imagent")
 
 extension DispatchQueue {
     static let IDSProcessingQueue = DispatchQueue(label: "com.barcelona.imagent.IDSProcessingQueue")
@@ -17,15 +17,15 @@ extension DispatchQueue {
 
 class BLDaemon {
     static let shared = BLDaemon()
-    
+
     var services: [String: IDSService] = [:]
-    
+
     func initialize() {
         for name in [IDSServiceNameiMessage, IDSServiceNameSMSRelay] {
             let service = IDSService(service: name)!
-            
+
             service.addDelegate(BLServiceListener.shared, queue: .IDSProcessingQueue)
-            
+
             services[name] = service
         }
     }
@@ -114,78 +114,143 @@ enum IDSCommandID: NSInteger, CaseIterable, Codable {
     case commandResponse = 255
 }
 
-public class ERBaseIDSListener: NSObject, IDSDaemonListenerProtocol {    
+public class ERBaseIDSListener: NSObject, IDSDaemonListenerProtocol {
     public func daemonConnected() {
         DispatchQueue.main.async {
             BLDaemon.shared.initialize()
         }
     }
-    
-    public func messageReceived(_ arg1: [AnyHashable : Any]!, withGUID arg2: String!, withPayload arg3: [AnyHashable : Any]!, forTopic arg4: String!, toIdentifier arg5: String!, fromID arg6: String!, context arg7: [AnyHashable : Any]!) {
-        
+
+    public func messageReceived(
+        _ arg1: [AnyHashable: Any]!,
+        withGUID arg2: String!,
+        withPayload arg3: [AnyHashable: Any]!,
+        forTopic arg4: String!,
+        toIdentifier arg5: String!,
+        fromID arg6: String!,
+        context arg7: [AnyHashable: Any]!
+    ) {
+
     }
-    
-    public func protobufReceived(_ arg1: [AnyHashable : Any]!, withGUID arg2: String!, forTopic arg3: String!, toIdentifier arg4: String!, fromID arg5: String!, context arg6: [AnyHashable : Any]!) {
-        
+
+    public func protobufReceived(
+        _ arg1: [AnyHashable: Any]!,
+        withGUID arg2: String!,
+        forTopic arg3: String!,
+        toIdentifier arg4: String!,
+        fromID arg5: String!,
+        context arg6: [AnyHashable: Any]!
+    ) {
+
     }
-    
-    public func dataReceived(_ arg1: Data!, withGUID arg2: String!, forTopic arg3: String!, toIdentifier arg4: String!, fromID arg5: String!, context arg6: [AnyHashable : Any]!) {
-        
+
+    public func dataReceived(
+        _ arg1: Data!,
+        withGUID arg2: String!,
+        forTopic arg3: String!,
+        toIdentifier arg4: String!,
+        fromID arg5: String!,
+        context arg6: [AnyHashable: Any]!
+    ) {
+
     }
-    
-    public func receivedGroupSessionParticipantUpdate(_ arg1: [AnyHashable : Any]!, forTopic arg2: String!, toIdentifier arg3: String!, fromID arg4: String!) {
-        
+
+    public func receivedGroupSessionParticipantUpdate(
+        _ arg1: [AnyHashable: Any]!,
+        forTopic arg2: String!,
+        toIdentifier arg3: String!,
+        fromID arg4: String!
+    ) {
+
     }
-    
-    public func receivedGroupSessionParticipantDataUpdate(_ arg1: [AnyHashable : Any]!, forTopic arg2: String!, toIdentifier arg3: String!, fromID arg4: String!) {
-        
+
+    public func receivedGroupSessionParticipantDataUpdate(
+        _ arg1: [AnyHashable: Any]!,
+        forTopic arg2: String!,
+        toIdentifier arg3: String!,
+        fromID arg4: String!
+    ) {
+
     }
-    
+
     public func sessionEndReceived(_ arg1: String!, fromID arg2: String!, with arg3: Data!) {
-        
+
     }
-    
+
     public func sessionCancelReceived(_ arg1: String!, fromID arg2: String!, with arg3: Data!) {
-        
+
     }
-    
+
     public func sessionAcceptReceived(_ arg1: String!, fromID arg2: String!, with arg3: Data!) {
-        
+
     }
-    
+
     public func sessionMessageReceived(_ arg1: String!, fromID arg2: String!, with arg3: Data!) {
-        
+
     }
-    
+
     public func session(_ arg1: String!, didReceiveReport arg2: [Any]!) {
-        
+
     }
-    
+
     public func sessionDeclineReceived(_ arg1: String!, fromID arg2: String!, with arg3: Data!) {
-        
+
     }
-    
-    public func opportunisticDataReceived(_ arg1: Data!, withIdentifier arg2: String!, fromID arg3: String!, context arg4: [AnyHashable : Any]!) {
-        
+
+    public func opportunisticDataReceived(
+        _ arg1: Data!,
+        withIdentifier arg2: String!,
+        fromID arg3: String!,
+        context arg4: [AnyHashable: Any]!
+    ) {
+
     }
-    
-    public func groupShareReceived(_ arg1: Data!, withGUID arg2: String!, forTopic arg3: String!, toIdentifier arg4: String!, fromID arg5: String!, context arg6: [AnyHashable : Any]!) {
-        
+
+    public func groupShareReceived(
+        _ arg1: Data!,
+        withGUID arg2: String!,
+        forTopic arg3: String!,
+        toIdentifier arg4: String!,
+        fromID arg5: String!,
+        context arg6: [AnyHashable: Any]!
+    ) {
+
     }
-    
-    public func accessoryDataReceived(_ arg1: Data!, withGUID arg2: String!, forTopic arg3: String!, toIdentifier arg4: String!, fromID arg5: String!, context arg6: [AnyHashable : Any]!) {
-        
+
+    public func accessoryDataReceived(
+        _ arg1: Data!,
+        withGUID arg2: String!,
+        forTopic arg3: String!,
+        toIdentifier arg4: String!,
+        fromID arg5: String!,
+        context arg6: [AnyHashable: Any]!
+    ) {
+
     }
-    
-    public func engramDataReceived(_ arg1: [AnyHashable : Any]!, withGUID arg2: String!, forTopic arg3: String!, toIdentifier arg4: String!, fromID arg5: String!, context arg6: [AnyHashable : Any]!) {
-        
+
+    public func engramDataReceived(
+        _ arg1: [AnyHashable: Any]!,
+        withGUID arg2: String!,
+        forTopic arg3: String!,
+        toIdentifier arg4: String!,
+        fromID arg5: String!,
+        context arg6: [AnyHashable: Any]!
+    ) {
+
     }
-    
+
     public func session(_ arg1: String!, didReceiveActiveParticipants arg2: [Any]!, success arg3: Bool) {
-        
+
     }
-    
-    public func sessionInvitationReceived(withPayload arg1: [AnyHashable : Any]!, forTopic arg2: String!, sessionID arg3: String!, toIdentifier arg4: String!, fromID arg5: String!, transportType arg6: NSNumber!) {
-        
+
+    public func sessionInvitationReceived(
+        withPayload arg1: [AnyHashable: Any]!,
+        forTopic arg2: String!,
+        sessionID arg3: String!,
+        toIdentifier arg4: String!,
+        fromID arg5: String!,
+        transportType arg6: NSNumber!
+    ) {
+
     }
 }

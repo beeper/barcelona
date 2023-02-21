@@ -6,11 +6,11 @@
 //  Copyright © 2020 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import DigitalTouchShared
+import Foundation
 
 public struct ETTapData: Codable {
     init(_ message: ETTapMessage) {
-        
+
     }
 }

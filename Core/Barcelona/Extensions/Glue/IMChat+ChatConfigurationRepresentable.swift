@@ -13,7 +13,7 @@ private let IMChatPropertyGroupPhotoGUID: NSString? = CBWeakLink(
     against: .privateFramework(name: "IMSharedUtilities"),
     options: [
         .symbol("IMGroupPhotoGuidKey").bigSur.preMonterey,
-        .symbol("IMChatPropertyGroupPhotoGUID").monterey
+        .symbol("IMChatPropertyGroupPhotoGUID").monterey,
     ]
 )
 
@@ -26,7 +26,7 @@ extension IMChat: ChatConfigurationRepresentable {
             setValue(newValue == true ? 1 : 0, forChatProperty: "EnableReadReceiptForChat")
         }
     }
-    
+
     public var ignoreAlerts: Bool {
         get {
             value(forChatProperty: "ignoreAlertsFlag") as? Bool ?? false
@@ -35,16 +35,18 @@ extension IMChat: ChatConfigurationRepresentable {
             setValue(newValue == true ? 1 : 0, forChatProperty: "ignoreAlertsFlag")
         }
     }
-    
+
     public var groupPhotoID: String? {
         get {
             IMChatPropertyGroupPhotoGUID.map(value(forChatProperty:)) as? String
         }
         set {
-            guard let IMChatPropertyGroupPhotoGUID = IMChatPropertyGroupPhotoGUID, #available(macOS 11.0, iOS 14.0, watchOS 7.0, *) else {
+            guard let IMChatPropertyGroupPhotoGUID = IMChatPropertyGroupPhotoGUID,
+                #available(macOS 11.0, iOS 14.0, watchOS 7.0, *)
+            else {
                 return
             }
-            
+
             setValue(newValue, forChatProperty: IMChatPropertyGroupPhotoGUID)
             sendGroupPhotoUpdate(newValue)
         }
