@@ -10,7 +10,6 @@ targetTemplates:
         PRODUCT_NAME: "$(TARGET_NAME:c99extidentifier)"
         VALID_ARCHS: "x86_64 arm64e arm64"
         SUPPORTED_PLATFORMS: "macosx iphonesimulator iphoneos"
-        MACOSX_DEPLOYMENT_TARGET: "13.0"
   BLTest:
     type: bundle.unit-test
     platform: macOS
@@ -19,11 +18,10 @@ targetTemplates:
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: $(inherited) UNIT_TEST
         TEST_HOST: $(BUILT_PRODUCTS_DIR)/${test_host}.app/Contents/MacOS/${test_host}
         BUNDLE_LOADER: $(TEST_HOST)
-        MACOSX_DEPLOYMENT_TARGET: "13.0"
     postBuildScripts:
       - name: Codesign
         script: |
-          codesign -f -s "$CODE_SIGN_IDENTITY" --deep $BUILT_PRODUCTS_DIR/${test_host}.app/Contents/PlugIns/${target_name}.xctest
+            codesign -f -s "$CODE_SIGN_IDENTITY" --deep $BUILT_PRODUCTS_DIR/${test_host}.app/Contents/PlugIns/${target_name}.xctest
     dependencies:
       - target: ${test_host}
   BLTestHost:
@@ -37,6 +35,5 @@ targetTemplates:
       - ../Beeper/BarcelonaTestHost
     settings:
       CODE_SIGN_ENTITLEMENTS: ${entitlements}
-      MACOSX_DEPLOYMENT_TARGET: "13.0"
     dependencies:
       - package: XCTHarness

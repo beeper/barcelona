@@ -41,7 +41,11 @@ public extension IMChat {
 
         let rawType = Int64(type)
 
-        return try venturaTapback(associatedMessageType: rawType, messageSummaryInfo: summaryInfo, messagePartChatItem: subpart)
+        if #available(macOS 13, iOS 16.0, *) {
+            return try venturaTapback(associatedMessageType: rawType, messageSummaryInfo: summaryInfo, messagePartChatItem: subpart)
+        } else {
+            return try preVenturaTapback(type: rawType, overridingItemType: overridingItemType, subpart: subpart, summaryInfo: summaryInfo)
+        }
     }
 
     @available(macOS 13.0, *)
@@ -72,5 +76,44 @@ public extension IMChat {
         send(message)
 
         return message
+    }
+
+    @available(macOS, obsoleted: 13.0, message: "Use venturaTapback instead")
+    @available(iOS, obsoleted: 16.0, message: "Use venturaTapback instead")
+    func preVenturaTapback(
+        type: Int64,
+        overridingItemType: UInt8?,
+        subpart: IMMessagePartChatItem,
+        summaryInfo: [AnyHashable: Any],
+        metadata: Message.Metadata? = nil
+    ) throws -> IMMessage {
+        guard let compatibilityString = CBGeneratePreviewStringForAcknowledgmentType(type, summaryInfo: summaryInfo),
+              let superFormat = IMCreateSuperFormatStringFromPlainTextString(compatibilityString) else {
+            throw BarcelonaError(code: 500, message: "Internal server error")
+        }
+
+        let adjustedSummaryInfo = IMChat.__im_adjustMessageSummaryInfo(forSending: summaryInfo)
+        let guid = subpart.guid
+        let range = subpart.messagePartRange
+
+        var toSendMessage: IMMessage?
+
+        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+            toSendMessage = IMMessage.instantMessage(withAssociatedMessageContent: superFormat, flags: 0, associatedMessageGUID: guid, associatedMessageType: type, associatedMessageRange: range, messageSummaryInfo: adjustedSummaryInfo, threadIdentifier: nil)
+        } else {
+            toSendMessage = IMMessage.instantMessage(withAssociatedMessageContent: superFormat, flags: 0, associatedMessageGUID: guid, associatedMessageType: type, associatedMessageRange: range, messageSummaryInfo: adjustedSummaryInfo)
+        }
+
+        guard let toSendMessage else {
+            throw BarcelonaError(code: 500, message: "Couldn't create tapback message")
+        }
+
+        if let metadata {
+            toSendMessage.metadata = metadata
+        }
+
+        send(toSendMessage)
+
+        return toSendMessage
     }
 }
