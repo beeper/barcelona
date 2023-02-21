@@ -11,11 +11,11 @@ import IMCore
 
 public struct TypingItem: ChatItemOwned, Hashable {
     public static let ingestionClasses: [NSObject.Type] = [IMTypingChatItem.self]
-    
+
     public init(ingesting item: NSObject, context: IngestionContext) {
         self.init(item as! IMTypingChatItem, chatID: context.chatID)
     }
-    
+
     init(_ item: IMTypingChatItem, chatID: String) {
         id = item.id
         fromMe = item.isFromMe
@@ -23,7 +23,7 @@ public struct TypingItem: ChatItemOwned, Hashable {
         time = item.effectiveTime
         self.chatID = chatID
     }
-    
+
     public var id: String = ""
     public var chatID: String = ""
     public var fromMe: Bool
@@ -31,7 +31,7 @@ public struct TypingItem: ChatItemOwned, Hashable {
     public var threadIdentifier: String?
     public var threadOriginator: String?
     public var sender: String?
-    
+
     public var type: ChatItemType {
         .typing
     }

@@ -6,9 +6,9 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
+import BarcelonaDB
 import Foundation
 import IMCore
-import BarcelonaDB
 import IMSharedUtilities
 import Logging
 
@@ -32,24 +32,26 @@ extension IMMessage: IMItemIDResolvable {
     var itemGUID: String? { guid }
 }
 
-
 // MARK: - IMFileTransfer Preload
 @inlinable
 internal func _BLLoadFileTransfers(forObjects objects: [NSObject]) async throws {
     let log = Logger(label: "_BLLoadFileTransfers")
-    let unloadedFileTransferGUIDs = objects.compactMap {
-        $0 as? IMFileTransferContainer
-    }.flatMap(\.unloadedFileTransferGUIDs)
-    
+    let unloadedFileTransferGUIDs =
+        objects.compactMap {
+            $0 as? IMFileTransferContainer
+        }
+        .flatMap(\.unloadedFileTransferGUIDs)
+
     guard unloadedFileTransferGUIDs.count > 0 else {
         return
     }
-    
+
     log.info("loading \(unloadedFileTransferGUIDs.count) transfers")
-    
-    try await DBReader.shared.attachments(withGUIDs: unloadedFileTransferGUIDs).compactMap(\.attachment).forEach {
-        $0.initializeFileTransferIfNeeded()
-    }
+
+    try await DBReader.shared.attachments(withGUIDs: unloadedFileTransferGUIDs).compactMap(\.attachment)
+        .forEach {
+            $0.initializeFileTransferIfNeeded()
+        }
 }
 
 @inlinable
@@ -62,36 +64,52 @@ internal func _BLLoadAcknowledgmentChatItems(
         return [:]
     }
 
-    return _BLParseObjects(BLLoadIMMessages(withGUIDs: messageGUIDs), inChat: chat, service: service).compactMap {
-        $0 as? Message
-    }.flatMap(\.items).map(\.item).compactMap {
-        $0 as? AcknowledgmentChatItem
-    }.collectedDictionary(keyedBy: \.associatedID)
+    return _BLParseObjects(BLLoadIMMessages(withGUIDs: messageGUIDs), inChat: chat, service: service)
+        .compactMap {
+            $0 as? Message
+        }
+        .flatMap(\.items).map(\.item)
+        .compactMap {
+            $0 as? AcknowledgmentChatItem
+        }
+        .collectedDictionary(keyedBy: \.associatedID)
 }
 
 // MARK: - Associated Resolution
 @inlinable
-internal func _BLLoadTapbacks(forItems items: [ChatItem], inChat chat: String, service: IMServiceStyle) async throws -> [ChatItem] {
+internal func _BLLoadTapbacks(
+    forItems items: [ChatItem],
+    inChat chat: String,
+    service: IMServiceStyle
+) async throws -> [ChatItem] {
     let log = Logger(label: "_BLLoadTapbacks")
     guard items.count > 0 else {
         return []
     }
-    
+
     let messages = items.compactMap { $0 as? Message }.dictionary(keyedBy: \.id)
-    
-    let associatedLedger = messages.values.flatMap { message in
-        message.associableItemIDs.map {
-            (itemID: $0, messageID: message.id)
+
+    let associatedLedger = messages.values
+        .flatMap { message in
+            message.associableItemIDs.map {
+                (itemID: $0, messageID: message.id)
+            }
         }
-    }.dictionary(keyedBy: \.itemID, valuedBy: \.messageID)
-    
+        .dictionary(keyedBy: \.itemID, valuedBy: \.messageID)
+
     guard associatedLedger.count > 0 else {
         return items
     }
 
     do {
-        let associations = try await DBReader.shared.associatedMessageGUIDs(with: messages.values.flatMap(\.associableItemIDs))
-        let ledger = _BLLoadAcknowledgmentChatItems(withMessageGUIDs: associations.flatMap(\.value), inChat: chat, service: service)
+        let associations = try await DBReader.shared.associatedMessageGUIDs(
+            with: messages.values.flatMap(\.associableItemIDs)
+        )
+        let ledger = _BLLoadAcknowledgmentChatItems(
+            withMessageGUIDs: associations.flatMap(\.value),
+            inChat: chat,
+            service: service
+        )
 
         if ledger.values.flatten().count > 0 {
             ledger.forEach { itemID, tapbacks -> Void in
@@ -143,14 +161,14 @@ internal func _BLResolveChatIDs(forObjects objects: [NSObject]) async throws -> 
     guard objects.count > 0 else {
         return []
     }
-    
+
     let ids = objects.compactMap {
         ($0 as? IMItemIDResolvable)?.itemGUID
     }
-    
+
     guard ids.count == objects.count else {
         throw BarcelonaError(code: 500, message: "Failed to resolve item IDs during ingestion")
     }
-    
+
     return try await DBReader.shared.chatIdentifiers(forMessageGUIDs: ids)
 }

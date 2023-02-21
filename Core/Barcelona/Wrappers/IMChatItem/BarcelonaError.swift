@@ -13,7 +13,7 @@ public struct BarcelonaError: Error {
         self.code = code
         self.message = message
     }
-    
+
     public var code: Int
     public var message: String
 }

@@ -5,8 +5,8 @@
 //  Created by Eric Rabil on 1/11/22.
 //
 
-import Foundation
 import FeatureFlags
+import Foundation
 
 #if DEBUG
 private let isDebugBuild = true
@@ -22,73 +22,73 @@ public class _CBFeatureFlags: FlagProvider {
         public static var adHocRichLinks: Bool = true
     }
     public let suiteName = "com.ericrabil.barcelona"
-    
+
     /// Whether to check the chat service before sending the first message of the session on a per-chat basis
     @FeatureFlag("refresh-chat-services", defaultValue: true)
     public var refreshChatServices: Bool
-    
+
     @FeatureFlag("use-sending-v2", defaultValue: true)
     public var useSendingV2: Bool
-    
+
     /// A faulty implementation of rich links resulted in crashes during message queries. This will repair those messages.
     @FeatureFlag("repair-corrupted-links", defaultValue: true)
     public var repairCorruptedLinks: Bool
-    
+
     @FeatureFlag("ad-hoc-rich-links", defaultValue: Defaults.adHocRichLinks)
     public var adHocRichLinks: Bool
-    
+
     @FeatureFlag("matrix-audio", defaultValue: false)
     public var permitAudioOverMautrix: Bool
-    
+
     @FeatureFlag("internal-diagnostics", defaultValue: isDebugBuild)
     public var internalDiagnostics: Bool
-    
+
     @FeatureFlag("xcode", domain: .debugging, defaultValue: false)
     public var runningFromXcode: Bool
-    
+
     @FeatureFlag("any-country", defaultValue: false)
     public var ignoresSameCountryCodeAssertion: Bool
-    
+
     @FeatureFlag("exit-after-scratchbox", domain: .debugging, defaultValue: false)
     public var exitAfterScratchbox: Bool
-    
+
     @FeatureFlag("prewarm-item-rules", defaultValue: true)
     public var prewarmItemRules: Bool
-    
+
     @FeatureFlag("contact-fuzz-enumerator", defaultValue: true)
     public var contactFuzzEnumerator: Bool
-    
+
     @FeatureFlag("sms-read-buffer", defaultValue: true)
     public var useSMSReadBuffer: Bool
-    
+
     @FeatureFlag("drop-spam-messages", defaultValue: true)
     public var dropSpamMessages: Bool
-    
+
     @FeatureFlag("log-sensitive-payloads", defaultValue: isDebugBuild)
     public var logSensitivePayloads: Bool
-    
+
     @_spi(featureFlags) public var overrideWithholdPartialFailures: Bool?
     @_spi(featureFlags) public var overrideWithholdDupes: Bool?
     public var correlateChats: Bool = true
-    
+
     @FeatureFlag("withhold-partial-failures", defaultValue: true)
     private var _withholdPartialFailures: Bool
-    
+
     @FeatureFlag("withhold-dupes", defaultValue: true)
     private var _withholdDupes: Bool
-    
+
     @FeatureFlag("blocklist", defaultValue: true)
     public var enableBlocklist: Bool
-    
+
     @FeatureFlag("media-monitor-timeout", defaultValue: true)
     public var mediaMonitorTimeout: Bool
-    
+
     @FeatureFlag("beeper", defaultValue: false)
     public var beeper: Bool
-    
+
     @FeatureFlag("migrated-database", defaultValue: false)
     public var migratedDatabase: Bool
-    
+
     public var withholdPartialFailures: Bool {
         get {
             overrideWithholdPartialFailures ?? _withholdPartialFailures
@@ -97,7 +97,7 @@ public class _CBFeatureFlags: FlagProvider {
             _withholdPartialFailures = newValue
         }
     }
-    
+
     public var withholdDupes: Bool {
         get {
             overrideWithholdDupes ?? _withholdDupes
@@ -118,7 +118,7 @@ extension String {
             }
         }
     }
-    
+
     var camelToHyphen: String {
         splitByCamel.joined(separator: "-")
     }
@@ -147,19 +147,19 @@ public class _CBLoggingFlags: FlagProvider {
 public let CBFeatureFlags = _CBFeatureFlags()
 public let CBLoggingFlags = _CBLoggingFlags()
 
-@_transparent internal func ifInternal(_ block: () -> ()) {
+@_transparent internal func ifInternal(_ block: () -> Void) {
     if CBFeatureFlags.internalDiagnostics {
         block()
     }
 }
 
-@_transparent internal func ifDebugBuild(_ block: () -> ()) {
+@_transparent internal func ifDebugBuild(_ block: () -> Void) {
     #if DEBUG
     block()
     #endif
 }
 
-@_transparent internal func ifReleaseBuild(_ block: () -> ()) {
+@_transparent internal func ifReleaseBuild(_ block: () -> Void) {
     #if !DEBUG
     block()
     #endif

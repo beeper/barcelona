@@ -6,8 +6,8 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import Barcelona
+import Foundation
 
 public struct SendMessageCommand: Codable, ChatResolvable {
     public var chat_guid: String

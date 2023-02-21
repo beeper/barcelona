@@ -27,18 +27,18 @@ extension IMCoreDataResolvable {
         guard #available(iOS 14, macOS 10.16, watchOS 7, *), self.responds(to: sel_threadIdentifier) else {
             return nil
         }
-        
+
         return self.perform(sel_threadIdentifier)?.takeUnretainedValue() as? String
     }
-    
+
     public var threadOriginator: IMMessageItem? {
         guard #available(iOS 14, macOS 10.16, watchOS 7, *), self.responds(to: sel_threadOriginator) else {
             return nil
         }
-        
+
         return self.perform(sel_threadOriginator)?.takeUnretainedValue() as? IMMessageItem
     }
-    
+
     public var threadOriginatorID: String? {
         threadOriginator?.id
     }

@@ -6,8 +6,8 @@
 //  Copyright © 2020 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import BarcelonaDB
+import Foundation
 
 /// Represents an identifiable and searchable record/entity
 public protocol Searchable: Identifiable {
@@ -17,7 +17,7 @@ public protocol Searchable: Identifiable {
     associatedtype instancetype: Codable
     /// Represents the bulk version of the search parameters
     associatedtype BulkSearch = BulkSearchRequest<QueryParametersImplementation>
-    
+
     /// Perform a single query
     static func resolve(withParameters: QueryParametersImplementation) -> Promise<[instancetype]>
     /// Perform multiple concurrent queries
@@ -27,19 +27,25 @@ public protocol Searchable: Identifiable {
 /// Implementation for concurrent bulk searches
 extension Searchable {
     /// Concurrently executes all provided queries, returning a dictionary keyed identical to the parameters, with the result values replacing the query values
-    public static func bulkResolve(withParameters parameters: [String: QueryParametersImplementation]) -> Promise<[String: [instancetype]]> {
-        Promise.all(parameters.map { entry in
-            self.resolve(withParameters: entry.value).then {
-                (entry.key, $0)
+    public static func bulkResolve(
+        withParameters parameters: [String: QueryParametersImplementation]
+    ) -> Promise<[String: [instancetype]]> {
+        Promise.all(
+            parameters.map { entry in
+                self.resolve(withParameters: entry.value)
+                    .then {
+                        (entry.key, $0)
+                    }
             }
-        }).dictionary(keyedBy: \.0, valuedBy: \.1)
+        )
+        .dictionary(keyedBy: \.0, valuedBy: \.1)
     }
 }
 
 /// Represents a bulk search request
 public protocol BulkSearchRequestRepresentable: Codable {
     associatedtype T: QueryParameters
-    
+
     /// Search queries keyed by unique IDs to be used in the results
     var searches: [String: T] { get set }
 }
@@ -53,8 +59,8 @@ public protocol SearchParameter {
     func test(_ object: Object) -> Bool
 }
 
-public extension Array where Element : SearchParameter {
-    func test(_ object: Element.Object) -> Bool {
+extension Array where Element: SearchParameter {
+    public func test(_ object: Element.Object) -> Bool {
         allSatisfy {
             $0.test(object)
         }

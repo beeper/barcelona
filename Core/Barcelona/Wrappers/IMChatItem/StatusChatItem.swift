@@ -17,18 +17,28 @@ public enum StatusType: CLongLong, Codable, Hashable {
     case notDelivered = 7
 }
 
-private extension Optional where Wrapped == StatusType {
-    var debugString: String {
+extension Optional where Wrapped == StatusType {
+    fileprivate var debugString: String {
         guard let value = self else {
             return "(nil)"
         }
-        
+
         return String(describing: value)
     }
 }
 
 public struct StatusChatItem: ChatItemOwned, Hashable {
-    public init(id: String, chatID: String, fromMe: Bool, time: Double, sender: String? = nil, threadIdentifier: String? = nil, threadOriginator: String? = nil, statusType: StatusType? = nil, itemID: String) {
+    public init(
+        id: String,
+        chatID: String,
+        fromMe: Bool,
+        time: Double,
+        sender: String? = nil,
+        threadIdentifier: String? = nil,
+        threadOriginator: String? = nil,
+        statusType: StatusType? = nil,
+        itemID: String
+    ) {
         self.id = id
         self.chatID = chatID
         self.fromMe = fromMe
@@ -39,13 +49,13 @@ public struct StatusChatItem: ChatItemOwned, Hashable {
         self.statusType = statusType
         self.itemID = itemID
     }
-    
+
     public static let ingestionClasses: [NSObject.Type] = [IMMessageStatusChatItem.self]
-    
+
     public init(ingesting item: NSObject, context: IngestionContext) {
         self.init(item: item as! IMMessageStatusChatItem, chatID: context.chatID)
     }
-    
+
     public init(item: IMMessageStatusChatItem, chatID: String) {
         id = item.id
         self.chatID = chatID
@@ -57,7 +67,7 @@ public struct StatusChatItem: ChatItemOwned, Hashable {
         itemID = item._item().guid
         sender = item._item().handle
     }
-    
+
     public var id: String
     public var chatID: String
     public var fromMe: Bool
@@ -67,11 +77,11 @@ public struct StatusChatItem: ChatItemOwned, Hashable {
     public var threadOriginator: String?
     public var statusType: StatusType?
     public var itemID: String
-    
+
     public var type: ChatItemType {
         .status
     }
-    
+
     public var debugDescription: String {
         "\(type) { id=\(id) fromMe=\(fromMe) status=\(statusType.debugString) }"
     }

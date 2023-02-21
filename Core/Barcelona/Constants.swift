@@ -10,16 +10,12 @@ import Foundation
 
 public let HandleQueue = DispatchQueue.init(label: "HandleIDS")
 
-/**
- Imma be real witchu idk why this is the attachment string but IMCore uses this
- */
+/// Imma be real witchu idk why this is the attachment string but IMCore uses this
 public let IMAttachmentString = String(data: Data(base64Encoded: "77+8")!, encoding: .utf8)!
 
 internal let IDSListenerID = "SOIDSListener-com.apple.imessage-rest"
 
-/**
- flag |= MessageModifier
- */
+/// flag |= MessageModifier
 public enum MessageModifiers: UInt64 {
     case expirable = 0x1000005
 }

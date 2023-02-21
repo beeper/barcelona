@@ -13,7 +13,7 @@ public struct CBSender: Codable, CustomDebugStringConvertible, Equatable {
         self.scheme = scheme
         self.value = value
     }
-    
+
     /// Assigns a value by best-guessing the type from the URI
     init(id: String, fromMe: Bool = false) {
         if fromMe {
@@ -31,22 +31,23 @@ public struct CBSender: Codable, CustomDebugStringConvertible, Equatable {
             scheme = .other("")
         }
     }
-    
+
     /// Assigns a value by extracting the stored handle and initializing based on that
     init(dictionary: [AnyHashable: Any]) {
         let handle = dictionary["handle"] as? String
         self = .init(id: handle ?? "E:", fromMe: handle == nil)
     }
-    
+
     public enum Scheme: Hashable {
-        case biz, phone, email, me, other(String)
+        case biz, phone, email, me
+        case other(String)
     }
-    
+
     /// The type of sender for this instance
     var scheme: Scheme
     /// The address for this sender
     var value: String = ""
-    
+
     public var debugDescription: String {
         "<Handle name=\(scheme.rawValue) value=\(value.isEmpty ? "true" : value)/>"
     }
@@ -63,7 +64,7 @@ extension CBSender.Scheme: RawRepresentable {
         case let other: self = .other(other)
         }
     }
-    
+
     public var rawValue: String {
         switch self {
         case .biz: return "biz"
@@ -81,7 +82,7 @@ extension CBSender.Scheme: Codable {
         let string = try String(from: decoder)
         self = .init(rawValue: string)
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         try rawValue.encode(to: encoder)
     }
@@ -92,8 +93,8 @@ extension CBSender.Scheme: Codable {
 #if canImport(IMCore)
 import IMCore
 
-public extension CBSender {
-    init(handle: IMHandle) {
+extension CBSender {
+    public init(handle: IMHandle) {
         if handle.isLoginIMHandle {
             scheme = .me
         } else if handle.isBusiness() {
@@ -116,12 +117,12 @@ public extension CBSender {
 #if canImport(IMSharedUtilities)
 import IMSharedUtilities
 
-public extension CBSender {
-    init(item: IMItem) {
+extension CBSender {
+    public init(item: IMItem) {
         self = .init(id: item.sender ?? "E:", fromMe: item.isFromMe)
     }
-    
-    init(item: IMMessageItem) {
+
+    public init(item: IMMessageItem) {
         self = .init(id: item.handle ?? "E:", fromMe: item.isFromMe())
     }
 }

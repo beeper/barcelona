@@ -5,14 +5,14 @@
 //  Created by Eric Rabil on 8/8/22.
 //
 
-import Foundation
-import Logging
 @_spi(synchronousQueries) import BarcelonaDB
+import Foundation
 import IMCore
-import IMSharedUtilities
 import IMFoundation
+import IMSharedUtilities
+import Logging
 
-fileprivate let log = Logger(label: "CBMessage")
+private let log = Logger(label: "CBMessage")
 
 public struct CBMessage: Codable, CustomDebugStringConvertible {
     /// The chat this message originated from
@@ -33,7 +33,7 @@ public struct CBMessage: Codable, CustomDebugStringConvertible {
     public var timeDelivered: Date?
     /// The bitflags for this message
     public var flags: Flags = .none
-    
+
     /// Initializes the message from a dictionary representation
     public init?(dictionary: [AnyHashable: Any], chat: CBChatIdentifier) {
         guard let id = dictionary["guid"] as? String else {
@@ -43,9 +43,14 @@ public struct CBMessage: Codable, CustomDebugStringConvertible {
         self.chat = chat
         self.handle(dictionary: dictionary)
     }
-    
+
     /// Updates the sender and timestamps according to the person who triggered the update
-    public mutating func handle(time: Date?, timeDelivered: Date?, timeRead: Date?, sender deltaSender: CBSender) -> CBMessage {
+    public mutating func handle(
+        time: Date?,
+        timeDelivered: Date?,
+        timeRead: Date?,
+        sender deltaSender: CBSender
+    ) -> CBMessage {
         if flags.contains(.fromMe) {
             if deltaSender.scheme != .me {
                 self.timeDelivered = timeDelivered
@@ -63,7 +68,7 @@ public struct CBMessage: Codable, CustomDebugStringConvertible {
         }
         return updated()
     }
-    
+
     /// Updates the message using a dictionary representation
     @discardableResult public mutating func handle(dictionary: [AnyHashable: Any]) -> CBMessage {
         service = (dictionary["service"] as? String).flatMap(CBServiceName.init(rawValue:)) ?? service
@@ -72,9 +77,14 @@ public struct CBMessage: Codable, CustomDebugStringConvertible {
             (dictionary[key] as? Double).flatMap(Date.init(timeIntervalSinceReferenceDate:))
         }
         flags.handle(dictionary: dictionary)
-        return handle(time: extractTime("time"), timeDelivered: extractTime("timeDelivered"), timeRead: extractTime("timeRead"), sender: CBSender(dictionary: dictionary))
+        return handle(
+            time: extractTime("time"),
+            timeDelivered: extractTime("timeDelivered"),
+            timeRead: extractTime("timeRead"),
+            sender: CBSender(dictionary: dictionary)
+        )
     }
-    
+
     private mutating func updated() -> CBMessage {
         if eligibleToResend {
             let id = id
@@ -83,7 +93,7 @@ public struct CBMessage: Codable, CustomDebugStringConvertible {
         }
         return self
     }
-    
+
     /// An XML-like string describing the message
     public var debugDescription: String {
         """
@@ -92,64 +102,64 @@ public struct CBMessage: Codable, CustomDebugStringConvertible {
     }
 }
 
-public extension CBMessage {
+extension CBMessage {
     /// Abstraction for managing message flags via an `OptionSet`
-    struct Flags: OptionSet {
+    public struct Flags: OptionSet {
         public typealias RawValue = UInt32
-        
+
         public let rawValue: RawValue
-        
+
         public init(rawValue: RawValue) {
             self.rawValue = rawValue
         }
     }
 }
 
-public extension CBMessage.Flags {
+extension CBMessage.Flags {
     /// No flags
-    static let none = Self(rawValue: 0)
+    public static let none = Self(rawValue: 0)
     /// The message was successfully sent
-    static let sent = Self(rawValue: 1 << 0)
+    public static let sent = Self(rawValue: 1 << 0)
     /// The message was successfully delivered
-    static let delivered = Self(rawValue: 1 << 1)
+    public static let delivered = Self(rawValue: 1 << 1)
     /// The message has been read
-    static let read = Self(rawValue: 1 << 2)
+    public static let read = Self(rawValue: 1 << 2)
     /// The message was sent by me
-    static let fromMe = Self(rawValue: 1 << 3)
+    public static let fromMe = Self(rawValue: 1 << 3)
     /// The message has been downgraded to SMS
-    static let downgraded = Self(rawValue: 1 << 4)
+    public static let downgraded = Self(rawValue: 1 << 4)
     /// The message will be sent again
-    static let beingRetried = Self(rawValue: 1 << 5)
+    public static let beingRetried = Self(rawValue: 1 << 5)
     /// The message is finished sending
-    static let finished = Self(rawValue: 1 << 6)
-    static let prepared = Self(rawValue: 1 << 7)
+    public static let finished = Self(rawValue: 1 << 6)
+    public static let prepared = Self(rawValue: 1 << 7)
     /// The message was sent using the SOS feature
-    static let sos = Self(rawValue: 1 << 8)
+    public static let sos = Self(rawValue: 1 << 8)
     /// The message is an alert from the system
-    static let alert = Self(rawValue: 1 << 9)
+    public static let alert = Self(rawValue: 1 << 9)
     /// The message has been marked and reported as spam
-    static let spam = Self(rawValue: 1 << 10)
+    public static let spam = Self(rawValue: 1 << 10)
     /// The message should be presented as an emote (removed in Big Sur, never used on iOS)
-    static let emote = Self(rawValue: 1 << 11)
+    public static let emote = Self(rawValue: 1 << 11)
     /// The message has been played (if it is an audio message)
-    static let played = Self(rawValue: 1 << 12)
+    public static let played = Self(rawValue: 1 << 12)
     /// The message is corrupt and may be missing information
-    static let corrupt = Self(rawValue: 1 << 13)
+    public static let corrupt = Self(rawValue: 1 << 13)
     /// The message should expire once viewed
-    static let expirable = Self(rawValue: 1 << 14)
+    public static let expirable = Self(rawValue: 1 << 14)
     /// The message should be presented as a waveform audio message
-    static let audioMessage = Self(rawValue: 1 << 15)
+    public static let audioMessage = Self(rawValue: 1 << 15)
     /// The message should be presented as a location message
-    static let locationMessage = Self(rawValue: 1 << 16)
+    public static let locationMessage = Self(rawValue: 1 << 16)
     /// The message has no contents, and is symbolic. Used for receipts and typing.
-    static let empty = Self(rawValue: 1 << 17)
-    static let reserved2 = Self(rawValue: 1 << 18)
-    static let reserved3 = Self(rawValue: 1 << 19)
+    public static let empty = Self(rawValue: 1 << 17)
+    public static let reserved2 = Self(rawValue: 1 << 18)
+    public static let reserved3 = Self(rawValue: 1 << 19)
     /// The message is a typing message when you have sent an empty message.
-    static let typing: Self = [.sent, .empty]
-    
+    public static let typing: Self = [.sent, .empty]
+
     /// Updates the bitmask state from dictionary representation
-    mutating func handle(dictionary: [AnyHashable: Any]) {
+    public mutating func handle(dictionary: [AnyHashable: Any]) {
         let flags = IMMessageFlags(rawValue: dictionary["flags"] as? UInt64 ?? 0)
         flip(.sent, flags.contains(.sent))
         flip(.delivered, flags.contains(.delivered))
@@ -167,28 +177,31 @@ public extension CBMessage.Flags {
         flip(.corrupt, flags.contains(.corrupt))
         flip(.expirable, flags.contains(.expirable))
         flip(.empty, flags.contains(.empty))
-//                flip(.acknowledgement, flags.contains(.ack))
-//                flip(.edit, flags.contains(.ed))
+        //                flip(.acknowledgement, flags.contains(.ack))
+        //                flip(.edit, flags.contains(.ed))
     }
-    
+
     /// Flip a specific flag
-    mutating func flip(_ flag: Self, _ enabled: Bool) {
+    public mutating func flip(_ flag: Self, _ enabled: Bool) {
         if enabled {
             insert(flag)
         } else {
             remove(flag)
         }
     }
-    
+
 }
 
 extension CBMessage.Flags: CaseIterable {
-    public static let allCases: [CBMessage.Flags] = [.sent, .delivered, .typing, .read, .fromMe, .downgraded, .beingRetried, .finished, .prepared, .sos, .alert, .spam, .emote, .played, .corrupt, .expirable, .audioMessage, .locationMessage, .empty]
+    public static let allCases: [CBMessage.Flags] = [
+        .sent, .delivered, .typing, .read, .fromMe, .downgraded, .beingRetried, .finished, .prepared, .sos, .alert,
+        .spam, .emote, .played, .corrupt, .expirable, .audioMessage, .locationMessage, .empty,
+    ]
 }
 
 // MARK: - Flag descriptions
-public extension CBMessage.Flags {
-    var name: String {
+extension CBMessage.Flags {
+    public var name: String {
         switch self {
         case .sent: return "sent"
         case .delivered: return "delivered"
@@ -236,7 +249,7 @@ extension CBMessage: Comparable {
         }
         return ltime < rtime
     }
-    
+
     public static func > (lhs: CBMessage, rhs: CBMessage) -> Bool {
         guard let ltime = lhs.time else {
             return true
@@ -253,7 +266,7 @@ extension CBMessage.Flags: Codable {
     public init(from decoder: Decoder) throws {
         rawValue = try RawValue(from: decoder)
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         try rawValue.encode(to: encoder)
     }
@@ -280,10 +293,10 @@ extension CBMessage.Flags {
         flip(.corrupt, item.isCorrupt)
         flip(.expirable, item.isExpirable)
         flip(.empty, item.isEmpty)
-//                flip(.acknowledgement, item.isMessageAcknowledgment())
-//                flip(.edit, item.isMessageEdit())
+        //                flip(.acknowledgement, item.isMessageAcknowledgment())
+        //                flip(.edit, item.isMessageEdit())
     }
-    
+
     /// Update flag state using an `IMItem` object
     @_disfavoredOverload mutating func handle(item: IMItem) {
         if let item = item as? IMMessageItem {
@@ -306,12 +319,12 @@ extension CBMessage.Flags {
         flip(.expirable, false)
         flip(.empty, false)
     }
-    
+
 }
 
-public extension CBMessage {
+extension CBMessage {
     /// Initializes the message using an `IMItem` instance
-    @_disfavoredOverload init(item: IMItem, chat: CBChatIdentifier) {
+    @_disfavoredOverload public init(item: IMItem, chat: CBChatIdentifier) {
         if let item = item as? IMMessageItem {
             self = CBMessage(item: item, chat: chat)
         } else {
@@ -320,16 +333,16 @@ public extension CBMessage {
             self.handle(item: item)
         }
     }
-    
+
     /// Initializes the message using an `IMMessageItem` instance
-    init(item: IMMessageItem, chat: CBChatIdentifier) {
+    public init(item: IMMessageItem, chat: CBChatIdentifier) {
         self.id = item.id
         self.chat = chat
         self.handle(item: item)
     }
-    
+
     /// Updates the message using an `IMItem` instance
-    @discardableResult @_disfavoredOverload mutating func handle(item: IMItem) -> CBMessage {
+    @discardableResult @_disfavoredOverload public mutating func handle(item: IMItem) -> CBMessage {
         if let item = item as? IMMessageItem {
             return handle(item: item)
         }
@@ -338,18 +351,23 @@ public extension CBMessage {
         flags.handle(item: item)
         return handle(time: item.time, timeDelivered: nil, timeRead: nil, sender: CBSender(item: item))
     }
-    
+
     /// Updates the message using an `IMMessageItem` instance
-    @discardableResult mutating func handle(item: IMMessageItem) -> CBMessage {
+    @discardableResult public mutating func handle(item: IMMessageItem) -> CBMessage {
         service = item.serviceStyle.map(CBServiceName.init(style:)) ?? service
         error = item.errorCode
         flags.handle(item: item)
-        return handle(time: item.time, timeDelivered: item.timeDelivered, timeRead: item.timeRead, sender: CBSender(item: item))
+        return handle(
+            time: item.time,
+            timeDelivered: item.timeDelivered,
+            timeRead: item.timeRead,
+            sender: CBSender(item: item)
+        )
     }
 }
 
-public extension CBMessage {
-    func loadIMMessageItem() -> IMMessageItem? {
+extension CBMessage {
+    public func loadIMMessageItem() -> IMMessageItem? {
         switch BLLoadIMMessageItem(withGUID: id) {
         case .some(let message):
             return message
@@ -372,8 +390,8 @@ extension CBMessage {
     }
 }
 
-public extension CBMessage {
-    var eligibleToResend: Bool {
+extension CBMessage {
+    public var eligibleToResend: Bool {
         guard flags.contains(.fromMe) else {
             return false
         }
@@ -386,7 +404,8 @@ public extension CBMessage {
         switch error {
         case .remoteUserDoesNotExist, .remoteUserIncompatible, .remoteUserInvalid, .remoteUserRejected:
             return true
-        case .networkFailure, .networkBusyFailure, .networkDeniedFailure, .networkLookupFailure, .networkConnectionFailure, .noNetworkFailure:
+        case .networkFailure, .networkBusyFailure, .networkDeniedFailure, .networkLookupFailure,
+            .networkConnectionFailure, .noNetworkFailure:
             return false
         case .localAccountDisabled, .localAccountInvalid, .localAccountNeedsUpdate, .localAccountDoesNotExist:
             return false
@@ -401,12 +420,14 @@ public extension CBMessage {
         }
     }
 
-    func resend() {
+    public func resend() {
         guard let message = loadIMMessageItem() else {
             return
         }
         if message.isBeingRetried {
-            log.info("Ignoring request to resend message \(String(describing: message.guid)), it is already being retried")
+            log.info(
+                "Ignoring request to resend message \(String(describing: message.guid)), it is already being retried"
+            )
             return
         }
         message.isBeingRetried = true
@@ -423,7 +444,14 @@ public extension CBMessage {
             #if canImport(IMFoundation) && canImport(BarcelonaDB)
             // only if we have CBDaemonListener
             if let style = service?.IMServiceStyle {
-                CBDaemonListener.shared.messagePipeline.send(Message(messageItem: message, chatID: DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id) ?? chat.chatIdentifiers[0], service: style))
+                CBDaemonListener.shared.messagePipeline.send(
+                    Message(
+                        messageItem: message,
+                        chatID: DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id)
+                            ?? chat.chatIdentifiers[0],
+                        service: style
+                    )
+                )
             }
             #endif
             return

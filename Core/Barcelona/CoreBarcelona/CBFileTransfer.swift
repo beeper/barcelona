@@ -18,7 +18,8 @@ public func CBInitializeFileTransfer(filename: String, path: URL) -> IMFileTrans
     Thread.main.sync {
         var guid: String
         if #available(macOS 11.0, *) {
-            guid = IMFileTransferCenter.sharedInstance().guidForNewOutgoingTransfer(withLocalURL: path, useLegacyGuid: true)
+            guid = IMFileTransferCenter.sharedInstance()
+                .guidForNewOutgoingTransfer(withLocalURL: path, useLegacyGuid: true)
         } else {
             guid = IMFileTransferCenter.sharedInstance().guidForNewOutgoingTransfer(withLocalURL: path)
         }
@@ -26,25 +27,32 @@ public func CBInitializeFileTransfer(filename: String, path: URL) -> IMFileTrans
         if let persistentPath = IMAttachmentPersistentPath(guid, filename, transfer.mimeType, transfer.type) {
             let persistentURL = URL(fileURLWithPath: persistentPath)
             do {
-                try FileManager.default.createDirectory(at: persistentURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
+                try FileManager.default.createDirectory(
+                    at: persistentURL.deletingLastPathComponent(),
+                    withIntermediateDirectories: true,
+                    attributes: nil
+                )
                 try FileManager.default.copyItem(at: path, to: persistentURL)
                 IMFileTransferCenter.sharedInstance().cbRetargetTransfer(transfer, toPath: persistentPath)
                 transfer.localURL = persistentURL
                 log.info("Retargeted file transfer \(guid) from \(path) to \(persistentURL)", source: "CBFileTransfer")
             } catch {
-                log.error("Failed to retarget file transfer \(guid) from \(path) to \(persistentURL): \(String(describing: error))", source: "CBFileTransfer")
+                log.error(
+                    "Failed to retarget file transfer \(guid) from \(path) to \(persistentURL): \(String(describing: error))",
+                    source: "CBFileTransfer"
+                )
             }
         }
-        
+
         transfer.transferredFilename = filename
-        
+
         IMFileTransferCenter.sharedInstance().registerTransfer(withDaemon: guid)
     }
     return transfer
 }
 
-public extension IMFileTransferCenter {
-    func cbRetargetTransfer(_ transfer: IMFileTransfer, toPath path: String) {
+extension IMFileTransferCenter {
+    public func cbRetargetTransfer(_ transfer: IMFileTransfer, toPath path: String) {
         if #available(macOS 13.0, iOS 16.0, *) {
             retargetTransfer(transfer.guid, toPath: path)
         } else {

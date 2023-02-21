@@ -6,9 +6,9 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
-import BarcelonaFoundation
 import Barcelona
+import BarcelonaFoundation
+import Foundation
 import Logging
 
 /// Need to update the enums codable data? Paste the cases at the top into IPCCommand.codegen.js and then paste the output of that below the CodingKeys declaration
@@ -44,51 +44,54 @@ private let log = Logger(label: "IPCPayload")
 public struct IPCPayload: Codable {
     public var command: IPCCommand
     public var id: Int?
-    
+
     private enum CodingKeys: CodingKey, CaseIterable {
         case id
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        
+
         if command.name != .log, let id = id {
             try container.encode(id, forKey: .id)
         }
-        
+
         try command.encode(to: encoder)
     }
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
+
         command = try IPCCommand(from: decoder)
         let commandID = try? container.decode(Int.self, forKey: .id)
-        
+
         id = commandID
     }
-    
+
     public init(id: Int? = nil, command: IPCCommand) {
         self.id = id
         self.command = command
     }
-    
+
     public func reply(withCommand command: IPCCommand, ipcChannel: MautrixIPCChannel) {
         guard let id = id else {
-            return log.debug("Reply issued for a command that had no ID. Inbound name: \(self.command.name.rawValue) Outbound name: \(self.command.name.rawValue)", source: "Mautrix")
+            return log.debug(
+                "Reply issued for a command that had no ID. Inbound name: \(self.command.name.rawValue) Outbound name: \(self.command.name.rawValue)",
+                source: "Mautrix"
+            )
         }
-        
+
         ipcChannel.writePayload(IPCPayload(id: id, command: command))
     }
-    
+
     public func reply(withResponse response: IPCResponse, ipcChannel: MautrixIPCChannel) {
         reply(withCommand: .response(response), ipcChannel: ipcChannel)
     }
-    
+
     public func fail(code: String, message: String, ipcChannel: MautrixIPCChannel) {
         reply(withCommand: .error(.init(code: code, message: message)), ipcChannel: ipcChannel)
     }
-    
+
     public func fail(strategy: ErrorStrategy, ipcChannel: MautrixIPCChannel) {
         reply(withCommand: strategy.asCommand, ipcChannel: ipcChannel)
     }

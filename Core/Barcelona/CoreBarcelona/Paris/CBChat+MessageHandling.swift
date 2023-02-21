@@ -14,25 +14,25 @@ import IMSharedUtilities
 
 private let log = Logger(label: "CBChat")
 
-public extension CBChat {
-    enum MessageInput: CustomDebugStringConvertible, CustomStringConvertible {
+extension CBChat {
+    public enum MessageInput: CustomDebugStringConvertible, CustomStringConvertible {
         #if canImport(IMSharedUtilities)
         case item(IMItem)
         #endif
         case dict([AnyHashable: Any])
-        
+
         public var guid: String? {
             switch self {
-                #if canImport(IMSharedUtilities)
+            #if canImport(IMSharedUtilities)
             case .item(let item): return item.id
-                #endif
+            #endif
             case .dict(let dict): return dict["guid"] as? String
             }
         }
-        
+
         public func handle(message: inout CBMessage?, leaf: CBChatIdentifier) -> CBMessage {
             switch self {
-                #if canImport(IMSharedUtilities)
+            #if canImport(IMSharedUtilities)
             case .item(let item):
                 if message != nil {
                     message!.handle(item: item)
@@ -40,7 +40,7 @@ public extension CBChat {
                 }
                 message = CBMessage(item: item, chat: leaf)
                 return message!
-                #endif
+            #endif
             case .dict(let dict):
                 if message != nil {
                     message!.handle(dictionary: dict)
@@ -50,29 +50,30 @@ public extension CBChat {
                 return message!
             }
         }
-        
+
         private var shared: CustomDebugStringConvertible & CustomStringConvertible {
             switch self {
-                #if canImport(IMSharedUtilities)
-            case .dict(let dict as CustomDebugStringConvertible & CustomStringConvertible), .item(let dict as CustomDebugStringConvertible & CustomStringConvertible):
+            #if canImport(IMSharedUtilities)
+            case .dict(let dict as CustomDebugStringConvertible & CustomStringConvertible),
+                .item(let dict as CustomDebugStringConvertible & CustomStringConvertible):
                 return dict
-                #else
+            #else
             case .dict(let dict as CustomDebugStringConvertible & CustomStringConvertible):
                 return dict
-                #endif
+            #endif
             }
         }
-        
+
         public var debugDescription: String {
             shared.debugDescription
         }
-        
+
         public var description: String {
             shared.description
         }
     }
-    
-    @discardableResult func handle(leaf: CBChatIdentifier, input item: MessageInput) -> CBMessage? {
+
+    @discardableResult public func handle(leaf: CBChatIdentifier, input item: MessageInput) -> CBMessage? {
         guard let id = item.guid else {
             log.warning("dropping message \(item.debugDescription) as it has an invalid guid?!")
             return nil
@@ -81,15 +82,15 @@ public extension CBChat {
         log.info("handled message \(id), \(message.debugDescription)")
         return message
     }
-    
-    @discardableResult func handle(leaf: CBChatIdentifier, item dictionary: [AnyHashable: Any]) -> CBMessage? {
+
+    @discardableResult public func handle(leaf: CBChatIdentifier, item dictionary: [AnyHashable: Any]) -> CBMessage? {
         handle(leaf: leaf, input: .dict(dictionary))
     }
 }
 
 #if canImport(IMSharedUtilities)
-public extension CBChat {
-    @discardableResult func handle(leaf: CBChatIdentifier, item: IMItem) -> CBMessage? {
+extension CBChat {
+    @discardableResult public func handle(leaf: CBChatIdentifier, item: IMItem) -> CBMessage? {
         handle(leaf: leaf, input: .item(item))
     }
 }

@@ -6,15 +6,15 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import Barcelona
+import Foundation
 import IMCore
 import Logging
 
 private let log = Logger(label: "BLIPC")
 
-private extension IPCPayload {
-    var runnable: Runnable? {
+extension IPCPayload {
+    fileprivate var runnable: Runnable? {
         switch command {
         case .send_message(let req):
             return req
@@ -50,10 +50,18 @@ func BLHandlePayload(_ payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
     guard let runnable = payload.runnable else {
         return log.warning("Received unhandleable payload type \(payload.command.name)")
     }
-    
+
     if runnable is AuthenticatedAsserting {
         guard IMAccountController.shared.accounts.contains(where: \.canSendMessages) else {
-            payload.reply(withCommand: .error(.init(code: BLHealthTicker.shared.latestStatus.state_event.rawValue, message: "You must be signed in to do that.")), ipcChannel: ipcChannel)
+            payload.reply(
+                withCommand: .error(
+                    .init(
+                        code: BLHealthTicker.shared.latestStatus.state_event.rawValue,
+                        message: "You must be signed in to do that."
+                    )
+                ),
+                ipcChannel: ipcChannel
+            )
             return
         }
     }

@@ -6,10 +6,10 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
-import IMCore
 import BarcelonaDB
+import Foundation
 import IDS
+import IMCore
 import IMSharedUtilities
 
 struct CBHandleFormatter {
@@ -17,12 +17,12 @@ struct CBHandleFormatter {
         case withResource
         case withoutResource
     }
-    
+
     var format: OutputFormat
-    
+
     static let prefixedFormatter = CBHandleFormatter(format: .withResource)
     static let unprefixedFormatter = CBHandleFormatter(format: .withoutResource)
-    
+
     func format(_ id: String) -> String {
         // IDSDestination takes whatever you throw at it and parses it
         let destination = IDSDestination(uri: id)
@@ -37,7 +37,7 @@ internal func CBResolveSenderHandle(originalHandle: String?, isFromMe: Bool, ser
     guard isFromMe, let service = service?.service else {
         return originalHandle
     }
-    
+
     switch service.id {
     case .iMessage:
         return nil
@@ -56,7 +56,11 @@ extension IMItem {
 
 extension IMMessage {
     func resolveSenderID(inService service: IMServiceStyle? = nil) -> String? {
-        CBResolveSenderHandle(originalHandle: sender?.idWithoutResource, isFromMe: isFromMe, service: service ?? _imMessageItem?.serviceStyle)
+        CBResolveSenderHandle(
+            originalHandle: sender?.idWithoutResource,
+            isFromMe: isFromMe,
+            service: service ?? _imMessageItem?.serviceStyle
+        )
     }
 }
 

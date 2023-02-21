@@ -6,18 +6,18 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
-import CoreFoundation
-import BarcelonaFoundation
 import Barcelona
+import BarcelonaFoundation
 import Combine
+import CoreFoundation
+import Foundation
 
-public extension FileHandle {
+extension FileHandle {
     private static var threads: [FileHandle: Thread] = [:]
-    private static var callbacks: [FileHandle: (Data) -> ()] = [:]
+    private static var callbacks: [FileHandle: (Data) -> Void] = [:]
     private static var runLoops: [FileHandle: CFRunLoop] = [:]
-    
-    var dataCallback: (Data) -> () {
+
+    public var dataCallback: (Data) -> Void {
         get {
             Self.callbacks[self] ?? { _ in }
         }
@@ -25,32 +25,33 @@ public extension FileHandle {
             Self.callbacks[self] = newValue
         }
     }
-    
+
     private var thread: Thread {
         if let thread = Self.threads[self] {
             return thread
         }
-        
+
         let thread = Thread {
             Self.runLoops[self] = CFRunLoopGetCurrent()
-            
+
             RunLoop.current.schedule {
-                NotificationCenter.default.addObserver(forName: .NSFileHandleDataAvailable, object: self, queue: nil) { notif in
+                NotificationCenter.default.addObserver(forName: .NSFileHandleDataAvailable, object: self, queue: nil) {
+                    notif in
                     let handle = notif.object as! FileHandle
                     self.dataCallback(handle.availableData)
                     handle.waitForDataInBackgroundAndNotify()
                 }
                 self.waitForDataInBackgroundAndNotify()
             }
-            
+
             RunLoop.current.run()
         }
         Self.threads[self] = thread
-        
+
         return thread
     }
-    
-    func performOnThread(_ callback: @escaping () -> ()) {
+
+    public func performOnThread(_ callback: @escaping () -> Void) {
         guard let runLoop = Self.runLoops[self] else {
             callback()
             return
@@ -58,15 +59,15 @@ public extension FileHandle {
         CFRunLoopPerformBlock(runLoop, CFRunLoopMode.commonModes.rawValue, callback)
         CFRunLoopWakeUp(runLoop)
     }
-    
-    func handleDataAsynchronously(_ cb: @escaping (Data) -> ()) {
+
+    public func handleDataAsynchronously(_ cb: @escaping (Data) -> Void) {
         dataCallback = cb
         thread.start()
     }
 }
 
 extension FileHandle: MautrixIPCInputChannel {
-    public func listen(_ cb: @escaping (Data) -> ()) {
+    public func listen(_ cb: @escaping (Data) -> Void) {
         self.handleDataAsynchronously(cb)
     }
 }

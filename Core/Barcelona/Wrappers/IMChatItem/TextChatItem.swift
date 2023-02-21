@@ -6,8 +6,8 @@
 //  Copyright © 2020 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import AnyCodable
+import Foundation
 import IMCore
 
 private let regex = try! NSRegularExpression(pattern: "<body.*?>([\\s\\S]*)<\\/body>")
@@ -36,55 +36,41 @@ public enum TextPartAttribute: Codable, Hashable {
     case breadcrumbMarker(String)
     case breadcrumbOptions(Int)
     case mention(String)
-    
+
     private enum CodingKeys: String, Codable, CodingKey {
         case key, value
     }
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
+
         var attribute: TextPartAttribute? = nil
-        
+
         let key = try container.decode(String.self, forKey: .key)
-        
+
         switch key {
-        case "bold":
-            fallthrough
-        case "italic":
-            fallthrough
-        case "underline":
-            fallthrough
-        case "strike":
-            fallthrough
-        case "breadcrumbOptions":
-            fallthrough
-        case "writingDirection":
+        case "bold", "italic", "underline", "strike", "breadcrumbOptions", "writingDirection":
             attribute = TextPartAttribute(rawKey: key, rawValue: try container.decode(Int.self, forKey: .value))
-        case "mention":
-            fallthrough
-        case "breadcrumbMarker":
-            fallthrough
-        case "link":
+        case "mention", "breadcrumbMarker", "link":
             attribute = TextPartAttribute(rawKey: key, rawValue: try container.decode(String.self, forKey: .value))
         default:
             throw BarcelonaError(code: 400, message: "Invalid attribute key")
         }
-        
+
         guard attribute != nil else {
             throw BarcelonaError(code: 400, message: "Invalid attribute key")
         }
-        
+
         self = attribute!
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        
+
         try container.encode(name, forKey: .key)
         try container.encode(value, forKey: .value)
     }
-    
+
     public init?(rawKey key: String, rawValue value: Int) {
         switch key {
         case "bold":
@@ -103,7 +89,7 @@ public enum TextPartAttribute: Codable, Hashable {
             return nil
         }
     }
-    
+
     public init?(rawKey key: String, rawValue value: String) {
         switch key {
         case "link":
@@ -116,37 +102,31 @@ public enum TextPartAttribute: Codable, Hashable {
             return nil
         }
     }
-    
+
     public init?(attributedKey key: NSAttributedString.Key, rawValue value: Any) {
         guard let enumKey = TextPartAttribute.enumKey(forAttributedKey: key) else {
             return nil
         }
-        
+
         switch enumKey {
-        case "bold":
-            fallthrough
-        case "italic":
-            fallthrough
-        case "strike":
-            fallthrough
-        case "underline":
-            fallthrough
-        case "breadcrumbOptions":
-            fallthrough
-        case "writingDirection":
-            guard let intValue = value as? Int ?? Int(value as? String ?? "illegal"), let attribute = TextPartAttribute(rawKey: enumKey, rawValue: intValue) else {
+        case "bold", "italic", "strike", "underline", "breadcrumbOptions", "writingDirection":
+            guard let intValue = value as? Int ?? Int(value as? String ?? "illegal"),
+                let attribute = TextPartAttribute(rawKey: enumKey, rawValue: intValue)
+            else {
                 return nil
             }
             self = attribute
-        case "mention":
-            fallthrough
-        case "breadcrumbMarker":
-            guard let stringValue = value as? String, let attribute = TextPartAttribute(rawKey: enumKey, rawValue: stringValue) else {
+        case "mention", "breadcrumbMarker":
+            guard let stringValue = value as? String,
+                let attribute = TextPartAttribute(rawKey: enumKey, rawValue: stringValue)
+            else {
                 return nil
             }
             self = attribute
         case "link":
-            guard let urlValue = value as? URL, let attribute = TextPartAttribute(rawKey: enumKey, rawValue: urlValue.absoluteString) else {
+            guard let urlValue = value as? URL,
+                let attribute = TextPartAttribute(rawKey: enumKey, rawValue: urlValue.absoluteString)
+            else {
                 return nil
             }
             self = attribute
@@ -154,19 +134,19 @@ public enum TextPartAttribute: Codable, Hashable {
             return nil
         }
     }
-    
+
     public var stringValue: String? {
         return self.value.value as? String
     }
-    
+
     public var intValue: Int? {
         return self.value.value as? Int
     }
-    
+
     public var boolValue: Bool? {
         return self.value.value as? Bool
     }
-    
+
     public var value: AnyCodable {
         switch self {
         case .bold(let value):
@@ -189,7 +169,7 @@ public enum TextPartAttribute: Codable, Hashable {
             return .init(value)
         }
     }
-    
+
     public static func enumKey(forAttributedKey key: NSAttributedString.Key) -> String? {
         if #available(iOS 14, macOS 10.16, watchOS 7, *) {
             switch key {
@@ -199,7 +179,7 @@ public enum TextPartAttribute: Codable, Hashable {
                 break
             }
         }
-        
+
         switch key {
         case MessageAttributes.bold:
             return "bold"
@@ -221,7 +201,7 @@ public enum TextPartAttribute: Codable, Hashable {
             return nil
         }
     }
-    
+
     public var name: String {
         switch self {
         case .bold:
@@ -244,7 +224,7 @@ public enum TextPartAttribute: Codable, Hashable {
             return "mention"
         }
     }
-    
+
     public var attributedKey: NSAttributedString.Key {
         if #available(iOS 14, macOS 10.16, watchOS 7, *) {
             switch self {
@@ -254,7 +234,7 @@ public enum TextPartAttribute: Codable, Hashable {
                 break
             }
         }
-        
+
         switch self {
         case .bold:
             return MessageAttributes.bold
@@ -276,7 +256,7 @@ public enum TextPartAttribute: Codable, Hashable {
             return MessageAttributes.bold
         }
     }
-    
+
     public var attributedValue: Any {
         switch self {
         case .link:
@@ -292,11 +272,11 @@ public enum TextPartAttribute: Codable, Hashable {
 
 public struct TextChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
     public static let ingestionClasses: [NSObject.Type] = [IMTextMessagePartChatItem.self]
-    
+
     public init?(ingesting item: NSObject, context: IngestionContext) {
         self.init(item as! IMTextMessagePartChatItem, parts: context.textParts, chatID: context.chatID)
     }
-    
+
     init(_ item: IMTextMessagePartChatItem, parts: [TextPart]? = nil, chatID: String) {
         id = item.id
         self.chatID = chatID
@@ -308,7 +288,7 @@ public struct TextChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
         self.parts = parts ?? ERTextParts(from: item.text ?? NSAttributedString())
         self.subject = item.subject?.string
     }
-    
+
     init(_ item: IMTranscriptPluginChatItem, text: String, parts: [TextPart], chatID: String) {
         id = item.id
         self.chatID = chatID
@@ -319,7 +299,7 @@ public struct TextChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
         self.parts = parts
         self.text = text
     }
-    
+
     public var id: String
     public var chatID: String
     public var fromMe: Bool
@@ -330,11 +310,11 @@ public struct TextChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
     public var text: String
     public var subject: String?
     public var acknowledgments: [AcknowledgmentChatItem]?
-    
+
     public var type: ChatItemType {
         .text
     }
-    
+
     #if PRIVATE_LOGGING
     public var debugDescription: String {
         "\(type) { id=\(id) text=\(text) fromMe=\(fromMe) }"

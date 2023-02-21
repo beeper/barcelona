@@ -33,8 +33,10 @@ extension IMGroupTitleChangeChatItem: IMGroupTitleItemConforming {
 }
 
 public struct GroupTitleChangeItem: ChatItemOwned, Hashable {
-    public static let ingestionClasses: [NSObject.Type] = [IMGroupTitleChangeItem.self, IMGroupTitleChangeChatItem.self]
-    
+    public static let ingestionClasses: [NSObject.Type] = [
+        IMGroupTitleChangeItem.self, IMGroupTitleChangeChatItem.self,
+    ]
+
     public init?(ingesting item: NSObject, context: IngestionContext) {
         switch item {
         case let item as IMGroupTitleChangeItem:
@@ -45,7 +47,7 @@ public struct GroupTitleChangeItem: ChatItemOwned, Hashable {
             return nil
         }
     }
-    
+
     init(_ item: IMGroupTitleItemConforming, chatID: String) {
         id = item.id
         self.chatID = chatID
@@ -56,7 +58,7 @@ public struct GroupTitleChangeItem: ChatItemOwned, Hashable {
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
     }
-    
+
     public var id: String
     public var chatID: String
     public var fromMe: Bool
@@ -65,7 +67,7 @@ public struct GroupTitleChangeItem: ChatItemOwned, Hashable {
     public var threadOriginator: String?
     public var title: String?
     public var sender: String?
-    
+
     public var type: ChatItemType {
         .groupTitle
     }

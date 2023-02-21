@@ -12,7 +12,7 @@ public protocol Identifiable {
 
     /// A type representing the stable identity of the entity associated with
     /// an instance.
-    associatedtype ID : Hashable
+    associatedtype ID: Hashable
 
     /// The stable identity of the entity associated with this instance.
     var id: Self.ID { get }

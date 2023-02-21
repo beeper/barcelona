@@ -9,9 +9,7 @@
 import Foundation
 import GRDB
 
-/**
- Represents a chat record in the chat.db file
- */
+/// Represents a chat record in the chat.db file
 public class RawChat: Record {
     public required init(row: Row) {
         ROWID = row[Columns.ROWID]
@@ -43,7 +41,7 @@ public class RawChat: Record {
         is_blackholed = row[Columns.is_blackholed]
         super.init(row: row)
     }
-    
+
     public override class var databaseTableName: String { "chat" }
 
     public override func encode(to container: inout PersistenceContainer) {
@@ -77,7 +75,10 @@ public class RawChat: Record {
     }
 
     public enum Columns: String, ColumnExpression {
-        case ROWID, guid, style, state, account_id, properties, chat_identifier, service_name, room_name, account_login, is_archived, last_addressed_handle, display_name, group_id, is_filtered, successful_query, engram_id, server_change_token, ck_sync_state, original_group_id, last_read_message_timestamp, sr_server_change_token, sr_ck_sync_state, cloudkit_record_id, sr_cloudkit_record_id, last_addressed_sim_id, is_blackholed
+        case ROWID, guid, style, state, account_id, properties, chat_identifier, service_name, room_name, account_login,
+            is_archived, last_addressed_handle, display_name, group_id, is_filtered, successful_query, engram_id,
+            server_change_token, ck_sync_state, original_group_id, last_read_message_timestamp, sr_server_change_token,
+            sr_ck_sync_state, cloudkit_record_id, sr_cloudkit_record_id, last_addressed_sim_id, is_blackholed
     }
 
     public var ROWID: Int64?
@@ -108,4 +109,3 @@ public class RawChat: Record {
     public var last_addressed_sim_id: String?
     public var is_blackholed: Int64?
 }
-

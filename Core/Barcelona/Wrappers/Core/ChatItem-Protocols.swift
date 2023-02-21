@@ -10,19 +10,19 @@ import Foundation
 import IMCore
 
 #if os(iOS)
-private extension NSObject {
-    static var className: String {
+extension NSObject {
+    fileprivate static var className: String {
         NSStringFromClass(self)
     }
-    
-    var className: String {
+
+    fileprivate var className: String {
         NSStringFromClass(object_getClass(self)!)
     }
 }
 #endif
 
-private extension ChatItem {
-    static var ingestionPairs: [(String, ChatItem.Type)] {
+extension ChatItem {
+    fileprivate static var ingestionPairs: [(String, ChatItem.Type)] {
         ingestionClasses.map {
             #if os(iOS)
             ($0.className, self)
@@ -50,24 +50,26 @@ public enum ChatItemType: String, Codable, CaseIterable {
     case sticker
     case action
     case error
-    
-    static let ingestionMapping: [String: ChatItem.Type] = allCases.flatMap { $0.decodingClass.ingestionPairs }.dictionary(keyedBy: \.0, valuedBy: \.1)
-    
+
+    static let ingestionMapping: [String: ChatItem.Type] = allCases.flatMap { $0.decodingClass.ingestionPairs }
+        .dictionary(keyedBy: \.0, valuedBy: \.1)
+
     @usableFromInline
     static func ingest(object: NSObject, context: IngestionContext) -> ChatItem {
-        ingestionMapping[object.className]?.init(ingesting: object, context: context) ?? PhantomChatItem(object, chatID: context.chatID)
+        ingestionMapping[object.className]?.init(ingesting: object, context: context)
+            ?? PhantomChatItem(object, chatID: context.chatID)
     }
-    
+
     static let transcriptItems: [ChatItemType] = [
-        .participantChange, .groupAction, .groupTitle, .typing
+        .participantChange, .groupAction, .groupTitle, .typing,
     ]
-    
+
     static let chatItems: [ChatItemType] = [
         .action, .attachment, .plugin,
         .text, .acknowledgment,
-        .sticker, .message
+        .sticker, .message,
     ]
-    
+
     var decodingClass: ChatItem.Type {
         switch self {
         case .date:
@@ -107,12 +109,12 @@ public enum ChatItemType: String, Codable, CaseIterable {
 }
 
 public struct IngestionContext {
-    
+
     public init(chatID: String, service: IMServiceStyle) {
         self.chatID = chatID
         self.service = service
     }
-    
+
     public let chatID: String
     public let service: IMServiceStyle
     public let attachment: Attachment? = nil
@@ -121,13 +123,13 @@ public struct IngestionContext {
     public let message: IMMessage? = nil
 }
 
-internal extension Optional where Wrapped == String {
+extension Optional where Wrapped == String {
     var debugString: String {
         self ?? "(nil)"
     }
 }
 
-internal extension Optional where Wrapped == Bool {
+extension Optional where Wrapped == Bool {
     var debugString: String {
         (self ?? false).description
     }
@@ -136,9 +138,9 @@ internal extension Optional where Wrapped == Bool {
 @_typeEraser(AnyChatItem)
 public protocol ChatItem: Codable, CustomDebugStringConvertible {
     static var ingestionClasses: [NSObject.Type] { get }
-    
+
     init?(ingesting item: NSObject, context: IngestionContext)
-    
+
     var id: String { get set }
     var chatID: String { get set }
     var fromMe: Bool { get set }
@@ -150,12 +152,12 @@ public protocol ChatItem: Codable, CustomDebugStringConvertible {
     var isChatItem: Bool { get }
     var isMessage: Bool { get }
     var isNotMessage: Bool { get }
-    
+
     func hash(into hasher: inout Hasher)
 }
 
-public extension ChatItem {
-    var debugDescription: String {
+extension ChatItem {
+    public var debugDescription: String {
         "\(type) { id=\(id) fromMe=\(fromMe) }"
     }
 }
@@ -165,26 +167,26 @@ extension ChatItem {
         if let item = self as? AnyChatItem {
             return item
         }
-        
+
         return AnyChatItem(erasing: self)
     }
-    
+
     public var isTranscriptItem: Bool {
         ChatItemType.transcriptItems.contains(type)
     }
-    
+
     public var isChatItem: Bool {
         ChatItemType.chatItems.contains(type)
     }
-    
+
     public var isMessage: Bool {
         type == .message
     }
-    
+
     public var isNotMessage: Bool {
         type != .message
     }
-    
+
     public var isAcknowledgable: Bool {
         self is ChatItemAcknowledgable
     }
@@ -206,19 +208,37 @@ public class AnyChatItem: ChatItem, Hashable, ChatItemOwned, ChatItemAcknowledga
     public static func == (lhs: AnyChatItem, rhs: AnyChatItem) -> Bool {
         lhs.hashValue == rhs.hashValue
     }
-    
+
     public func hash(into hasher: inout Hasher) {
         item.hash(into: &hasher)
     }
-    
+
     public static var ingestionClasses: [NSObject.Type] { [] }
-    
-    public var id: String { get { item.id } set { item.id = newValue } }
-    public var chatID: String { get { item.chatID } set { item.chatID = newValue } }
-    public var fromMe: Bool { get { item.fromMe } set { item.fromMe = newValue } }
-    public var time: Double { get { item.time } set { item.time = newValue } }
-    public var threadIdentifier: String? { get { item.threadIdentifier } set { item.threadIdentifier = newValue } }
-    public var threadOriginator: String? { get { item.threadOriginator } set { item.threadOriginator = newValue } }
+
+    public var id: String {
+        get { item.id }
+        set { item.id = newValue }
+    }
+    public var chatID: String {
+        get { item.chatID }
+        set { item.chatID = newValue }
+    }
+    public var fromMe: Bool {
+        get { item.fromMe }
+        set { item.fromMe = newValue }
+    }
+    public var time: Double {
+        get { item.time }
+        set { item.time = newValue }
+    }
+    public var threadIdentifier: String? {
+        get { item.threadIdentifier }
+        set { item.threadIdentifier = newValue }
+    }
+    public var threadOriginator: String? {
+        get { item.threadOriginator }
+        set { item.threadOriginator = newValue }
+    }
     public var type: ChatItemType { item.type }
     public var sender: String? {
         get {
@@ -228,12 +248,12 @@ public class AnyChatItem: ChatItem, Hashable, ChatItemOwned, ChatItemAcknowledga
             guard var item = item as? ChatItemOwned else {
                 return
             }
-            
+
             item.sender = newValue
             self.item = item
         }
     }
-    
+
     public var associatedID: String? {
         get {
             (item as? ChatItemAssociable)?.associatedID
@@ -242,12 +262,12 @@ public class AnyChatItem: ChatItem, Hashable, ChatItemOwned, ChatItemAcknowledga
             guard var item = item as? ChatItemAssociable, let id = newValue else {
                 return
             }
-            
+
             item.associatedID = id
             self.item = item
         }
     }
-    
+
     public var acknowledgments: [AcknowledgmentChatItem]? {
         get {
             (item as? ChatItemAcknowledgable)?.acknowledgments
@@ -256,52 +276,52 @@ public class AnyChatItem: ChatItem, Hashable, ChatItemOwned, ChatItemAcknowledga
             guard var item = item as? ChatItemAcknowledgable else {
                 return
             }
-            
+
             item.acknowledgments = newValue
             self.item = item
         }
     }
-    
+
     public var isAcknowledgable: Bool {
         item is ChatItemAcknowledgable
     }
-    
+
     public private(set) var item: ChatItem
-    
+
     public init<T: ChatItem>(erasing item: T) {
         self.item = item
     }
-    
+
     public required init(ingesting item: NSObject, context: IngestionContext) {
         self.item = ChatItemType.ingest(object: item, context: context)
     }
-    
+
     public init(_ item: ChatItem) {
         self.item = item
     }
-    
+
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
+
         let type = try container.decode(ChatItemType.self, forKey: .type)
         item = try type.decodingClass.init(from: container.superDecoder(forKey: .payload))
     }
-    
+
     private enum CodingKeys: CodingKey {
         case payload, type
     }
-    
-    private func setting<Proto: ChatItem>(type: Proto.Type, _ cb: (inout Proto) -> ()) {
-        
+
+    private func setting<Proto: ChatItem>(type: Proto.Type, _ cb: (inout Proto) -> Void) {
+
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        
+
         try item.encode(to: container.superEncoder(forKey: .payload))
         try container.encode(type, forKey: .type)
     }
-    
+
     public var debugDescription: String {
         item.debugDescription
     }

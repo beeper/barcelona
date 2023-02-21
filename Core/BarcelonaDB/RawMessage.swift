@@ -9,17 +9,29 @@
 import Foundation
 import GRDB
 
-/**
- Represents a message record in the chat.db file
- */
+/// Represents a message record in the chat.db file
 public class RawMessage: Record {
     public override class var databaseTableName: String { "message" }
-    
-    public static let messageChatJoin = belongsTo(ChatMessageJoin.self, using: ForeignKey(["ROWID"], to: ["message_id"]))
-    public static let messageHandleJoin = belongsTo(RawHandle.self, key: "handle", using: ForeignKey([RawMessage.Columns.handle_id], to: [RawHandle.Columns.ROWID]))
-    public static let messageOtherHandleJoin = belongsTo(RawHandle.self, key: "otherHandle", using: ForeignKey([RawMessage.Columns.other_handle], to: [RawHandle.Columns.ROWID]))
-    public static let messageAttachmentJoin = belongsTo(MessageAttachmentJoin.self, using: ForeignKey([RawMessage.Columns.ROWID], to: [MessageAttachmentJoin.Columns.message_id]))
-    
+
+    public static let messageChatJoin = belongsTo(
+        ChatMessageJoin.self,
+        using: ForeignKey(["ROWID"], to: ["message_id"])
+    )
+    public static let messageHandleJoin = belongsTo(
+        RawHandle.self,
+        key: "handle",
+        using: ForeignKey([RawMessage.Columns.handle_id], to: [RawHandle.Columns.ROWID])
+    )
+    public static let messageOtherHandleJoin = belongsTo(
+        RawHandle.self,
+        key: "otherHandle",
+        using: ForeignKey([RawMessage.Columns.other_handle], to: [RawHandle.Columns.ROWID])
+    )
+    public static let messageAttachmentJoin = belongsTo(
+        MessageAttachmentJoin.self,
+        using: ForeignKey([RawMessage.Columns.ROWID], to: [MessageAttachmentJoin.Columns.message_id])
+    )
+
     public required init(row: Row) {
         account = row[Columns.account]
         account_guid = row[Columns.account_guid]
@@ -94,7 +106,7 @@ public class RawMessage: Record {
         was_downgraded = row[Columns.was_downgraded]
         super.init(row: row)
     }
-    
+
     public override func encode(to container: inout PersistenceContainer) {
         container[Columns.account] = account
         container[Columns.account_guid] = account_guid
@@ -170,9 +182,19 @@ public class RawMessage: Record {
     }
 
     public enum Columns: String, ColumnExpression {
-        case account, account_guid, associated_message_guid, associated_message_range_length, associated_message_range_location, associated_message_type, attributedBody, balloon_bundle_id, cache_has_attachments, cache_roomnames, ck_record_change_tag, ck_record_id, ck_sync_state, country, date, date_delivered, date_played, date_read, destination_caller_id, error, expire_state, expressive_send_style_id, group_action_type, group_title, guid, handle_id, has_dd_results, is_archive, is_audio_message, is_auto_reply, is_corrupt, is_delayed, is_delivered, is_emote, is_empty, is_expirable, is_finished, is_forward, is_from_me, is_played, is_prepared, is_read, is_sent, is_service_message, is_spam, is_system_message, item_type, message_action_type, message_source, message_summary_info, other_handle, payload_data, replace, reply_to_guid, ROWID, service, service_center, share_direction, share_status, sort_id, sr_ck_record_change_tag, sr_ck_record_id, sr_ck_sync_state, subject, text, time_expressive_send_played, type, version, was_data_detected, was_deduplicated, was_downgraded
+        case account, account_guid, associated_message_guid, associated_message_range_length,
+            associated_message_range_location, associated_message_type, attributedBody, balloon_bundle_id,
+            cache_has_attachments, cache_roomnames, ck_record_change_tag, ck_record_id, ck_sync_state, country, date,
+            date_delivered, date_played, date_read, destination_caller_id, error, expire_state,
+            expressive_send_style_id, group_action_type, group_title, guid, handle_id, has_dd_results, is_archive,
+            is_audio_message, is_auto_reply, is_corrupt, is_delayed, is_delivered, is_emote, is_empty, is_expirable,
+            is_finished, is_forward, is_from_me, is_played, is_prepared, is_read, is_sent, is_service_message, is_spam,
+            is_system_message, item_type, message_action_type, message_source, message_summary_info, other_handle,
+            payload_data, replace, reply_to_guid, ROWID, service, service_center, share_direction, share_status,
+            sort_id, sr_ck_record_change_tag, sr_ck_record_id, sr_ck_sync_state, subject, text,
+            time_expressive_send_played, type, version, was_data_detected, was_deduplicated, was_downgraded
     }
-    
+
     public var account: String?
     public var account_guid: String?
     public var associated_message_guid: String?
@@ -246,13 +268,19 @@ public class RawMessage: Record {
     public var was_downgraded: Int64?
 }
 
-internal extension RawMessage {
-    static func joiningOnROWIDsWhenNotEmpty(ROWIDs: [Int64], withColumns columns: [RawMessage.Columns]) -> QueryInterfaceRequest<RawMessage> {
+extension RawMessage {
+    static func joiningOnROWIDsWhenNotEmpty(
+        ROWIDs: [Int64],
+        withColumns columns: [RawMessage.Columns]
+    ) -> QueryInterfaceRequest<RawMessage> {
         if ROWIDs.count > 0 {
-            return RawMessage.joining(required: RawMessage.messageChatJoin.filter(ROWIDs.contains(ChatMessageJoin.Columns.chat_id))).select(columns)
+            return
+                RawMessage.joining(
+                    required: RawMessage.messageChatJoin.filter(ROWIDs.contains(ChatMessageJoin.Columns.chat_id))
+                )
+                .select(columns)
         } else {
             return RawMessage.select(columns)
         }
     }
 }
-

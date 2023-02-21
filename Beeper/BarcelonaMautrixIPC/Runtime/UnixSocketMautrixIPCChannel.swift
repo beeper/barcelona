@@ -1,7 +1,7 @@
 import Foundation
+import Logging
 import NIO
 import NIOFoundationCompat
-import Logging
 
 /// Handles sending and receiving data from the Mautrix UNIX socket.
 public class UnixSocketMautrixIPCChannel: MautrixIPCInputChannel, MautrixIPCOutputChannel {
@@ -25,11 +25,12 @@ public class UnixSocketMautrixIPCChannel: MautrixIPCInputChannel, MautrixIPCOutp
         do {
             let group = MultiThreadedEventLoopGroup(numberOfThreads: 2)
             let client = ClientBootstrap(group: group)
-            channel = try client.channelInitializer { channel in
-                channel.pipeline.addHandler(ClosureReadHandler(readCallback: cb))
-            }
-            .connect(unixDomainSocketPath: socketPath)
-            .wait()
+            channel =
+                try client.channelInitializer { channel in
+                    channel.pipeline.addHandler(ClosureReadHandler(readCallback: cb))
+                }
+                .connect(unixDomainSocketPath: socketPath)
+                .wait()
         } catch {
             log.error("Failed to start listening to unix socket: \(error.localizedDescription)")
         }

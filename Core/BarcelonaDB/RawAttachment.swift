@@ -14,12 +14,12 @@ public struct ResourceOrigin: Codable, Hashable {
         self.chatID = chatID
         self.handleID = handleID
         self.date = date
-        
+
         if chatID == nil, handleID == nil, date == nil {
             return nil
         }
     }
-    
+
     public var chatID: String?
     public var handleID: String?
     public var date: Double?
@@ -27,9 +27,12 @@ public struct ResourceOrigin: Codable, Hashable {
 
 public class RawAttachment: Record {
     public override class var databaseTableName: String { "attachment" }
-    
-    public static let messageAttachmentJoin = belongsTo(MessageAttachmentJoin.self, using: ForeignKey(["ROWID"], to: ["attachment_id"]))
-    
+
+    public static let messageAttachmentJoin = belongsTo(
+        MessageAttachmentJoin.self,
+        using: ForeignKey(["ROWID"], to: ["attachment_id"])
+    )
+
     public required init(row: Row) {
         ROWID = row[Columns.ROWID]
         guid = row[Columns.guid]
@@ -84,7 +87,10 @@ public class RawAttachment: Record {
     }
 
     public enum Columns: String, ColumnExpression {
-        case ROWID, guid, created_date, start_date, filename, uti, mime_type, transfer_state, is_outgoing, user_info, transfer_name, total_bytes, is_sticker, sticker_user_info, attribution_info, hide_attachment, ck_sync_state, ck_server_change_token_blob, ck_record_id, original_guid, sr_ck_sync_state, sr_ck_server_change_token_blob, sr_ck_record_id
+        case ROWID, guid, created_date, start_date, filename, uti, mime_type, transfer_state, is_outgoing, user_info,
+            transfer_name, total_bytes, is_sticker, sticker_user_info, attribution_info, hide_attachment, ck_sync_state,
+            ck_server_change_token_blob, ck_record_id, original_guid, sr_ck_sync_state, sr_ck_server_change_token_blob,
+            sr_ck_record_id
     }
 
     public var ROWID: Int64?
@@ -110,8 +116,7 @@ public class RawAttachment: Record {
     public var sr_ck_sync_state: Int64?
     public var sr_ck_server_change_token_blob: Data?
     public var sr_ck_record_id: String?
-    
+
     // MARK: - Overlay
     public var origin: ResourceOrigin?
 }
-

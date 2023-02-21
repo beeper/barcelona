@@ -6,49 +6,53 @@
 //  Copyright © 2020 Eric Rabil. All rights reserved.
 //
 
+import BarcelonaDB
 import Foundation
 import IMCore
-import IMSharedUtilities
-import BarcelonaDB
-import Logging
 import IMFoundation
+import IMSharedUtilities
+import Logging
 
 private func CBExtractThreadOriginatorAndPartFromIdentifier(_ identifier: String) -> (String, Int)? {
     let parts = identifier.split(separator: ",")
-    
-    if #available(macOS 10.16, iOS 14.0, *), let identifierData = CBMessageItemIdentifierData(rawValue: IMMessageCreateAssociatedMessageGUIDFromThreadIdentifier(identifier)) {
+
+    if #available(macOS 10.16, iOS 14.0, *),
+        let identifierData = CBMessageItemIdentifierData(
+            rawValue: IMMessageCreateAssociatedMessageGUIDFromThreadIdentifier(identifier)
+        )
+    {
         guard let part = identifierData.part else {
             return nil
         }
-        
+
         return (identifierData.id, part)
     }
-    
+
     guard parts.count > 2 else {
         return nil
     }
-    
+
     guard let part = Int(parts[1]), let identifier = parts.last else {
         return nil
     }
-    
+
     return (String(identifier), part)
 }
 
-private extension IngestionContext {
-    func ingest(_ items: [NSObject]) -> [ChatItem] {
+extension IngestionContext {
+    fileprivate func ingest(_ items: [NSObject]) -> [ChatItem] {
         return items.map {
             ChatItemType.ingest(object: $0, context: self)
         }
     }
 }
 
-private extension IngestionContext {
-    func items(forMessageItem item: IMMessageItem) -> [ChatItem] {
+extension IngestionContext {
+    fileprivate func items(forMessageItem item: IMMessageItem) -> [ChatItem] {
         ingest(item.chatItems)
     }
-    
-    func items(forMessage message: IMMessage) -> [ChatItem] {
+
+    fileprivate func items(forMessage message: IMMessage) -> [ChatItem] {
         ingest(message._imMessageItem?.chatItems ?? [])
     }
 }
@@ -57,7 +61,7 @@ extension FZErrorType: Codable {
     public init(from decoder: Decoder) throws {
         self = .init(rawValue: try decoder.singleValueContainer().decode(RawValue.self)) ?? .unknownError
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         try rawValue.encode(to: encoder)
     }
@@ -72,11 +76,13 @@ extension FZErrorType: CustomStringConvertible {
             return "Your message was interrupted while being sent."
         case .timeout:
             return "Your message took too long to send."
-        case .networkFailure, .networkLookupFailure, .networkConnectionFailure, .noNetworkFailure, .networkBusyFailure, .networkDeniedFailure:
+        case .networkFailure, .networkLookupFailure, .networkConnectionFailure, .noNetworkFailure, .networkBusyFailure,
+            .networkDeniedFailure:
             return "Your message couldn't be sent due to a network connectivity issue."
         case .serverSignatureError:
             return "A secure connection cannot be established with iMessage, so your message will not be sent."
-        case .serverDecodeError, .serverParseError, .serverInternalError, .serverInvalidRequestError, .serverMalformedRequestError, .serverUnknownRequestError, .serverRejectedError:
+        case .serverDecodeError, .serverParseError, .serverInternalError, .serverInvalidRequestError,
+            .serverMalformedRequestError, .serverUnknownRequestError, .serverRejectedError:
             return "The iMessage servers are having some trouble, please try again later."
         case .serverInvalidTokenError:
             return "The iMessage servers are rejecting your token. You may have to sign out and sign back in."
@@ -98,8 +104,10 @@ extension FZErrorType: CustomStringConvertible {
             return "Your message couldn't be sent due to an iMessage decryption error."
         case .otrDecryptionFailure:
             return "Your message couldn't be sent due to an iMessage OTR decryption error."
-        case .localAccountDisabled, .localAccountDoesNotExist, .localAccountNeedsUpdate, .localAccountInvalid, .invalidLocalCredentials:
-            return "Your message couldn't be sent due to an issue with your account. You may have to sign out and sign back in."
+        case .localAccountDisabled, .localAccountDoesNotExist, .localAccountNeedsUpdate, .localAccountInvalid,
+            .invalidLocalCredentials:
+            return
+                "Your message couldn't be sent due to an issue with your account. You may have to sign out and sign back in."
         case .attachmentDownloadFailure, .messageAttachmentDownloadFailure:
             return "This message is missing an attachment that failed to download."
         case .attachmentUploadFailure, .messageAttachmentUploadFailure:
@@ -118,7 +126,7 @@ extension FZErrorType: CustomStringConvertible {
             return "Your message couldn't be sent due to an unknown error."
         }
     }
-    
+
     public var description: String {
         switch self {
         case .noError:
@@ -214,7 +222,36 @@ extension FZErrorType: CustomStringConvertible {
 }
 
 public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
-    @_spi(unitTestInternals) public init(id: String, chatID: String, fromMe: Bool, time: Double, sender: String? = nil, subject: String? = nil, timeDelivered: Double = 0, timePlayed: Double = 0, timeRead: Double = 0, messageSubject: String? = nil, isSOS: Bool, isTypingMessage: Bool, isCancelTypingMessage: Bool, isDelivered: Bool, isAudioMessage: Bool, isRead: Bool = false, description: String? = nil, flags: IMMessageFlags, failed: Bool, failureCode: FZErrorType, failureDescription: String, items: [AnyChatItem], service: IMServiceStyle, fileTransferIDs: [String], associatedMessageID: String? = nil, threadIdentifier: String? = nil, threadOriginator: String? = nil, threadOriginatorPart: Int? = nil) {
+    @_spi(unitTestInternals) public init(
+        id: String,
+        chatID: String,
+        fromMe: Bool,
+        time: Double,
+        sender: String? = nil,
+        subject: String? = nil,
+        timeDelivered: Double = 0,
+        timePlayed: Double = 0,
+        timeRead: Double = 0,
+        messageSubject: String? = nil,
+        isSOS: Bool,
+        isTypingMessage: Bool,
+        isCancelTypingMessage: Bool,
+        isDelivered: Bool,
+        isAudioMessage: Bool,
+        isRead: Bool = false,
+        description: String? = nil,
+        flags: IMMessageFlags,
+        failed: Bool,
+        failureCode: FZErrorType,
+        failureDescription: String,
+        items: [AnyChatItem],
+        service: IMServiceStyle,
+        fileTransferIDs: [String],
+        associatedMessageID: String? = nil,
+        threadIdentifier: String? = nil,
+        threadOriginator: String? = nil,
+        threadOriginatorPart: Int? = nil
+    ) {
         self.id = id
         self.chatID = chatID
         self.fromMe = fromMe
@@ -244,42 +281,60 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         self.threadOriginator = threadOriginator
         self.threadOriginatorPart = threadOriginatorPart
     }
-    
+
     /*static func message(withGUID guid: String, in chatID: String? = nil) -> Promise<Message?> {
         IMMessage.message(withGUID: guid, in: chatID).then {
             $0 as? Message
         }
     }
-    
+
     static func messages(withGUIDs guids: [String], in chat: String? = nil) -> Promise<[Message]> {
         IMMessage.messages(withGUIDs: guids, in: chat).compactMap {
             $0 as? Message
         }
     }
-    
+
     public static func messages(matching query: String, limit: Int) -> Promise<[Message]> {
         DBReader.shared.messages(matching: query, limit: limit)
             .then { guids in BLLoadChatItems(withGUIDs: guids) }
             .compactMap { $0 as? Message }
     }*/
-    
-    public static let ingestionClasses: [NSObject.Type] = [IMItem.self, IMMessage.self, IMMessageItem.self, IMAssociatedMessageItem.self]
-    
+
+    public static let ingestionClasses: [NSObject.Type] = [
+        IMItem.self, IMMessage.self, IMMessageItem.self, IMAssociatedMessageItem.self,
+    ]
+
     public init?(ingesting item: NSObject, context: IngestionContext) {
         switch item {
         case let item as IMMessageItem:
             if let message = context.message {
-                self.init(item, message: message, items: context.items(forMessageItem: item), chatID: context.chatID, service: context.service)
+                self.init(
+                    item,
+                    message: message,
+                    items: context.items(forMessageItem: item),
+                    chatID: context.chatID,
+                    service: context.service
+                )
             } else {
-                self.init(item, items: context.items(forMessageItem: item), chatID: context.chatID, service: context.service)
+                self.init(
+                    item,
+                    items: context.items(forMessageItem: item),
+                    chatID: context.chatID,
+                    service: context.service
+                )
             }
         case let message as IMMessage:
-            self.init(message, items: context.items(forMessage: message), chatID: context.chatID, service: context.service)
+            self.init(
+                message,
+                items: context.items(forMessage: message),
+                chatID: context.chatID,
+                service: context.service
+            )
         default:
             return nil
         }
     }
-    
+
     // SPI for CBDaemonListener ONLY
     init(messageItem item: IMMessageItem, chatID: String, service: IMServiceStyle, items: [AnyChatItem]? = nil) {
         id = item.id
@@ -296,14 +351,22 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         isAudioMessage = item.isAudioMessage
         isRead = item.isRead
         flags = .init(rawValue: item.flags)
-        self.items = items ?? IngestionContext(chatID: chatID, service: service).ingest(item.chatItems).map {
-            $0.eraseToAnyChatItem()
-        }
+        self.items =
+            items
+            ?? IngestionContext(chatID: chatID, service: service).ingest(item.chatItems)
+            .map {
+                $0.eraseToAnyChatItem()
+            }
         self.service = service
         sender = item.resolveSenderID(inService: service)
         associatedMessageID = item.associatedMessageGUID()
         fileTransferIDs = item.fileTransferGUIDs
-        description = item.message()?.description(forPurpose: .SPI, in: IMChat.chat(withIdentifier: chatID, onService: service, style: nil), senderDisplayName: nil)
+        description = item.message()?
+            .description(
+                forPurpose: .SPI,
+                in: IMChat.chat(withIdentifier: chatID, onService: service, style: nil),
+                senderDisplayName: nil
+            )
         failureCode = item.errorCode
         failed = failureCode != .noError
         failureDescription = failureCode.description
@@ -342,8 +405,14 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         failureDescription = failureCode.description
         item.bareReceipt.assign(toMessage: &self)
     }
-    
-    init(_ backing: IMMessageItem?, message: IMMessage, items chatItems: [ChatItem], chatID: String, service: IMServiceStyle) {
+
+    init(
+        _ backing: IMMessageItem?,
+        message: IMMessage,
+        items chatItems: [ChatItem],
+        chatID: String,
+        service: IMServiceStyle
+    ) {
         id = message.id
         self.chatID = chatID
         fromMe = message.isFromMe
@@ -365,43 +434,52 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         failureCode = backing?.errorCode ?? message._imMessageItem?.errorCode ?? FZErrorType.noError
         failed = failureCode != .noError
         failureDescription = failureCode.description
-        
+
         if let chat = IMChat.chat(withIdentifier: chatID, onService: service, style: nil) {
             description = message.description(forPurpose: .conversationList, in: chat)
         }
-        
+
         // load timestamps
         message.receipt.merging(receipt: backing?.receipt ?? message.receipt).assign(toMessage: &self)
         self.load(message: message, backing: backing)
         metadata = backing?.metadata ?? message.metadata
     }
-    
+
     init(_ backing: IMMessageItem, items: [ChatItem], chatID: String, service: IMServiceStyle) {
         if let message = backing.message() ?? IMMessage.message(fromUnloadedItem: backing) {
             self.init(backing, message: message, items: items, chatID: chatID, service: service)
         } else {
-            self.init(messageItem: backing, chatID: chatID, service: service, items: items.map { $0.eraseToAnyChatItem() })
+            self.init(
+                messageItem: backing,
+                chatID: chatID,
+                service: service,
+                items: items.map { $0.eraseToAnyChatItem() }
+            )
         }
     }
-    
+
     init(_ message: IMMessage, items: [ChatItem], chatID: String, service: IMServiceStyle) {
         self.init(message._imMessageItem, message: message, items: items, chatID: chatID, service: service)
     }
-    
+
     private mutating func load(message: IMMessage?, backing: IMMessageItem?) {
         if #available(iOS 14, macOS 10.16, watchOS 7, *) {
             if let rawThreadIdentifier = message?.threadIdentifier() ?? backing?.threadIdentifier {
-                guard let (threadIdentifier, threadOriginatorPart) = CBExtractThreadOriginatorAndPartFromIdentifier(rawThreadIdentifier) else {
+                guard
+                    let (threadIdentifier, threadOriginatorPart) = CBExtractThreadOriginatorAndPartFromIdentifier(
+                        rawThreadIdentifier
+                    )
+                else {
                     return
                 }
-                
+
                 self.threadIdentifier = threadIdentifier
                 self.threadOriginator = threadIdentifier
                 self.threadOriginatorPart = threadOriginatorPart
             }
         }
     }
-    
+
     public var id: String
     public var chatID: String
     public var fromMe: Bool
@@ -435,49 +513,65 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     public var isFinished: Bool {
         flags.contains(.finished)
     }
-    
+
     public var isSent: Bool {
         flags.contains(.sent)
     }
-    
+
     public var hasTranscriptItems: Bool {
         items.contains(where: \.isTranscriptItem)
     }
-    
+
     public var isFromMe: Bool {
         fromMe
     }
-    
+
     public var debugDescription: String {
-        String(format: "Message(id=%@,sender=%@,typing=%d,items=[%@],failed=%d,sent=%d,error=%d)", id, sender ?? "(nil)", isTypingMessage, items.map(\.debugDescription).joined(separator: ", "), failed, isSent, errorCode.rawValue)
+        String(
+            format: "Message(id=%@,sender=%@,typing=%d,items=[%@],failed=%d,sent=%d,error=%d)",
+            id,
+            sender ?? "(nil)",
+            isTypingMessage,
+            items.map(\.debugDescription).joined(separator: ", "),
+            failed,
+            isSent,
+            errorCode.rawValue
+        )
     }
-    
+
     public var imChat: IMChat? {
         IMChat.chat(withIdentifier: chatID, onService: service, style: nil)
     }
-    
+
     public var chat: Chat? {
         imChat.map(Chat.init(_:))
     }
-    
+
     public var associableItemIDs: [String] {
         items.filter { item in
             item.type == .text || item.type == .attachment || item.type == .plugin
-        }.map(\.id)
+        }
+        .map(\.id)
     }
-    
+
     public var type: ChatItemType {
         .message
     }
-    
+
     public var isReadByMe: Bool {
         let log = Logger(label: "Message")
         if fromMe {
-            log.debug("\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because it is from me", source: "ReadState")
+            log.debug(
+                "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because it is from me",
+                source: "ReadState"
+            )
             return true
         }
         if timeRead > 0 {
-            log.debug("\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because time read is non-zero", source: "ReadState")
+            log.debug(
+                "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because time read is non-zero",
+                source: "ReadState"
+            )
             return true
         }
         /// BRI-4711: `isRead` may be erroneously true; use `timeRead` as the source of truth for now
@@ -486,20 +580,23 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
             return true
         }*/
         if CBFeatureFlags.useSMSReadBuffer && CBDaemonListener.shared.smsReadBuffer.contains(id) {
-            log.debug("\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because read buffer contains ID", source: "ReadState")
+            log.debug(
+                "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because read buffer contains ID",
+                source: "ReadState"
+            )
             return true
         }
         return false
     }
 }
 
-public extension Message {
+extension Message {
     /// Returns a refreshed copy of the message
-    func refresh() -> Message {
+    public func refresh() -> Message {
         guard let item = BLLoadIMMessageItem(withGUID: id) else {
             return self
         }
-        
+
         return Message(messageItem: item, chatID: chatID, service: service)
     }
 }
@@ -529,21 +626,25 @@ extension IMMessageSummaryInfoProvider {
 }
 
 let metadataPrefix = "com.ericrabil.barcelona.metadata:00000000:"
-public extension IMMessageSummaryInfoProvider {
-    
-    func calculateMetadata() -> Message.Metadata {
+extension IMMessageSummaryInfoProvider {
+
+    public func calculateMetadata() -> Message.Metadata {
         guard let sourceApplicationID = sourceApplicationID, sourceApplicationID.starts(with: metadataPrefix) else {
             return [:]
         }
         do {
-            return try PropertyListDecoder().decode(Message.Metadata.self, from: Data(base64Encoded: String(sourceApplicationID.dropFirst(metadataPrefix.count)))!)
+            return try PropertyListDecoder()
+                .decode(
+                    Message.Metadata.self,
+                    from: Data(base64Encoded: String(sourceApplicationID.dropFirst(metadataPrefix.count)))!
+                )
         } catch {
             print(error, sourceApplicationID.dropFirst(metadataPrefix.count))
             return [:]
         }
     }
-    
-    var metadata: Message.Metadata {
+
+    public var metadata: Message.Metadata {
         get {
             if sourceApplicationID == nil {
                 return [:]
@@ -569,6 +670,6 @@ public extension IMMessageSummaryInfoProvider {
     }
 }
 
-public extension Message {
-    typealias Metadata = [String: MetadataValue]
+extension Message {
+    public typealias Metadata = [String: MetadataValue]
 }

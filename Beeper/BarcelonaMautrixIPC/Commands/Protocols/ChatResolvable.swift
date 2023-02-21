@@ -6,8 +6,8 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import Barcelona
+import Foundation
 import IMCore
 
 protocol ChatResolvable {
@@ -20,10 +20,10 @@ extension ChatResolvable {
             return chat
         } else {
             var parsed = ParsedGUID(rawValue: chat_guid)
-            
+
             let service = parsed.service == "iMessage" ? IMServiceStyle.iMessage : .SMS
             let id = parsed.last
-            
+
             if id.isPhoneNumber || id.isEmail || id.isBusinessID {
                 return Chat.directMessage(withHandleID: id, service: service).imChat
             } else {
@@ -36,15 +36,15 @@ extension ChatResolvable {
     var service: IMServiceStyle {
         ParsedGUID(rawValue: chat_guid).service == "iMessage" ? IMServiceStyle.iMessage : .SMS
     }
-    
+
     var cbChat: Chat? {
         guard let chat = chat else {
             return nil
         }
-        
+
         return Chat(chat)
     }
-    
+
     var blChat: BLChat? {
         chat?.blChat
     }

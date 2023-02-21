@@ -9,13 +9,13 @@ import Foundation
 
 class BLUnitTests {
     static let shared = BLUnitTests()
-    
+
     enum ForcedCondition {
         case messageFailure
     }
-    
+
     var forcedConditions: Set<ForcedCondition> = Set()
-    
+
     init() {
         if ProcessInfo.processInfo.environment.keys.contains("BL_FORCE_MESSAGE_FAILURE") {
             forcedConditions.insert(.messageFailure)

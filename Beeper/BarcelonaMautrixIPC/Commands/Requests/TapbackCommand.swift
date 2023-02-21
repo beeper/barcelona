@@ -6,8 +6,8 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import Barcelona
+import Foundation
 
 public struct TapbackCommand: Codable, ChatResolvable {
     public var chat_guid: String
@@ -16,8 +16,8 @@ public struct TapbackCommand: Codable, ChatResolvable {
     public var metadata: Message.Metadata?
 }
 
-public extension TapbackCommand {
-    var creation: TapbackCreation? {
+extension TapbackCommand {
+    public var creation: TapbackCreation? {
         return TapbackCreation(item: target_guid, message: target_guid, type: type)
     }
 }

@@ -7,12 +7,12 @@
 
 import Foundation
 import IMCore
+import IMSharedUtilities
 import LinkPresentation
 import LinkPresentationPrivate
-import IMSharedUtilities
 import Logging
 
-internal extension IMBalloonPluginManager {
+extension IMBalloonPluginManager {
     var richLinkPlugin: IMBalloonPlugin? {
         balloonPlugin(forBundleID: "com.apple.messages.URLBalloonProvider")
     }
@@ -30,19 +30,19 @@ internal extension IMBalloonPluginManager {
     @objc func createEmptyMetadataWithOriginalURL()
 }
 
-internal extension IMBalloonPluginDataSource {
+extension IMBalloonPluginDataSource {
     enum LPBalloonPluginError: Error {
-        case dataSourceMismatch // you provided metadata to a non-rich-link datasource
-        case unsupported // fuck
+        case dataSourceMismatch  // you provided metadata to a non-rich-link datasource
+        case unsupported  // fuck
     }
-    
+
     fileprivate var richLinkDataSource: RichLinkPluginDataSource? {
         guard bundleID == IMBalloonPluginManager.sharedInstance().richLinkPlugin?.identifier else {
             return nil
         }
         return self
     }
-    
+
     func provideArbitraryLinkMetadata(_ metadata: LPLinkMetadata) throws {
         guard bundleID == IMBalloonPluginManager.sharedInstance().richLinkPlugin?.identifier else {
             throw LPBalloonPluginError.dataSourceMismatch
@@ -96,7 +96,7 @@ enum IMBalloonPluginMisuseError: Error {
     case iAmNotAPlugin
 }
 
-internal extension IMBalloonPluginCarrier {
+extension IMBalloonPluginCarrier {
     func decodePluginDataSource() -> IMBalloonPluginDataSource? {
         guard let plugin = locateBalloonPlugin() else {
             return nil
@@ -106,7 +106,7 @@ internal extension IMBalloonPluginCarrier {
         }
         return plugin.dataSource(for: payload)
     }
-    
+
     func decodeRichLink() -> LPLinkMetadata? {
         guard let richLinkProvider = IMBalloonPluginManager.sharedInstance().richLinkPlugin else {
             return nil
@@ -122,7 +122,7 @@ internal extension IMBalloonPluginCarrier {
         }
         return dataSource.richLinkMetadata
     }
-    
+
     func locateBalloonPlugin() -> IMBalloonPlugin? {
         guard let balloonBundleID = balloonBundleID else {
             return nil
@@ -131,9 +131,9 @@ internal extension IMBalloonPluginCarrier {
     }
 }
 
-public extension IMMessage {
+extension IMMessage {
     private static var retains: [IMMessage: Set<AnyHashable>] = [:]
-    
+
     private func onceSent() -> Promise<Void> {
         if isSent {
             return .success(())
@@ -148,15 +148,15 @@ public extension IMMessage {
             }
         }
     }
-    
-    func loadLinkMetadata(at url: URL) {
+
+    public func loadLinkMetadata(at url: URL) {
         guard let dataSource = decodePluginDataSource() else {
             return
         }
         guard let richLinkDataSource = dataSource.richLinkDataSource else {
             return
         }
-        
+
         func _load() {
             let metadata = LPLinkMetadata()
             metadata.originalURL = url
@@ -168,9 +168,10 @@ public extension IMMessage {
             dataSource.payloadWillSendFromShelf()
             richLinkDataSource._startFetchingMetadata()
             IMMessage.retains[self] = .init(arrayLiteral: metadata, dataSource)
-            onceSent().then {
-                IMMessage.retains.removeValue(forKey: self)
-            }
+            onceSent()
+                .then {
+                    IMMessage.retains.removeValue(forKey: self)
+                }
         }
 
         if Thread.isMainThread {
@@ -178,39 +179,39 @@ public extension IMMessage {
         } else {
             DispatchQueue.main.sync(execute: _load)
         }
-        
-//        let sentPromise = onceSent()
-//        DispatchQueue.main.async {
-//            guard let provider = LPMetadataProvider() else {
-//                return
-//            }
-//            IMMessage.fetchers[self] = provider
-//            provider.startFetchingMetadata(for: url) { metadata, error in
-//                IMMessage.fetchers.removeValue(forKey: self)
-//                guard let metadata = metadata else {
-//                    return
-//                }
-//                sentPromise.then {
-//                    richLinkDataSource.updateRichLink(with: metadata)
-//                    richLinkDataSource.dispatchDidReceiveMetadataToAllClients()
-//                    var attachments: NSArray?
-//                    self.payloadData = richLinkDataSource.richLink.dataRepresentation(withOutOfLineAttachments: &attachments)
-//                    dataSource.sendPayload(self.payloadData, attachments: attachments)
-//                    if let attachments = attachments {
-//                        let transferGUIDs = IMFileTransferCenter.sharedInstance().guids(forStoredAttachmentPayloadData: attachments, messageGUID: self.guid) as? [String] ?? []
-//                        self.fileTransferGUIDs = transferGUIDs
-//                        self._imMessageItem.fileTransferGUIDs = transferGUIDs
-//                    }
-//                }
-//            }
-//        }
+
+        //        let sentPromise = onceSent()
+        //        DispatchQueue.main.async {
+        //            guard let provider = LPMetadataProvider() else {
+        //                return
+        //            }
+        //            IMMessage.fetchers[self] = provider
+        //            provider.startFetchingMetadata(for: url) { metadata, error in
+        //                IMMessage.fetchers.removeValue(forKey: self)
+        //                guard let metadata = metadata else {
+        //                    return
+        //                }
+        //                sentPromise.then {
+        //                    richLinkDataSource.updateRichLink(with: metadata)
+        //                    richLinkDataSource.dispatchDidReceiveMetadataToAllClients()
+        //                    var attachments: NSArray?
+        //                    self.payloadData = richLinkDataSource.richLink.dataRepresentation(withOutOfLineAttachments: &attachments)
+        //                    dataSource.sendPayload(self.payloadData, attachments: attachments)
+        //                    if let attachments = attachments {
+        //                        let transferGUIDs = IMFileTransferCenter.sharedInstance().guids(forStoredAttachmentPayloadData: attachments, messageGUID: self.guid) as? [String] ?? []
+        //                        self.fileTransferGUIDs = transferGUIDs
+        //                        self._imMessageItem.fileTransferGUIDs = transferGUIDs
+        //                    }
+        //                }
+        //            }
+        //        }
     }
-    
-    func provideLinkMetadata(_ metadata: RichLinkMetadata) throws -> () -> () {
+
+    public func provideLinkMetadata(_ metadata: RichLinkMetadata) throws -> () -> Void {
         try provideLinkMetadata(metadata.createLinkMetadata())
     }
-    
-    func provideLinkMetadata(_ metadata: @autoclosure () -> LPLinkMetadata) throws -> () -> () {
+
+    public func provideLinkMetadata(_ metadata: @autoclosure () -> LPLinkMetadata) throws -> () -> Void {
         let log = Logger(label: "IMMessage")
         let payload = IMPluginPayload()
         payload.messageGUID = guid
@@ -229,13 +230,19 @@ public extension IMMessage {
         richLinkDataSource.createEmptyMetadataWithOriginalURL()
         richLinkDataSource.richLink.needsCompleteFetch = false
         richLinkDataSource.richLink.needsSubresourceFetch = false
-        log.info("Initialized a RichLinkDataSource for message \(self.guid) for URL \(metadata.originalURL?.absoluteString ?? "nil")", source: "LPLink")
+        log.info(
+            "Initialized a RichLinkDataSource for message \(self.guid) for URL \(metadata.originalURL?.absoluteString ?? "nil")",
+            source: "LPLink"
+        )
         log.info("RichLinkDataSource for message \(guid) willEnterShelf", source: "LPLink")
         dataSource.payloadWillEnterShelf()
         log.info("RichLinkDataSource for message \(guid) willSendFromShelf", source: "LPLink")
         dataSource.payloadWillSendFromShelf()
         payloadData = dataSource.messagePayloadDataForSending
-        log.info("RichLinkDataSource for message \(guid) placeholder payload is \(payloadData?.count ?? 0)", source: "LPLink")
+        log.info(
+            "RichLinkDataSource for message \(guid) placeholder payload is \(payloadData?.count ?? 0)",
+            source: "LPLink"
+        )
         dataSource.payloadInShelf = false
         return {
             log.info("RichLinkDataSource for message \(self.guid) was sent. Time for more!", source: "LPLink")
@@ -244,8 +251,17 @@ public extension IMMessage {
             richLinkDataSource.dispatchMetadataUpdate()
             var attachments: NSArray?
             let data = richLinkDataSource.richLink.dataRepresentation(withOutOfLineAttachments: &attachments)
-            log.info("RichLinkDataSource for message \(self.guid) sending packaged payload with size \(data.count) and attachment count \(attachments?.count ?? 0)", source: "LPLink")
-            IMDaemonController.sharedInstance().sendBalloonPayload(data, attachments: attachments as! [Any]?, withMessageGUID: self.guid, bundleID: IMBalloonPluginIdentifierRichLinks)
+            log.info(
+                "RichLinkDataSource for message \(self.guid) sending packaged payload with size \(data.count) and attachment count \(attachments?.count ?? 0)",
+                source: "LPLink"
+            )
+            IMDaemonController.sharedInstance()
+                .sendBalloonPayload(
+                    data,
+                    attachments: attachments as! [Any]?,
+                    withMessageGUID: self.guid,
+                    bundleID: IMBalloonPluginIdentifierRichLinks
+                )
         }
     }
 }

@@ -6,27 +6,27 @@
 //  Copyright © 2020 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import DigitalTouchShared
+import Foundation
 import IMCore
 
 @objc protocol ETMessageDelegate {
-    @objc func messageWillReachSizeLimit(_ message: ETMessage) -> Void
-    @objc func messageWillStopPlaying(_ message: ETMessage) -> Void
-    @objc func messageDidStopPlaying(_ message: ETMessage) -> Void
+    @objc func messageWillReachSizeLimit(_ message: ETMessage)
+    @objc func messageWillStopPlaying(_ message: ETMessage)
+    @objc func messageDidStopPlaying(_ message: ETMessage)
 }
 
 @objc class DigitalTouchMessageDelegate: NSObject, ETMessageDelegate {
     func messageWillReachSizeLimit(_ message: ETMessage) {
-        
+
     }
-    
+
     func messageWillStopPlaying(_ message: ETMessage) {
-        
+
     }
-    
+
     func messageDidStopPlaying(_ message: ETMessage) {
-        
+
     }
 }
 
@@ -37,7 +37,7 @@ public enum DigitalTouchMessage {
     case heartbeat(_ item: ETHeartbeatData)
     case anger(_ item: ETAngerData)
     case kiss(_ item: ETKissData)
-    
+
     init?(message: ETMessage) {
         switch message {
         case let message as ETSketchMessage:
@@ -56,12 +56,12 @@ public enum DigitalTouchMessage {
             return nil
         }
     }
-    
+
     init?(data: Data) {
         guard let message = ETMessage.unarchive(data), let item = DigitalTouchMessage(message: message) else {
             return nil
         }
-        
+
         self = item
     }
 }

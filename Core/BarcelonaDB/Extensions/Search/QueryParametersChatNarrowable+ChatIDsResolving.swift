@@ -6,10 +6,10 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import BarcelonaFoundation
+import Foundation
 
-internal extension QueryParametersChatNarrowable {
+extension QueryParametersChatNarrowable {
     func chatROWIDs() async throws -> [Int64] {
         guard let chats, !chats.isEmpty else {
             return []

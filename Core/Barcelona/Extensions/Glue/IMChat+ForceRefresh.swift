@@ -11,14 +11,14 @@ import Logging
 
 private let log = Logger(label: "IMChat")
 
-public extension IMChat {
+extension IMChat {
     /// Returns true if the next message sent will be sent over SMS
-    var willSendSMS: Bool {
+    public var willSendSMS: Bool {
         account.service?.id == .SMS
     }
-    
+
     /// Returns true if there are data inconsistencies warranting a service refresh
-    var forceRefresh: Bool {
+    public var forceRefresh: Bool {
         if isSingle && willSendSMS && recipient?.id.isEmail == true {
             return true
         }
@@ -27,7 +27,7 @@ public extension IMChat {
 
     // Call to ensure that all handles are being watched so that we don't miss any mesages from them
     @available(macOS 13.0, *)
-    func watchAllHandles() {
+    public func watchAllHandles() {
         beginObservingHandleAvailability()
 
         guard let participants else {

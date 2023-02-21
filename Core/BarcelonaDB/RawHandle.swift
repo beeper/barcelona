@@ -9,12 +9,10 @@
 import Foundation
 import GRDB
 
-/**
- Represents the handle table in the chat.db file
- */
+/// Represents the handle table in the chat.db file
 public class RawHandle: Record {
     public override class var databaseTableName: String { "handle" }
-    
+
     public required init(row: Row) {
         country = row[Columns.country]
         id = row[Columns.id]
@@ -24,7 +22,7 @@ public class RawHandle: Record {
         uncanonicalized_id = row[Columns.uncanonicalized_id]
         super.init(row: row)
     }
-    
+
     public override func encode(to container: inout PersistenceContainer) {
         container[Columns.country] = country
         container[Columns.id] = id
@@ -33,11 +31,11 @@ public class RawHandle: Record {
         container[Columns.service] = service
         container[Columns.uncanonicalized_id] = uncanonicalized_id
     }
-    
+
     public enum Columns: String, ColumnExpression {
         case country, id, person_centric_id, ROWID, service, uncanonicalized_id
     }
-    
+
     public var country: String?
     public var id: String
     public var person_centric_id: String?

@@ -9,20 +9,23 @@
 import Foundation
 import IMCore
 
-private extension String {
-    var unpacked: (type: String?, part: Int?, id: String) {
+extension String {
+    fileprivate var unpacked: (type: String?, part: Int?, id: String) {
         guard let slashIndex = firstIndex(of: "/"), let colonIndex = firstIndex(of: ":") else {
             guard let colonIndex = firstIndex(of: ":") else {
                 return (nil, nil, self)
             }
-            
-            let type = self[..<colonIndex], id = self[index(after: colonIndex)...]
-            
+
+            let type = self[..<colonIndex]
+            let id = self[index(after: colonIndex)...]
+
             return (String(type), nil, String(id))
         }
-        
-        let type = self[..<colonIndex], part = self[index(after: colonIndex)..<slashIndex], id = self[index(after: slashIndex)...]
-        
+
+        let type = self[..<colonIndex]
+        let part = self[index(after: colonIndex)..<slashIndex]
+        let id = self[index(after: slashIndex)...]
+
         return (String(type), Int(part), String(id))
     }
 }
@@ -32,20 +35,20 @@ public struct CBMessageItemIdentifierData: Codable, CustomStringConvertible, Raw
         guard let character = rawValue.first, character != "t" else {
             return nil
         }
-        
+
         (type, part, id) = rawValue.unpacked
     }
-    
+
     public var rawValue: String {
         description
     }
-    
+
     public typealias RawValue = String
-    
+
     public var id: String
     public var part: Int?
     public var type: String?
-    
+
     public var description: String {
         [
             type.map {
@@ -54,28 +57,33 @@ public struct CBMessageItemIdentifierData: Codable, CustomStringConvertible, Raw
             part.map {
                 $0.description.appending("/")
             } ?? "",
-            id
-        ].joined(separator: "")
+            id,
+        ]
+        .joined(separator: "")
     }
 }
 
-public extension String {
-    var cb_messageIDExtracted: String {
+extension String {
+    public var cb_messageIDExtracted: String {
         guard let splitted = self.split(separator: ":").last?.split(separator: "/").last else {
             return self
         }
-        
+
         return String(splitted)
     }
 }
 
 extension IMChatItem: LazilyResolvable, ConcreteLazilyBasicResolvable {
     public static func lazyResolve(withIdentifiers identifiers: [String]) -> Promise<[IMChatItem]> {
-        IMMessage.lazyResolve(withIdentifiers: identifiers.map(\.cb_messageIDExtracted)).flatMap(\._imMessageItem.chatItems).filter {
-            guard let transcriptChatItem = $0 as? IMTranscriptChatItem, identifiers.contains(transcriptChatItem.guid) else {
-                return false
+        IMMessage.lazyResolve(withIdentifiers: identifiers.map(\.cb_messageIDExtracted))
+            .flatMap(\._imMessageItem.chatItems)
+            .filter {
+                guard let transcriptChatItem = $0 as? IMTranscriptChatItem,
+                    identifiers.contains(transcriptChatItem.guid)
+                else {
+                    return false
+                }
+                return true
             }
-            return true
-        }
     }
 }

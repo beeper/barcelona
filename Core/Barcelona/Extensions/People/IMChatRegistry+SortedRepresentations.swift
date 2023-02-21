@@ -9,34 +9,40 @@
 import Foundation
 import IMCore
 
-public extension IMChatRegistry {
-    static var shared: IMChatRegistry {
+extension IMChatRegistry {
+    public static var shared: IMChatRegistry {
         IMChatRegistry.sharedInstance()!
     }
-    
-    var allChats: [IMChat] {
+
+    public var allChats: [IMChat] {
         if BLIsSimulation {
             return simulatedChats as! [IMChat]
         } else {
             return allExistingChats ?? []
         }
     }
-    
+
     /**
      Returns all chats sorted by their last update, with a limit if requested
      */
-    func allSortedChats(limit: Int? = nil, after: String? = nil) -> [Chat] {
+    public func allSortedChats(limit: Int? = nil, after: String? = nil) -> [Chat] {
         var chats = allChats.sorted { (chat1, chat2) in
-            let time1 = chat1.lastMessage?.time ?? NSDate.__im_dateWithNanosecondTimeInterval(sinceReferenceDate: chat1.lastMessageTimeStampOnLoad)!
-            let time2 = chat2.lastMessage?.time ?? NSDate.__im_dateWithNanosecondTimeInterval(sinceReferenceDate: chat2.lastMessageTimeStampOnLoad)!
-            
+            let time1 =
+                chat1.lastMessage?.time ?? NSDate.__im_dateWithNanosecondTimeInterval(
+                    sinceReferenceDate: chat1.lastMessageTimeStampOnLoad
+                )!
+            let time2 =
+                chat2.lastMessage?.time ?? NSDate.__im_dateWithNanosecondTimeInterval(
+                    sinceReferenceDate: chat2.lastMessageTimeStampOnLoad
+                )!
+
             return time1 > time2
         }
-        
+
         if let limit = limit {
             chats = Array(chats.prefix(limit))
         }
-        
+
         return chats.map(Chat.init)
     }
 }

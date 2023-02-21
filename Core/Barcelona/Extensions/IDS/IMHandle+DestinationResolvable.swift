@@ -7,20 +7,20 @@
 //
 
 import Foundation
-import IMFoundation
-import IMCore
 import IDS
+import IMCore
+import IMFoundation
 
-public extension IMHandle {
-    var idsStatus: IDSState {
+extension IMHandle {
+    public var idsStatus: IDSState {
         guard let serviceId = service.id else {
             return .unknown
         }
 
         return (try? BLResolveIDStatusForIDs([id], onService: serviceId))?.first?.value ?? .unknown
     }
-    
-    func lazyIDSStatus() -> Promise<IDSState> {
+
+    public func lazyIDSStatus() -> Promise<IDSState> {
         Promise { resolve, reject in
             do {
                 try BLResolveIDStatusForIDs([self.id], onService: .iMessage) {

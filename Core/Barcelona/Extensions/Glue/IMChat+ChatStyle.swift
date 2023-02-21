@@ -9,12 +9,12 @@
 import Foundation
 import IMCore
 
-public extension IMChat {
-    var isGroup: Bool {
+extension IMChat {
+    public var isGroup: Bool {
         chatStyle == .group
     }
-    
-    var isSingle: Bool {
+
+    public var isSingle: Bool {
         chatStyle == .instantMessage
     }
 }

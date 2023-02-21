@@ -6,8 +6,8 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import BarcelonaFoundation
+import Foundation
 import GRDB
 import Logging
 
@@ -23,50 +23,54 @@ extension IMHandleRegistrar: IMCNHandleBridgingProvider {
     public func handleIDs(forCNIdentifier arg1: String) -> [String] {
         handles(forCNIdentifier: arg1).map(\.id)
     }
-    
+
     public var allLoginHandles: [String] {
         IMAccountController.__sharedInstance().accounts.flatMap(\.aliases)
     }
 }
 #endif
 
-public extension DBReader {
-    var log: Logging.Logger {
+extension DBReader {
+    public var log: Logging.Logger {
         Logger(label: "DBReader")
     }
-    func queryMessages(
+    public func queryMessages(
         withParameters params: MessageQueryParameters,
         handleProvider: IMCNHandleBridgingProvider? = nil
     ) async throws -> [(chatID: String, messageID: String)] {
         let limit = params.limit ?? 20
-        
+
         let ROWIDs: [Int64]
-        
+
         if let chatIdentifiers = params.chats {
             ROWIDs = try await rowIDs(forIdentifiers: chatIdentifiers).values.flatten()
         } else {
             ROWIDs = []
         }
-        
+
         var handles = params.handles ?? []
-        
+
         #if canImport(IMCore)
         let handleProvider = Optional(handleProvider ?? IMHandleRegistrar.sharedInstance())
         #endif
-        
-            /// Get database handle
+
+        /// Get database handle
         let items = try await self.read { db in
             #if DEBUG
-            log.info("Performing message query with chat identifiers \(params.chats ?? []) handles \(handles) text \(params.search ?? "<<no search>>") limit \(params.limit ?? 20)")
+            log.info(
+                "Performing message query with chat identifiers \(params.chats ?? []) handles \(handles) text \(params.search ?? "<<no search>>") limit \(params.limit ?? 20)"
+            )
             #endif
 
             /// Performs a query for either me or not me (IMCore handle that are associated with an account function differently)
             let query: ([String]?, Bool?) throws -> [RawMessage] = { handles, fromMe in
-                var dbQuery = RawMessage
+                var dbQuery =
+                    RawMessage
                     .joiningOnROWIDsWhenNotEmpty(ROWIDs: ROWIDs, withColumns: [.guid, .ROWID, .date])
 
                 if let handles = handles, let fromMe = fromMe {
-                    dbQuery = dbQuery
+                    dbQuery =
+                        dbQuery
                         .joiningOnHandlesWhenNotEmpty(handles: handles)
                         .filter(RawMessage.Columns.is_from_me == (fromMe ? 1 : 0))
                 }

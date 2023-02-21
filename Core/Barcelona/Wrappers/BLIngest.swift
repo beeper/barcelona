@@ -6,22 +6,26 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-import Foundation
 import BarcelonaFoundation
+import Foundation
 import Logging
 
 private let log = Logger(label: "BLIngestObjects")
 
 // MARK: - Public API
-public func BLIngestObjects(_ objects: [NSObject], inChat chatId: String? = nil, service: IMServiceStyle) async throws -> [ChatItem] {
+public func BLIngestObjects(
+    _ objects: [NSObject],
+    inChat chatId: String? = nil,
+    service: IMServiceStyle
+) async throws -> [ChatItem] {
     guard objects.count > 0 else {
         log.debug("Early-exit BLIngest because objects is empty")
         return []
     }
-    
+
     guard let chatId else {
         log.debug("inferring chat ids before ingestion because chat id was not provided")
-        
+
         let chatIDs = try await _BLResolveChatIDs(forObjects: objects)
 
         log.debug("got \(chatIDs.count) chat IDs from database")
@@ -55,7 +59,7 @@ public func BLIngestObjects(_ objects: [NSObject], inChat chatId: String? = nil,
 
         return items
     }
-    
+
     try await _BLLoadFileTransfers(forObjects: objects)
 
     log.debug("file transfers loaded. parsing objects")
@@ -68,11 +72,15 @@ public func BLIngestObjects(_ objects: [NSObject], inChat chatId: String? = nil,
     return tapbacks
 }
 
-public func BLIngestObject(_ object: NSObject, inChat chatId: String? = nil, service: IMServiceStyle) async throws -> ChatItem {
+public func BLIngestObject(
+    _ object: NSObject,
+    inChat chatId: String? = nil,
+    service: IMServiceStyle
+) async throws -> ChatItem {
     guard let chatId else {
         let chatId = try await _BLResolveChatID(forObject: object)
         return try await BLIngestObject(object, inChat: chatId, service: service)
     }
-    
+
     return try await BLIngestObjects([object], inChat: chatId, service: service).first!
 }

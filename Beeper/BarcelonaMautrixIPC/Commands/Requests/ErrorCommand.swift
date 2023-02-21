@@ -18,12 +18,10 @@ public enum ErrorStrategy {
     case chat_not_found
     case command_not_found(String)
     case internal_error(String)
-    
+
     public var code: String {
         switch self {
-        case .chat_not_found:
-            fallthrough
-        case .not_found:
+        case .chat_not_found, .not_found:
             return "not_found"
         case .command_not_found(_):
             return "unknown_command"
@@ -31,7 +29,7 @@ public enum ErrorStrategy {
             return "internal_error"
         }
     }
-    
+
     public var message: String {
         switch self {
         case .not_found:
@@ -44,7 +42,7 @@ public enum ErrorStrategy {
             return "Internal Error: \(error)"
         }
     }
-    
+
     public var asCommand: IPCCommand {
         return .error(.init(code: code, message: message))
     }

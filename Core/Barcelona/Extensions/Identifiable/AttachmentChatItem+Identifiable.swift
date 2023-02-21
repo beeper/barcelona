@@ -9,5 +9,5 @@
 import Foundation
 
 extension AttachmentChatItem: Identifiable {
-    
+
 }

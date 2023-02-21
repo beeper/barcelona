@@ -12,25 +12,25 @@ public struct ErrorChatItem: ChatItem, Hashable {
     public var type: ChatItemType {
         .error
     }
-    
+
     public static let ingestionClasses: [NSObject.Type] = [IMErrorMessagePartChatItem.self]
-    
+
     public init?(ingesting item: NSObject, context: IngestionContext) {
         self.init(item as! IMErrorMessagePartChatItem, chatID: context.chatID)
     }
-    
+
     init(_ item: IMErrorMessagePartChatItem, chatID: String) {
         id = item.id
         self.chatID = chatID
         fromMe = item.isFromMe
         time = item.effectiveTime
-        
+
         if #available(macOS 11.0, iOS 14.0, *) {
             threadIdentifier = item.threadIdentifier()
             threadOriginator = item.threadOriginatorID
         }
     }
-    
+
     public var id: String
     public var chatID: String
     public var fromMe: Bool

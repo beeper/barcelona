@@ -8,11 +8,11 @@
 //
 
 import Foundation
-import IMSharedUtilities
-import IMFoundation
+import IMCore
 import IMDPersistence
 import IMDaemonCore
-import IMCore
+import IMFoundation
+import IMSharedUtilities
 import Logging
 import Pwomise
 
@@ -21,21 +21,21 @@ public protocol CBPurgedAttachmentControllerDelegate {
     func purgedTransferFailed(_ transfer: IMFileTransfer)
 }
 
-public extension CBPurgedAttachmentControllerDelegate {
-    func purgedTransferResolved(_ transfer: IMFileTransfer) {}
-    func purgedTransferFailed(_ transfer: IMFileTransfer) {}
+extension CBPurgedAttachmentControllerDelegate {
+    public func purgedTransferResolved(_ transfer: IMFileTransfer) {}
+    public func purgedTransferFailed(_ transfer: IMFileTransfer) {}
 }
 
-private extension DispatchQueue {
-    func makeOperationQueue() -> OperationQueue {
+extension DispatchQueue {
+    fileprivate func makeOperationQueue() -> OperationQueue {
         let queue = OperationQueue()
         queue.underlyingQueue = self
         return queue
     }
 }
 
-private extension IMFileTransfer {
-    var actualState: IMFileTransferState {
+extension IMFileTransfer {
+    fileprivate var actualState: IMFileTransferState {
         let state = state
         if state == .error, error == 24, existsAtLocalPath {
             // i have no clue what is going on but the attachment is present and usable
@@ -45,15 +45,17 @@ private extension IMFileTransfer {
     }
 }
 
-
-public extension Notification {
-    func decodeObject<P>(to: P.Type) -> P? {
+extension Notification {
+    public func decodeObject<P>(to: P.Type) -> P? {
         let log = Logger(label: "Notifications")
         guard let object = object else {
             return nil
         }
         guard let object = object as? P else {
-            log.error("Notified about \(name.rawValue) but the object was \(String(describing: type(of: object))) instead of \(String(describing: P.self))", source: "Notifications")
+            log.error(
+                "Notified about \(name.rawValue) but the object was \(String(describing: type(of: object))) instead of \(String(describing: P.self))",
+                source: "Notifications"
+            )
             return nil
         }
         return object
@@ -62,20 +64,35 @@ public extension Notification {
 
 public class CBFileTransferCenter {
     public static let shared = CBFileTransferCenter()
-    
+
     private let queue = DispatchQueue(label: "com.ericrabil.barcelona.CBFileTransferCenter")
     private lazy var operationQueue = queue.makeOperationQueue()
-    
+
     public init() {
-        NotificationCenter.default.addObserver(forName: .IMFileTransferCreated, object: nil, queue: operationQueue, using: transferCreated(_:))
-        NotificationCenter.default.addObserver(forName: .IMFileTransferUpdated, object: nil, queue: operationQueue, using: transferUpdated(_:))
-        NotificationCenter.default.addObserver(forName: .IMFileTransferFinished, object: nil, queue: operationQueue, using: transferFinished(_:))
+        NotificationCenter.default.addObserver(
+            forName: .IMFileTransferCreated,
+            object: nil,
+            queue: operationQueue,
+            using: transferCreated(_:)
+        )
+        NotificationCenter.default.addObserver(
+            forName: .IMFileTransferUpdated,
+            object: nil,
+            queue: operationQueue,
+            using: transferUpdated(_:)
+        )
+        NotificationCenter.default.addObserver(
+            forName: .IMFileTransferFinished,
+            object: nil,
+            queue: operationQueue,
+            using: transferFinished(_:)
+        )
     }
-    
+
     public private(set) var transfers: [String: IMFileTransfer] = [:]
-    
+
     private let log = Logger(label: "FileTransfers")
-    
+
     private func transferForID(_ id: String) -> IMFileTransfer? {
         if let transfer = transfers[id] {
             return transfer
@@ -86,16 +103,19 @@ public class CBFileTransferCenter {
         }
         return nil
     }
-    
-    private var transferFinishedHandler: [String: [((()) -> (), (Error) -> ())]] = [:]
-    
+
+    private var transferFinishedHandler: [String: [((()) -> Void, (Error) -> Void)]] = [:]
+
     private func transferTrulyFinishedPromise(_ transfer: IMFileTransfer) -> Promise<Void> {
         Promise { resolve in
             if !transfer.isTrulyFinished {
                 let timer = DispatchSource.makeTimerSource(flags: .strict, queue: queue)
                 timer.setEventHandler { [unowned self] in
                     if transfer.isTrulyFinished {
-                        log.info("Transfer \(transfer.guid ?? "nil") is truly finished!", source: "CBFileTransferCenter")
+                        log.info(
+                            "Transfer \(transfer.guid ?? "nil") is truly finished!",
+                            source: "CBFileTransferCenter"
+                        )
                         resolve(())
                         timer.cancel()
                     } else {
@@ -109,9 +129,10 @@ public class CBFileTransferCenter {
             } else {
                 resolve(())
             }
-        }.resolve(on: queue)
+        }
+        .resolve(on: queue)
     }
-    
+
     public func transferCompletionPromise(_ id: String) -> Promise<Void> {
         queue.sync {
             guard let transfer = transferForID(id) else {
@@ -123,10 +144,11 @@ public class CBFileTransferCenter {
                 } else {
                     transferFinishedHandler[id, default: []].append((resolve, reject))
                 }
-            }.resolve(on: DispatchQueue.main)
+            }
+            .resolve(on: DispatchQueue.main)
         }
     }
-    
+
     private func transferCreated(_ notification: Notification) {
         guard let transfer = notification.decodeObject(to: IMFileTransfer.self) else {
             return
@@ -140,7 +162,7 @@ public class CBFileTransferCenter {
         log.debug("Transfer \(guid) was created!")
         #endif
     }
-    
+
     private func transferUpdated(_ notification: Notification) {
         guard let transfer = notification.decodeObject(to: IMFileTransfer.self) else {
             return
@@ -150,12 +172,14 @@ public class CBFileTransferCenter {
             return
         }
         transfers[guid] = transfer
-        log.debug("Transfer \(guid) has updated! isFinished \(transfer.isFinished) state \(transfer.actualState.description) error \(transfer.errorDescription ?? "nil")")
+        log.debug(
+            "Transfer \(guid) has updated! isFinished \(transfer.isFinished) state \(transfer.actualState.description) error \(transfer.errorDescription ?? "nil")"
+        )
         if transfer.isFinished {
             transferFinished(transfer)
         }
     }
-    
+
     private func transferFinished(_ transfer: IMFileTransfer) {
         guard let transferGUID = transfer.guid else {
             log.warning("Witnessed transferFinished for a transfer with no GUID")
@@ -167,20 +191,27 @@ public class CBFileTransferCenter {
         #endif
         switch transfer.actualState {
         case .finished:
-            transferTrulyFinishedPromise(transfer).then {
-                for (resolve, _) in self.transferFinishedHandler[transferGUID, default: []] {
-                    resolve(())
+            transferTrulyFinishedPromise(transfer)
+                .then {
+                    for (resolve, _) in self.transferFinishedHandler[transferGUID, default: []] {
+                        resolve(())
+                    }
+                    self.transferFinishedHandler.removeValue(forKey: transferGUID)
                 }
-                self.transferFinishedHandler.removeValue(forKey: transferGUID)
-            }
         default:
             for (_, reject) in transferFinishedHandler[transferGUID, default: []] {
-                reject(BarcelonaError(code: 500, message: "Failed to download file transfer: \(transfer.errorDescription ?? transfer.error.description)"))
+                reject(
+                    BarcelonaError(
+                        code: 500,
+                        message:
+                            "Failed to download file transfer: \(transfer.errorDescription ?? transfer.error.description)"
+                    )
+                )
             }
             transferFinishedHandler.removeValue(forKey: transferGUID)
         }
     }
-    
+
     private func transferFinished(_ notification: Notification) {
         guard let transfer = notification.decodeObject(to: IMFileTransfer.self) else {
             return
@@ -194,63 +225,79 @@ public class CBFileTransferCenter {
     }
 }
 
-public extension IMFileTransfer {
+extension IMFileTransfer {
 
-    var log: Logging.Logger {
+    public var log: Logging.Logger {
         Logger(label: "IMFileTransfer")
     }
 
-    var inSandboxedLocation: Bool {
+    public var inSandboxedLocation: Bool {
         localPath.hasPrefix("/var/folders")
     }
 
-    var isTrulyFinished: Bool {
+    public var isTrulyFinished: Bool {
         isFinished && existsAtLocalPath && !inSandboxedLocation
     }
-    
-    var needsUnpurging: Bool {
+
+    public var needsUnpurging: Bool {
         state == .waitingForAccept && canAutoDownload && CBPurgedAttachmentController.maxBytes > totalBytes
     }
-    
+
     private var currentResult: Result<Void, Error>? {
         switch state {
         case .finished:
             if inSandboxedLocation {
-                log.debug("Waiting for \(self.guid ?? "nil") to move to the final attachments folder", source: "IMFileTransfer")
+                log.debug(
+                    "Waiting for \(self.guid ?? "nil") to move to the final attachments folder",
+                    source: "IMFileTransfer"
+                )
                 return nil
             }
             return .success(())
-        case .recoverableError:
-            fallthrough
-        case .error:
-            return .failure(BarcelonaError(code: 500, message: "Failed to download file transfer: \(errorDescription ?? error.description)"))
+        case .recoverableError, .error:
+            return .failure(
+                BarcelonaError(
+                    code: 500,
+                    message: "Failed to download file transfer: \(errorDescription ?? error.description)"
+                )
+            )
         default:
             return nil
         }
     }
-    
-    func completionPromise() -> Promise<Void> {
+
+    public func completionPromise() -> Promise<Void> {
         Promise<Void> { resolve, reject in
-            NotificationCenter.default.addObserver(forName: .IMFileTransferUpdated, object: nil, queue: .main) { [unowned self] notification, unsubscribe in
-                guard let object = notification.object as? IMFileTransfer, let guid = object.guid, object.guid == self.guid else {
+            NotificationCenter.default.addObserver(forName: .IMFileTransferUpdated, object: nil, queue: .main) {
+                [unowned self] notification, unsubscribe in
+                guard let object = notification.object as? IMFileTransfer, let guid = object.guid,
+                    object.guid == self.guid
+                else {
                     return
                 }
-                
+
                 log.debug("transfer \(guid) moved to state \(object.state)", source: "IMFileTransfer")
-                
+
                 switch object.state {
                 case .finished:
                     if object.inSandboxedLocation {
-                        log.debug("Waiting for \(guid) to move to the final attachments folder", source: "IMFileTransfer")
+                        log.debug(
+                            "Waiting for \(guid) to move to the final attachments folder",
+                            source: "IMFileTransfer"
+                        )
                         return
                     }
                     unsubscribe()
                     resolve(())
-                case .recoverableError:
-                    fallthrough
-                case .error:
+                case .recoverableError, .error:
                     unsubscribe()
-                    reject(BarcelonaError(code: 500, message: "Failed to download file transfer: \(object.errorDescription ?? object.error.description)"))
+                    reject(
+                        BarcelonaError(
+                            code: 500,
+                            message:
+                                "Failed to download file transfer: \(object.errorDescription ?? object.error.description)"
+                        )
+                    )
                 default:
                     return
                 }
@@ -263,103 +310,123 @@ public extension IMFileTransfer {
 // Disabled by default!
 public class CBPurgedAttachmentController {
     public static let shared = CBPurgedAttachmentController()
-    
-    public static var maxBytes: Int = 100000000 // default -- 100MB
+
+    public static var maxBytes: Int = 100_000_000  // default -- 100MB
     public var enabled: Bool = false
     public var delegate: CBPurgedAttachmentControllerDelegate?
-    
+
     private let log = Logger(label: "PurgedAttachments")
-    private var processingTransfers: [String: Promise<Void>] = [:] // used to mux together purged transfers, to prevent a race in which two operations are both fetching a transfer
-    
+    private var processingTransfers: [String: Promise<Void>] = [:]  // used to mux together purged transfers, to prevent a race in which two operations are both fetching a transfer
+
     public func process(transferIDs: [String]) -> Promise<Void> {
-        let (transfers, supplemented) = transferIDs
+        let (transfers, supplemented) =
+            transferIDs
             .compactMap(IMFileTransferCenter.sharedInstance().transfer(forGUID:))
             .filter { transfer in
                 transfer.needsUnpurging || !transfer.isTrulyFinished
-            }.splitReduce(intoLeft: [IMFileTransfer](), intoRight: [Promise<Void>]()) { transfers, promises, transfer in
+            }
+            .splitReduce(intoLeft: [IMFileTransfer](), intoRight: [Promise<Void>]()) { transfers, promises, transfer in
                 guard let guid = transfer.guid else {
                     // we cant do anything, and we certainly wont wait!
                     promises.append(Promise.success(()))
                     return
                 }
                 if let pendingPromise = processingTransfers[guid] {
-                    promises.append(pendingPromise) // existing download in progress, return that instead
+                    promises.append(pendingPromise)  // existing download in progress, return that instead
                 } else {
-                    transfers.append(transfer) // clear for takeoff
+                    transfers.append(transfer)  // clear for takeoff
                 }
             }
-        
+
         guard transfers.count > 0 else {
             if supplemented.count > 0 {
-                return Promise.all(supplemented).replace(with: ()) // return summative promise over all existing operations
+                return Promise.all(supplemented).replace(with: ())  // return summative promise over all existing operations
             }
-            
+
             return .success(())
         }
-        
+
         log.info("fetching \(transfers.count) guids from cloudkit")
-        
-        return Promise.all(supplemented + transfers.map { transfer in
-            guard let guid = transfer.guid else {
-                log.error("Transfers were filtered out to only the ones with GUIDs, but encountered a transfer without one.")
-                return Promise.success(())
-            }
-            
-            var promise = CBFileTransferCenter.shared.transferCompletionPromise(guid)
-            
-            guard transfer.needsUnpurging else {
-                return promise
-            }
-            
-            promise = promise.observeOutput {
-                self.processingTransfers.removeValue(forKey: guid)
-                self.delegate?.purgedTransferResolved(transfer)
-            }.observeFailure { _ in
-                self.delegate?.purgedTransferFailed(transfer)
-            }
-            
-            processingTransfers[guid] = promise
-            
-            IMFileTransferCenter.sharedInstance().acceptTransfer(transfer.guid)
-            
-            return promise
-        }).replace(with: ()).resolve(on: DispatchQueue.main).timeout(.seconds(60)).then { result in
-            switch result {
-            case .timedOut:
-                let unavailableTransfers = transfers.filter { !$0.isTrulyFinished }
-                if unavailableTransfers.isEmpty {
-                    self.log.error("File transfer completion promise never fired, but all attachments seem to have finished.")
-                } else {
-                    let transferIDS = unavailableTransfers.map(\.guid)
-                    self.log.warning("Continuing message processing despite unsuccessful attachment loading! The following transfers are incomplete/unavailable: \(transferIDS)")
+
+        return
+            Promise.all(
+                supplemented
+                    + transfers.map { transfer in
+                        guard let guid = transfer.guid else {
+                            log.error(
+                                "Transfers were filtered out to only the ones with GUIDs, but encountered a transfer without one."
+                            )
+                            return Promise.success(())
+                        }
+
+                        var promise = CBFileTransferCenter.shared.transferCompletionPromise(guid)
+
+                        guard transfer.needsUnpurging else {
+                            return promise
+                        }
+
+                        promise =
+                            promise.observeOutput {
+                                self.processingTransfers.removeValue(forKey: guid)
+                                self.delegate?.purgedTransferResolved(transfer)
+                            }
+                            .observeFailure { _ in
+                                self.delegate?.purgedTransferFailed(transfer)
+                            }
+
+                        processingTransfers[guid] = promise
+
+                        IMFileTransferCenter.sharedInstance().acceptTransfer(transfer.guid)
+
+                        return promise
+                    }
+            )
+            .replace(with: ()).resolve(on: DispatchQueue.main).timeout(.seconds(60))
+            .then { result in
+                switch result {
+                case .timedOut:
+                    let unavailableTransfers = transfers.filter { !$0.isTrulyFinished }
+                    if unavailableTransfers.isEmpty {
+                        self.log.error(
+                            "File transfer completion promise never fired, but all attachments seem to have finished."
+                        )
+                    } else {
+                        let transferIDS = unavailableTransfers.map(\.guid)
+                        self.log.warning(
+                            "Continuing message processing despite unsuccessful attachment loading! The following transfers are incomplete/unavailable: \(transferIDS)"
+                        )
+                    }
+                default:
+                    break
                 }
-            default:
-                break
             }
-        }
     }
 }
 
 extension Promise {
     func timeout(_ interval: DispatchTimeInterval) -> Promise<TimedResult> {
-        Promise<Any>.any([
-            OpaquePromise(self),
-            OpaquePromise(Promise<Void> { resolve in
-                guard let queue = resolveQueue as? DispatchQueue else {
-                    preconditionFailure("This timeout implementation only supports libdispatch")
+        Promise<Any>
+            .any([
+                OpaquePromise(self),
+                OpaquePromise(
+                    Promise<Void> { resolve in
+                        guard let queue = resolveQueue as? DispatchQueue else {
+                            preconditionFailure("This timeout implementation only supports libdispatch")
+                        }
+                        let timer = DispatchSource.makeTimerSource(flags: .strict, queue: queue)
+                        timer.schedule(deadline: .now().advanced(by: interval))
+                        timer.setEventHandler(handler: { resolve(()) })
+                        timer.resume()
+                    }
+                ),
+            ])
+            .then { output in
+                switch output {
+                case let output as Output:
+                    return .finished(output)
+                default:
+                    return .timedOut
                 }
-                let timer = DispatchSource.makeTimerSource(flags: .strict, queue: queue)
-                timer.schedule(deadline: .now().advanced(by: interval))
-                timer.setEventHandler(handler: { resolve(()) })
-                timer.resume()
-            })
-        ]).then { output in
-            switch output {
-            case let output as Output:
-                return .finished(output)
-            default:
-                return .timedOut
             }
-        }
     }
 }
