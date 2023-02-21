@@ -129,7 +129,7 @@ private extension IMAccountController {
         
         // True if the account failed to register, has a known registration failure reason, or most recently failed to register
         var hasAccountError: Bool {
-            account.registrationStatus == .failed || account.registrationFailureReason > .unknownError || registrationFailureDate != nil
+            account.registrationStatus == .failed || account.registrationFailureReason > .cannotConnect
         }
         
         // If we are registered but disconnected, consider that a TRANSIENT_DISCONNECT
