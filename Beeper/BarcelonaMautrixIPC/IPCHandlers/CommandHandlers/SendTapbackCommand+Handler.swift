@@ -25,7 +25,7 @@ extension TapbackCommand: Runnable, AuthenticatedAsserting {
         }
 
         do {
-            payload.respond(
+            await payload.respond(
                 .message_receipt(try chat.tapback(creation, metadata: metadata).partialMessage),
                 ipcChannel: ipcChannel
             )

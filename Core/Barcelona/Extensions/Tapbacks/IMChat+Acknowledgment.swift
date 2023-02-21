@@ -17,6 +17,7 @@ extension IMChat {
     /**
      Sends a tapback for a given message, calling back with a Vapor abort if the operation fails. This must be invoked on the main thread.
      */
+    @MainActor
     public func tapback(
         guid: String,
         itemGUID: String,

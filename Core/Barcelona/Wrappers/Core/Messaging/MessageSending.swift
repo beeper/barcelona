@@ -160,13 +160,13 @@ extension Chat {
         )
     }
 
-    public func tapback(_ creation: TapbackCreation, metadata: Message.Metadata? = nil) throws -> Message {
+    public func tapback(_ creation: TapbackCreation, metadata: Message.Metadata? = nil) async throws -> Message {
         markAsRead()
         guard let imChat, let service else {
             throw BarcelonaError(code: 500, message: "No IMChat or service for \(id)")
         }
 
-        let message = try imChat.tapback(
+        let message = try await imChat.tapback(
             guid: creation.message,
             itemGUID: creation.item,
             type: creation.type,
