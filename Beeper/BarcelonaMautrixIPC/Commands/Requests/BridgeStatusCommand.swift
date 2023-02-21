@@ -143,9 +143,9 @@ private extension IMAccountController {
         // Otherwise, if there is any kind of account error, we are in bad credentials.
         } else if hasAccountError {
             return .badCredentials
-        // Otherwise, if we are probably about to register, then we are connecting.
+        // Otherwise, if we are probably about to register, then we are still unconfigured.
         } else if isProbablyAboutToRegister {
-            return .connecting
+            return .unconfigured
         // Otherwise, we don't know what state we're in, but it isn't good.
         } else {
             return .unknownError
