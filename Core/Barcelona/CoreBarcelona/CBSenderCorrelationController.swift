@@ -303,7 +303,8 @@ public class CBSenderCorrelationController {
     private static let queue = DispatchQueue(label: "CBSenderCorrelation")
     
     /// this dictionary tracks the latest optionality to avoid redundant db hits for correlation IDs that we don't have
-    @Atomic private var senderIDToCorrelationID: [String: String?] = [:]
+    private var senderIDToCorrelationID: [String: String?] = [:]
+    private let senderIDToCorrelationIDLock = NSRecursiveLock()
     
     /// Establish a correlation between a sender ID and a correlation ID
     public func correlate(senderID: String, correlationID: String) {
@@ -312,7 +313,7 @@ public class CBSenderCorrelationController {
             ~log.debug("Ignoring equal self-referencing ID for \(senderID) (this means they are using a temporary registration and there's nothing to correlate against)")
             return
         }
-        { senderIDToCorrelationID in
+        senderIDToCorrelationIDLock.withLock {
             switch senderIDToCorrelationID[senderID] {
             case .none, .some(.none):
                 senderIDToCorrelationID[senderID] = correlationID
@@ -320,14 +321,16 @@ public class CBSenderCorrelationController {
             default:
                 break
             }
-        }(&senderIDToCorrelationID)
+        }
     }
     
     private func cachedCorrelation(for destination: String) -> String?? {
         if let override = CBCorrelationOverrideController.shared.override(for: destination) {
             return .some(override)
         }
-        return senderIDToCorrelationID[destination]
+        return senderIDToCorrelationIDLock.withLock {
+            senderIDToCorrelationID[destination]
+        }
     }
     
     private func loadCachedCorrelation(senderID: String) -> String? {
@@ -351,7 +354,9 @@ public class CBSenderCorrelationController {
             semaphore.signal()
         }
         semaphore.wait()
-        senderIDToCorrelationID[senderID] = result
+        senderIDToCorrelationIDLock.withLock {
+            senderIDToCorrelationID[senderID] = result
+        }
         return result
     }
     
@@ -373,12 +378,12 @@ public class CBSenderCorrelationController {
             semaphore.signal()
         }.resolving(on: DispatchQueue.global()).wait(upTo: .distantFuture);
         // lock for the entire enumeration
-        { senderIDToCorrelationID in
+        senderIDToCorrelationIDLock.withLock {
             // store the database results
             for missingCorrelation in missingCorrelations {
                 senderIDToCorrelationID[missingCorrelation] = loadedCorrelations[missingCorrelation]
             }
-        }(&senderIDToCorrelationID)
+        }
         return loadedCorrelations
     }
     
@@ -453,10 +458,12 @@ public class CBSenderCorrelationController {
             // no correlations!
             let correlations = retrieveCorrelationsAndWait(senderIDs: senders)
             if correlations.isEmpty {
-                // there's truly no correlations, set caches to nil and return
-                for sender in senders {
-                    ~log.debug("\(sender) has no correlation ID, caching a nil value")
-                    senderIDToCorrelationID[sender] = .some(.none)
+                senderIDToCorrelationIDLock.withLock {
+                    // there's truly no correlations, set caches to nil and return
+                    for sender in senders {
+                        ~log.debug("\(sender) has no correlation ID, caching a nil value")
+                        senderIDToCorrelationID[sender] = .some(.none)
+                    }
                 }
                 return nil
             } else {
@@ -479,30 +486,30 @@ public class CBSenderCorrelationController {
     /// For an array of senders, prewarms their correlation data.
     public func prewarm(senders: [String]) -> Promise<Void> {
         // only take senders that haven't been queried
-        let senders = { senderIDToCorrelationID in
+        let senders = senderIDToCorrelationIDLock.withLock {
             senders.filter {
                 senderIDToCorrelationID[$0] == .none
             }
-        }(&senderIDToCorrelationID)
+        }
         guard !senders.isEmpty else {
             return .success(())
         }
-        return retrieveCorrelations(senderIDs: senders).then { correlations in
-            { senderIDToCorrelationID in
+        return retrieveCorrelations(senderIDs: senders).then { [unowned self] correlations in
+            senderIDToCorrelationIDLock.withLock {
                 for sender in senders {
                     senderIDToCorrelationID[sender] = .some(correlations[sender])
                 }
-            }(&self.senderIDToCorrelationID)
+            }
         }
     }
     
     public func reset() {
-        let allCorrelations = try! Stack.stack.allCorrelations().wait(upTo: .distantFuture);
-        { senderIDToCorrelationID in
+        let allCorrelations = try! Stack.stack.allCorrelations().wait(upTo: .distantFuture)
+        senderIDToCorrelationIDLock.withLock {
             for correlation in allCorrelations {
                 senderIDToCorrelationID[correlation.sender_id] = correlation.correl_id
             }
-        }(&senderIDToCorrelationID)
+        }
     }
     
     /// Queries the correlation identifier for a given sender ID, if it is known
