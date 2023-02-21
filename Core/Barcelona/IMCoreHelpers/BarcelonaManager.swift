@@ -135,8 +135,12 @@ public func BLBootstrapController(_ callbackC: (@convention(c) (Bool) -> ())? = 
         #if DEBUG
         log.debug("Set up IMContactStore. Loading correlation controller...")
         #endif
-        
-        _ = CBSenderCorrelationController.shared
+
+        // CBSenderCorrelationController's usage of Pwomise creates data races (according to the thread sanitizer)
+        // and we don't use it anymore, so let's just make sure it's never called so that we don't get those data races.
+        // Also, once I commented this out, I was able to debug async functions (whereas previously breakpoints in some
+        // top-level async functions would never catch, but if we never call the controller, they do catch)
+        // _ = CBSenderCorrelationController.shared
         
         #if DEBUG
         log.debug("Loaded correlation controller. Loading all chats...")

@@ -41,15 +41,15 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     }
     
     public func chat(_ persistentIdentifier: String!, updated updateDictionary: [AnyHashable : Any]!) {
-        trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) updated \(updateDictionary)")
+        trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) updated \(updateDictionary.singleLineDebugDescription)")
         _ = handle(chat: updateDictionary)
     }
     
     public func chat(_ persistentIdentifier: String!, propertiesUpdated properties: [AnyHashable : Any]!) {
-        trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) properties \(properties)")
+        trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) properties \(properties.singleLineDebugDescription)")
         _ = handle(chat: [
-            "guid": persistentIdentifier,
-            "properties": properties
+            "guid": persistentIdentifier as Any,
+            "properties": properties as Any
         ])
     }
     
@@ -79,11 +79,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     }
     
     public func service(_ serviceID: String!, chat chatIdentifier: String!, style chatStyle: IMChatStyle, messagesUpdated messages: [[AnyHashable: Any]]!) {
-        #if DEBUG
-        trace(chatIdentifier, nil, "messages updated \(messages.debugDescription)")
-        #else
-        trace(chatIdentifier, nil, "\(messages.count) messages updated in")
-        #endif
+        trace(chatIdentifier, nil, "messages updated \(messages)")
         messages.forEach {
             handle(chat: .chatIdentifier(chatIdentifier), item: $0)
         }

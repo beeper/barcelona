@@ -218,8 +218,20 @@ internal extension CBDaemonListener {
             self.chatConfigurationPipeline.send(chat.configurationBits)
         }
 
-        NotificationCenter.default.addObserver(forName: .init("__kIMPeopleAddedNotification"), object: nil, queue: nil) { notification in
-            log.debug("People were added: \(notification.object.debugDescription)")
+        NotificationCenter.default.addObserver(forName: .IMPeopleAdded, object: nil, queue: nil) { notification in
+            log.debug("IMPeopleAdded: \(notification.object), \(notification.userInfo)")
+        }
+
+        NotificationCenter.default.addObserver(forName: .IMChatRegistryDidRegisterChat, object: nil, queue: nil) { notification in
+            log.debug("IMChatRegistryDidRegisterChat: \(notification.object), \(notification.userInfo)")
+        }
+
+        NotificationCenter.default.addObserver(forName: .IMHandleStatusChanged, object: nil, queue: nil) { notification in
+            log.debug("IMHandleStatusChanged: \(notification.object), \(notification.userInfo)")
+        }
+
+        NotificationCenter.default.addObserver(forName: .IMChatParticipantsDidChange, object: nil, queue: nil) { notification in
+            log.debug("IMChatParticipantsDidChange: \(notification.object), \(notification.userInfo)")
         }
 
         ifDebugBuild {
@@ -461,7 +473,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
     
     // Properties were changed
     public override func chat(_ persistentIdentifier: String, updated updateDictionary: [AnyHashable : Any]) {
-        log.debug("chat:\(persistentIdentifier) updated:\(updateDictionary)")
+        log.debug("chat:\(persistentIdentifier) updated:\(updateDictionary.singleLineDebugDescription)")
         apply(serializedChat: updateDictionary, emitIfNeeded: true)
     }
     

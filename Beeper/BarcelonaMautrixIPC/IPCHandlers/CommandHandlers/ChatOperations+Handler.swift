@@ -32,25 +32,23 @@ extension Array where Element == String {
 }
 
 extension GetChatsCommand: Runnable {
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         if min_timestamp <= 0 {
             return payload.reply(withResponse: .chats_resolved(IMChatRegistry.shared.allChats.map(\.blChatGUID)), ipcChannel: ipcChannel)
         }
 
-        Task {
-            do {
-                let timestamps = try await DBReader.shared.latestMessageTimestamps()
+        do {
+            let timestamps = try await DBReader.shared.latestMessageTimestamps()
 
-                let guids = timestamps.mapValues { timestamp, guid in
-                    (IMDPersistenceTimestampToUnixSeconds(timestamp: timestamp), guid)
-                }.filter { chatID, pair in
-                    pair.0 > min_timestamp
-                }.map(\.value.1)
+            let guids = timestamps.mapValues { timestamp, guid in
+                (IMDPersistenceTimestampToUnixSeconds(timestamp: timestamp), guid)
+            }.filter { chatID, pair in
+                pair.0 > min_timestamp
+            }.map(\.value.1)
 
-                payload.reply(withResponse: .chats_resolved(guids.dedupeChatGUIDs()), ipcChannel: ipcChannel)
-            } catch {
-                payload.fail(strategy: .internal_error(error.localizedDescription), ipcChannel: ipcChannel)
-            }
+            payload.reply(withResponse: .chats_resolved(guids.dedupeChatGUIDs()), ipcChannel: ipcChannel)
+        } catch {
+            payload.fail(strategy: .internal_error(error.localizedDescription), ipcChannel: ipcChannel)
         }
     }
 }
@@ -59,7 +57,7 @@ extension GetGroupChatInfoCommand: Runnable {
     var log: Logging.Logger {
         Logger(label: "TapbackCommand")
     }
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         log.info("Getting chat with id \(chat_guid)", source: "MautrixIPC")
         
         guard let chat = blChat else {
@@ -74,7 +72,7 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
     var log: Logging.Logger {
         Logger(label: "TapbackCommand")
     }
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         log.info("Sending read receipt to \(String(describing: cbChat?.blChatGUID))", source: "MautrixIPC")
 
         guard let chat = cbChat else {
@@ -86,7 +84,7 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
 }
 
 extension SendTypingCommand: Runnable, AuthenticatedAsserting {
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         guard let chat = cbChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
@@ -96,7 +94,7 @@ extension SendTypingCommand: Runnable, AuthenticatedAsserting {
 }
 
 extension GetGroupChatAvatarCommand: Runnable {
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         guard let chat = chat, let groupPhotoID = chat.groupPhotoID else {
             return payload.respond(.chat_avatar(nil), ipcChannel: ipcChannel)
         }
