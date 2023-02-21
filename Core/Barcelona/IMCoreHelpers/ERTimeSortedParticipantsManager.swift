@@ -7,6 +7,7 @@
 //
 
 import BarcelonaDB
+import Combine
 import Foundation
 import IMCore
 import IMSharedUtilities
@@ -195,49 +196,24 @@ public class ERTimeSortedParticipantsManager {
     }
 
     private func listen() async {
-        Task {
-            for await notification in NotificationCenter.default.notifications(
-                named: ERChatMessagesReceivedNotification
-            ) {
+        NotificationCenter.default.publisher(for: ERChatMessagesReceivedNotification)
+            .merge(with: NotificationCenter.default.publisher(for: ERChatMessageReceivedNotification))
+            .sink { [unowned self] notification in
                 if let ingestible = notification.object as? [ERTimeSortedParticipantsManagerIngestible] {
                     ingest(items: ingestible, inChat: notification.userInfo!["chat"] as! String)
                 }
             }
-        }
+            .store(in: &cancellables)
 
-        Task {
-            for await notification in NotificationCenter.default.notifications(
-                named: ERChatMessageReceivedNotification
-            ) {
-                if let ingestible = notification.object as? ERTimeSortedParticipantsManagerIngestible {
-                    ingest(item: ingestible, inChat: notification.userInfo!["chat"] as! String)
-                }
-            }
-        }
-
-        Task {
-            for await notification in NotificationCenter.default.notifications(
-                named: .IMChatRegistryDidRegisterChat
-            ) {
+        NotificationCenter.default.publisher(for: .IMChatRegistryDidRegisterChat)
+            .merge(
+                with: NotificationCenter.default.publisher(for: .IMChatRegistryDidUnregisterChat),
+                NotificationCenter.default.publisher(for: .IMChatParticipantsDidChange)
+            )
+            .sink { [unowned self] notification in
                 ingest(bootstrapNotification: notification)
             }
-        }
-
-        Task {
-            for await notification in NotificationCenter.default.notifications(
-                named: .IMChatRegistryDidUnregisterChat
-            ) {
-                ingest(bootstrapNotification: notification)
-            }
-        }
-
-        Task {
-            for await notification in NotificationCenter.default.notifications(
-                named: .IMChatParticipantsDidChange
-            ) {
-                ingest(bootstrapNotification: notification)
-            }
-        }
+            .store(in: &cancellables)
     }
 
     private func ingest(bootstrapNotification notification: Notification) {
@@ -307,4 +283,5 @@ public class ERTimeSortedParticipantsManager {
         self.sortParticipants(forChat: chat)
     }
 
+    private var cancellables = Set<AnyCancellable>()
 }
