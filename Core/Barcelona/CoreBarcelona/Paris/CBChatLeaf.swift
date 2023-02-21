@@ -77,12 +77,7 @@ public struct CBChatLeaf {
         originalGroupID = dictionary["originalGroupID"] as? String ?? originalGroupID
         if let participants = dictionary["participants"] as? [[AnyHashable: Any]] {
             self.participants = participants.compactMap(CBChatParticipant.init(dictionary:))
-            if (dictionary["style"] as? UInt8) == 45, self.participants.count == 1 {
-                let uri = (self.participants[0].personID as NSString)._bestGuessURIFromCanicalizedID() as! String
-                correlationID = CBSenderCorrelationController.shared.correlate(sameSenders: [uri], offline: true, hitDatabase: false) ?? ""
-            } else {
-                correlationID = ""
-            }
+            correlationID = ""
         }
         return self
     }

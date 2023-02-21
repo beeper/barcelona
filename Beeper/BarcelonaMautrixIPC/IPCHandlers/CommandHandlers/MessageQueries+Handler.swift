@@ -14,7 +14,7 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
     var log: Logging.Logger {
         Logger(label: "GetMessagesAfterCommand")
     }
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         log.debug("Getting messages for chat guid \(chat_guid) after time \(timestamp)")
         
         guard let chat = chat else {
@@ -30,19 +30,18 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
             return payload.respond(.messages([]), ipcChannel: ipcChannel)
         }
 
-        Task { @MainActor in
-            do {
-                let messages = try await BLLoadChatItems(withChats: siblings.compactMap(\.chatIdentifier).map({ ($0, service) }), afterDate: date, limit: limit).blMessages
-                payload.respond(.messages(messages), ipcChannel: ipcChannel)
-            } catch {
-                payload.fail(strategy: .internal_error(error.localizedDescription), ipcChannel: ipcChannel)
-            }
+        do {
+            let chats = siblings.compactMap(\.chatIdentifier).map({ ($0, service) })
+            let messages = try await BLLoadChatItems(withChats: chats, afterDate: date, limit: limit).blMessages
+            payload.respond(.messages(messages), ipcChannel: ipcChannel)
+        } catch {
+            payload.fail(strategy: .internal_error(error.localizedDescription), ipcChannel: ipcChannel)
         }
     }
 }
 
 extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         if MXFeatureFlags.shared.mergedChats, chat_guid.starts(with: "SMS;") {
             return payload.respond(.messages([]), ipcChannel: ipcChannel)
         }

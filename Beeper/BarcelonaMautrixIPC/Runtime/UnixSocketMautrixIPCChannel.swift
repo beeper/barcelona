@@ -23,7 +23,7 @@ public class UnixSocketMautrixIPCChannel: MautrixIPCInputChannel, MautrixIPCOutp
 
     public func listen(_ cb: @escaping (Data) -> Void) {
         do {
-            let group = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+            let group = MultiThreadedEventLoopGroup(numberOfThreads: 2)
             let client = ClientBootstrap(group: group)
             channel = try client.channelInitializer { channel in
                 channel.pipeline.addHandler(ClosureReadHandler(readCallback: cb))

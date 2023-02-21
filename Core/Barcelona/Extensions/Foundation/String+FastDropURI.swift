@@ -18,3 +18,9 @@ extension String {
         return String(self[self.index(after: index)...])
     }
 }
+
+extension CustomDebugStringConvertible {
+    var singleLineDebugDescription: String {
+        debugDescription.replacingOccurrences(of: "\n", with: " ")
+    }
+}
