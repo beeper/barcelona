@@ -93,7 +93,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                 withExtendedLifetime(monitor) { monitor = nil }
             }
 
-            message = try chat.sendReturningRaw(message: messageCreation)
+            message = try await chat.sendReturningRaw(message: messageCreation)
 
             payload.reply(
                 withResponse: .message_receipt(

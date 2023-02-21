@@ -139,7 +139,9 @@ extension BLRegressionTesting {
             preconditionFailure("Expected chat to be SMS targeted initially")
         }
         let wrapper = Chat(chat)
-        try! wrapper.send(message: .init(parts: [.init(type: .text, details: "asdf")]))
+        Task {
+            try! await wrapper.send(message: .init(parts: [.init(type: .text, details: "asdf")]))
+        }
     }
 
     /// Coverage for the case where an SMS chat is pointed at an e-mail
@@ -152,46 +154,48 @@ extension BLRegressionTesting {
         let handles = handles
 
         func go_barcelona(_ outcome: Outcome) {
-            // hunt down the SMS email handle
-            guard
-                let smsEmailHandle = handles.first(where: {
-                    $0.id.isEmail && $0.service?.id == .SMS
-                })
-            else {
-                preconditionFailure("Expected to find an SMS email handle, but did not.")
-            }
-            guard let bestHandle = IMHandle.bestIMHandle(in: handles) else {
-                preconditionFailure("Expected to find the best handle from a set of handles, but did not.")
-            }
-            let imChat = IMChatRegistry.shared.chat(for: bestHandle)
-            imChat.forceToSMS()
-            imChat.setRecipient(smsEmailHandle, locally: false)
-            defer {
-                IMChat.regressionTesting_disableServiceRefresh = false
-            }
-            if outcome == .succeed {
-                IMChat.regressionTesting_disableServiceRefresh = false
-            } else {
-                IMChat.regressionTesting_disableServiceRefresh = true
-            }
-            let chat = Chat(imChat)
-            do {
-                let message = try chat.send(message: CreateMessage(parts: [.init(type: .text, details: "asdf")]))
-                if outcome == .succeed {
-                    guard message.service == .iMessage else {
-                        preconditionFailure(
-                            "Expected Barcelona Chat to retarget itself to iMessage when sending SMS to an email, but the message sent as \(message.service.rawValue)."
-                        )
-                    }
-                } else {
-                    guard message.service == .SMS else {
-                        preconditionFailure(
-                            "Expected Barcelona Chat to send SMS to an email, but the message sent as \(message.service.rawValue)."
-                        )
-                    }
+            Task {
+                // hunt down the SMS email handle
+                guard
+                    let smsEmailHandle = handles.first(where: {
+                        $0.id.isEmail && $0.service?.id == .SMS
+                    })
+                else {
+                    preconditionFailure("Expected to find an SMS email handle, but did not.")
                 }
-            } catch {
-                preconditionFailure("Error while sending message: \(error)")
+                guard let bestHandle = IMHandle.bestIMHandle(in: handles) else {
+                    preconditionFailure("Expected to find the best handle from a set of handles, but did not.")
+                }
+                let imChat = IMChatRegistry.shared.chat(for: bestHandle)
+                imChat.forceToSMS()
+                imChat.setRecipient(smsEmailHandle, locally: false)
+                defer {
+                    IMChat.regressionTesting_disableServiceRefresh = false
+                }
+                if outcome == .succeed {
+                    IMChat.regressionTesting_disableServiceRefresh = false
+                } else {
+                    IMChat.regressionTesting_disableServiceRefresh = true
+                }
+                let chat = Chat(imChat)
+                do {
+                    let message = try await chat.send(message: CreateMessage(parts: [.init(type: .text, details: "asdf")]))
+                    if outcome == .succeed {
+                        guard message.service == .iMessage else {
+                            preconditionFailure(
+                                "Expected Barcelona Chat to retarget itself to iMessage when sending SMS to an email, but the message sent as \(message.service.rawValue)."
+                            )
+                        }
+                    } else {
+                        guard message.service == .SMS else {
+                            preconditionFailure(
+                                "Expected Barcelona Chat to send SMS to an email, but the message sent as \(message.service.rawValue)."
+                            )
+                        }
+                    }
+                } catch {
+                    preconditionFailure("Error while sending message: \(error)")
+                }
             }
         }
 
