@@ -59,13 +59,17 @@ extension GetGroupChatInfoCommand: Runnable {
         Logger(label: "TapbackCommand")
     }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "GetGroupChatInfoCommand", operation: "run", bindToScope: true)
         log.info("Getting chat with id \(chat_guid)", source: "MautrixIPC")
 
         guard let chat = await blChat else {
-            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            span.finish(status: .notFound)
+            return
         }
 
         payload.respond(.chat_resolved(chat), ipcChannel: ipcChannel)
+        span.finish()
     }
 }
 
