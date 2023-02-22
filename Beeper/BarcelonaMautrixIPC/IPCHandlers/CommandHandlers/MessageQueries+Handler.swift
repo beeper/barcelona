@@ -22,7 +22,7 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
 
-        let siblings = chat.siblings
+        let siblings = [chat]
 
         if let lastMessageTime = siblings.compactMap(\.lastMessage?.time?.timeIntervalSince1970).max(),
             lastMessageTime < timestamp
@@ -45,15 +45,11 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
 
 extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
-        if MXFeatureFlags.shared.mergedChats, chat_guid.starts(with: "SMS;") {
-            return payload.respond(.messages([]), ipcChannel: ipcChannel)
-        }
-
         guard let chat = await chat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
 
-        let siblings = chat.siblings
+        let siblings = [chat]
 
         Task {
             do {

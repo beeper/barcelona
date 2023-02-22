@@ -48,7 +48,6 @@ public class CBIDSListener: ERBaseIDSListener {
         return listener
     }()
 
-    public let senderCorrelationPipeline = CBPipeline<(senderID: String, correlationID: String)>()
     public let reflectedReadReceiptPipeline = CBPipeline<(guid: String, service: IMServiceStyle, time: Date)>()
 
     private var myDestinationURIs: [String] {
@@ -68,12 +67,6 @@ public class CBIDSListener: ERBaseIDSListener {
     ) {
         guard let payload = arg1?["IDSIncomingMessagePushPayload"] as? [String: Any] else {
             return
-        }
-
-        if let senderParticipant = payload["sP"] as? String,
-            let correlationIdentifier = arg7?["IDSMessageContextSenderCorrelationIdentifierKey"] as? String
-        {
-            senderCorrelationPipeline.send((senderParticipant, correlationIdentifier))
         }
 
         guard let rawCommand = payload["c"] as? IDSCommandID.RawValue, let command = IDSCommandID(rawValue: rawCommand)

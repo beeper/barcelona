@@ -73,7 +73,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
         joinState = backing.joinState
         roomName = backing.roomName
         displayName = backing.displayName
-        id = backing.id
+        id = backing.chatIdentifier
         participants = backing.recentParticipantHandleIDs
         unreadMessageCount = backing.unreadMessageCount
         messageFailureCount = backing.messageFailureCount

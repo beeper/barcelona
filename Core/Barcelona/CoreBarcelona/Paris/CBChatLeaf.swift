@@ -27,8 +27,6 @@ public struct CBChatLeaf {
     public var originalGroupID: String = ""
     /// An array of participants for this chat
     public var participants: [CBChatParticipant] = []
-    /// The sender correlation identifier for this chat
-    public var correlationID: String = ""
 
     /// Returns the identifier with the most specificity for this chat
     public var mostUniqueIdentifier: CBChatIdentifier? {
@@ -43,9 +41,6 @@ public struct CBChatLeaf {
         }
         if !originalGroupID.isEmpty {
             return .originalGroupID(originalGroupID)
-        }
-        if !correlationID.isEmpty {
-            return .correlationID(correlationID)
         }
         return nil
     }
@@ -64,9 +59,6 @@ public struct CBChatLeaf {
         if !originalGroupID.isEmpty {
             try callback(.originalGroupID(originalGroupID))
         }
-        if !correlationID.isEmpty {
-            try callback(.correlationID(correlationID))
-        }
     }
 
     /// Updates the struct with only the identifiable information from the provided dictionary
@@ -77,7 +69,6 @@ public struct CBChatLeaf {
         originalGroupID = dictionary["originalGroupID"] as? String ?? originalGroupID
         if let participants = dictionary["participants"] as? [[AnyHashable: Any]] {
             self.participants = participants.compactMap(CBChatParticipant.init(dictionary:))
-            correlationID = ""
         }
         return self
     }

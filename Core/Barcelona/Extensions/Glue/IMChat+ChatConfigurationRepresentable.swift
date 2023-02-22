@@ -18,6 +18,11 @@ private let IMChatPropertyGroupPhotoGUID: NSString? = CBWeakLink(
 )
 
 extension IMChat: ChatConfigurationRepresentable {
+
+    public var id: String {
+        chatIdentifier
+    }
+
     public var readReceipts: Bool {
         get {
             value(forChatProperty: "EnableReadReceiptForChat") as? Bool ?? false

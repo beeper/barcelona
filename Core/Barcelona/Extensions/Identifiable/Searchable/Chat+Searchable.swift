@@ -190,7 +190,7 @@ extension ChatSearchParameter: SearchParameter {
                 }
             }
         case .identifiers(let identifiers):
-            if !identifiers.contains(chat.id) {
+            if !identifiers.contains(chat.chatIdentifier) {
                 return false
             }
         case .ignoreAlerts(let ignoreAlerts):

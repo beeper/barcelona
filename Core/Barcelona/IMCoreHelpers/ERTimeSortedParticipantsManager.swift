@@ -220,11 +220,11 @@ public class ERTimeSortedParticipantsManager {
         if let chat = notification.chat {
             do {
                 log.info(
-                    "Recomputing sorted participants with chat ID \(chat.id) per notification \(notification.name.rawValue)"
+                    "Recomputing sorted participants with chat ID \(chat.chatIdentifier) per notification \(notification.name.rawValue)"
                 )
                 try bootstrap(chat: chat)
                 log.info(
-                    "Finished recomputing sorted participants with chat ID \(chat.id) per notification \(notification.name.rawValue)"
+                    "Finished recomputing sorted participants with chat ID \(chat.chatIdentifier) per notification \(notification.name.rawValue)"
                 )
             } catch {
                 log.error("Error ")

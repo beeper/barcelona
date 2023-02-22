@@ -15,19 +15,7 @@ import Logging
 extension Array where Element == String {
     /// Given self is an array of chat GUIDs, masks the GUIDs to iMessage service and returns the deduplicated result
     func dedupeChatGUIDs() -> [String] {
-        if MXFeatureFlags.shared.mergedChats {
-            var guids: Set<String> = Set()
-            for guid in self {
-                if guid.hasPrefix("iMessage;") {
-                    guids.insert(guid)
-                } else if let firstSemi = guid.firstIndex(of: ";") {
-                    guids.insert(String("iMessage" + guid[firstSemi...]))
-                }
-            }
-            return Array(guids)
-        } else {
-            return Array(Set(self))
-        }
+        Array(Set(self))
     }
 }
 

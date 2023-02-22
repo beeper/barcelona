@@ -94,21 +94,16 @@ extension PrepareDMCommand: Runnable {
 
         let parsed = ParsedGUID(rawValue: guid)
 
-        if MXFeatureFlags.shared.mergedChats {
-            let chat = await Chat.directMessage(withHandleID: parsed.last, service: .iMessage)
-            log.info("Prepared chat \(chat.id)", source: "PrepareDM")
-        } else {
-            guard let service = parsed.service.flatMap(IMServiceStyle.init(rawValue:)) else {
-                return payload.fail(
-                    code: "err_invalid_service",
-                    message: "The service provided does not exist.",
-                    ipcChannel: ipcChannel
-                )
-            }
-
-            let chat = await Chat.directMessage(withHandleID: parsed.last, service: service)
-            log.info("Prepared chat \(chat.id) on service \(service.rawValue)", source: "PrepareDM")
+        guard let service = parsed.service.flatMap(IMServiceStyle.init(rawValue:)) else {
+            return payload.fail(
+                code: "err_invalid_service",
+                message: "The service provided does not exist.",
+                ipcChannel: ipcChannel
+            )
         }
+
+        let chat = await Chat.directMessage(withHandleID: parsed.last, service: service)
+        log.info("Prepared chat \(chat.id) on service \(service.rawValue)", source: "PrepareDM")
 
         payload.respond(.ack, ipcChannel: ipcChannel)
     }

@@ -139,7 +139,7 @@ public class BLMediaMessageMonitor {
             if finishedCount == transferGUIDs.count {
                 snap(success: true, code: nil)
             }
-        case .failed(_, _, _, let code, _):
+        case .failed(_, _, _, let code):
             snap(success: false, code: code)
         case .sending:
             return
