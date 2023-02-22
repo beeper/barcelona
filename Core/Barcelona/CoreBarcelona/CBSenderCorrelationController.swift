@@ -30,7 +30,7 @@ extension IMChat {
 
     /// If the chat is a DM, returns the correlation identifier of the recipient if it is known
     public var correlationIdentifier: String? {
-        guard isSingle else {
+        guard isSingle && CBFeatureFlags.correlateChats else {
             return nil
         }
         return recipient?.senderCorrelationID
@@ -232,17 +232,6 @@ public class CBSenderCorrelationController {
             .resolving(on: CBSenderCorrelationController.queue)
         }
 
-        func correlations(forCorrelation correlationID: String) -> Promise<[String]> {
-            read { result in
-                let req: SQLRequest<String> = """
-                    SELECT c.sender_id
-                    FROM correlation c
-                    WHERE c.correl_id = \(correlationID)
-                    """
-                return try req.fetchAll(result)
-            }
-        }
-
         func correlations(forSender sender: String) -> Promise<[Correlation]> {
             read { result in
                 let stmt = try result.makeSelectStatement(
@@ -364,34 +353,6 @@ public class CBSenderCorrelationController {
         return senderIDToCorrelationIDLock.withLock {
             senderIDToCorrelationID[destination]
         }
-    }
-
-    private func loadCachedCorrelation(senderID: String) -> String? {
-        if let correlationID = cachedCorrelation(for: senderID) {
-            return correlationID
-        }
-        ~log.debug("Looking up correlation ID for \(senderID)")
-        let semaphore = DispatchSemaphore(value: 1)
-        var semaphoreLocked: Bool {
-            if semaphore.wait(timeout: .now()) == .success {
-                semaphore.signal()
-                return false
-            }
-            return true
-        }
-        var result: String?
-        Stack.stack.correlationID(for: senderID)
-            .always { outcome in
-                if case .success(let id) = outcome {
-                    result = id
-                }
-                semaphore.signal()
-            }
-        semaphore.wait()
-        senderIDToCorrelationIDLock.withLock {
-            senderIDToCorrelationID[senderID] = result
-        }
-        return result
     }
 
     private func loadCachedCorrelations(senderIDs: [String], hitDatabase: Bool = true) -> [String: String?] {
@@ -570,15 +531,6 @@ public class CBSenderCorrelationController {
         correlate(sameSenders: [senderID], offline: true)
     }
 
-    /// Queries all URIs for the given correlation identifier
-    public func correlations(for correlationID: String) -> [String] {
-        do {
-            return try Stack.stack.correlations(forCorrelation: correlationID).wait(upTo: .distantFuture)
-        } catch {
-            return []
-        }
-    }
-
     public func siblingSenders(for senderID: String) -> [String] {
         do {
             return try Stack.stack.correlations(forSender: senderID).map(\.sender_id).wait(upTo: .distantFuture)
@@ -606,7 +558,10 @@ extension IDSURI {
 
 extension IDSDestination {
     public var correlationID: String? {
-        uri().correlationID
+        guard CBFeatureFlags.correlateChats else {
+            return nil
+        }
+        return uri().correlationID
     }
 }
 

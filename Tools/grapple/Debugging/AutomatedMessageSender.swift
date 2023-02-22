@@ -74,8 +74,8 @@ class AutomatedMessageSender: GrappleDebugger {
             }
         }
 
-        var resolvedChat: Chat {
-            Chat.chat(withHandleIDs: chat.split(separator: ",").map(String.init))
+        func resolvedChat() async -> Chat {
+            await Chat.chat(withHandleIDs: chat.split(separator: ",").map(String.init), service: .iMessage)
         }
 
         func message(atIndex index: Int) -> String {
@@ -180,20 +180,22 @@ class AutomatedMessageSender: GrappleDebugger {
         case .delivered:
             if let tapbacks = configuration.tapbacks {
                 if counter % tapbacks.interval == 1 {
-                    do {
-                        let message = try configuration.resolvedChat.tapback(
-                            .init(
-                                item: statusChange.message.chatItems.first!.id,
-                                message: statusChange.messageID,
-                                type: tapbacks.type
+                    Task {
+                        do {
+                            let message = try await configuration.resolvedChat().tapback(
+                                .init(
+                                    item: statusChange.message.chatItems.first!.id,
+                                    message: statusChange.messageID,
+                                    type: tapbacks.type
+                                )
                             )
-                        )
-                        sentTapbacks.append(message.id)
+                            sentTapbacks.append(message.id)
 
-                    } catch {
-                        log.error(
-                            "Failed to send tapback to \(statusChange.messageID): \((error as NSError).debugDescription)"
-                        )
+                        } catch {
+                            log.error(
+                                "Failed to send tapback to \(statusChange.messageID): \((error as NSError).debugDescription)"
+                            )
+                        }
                     }
                 }
             }
@@ -210,28 +212,30 @@ class AutomatedMessageSender: GrappleDebugger {
     }
 
     func sendNext() {
-        let text = configuration.message(atIndex: position)
+        Task {
+            let text = configuration.message(atIndex: position)
 
-        do {
-            let message = try configuration.resolvedChat.send(message: .init(stringLiteral: text))
-            sentMessages[message.id] = (message.time, text)
+            do {
+                let message = try await configuration.resolvedChat().send(message: .init(stringLiteral: text))
+                sentMessages[message.id] = (message.time, text)
 
-            position += 1
-            counter += 1
+                position += 1
+                counter += 1
 
-            log.info("Initiated send for \(message.id) (text={ \(text) })")
+                log.info("Initiated send for \(message.id) (text={ \(text) })")
 
-            if configuration.waitForDelivery {
-                pendingDeliveries[message.id] = {
-                    self.scheduler.schedule(milliseconds: self.configuration.delay)
+                if configuration.waitForDelivery {
+                    pendingDeliveries[message.id] = {
+                        self.scheduler.schedule(milliseconds: self.configuration.delay)
+                    }
+                    return
                 }
-                return
+            } catch {
+                log.error("Failed to send text{ \(text) }: \((error as NSError).debugDescription)")
             }
-        } catch {
-            log.error("Failed to send text{ \(text) }: \((error as NSError).debugDescription)")
-        }
 
-        scheduler.schedule(milliseconds: configuration.delay)
+            scheduler.schedule(milliseconds: configuration.delay)
+        }
     }
 }
 

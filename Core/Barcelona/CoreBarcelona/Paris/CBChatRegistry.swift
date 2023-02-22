@@ -93,7 +93,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         style chatStyle: IMChatStyle,
         messagesUpdated messages: [[AnyHashable: Any]]!
     ) {
-        trace(chatIdentifier, nil, "messages updated \(messages)")
+        trace(chatIdentifier, nil, "messages updated \(messages.singleLineDebugDescription)")
         messages.forEach {
             handle(chat: .chatIdentifier(chatIdentifier), item: $0)
         }
@@ -117,11 +117,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         notifySentMessage msg: IMMessageItem!,
         sendTime: NSNumber!
     ) {
-        #if DEBUG
-        trace(chatIdentifier, nil, "sent message \(msg.guid ?? "nil") \(msg.debugDescription)")
-        #else
-        trace(chatIdentifier, nil, "sent message \(msg.guid ?? "nil")")
-        #endif
+        trace(chatIdentifier, nil, "sent message \(msg.guid ?? "nil") \(msg.singleLineDebugDescription)")
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
     }
 
@@ -189,11 +185,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         chatPersonCentricID personCentricID: String!,
         messageReceived msg: IMItem!
     ) {
-        #if DEBUG
-        trace(chatIdentifier, personCentricID, "received message \(msg.debugDescription)")
-        #else
-        trace(chatIdentifier, personCentricID, "received message \(msg.id)")
-        #endif
+        trace(chatIdentifier, personCentricID, "received message \(msg.singleLineDebugDescription)")
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
     }
 
@@ -283,7 +275,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         trace(
             chatIdentifier,
             nil,
-            "properties \(((properties ?? [:]) as NSDictionary)) updated to \(((update ?? [:]) as NSDictionary))"
+            "properties \(((properties ?? [:]) as NSDictionary)) updated to \(((update ?? [:]) as NSDictionary).singleLineDebugDescription)"
         )
     }
 
@@ -305,7 +297,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         chatProperties properties: [AnyHashable: Any]!,
         messagesUpdated messages: [NSObject]!
     ) {
-        trace(chatIdentifier, nil, "messages updated \((messages! as NSArray))")
+        trace(chatIdentifier, nil, "messages updated \((messages! as NSArray).singleLineDebugDescription)")
         messages.forEach {
             handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: $0)
         }

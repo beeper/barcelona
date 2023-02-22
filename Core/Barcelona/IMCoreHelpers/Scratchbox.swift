@@ -19,5 +19,5 @@ import IDS
 #endif
 
 @_spi(scratchbox) public func _scratchboxMain() {
-
+    
 }

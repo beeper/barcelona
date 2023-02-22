@@ -162,6 +162,11 @@ public func BLBootstrapController(
         } else {
             controller.loadChats(withChatID: "all")
         }
+
+        for account in IMAccountController.shared.accounts {
+            // We want to make sure that nothing is prohibited us
+            account.updateCapabilities(UInt64.max)
+        }
     }
 
     if BLIsSimulation {

@@ -20,7 +20,7 @@ extension IMAccount: TextTableRepresentable {
 
     public var tableValues: [CustomStringConvertible] {
         [
-            service?.id.rawValue ?? "nil",
+            service?.id?.rawValue ?? "nil",
             uniqueID ?? "nil",
             login ?? "nil",
             loginIMHandle?.id ?? "nil",
