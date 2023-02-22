@@ -96,21 +96,25 @@ public struct PrepareDMCommand: Codable {
 
 extension PrepareDMCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "PrepareDMCommand", operation: "run", bindToScope: true)
         let log = Logger(label: "ResolveIdentifierCommand")
 
         let parsed = ParsedGUID(rawValue: guid)
 
         guard let service = parsed.service.flatMap(IMServiceStyle.init(rawValue:)) else {
-            return payload.fail(
+            payload.fail(
                 code: "err_invalid_service",
                 message: "The service provided does not exist.",
                 ipcChannel: ipcChannel
             )
+            span.finish(status: .invalidArgument)
+            return
         }
 
         let chat = await Chat.directMessage(withHandleID: parsed.last, service: service)
         log.info("Prepared chat \(chat.id) on service \(service.rawValue)", source: "PrepareDM")
 
         payload.respond(.ack, ipcChannel: ipcChannel)
+        span.finish()
     }
 }
