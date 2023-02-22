@@ -66,7 +66,7 @@ extension GetGroupChatInfoCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         log.info("Getting chat with id \(chat_guid)", source: "MautrixIPC")
 
-        guard let chat = blChat else {
+        guard let chat = await blChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
 
@@ -79,9 +79,10 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
         Logger(label: "TapbackCommand")
     }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
-        log.info("Sending read receipt to \(String(describing: cbChat?.blChatGUID))", source: "MautrixIPC")
+        let chatGUID = await cbChat?.blChatGUID
+        log.info("Sending read receipt to \(String(describing: chatGUID))", source: "MautrixIPC")
 
-        guard let chat = cbChat else {
+        guard let chat = await cbChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
 
@@ -91,7 +92,7 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
 
 extension SendTypingCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
-        guard let chat = cbChat else {
+        guard let chat = await cbChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
 
@@ -101,7 +102,7 @@ extension SendTypingCommand: Runnable, AuthenticatedAsserting {
 
 extension GetGroupChatAvatarCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
-        guard let chat = chat, let groupPhotoID = chat.groupPhotoID else {
+        guard let chat = await chat, let groupPhotoID = chat.groupPhotoID else {
             return payload.respond(.chat_avatar(nil), ipcChannel: ipcChannel)
         }
 

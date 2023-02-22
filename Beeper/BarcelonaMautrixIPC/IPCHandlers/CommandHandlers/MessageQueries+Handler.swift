@@ -17,7 +17,7 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         log.debug("Getting messages for chat guid \(chat_guid) after time \(timestamp)")
 
-        guard let chat = chat else {
+        guard let chat = await chat else {
             log.debug("Unknown chat with guid \(chat_guid)")
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
@@ -49,7 +49,7 @@ extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
             return payload.respond(.messages([]), ipcChannel: ipcChannel)
         }
 
-        guard let chat = chat else {
+        guard let chat = await chat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
         }
 

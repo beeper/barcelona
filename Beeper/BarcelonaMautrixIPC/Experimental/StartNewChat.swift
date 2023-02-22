@@ -95,7 +95,7 @@ extension PrepareDMCommand: Runnable {
         let parsed = ParsedGUID(rawValue: guid)
 
         if MXFeatureFlags.shared.mergedChats {
-            let chat = Chat.directMessage(withHandleID: parsed.last, service: .iMessage)
+            let chat = await Chat.directMessage(withHandleID: parsed.last, service: .iMessage)
             log.info("Prepared chat \(chat.id)", source: "PrepareDM")
         } else {
             guard let service = parsed.service.flatMap(IMServiceStyle.init(rawValue:)) else {
@@ -106,7 +106,7 @@ extension PrepareDMCommand: Runnable {
                 )
             }
 
-            let chat = Chat.directMessage(withHandleID: parsed.last, service: service)
+            let chat = await Chat.directMessage(withHandleID: parsed.last, service: service)
             log.info("Prepared chat \(chat.id) on service \(service.rawValue)", source: "PrepareDM")
         }
 
