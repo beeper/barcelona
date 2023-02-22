@@ -95,11 +95,15 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
 
 extension SendTypingCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "SendTypingCommand", operation: "run", bindToScope: true)
         guard let chat = await cbChat else {
-            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            span.finish(status: .notFound)
+            return
         }
 
         chat.setTyping(typing)
+        span.finish()
     }
 }
 
