@@ -11,6 +11,7 @@ import ERBufferedStream
 import Foundation
 import Logging
 import OpenCombine
+import Sentry
 
 let TERMINATOR = Data("\n".utf8)
 
@@ -124,6 +125,13 @@ public class MautrixIPCChannel {
         var data = Data()
 
         for payload in payloads {
+            let breadrumb = Breadcrumb(level: .debug, category: "IPC")
+            breadrumb.message = "writePayload"
+            breadrumb.data = [
+                "payload_id": String(describing: payload.id),
+                "command": payload.command.name.rawValue,
+            ]
+            SentrySDK.addBreadcrumb(breadrumb)
             if payload.command.name == .message {
                 log.info("Outgoing! \(payload.command.name.rawValue) \(payload.id ?? -1)")
             }
