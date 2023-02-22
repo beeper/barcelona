@@ -16,9 +16,7 @@ public struct BLMessageStatus: Codable {
         status: BLMessageStatus.StatusEvent,
         service: String,
         message: String? = nil,
-        statusCode: String? = nil,
-        correlation_id: String? = nil,
-        sender_correlation_id: String? = nil
+        statusCode: String? = nil
     ) {
         self.guid = guid
         self.chatGUID = chatGUID
@@ -26,16 +24,12 @@ public struct BLMessageStatus: Codable {
         self.service = service
         self.message = message
         self.statusCode = statusCode
-        self.correlationID = correlation_id
-        self.senderCorrelationID = sender_correlation_id
     }
 
     public init(
         sentMessageGUID: String,
         onService: String,
-        forChatGUID: String,
-        correlation_id: String? = nil,
-        sender_correlation_id: String? = nil
+        forChatGUID: String
     ) {
         guid = sentMessageGUID
         chatGUID = forChatGUID
@@ -43,8 +37,6 @@ public struct BLMessageStatus: Codable {
         message = nil
         statusCode = nil
         service = onService
-        correlationID = correlation_id
-        senderCorrelationID = sender_correlation_id
     }
 
     public enum StatusEvent: String, Codable {
@@ -57,15 +49,11 @@ public struct BLMessageStatus: Codable {
     public var service: String
     public var message: String?
     public var statusCode: String?
-    public var correlationID: String?
-    public var senderCorrelationID: String?
 
     public enum CodingKeys: String, CodingKey {
         case guid
         case chatGUID = "chat_guid"
         case status, service, message
         case statusCode = "status_code"
-        case correlationID = "correlation_id"
-        case senderCorrelationID = "sender_correlation_id"
     }
 }

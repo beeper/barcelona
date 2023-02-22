@@ -15,7 +15,6 @@ public struct CBChatIdentifier: Hashable, Equatable {
     }
 
     public enum Scheme: String {
-        case correlationID = "correlation"
         case handleID = "handle"
         case chatIdentifier = "chat"
         case guid = "guid"
@@ -76,10 +75,6 @@ extension CBChatIdentifier: Codable {
 
 // MARK: - Convenience
 extension CBChatIdentifier {
-    public static func correlationID(_ value: String) -> CBChatIdentifier {
-        CBChatIdentifier(scheme: .correlationID, value: value)
-    }
-
     public static func handleID(_ value: String) -> CBChatIdentifier {
         CBChatIdentifier(scheme: .handleID, value: value)
     }

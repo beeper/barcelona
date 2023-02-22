@@ -81,9 +81,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                             sender_guid: change.mautrixFriendlyGUID,
                             is_from_me: change.fromMe,
                             chat_guid: chat.blChatGUID,
-                            read_up_to: change.messageID,
-                            correlation_id: chat.correlationIdentifier,
-                            sender_correlation_id: change.senderCorrelationID
+                            read_up_to: change.messageID
                         )
                     )
                 )
@@ -115,10 +113,10 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 #endif
                 let blMessage = BLMessage(message: message)
                 log.debug(
-                    "Sending message payload \(blMessage.guid) \(blMessage.chat_guid) \(blMessage.sender_guid ?? "nil") \(blMessage.sender_correlation_id ?? "nil") \(blMessage.service)"
+                    "Sending message payload \(blMessage.guid) \(blMessage.chat_guid) \(blMessage.sender_guid ?? "nil") \(blMessage.service)"
                 )
                 self.ipcChannel.writePayload(.init(command: .message(blMessage)))
-            case .sent(let id, let service, let chat, time: _, let senderCorrelationID):
+            case .sent(let id, let service, let chat, time: _):
                 guard let chat else {
                     log.error(
                         ".sent event \(event.id), \(event.service) can't resolve its IMChat; can't pass to mautrix."
@@ -132,14 +130,12 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                             BLMessageStatus(
                                 sentMessageGUID: id,
                                 onService: service.rawValue,
-                                forChatGUID: chat.blChatGUID,
-                                correlation_id: chat.correlationIdentifier,
-                                sender_correlation_id: senderCorrelationID
+                                forChatGUID: chat.blChatGUID
                             )
                         )
                     )
                 )
-            case .failed(let id, let service, let chat, let code, let senderCorrelationID):
+            case .failed(let id, let service, let chat, let code):
                 guard let chat else {
                     log.error(".failed event \(id), \(service) has no IMChat; can't pass to mautrix.")
                     return
@@ -154,14 +150,12 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                                 status: .failed,
                                 service: service.rawValue,
                                 message: code.localizedDescription,
-                                statusCode: code.description,
-                                correlation_id: chat.correlationIdentifier,
-                                sender_correlation_id: senderCorrelationID
+                                statusCode: code.description
                             )
                         )
                     )
                 )
-            case .delivered(let id, let service, let chat, _, let senderCorrelationID):
+            case .delivered(let id, let service, let chat, _):
                 guard let chat else {
                     log.error(".delivered event \(id), \(service) has no IMChat; can't pass to mautrix")
                     return
@@ -173,9 +167,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                             guid: id,
                             chatGUID: chat.blChatGUID,
                             status: .delivered,
-                            service: service.rawValue,
-                            correlation_id: chat.correlationIdentifier,
-                            sender_correlation_id: senderCorrelationID
+                            service: service.rawValue
                         )
                     ))
                 )

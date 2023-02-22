@@ -15,8 +15,7 @@ extension IMChat {
         BLChat(
             chat_guid: blChatGUID,
             title: displayName,
-            members: participants.map(\.id),
-            correlation_id: correlationIdentifier
+            members: participants.map(\.id)
         )
     }
 }
@@ -25,5 +24,4 @@ public struct BLChat: Codable, ChatResolvable {
     public var chat_guid: String
     public var title: String?
     public var members: [String]
-    public var correlation_id: String?
 }

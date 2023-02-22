@@ -176,10 +176,6 @@ extension CBDaemonListener {
             }
         }
 
-        _ = CBIDSListener.shared.senderCorrelationPipeline.pipe { senderID, correlationID in
-            CBSenderCorrelationController.shared.correlate(senderID: senderID, correlationID: correlationID)
-        }
-
         if CBFeatureFlags.useSMSReadBuffer {
             _ = messageStatusPipeline.pipe { status in
                 guard status.type == .read, status.fromMe else {
@@ -228,7 +224,7 @@ extension CBDaemonListener {
                 return
             }
 
-            self.chatJoinStatePipeline.send((chat.id, chat.joinState))
+            self.chatJoinStatePipeline.send((chat.chatIdentifier, chat.joinState))
         }
 
         NotificationCenter.default.addObserver(forName: .IMChatPropertiesChanged, object: nil, queue: nil) {

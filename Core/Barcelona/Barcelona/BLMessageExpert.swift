@@ -21,23 +21,23 @@ public class BLMessageExpert {
         }
 
         /// The message with the given ID has failed with the given error code.
-        case failed(id: String, service: IMServiceStyle, chat: IMChat?, code: FZErrorType, senderCorrelationID: String?)
+        case failed(id: String, service: IMServiceStyle, chat: IMChat?, code: FZErrorType)
         /// The message with the given ID was delivered to the recipient.
-        case delivered(id: String, service: IMServiceStyle, chat: IMChat?, time: Double?, senderCorrelationID: String?)
+        case delivered(id: String, service: IMServiceStyle, chat: IMChat?, time: Double?)
         /// The message with the given ID was read by the recipient.
-        case read(id: String, service: IMServiceStyle, chat: IMChat?, time: Double?, senderCorrelationID: String?)
+        case read(id: String, service: IMServiceStyle, chat: IMChat?, time: Double?)
         /// The message with the given ID started sending
-        case sending(id: String, service: IMServiceStyle, chat: IMChat?, time: Double?, senderCorrelationID: String?)
+        case sending(id: String, service: IMServiceStyle, chat: IMChat?, time: Double?)
         /// The message with the given ID has been sent
-        case sent(id: String, service: IMServiceStyle, chat: IMChat?, time: Double?, senderCorrelationID: String?)
+        case sent(id: String, service: IMServiceStyle, chat: IMChat?, time: Double?)
         /// A message has been sent or received.
         case message(Message)
 
         /// The ID of this message
         public var id: String {
             switch self {
-            case .failed(let id, _, _, _, _), .delivered(let id, _, _, _, _), .read(let id, _, _, _, _),
-                .sending(let id, _, _, _, _), .sent(let id, _, _, _, _):
+            case .failed(let id, _, _, _), .delivered(let id, _, _, _), .read(let id, _, _, _),
+                .sending(let id, _, _, _), .sent(let id, _, _, _):
                 return id
             case .message(let message):
                 return message.id
@@ -46,8 +46,8 @@ public class BLMessageExpert {
 
         public var imChat: IMChat? {
             switch self {
-            case .failed(_, _, let chat, _, _), .delivered(_, _, let chat, _, _), .read(_, _, let chat, _, _),
-                .sending(_, _, let chat, _, _), .sent(_, _, let chat, _, _):
+            case .failed(_, _, let chat, _), .delivered(_, _, let chat, _), .read(_, _, let chat, _),
+                .sending(_, _, let chat, _), .sent(_, _, let chat, _):
                 return chat
             case .message(let message):
                 return message.imChat
@@ -56,22 +56,11 @@ public class BLMessageExpert {
 
         public var service: IMServiceStyle {
             switch self {
-            case .failed(_, let service, _, _, _), .delivered(_, let service, _, _, _), .read(_, let service, _, _, _),
-                .sending(_, let service, _, _, _), .sent(_, let service, _, _, _):
+            case .failed(_, let service, _, _), .delivered(_, let service, _, _), .read(_, let service, _, _),
+                .sending(_, let service, _, _), .sent(_, let service, _, _):
                 return service
             case .message(let message):
                 return message.service
-            }
-        }
-
-        public var senderCorrelationID: String? {
-            switch self {
-            case .failed(_, _, _, _, let senderCorrelationID), .delivered(_, _, _, _, let senderCorrelationID),
-                .read(_, _, _, _, let senderCorrelationID), .sending(_, _, _, _, let senderCorrelationID),
-                .sent(_, _, _, _, let senderCorrelationID):
-                return senderCorrelationID
-            case .message(let message):
-                return message.senderCorrelationID
             }
         }
 
@@ -114,9 +103,9 @@ public class BLMessageExpert {
             return
         }
         switch event {
-        case .delivered(id: let deliveredMessageID, service: _, chat: _, let time, _):
+        case .delivered(id: let deliveredMessageID, service: _, chat: _, let time):
             log.info("Message \(deliveredMessageID) was delivered at \(time?.description ?? "null")")
-        case .failed(id: let failedMessageID, service: _, chat: _, code: let failureCode, _):
+        case .failed(id: let failedMessageID, service: _, chat: _, code: let failureCode):
             log.warning("Message \(failedMessageID) failed with failure code \(failureCode.description)")
         default:
             break
@@ -140,15 +129,13 @@ public class BLMessageExpert {
                     failedMessageID: change.messageID,
                     service: change.service,
                     chat: change.chat,
-                    failureCode: change.message.errorCode,
-                    senderCorrelationID: change.senderCorrelationID
+                    failureCode: change.message.errorCode
                 )
             } else {
                 process(
                     failedMessageID: change.messageID,
                     service: change.service,
-                    chat: change.chat,
-                    senderCorrelationID: change.senderCorrelationID
+                    chat: change.chat
                 )
             }
         case .delivered:
@@ -156,16 +143,14 @@ public class BLMessageExpert {
                 deliveredMessageID: change.messageID,
                 service: change.service,
                 chat: change.chat,
-                time: change.time,
-                senderCorrelationID: change.senderCorrelationID
+                time: change.time
             )
         case .read:
             process(
                 readMessageID: change.messageID,
                 service: change.service,
                 chat: change.chat,
-                time: change.time,
-                senderCorrelationID: change.senderCorrelationID
+                time: change.time
             )
         case .sent:
             send(
@@ -173,8 +158,7 @@ public class BLMessageExpert {
                     id: change.messageID,
                     service: change.service,
                     chat: change.chat,
-                    time: change.time,
-                    senderCorrelationID: change.senderCorrelationID
+                    time: change.time
                 )
             )
         default:
@@ -188,8 +172,7 @@ public class BLMessageExpert {
                 failedMessageID: message.id,
                 service: message.service,
                 chat: message.imChat,
-                failureCode: message.failureCode,
-                senderCorrelationID: message.senderCorrelationID
+                failureCode: message.failureCode
             )
             return
         }
@@ -200,8 +183,7 @@ public class BLMessageExpert {
                     id: message.id,
                     service: message.service,
                     chat: message.imChat,
-                    time: message.time,
-                    senderCorrelationID: message.senderCorrelationID
+                    time: message.time
                 )
             )
         default:
@@ -225,16 +207,14 @@ public class BLMessageExpert {
         failedMessageID: String,
         service: IMServiceStyle,
         chat: IMChat?,
-        failureCode: FZErrorType,
-        senderCorrelationID: String?
+        failureCode: FZErrorType
     ) {
         send(
             .failed(
                 id: failedMessageID,
                 service: service,
                 chat: chat,
-                code: failureCode,
-                senderCorrelationID: senderCorrelationID
+                code: failureCode
             )
         )
     }
@@ -244,8 +224,7 @@ extension BLMessageExpert {
     fileprivate func process(
         failedMessageID: String,
         service: IMServiceStyle,
-        chat: IMChat?,
-        senderCorrelationID: String?
+        chat: IMChat?
     ) {
         guard let message = BLLoadIMMessageItem(withGUID: failedMessageID) else {
             log.error(
@@ -257,8 +236,7 @@ extension BLMessageExpert {
             failedMessageID: failedMessageID,
             service: service,
             chat: chat,
-            failureCode: message.errorCode,
-            senderCorrelationID: senderCorrelationID
+            failureCode: message.errorCode
         )
     }
 }
@@ -268,16 +246,14 @@ extension BLMessageExpert {
         deliveredMessageID: String,
         service: IMServiceStyle,
         chat: IMChat?,
-        time: Double?,
-        senderCorrelationID: String?
+        time: Double?
     ) {
         send(
             .delivered(
                 id: deliveredMessageID,
                 service: service,
                 chat: chat,
-                time: time,
-                senderCorrelationID: senderCorrelationID
+                time: time
             )
         )
     }
@@ -286,11 +262,10 @@ extension BLMessageExpert {
         readMessageID: String,
         service: IMServiceStyle,
         chat: IMChat?,
-        time: Double?,
-        senderCorrelationID: String?
+        time: Double?
     ) {
         send(
-            .read(id: readMessageID, service: service, chat: chat, time: time, senderCorrelationID: senderCorrelationID)
+            .read(id: readMessageID, service: service, chat: chat, time: time)
         )
     }
 }

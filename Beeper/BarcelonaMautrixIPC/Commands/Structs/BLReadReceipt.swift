@@ -13,6 +13,4 @@ public struct BLReadReceipt: Codable, ChatResolvable {
     public var is_from_me: Bool
     public var chat_guid: String
     public var read_up_to: String
-    public var correlation_id: String?
-    public var sender_correlation_id: String?
 }

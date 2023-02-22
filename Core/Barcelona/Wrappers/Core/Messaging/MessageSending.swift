@@ -74,7 +74,7 @@ extension IMChat {
         }
         hasRefreshedServiceForSending = false
         refreshServiceForSending()
-        let id = self.id
+        let id = self.chatIdentifier
         let serviceName = account.serviceName ?? "nil"
         log.info("The resolved service for \(id) is currently \(serviceName)", source: "ERChat")
     }
@@ -155,7 +155,7 @@ extension Chat {
 
         return Message(
             messageItem: try await sendReturningRaw(message: createMessage, from: from)._imMessageItem,
-            chatID: imChat.id,
+            chatID: imChat.chatIdentifier,
             service: service
         )
     }
@@ -174,6 +174,6 @@ extension Chat {
             metadata: metadata
         )
 
-        return Message(messageItem: message._imMessageItem, chatID: imChat.id, service: service)
+        return Message(messageItem: message._imMessageItem, chatID: imChat.chatIdentifier, service: service)
     }
 }

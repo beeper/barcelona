@@ -108,7 +108,7 @@ private func IMChatHooks() throws -> Interpose {
 
                         NotificationCenter.default.post(
                             name: BLMessageStatusChangedNotification,
-                            object: StatusChatItem(item: statusItem, chatID: chat.id)
+                            object: StatusChatItem(item: statusItem, chatID: chat.chatIdentifier)
                         )
 
                         do {
