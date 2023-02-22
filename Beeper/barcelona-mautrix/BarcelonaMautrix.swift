@@ -37,7 +37,7 @@ class BarcelonaMautrix {
             options.sendDefaultPii = true
             options.enableAppHangTracking = false
             options.enableAutoSessionTracking = false
-            options.profilesSampleRate = 0.1
+            options.profilesSampleRate = 1
             options.tracesSampleRate = 0.1
         }
     }
