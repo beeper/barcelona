@@ -109,10 +109,14 @@ extension SendTypingCommand: Runnable, AuthenticatedAsserting {
 
 extension GetGroupChatAvatarCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "GetGroupChatAvatarCommand", operation: "run", bindToScope: true)
         guard let chat = await chat, let groupPhotoID = chat.groupPhotoID else {
-            return payload.respond(.chat_avatar(nil), ipcChannel: ipcChannel)
+            payload.respond(.chat_avatar(nil), ipcChannel: ipcChannel)
+            span.finish()
+            return
         }
 
         payload.respond(.chat_avatar(BLAttachment(guid: groupPhotoID)), ipcChannel: ipcChannel)
+        span.finish()
     }
 }
