@@ -23,16 +23,21 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         Logger(label: "SendMediaMessageCommand")
     }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "SendMediaMessageCommand", operation: "run", bindToScope: true)
         guard let chat = await cbChat, let imChat = chat.imChat else {
-            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            span.finish(status: .notFound)
+            return
         }
 
         let transfer = CBInitializeFileTransfer(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
         guard let guid = transfer.guid else {
-            return payload.fail(
+            payload.fail(
                 strategy: .internal_error("created transfer was not assigned a guid!!!"),
                 ipcChannel: ipcChannel
             )
+            span.finish(status: .internalError)
+            return
         }
         var messageCreation = CreateMessage(parts: [
             .init(type: .attachment, details: guid)
@@ -105,13 +110,16 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                 ),
                 ipcChannel: ipcChannel
             )
+            span.finish()
         } catch {
+            SentrySDK.capture(error: error)
             log.error("failed to send media message: \(error as NSError)", source: "BLMautrix")
             payload.fail(
                 code: "internal_error",
                 message: "Sorry, we're having trouble processing your attachment upload.",
                 ipcChannel: ipcChannel
             )
+            span.finish(status: .internalError)
         }
     }
 }
