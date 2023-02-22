@@ -10,18 +10,25 @@ import Barcelona
 import Foundation
 import IMCore
 import Logging
+import Sentry
 
 private let log = Logger(label: "SendMessageCommand")
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "SendMessageCommand", operation: "run", bindToScope: true)
+        defer {
+            span.finish()
+        }
         guard let chat = await cbChat, let imChat = chat.imChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            span.finish(status: .notFound)
         }
 
         if BLUnitTests.shared.forcedConditions.contains(.messageFailure) {
             Timer.scheduledTimer(withTimeInterval: 2, repeats: false) { _ in
                 payload.fail(code: "idk", message: "couldnt send message lol", ipcChannel: ipcChannel)
+                span.finish(status: .aborted)
             }
             return
         }
@@ -44,6 +51,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                 var threadError: Error?
                 Thread.main.sync(
                     {
+                        span.startChild(operation: "processRichLink")
                         log.debug("I am processing a rich link! text '\(text)'", source: "BLMautrix")
 
                         let message = ERCreateBlankRichLinkMessage(text.trimmingCharacters(in: [" "]), url) { item in
@@ -70,6 +78,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                                 afterSend = try message.provideLinkMetadata(richLink)
                             } catch {
                                 threadError = error
+                                span.finish(status: .internalError)
                                 return
                             }
                         } else if !CBFeatureFlags.adHocRichLinks, let url = richLinkURL,
@@ -83,6 +92,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                             ingesting: message,
                             context: IngestionContext(chatID: chat.id, service: service)
                         )!
+                        span.finish()
                     } as @convention(block) () -> Void
                 )
                 if let threadError = threadError {
@@ -110,7 +120,9 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                 ),
                 ipcChannel: ipcChannel
             )
+            span.finish(status: .ok)
         } catch {
+            SentrySDK.capture(error: error)
             // girl fuck
             log.error("failed to send text message: \(error as NSError)", source: "BLMautrix")
             switch error {
@@ -119,6 +131,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
             case let error as NSError:
                 payload.fail(code: error.code.description, message: error.localizedDescription, ipcChannel: ipcChannel)
             }
+            span.finish(status: .internalError)
         }
     }
 }

@@ -9,17 +9,21 @@
 import Barcelona
 import Foundation
 import Logging
+import Sentry
 
 extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
     var log: Logging.Logger {
         Logger(label: "GetMessagesAfterCommand")
     }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "GetMessagesAfterCommand", operation: "run", bindToScope: true)
         log.debug("Getting messages for chat guid \(chat_guid) after time \(timestamp)")
 
         guard let chat = await chat else {
             log.debug("Unknown chat with guid \(chat_guid)")
-            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            span.finish(status: .notFound)
+            return
         }
 
         let siblings = [chat]
@@ -30,23 +34,31 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
             log.debug(
                 "Not processing get_messages_after because chats last message timestamp \(lastMessageTime) is before req.timestamp \(timestamp)"
             )
-            return payload.respond(.messages([]), ipcChannel: ipcChannel)
+            payload.respond(.messages([]), ipcChannel: ipcChannel)
+            span.finish()
+            return
         }
 
         do {
             let chats = siblings.compactMap(\.chatIdentifier).map({ ($0, service) })
             let messages = try await BLLoadChatItems(withChats: chats, afterDate: date, limit: limit).blMessages
             payload.respond(.messages(messages), ipcChannel: ipcChannel)
+            span.finish()
         } catch {
+            SentrySDK.capture(error: error)
             payload.fail(strategy: .internal_error(error.localizedDescription), ipcChannel: ipcChannel)
+            span.finish(status: .internalError)
         }
     }
 }
 
 extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "GetRecentMessagesCommand", operation: "run", bindToScope: true)
         guard let chat = await chat else {
-            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            span.finish(status: .notFound)
+            return
         }
 
         let siblings = [chat]
@@ -59,8 +71,11 @@ extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
                 )
                 .blMessages
                 payload.respond(.messages(messages), ipcChannel: ipcChannel)
+                span.finish()
             } catch {
+                SentrySDK.capture(error: error)
                 payload.fail(strategy: .internal_error(error.localizedDescription), ipcChannel: ipcChannel)
+                span.finish(status: .internalError)
             }
         }
     }

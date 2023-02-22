@@ -11,6 +11,7 @@ import BarcelonaDB
 import Foundation
 import IMCore
 import Logging
+import Sentry
 
 extension Array where Element == String {
     /// Given self is an array of chat GUIDs, masks the GUIDs to iMessage service and returns the deduplicated result
@@ -21,11 +22,14 @@ extension Array where Element == String {
 
 extension GetChatsCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "GetChatsCommand", operation: "run", bindToScope: true)
         if min_timestamp <= 0 {
-            return payload.reply(
+            payload.reply(
                 withResponse: .chats_resolved(IMChatRegistry.shared.allChats.map(\.blChatGUID)),
                 ipcChannel: ipcChannel
             )
+            span.finish()
+            return
         }
 
         do {
@@ -41,8 +45,11 @@ extension GetChatsCommand: Runnable {
                 .map(\.value.1)
 
             payload.reply(withResponse: .chats_resolved(guids.dedupeChatGUIDs()), ipcChannel: ipcChannel)
+            span.finish()
         } catch {
             payload.fail(strategy: .internal_error(error.localizedDescription), ipcChannel: ipcChannel)
+            SentrySDK.capture(error: error)
+            span.finish(status: .internalError)
         }
     }
 }
@@ -52,13 +59,17 @@ extension GetGroupChatInfoCommand: Runnable {
         Logger(label: "TapbackCommand")
     }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "GetGroupChatInfoCommand", operation: "run", bindToScope: true)
         log.info("Getting chat with id \(chat_guid)", source: "MautrixIPC")
 
         guard let chat = await blChat else {
-            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            span.finish(status: .notFound)
+            return
         }
 
         payload.respond(.chat_resolved(chat), ipcChannel: ipcChannel)
+        span.finish()
     }
 }
 
@@ -67,33 +78,45 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
         Logger(label: "TapbackCommand")
     }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "SendReadReceiptCommand", operation: "run", bindToScope: true)
         let chatGUID = await cbChat?.blChatGUID
         log.info("Sending read receipt to \(String(describing: chatGUID))", source: "MautrixIPC")
 
         guard let chat = await cbChat else {
-            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            span.finish(status: .notFound)
+            return
         }
 
         chat.markMessageAsRead(withID: read_up_to)
+        span.finish()
     }
 }
 
 extension SendTypingCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "SendTypingCommand", operation: "run", bindToScope: true)
         guard let chat = await cbChat else {
-            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            span.finish(status: .notFound)
+            return
         }
 
         chat.setTyping(typing)
+        span.finish()
     }
 }
 
 extension GetGroupChatAvatarCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "GetGroupChatAvatarCommand", operation: "run", bindToScope: true)
         guard let chat = await chat, let groupPhotoID = chat.groupPhotoID else {
-            return payload.respond(.chat_avatar(nil), ipcChannel: ipcChannel)
+            payload.respond(.chat_avatar(nil), ipcChannel: ipcChannel)
+            span.finish()
+            return
         }
 
         payload.respond(.chat_avatar(BLAttachment(guid: groupPhotoID)), ipcChannel: ipcChannel)
+        span.finish()
     }
 }

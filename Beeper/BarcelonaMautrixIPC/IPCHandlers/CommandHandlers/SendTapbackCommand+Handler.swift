@@ -9,6 +9,7 @@
 import Barcelona
 import Foundation
 import Logging
+import Sentry
 
 extension TapbackCommand: Runnable, AuthenticatedAsserting {
     var log: Logging.Logger {
@@ -16,23 +17,31 @@ extension TapbackCommand: Runnable, AuthenticatedAsserting {
     }
 
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "TapbackCommand", operation: "run", bindToScope: true)
         guard let chat = await cbChat else {
-            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            span.finish(status: .notFound)
+            return
         }
 
         guard let creation = creation else {
-            return payload.fail(strategy: .internal_error("Failed to create tapback operation"), ipcChannel: ipcChannel)
+            payload.fail(strategy: .internal_error("Failed to create tapback operation"), ipcChannel: ipcChannel)
+            span.finish(status: .internalError)
+            return
         }
 
         do {
-            await payload.respond(
-                .message_receipt(try chat.tapback(creation, metadata: metadata).partialMessage),
+            payload.respond(
+                .message_receipt(try await chat.tapback(creation, metadata: metadata).partialMessage),
                 ipcChannel: ipcChannel
             )
+            span.finish()
         } catch {
+            SentrySDK.capture(error: error)
             // girl fuck
             log.error("failed to send tapback: \(error as NSError)", source: "BLMautrix")
             payload.fail(strategy: .internal_error(error.localizedDescription), ipcChannel: ipcChannel)
+            span.finish(status: .internalError)
         }
     }
 }
