@@ -54,8 +54,11 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
 
 extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "GetRecentMessagesCommand", operation: "run", bindToScope: true)
         guard let chat = await chat else {
-            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            span.finish(status: .notFound)
+            return
         }
 
         let siblings = [chat]
@@ -68,8 +71,11 @@ extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
                 )
                 .blMessages
                 payload.respond(.messages(messages), ipcChannel: ipcChannel)
+                span.finish()
             } catch {
+                SentrySDK.capture(error: error)
                 payload.fail(strategy: .internal_error(error.localizedDescription), ipcChannel: ipcChannel)
+                span.finish(status: .internalError)
             }
         }
     }
