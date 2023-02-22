@@ -16,7 +16,23 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
         Logger(label: "GetMessagesAfterCommand")
     }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": String(describing: payload.id),
+                    "command": payload.command.name.rawValue,
+                ],
+                key: "payload"
+            )
+        }
         let span = SentrySDK.startTransaction(name: "GetMessagesAfterCommand", operation: "run", bindToScope: true)
+        let breadcrumb = Breadcrumb(level: .debug, category: "command")
+        breadcrumb.message = "GetMessagesAfterCommand"
+        breadcrumb.type = "user"
+        breadcrumb.data = [
+            "payload_id": String(describing: payload.id)
+        ]
+        SentrySDK.addBreadcrumb(breadcrumb)
         log.debug("Getting messages for chat guid \(chat_guid) after time \(timestamp)")
 
         guard let chat = await chat else {
@@ -24,6 +40,14 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
             payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
             span.finish(status: .notFound)
             return
+        }
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": chat.id
+                ],
+                key: "imchat"
+            )
         }
 
         let siblings = [chat]
@@ -54,11 +78,35 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
 
 extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": String(describing: payload.id),
+                    "command": payload.command.name.rawValue,
+                ],
+                key: "payload"
+            )
+        }
         let span = SentrySDK.startTransaction(name: "GetRecentMessagesCommand", operation: "run", bindToScope: true)
+        let breadcrumb = Breadcrumb(level: .debug, category: "command")
+        breadcrumb.message = "GetRecentMessagesCommand"
+        breadcrumb.type = "user"
+        breadcrumb.data = [
+            "payload_id": String(describing: payload.id)
+        ]
+        SentrySDK.addBreadcrumb(breadcrumb)
         guard let chat = await chat else {
             payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
             span.finish(status: .notFound)
             return
+        }
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": chat.id
+                ],
+                key: "imchat"
+            )
         }
 
         let siblings = [chat]

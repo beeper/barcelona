@@ -12,6 +12,7 @@ import Foundation
 import IMCore
 import IMSharedUtilities
 import Logging
+import Sentry
 
 private let log = Logger(label: "ParticipantsManager")
 
@@ -143,6 +144,14 @@ public class ERTimeSortedParticipantsManager {
         defer {
             lock.unlock()
         }
+        let breadcrumb = Breadcrumb(level: .debug, category: "ERTimeSortedParticipantsManager")
+        breadcrumb.message = "Getting sorted participants"
+        breadcrumb.data = [
+            "chat_id": chat,
+            "sort_rule_count_chat": chatToParticipantSortRules[chat]?.count ?? -1,
+            "sort_rule_count": chatToParticipantSortRules.count,
+        ]
+        SentrySDK.addBreadcrumb(breadcrumb)
         return chatToParticipantSortRules[chat]?.map(\.handleID) ?? []
     }
 
@@ -222,6 +231,13 @@ public class ERTimeSortedParticipantsManager {
                 log.info(
                     "Recomputing sorted participants with chat ID \(chat.chatIdentifier) per notification \(notification.name.rawValue)"
                 )
+                let breadcrumb = Breadcrumb(level: .info, category: "ERTimeSortedParticipantsManager")
+                breadcrumb.message = "Recomputing sorted participants"
+                breadcrumb.data = [
+                    "chat_id": String(describing: chat.chatIdentifier),
+                    "notification": notification.name.rawValue,
+                ]
+                SentrySDK.addBreadcrumb(breadcrumb)
                 try bootstrap(chat: chat)
                 log.info(
                     "Finished recomputing sorted participants with chat ID \(chat.chatIdentifier) per notification \(notification.name.rawValue)"

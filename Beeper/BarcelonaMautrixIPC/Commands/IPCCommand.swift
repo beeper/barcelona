@@ -10,6 +10,7 @@ import Barcelona
 import BarcelonaFoundation
 import Foundation
 import Logging
+import Sentry
 
 /// Need to update the enums codable data? Paste the cases at the top into IPCCommand.codegen.js and then paste the output of that below the CodingKeys declaration
 public enum IPCCommand {
@@ -75,24 +76,51 @@ public struct IPCPayload: Codable {
 
     public func reply(withCommand command: IPCCommand, ipcChannel: MautrixIPCChannel) {
         guard let id = id else {
-            return log.debug(
+            log.debug(
                 "Reply issued for a command that had no ID. Inbound name: \(self.command.name.rawValue) Outbound name: \(self.command.name.rawValue)",
                 source: "Mautrix"
             )
+            let breadcrumb = Breadcrumb(level: .debug, category: "IPC")
+            breadcrumb.message = "Reply issued for a command that had no ID"
+            breadcrumb.data = [
+                "inbound_name": self.command.name.rawValue,
+                "outbound": command.name.rawValue,
+            ]
+            SentrySDK.addBreadcrumb(breadcrumb)
+            return
         }
 
         ipcChannel.writePayload(IPCPayload(id: id, command: command))
     }
 
     public func reply(withResponse response: IPCResponse, ipcChannel: MautrixIPCChannel) {
+        let breadcrumb = Breadcrumb(level: .info, category: "IPC")
+        breadcrumb.message = "reply"
+        breadcrumb.data = [
+            "id": id ?? -1
+        ]
+        SentrySDK.addBreadcrumb(breadcrumb)
         reply(withCommand: .response(response), ipcChannel: ipcChannel)
     }
 
     public func fail(code: String, message: String, ipcChannel: MautrixIPCChannel) {
+        let breadcrumb = Breadcrumb(level: .error, category: "IPC")
+        breadcrumb.message = "fail"
+        breadcrumb.data = [
+            "id": id ?? -1,
+            "code": code,
+            "message": message,
+        ]
         reply(withCommand: .error(.init(code: code, message: message)), ipcChannel: ipcChannel)
     }
 
     public func fail(strategy: ErrorStrategy, ipcChannel: MautrixIPCChannel) {
+        let breadcrumb = Breadcrumb(level: .error, category: "IPC")
+        breadcrumb.message = "fail"
+        breadcrumb.data = [
+            "id": id ?? -1,
+            "strategy": strategy,
+        ]
         reply(withCommand: strategy.asCommand, ipcChannel: ipcChannel)
     }
 }

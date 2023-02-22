@@ -17,12 +17,38 @@ extension TapbackCommand: Runnable, AuthenticatedAsserting {
     }
 
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": String(describing: payload.id),
+                    "command": payload.command.name.rawValue,
+                ],
+                key: "payload"
+            )
+        }
         let span = SentrySDK.startTransaction(name: "TapbackCommand", operation: "run", bindToScope: true)
         guard let chat = await cbChat else {
             payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
             span.finish(status: .notFound)
             return
         }
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": chat.id,
+                    "service": String(describing: chat.service),
+                ],
+                key: "chat"
+            )
+        }
+        let breadcrumb = Breadcrumb(level: .debug, category: "command")
+        breadcrumb.message = "SendTypingCommand"
+        breadcrumb.type = "user"
+        breadcrumb.data = [
+            "payload_id": String(describing: payload.id),
+            "chat_id": chat.id,
+        ]
+        SentrySDK.addBreadcrumb(breadcrumb)
 
         guard let creation = creation else {
             payload.fail(strategy: .internal_error("Failed to create tapback operation"), ipcChannel: ipcChannel)
