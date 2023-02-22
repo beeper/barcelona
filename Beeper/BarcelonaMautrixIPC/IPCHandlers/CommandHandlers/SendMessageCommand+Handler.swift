@@ -16,6 +16,15 @@ private let log = Logger(label: "SendMessageCommand")
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": String(describing: payload.id),
+                    "command": payload.command.name.rawValue,
+                ],
+                key: "payload"
+            )
+        }
         let span = SentrySDK.startTransaction(name: "SendMessageCommand", operation: "run", bindToScope: true)
         defer {
             span.finish()
@@ -30,6 +39,15 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
         guard let chat = await cbChat, let imChat = chat.imChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
             span.finish(status: .notFound)
+        }
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": chat.id,
+                    "service": String(describing: chat.service),
+                ],
+                key: "chat"
+            )
         }
 
         if BLUnitTests.shared.forcedConditions.contains(.messageFailure) {

@@ -22,6 +22,15 @@ extension Array where Element == String {
 
 extension GetChatsCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": String(describing: payload.id),
+                    "command": payload.command.name.rawValue,
+                ],
+                key: "payload"
+            )
+        }
         let span = SentrySDK.startTransaction(name: "GetChatsCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
         breadcrumb.message = "GetChatsCommand"
@@ -66,6 +75,15 @@ extension GetGroupChatInfoCommand: Runnable {
         Logger(label: "TapbackCommand")
     }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": String(describing: payload.id),
+                    "command": payload.command.name.rawValue,
+                ],
+                key: "payload"
+            )
+        }
         let span = SentrySDK.startTransaction(name: "GetGroupChatInfoCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
         breadcrumb.message = "GetGroupChatInfoCommand"
@@ -81,6 +99,15 @@ extension GetGroupChatInfoCommand: Runnable {
             span.finish(status: .notFound)
             return
         }
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "guid": chat_guid,
+                    "service": chat.service,
+                ],
+                key: "blchat"
+            )
+        }
 
         payload.respond(.chat_resolved(chat), ipcChannel: ipcChannel)
         span.finish()
@@ -92,6 +119,15 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
         Logger(label: "TapbackCommand")
     }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": String(describing: payload.id),
+                    "command": payload.command.name.rawValue,
+                ],
+                key: "payload"
+            )
+        }
         let span = SentrySDK.startTransaction(name: "SendReadReceiptCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
         breadcrumb.message = "SendReadReceiptCommand"
@@ -108,6 +144,15 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
             span.finish(status: .notFound)
             return
         }
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": chat.id,
+                    "service": String(describing: chat.service),
+                ],
+                key: "chat"
+            )
+        }
 
         chat.markMessageAsRead(withID: read_up_to)
         span.finish()
@@ -116,6 +161,15 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
 
 extension SendTypingCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": String(describing: payload.id),
+                    "command": payload.command.name.rawValue,
+                ],
+                key: "payload"
+            )
+        }
         let span = SentrySDK.startTransaction(name: "SendTypingCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
         breadcrumb.message = "SendTypingCommand"
@@ -129,6 +183,15 @@ extension SendTypingCommand: Runnable, AuthenticatedAsserting {
             span.finish(status: .notFound)
             return
         }
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": chat.id,
+                    "service": String(describing: chat.service),
+                ],
+                key: "chat"
+            )
+        }
 
         chat.setTyping(typing)
         span.finish()
@@ -137,6 +200,15 @@ extension SendTypingCommand: Runnable, AuthenticatedAsserting {
 
 extension GetGroupChatAvatarCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": String(describing: payload.id),
+                    "command": payload.command.name.rawValue,
+                ],
+                key: "payload"
+            )
+        }
         let span = SentrySDK.startTransaction(name: "GetGroupChatAvatarCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
         breadcrumb.message = "GetGroupChatAvatarCommand"
@@ -149,6 +221,14 @@ extension GetGroupChatAvatarCommand: Runnable {
             payload.respond(.chat_avatar(nil), ipcChannel: ipcChannel)
             span.finish()
             return
+        }
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": chat.id
+                ],
+                key: "imchat"
+            )
         }
 
         payload.respond(.chat_avatar(BLAttachment(guid: groupPhotoID)), ipcChannel: ipcChannel)

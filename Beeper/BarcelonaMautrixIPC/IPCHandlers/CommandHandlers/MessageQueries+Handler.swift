@@ -16,6 +16,15 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
         Logger(label: "GetMessagesAfterCommand")
     }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": String(describing: payload.id),
+                    "command": payload.command.name.rawValue,
+                ],
+                key: "payload"
+            )
+        }
         let span = SentrySDK.startTransaction(name: "GetMessagesAfterCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
         breadcrumb.message = "GetMessagesAfterCommand"
@@ -31,6 +40,14 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
             payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
             span.finish(status: .notFound)
             return
+        }
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": chat.id
+                ],
+                key: "imchat"
+            )
         }
 
         let siblings = [chat]
@@ -61,6 +78,15 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
 
 extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": String(describing: payload.id),
+                    "command": payload.command.name.rawValue,
+                ],
+                key: "payload"
+            )
+        }
         let span = SentrySDK.startTransaction(name: "GetRecentMessagesCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
         breadcrumb.message = "GetRecentMessagesCommand"
@@ -73,6 +99,14 @@ extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
             payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
             span.finish(status: .notFound)
             return
+        }
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": chat.id
+                ],
+                key: "imchat"
+            )
         }
 
         let siblings = [chat]

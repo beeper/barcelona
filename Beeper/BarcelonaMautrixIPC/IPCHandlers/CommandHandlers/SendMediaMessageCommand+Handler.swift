@@ -23,6 +23,15 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         Logger(label: "SendMediaMessageCommand")
     }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": String(describing: payload.id),
+                    "command": payload.command.name.rawValue,
+                ],
+                key: "payload"
+            )
+        }
         let span = SentrySDK.startTransaction(name: "SendMediaMessageCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
         breadcrumb.message = "SendMediaMessageCommand"
@@ -35,6 +44,15 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
             span.finish(status: .notFound)
             return
+        }
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": chat.id,
+                    "service": String(describing: chat.service),
+                ],
+                key: "chat"
+            )
         }
 
         let transfer = CBInitializeFileTransfer(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
