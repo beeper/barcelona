@@ -228,21 +228,25 @@ extension Chat {
 
 // MARK: - Querying
 extension Chat {
+    @MainActor
     public static var allChats: [Chat] {
-        IMChatRegistry.shared.allChats.lazy.map(Chat.init(_:))
+        IMChatRegistry.shared.allChats.lazy.map { imChat in Chat(imChat) }
     }
 
     /// Returns a chat targeted at the appropriate service for a handleID
+    @MainActor
     public static func directMessage(withHandleID handleID: String) -> Chat {
         Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID)))
     }
 
     /// Returns a chat targeted at the appropriate service for a handleID
+    @MainActor
     public static func directMessage(withHandleID handleID: String, service: IMServiceStyle) -> Chat {
         Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service)))
     }
 
     /// Returns a chat targeted at the appropriate service for a set of handleIDs
+    @MainActor
     public static func chat(withHandleIDs handleIDs: [String], service: IMServiceStyle) -> Chat {
         guard handleIDs.count > 0 else {
             preconditionFailure("chat(withHandleIDs) requires at least one handle ID to be non-null return type")

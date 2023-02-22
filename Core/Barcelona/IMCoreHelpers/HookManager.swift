@@ -51,7 +51,11 @@ private let PNCopyBestGuessCountryCodeForNumber:
 private func IMHandleHooks() throws -> Interpose {
     return try Interpose(IMHandle.self) {
         try $0.prepareHook(#selector(getter:IMHandle.countryCode)) {
-            (store: TypedHook<@convention(c) (AnyObject, Selector) -> String, @convention(block) (IMHandle) -> String>)
+            (
+                store: TypedHook<
+                    @convention(c) (AnyObject, Selector) -> String, @convention(block) (IMHandle) -> String
+                >
+            )
             in
             { handle in
                 let id = handle.id

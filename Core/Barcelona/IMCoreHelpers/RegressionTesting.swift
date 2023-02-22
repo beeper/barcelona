@@ -179,7 +179,9 @@ extension BLRegressionTesting {
                 }
                 let chat = Chat(imChat)
                 do {
-                    let message = try await chat.send(message: CreateMessage(parts: [.init(type: .text, details: "asdf")]))
+                    let message = try await chat.send(
+                        message: CreateMessage(parts: [.init(type: .text, details: "asdf")])
+                    )
                     if outcome == .succeed {
                         guard message.service == .iMessage else {
                             preconditionFailure(
