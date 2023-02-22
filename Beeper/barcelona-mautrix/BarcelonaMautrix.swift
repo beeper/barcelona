@@ -67,6 +67,12 @@ class BarcelonaMautrix {
             log.info("Starting without setting up Sentry")
         }
 
+        if let userID = ProcessInfo.processInfo.environment["BARCELONA_SENTRY_USER_ID"] {
+            log.info("Setting Sentry user ID to \(userID)")
+            let user = User(userId: userID)
+            SentrySDK.setUser(user)
+        }
+
         var mautrixIPCChannel: MautrixIPCChannel
         if let unixSocketPath = getUnixSocketPath() {
             let unixMautrixIPCChannel = UnixSocketMautrixIPCChannel(unixSocketPath)
