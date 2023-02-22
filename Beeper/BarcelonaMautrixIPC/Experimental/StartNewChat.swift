@@ -29,6 +29,7 @@ enum ResolveIdentifierCommandError: Error {
 
 extension ResolveIdentifierCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "ResolveIdentifierCommand", operation: "run", bindToScope: true)
         let log = Logger(label: "ResolveIdentifierCommand")
         var retrievedGuid: GUIDResponse? = nil
 
@@ -54,6 +55,8 @@ extension ResolveIdentifierCommand: Runnable {
             }
         } catch {
             result = .failed("TaskGroup threw an error: \(error.localizedDescription)")
+            SentrySDK.capture(error: error)
+            span.finish(status: .internalError)
         }
 
         switch result {
@@ -68,18 +71,21 @@ extension ResolveIdentifierCommand: Runnable {
 
         if let retrievedGuid {
             payload.respond(.guid(retrievedGuid), ipcChannel: ipcChannel)
+            span.finish()
         } else if IMServiceImpl.smsEnabled() {
             log.info(
                 "Responding that \(identifier) is available on SMS due to availability of forwarding",
                 source: "ResolveIdentifier"
             )
             payload.respond(.guid(.init("SMS;-;\(identifier)")), ipcChannel: ipcChannel)
+            span.finish()
         } else {
             payload.fail(
                 code: "err_destination_unreachable",
                 message: "Identifier resolution failed and SMS service is unavailable",
                 ipcChannel: ipcChannel
             )
+            span.finish(status: .internalError)
         }
     }
 }
