@@ -48,7 +48,7 @@ public struct BLMessageStatus: Codable {
     }
 
     public enum StatusEvent: String, Codable {
-        case sent, failed
+        case delivered, sent, failed
     }
 
     public var guid: String

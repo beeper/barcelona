@@ -141,9 +141,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 )
             case .failed(let id, let service, let chat, let code, let senderCorrelationID):
                 guard let chat else {
-                    log.error(
-                        ".failed event \(event.id), \(event.service) can't resolve its IMChat; can't pass to mautrix."
-                    )
+                    log.error(".failed event \(id), \(service) has no IMChat; can't pass to mautrix.")
                     return
                 }
 
@@ -163,7 +161,26 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                         )
                     )
                 )
-            default:
+            case .delivered(let id, let service, let chat, _, let senderCorrelationID):
+                guard let chat else {
+                    log.error(".delivered event \(id), \(service) has no IMChat; can't pass to mautrix")
+                    return
+                }
+
+                self.ipcChannel.writePayload(
+                    .init(command: .send_message_status(
+                        BLMessageStatus(
+                            guid: id,
+                            chatGUID: chat.blChatGUID,
+                            status: .delivered,
+                            service: service.rawValue,
+                            correlation_id: chat.correlationIdentifier,
+                            sender_correlation_id: senderCorrelationID
+                        )
+                    ))
+                )
+            case .read, .sending:
+                // don't do anything; these are handled elsewhere
                 break
             }
         }
