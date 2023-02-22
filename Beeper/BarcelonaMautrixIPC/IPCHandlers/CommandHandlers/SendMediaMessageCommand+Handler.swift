@@ -24,6 +24,13 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
     }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         let span = SentrySDK.startTransaction(name: "SendMediaMessageCommand", operation: "run", bindToScope: true)
+        let breadcrumb = Breadcrumb(level: .debug, category: "command")
+        breadcrumb.message = "SendMediaMessageCommand"
+        breadcrumb.type = "user"
+        breadcrumb.data = [
+            "payload_id": String(describing: payload.id)
+        ]
+        SentrySDK.addBreadcrumb(breadcrumb)
         guard let chat = await cbChat, let imChat = chat.imChat else {
             payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
             span.finish(status: .notFound)

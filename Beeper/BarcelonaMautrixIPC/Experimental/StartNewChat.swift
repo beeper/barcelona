@@ -30,6 +30,13 @@ enum ResolveIdentifierCommandError: Error {
 extension ResolveIdentifierCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         let span = SentrySDK.startTransaction(name: "ResolveIdentifierCommand", operation: "run", bindToScope: true)
+        let breadcrumb = Breadcrumb(level: .debug, category: "command")
+        breadcrumb.message = "ResolveIdentifierCommand"
+        breadcrumb.type = "user"
+        breadcrumb.data = [
+            "payload_id": String(describing: payload.id)
+        ]
+        SentrySDK.addBreadcrumb(breadcrumb)
         let log = Logger(label: "ResolveIdentifierCommand")
         var retrievedGuid: GUIDResponse? = nil
 
@@ -97,6 +104,13 @@ public struct PrepareDMCommand: Codable {
 extension PrepareDMCommand: Runnable {
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         let span = SentrySDK.startTransaction(name: "PrepareDMCommand", operation: "run", bindToScope: true)
+        let breadcrumb = Breadcrumb(level: .debug, category: "command")
+        breadcrumb.message = "PrepareDMCommand"
+        breadcrumb.type = "user"
+        breadcrumb.data = [
+            "payload_id": String(describing: payload.id)
+        ]
+        SentrySDK.addBreadcrumb(breadcrumb)
         let log = Logger(label: "ResolveIdentifierCommand")
 
         let parsed = ParsedGUID(rawValue: guid)
