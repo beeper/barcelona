@@ -78,14 +78,18 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
         Logger(label: "TapbackCommand")
     }
     public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+        let span = SentrySDK.startTransaction(name: "SendReadReceiptCommand", operation: "run", bindToScope: true)
         let chatGUID = await cbChat?.blChatGUID
         log.info("Sending read receipt to \(String(describing: chatGUID))", source: "MautrixIPC")
 
         guard let chat = await cbChat else {
-            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+            span.finish(status: .notFound)
+            return
         }
 
         chat.markMessageAsRead(withID: read_up_to)
+        span.finish()
     }
 }
 
