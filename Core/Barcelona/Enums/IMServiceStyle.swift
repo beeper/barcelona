@@ -11,7 +11,7 @@ import IMCore
 
 // (bl-api-exposed)
 /// Different styles of IMCore services
-public enum IMServiceStyle: String, CaseIterable, Codable, Hashable {
+public enum IMServiceStyle: String, CaseIterable, Codable, Hashable, Sendable {
     case iMessage
     #if IDS_IMESSAGE_BIZ
     case iMessageBiz

@@ -62,8 +62,6 @@ class Grudge: BarcelonaCommand {
     }
 
     func execute() throws {
-        LoggingDrivers = [OSLogDriver.shared, ConsoleDriver.shared]
-
         GrudgeConfiguration.path = configuration
 
         debuggers = GrudgeConfiguration.load().debuggers

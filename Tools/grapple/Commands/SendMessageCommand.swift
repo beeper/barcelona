@@ -44,44 +44,45 @@ extension ChatCommandLike {
     }
 
     var chat: Chat {
-        if isID {
-            if _sms {
-                guard let chat = IMChat.chat(withIdentifier: destination, onService: .SMS, style: nil).map(Chat.init)
-                else {
-                    fatalError("Unknown chat with identifier \(destination)")
+        get async {
+            if isID {
+                if _sms {
+                    guard let imChat = IMChat.chat(withIdentifier: destination, onService: .SMS, style: nil) else {
+                        fatalError("Unknown chat with identifier \(destination)")
+                    }
+
+                    return await Chat(imChat)
                 }
 
-                return chat
+                return await Chat.firstChatRegardlessOfService(withId: destination)!
             }
 
-            return Chat.firstChatRegardlessOfService(withId: destination)!
-        }
-
-        if let self = self as? ChatCommandGUIDSupporting, self.isGUID {
-            guard let chat = IMChatRegistry.shared.existingChat(withGUID: destination) else {
-                let components = destination.split(separator: ";")
-                if components.count == 3 {
-                    let service = components[0]
-                    let group = components[1]
-                    let identifier = components[2]
-                    if group == "-" {
-                        if let service = IMServiceStyle(rawValue: String(service))?.service,
-                            let account = IMAccountController.shared.bestAccount(forService: service)
-                        {
-                            return Chat(IMChatRegistry.shared.chat(for: account.imHandle(withID: String(identifier))))
+            if let self = self as? ChatCommandGUIDSupporting, self.isGUID {
+                guard let chat = IMChatRegistry.shared.existingChat(withGUID: destination) else {
+                    let components = destination.split(separator: ";")
+                    if components.count == 3 {
+                        let service = components[0]
+                        let group = components[1]
+                        let identifier = components[2]
+                        if group == "-" {
+                            if let service = IMServiceStyle(rawValue: String(service))?.service,
+                               let account = IMAccountController.shared.bestAccount(forService: service)
+                            {
+                                return await Chat(IMChatRegistry.shared.chat(for: account.imHandle(withID: String(identifier))))
+                            }
                         }
                     }
+                    fatalError("unknown chat with GUID \(destination)")
                 }
-                fatalError("unknown chat with GUID \(destination)")
+
+                return await Chat(chat)
             }
 
-            return Chat(chat)
+            return await Chat.chat(
+                withHandleIDs: destination.split(separator: ",").map(String.init),
+                service: _sms ? .SMS : .iMessage
+            )
         }
-
-        return Chat.chat(
-            withHandleIDs: destination.split(separator: ",").map(String.init),
-            service: _sms ? .SMS : .iMessage
-        )
     }
 }
 
@@ -117,24 +118,22 @@ class MessageCommand: CommandGroup {
             }
 
             func execute() throws {
-                BLLoadChatItems(
-                    withChats: [(chat, .iMessage), (chat, .SMS)],
-                    afterDate: nil,
-                    beforeDate: nil,
-                    afterGUID: nil,
-                    beforeGUID: nil,
-                    limit: limit ?? 100
-                )
-                .then(
-                    onlyIDs
-                        ? { chatItems in
-                            print(chatItems.map { MessageIdentifier(messageID: $0.id, chatID: $0.chatID) }.jsonString)
-                        }
-                        : { chatItems in
-                            print(chatItems.map { $0.eraseToAnyChatItem() }.jsonString)
-                        }
-                )
-                .observeAlways { _ in
+                _Concurrency.Task {
+                    let chatItems = try await BLLoadChatItems(
+                        withChats: [(chat, .iMessage), (chat, .SMS)],
+                        afterDate: nil,
+                        beforeDate: nil,
+                        afterGUID: nil,
+                        beforeGUID: nil,
+                        limit: limit ?? 100
+                    )
+
+                    if onlyIDs {
+                        print(chatItems.map { MessageIdentifier(messageID: $0.id, chatID: $0.chatID) }.jsonString)
+                    } else {
+                        print(chatItems.map { $0.eraseToAnyChatItem() }.jsonString)
+                    }
+
                     exit(0)
                 }
             }
@@ -150,14 +149,15 @@ class MessageCommand: CommandGroup {
             }
 
             func execute() throws {
-                BLLoadChatItems(withGUIDs: ids, service: .iMessage)
-                    .then { items in
-                        if self.mautrix {
-                            print(items.compactMap { $0 as? Message }.map { BLMessage(message: $0) }.prettyJSON)
-                        } else {
-                            print(items.map { $0.eraseToAnyChatItem() }.prettyJSON)
-                        }
+                _Concurrency.Task {
+                    let items = try await BLLoadChatItems(withGUIDs: ids, service: .iMessage)
+
+                    if self.mautrix {
+                        print(items.compactMap { $0 as? Message }.map { BLMessage(message: $0) }.prettyJSON)
+                    } else {
+                        print(items.map { $0.eraseToAnyChatItem() }.prettyJSON)
                     }
+                }
             }
         }
 
@@ -189,19 +189,24 @@ class MessageCommand: CommandGroup {
             var monitor: BLMediaMessageMonitor?
 
             func execute() throws {
-                let metadata = try! JSONDecoder()
-                    .decode(RichLinkMetadata.self, from: Data(contentsOf: URL(fileURLWithPath: jsonPath)))
-                let message = ERCreateBlankRichLinkMessage(text, URL(string: "https://google.com")!)
-                let afterSend = try message.provideLinkMetadata(metadata)
-                monitor = BLMediaMessageMonitor(
-                    messageID: message.id,
-                    transferGUIDs: message._imMessageItem?.fileTransferGUIDs ?? []
-                ) { success, error, cancel in
-                    print(success, error?.description, cancel)
-                    self.monitor = nil
+                _Concurrency.Task {
+                    let metadata = try! JSONDecoder()
+                        .decode(RichLinkMetadata.self, from: Data(contentsOf: URL(fileURLWithPath: jsonPath)))
+
+                    let message = ERCreateBlankRichLinkMessage(text, URL(string: "https://google.com")!)
+                    let afterSend = try message.provideLinkMetadata(metadata)
+
+                    monitor = BLMediaMessageMonitor(
+                        messageID: message.id,
+                        transferGUIDs: message._imMessageItem?.fileTransferGUIDs ?? []
+                    ) { success, error, cancel in
+                        print(success, error?.description as Any, cancel)
+                        self.monitor = nil
+                    }
+
+                    await chat.imChat!.send(message)
+                    afterSend()
                 }
-                chat.imChat!.send(message)
-                afterSend()
             }
         }
 
@@ -228,9 +233,9 @@ class MessageCommand: CommandGroup {
 
             @Key("--from") var from: String?
 
-            static func ERSendIMessage(to: String, text: String, _ sms: Bool) throws -> Message {
-                let chat = Chat.directMessage(withHandleID: to, service: sms ? .SMS : .iMessage)
-                let message = try chat.send(message: CreateMessage(parts: [.init(type: .text, details: text)]))
+            static func ERSendIMessage(to: String, text: String, _ sms: Bool) async throws -> Message {
+                let chat = await Chat.directMessage(withHandleID: to, service: sms ? .SMS : .iMessage)
+                let message = try await chat.send(message: CreateMessage(parts: [.init(type: .text, details: text)]))
                 return message
             }
 
@@ -239,63 +244,71 @@ class MessageCommand: CommandGroup {
             }
 
             func execute() throws {
-                IMChatRegistry.shared._postMessageSentNotifications = true
+                _Concurrency.Task {
+                    IMChatRegistry.shared._postMessageSentNotifications = true
 
-                var message: Message! = nil
+                    var message: Message! = nil
 
-                NotificationCenter.default.addObserver(forName: .IMChatRegistryMessageSent, object: nil, queue: nil) {
-                    notification in
-                    guard
-                        let sentMessage = notification.userInfo?["__kIMChatRegistryMessageSentMessageKey"] as? IMMessage
-                    else {
-                        return
+                    let msgIsSame: (IMMessage) -> Bool = {
+                        message?.id == $0.id
                     }
 
-                    guard message?.id == sentMessage.id else {
-                        return
-                    }
-
-                    print(sentMessage.debugDescription)
-
-                    if self.autoReply {
-                        if #available(macOS 11.0, *) {
-                            let create = CreateMessage(
-                                subject: nil,
-                                parts: [.init(type: .text, details: "asdf")],
-                                isAudioMessage: nil,
-                                flags: nil,
-                                ballonBundleID: nil,
-                                payloadData: nil,
-                                expressiveSendStyleID: nil,
-                                threadIdentifier: sentMessage.threadIdentifier(),
-                                replyToPart: 0,
-                                replyToGUID: sentMessage.guid
-                            )
-                            let chat = Chat.directMessage(
-                                withHandleID: self.destination,
-                                service: self.sms ? .SMS : .iMessage
-                            )
-                            try! chat.send(message: create)
-                        } else {
-                            // Fallback on earlier versions
+                    NotificationCenter.default.addObserver(forName: .IMChatRegistryMessageSent, object: nil, queue: nil) {
+                        notification in
+                        guard
+                            let sentMessage = notification.userInfo?["__kIMChatRegistryMessageSentMessageKey"] as? IMMessage
+                        else {
+                            return
                         }
-                    } else {
+
+                        guard msgIsSame(sentMessage) else {
+                            return
+                        }
+
+                        print(sentMessage.debugDescription)
+
+                        if self.autoReply {
+                            if #available(macOS 11.0, *) {
+                                let create = CreateMessage(
+                                    subject: nil,
+                                    parts: [.init(type: .text, details: "asdf")],
+                                    isAudioMessage: nil,
+                                    flags: nil,
+                                    ballonBundleID: nil,
+                                    payloadData: nil,
+                                    expressiveSendStyleID: nil,
+                                    threadIdentifier: sentMessage.threadIdentifier(),
+                                    replyToPart: 0,
+                                    replyToGUID: sentMessage.guid
+                                )
+                                _Concurrency.Task {
+                                    let chat = await Chat.directMessage(
+                                        withHandleID: self.destination,
+                                        service: self.sms ? .SMS : .iMessage
+                                    )
+                                    _ = try! await chat.send(message: create)
+                                }
+                            } else {
+                                // Fallback on earlier versions
+                            }
+                        } else {
+                            exit(0)
+                        }
+
                         exit(0)
                     }
 
-                    exit(0)
-                }
-
-                if force {
-                    message = try Self.ERSendIMessage(to: destination, text: text, sms)
-                } else {
-                    if pingEveryone {
-                        message = try chat.pingEveryone(text: text)
+                    if force {
+                        message = try await Self.ERSendIMessage(to: destination, text: text, sms)
                     } else {
-                        message = try chat.send(
-                            message: CreateMessage(parts: [MessagePart(type: .text, details: text)]),
-                            from: from
-                        )
+                        if pingEveryone {
+                            message = try await chat.pingEveryone(text: text)
+                        } else {
+                            message = try await chat.send(
+                                message: CreateMessage(parts: [MessagePart(type: .text, details: text)]),
+                                from: from
+                            )
+                        }
                     }
                 }
             }
@@ -315,35 +328,41 @@ class MessageCommand: CommandGroup {
             func execute() throws {
                 IMChatRegistry.shared._postMessageSentNotifications = true
 
-                var message: Message! = nil
+                _Concurrency.Task {
+                    var message: Message! = nil
 
-                NotificationCenter.default.addObserver(forName: .IMChatRegistryMessageSent, object: nil, queue: nil) {
-                    notification in
-                    guard
-                        let sentMessage = notification.userInfo?["__kIMChatRegistryMessageSentMessageKey"] as? IMMessage
-                    else {
-                        return
+                    let idIsSame: (IMMessage) -> Bool = {
+                        message?.id == $0.id
                     }
 
-                    guard message?.id == sentMessage.id else {
-                        return
+                    NotificationCenter.default.addObserver(forName: .IMChatRegistryMessageSent, object: nil, queue: nil) {
+                        notification in
+                        guard
+                            let sentMessage = notification.userInfo?["__kIMChatRegistryMessageSentMessageKey"] as? IMMessage
+                        else {
+                            return
+                        }
+
+                        guard idIsSame(sentMessage) else {
+                            return
+                        }
+
+                        print(sentMessage.debugDescription)
+
+                        exit(0)
                     }
 
-                    print(sentMessage.debugDescription)
-
-                    exit(0)
+                    guard let targetMessage = BLLoadIMMessage(withGUID: id) else {
+                        fatalError("Unknown message")
+                    }
+                    let parts = targetMessage._imMessageItem.chatItems
+                    guard parts.indices.contains(part) else {
+                        fatalError("Out of bounds. Message has these parts: \(parts.indices)")
+                    }
+                    message = try await chat.tapback(
+                        .init(item: parts[part].id, message: targetMessage.id, type: Int(type.rawValue))
+                    )
                 }
-
-                guard let targetMessage = BLLoadIMMessage(withGUID: id) else {
-                    fatalError("Unknown message")
-                }
-                let parts = targetMessage._imMessageItem.chatItems
-                guard parts.indices.contains(part) else {
-                    fatalError("Out of bounds. Message has these parts: \(parts.indices)")
-                }
-                message = try chat.tapback(
-                    .init(item: parts[part].id, message: targetMessage.id, type: Int(type.rawValue))
-                )
             }
         }
 
@@ -365,44 +384,48 @@ class SendMessageCommand: BarcelonaCommand {
     @Flag("-s", "--sms", description: "Send over SMS (will send on iMessage instead") var sms: Bool
 
     var chat: Chat {
-        if isID {
-            guard
-                let chat = IMChat.chat(withIdentifier: destination, onService: sms ? .SMS : .iMessage, style: nil)
-                    .map(Chat.init)
-            else {
-                fatalError("Unknown chat with identifier \(destination)")
+        get async {
+            if isID {
+                guard let imChat = IMChat.chat(withIdentifier: destination, onService: sms ? .SMS : .iMessage, style: nil) else {
+                    fatalError("Unknown chat with identifier \(destination)")
+                }
+
+                return await Chat(imChat)
             }
 
-            return chat
+            return await Chat.chat(
+                withHandleIDs: destination.split(separator: ",").map(String.init),
+                service: sms ? .SMS : .iMessage
+            )
         }
-
-        return Chat.chat(
-            withHandleIDs: destination.split(separator: ",").map(String.init),
-            service: sms ? .SMS : .iMessage
-        )
     }
 
     func execute() throws {
         IMChatRegistry.shared._postMessageSentNotifications = true
 
-        var message: Message! = nil
+        _Concurrency.Task {
+            var message: Message! = nil
 
-        NotificationCenter.default.addObserver(forName: .IMChatRegistryMessageSent, object: nil, queue: nil) {
-            notification in
-            guard let sentMessage = notification.userInfo?["__kIMChatRegistryMessageSentMessageKey"] as? IMMessage
-            else {
-                return
+            let idIsSame: (IMMessage) -> Bool = {
+                message?.id == $0.id
             }
 
-            guard message?.id == sentMessage.id else {
-                return
+            NotificationCenter.default.addObserver(forName: .IMChatRegistryMessageSent, object: nil, queue: nil) {
+                notification in
+                guard let sentMessage = notification.userInfo?["__kIMChatRegistryMessageSentMessageKey"] as? IMMessage else {
+                    return
+                }
+
+                guard idIsSame(sentMessage) else {
+                    return
+                }
+
+                print(sentMessage.debugDescription)
+
+                exit(0)
             }
 
-            print(sentMessage.debugDescription)
-
-            exit(0)
+            message = try await chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: self.message)]))
         }
-
-        message = try chat.send(message: CreateMessage(parts: [MessagePart(type: .text, details: self.message)]))
     }
 }

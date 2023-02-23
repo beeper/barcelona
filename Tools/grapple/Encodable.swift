@@ -1,5 +1,5 @@
 //
-//  Query.swift
+//  Encodable.swift
 //  grapple
 //
 //  Created by Eric Rabil on 11/24/21.

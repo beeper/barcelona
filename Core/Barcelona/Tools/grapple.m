@@ -7,8 +7,6 @@
 
 #import <Foundation/Foundation.h>
 
-#import "grapple.h"
-
 @implementation ObjC: NSObject
 
 + (id)catchException:(id(^)())tryBlock error:(__autoreleasing NSError **)error {

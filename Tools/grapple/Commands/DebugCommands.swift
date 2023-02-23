@@ -154,7 +154,7 @@ class DebugCommands: CommandGroup {
                     return
                 }
 
-                let chat = Chat(_chat)
+                let chat = await Chat(_chat)
 
                 let msgs = try await chat.messages()
                 print(msgs)
@@ -202,7 +202,9 @@ class DebugCommands: CommandGroup {
                 if message.chatID == self.chatID, !message.fromMe,
                     message.items.contains(where: { ($0.item as? TextChatItem)?.text == self.triggerText })
                 {
-                    try! MessageCommand.Send.Text.ERSendIMessage(to: self.chatID, text: self.copyText, false)
+                    _Concurrency.Task {
+                        try! await MessageCommand.Send.Text.ERSendIMessage(to: self.chatID, text: self.copyText, false)
+                    }
                 }
             }
         }

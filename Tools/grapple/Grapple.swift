@@ -64,29 +64,24 @@ class Grapple {
 
     static func main() throws {
         if ProcessInfo.processInfo.environment["RAVIOLI"] == "RAVIOLI" || isDebugBuild {
-            log.info("Forcing internal install for enhanced logging", source: "Grapple")
-            func ERForceInternalInstall() -> Bool {
-                let isInternalInstall_imp = imp_implementationWithBlock(
-                    { _ in
-                        true
-                    } as @convention(block) (NSObject) -> Bool
-                )
-                if let meth = class_getInstanceMethod(
+            Logger(label: "Grapple").info("Forcing internal install for enhanced logging", source: "Grapple")
+            let isInternalInstall_imp = imp_implementationWithBlock(
+                { _ in
+                    true
+                } as @convention(block) (NSObject) -> Bool
+            )
+            if let meth = class_getInstanceMethod(
+                IMLockdownManager.self,
+                #selector(getter:IMLockdownManager.isInternalInstall)
+            ) {
+                method_setImplementation(meth, isInternalInstall_imp)
+                if let meth2 = class_getInstanceMethod(
                     IMLockdownManager.self,
-                    #selector(getter:IMLockdownManager.isInternalInstall)
+                    #selector(getter:IMLockdownManager._isInternalInstall)
                 ) {
-                    method_setImplementation(meth, isInternalInstall_imp)
-                    if let meth2 = class_getInstanceMethod(
-                        IMLockdownManager.self,
-                        #selector(getter:IMLockdownManager._isInternalInstall)
-                    ) {
-                        method_setImplementation(meth2, isInternalInstall_imp)
-                        return true
-                    }
+                    method_setImplementation(meth2, isInternalInstall_imp)
                 }
-                return false
             }
-            _ = ERForceInternalInstall()
         }
 
         CBFeatureFlags.overrideWithholdPartialFailures = false
@@ -96,7 +91,7 @@ class Grapple {
             commands: [
                 SendMessageCommand(), ChatCommands(), DebugCommands(), ListCommand(), IDSCommand(), AccountManagement(),
                 Grudge.shared, QueryCommand(), DiagsCommand(), MessageCommand(), ScratchboxCommand(),
-                TransferCommands(), RegressionTestingCommand(), CBCorrelationCommands(),
+                TransferCommands(), RegressionTestingCommand()
             ]
         )
         LoggingDrivers.append(OSLogDriver.shared)

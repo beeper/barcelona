@@ -60,12 +60,14 @@ class ChatCommands: CommandGroup {
             @CollectedParam var participants: [String]
 
             func execute() throws {
-                guard let chat = IMChat.chat(withIdentifier: chatID, onService: .iMessage, style: nil).map(Chat.init)
-                else {
-                    return print("unknown chatID")
-                }
+                _Concurrency.Task {
+                    guard let imChat = IMChat.chat(withIdentifier: chatID, onService: .iMessage, style: nil) else {
+                        return print("unknown chatID")
+                    }
 
-                print(chat.addParticipants(participants))
+                    let chat = await Chat(imChat)
+                    print(chat.addParticipants(participants))
+                }
             }
         }
 
@@ -76,12 +78,14 @@ class ChatCommands: CommandGroup {
             @CollectedParam var participants: [String]
 
             func execute() throws {
-                guard let chat = IMChat.chat(withIdentifier: chatID, onService: .iMessage, style: nil).map(Chat.init)
-                else {
-                    return print("unknown chatID")
-                }
+                _Concurrency.Task {
+                    guard let imChat = IMChat.chat(withIdentifier: chatID, onService: .iMessage, style: nil) else {
+                        return print("unknown chatID")
+                    }
 
-                print(chat.removeParticipants(participants))
+                    let chat = await Chat(imChat)
+                    print(chat.removeParticipants(participants))
+                }
             }
         }
 

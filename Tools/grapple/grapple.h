@@ -6,9 +6,9 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 #import <Foundation/Foundation.h>
+#import "Barcelona.h"
 
 #if TARGET_OS_IPHONE
-
 
 @class NSArray<ObjectType>, NSDictionary<KeyType, ObjectType>, NSString;
 

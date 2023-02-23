@@ -12,24 +12,22 @@ import IMCore
 import SwiftCLI
 
 struct ChatDiagnostics: Codable {
-    static func diagnostics(forChat id: String, recentMessagesCount: Int) -> Promise<ChatDiagnostics?> {
-        guard let chat = Chat.resolve(withIdentifier: id) else {
-            return .success(nil)
+    static func diagnostics(forChat id: String, recentMessagesCount: Int) async throws -> ChatDiagnostics? {
+        guard let chat = await Chat.firstChatRegardlessOfService(withId: id) else {
+            return nil
         }
 
-        return chat.messages(before: nil, limit: 50, beforeDate: nil)
-            .then { messages in
-                let handles = chat.participants.map(Handle.init(id:))
+        let messages = try await chat.messages(before: nil, limit: 50, beforeDate: nil)
+        let handles = chat.participants.map(Handle.init(id:))
 
-                return ChatDiagnostics(
-                    chat: chat,
-                    blChat: chat.blChat,
-                    myHandle: chat.imChat.lastAddressedHandleID,
-                    participants: chat.participants.map(Handle.init(id:)),
-                    recentBLMessages: messages.map(BLMessage.init(message:)),
-                    recentMessages: messages
-                )
-            }
+        return ChatDiagnostics(
+            chat: chat,
+            blChat: chat.imChat!.blChat,
+            myHandle: chat.imChat!.lastAddressedHandleID,
+            participants: chat.participants.map(Handle.init(id:)),
+            recentBLMessages: messages.map(BLMessage.init(message:)),
+            recentMessages: messages
+        )
     }
 
     var chat: Chat
@@ -46,7 +44,7 @@ struct AccountDiagnostics: Codable {
     init(account: IMAccount) {
         activeAliases = account.aliases
         // Ignore the Xcode warning, I think we're just not confident it'll actually return an array of strings
-        allAliases = account.vettedAliases.compactMap { $0 as? String }
+        allAliases = account.vettedAliases
         serviceID = account.serviceName
         registered = account.isRegistered
         active = account.isActive
@@ -90,19 +88,19 @@ protocol DiagResolver {
 
 extension IMServiceStyle: DiagResolver {
     static func resolve(_ serviceID: String) -> ResolveResult<IMServiceImpl> {
-        guard let serviceStyle = IMServiceStyle(rawValue: serviceID), let service = serviceStyle.service else {
+        guard let serviceStyle = IMServiceStyle(rawValue: serviceID) else {
             return .notFound(
                 (["Unknown service. Valid services:"] + IMServiceStyle.allCases.map(\.rawValue)).joined(separator: "\n")
             )
         }
 
-        return .found(service)
+        return .found(serviceStyle.service)
     }
 }
 
 extension IMAccount {
     var serviceTag: String {
-        "\(service!.id.rawValue)/\(login!)"
+        "\(service!.id!.rawValue)/\(login!)"
     }
 }
 
@@ -371,16 +369,18 @@ class DiagsCommand: CommandGroup {
         @Key("--login") var loginHandleFilter: String?
 
         func execute() throws {
-            var chats = Chat.allChats
+            _Concurrency.Task {
+                var chats = await Chat.allChats
 
-            if let loginHandleFilter = loginHandleFilter {
-                chats = chats.filter {
-                    $0.imChat.lastAddressedHandleID == loginHandleFilter
+                if let loginHandleFilter = loginHandleFilter {
+                    chats = chats.filter {
+                        $0.imChat?.lastAddressedHandleID == loginHandleFilter
+                    }
                 }
-            }
 
-            print(chats.dictionary(keyedBy: \.id, valuedBy: \.participants).prettyJSON)
-            exit(0)
+                print(chats.dictionary(keyedBy: \.id, valuedBy: \.participants).prettyJSON)
+                exit(0)
+            }
         }
     }
 
@@ -392,16 +392,14 @@ class DiagsCommand: CommandGroup {
         @Key("-l") var limit: Int?
 
         func execute() throws {
-            ChatDiagnostics.diagnostics(forChat: id, recentMessagesCount: limit ?? 25)
-                .then { diagnostics in
-                    if let diagnostics = diagnostics {
-                        print(diagnostics.prettyJSON)
-                    } else {
-                        print(["error": "no chat with that ID", "id": self.id].prettyJSON)
-                    }
-
-                    exit(0)
+            _Concurrency.Task {
+                guard let diagnostics = try? await ChatDiagnostics.diagnostics(forChat: id, recentMessagesCount: limit ?? 25) else {
+                    return print(["error": "no chat with that ID", "id": self.id].prettyJSON)
                 }
+
+                print(diagnostics.prettyJSON)
+                exit(0)
+            }
         }
     }
 
