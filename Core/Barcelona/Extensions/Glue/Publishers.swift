@@ -29,15 +29,11 @@ extension Publisher {
 }
 
 extension Sequence {
-    func asyncMap<T>(_ transform: @escaping (Element) async -> T) async -> [T] {
-        await withTaskGroup(of: T.self, returning: [T].self) { group in
-            for item in self {
-                group.addTask {
-                    await transform(item)
-                }
-            }
-
-            return await group.reduce(into: []) { $0.append($1) }
+    func asyncMap<T>(_ transform: (Element) async throws -> T) async rethrows -> [T] {
+        var values = [T]()
+        for element in self {
+            values.append(try await transform(element))
         }
+        return values
     }
 }
