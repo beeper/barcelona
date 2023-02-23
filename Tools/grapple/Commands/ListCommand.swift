@@ -44,7 +44,7 @@ class TransferCommands: CommandGroup {
             let name = "all"
 
             func execute() throws {
-                print(IMFileTransferCenter.sharedInstance().transfers.prettyJSON)
+                print(IMFileTransferCenter.sharedInstance().transfers.mapValues(\.debugDescription).prettyJSON)
             }
         }
 

@@ -66,7 +66,12 @@ class ReadReceiptTester: GrappleDebugger {
         log.info("marking \(message.id) as read in \(self.config.delay)ms")
 
         DispatchQueue.main.asyncAfter(deadline: .now().advanced(by: .milliseconds(config.delay))) {
-            message.imChat.markMessage(asRead: BLLoadIMMessage(withGUID: message.id)!)
+            guard let imChat = message.imChat else {
+                self.log.warning("IMChat for \(message.chatID),\(message.service) can't be found")
+                return
+            }
+
+            imChat.markMessage(asRead: BLLoadIMMessage(withGUID: message.id)!)
         }
     }
 

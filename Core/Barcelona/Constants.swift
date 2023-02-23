@@ -28,5 +28,3 @@ public let ERChatMessageUpdatedNotification = NSNotification.Name(rawValue: "ERC
 public let ERChatMessagesDeletedNotification = NSNotification.Name(rawValue: "ERChatMessagesDeletedNotification")
 
 public let ERDefaultMessageQueryLimit: Int = 75
-
-public let BLMessageStatusChangedNotification = NSNotification.Name(rawValue: "BLMessageStatusChangedNotification")

@@ -20,16 +20,18 @@ class ChatCommands: CommandGroup {
         let name = "list"
 
         func execute() throws {
-            print("printing most recent 20 chats")
+            _Concurrency.Task {
+                print("printing most recent 20 chats")
 
-            var table = TextTable(columns: [.init(header: "ID"), .init(header: "Name")])
+                var table = TextTable(columns: [.init(header: "ID"), .init(header: "Name")])
 
-            for chat in Chat.allChats.prefix(20) {
-                table.addRow(values: [chat.id, chat.displayName ?? chat.participantNames.joined(separator: ", ")])
+                for chat in await Chat.allChats.prefix(20) {
+                    table.addRow(values: [chat.id, chat.displayName ?? chat.participantNames.joined(separator: ", ")])
+                }
+
+                print(table.render())
+                exit(0)
             }
-
-            print(table.render())
-            exit(0)
         }
     }
 
@@ -39,11 +41,11 @@ class ChatCommands: CommandGroup {
         @Param var id: String
 
         func execute() throws {
-            BLLoadChatItems(withChats: [.iMessage, .SMS].map { (id, $0) }, limit: 20)
-                .then {
-                    print($0)
-                    exit(0)
-                }
+            _Concurrency.Task {
+                let chats = try! await BLLoadChatItems(withChats: [.iMessage, .SMS].map { (id, $0) }, limit: 20)
+                print(chats)
+                exit(0)
+            }
         }
     }
 

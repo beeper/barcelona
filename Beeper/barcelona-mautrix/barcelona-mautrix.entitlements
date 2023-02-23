@@ -81,6 +81,7 @@
 	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
 	<array>
 		<string>com.apple.accountsd.accountmanager</string>
+		<string>com.apple.imdpersistence.IMDPersistenceAgent</string>
 		<string>com.apple.dmd.policy</string>
 		<string>com.apple.dmd.emergency-mode</string>
 		<string>com.apple.marco</string>

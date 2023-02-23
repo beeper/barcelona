@@ -70,7 +70,7 @@ private func IMHandleHooks() throws -> Interpose {
     }
 }
 
-private func IMChatHooks() throws -> Interpose {
+/*private func IMChatHooks() throws -> Interpose {
     try Interpose(IMChat.self) {
         try $0.prepareHook(#selector(IMChat._handleIncomingItem(_:))) {
             (
@@ -142,7 +142,7 @@ private func IMChatHooks() throws -> Interpose {
             }
         }
     }
-}
+}*/
 
 private func IDSServiceHooks() throws -> Interpose {
     try Interpose(NSClassFromString("_IDSService")!) {
@@ -173,7 +173,7 @@ private func IMIDSHooks() throws -> Interpose {
 public class HookManager {
     public static let shared = HookManager()
 
-    let hooks = [IMChatHooks, IMIDSHooks, CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks]
+    let hooks = [/*IMChatHooks, */IMIDSHooks, CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks]
     private var appliedHooks: [Interpose]?
 
     public func apply() throws {

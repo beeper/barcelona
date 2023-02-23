@@ -59,8 +59,6 @@ class QueryCommand: EphemeralBarcelonaCommand {
             case .chats:
                 send(IMChatRegistry.shared.allChats.collectedDictionary(keyedBy: \.chatIdentifier) as NSDictionary)
             }
-
-            visited = Set()
         }
     }
 

@@ -149,21 +149,16 @@ class DebugCommands: CommandGroup {
         let name = "imd"
 
         func execute() throws {
-
-            guard let _chat = IMChatRegistry.shared.allChats.first else {
-                return
-            }
-
-            typealias XYZ = @convention(c) (
-                UnsafeRawPointer, UnsafeRawPointer, UnsafeRawPointer, UnsafeRawPointer, UnsafeRawPointer
-            ) -> Void
-
-            let chat = Chat(_chat)
-
-            chat.messages()
-                .then {
-                    print($0)
+            _Concurrency.Task {
+                guard let _chat = IMChatRegistry.shared.allChats.first else {
+                    return
                 }
+
+                let chat = Chat(_chat)
+
+                let msgs = try await chat.messages()
+                print(msgs)
+            }
         }
     }
 

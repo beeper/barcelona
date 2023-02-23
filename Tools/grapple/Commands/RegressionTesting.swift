@@ -46,11 +46,11 @@ class RegressionTestingCommand: CommandGroup {
 
         func execute() throws {
             if ids.isEmpty {
-                print(BarcelonaMautrixIPC.RegressionTesting.tests.keys.map { "- \($0)" }.joined(separator: "\n"))
+                print(BLRegressionTesting.tests.keys.map { "- \($0)" }.joined(separator: "\n"))
                 exit(0)
             }
             for id in ids {
-                guard let test = BarcelonaMautrixIPC.RegressionTesting.tests[id.uppercased()] else {
+                guard let test = BLRegressionTesting.tests[id.uppercased()] else {
                     print("skipping \(id): unknown test")
                     continue
                 }

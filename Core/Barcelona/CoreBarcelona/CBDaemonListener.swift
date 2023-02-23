@@ -550,11 +550,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
         chatPersonCentricID personCentricID: String!,
         messageSent msg: IMMessageItem
     ) {
-        #if DEBUG
-        log.debug("messageSent: \(msg.debugDescription)")
-        #else
-        log.debug("messageSent: \(msg.id)")
-        #endif
+        log.debug("messageSent: \(msg.singleLineDebugDescription)")
         chatIdentifierCache[msg.id] = chatIdentifier
         process(newMessage: msg, chatIdentifier: chatIdentifier)
     }
@@ -568,11 +564,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
         notifySentMessage msg: IMMessageItem!,
         sendTime: NSNumber!
     ) {
-        #if DEBUG
-        log.debug("notifySentMessage: \(msg.debugDescription)")
-        #else
-        log.debug("notifySentMessage: \(msg.id)")
-        #endif
+        log.debug("notifySentMessage: \(msg.singleLineDebugDescription)")
         process(sentMessage: msg, sentTime: (msg.clientSendTime ?? msg.time ?? Date()).timeIntervalSince1970)
     }
 
@@ -585,11 +577,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
         chatPersonCentricID personCentricID: String,
         messageReceived msg: IMItem
     ) {
-        #if DEBUG
-        log.debug("messageReceived: \(msg.debugDescription)")
-        #else
-        log.debug("messageReceived: \(msg.id)")
-        #endif
+        log.debug("messageReceived: \(msg.singleLineDebugDescription)")
 
         process(newMessage: msg, chatIdentifier: chatIdentifier)
     }
@@ -604,11 +592,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
         messagesReceived messages: [IMItem],
         messagesComingFromStorage fromStorage: Bool
     ) {
-        #if DEBUG
-        log.debug("messagesReceived: \(messages.debugDescription)")
-        #else
-        log.debug("messagesReceived in \(chatIdentifier): \(messages.count) messages")
-        #endif
+        log.debug("messagesReceived: \(messages.singleLineDebugDescription)")
 
         for message in messages {
             process(newMessage: message, chatIdentifier: chatIdentifier)
@@ -624,11 +608,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
         chatPersonCentricID personCentricID: String!,
         messagesReceived messages: [IMItem]!
     ) {
-        #if DEBUG
-        log.debug("messagesReceived: \(messages.debugDescription)")
-        #else
-        log.debug("messagesReceived in \(chatIdentifier): \(messages.count) messages")
-        #endif
+        log.debug("messagesReceived: \(messages.singleLineDebugDescription)")
 
         for message in messages {
             process(newMessage: message, chatIdentifier: chatIdentifier)
@@ -642,11 +622,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
         style chatStyle: IMChatStyle,
         messagesUpdated messages: [[AnyHashable: Any]]!
     ) {
-        #if DEBUG
-        log.debug("messagesUpdated[service]: \(messages.debugDescription)")
-        #else
-        log.debug("messagesUpdated[service] in \(chatIdentifier): \(messages.count) messages")
-        #endif
+        log.debug("messagesUpdated[service]: \(messages.debugDescription.singleLineDebugDescription)")
 
         for message in CBCreateItemsFromSerializedArray(messages) {
             switch message {
@@ -681,11 +657,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
         chatProperties properties: [AnyHashable: Any]!,
         messagesUpdated messages: [NSObject]!
     ) {
-        #if DEBUG
-        log.debug("messagesUpdated[account]: \(messages.debugDescription)")
-        #else
-        log.debug("messagesUpdated[account] in \(chatIdentifier): \(messages.count) messages")
-        #endif
+        log.debug("messagesUpdated[account]: \(messages.debugDescription.singleLineDebugDescription)")
 
         for message in messages as? [IMItem] ?? CBCreateItemsFromSerializedArray(messages) {
             switch message {
