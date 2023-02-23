@@ -16,12 +16,12 @@ import Sentry
 
 private let log = Logger(label: "ParticipantsManager")
 
-public struct ParticipantSortRule: Equatable, Hashable {
+public struct ParticipantSortRule: Equatable, Hashable, Sendable {
     var handleID: String
     var lastSentMessageTime: Double
 
     public func hash(into hasher: inout Hasher) {
-        handleID.hash(into: &hasher)
+        hasher.combine(handleID)
     }
 
     public var hashValue: Int {
@@ -119,13 +119,11 @@ extension NotificationCenter {
     }
 }
 
-public class ERTimeSortedParticipantsManager {
+public actor ERTimeSortedParticipantsManager {
 
     // MARK: - Properties
 
     public static let sharedInstance = ERTimeSortedParticipantsManager()
-
-    private let lock = NSRecursiveLock()
 
     private var chatToParticipantSortRules: [String: [ParticipantSortRule]] = [:]
 
@@ -140,10 +138,6 @@ public class ERTimeSortedParticipantsManager {
     // MARK: - Methods
 
     public func sortedParticipants(forChat chat: String) -> [String] {
-        lock.lock()
-        defer {
-            lock.unlock()
-        }
         let breadcrumb = Breadcrumb(level: .debug, category: "ERTimeSortedParticipantsManager")
         breadcrumb.message = "Getting sorted participants"
         breadcrumb.data = [
@@ -168,10 +162,6 @@ public class ERTimeSortedParticipantsManager {
     }
 
     public func unload(chatID: String) {
-        lock.lock()
-        defer {
-            lock.unlock()
-        }
         self.chatToParticipantSortRules[chatID] = nil
     }
 
@@ -180,10 +170,6 @@ public class ERTimeSortedParticipantsManager {
     }
 
     public func bootstrap(chats: [IMChat]) throws {
-        lock.lock()
-        defer {
-            lock.unlock()
-        }
         let records = try DBReader.shared.handleTimestampRecords(
             forChatIdentifiers: chats.compactMap { $0.chatIdentifier }
         )
@@ -229,7 +215,7 @@ public class ERTimeSortedParticipantsManager {
         if let chat = notification.chat {
             do {
                 log.info(
-                    "Recomputing sorted participants with chat ID \(chat.chatIdentifier) per notification \(notification.name.rawValue)"
+                    "Recomputing sorted participants with chat ID \(chat.chatIdentifier.debugDescription) per notification \(notification.name.rawValue)"
                 )
                 let breadcrumb = Breadcrumb(level: .info, category: "ERTimeSortedParticipantsManager")
                 breadcrumb.message = "Recomputing sorted participants"
@@ -240,7 +226,7 @@ public class ERTimeSortedParticipantsManager {
                 SentrySDK.addBreadcrumb(breadcrumb)
                 try bootstrap(chat: chat)
                 log.info(
-                    "Finished recomputing sorted participants with chat ID \(chat.chatIdentifier) per notification \(notification.name.rawValue)"
+                    "Finished recomputing sorted participants with chat ID \(chat.chatIdentifier.debugDescription) per notification \(notification.name.rawValue)"
                 )
             } catch {
                 log.error("Error ")
@@ -249,10 +235,6 @@ public class ERTimeSortedParticipantsManager {
     }
 
     private func sortParticipants(forChat chat: String) {
-        lock.lock()
-        defer {
-            lock.unlock()
-        }
         self.chatToParticipantSortRules[chat]?
             .sort(by: { r1, r2 in
                 r1.lastSentMessageTime > r2.lastSentMessageTime
@@ -282,10 +264,6 @@ public class ERTimeSortedParticipantsManager {
     }
 
     private func ingest(rule: ParticipantSortRule, inChat chat: String) {
-        lock.lock()
-        defer {
-            lock.unlock()
-        }
         if chatToParticipantSortRules[chat] == nil {
             return
         }

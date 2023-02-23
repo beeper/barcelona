@@ -17,19 +17,21 @@ protocol ChatResolvable {
 extension ChatResolvable {
     @MainActor
     var chat: IMChat? {
-        if let chat = IMChatRegistry.shared.existingChat(withGUID: chat_guid) {
-            return chat
-        } else {
-            var parsed = ParsedGUID(rawValue: chat_guid)
-
-            let service = parsed.service == "iMessage" ? IMServiceStyle.iMessage : .SMS
-            let id = parsed.last
-
-            if id.isPhoneNumber || id.isEmail || id.isBusinessID {
-                return Chat.directMessage(withHandleID: id, service: service).imChat
+        get async {
+            if let chat = IMChatRegistry.shared.existingChat(withGUID: chat_guid) {
+                return chat
             } else {
-                parsed.service = service == .iMessage ? "SMS" : "iMessage"
-                return IMChatRegistry.shared.existingChat(withGUID: parsed.description)
+                var parsed = ParsedGUID(rawValue: chat_guid)
+
+                let service = parsed.service == "iMessage" ? IMServiceStyle.iMessage : .SMS
+                let id = parsed.last
+
+                if id.isPhoneNumber || id.isEmail || id.isBusinessID {
+                    return await Chat.directMessage(withHandleID: id, service: service).imChat
+                } else {
+                    parsed.service = service == .iMessage ? "SMS" : "iMessage"
+                    return IMChatRegistry.shared.existingChat(withGUID: parsed.description)
+                }
             }
         }
     }
@@ -38,17 +40,19 @@ extension ChatResolvable {
         ParsedGUID(rawValue: chat_guid).service == "iMessage" ? IMServiceStyle.iMessage : .SMS
     }
 
-    @MainActor
     var cbChat: Chat? {
-        guard let chat = chat else {
-            return nil
-        }
+        get async {
+            guard let chat = await chat else {
+                return nil
+            }
 
-        return Chat(chat)
+            return await Chat(chat)
+        }
     }
 
-    @MainActor
     var blChat: BLChat? {
-        chat?.blChat
+        get async {
+            await chat?.blChat
+        }
     }
 }

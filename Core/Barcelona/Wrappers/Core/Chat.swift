@@ -65,16 +65,16 @@ extension IMChatStyle: Hashable {
 }
 
 // (bl-api-exposed)
-public struct Chat: Codable, ChatConfigurationRepresentable, Hashable {
+public struct Chat: Codable, ChatConfigurationRepresentable, Hashable, Sendable {
     /// Useful for adding application-specific behavior, allows you to hook into different APIs on Chat (like sending)
     public static var delegate: ChatDelegate?
 
-    public init(_ backing: IMChat) {
+    public init(_ backing: IMChat) async {
         joinState = backing.joinState
         roomName = backing.roomName
         displayName = backing.displayName
         id = backing.chatIdentifier
-        participants = backing.recentParticipantHandleIDs
+        participants = await backing.recentParticipantHandleIDs
         unreadMessageCount = backing.unreadMessageCount
         messageFailureCount = backing.messageFailureCount
         service = backing.account.service?.id
@@ -230,43 +230,47 @@ extension Chat {
 extension Chat {
     @MainActor
     public static var allChats: [Chat] {
-        IMChatRegistry.shared.allChats.lazy.map { imChat in Chat(imChat) }
+        get async {
+            await IMChatRegistry.shared.allChats.asyncMap { imChat in
+                await Chat(imChat)
+            }
+        }
     }
 
     /// Returns a chat targeted at the appropriate service for a handleID
     @MainActor
-    public static func directMessage(withHandleID handleID: String) -> Chat {
-        Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID)))
+    public static func directMessage(withHandleID handleID: String) async -> Chat {
+        await Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID)))
     }
 
     /// Returns a chat targeted at the appropriate service for a handleID
     @MainActor
-    public static func directMessage(withHandleID handleID: String, service: IMServiceStyle) -> Chat {
-        Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service)))
+    public static func directMessage(withHandleID handleID: String, service: IMServiceStyle) async -> Chat {
+        await Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service)))
     }
 
     /// Returns a chat targeted at the appropriate service for a set of handleIDs
     @MainActor
-    public static func chat(withHandleIDs handleIDs: [String], service: IMServiceStyle) -> Chat {
+    public static func chat(withHandleIDs handleIDs: [String], service: IMServiceStyle) async -> Chat {
         guard handleIDs.count > 0 else {
             preconditionFailure("chat(withHandleIDs) requires at least one handle ID to be non-null return type")
         }
 
         if handleIDs.count == 1 {
-            return directMessage(withHandleID: handleIDs.first!, service: service)
+            return await directMessage(withHandleID: handleIDs.first!, service: service)
         } else {
             if let account = service.account {
-                return Chat(IMChatRegistry.shared.chat(for: handleIDs.map(account.imHandle(withID:))))
+                return await Chat(IMChatRegistry.shared.chat(for: handleIDs.map(account.imHandle(withID:))))
             } else {
-                return Chat(IMChatRegistry.shared.chat(for: homogenousHandles(forIDs: handleIDs)))
+                return await Chat(IMChatRegistry.shared.chat(for: homogenousHandles(forIDs: handleIDs)))
             }
         }
     }
 
-    public static func firstChatRegardlessOfService(withId chatId: String) -> Chat? {
+    public static func firstChatRegardlessOfService(withId chatId: String) async -> Chat? {
         for service in [IMServiceStyle.iMessage, IMServiceStyle.SMS] {
             if let chat = IMChat.chat(withIdentifier: chatId, onService: service, style: nil) {
-                return Chat(chat)
+                return await Chat(chat)
             }
         }
         return nil

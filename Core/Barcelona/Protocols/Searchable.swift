@@ -19,9 +19,9 @@ public protocol Searchable: Identifiable {
     associatedtype BulkSearch = BulkSearchRequest<QueryParametersImplementation>
 
     /// Perform a single query
-    static func resolve(withParameters: QueryParametersImplementation) -> Promise<[instancetype]>
+    static func resolve(withParameters: QueryParametersImplementation) async -> [instancetype]
     /// Perform multiple concurrent queries
-    static func bulkResolve(withParameters: BulkSearch) -> Promise<[String: [instancetype]]>
+    static func bulkResolve(withParameters: BulkSearch) async -> [String: [instancetype]]
 }
 
 /// Implementation for concurrent bulk searches
@@ -29,16 +29,12 @@ extension Searchable {
     /// Concurrently executes all provided queries, returning a dictionary keyed identical to the parameters, with the result values replacing the query values
     public static func bulkResolve(
         withParameters parameters: [String: QueryParametersImplementation]
-    ) -> Promise<[String: [instancetype]]> {
-        Promise.all(
-            parameters.map { entry in
-                self.resolve(withParameters: entry.value)
-                    .then {
-                        (entry.key, $0)
-                    }
+    ) async -> [String: [instancetype]] {
+        let all = await parameters.asyncMap { entry in
+                let chats = await resolve(withParameters: entry.value)
+                return (entry.key, chats)
             }
-        )
-        .dictionary(keyedBy: \.0, valuedBy: \.1)
+        return all.dictionary(keyedBy: \.0, valuedBy: \.1)
     }
 }
 
