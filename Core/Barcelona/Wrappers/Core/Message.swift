@@ -222,7 +222,7 @@ extension FZErrorType: CustomStringConvertible {
 }
 
 public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
-    @_spi(unitTestInternals) public init(
+    public init(
         id: String,
         chatID: String,
         fromMe: Bool,

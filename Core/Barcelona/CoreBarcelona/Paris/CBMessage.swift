@@ -5,7 +5,7 @@
 //  Created by Eric Rabil on 8/8/22.
 //
 
-@_spi(synchronousQueries) import BarcelonaDB
+import BarcelonaDB
 import Foundation
 import IMCore
 import IMFoundation

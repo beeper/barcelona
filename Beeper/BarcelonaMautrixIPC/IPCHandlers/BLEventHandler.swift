@@ -34,7 +34,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         ipcChannel.writePayload(.init(command: command))
     }
 
-    @_spi(unitTestInternals) public func receiveTyping(_ chat: String, service: IMServiceStyle, _ typing: Bool) {
+    public func receiveTyping(_ chat: String, service: IMServiceStyle, _ typing: Bool) {
         guard let chat = IMChat.chat(withIdentifier: chat, onService: service, style: nil) else {
             return
         }
@@ -49,7 +49,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         send(.typing(.init(chat_guid: chat.blChatGUID, typing: typing)))
     }
 
-    @_spi(unitTestInternals) public func unreadCountChanged(_ chat: String, _ count: Int) {
+    public func unreadCountChanged(_ chat: String, _ count: Int) {
     }
 
     public func run() {
@@ -162,14 +162,16 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 }
 
                 self.ipcChannel.writePayload(
-                    .init(command: .send_message_status(
-                        BLMessageStatus(
-                            guid: id,
-                            chatGUID: chat.blChatGUID,
-                            status: .delivered,
-                            service: service.rawValue
+                    .init(
+                        command: .send_message_status(
+                            BLMessageStatus(
+                                guid: id,
+                                chatGUID: chat.blChatGUID,
+                                status: .delivered,
+                                service: service.rawValue
+                            )
                         )
-                    ))
+                    )
                 )
             case .read, .sending:
                 // don't do anything; these are handled elsewhere

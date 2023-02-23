@@ -54,7 +54,7 @@ extension DBReader {
         }
     }
 
-    @_spi(synchronousQueries) public func immediateChatIdentifier(forMessageGUID guid: String) -> String? {
+    public func immediateChatIdentifier(forMessageGUID guid: String) -> String? {
         try? pool.read { database in
             try chatIdentifierQuery(forMessageGUID: guid).fetchOne(database)?.chat_identifier
         }

@@ -6,7 +6,7 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
-@_spi(matrix) import Barcelona
+import Barcelona
 import Foundation
 import IMCore
 import Logging

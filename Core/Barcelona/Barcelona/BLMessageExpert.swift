@@ -202,7 +202,7 @@ public class BLMessageExpert {
     }
 }
 
-@_spi(messageExpertControlFlow) extension BLMessageExpert {
+extension BLMessageExpert {
     public func process(
         failedMessageID: String,
         service: IMServiceStyle,

@@ -390,7 +390,7 @@ extension RichLinkMetadata.RichLinkAsset {
 
 // MARK: - Introspection
 extension RichLinkMetadata {
-    @_spi(matrix) public var usableForMatrix: Bool {
+    public var usableForMatrix: Bool {
         if originalURL == nil && URL == nil {
             return false
         }

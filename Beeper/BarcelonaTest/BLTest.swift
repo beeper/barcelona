@@ -5,9 +5,9 @@
 //  Created by Eric Rabil on 4/15/22.
 //
 
-@_spi(unitTestInternals) import Barcelona
+import Barcelona
 import BarcelonaIPC
-@_spi(unitTestInternals) import BarcelonaMautrixIPC
+import BarcelonaMautrixIPC
 import IMCore
 import XCTest
 

@@ -8,7 +8,7 @@
 import Foundation
 
 public class BLBlocklistController {
-    @_spi(unitTestInternals) public var testingOverride: Set<String> = Set()
+    public var testingOverride: Set<String> = Set()
 }
 
 extension BLBlocklistController {

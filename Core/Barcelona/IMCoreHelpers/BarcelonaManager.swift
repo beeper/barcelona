@@ -214,6 +214,6 @@ public class BarcelonaManager {
     }
 }
 
-@_spi(grapple) extension BarcelonaManager {
-    @_spi(grapple) public static var bootstrapTimeout: TimeInterval = 120
+extension BarcelonaManager {
+    public static var bootstrapTimeout: TimeInterval = 120
 }

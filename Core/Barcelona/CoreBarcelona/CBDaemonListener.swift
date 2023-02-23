@@ -10,7 +10,7 @@
 //  It does away with most foundation APIs, opting for a much more lightweight pipeline that acts as a delivery mechanism to higher-level implementations.
 //
 
-@_spi(synchronousQueries) import BarcelonaDB
+import BarcelonaDB
 import Combine
 import CommunicationsFilter
 import Foundation

@@ -7,7 +7,6 @@
 //
 
 import Barcelona
-@_spi(featureFlags)@_spi(scratchbox) import Barcelona
 import FeatureFlags
 import Foundation
 import IMCore

@@ -5,7 +5,7 @@
 //  Created by Eric Rabil on 8/5/22.
 //
 
-@_spi(EncodingBoxInternals) import Barcelona
+import Barcelona
 import Foundation
 import IMCore
 import SwiftCLI
