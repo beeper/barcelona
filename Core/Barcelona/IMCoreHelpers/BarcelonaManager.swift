@@ -199,20 +199,6 @@ public class BarcelonaManager {
     public func bootstrap() -> Bool {
         BLBootstrapController()
     }
-    
-    @MainActor
-    public func asyncBootstrap() async -> Bool {
-        await withCheckedContinuation { continuation in
-            let ok = BLBootstrapController(nil) { bootstrap in
-                continuation.resume(returning: bootstrap)
-                return
-            }
-            if !ok {
-                continuation.resume(returning: false)
-                return
-            }
-        }
-    }
 
     public func bootstrap() -> Promise<Bool> {
         let lifetime = BarcelonaManager.bootstrapTimeout

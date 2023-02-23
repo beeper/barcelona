@@ -142,8 +142,6 @@ extension Notification.Name: ExpressibleByStringLiteral {
     }
 }
 
-private var reflectedReadReceiptPipelineCancellable: Cancellable?
-
 extension CBDaemonListener {
     static var didStartListening = false
     func startListening() {
@@ -153,33 +151,30 @@ extension CBDaemonListener {
 
         CBDaemonListener.didStartListening = true
 
-        reflectedReadReceiptPipelineCancellable = CBIDSListener
-            .shared
-            .reflectedReadReceiptPipeline
-            .sink { guid, service, time in
-                Task {
-                    let chatIdentifier = try? await DBReader.shared.chatIdentifier(forMessageGUID: guid)
+        _ = CBIDSListener.shared.reflectedReadReceiptPipeline.pipe { guid, service, time in
+            Task {
+                let chatIdentifier = try? await DBReader.shared.chatIdentifier(forMessageGUID: guid)
 
-                    log.debug(
-                        "reflectedReadReceiptPipeline received guid \(guid) in chat \(String(describing: chatIdentifier))"
-                    )
+                log.debug(
+                    "reflectedReadReceiptPipeline received guid \(guid) in chat \(String(describing: chatIdentifier))"
+                )
 
-                    guard let chatIdentifier else {
-                        return
-                    }
-
-                    self.messageStatusPipeline.send(
-                        CBMessageStatusChange(
-                            type: .read,
-                            service: service,
-                            time: time.timeIntervalSince1970,
-                            fromMe: true,
-                            chatID: chatIdentifier,
-                            messageID: guid
-                        )
-                    )
+                guard let chatIdentifier else {
+                    return
                 }
+
+                self.messageStatusPipeline.send(
+                    CBMessageStatusChange(
+                        type: .read,
+                        service: service,
+                        time: time.timeIntervalSince1970,
+                        fromMe: true,
+                        chatID: chatIdentifier,
+                        messageID: guid
+                    )
+                )
             }
+        }
 
         if CBFeatureFlags.useSMSReadBuffer {
             _ = messageStatusPipeline.pipe { status in
@@ -268,7 +263,6 @@ extension CBDaemonListener {
             }
         }
     }
-
 }
 
 @resultBuilder
