@@ -39,6 +39,7 @@ class BarcelonaMautrix {
             options.enableAutoSessionTracking = false
             options.profilesSampleRate = 1
             options.tracesSampleRate = 0.1
+            options.maxBreadcrumbs = 200
         }
     }
 
@@ -55,7 +56,12 @@ class BarcelonaMautrix {
         LoggingSystem.bootstrap { label in
             var handler = StreamLogHandler.standardOutput(label: label)
             handler.logLevel = .debug
-            return handler
+            return MultiplexLogHandler(
+                [
+                    handler,
+                    SentryLogHandler(label: label),
+                ]
+            )
         }
 
         if let dsn = ProcessInfo.processInfo.environment["BARCELONA_SENTRY_DSN"] {
