@@ -5,6 +5,7 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
+import Combine
 import Foundation
 import IDS
 import IMCore
@@ -48,7 +49,9 @@ public class CBIDSListener: ERBaseIDSListener {
         return listener
     }()
 
-    public let reflectedReadReceiptPipeline = CBPipeline<(guid: String, service: IMServiceStyle, time: Date)>()
+    public let reflectedReadReceiptPipeline = PassthroughSubject<
+        (guid: String, service: IMServiceStyle, time: Date), Never
+    >()
 
     private var myDestinationURIs: [String] {
         IMAccountController.shared.iMessageAccount?.aliases.map { IDSDestination(uri: $0).uri().prefixedURI } ?? []
