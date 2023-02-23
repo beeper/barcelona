@@ -52,7 +52,7 @@ packages:
     from: 1.0.4
   Sentry:
     url: https://github.com/getsentry/sentry-cocoa
-    from: 8.0.0
+    exactVersion: 8.2.0
   Paris:
     url: https://github.com/EricRabil/Paris
     revision: "75924f023c0197ee6063592dd0fa7bd11eec45dd"
