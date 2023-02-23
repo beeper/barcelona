@@ -53,6 +53,7 @@ class BarcelonaMautrix {
     }
 
     static func main() {
+        SentrySDK.startTransaction(name: "BarcelonaMautrix", operation: "startup", bindToScope: true)
         LoggingSystem.bootstrap { label in
             var handler = StreamLogHandler.standardOutput(label: label)
             handler.logLevel = .debug
@@ -109,16 +110,22 @@ class BarcelonaMautrix {
     }
 
     func bootstrap() {
+        let startupSpan = SentrySDK.span
+        let bootstrapSpan = startupSpan?.startChild(operation: "bootstrap")
         log.info("Bootstrapping")
 
         BarcelonaManager.shared.bootstrap()
             .catch { error in
                 log.error("fatal error while setting up barcelona: \(String(describing: error))")
+                startupSpan?.finish(status: .internalError)
+                bootstrapSpan?.finish(status: .internalError)
                 exit(197)
             }
             .then { success in
                 guard success else {
                     log.error("Failed to bootstrap")
+                    startupSpan?.finish(status: .internalError)
+                    bootstrapSpan?.finish(status: .internalError)
                     exit(-1)
                 }
 
@@ -135,6 +142,8 @@ class BarcelonaMautrix {
                 log.info("BLMautrix is ready")
 
                 self.startHealthTicker()
+                bootstrapSpan?.finish()
+                startupSpan?.finish()
             }
     }
 
