@@ -108,43 +108,37 @@ class BarcelonaMautrix {
 
         RunLoop.main.run()
     }
-
+    
     func bootstrap() {
-        let startupSpan = SentrySDK.span
-        let bootstrapSpan = startupSpan?.startChild(operation: "bootstrap")
-        log.info("Bootstrapping")
-
-        BarcelonaManager.shared.bootstrap()
-            .catch { error in
-                log.error("fatal error while setting up barcelona: \(String(describing: error))")
+        _Concurrency.Task {
+            let startupSpan = SentrySDK.span
+            let bootstrapSpan = startupSpan?.startChild(operation: "bootstrap")
+            log.info("Bootstrapping")
+            
+            let success = await BarcelonaManager.shared.asyncBootstrap()
+            guard success else {
+                log.error("Failed to bootstrap")
                 startupSpan?.finish(status: .internalError)
                 bootstrapSpan?.finish(status: .internalError)
-                exit(197)
+                exit(-1)
             }
-            .then { success in
-                guard success else {
-                    log.error("Failed to bootstrap")
-                    startupSpan?.finish(status: .internalError)
-                    bootstrapSpan?.finish(status: .internalError)
-                    exit(-1)
-                }
-
-                // allow payloads to start flowing
-                self.reader.ready = true
-                BLHealthTicker.shared.pinnedBridgeState = nil
-
-                CBPurgedAttachmentController.shared.enabled = true
-                CBPurgedAttachmentController.shared.delegate = self.eventHandler
-
-                // starts the imessage notification processor
-                self.eventHandler.run()
-
-                log.info("BLMautrix is ready")
-
-                self.startHealthTicker()
-                bootstrapSpan?.finish()
-                startupSpan?.finish()
-            }
+            
+            // allow payloads to start flowing
+            self.reader.ready = true
+            BLHealthTicker.shared.pinnedBridgeState = nil
+            
+            CBPurgedAttachmentController.shared.enabled = true
+            CBPurgedAttachmentController.shared.delegate = self.eventHandler
+            
+            // starts the imessage notification processor
+            self.eventHandler.run()
+            
+            log.info("BLMautrix is ready")
+            
+            self.startHealthTicker()
+            bootstrapSpan?.finish()
+            startupSpan?.finish()
+        }
     }
 
     func checkArguments() {
