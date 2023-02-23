@@ -544,7 +544,12 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     }
 
     public var chat: Chat? {
-        imChat.map(Chat.init(_:))
+        get async {
+            guard let imChat else {
+                return nil
+            }
+            return await Chat(imChat)
+        }
     }
 
     public var associableItemIDs: [String] {

@@ -138,8 +138,8 @@ extension BLRegressionTesting {
         guard chat.willSendSMS else {
             preconditionFailure("Expected chat to be SMS targeted initially")
         }
-        let wrapper = Chat(chat)
         Task {
+            let wrapper = await Chat(chat)
             try! await wrapper.send(message: .init(parts: [.init(type: .text, details: "asdf")]))
         }
     }
@@ -177,7 +177,7 @@ extension BLRegressionTesting {
                 } else {
                     IMChat.regressionTesting_disableServiceRefresh = true
                 }
-                let chat = Chat(imChat)
+                let chat = await Chat(imChat)
                 do {
                     let message = try await chat.send(
                         message: CreateMessage(parts: [.init(type: .text, details: "asdf")])

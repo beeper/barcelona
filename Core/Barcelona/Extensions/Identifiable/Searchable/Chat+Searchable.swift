@@ -236,18 +236,20 @@ extension Array where Element: Equatable {
 }
 
 extension Chat: Searchable {
-    public static func resolve(withParameters rawParameters: ChatSearchParameters) -> Promise<[Chat]> {
+    public static func resolve(withParameters rawParameters: ChatSearchParameters) async -> [Chat] {
         let parameters = rawParameters.parameters
 
         if parameters.count == 0 {
-            return .success([])
+            return []
         }
 
-        var chats = IMChatRegistry.shared.allChats
+        var chats = await IMChatRegistry.shared.allChats
             .filter {
                 parameters.test($0)
             }
-            .map(Chat.init(_:))
+            .asyncMap { imChat in
+                await Chat(imChat)
+            }
 
         chats.sort { chat1, chat2 in
             chat1.lastMessageTime > chat2.lastMessageTime
@@ -257,6 +259,6 @@ extension Chat: Searchable {
             chats = Array(chats.prefix(limit))
         }
 
-        return .success(chats)
+        return chats
     }
 }
