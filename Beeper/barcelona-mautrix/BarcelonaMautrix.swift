@@ -79,6 +79,8 @@ class BarcelonaMautrix {
             let user = User(userId: userID)
             SentrySDK.setUser(user)
         }
+        
+        log.info("Barcelona started with DYLD_LIBRARY_PATH: \(ProcessInfo.processInfo.environment["DYLD_LIBRARY_PATH"] ?? "nil")")
 
         var mautrixIPCChannel: MautrixIPCChannel
         if let unixSocketPath = getUnixSocketPath() {
