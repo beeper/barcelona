@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("any-country", defaultValue: false)
-    public var ignoresSameCountryCodeAssertion: Bool
-
     @FeatureFlag("exit-after-scratchbox", domain: .debugging, defaultValue: false)
     public var exitAfterScratchbox: Bool
 
