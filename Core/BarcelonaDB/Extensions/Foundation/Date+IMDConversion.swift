@@ -11,10 +11,6 @@ import Foundation
 private let IMDPersistenceUnixOffset: Int64 = Int64(Date.timeIntervalBetween1970AndReferenceDate * 1_000_000_000)
 private let NANOSECONDS_IN_SECOND: Double = 1e9
 
-public func IMDPersistenceTimestampToUnixEpoch(timestamp: Int64) -> Int64 {
-    timestamp + IMDPersistenceUnixOffset
-}
-
 public func IMDPersistenceTimestampToUnixSeconds(timestamp: Int64) -> Double {
     Double(timestamp + IMDPersistenceUnixOffset) / NANOSECONDS_IN_SECOND
 }

@@ -13,25 +13,6 @@ import GRDB
 class RawMessage: Record {
     override class var databaseTableName: String { "message" }
 
-    static let messageChatJoin = belongsTo(
-        ChatMessageJoin.self,
-        using: ForeignKey(["ROWID"], to: ["message_id"])
-    )
-    static let messageHandleJoin = belongsTo(
-        RawHandle.self,
-        key: "handle",
-        using: ForeignKey([RawMessage.Columns.handle_id], to: [RawHandle.Columns.ROWID])
-    )
-    static let messageOtherHandleJoin = belongsTo(
-        RawHandle.self,
-        key: "otherHandle",
-        using: ForeignKey([RawMessage.Columns.other_handle], to: [RawHandle.Columns.ROWID])
-    )
-    static let messageAttachmentJoin = belongsTo(
-        MessageAttachmentJoin.self,
-        using: ForeignKey([RawMessage.Columns.ROWID], to: [MessageAttachmentJoin.Columns.message_id])
-    )
-
     required init(row: Row) {
         account = row[Columns.account]
         account_guid = row[Columns.account_guid]
@@ -266,21 +247,4 @@ class RawMessage: Record {
     var was_data_detected: Int64?
     var was_deduplicated: Int64?
     var was_downgraded: Int64?
-}
-
-extension RawMessage {
-    static func joiningOnROWIDsWhenNotEmpty(
-        ROWIDs: [Int64],
-        withColumns columns: [RawMessage.Columns]
-    ) -> QueryInterfaceRequest<RawMessage> {
-        if ROWIDs.count > 0 {
-            return
-                RawMessage.joining(
-                    required: RawMessage.messageChatJoin.filter(ROWIDs.contains(ChatMessageJoin.Columns.chat_id))
-                )
-                .select(columns)
-        } else {
-            return RawMessage.select(columns)
-        }
-    }
 }
