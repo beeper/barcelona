@@ -23,7 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    public var overrideWithholdPartialFailures: Bool?
     public var overrideWithholdDupes: Bool?
 
     @FeatureFlag("withhold-partial-failures", defaultValue: true)
@@ -46,7 +45,7 @@ public class _CBFeatureFlags: FlagProvider {
 
     public var withholdPartialFailures: Bool {
         get {
-            overrideWithholdPartialFailures ?? _withholdPartialFailures
+            _withholdPartialFailures
         }
         set {
             _withholdPartialFailures = newValue
