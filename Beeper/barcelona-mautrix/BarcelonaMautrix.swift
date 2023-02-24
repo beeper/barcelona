@@ -39,6 +39,12 @@ class BarcelonaMautrix {
             options.profilesSampleRate = 1
             options.tracesSampleRate = 0.1
             options.maxBreadcrumbs = 200
+            if let info = Bundle.main.infoDictionary,
+                let bundleIdentifier = info["CFBundleIdentifier"],
+                let bundleVersion = info["CFBundleVersion"] as? String
+            {
+                options.releaseName = "\(bundleIdentifier)@\(bundleVersion)"
+            }
 
             if let serial = getSerial() {
                 SentrySDK.configureScope { scope in
