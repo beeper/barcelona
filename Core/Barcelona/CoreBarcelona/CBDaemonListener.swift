@@ -176,20 +176,18 @@ extension CBDaemonListener {
             }
         }
 
-        if CBFeatureFlags.useSMSReadBuffer {
-            _ = messageStatusPipeline.pipe { status in
-                guard status.type == .read, status.fromMe else {
-                    return
-                }
-
-                // Since this is only processing things on the SMS Read Buffer, we only want to continue
-                // if we have a chat for this chatID on SMS
-                guard IMChat.chat(withIdentifier: status.chatID, onService: .SMS, style: nil) != nil else {
-                    return
-                }
-
-                self.pushToSMSReadBuffer(status.messageID)
+        _ = messageStatusPipeline.pipe { status in
+            guard status.type == .read, status.fromMe else {
+                return
             }
+
+            // Since this is only processing things on the SMS Read Buffer, we only want to continue
+            // if we have a chat for this chatID on SMS
+            guard IMChat.chat(withIdentifier: status.chatID, onService: .SMS, style: nil) != nil else {
+                return
+            }
+
+            self.pushToSMSReadBuffer(status.messageID)
         }
 
         // Apparently in Ventura, macOS started ignoring certain chats to make the iMessage
@@ -255,13 +253,9 @@ extension CBDaemonListener {
             log.debug("IMChatParticipantsDidChange: \(notification.object), \(notification.userInfo)")
         }
 
-        ifDebugBuild {
-            _scratchboxMain()
-
-            if CBFeatureFlags.exitAfterScratchbox {
-                exit(0)
-            }
-        }
+        #if DEBUG
+        _scratchboxMain()
+        #endif
     }
 }
 
@@ -479,14 +473,12 @@ public class CBDaemonListener: ERBaseDaemonListener {
             }
         }
 
-        if CBFeatureFlags.prewarmItemRules {
-            DispatchQueue.global(qos: .background)
-                .async {
-                    for chat in IMChatRegistry.shared.allChats {
-                        _ = chat.chatItemRules
-                    }
+        DispatchQueue.global(qos: .background)
+            .async {
+                for chat in IMChatRegistry.shared.allChats {
+                    _ = chat.chatItemRules
                 }
-        }
+            }
 
         guard ProcessInfo.processInfo.environment["BLNoBlocklist"] == nil else {
             return
@@ -769,7 +761,7 @@ extension CBDaemonListener {
         lazy var messageItem: IMMessageItem? = message as? IMMessageItem
         lazy var sendProgress = messageItem?.sendProgress
 
-        if CBFeatureFlags.withholdDupes, nonces.contains(message.nonce) {
+        if nonces.contains(message.nonce) {
             // only let failed messages emit more than once, as failed messages may not first fail with their error code
             guard sendProgress == .failed else {
                 log.debug("withholding message \(String(describing: message.guid)): dedupe")
@@ -783,7 +775,7 @@ extension CBDaemonListener {
             return true
         }
 
-        if sendProgress == .failed, message.errorCode == .noError, CBFeatureFlags.withholdPartialFailures {
+        if sendProgress == .failed, message.errorCode == .noError {
             log.debug(
                 "withholding message \(String(describing: message.guid)): missing error code, message is either still in progress or the error code is coming soon"
             )
@@ -909,7 +901,7 @@ extension CBDaemonListener {
                 return
             }
 
-            if CBFeatureFlags.dropSpamMessages, item.isSpam {
+            if item.isSpam {
                 log.debug("ignoring message \(String(describing: item.guid)): flagged as spam")
                 return
             }
@@ -1069,7 +1061,7 @@ extension CBDaemonListener {
             return
         }
 
-        if CBFeatureFlags.dropSpamMessages, message.isSpam {
+        if message.isSpam {
             return
         }
 
@@ -1083,7 +1075,7 @@ extension CBDaemonListener {
     }
 
     func pushToSMSReadBuffer(_ guid: String) {
-        guard CBFeatureFlags.useSMSReadBuffer, !smsReadBuffer.contains(guid) else {
+        guard !smsReadBuffer.contains(guid) else {
             return
         }
         log.debug("Adding \(guid) to sms read buffer", source: "ReadState")

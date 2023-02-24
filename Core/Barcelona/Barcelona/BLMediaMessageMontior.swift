@@ -73,9 +73,7 @@ public class BLMediaMessageMonitor {
                 }
                 self.handle(updatedEvent: latestEvent, updatedStates: latestStates)
             }
-        if CBFeatureFlags.mediaMonitorTimeout {
-            startTimer()
-        }
+        startTimer()
     }
 
     deinit {

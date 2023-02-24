@@ -584,7 +584,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
             CLDebug("ReadState", "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because isRead == true")
             return true
         }*/
-        if CBFeatureFlags.useSMSReadBuffer && CBDaemonListener.shared.smsReadBuffer.contains(id) {
+        if CBDaemonListener.shared.smsReadBuffer.contains(id) {
             log.debug(
                 "\(id) on service \(service.rawValue) with sender \(sender ?? "nil") is read because read buffer contains ID",
                 source: "ReadState"
