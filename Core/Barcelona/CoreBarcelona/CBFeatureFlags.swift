@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("withhold-partial-failures", defaultValue: true)
-    private var _withholdPartialFailures: Bool
-
     @FeatureFlag("withhold-dupes", defaultValue: true)
     private var _withholdDupes: Bool
 
@@ -41,18 +38,9 @@ public class _CBFeatureFlags: FlagProvider {
     @FeatureFlag("migrated-database", defaultValue: false)
     public var migratedDatabase: Bool
 
-    public var withholdPartialFailures: Bool {
-        get {
-            _withholdPartialFailures
-        }
-        set {
-            _withholdPartialFailures = newValue
-        }
-    }
-
     public var withholdDupes: Bool {
         get {
-             _withholdDupes
+            _withholdDupes
         }
         set {
             _withholdDupes = newValue

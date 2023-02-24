@@ -775,7 +775,7 @@ extension CBDaemonListener {
             return true
         }
 
-        if sendProgress == .failed, message.errorCode == .noError, CBFeatureFlags.withholdPartialFailures {
+        if sendProgress == .failed, message.errorCode == .noError {
             log.debug(
                 "withholding message \(String(describing: message.guid)): missing error code, message is either still in progress or the error code is coming soon"
             )
