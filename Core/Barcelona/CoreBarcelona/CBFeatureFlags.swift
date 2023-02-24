@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("drop-spam-messages", defaultValue: true)
-    public var dropSpamMessages: Bool
-
     @FeatureFlag("log-sensitive-payloads", defaultValue: isDebugBuild)
     public var logSensitivePayloads: Bool
 

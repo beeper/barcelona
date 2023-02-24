@@ -901,7 +901,7 @@ extension CBDaemonListener {
                 return
             }
 
-            if CBFeatureFlags.dropSpamMessages, item.isSpam {
+            if item.isSpam {
                 log.debug("ignoring message \(String(describing: item.guid)): flagged as spam")
                 return
             }
@@ -1061,7 +1061,7 @@ extension CBDaemonListener {
             return
         }
 
-        if CBFeatureFlags.dropSpamMessages, message.isSpam {
+        if message.isSpam {
             return
         }
 
