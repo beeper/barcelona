@@ -176,20 +176,18 @@ extension CBDaemonListener {
             }
         }
 
-        if CBFeatureFlags.useSMSReadBuffer {
-            _ = messageStatusPipeline.pipe { status in
-                guard status.type == .read, status.fromMe else {
-                    return
-                }
-
-                // Since this is only processing things on the SMS Read Buffer, we only want to continue
-                // if we have a chat for this chatID on SMS
-                guard IMChat.chat(withIdentifier: status.chatID, onService: .SMS, style: nil) != nil else {
-                    return
-                }
-
-                self.pushToSMSReadBuffer(status.messageID)
+        _ = messageStatusPipeline.pipe { status in
+            guard status.type == .read, status.fromMe else {
+                return
             }
+
+            // Since this is only processing things on the SMS Read Buffer, we only want to continue
+            // if we have a chat for this chatID on SMS
+            guard IMChat.chat(withIdentifier: status.chatID, onService: .SMS, style: nil) != nil else {
+                return
+            }
+
+            self.pushToSMSReadBuffer(status.messageID)
         }
 
         // Apparently in Ventura, macOS started ignoring certain chats to make the iMessage
@@ -1077,7 +1075,7 @@ extension CBDaemonListener {
     }
 
     func pushToSMSReadBuffer(_ guid: String) {
-        guard CBFeatureFlags.useSMSReadBuffer, !smsReadBuffer.contains(guid) else {
+        guard !smsReadBuffer.contains(guid) else {
             return
         }
         log.debug("Adding \(guid) to sms read buffer", source: "ReadState")

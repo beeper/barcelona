@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("sms-read-buffer", defaultValue: true)
-    public var useSMSReadBuffer: Bool
-
     @FeatureFlag("drop-spam-messages", defaultValue: true)
     public var dropSpamMessages: Bool
 
