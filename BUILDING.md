@@ -19,13 +19,6 @@ brew install xcodegen && sudo gem install xcpretty
 sudo gem install xcodegen xcpretty
 ```
 
-### Building for iOS
-Barcelona builds command-line tools for iOS, which Xcode does not support by default. You can run [configure-xcode-for-embedded-development](Scripts/configure-xcode-for-embedded-development), which was plucked from the WebKit repository and patches Xcode to let you build CLIs for embedded systems (iOS, watchOS, tvOS, etc.)
-
-1. Close Xcode
-2. Run `sudo ./Scripts/configure-xcode-for-embedded-development` from a shell
-3. Reopen Xcode, you should be able to build the CLI tools for iOS
-
 ### Building for macOS
 No preparation is neededot build for mcaOS.
 
@@ -35,9 +28,4 @@ No preparation is neededot build for mcaOS.
 Compiling with Xcode is very straightforward, just select the scheme and build. For your convenience, there is a `tools` scheme which builds all of the command-line tools, and all of the frameworks as a side-effect.
 
 ### Compiling from the Terminal
-Barcelona has a [Makefile](Makefile) which can build and barcelona-mautrix for both iOS and macOS.
-
-| Host  | Mautrix            | Both       |
-|-------|--------------------|------------|
-| macOS | make mautrix-macos | make macos |
-| iOS   | make mautrix-ios   | make ios   |
+Barcelona has a [Makefile](Makefile) which can build and barcelona-mautrix.

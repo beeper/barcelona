@@ -25,8 +25,7 @@ targets:
   barcelona-mautrix:
     group: Beeper
     type: tool
-    platform: [macOS, iOS]
-    platformSuffix: -${platform}
+    platform: macOS
     productNameFromSettings: true
     sources:
       - ../Beeper/barcelona-mautrix
@@ -35,7 +34,7 @@ targets:
       base:
         CODE_SIGN_ENTITLEMENTS: Beeper/barcelona-mautrix/barcelona-mautrix.entitlements
         PRODUCT_BUNDLE_IDENTIFIER: com.apple.iChat
-        PRODUCT_NAME: barcelona-mautrix-${platform}
+        PRODUCT_NAME: barcelona-mautrix
         PRODUCT_MODULE_NAME: barcelona_mautrix
         CREATE_INFOPLIST_SECTION_IN_BINARY: YES
     info:

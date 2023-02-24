@@ -2,11 +2,9 @@
 xcuserdata/
 DRM
 build/
-ios_build
 macos_build
 macos_staging
 archive
-imessage-rest-ios/layout/Applications
 SourcePackages
 *.xcodeproj
 Beeper/barcelona-mautrix/Info.plist

@@ -50,7 +50,7 @@ extension IMChat {
 
         let rawType = Int64(type)
 
-        if #available(macOS 13, iOS 16.0, *) {
+        if #available(macOS 13, *) {
             return try venturaTapback(
                 associatedMessageType: rawType,
                 messageSummaryInfo: summaryInfo,
@@ -67,7 +67,6 @@ extension IMChat {
     }
 
     @available(macOS 13.0, *)
-    @available(iOS 13.0, *)
     public func venturaTapback(
         associatedMessageType: Int64,
         messageSummaryInfo: [AnyHashable: Any],
@@ -109,7 +108,6 @@ extension IMChat {
     }
 
     @available(macOS, obsoleted: 13.0, message: "Use venturaTapback instead")
-    @available(iOS, obsoleted: 16.0, message: "Use venturaTapback instead")
     public func preVenturaTapback(
         type: Int64,
         overridingItemType: UInt8?,
@@ -129,7 +127,7 @@ extension IMChat {
 
         var toSendMessage: IMMessage?
 
-        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+        if #available(macOS 10.16, *) {
             toSendMessage = IMMessage.instantMessage(
                 withAssociatedMessageContent: superFormat,
                 flags: 0,
