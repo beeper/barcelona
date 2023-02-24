@@ -151,7 +151,7 @@ extension Chat {
 
         let inviteText = add ? "Get in my van, kid." : "Goodbye, skank."
 
-        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+        if #available(macOS 10.16, *) {
             reasonMessage = IMMessage.instantMessage(
                 withText: NSAttributedString(string: inviteText),
                 messageSubject: nil,
@@ -195,7 +195,7 @@ extension IMChat {
         // IMDaemonController.sharedInstance().responds(to: #selector(IMRemoteDaemonProtocol.markRead(forIDs:style:onServices:messages:clientUnreadCount:)) == true
         // We can also see this in the decompilation of `-[IMChatRegistry _chat_sendReadReceiptForAllMessages:]`, where it calls IMDaemonController.sharedInstance().markRead(...)
         var controller: IMRemoteDaemonProtocol {
-            if #available(macOS 13.0, iOS 16, *) {
+            if #available(macOS 13.0, *) {
                 return IMDaemonController.sharedInstance()
             } else {
                 return IMDaemonController.shared()

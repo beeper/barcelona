@@ -17,7 +17,6 @@ include:
 options:
   deploymentTarget:
     macOS: 10.15
-    iOS: 13.0
   defaultConfig: Debug
   bundleIdPrefix: com.barcelona
   createIntermediateGroups: true

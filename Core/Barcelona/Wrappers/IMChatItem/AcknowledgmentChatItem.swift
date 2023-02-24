@@ -60,7 +60,7 @@ public struct AcknowledgmentChatItem: ChatItemAssociable, ChatItemOwned, Hashabl
 
 extension IMMessageAcknowledgmentChatItem {
     public var acknowledmentType: Int64 {
-        if #available(macOS 13, iOS 16.0, *) {
+        if #available(macOS 13, *) {
             return tapback?.associatedMessageType ?? 0
         } else {
             return messageAcknowledgmentType

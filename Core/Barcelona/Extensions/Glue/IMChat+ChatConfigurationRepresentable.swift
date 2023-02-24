@@ -47,7 +47,7 @@ extension IMChat: ChatConfigurationRepresentable {
         }
         set {
             guard let IMChatPropertyGroupPhotoGUID = IMChatPropertyGroupPhotoGUID,
-                #available(macOS 11.0, iOS 14.0, watchOS 7.0, *)
+                #available(macOS 11.0, *)
             else {
                 return
             }

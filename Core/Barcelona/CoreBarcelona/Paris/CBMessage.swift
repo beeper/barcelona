@@ -139,7 +139,7 @@ extension CBMessage.Flags {
     public static let alert = Self(rawValue: 1 << 9)
     /// The message has been marked and reported as spam
     public static let spam = Self(rawValue: 1 << 10)
-    /// The message should be presented as an emote (removed in Big Sur, never used on iOS)
+    /// The message should be presented as an emote (removed in Big Sur)
     public static let emote = Self(rawValue: 1 << 11)
     /// The message has been played (if it is an audio message)
     public static let played = Self(rawValue: 1 << 12)

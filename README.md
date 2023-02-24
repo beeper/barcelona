@@ -3,10 +3,7 @@ A Swift framework for interacting with iMessage.
 
 ## [Downloads](https://nightly.link/beeper/barcelona/workflows/build/main)
 
-| Host  | Grapple  | Mautrix  |
-|-------|----------|----------|
-| macOS | Unavailable | [Download](https://nightly.link/beeper/barcelona/workflows/build/main/darwin-barcelona-mautrix.zip) |
-| iOS   | Unavailable | Unavailable |
+Barcelona Mautrix: [Download](https://nightly.link/beeper/barcelona/workflows/build/main/darwin-barcelona-mautrix.zip)
 
 ## Getting Started
 
@@ -21,7 +18,7 @@ These are not strict requirements – this project is simply only ensured to bu
 
 Prepare your system to build Barcelona by following the instructions at [BUILDING.md](BUILDING.md)
 
-Build products go to `./Build/(iOS|macOS)/Products/(Debug|Release)/(barcelona-mautrix|grapple)`
+Build products go to `./Build/macOS/Products/(Debug|Release)/(barcelona-mautrix|grapple)`
 
 ### Running
 
@@ -62,7 +59,7 @@ automaticSending:
 
 `barcelona-mautrix` is a driver for connecting to matrix, via [matrix-imessage](https://github.com/mautrix/imessage). **This driver is in heavy development and stability is not guaranteed. You will find bugs! Please open issues as you find them so we can improve the driver.**
 
-Downloads for barcelona-mautrix are currently only available for [macOS](https://nightly.link/beeper/barcelona/workflows/build/main/darwin-barcelona-mautrix.zip). iOS is completely untested and currently not built in CI.
+Downloads for barcelona-mautrix are currently only available for [macOS](https://nightly.link/beeper/barcelona/workflows/build/main/darwin-barcelona-mautrix.zip).
 
 Ensure you have [com.apple.security.xpc.plist](https://github.com/beeper/barcelona/raw/main/com.apple.security.xpc.plist) installed to `/Library/Preferences/com.apple.security.xpc.plist`, as this is required to allow communication with IMDPersistenceAgent directly (imagent does not provide efficient message querying APIs, IMDPersistenceAgent does).
 

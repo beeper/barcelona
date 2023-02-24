@@ -53,7 +53,7 @@ public func CBInitializeFileTransfer(filename: String, path: URL) -> IMFileTrans
 
 extension IMFileTransferCenter {
     public func cbRetargetTransfer(_ transfer: IMFileTransfer, toPath path: String) {
-        if #available(macOS 13.0, iOS 16.0, *) {
+        if #available(macOS 13.0, *) {
             retargetTransfer(transfer.guid, toPath: path)
         } else {
             retargetTransfer(transfer, toPath: path)

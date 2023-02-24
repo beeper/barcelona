@@ -171,7 +171,7 @@ public enum TextPartAttribute: Codable, Hashable {
     }
 
     public static func enumKey(forAttributedKey key: NSAttributedString.Key) -> String? {
-        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+        if #available(macOS 10.16, *) {
             switch key {
             case MessageAttributes.mentionName:
                 return "mention"
@@ -226,7 +226,7 @@ public enum TextPartAttribute: Codable, Hashable {
     }
 
     public var attributedKey: NSAttributedString.Key {
-        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+        if #available(macOS 10.16, *) {
             switch self {
             case .mention:
                 return MessageAttributes.mentionName

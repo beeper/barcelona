@@ -14,17 +14,17 @@ private let log = Logger(label: "CBLinking")
 
 /// A constraint that will either qualify or disqualify a symbol from being selected during reconciliation
 public enum CBLinkerConstraint: Hashable, Equatable, CustomDebugStringConvertible {
-    /// macOS 13, iOS 16, watchOS 9
+    /// macOS 13
     case ventura
-    /// before macOS 13, iOS 16, watchOS 9
+    /// before macOS 13
     case preVentura
-    /// before macOS 12, iOS 15, watchOS 8
+    /// before macOS 12
     case preMonterey
-    /// macOS 12, iOS 15, watchOS 8
+    /// macOS 12
     case monterey
-    /// before macOS 11, iOS 14, watchOS 7
+    /// before macOS 11
     case preBigSur
-    /// macOS 11, iOS 14, watchOS 7
+    /// macOS 11
     case bigSur
 
     /// Whether the current environment satisfies the constraint
@@ -33,7 +33,7 @@ public enum CBLinkerConstraint: Hashable, Equatable, CustomDebugStringConvertibl
         case .preVentura:
             return !Self.ventura.applies
         case .ventura:
-            if #available(macOS 13, iOS 16, watchOS 9, *) {
+            if #available(macOS 13, *) {
                 return true
             } else {
                 return false
@@ -41,7 +41,7 @@ public enum CBLinkerConstraint: Hashable, Equatable, CustomDebugStringConvertibl
         case .preMonterey:
             return !Self.monterey.applies
         case .monterey:
-            if #available(macOS 12, iOS 15, watchOS 8, *) {
+            if #available(macOS 12, *) {
                 return true
             } else {
                 return false
@@ -49,7 +49,7 @@ public enum CBLinkerConstraint: Hashable, Equatable, CustomDebugStringConvertibl
         case .preBigSur:
             return !Self.bigSur.applies
         case .bigSur:
-            if #available(macOS 11, iOS 14, watchOS 7, *) {
+            if #available(macOS 11, *) {
                 return true
             } else {
                 return false

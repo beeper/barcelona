@@ -28,7 +28,7 @@ public protocol CreateMessageBase: Codable {
 
 extension CreateMessageBase {
     func resolvedThreadIdentifier(chat: IMChat) -> String? {
-        if #available(iOS 14, macOS 10.16, watchOS 7, *) {
+        if #available(macOS 10.16, *) {
             if let threadIdentifier = threadIdentifier {
                 return threadIdentifier
             } else if let replyToGUID = replyToGUID {
@@ -47,7 +47,7 @@ extension CreateMessageBase {
         chat: IMChat,
         withSubject subject: NSMutableAttributedString?
     ) throws -> IMMessage {
-        if #available(iOS 14, macOS 10.16, watchOS 7, *), chat.account.service == .iMessage() {
+        if #available(macOS 10.16, *), chat.account.service == .iMessage() {
             imMessageItem.setThreadIdentifier(resolvedThreadIdentifier(chat: chat))
         }
 

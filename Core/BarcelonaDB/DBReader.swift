@@ -30,14 +30,10 @@ private var dbConfiguration = Configuration { db in
 private var dbConfiguration = Configuration(trace: nil)
 #endif
 
-#if os(iOS)
-let databasePool = try! DatabasePool(path: "/var/mobile/Library/SMS/sms.db", configuration: dbConfiguration)
-#else
 let databasePool = try! DatabasePool(
     path: ("~/Library/Messages/chat.db" as NSString).expandingTildeInPath,
     configuration: dbConfiguration
 )
-#endif
 
 /// Interface for reading the chat.db file.
 ///

@@ -126,13 +126,9 @@ public struct MessageExtensionsData: Codable, Hashable {
             dataFilePath = String(data: dataFilePathData, encoding: .utf8)
 
             if var dataFilePath = dataFilePath, data == nil {
-                #if os(iOS)
-                fatalError("I AM NOT EQUIPPED FOR THIS!!!")
-                #else
                 if dataFilePath.starts(with: "Library") {
                     dataFilePath.insert(contentsOf: "~/", at: dataFilePath.startIndex)
                 }
-                #endif
 
                 dataFilePath = dataFilePath.expandingTildeInPath
 

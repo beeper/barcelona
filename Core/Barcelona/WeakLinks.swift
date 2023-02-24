@@ -33,7 +33,6 @@ let CBCreateSerializedItemsFromArray: IMCreateSerializedItemsFromArray_t = CBWea
 }
 
 @available(macOS, obsoleted: 13.0, message: "Only relevant for sending tapbacks; use IMTapbackSender instead")
-@available(iOS, obsoleted: 16.0, message: "Only relevant for sending tapbacks; use IMTapbackSender instead")
 func CBGeneratePreviewStringForAcknowledgmentType(_ associatedType: Int64, summaryInfo: [AnyHashable: Any]) -> String? {
     return NSClassFromString("IMMessageAcknowledgmentStringHelper")
         .map {

@@ -29,7 +29,7 @@ public struct MessageAttributes {
     static let breadcrumbOptions = NSAttributedString.Key(rawValue: IMBreadcrumbTextOptionFlags)
     static let breadcrumbMarker = NSAttributedString.Key(rawValue: IMBreadcrumbTextMarkerAttributeName)
 
-    @available(iOS 14, macOS 10.16, watchOS 7, *)
+    @available(macOS 10.16, *)
     static let mentionName = NSAttributedString.Key(rawValue: IMMentionConfirmedMention)
 }
 

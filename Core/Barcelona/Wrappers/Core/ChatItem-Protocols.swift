@@ -9,26 +9,10 @@
 import Foundation
 import IMCore
 
-#if os(iOS)
-extension NSObject {
-    fileprivate static var className: String {
-        NSStringFromClass(self)
-    }
-
-    fileprivate var className: String {
-        NSStringFromClass(object_getClass(self)!)
-    }
-}
-#endif
-
 extension ChatItem {
     fileprivate static var ingestionPairs: [(String, ChatItem.Type)] {
         ingestionClasses.map {
-            #if os(iOS)
-            ($0.className, self)
-            #else
             ($0.className(), self)
-            #endif
         }
     }
 }

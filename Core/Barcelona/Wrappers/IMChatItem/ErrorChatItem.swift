@@ -25,7 +25,7 @@ public struct ErrorChatItem: ChatItem, Hashable {
         fromMe = item.isFromMe
         time = item.effectiveTime
 
-        if #available(macOS 11.0, iOS 14.0, *) {
+        if #available(macOS 11.0, *) {
             threadIdentifier = item.threadIdentifier()
             threadOriginator = item.threadOriginatorID
         }
