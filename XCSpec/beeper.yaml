@@ -18,7 +18,6 @@ targets:
       - target: Barcelona
         embed: true
         link: true
-      - package: SwiftyContacts
       - package: swift-log
         product: Logging
   barcelona-mautrix:
@@ -48,7 +47,6 @@ targets:
       - target: BarcelonaMautrixIPC
         embed: true
         link: true
-      - package: SwiftCLI
       - package: Sentry
       - package: swift-log
         product: Logging

@@ -1,10 +1,4 @@
 packages:
-  SwiftyJavaScriptCore:
-    url: https://github.com/EricRabil/SwiftyJavaScriptCore
-    from: 1.0.0
-  SwiftCLI:
-    url: https://github.com/jakeheis/SwiftCLI
-    from: 6.0.3
   BarcelonaIPC:
     url: https://github.com/open-imcore/BarcelonaIPC
     from: 1.0.3
@@ -23,24 +17,12 @@ packages:
   Gzip:
     url: https://github.com/1024jp/GzipSwift
     from: 5.1.1
-  Yammit:
-    url: https://github.com/EricRabil/Yammit
-    from: 1.0.2
-  SwiftyTextTable:
-    url: https://github.com/scottrhoyt/SwiftyTextTable
-    from: 0.9.0
   AnyCodable:
     url: https://github.com/Flight-School/AnyCodable
     from: 0.6.1
   InterposeKit:
     url: https://github.com/steipete/InterposeKit
     branch: master
-  LineNoise:
-    url: https://github.com/andybest/linenoise-swift
-    from: 0.0.3
-  SwiftyContacts:
-    url: https://github.com/SwiftyContacts/SwiftyContacts
-    from: 4.0.0
   XCTHarness:
     url: https://github.com/EricRabil/XCTHarness
     from: 1.0.0

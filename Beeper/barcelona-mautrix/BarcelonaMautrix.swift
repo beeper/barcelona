@@ -12,7 +12,6 @@ import Foundation
 import IMCore
 import Logging
 import Sentry
-import SwiftCLI
 
 private let log = Logger(label: "BarcelonaMautrix")
 
