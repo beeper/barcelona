@@ -38,9 +38,6 @@ packages:
   LineNoise:
     url: https://github.com/andybest/linenoise-swift
     from: 0.0.3
-  FeatureFlags:
-    url: https://github.com/EricRabil/FeatureFlags.swift
-    from: 1.0.2
   SwiftyContacts:
     url: https://github.com/SwiftyContacts/SwiftyContacts
     from: 4.0.0

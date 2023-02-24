@@ -13,7 +13,6 @@ targets:
       - package: InterposeKit
       - package: BarcelonaFoundation
       - package: Pwomise
-      - package: FeatureFlags
       - package: SwiftCLI
       - package: Sentry
       - package: SwiftNIO

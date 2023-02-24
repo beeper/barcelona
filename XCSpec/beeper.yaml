@@ -13,7 +13,6 @@ targets:
         - barcelona-mautrix-tests
     dependencies:
       - package: BarcelonaFoundation
-      - package: FeatureFlags
       - package: Sentry
       - package: ERBufferedStream
       - target: Barcelona
