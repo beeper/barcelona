@@ -23,10 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    /// A faulty implementation of rich links resulted in crashes during message queries. This will repair those messages.
-    @FeatureFlag("repair-corrupted-links", defaultValue: true)
-    public var repairCorruptedLinks: Bool
-
     @FeatureFlag("ad-hoc-rich-links", defaultValue: Defaults.adHocRichLinks)
     public var adHocRichLinks: Bool
 
