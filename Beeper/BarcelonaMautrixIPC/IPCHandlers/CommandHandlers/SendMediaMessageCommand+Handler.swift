@@ -69,10 +69,6 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         ])
         messageCreation.metadata = metadata
 
-        if CBFeatureFlags.permitAudioOverMautrix && is_audio_message == true {
-            messageCreation.isAudioMessage = true
-        }
-
         do {
             var monitor: BLMediaMessageMonitor?
             var message: IMMessage?

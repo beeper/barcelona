@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("matrix-audio", defaultValue: false)
-    public var permitAudioOverMautrix: Bool
-
     @FeatureFlag("internal-diagnostics", defaultValue: isDebugBuild)
     public var internalDiagnostics: Bool
 
