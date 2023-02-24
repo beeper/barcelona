@@ -7,32 +7,24 @@
 
 import Foundation
 import Logging
-
-#if canImport(IMSharedUtilities)
 import IMSharedUtilities
-#endif
 
 private let log = Logger(label: "CBChat")
 
 extension CBChat {
     public enum MessageInput: CustomDebugStringConvertible, CustomStringConvertible {
-        #if canImport(IMSharedUtilities)
         case item(IMItem)
-        #endif
         case dict([AnyHashable: Any])
 
         public var guid: String? {
             switch self {
-            #if canImport(IMSharedUtilities)
             case .item(let item): return item.id
-            #endif
             case .dict(let dict): return dict["guid"] as? String
             }
         }
 
         public func handle(message: inout CBMessage?, leaf: CBChatIdentifier) -> CBMessage {
             switch self {
-            #if canImport(IMSharedUtilities)
             case .item(let item):
                 if message != nil {
                     message!.handle(item: item)
@@ -40,7 +32,6 @@ extension CBChat {
                 }
                 message = CBMessage(item: item, chat: leaf)
                 return message!
-            #endif
             case .dict(let dict):
                 if message != nil {
                     message!.handle(dictionary: dict)
@@ -53,14 +44,9 @@ extension CBChat {
 
         private var shared: CustomDebugStringConvertible & CustomStringConvertible {
             switch self {
-            #if canImport(IMSharedUtilities)
             case .dict(let dict as CustomDebugStringConvertible & CustomStringConvertible),
                 .item(let dict as CustomDebugStringConvertible & CustomStringConvertible):
                 return dict
-            #else
-            case .dict(let dict as CustomDebugStringConvertible & CustomStringConvertible):
-                return dict
-            #endif
             }
         }
 
@@ -88,10 +74,8 @@ extension CBChat {
     }
 }
 
-#if canImport(IMSharedUtilities)
 extension CBChat {
     @discardableResult public func handle(leaf: CBChatIdentifier, item: IMItem) -> CBMessage? {
         handle(leaf: leaf, input: .item(item))
     }
 }
-#endif
