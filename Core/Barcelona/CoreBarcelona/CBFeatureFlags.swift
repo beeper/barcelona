@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("prewarm-item-rules", defaultValue: true)
-    public var prewarmItemRules: Bool
-
     @FeatureFlag("contact-fuzz-enumerator", defaultValue: true)
     public var contactFuzzEnumerator: Bool
 
