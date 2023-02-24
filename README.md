@@ -27,7 +27,7 @@ Build products go to `./Build/(iOS|macOS)/Products/(Debug|Release)/(barcelona-ma
 
 Prepare your system to run Barcelona tools by following the instructions at [RUNNING.md](RUNNING.md)
 
-#### Grapple
+#### Grapple (deleted for now)
 
 Grapple is a debugging tool used to inspect the iMessage environment. A help page is displayed by just running `./grapple`
 

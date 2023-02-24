@@ -7,13 +7,12 @@ fileGroups:
   - BUILDING.md
   - Scripts
   - XCSpec
-  
+
 include:
   - XCSpec/spm.yaml
   - XCSpec/templates.yaml
   - XCSpec/barcelona.yaml
   - XCSpec/beeper.yaml
-  - XCSpec/schemes.yaml
 
 options:
   deploymentTarget:
