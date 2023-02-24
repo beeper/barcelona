@@ -98,7 +98,7 @@ extension Chat {
 
         let log = Logger(label: "Chat")
 
-        if CBFeatureFlags.useSendingV2, let cbChat = cbChat {
+        if let cbChat = cbChat {
             // If we're targeting the SMS service and call imChat.refreshServiceForSending(), it'll probably retarget to iMessage,
             // which we distinctly don't want it to do. Plus, we're implementing this to solve BE-7179, which has only happened
             // over iMessage as far as we can tell, so we don't need to work with SMS

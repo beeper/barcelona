@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("use-sending-v2", defaultValue: true)
-    public var useSendingV2: Bool
-
     /// A faulty implementation of rich links resulted in crashes during message queries. This will repair those messages.
     @FeatureFlag("repair-corrupted-links", defaultValue: true)
     public var repairCorruptedLinks: Bool
