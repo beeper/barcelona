@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("beeper", defaultValue: false)
-    public var beeper: Bool
-
     @FeatureFlag("migrated-database", defaultValue: false)
     public var migratedDatabase: Bool
 }
