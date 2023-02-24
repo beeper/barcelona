@@ -11,10 +11,6 @@ import Foundation
 import GRDB
 
 extension DBReader {
-    public func attachment(for guid: String) async throws -> RawAttachment? {
-        return try await attachments(withGUIDs: [guid]).first
-    }
-
     public func attachments(withGUIDs guids: [String]) async throws -> [RawAttachment] {
         log.debug("DBReader selecting attachments with GUIDs \(guids)")
 

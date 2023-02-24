@@ -26,16 +26,4 @@ extension DBReader {
         }
         .collectedDictionary(keyedBy: \.associated_message_guid, valuedBy: \.guid)
     }
-
-    /// Resolves associated messages with the given GUID
-    /// - Parameter guid: GUID of the message to load associations
-    /// - Returns: array of Messages
-    public func associatedMessageGUIDs(forGUID guid: String) async throws -> [String] {
-        try await read { db in
-            try RawMessage
-                .select(RawMessage.Columns.guid, as: String.self)
-                .filter(sql: "associated_message_guid = ?", arguments: [guid])
-                .fetchAll(db)
-        }
-    }
 }

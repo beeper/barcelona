@@ -11,8 +11,6 @@ import Foundation
 import GRDB
 import Logging
 
-internal let log = Logger(label: "Database")
-
 extension Configuration {
     init(trace: TraceFunction?) {
         self.init()
@@ -64,23 +62,5 @@ public struct DBReader {
                 }
             }
         }
-    }
-
-    internal func read<R: PromiseConvertible>(_ cb: @escaping (Database) throws -> R) -> Promise<R.Output> {
-        Promise { resolve, reject in
-            pool.asyncRead { result in
-                switch result {
-                case .success(let db):
-                    do {
-                        try cb(db).asPromise.then(resolve).catch(reject)
-                    } catch {
-                        reject(error)
-                    }
-                case .failure(let error):
-                    reject(error)
-                }
-            }
-        }
-        .resolve(on: DispatchQueue.main)
     }
 }

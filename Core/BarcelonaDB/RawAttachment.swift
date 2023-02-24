@@ -10,16 +10,6 @@ import Foundation
 import GRDB
 
 public struct ResourceOrigin: Codable, Hashable {
-    public init?(chatID: String? = nil, handleID: String? = nil, date: Double? = nil) {
-        self.chatID = chatID
-        self.handleID = handleID
-        self.date = date
-
-        if chatID == nil, handleID == nil, date == nil {
-            return nil
-        }
-    }
-
     public var chatID: String?
     public var handleID: String?
     public var date: Double?
@@ -27,11 +17,6 @@ public struct ResourceOrigin: Codable, Hashable {
 
 public class RawAttachment: Record {
     public override class var databaseTableName: String { "attachment" }
-
-    static let messageAttachmentJoin = belongsTo(
-        MessageAttachmentJoin.self,
-        using: ForeignKey(["ROWID"], to: ["attachment_id"])
-    )
 
     public required init(row: Row) {
         ROWID = row[Columns.ROWID]

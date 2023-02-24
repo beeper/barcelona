@@ -38,14 +38,6 @@ private class HandleTimestampSynthesized: Record {
 
 }
 
-extension Array where Element == HandleTimestampSynthesized {
-    fileprivate var records: [HandleTimestampRecord] {
-        map {
-            $0.record
-        }
-    }
-}
-
 extension DBReader {
     /// Returns an arrya of handle/timestamp records used for sorting an array of chat participants
     /// - Parameter chatIDs: identifiers of the chats to pull participants for (typically this should just be identifiers for the same chat on different services)

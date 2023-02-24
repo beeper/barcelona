@@ -60,53 +60,6 @@ extension DBReader {
         }
     }
 
-    /// Returns the chat id for a message with the given ROWID
-    /// - Parameter ROWID: ROWID of the message to query
-    /// - Returns: identifier of the chat the message resides in
-    public func chatIdentifier(forMessageRowID ROWID: Int64) async throws -> String? {
-        let join: SQLRequest<ChatIdentifierCursor> = """
-            SELECT chat.chat_identifier from message
-            LEFT JOIN chat_message_join ON chat_message_join.message_id = message.ROWID
-            LEFT JOIN chat ON chat.ROWID = chat_message_join.chat_id
-            WHERE message.ROWID = \(ROWID)
-            LIMIT 1;
-            """
-
-        return try await read { database in
-            try join.fetchOne(database)?.chat_identifier
-        }
-    }
-
-    private class MessageChatIdentifierCursor: GRDB.Record {
-        required init(row: Row) {
-            message_id = row["message_id"]
-            chat_identifier = row["chat_identifier"]
-            super.init(row: row)
-        }
-
-        var message_id: Int64
-        var chat_identifier: String
-    }
-
-    /// Resolves the identifiers for chats with the given identifiers
-    /// - Parameter ROWIDs: message ROWIDs to resolve
-    /// - Returns: ledger of message ROWID to chat identifier
-    public func chatIdentifiers(forMessageRowIDs ROWIDs: [Int64]) async throws -> [Int64: String] {
-        let join: SQLRequest<MessageChatIdentifierCursor> = """
-            SELECT message.ROWID AS message_id, chat.chat_identifier from message
-            LEFT JOIN chat_message_join ON chat_message_join.message_id = message.ROWID
-            LEFT JOIN chat ON chat.ROWID = chat_message_join.chat_id
-            WHERE message.ROWID IN \(ROWIDs);
-            """
-
-        return try await read { database in
-            try join.fetchAll(database)
-                .reduce(into: [Int64: String]()) { dict, join in
-                    dict[join.message_id] = join.chat_identifier
-                }
-        }
-    }
-
     /// Resolves the most recent GUIDs for chats with the given ROWIDs
     /// - Parameters:
     ///   - ROWIDs: ROWIDs of the chats to resolve
