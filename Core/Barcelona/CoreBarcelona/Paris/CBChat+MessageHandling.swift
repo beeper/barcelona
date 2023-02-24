@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import Logging
 import IMSharedUtilities
+import Logging
 
 private let log = Logger(label: "CBChat")
 
@@ -23,7 +23,8 @@ extension CBChat {
             }
         }
 
-        public func handle(message: inout CBMessage?, leaf: CBChatIdentifier) -> CBMessage {
+        public func handle(message: CBMessage?, leaf: CBChatIdentifier) -> CBMessage {
+            var message = message
             switch self {
             case .item(let item):
                 if message != nil {
@@ -64,9 +65,10 @@ extension CBChat {
             log.warning("dropping message \(item.debugDescription) as it has an invalid guid?!")
             return nil
         }
-        let message = item.handle(message: &messages[id], leaf: leaf)
-        log.info("handled message \(id), \(message.debugDescription)")
-        return message
+        let handledMessage = item.handle(message: messages[id], leaf: leaf)
+        messages[id] = handledMessage
+        log.info("handled message \(id), \(handledMessage.debugDescription)")
+        return handledMessage
     }
 
     @discardableResult public func handle(leaf: CBChatIdentifier, item dictionary: [AnyHashable: Any]) -> CBMessage? {
