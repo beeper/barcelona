@@ -40,9 +40,8 @@ extension IMChat {
     }
 
     /// Refreshes the chat service for sending, runs once per chat.
-    /// This is a no-op unless `CBFeatureFlags.refreshChatServices` is enabled.
     func refreshServiceForSendingIfNeeded() {
-        guard CBFeatureFlags.refreshChatServices && !IMChat.regressionTesting_disableServiceRefresh else {
+        guard !IMChat.regressionTesting_disableServiceRefresh else {
             return
         }
         if let lastMessageItem = lastFinishedMessageItem,

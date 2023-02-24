@@ -23,10 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    /// Whether to check the chat service before sending the first message of the session on a per-chat basis
-    @FeatureFlag("refresh-chat-services", defaultValue: true)
-    public var refreshChatServices: Bool
-
     @FeatureFlag("use-sending-v2", defaultValue: true)
     public var useSendingV2: Bool
 
