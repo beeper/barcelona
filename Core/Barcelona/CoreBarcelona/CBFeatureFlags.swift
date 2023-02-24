@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("log-sensitive-payloads", defaultValue: isDebugBuild)
-    public var logSensitivePayloads: Bool
-
     public var overrideWithholdPartialFailures: Bool?
     public var overrideWithholdDupes: Bool?
 
