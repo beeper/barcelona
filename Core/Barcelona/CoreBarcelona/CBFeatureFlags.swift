@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("contact-fuzz-enumerator", defaultValue: true)
-    public var contactFuzzEnumerator: Bool
-
     @FeatureFlag("sms-read-buffer", defaultValue: true)
     public var useSMSReadBuffer: Bool
 
