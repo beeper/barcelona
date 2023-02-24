@@ -25,7 +25,7 @@ public struct BulkHandleRepresentation: Codable {
     public var handles: [Handle]
 }
 
-public protocol BulkHandleIDRepresentable {
+protocol BulkHandleIDRepresentable {
     var handles: [String] { get set }
 }
 

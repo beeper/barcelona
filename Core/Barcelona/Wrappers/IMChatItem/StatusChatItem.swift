@@ -27,7 +27,7 @@ extension Optional where Wrapped == StatusType {
     }
 }
 
-public struct StatusChatItem: ChatItemOwned, Hashable {
+struct StatusChatItem: ChatItemOwned, Hashable {
     public init(
         id: String,
         chatID: String,
@@ -50,13 +50,13 @@ public struct StatusChatItem: ChatItemOwned, Hashable {
         self.itemID = itemID
     }
 
-    public static let ingestionClasses: [NSObject.Type] = [IMMessageStatusChatItem.self]
+    static let ingestionClasses: [NSObject.Type] = [IMMessageStatusChatItem.self]
 
-    public init(ingesting item: NSObject, context: IngestionContext) {
+    init(ingesting item: NSObject, context: IngestionContext) {
         self.init(item: item as! IMMessageStatusChatItem, chatID: context.chatID)
     }
 
-    public init(item: IMMessageStatusChatItem, chatID: String) {
+    init(item: IMMessageStatusChatItem, chatID: String) {
         id = item.id
         self.chatID = chatID
         fromMe = !item.isFromMe
@@ -68,21 +68,21 @@ public struct StatusChatItem: ChatItemOwned, Hashable {
         sender = item._item().handle
     }
 
-    public var id: String
-    public var chatID: String
-    public var fromMe: Bool
-    public var time: Double
-    public var sender: String?
-    public var threadIdentifier: String?
-    public var threadOriginator: String?
-    public var statusType: StatusType?
-    public var itemID: String
+    var id: String
+    var chatID: String
+    var fromMe: Bool
+    var time: Double
+    var sender: String?
+    var threadIdentifier: String?
+    var threadOriginator: String?
+    var statusType: StatusType?
+    var itemID: String
 
-    public var type: ChatItemType {
+    var type: ChatItemType {
         .status
     }
 
-    public var debugDescription: String {
+    var debugDescription: String {
         "\(type) { id=\(id) fromMe=\(fromMe) status=\(statusType.debugString) }"
     }
 }

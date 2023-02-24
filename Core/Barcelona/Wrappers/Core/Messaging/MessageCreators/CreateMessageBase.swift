@@ -11,7 +11,7 @@ import IMCore
 import IMSharedUtilities
 import Logging
 
-public protocol CreateMessageBase: Codable {
+protocol CreateMessageBase: Codable {
     var threadIdentifier: String? { get set }
     var replyToGUID: String? { get set }
     var replyToPart: Int? { get set }

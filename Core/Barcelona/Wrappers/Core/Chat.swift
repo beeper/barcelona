@@ -15,7 +15,7 @@ import Logging
 
 private let log = Logger(label: "Chat")
 
-public protocol ChatConfigurationRepresentable {
+protocol ChatConfigurationRepresentable {
     var id: String { get }
     var readReceipts: Bool { get set }
     var ignoreAlerts: Bool { get set }

@@ -9,10 +9,10 @@
 import Foundation
 import IMCore
 
-public struct TypingItem: ChatItemOwned, Hashable {
-    public static let ingestionClasses: [NSObject.Type] = [IMTypingChatItem.self]
+struct TypingItem: ChatItemOwned, Hashable {
+    static let ingestionClasses: [NSObject.Type] = [IMTypingChatItem.self]
 
-    public init(ingesting item: NSObject, context: IngestionContext) {
+    init(ingesting item: NSObject, context: IngestionContext) {
         self.init(item as! IMTypingChatItem, chatID: context.chatID)
     }
 
@@ -24,15 +24,15 @@ public struct TypingItem: ChatItemOwned, Hashable {
         self.chatID = chatID
     }
 
-    public var id: String = ""
-    public var chatID: String = ""
-    public var fromMe: Bool
-    public var time: Double
-    public var threadIdentifier: String?
-    public var threadOriginator: String?
-    public var sender: String?
+    var id: String = ""
+    var chatID: String = ""
+    var fromMe: Bool
+    var time: Double
+    var threadIdentifier: String?
+    var threadOriginator: String?
+    var sender: String?
 
-    public var type: ChatItemType {
+    var type: ChatItemType {
         .typing
     }
 }

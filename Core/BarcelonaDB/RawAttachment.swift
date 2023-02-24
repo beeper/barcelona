@@ -28,7 +28,7 @@ public struct ResourceOrigin: Codable, Hashable {
 public class RawAttachment: Record {
     public override class var databaseTableName: String { "attachment" }
 
-    public static let messageAttachmentJoin = belongsTo(
+    static let messageAttachmentJoin = belongsTo(
         MessageAttachmentJoin.self,
         using: ForeignKey(["ROWID"], to: ["attachment_id"])
     )

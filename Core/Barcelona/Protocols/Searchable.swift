@@ -10,7 +10,7 @@ import BarcelonaDB
 import Foundation
 
 /// Represents an identifiable and searchable record/entity
-public protocol Searchable: Identifiable {
+protocol Searchable: Identifiable {
     /// Applicable search parameters
     associatedtype QueryParametersImplementation: QueryParameters
     /// Metatype for instance type of implementation
@@ -31,9 +31,9 @@ extension Searchable {
         withParameters parameters: [String: QueryParametersImplementation]
     ) async -> [String: [instancetype]] {
         let all = await parameters.asyncMap { entry in
-                let chats = await resolve(withParameters: entry.value)
-                return (entry.key, chats)
-            }
+            let chats = await resolve(withParameters: entry.value)
+            return (entry.key, chats)
+        }
         return all.dictionary(keyedBy: \.0, valuedBy: \.1)
     }
 }
@@ -50,13 +50,13 @@ public struct BulkSearchRequest<T: QueryParameters>: BulkSearchRequestRepresenta
     public var searches: [String: T]
 }
 
-public protocol SearchParameter {
+protocol SearchParameter {
     associatedtype Object
     func test(_ object: Object) -> Bool
 }
 
 extension Array where Element: SearchParameter {
-    public func test(_ object: Element.Object) -> Bool {
+    func test(_ object: Element.Object) -> Bool {
         allSatisfy {
             $0.test(object)
         }

@@ -276,19 +276,19 @@ func createPipelineGlob<T>(@PipelineGlobber<T> component: () -> CBPipeline<T>) -
     return component()
 }
 
-public class OrderedDictionary<K: Hashable, V> {
+class OrderedDictionary<K: Hashable, V> {
     private(set) var dictionary: [K: V] = [:]
     private var orderedSet: NSMutableOrderedSet = .init()
 
-    public var maximumCapacity: Int? = nil
+    var maximumCapacity: Int? = nil
 
-    public init() {}
+    init() {}
 
-    public init(maximumCapacity: Int) {
+    init(maximumCapacity: Int) {
         self.maximumCapacity = maximumCapacity
     }
 
-    public subscript(_ key: K) -> V? {
+    subscript(_ key: K) -> V? {
         get {
             let index = orderedSet.index(of: key)
             if index != NSNotFound {
@@ -318,30 +318,30 @@ public class OrderedDictionary<K: Hashable, V> {
         }
     }
 
-    public var count: Int {
+    var count: Int {
         orderedSet.count
     }
 
-    public func index(of key: K) -> Int {
+    func index(of key: K) -> Int {
         orderedSet.index(of: key)
     }
 
-    public var keys: Dictionary<K, V>.Keys {
+    var keys: Dictionary<K, V>.Keys {
         dictionary.keys
     }
 
-    public var values: Dictionary<K, V>.Values {
+    var values: Dictionary<K, V>.Values {
         dictionary.values
     }
 
-    public func removeOldest(_ n: Int) {
+    func removeOldest(_ n: Int) {
         Array(orderedSet.prefix(n))
             .forEach { element in
                 self[(element as! K)] = nil
             }
     }
 
-    public func shrink(to size: Int) {
+    func shrink(to size: Int) {
         let overflow = max(count - size, 0)
         guard overflow > 0 else {
             return

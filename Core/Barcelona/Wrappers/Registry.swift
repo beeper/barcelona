@@ -15,14 +15,14 @@ extension Array where Element: Hashable {
     }
 }
 
-public class Registry {
-    public static let sharedInstance = Registry()
+class Registry {
+    static let sharedInstance = Registry()
 
-    public func account(withUniqueID uniqueID: String) -> IMAccount {
+    func account(withUniqueID uniqueID: String) -> IMAccount {
         return IMAccountController.shared.account(forUniqueID: uniqueID)
     }
 
-    public func imHandle(withID id: String) -> IMHandle? {
+    func imHandle(withID id: String) -> IMHandle? {
         if let account = IMAccountController.shared.iMessageAccount,
             let handle = imHandle(withID: id, onAccount: account)
         {
@@ -36,21 +36,21 @@ public class Registry {
         }
     }
 
-    public var allMeHandles: [IMHandle] {
+    var allMeHandles: [IMHandle] {
         allAccounts.flatMap { account in
             account.aliases.compactMap(account.imHandle(withID:))
         }
     }
 
-    public var uniqueMeHandleIDs: [String] {
+    var uniqueMeHandleIDs: [String] {
         allAccounts.flatMap(\.aliases).unique
     }
 
-    public var allAccounts: [IMAccount] {
+    var allAccounts: [IMAccount] {
         IMAccountController.shared.accounts
     }
 
-    public func imHandle(withID id: String, onService service: String) -> IMHandle? {
+    func imHandle(withID id: String, onService service: String) -> IMHandle? {
         guard let account = bestAccount(for: service) else {
             return nil
         }
@@ -58,7 +58,7 @@ public class Registry {
         return imHandle(withID: id, onAccount: account)
     }
 
-    public func imHandle(withID id: String, onService service: IMService) -> IMHandle? {
+    func imHandle(withID id: String, onService service: IMService) -> IMHandle? {
         guard let account = bestAccount(for: service) else {
             return nil
         }
@@ -66,11 +66,11 @@ public class Registry {
         return imHandle(withID: id, onAccount: account)
     }
 
-    public func imHandle(withID id: String, onAccount account: IMAccount) -> IMHandle? {
+    func imHandle(withID id: String, onAccount account: IMAccount) -> IMHandle? {
         account.imHandle(withID: id) ?? account.existingIMHandle(withID: id)
     }
 
-    public func suitableHandle(for service: String) -> IMHandle? {
+    func suitableHandle(for service: String) -> IMHandle? {
         guard let impl = self.resolve(service: service) else {
             return nil
         }
@@ -78,7 +78,7 @@ public class Registry {
         return suitableHandle(for: impl)
     }
 
-    public func suitableHandle(for service: IMService) -> IMHandle? {
+    func suitableHandle(for service: IMService) -> IMHandle? {
         guard let account = bestAccount(for: service) else {
             return nil
         }
@@ -86,7 +86,7 @@ public class Registry {
         return account.loginIMHandle
     }
 
-    public func bestAccount(for service: String) -> IMAccount? {
+    func bestAccount(for service: String) -> IMAccount? {
         guard let service = resolve(service: service) else {
             return nil
         }
@@ -94,7 +94,7 @@ public class Registry {
         return bestAccount(for: service)
     }
 
-    public func bestAccount(for service: IMService) -> IMAccount? {
+    func bestAccount(for service: IMService) -> IMAccount? {
         if let serviceImpl = service as? IMServiceImpl,
             let account = serviceImpl.value(forKey: "bestAccount") as? IMAccount
         {
@@ -104,17 +104,17 @@ public class Registry {
         return IMAccountController.shared.bestAccount(forService: service)
     }
 
-    public func resolve(service: String) -> IMService? {
+    func resolve(service: String) -> IMService? {
         let IMServiceAgentImpl = NSClassFromString("IMServiceAgentImpl") as! IMServiceAgent.Type
 
         return IMServiceAgentImpl.shared()?.service(withName: service)
     }
 
-    public func iMessageAccount() -> IMAccount? {
+    func iMessageAccount() -> IMAccount? {
         return IMAccountController.shared.iMessageAccount
     }
 
-    public func SMSAccount() -> IMAccount? {
+    func SMSAccount() -> IMAccount? {
         return IMAccountController.shared.activeSMSAccount
     }
 
@@ -131,12 +131,12 @@ public class Registry {
             )
     }
 
-    public var smsServiceEnabled: Bool {
+    var smsServiceEnabled: Bool {
         _connect()
         return IMService.sms()?.isEnabled() ?? false
     }
 
-    public var callServiceEnabled: Bool {
+    var callServiceEnabled: Bool {
         _connect()
         return IMService.call()?.isEnabled() ?? false
     }

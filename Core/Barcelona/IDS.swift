@@ -114,7 +114,7 @@ class BLIDSIDQueryCache {
 }
 
 /// Asynchronously resolves the latest IDS status for a set of handles on a given service, defaulting to iMessage.
-public func BLResolveIDStatusForIDs(
+func BLResolveIDStatusForIDs(
     _ ids: [String],
     onService service: IMServiceStyle,
     options: BLIDSResolutionOptions = .none,

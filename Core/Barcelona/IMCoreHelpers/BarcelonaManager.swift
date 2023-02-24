@@ -16,8 +16,8 @@ import Logging
 
 private let log = Logger(label: "BarcelonaManager")
 
-public let BLListenerIdentifier = "com.ericrabil.imessage-rest"
-public let BLIsSimulation = IMCoreSimulatedEnvironmentEnabled()
+let BLListenerIdentifier = "com.ericrabil.imessage-rest"
+let BLIsSimulation = IMCoreSimulatedEnvironmentEnabled()
 
 @_cdecl("BLTeardownController")
 public func BLTeardownController() {
@@ -82,7 +82,7 @@ public func BLSetup() -> Bool {
     return true
 }
 
-public func BLTeardown() {
+func BLTeardown() {
     let controller = IMDaemonController.sharedInstance()
     controller.listener.removeHandler(CBDaemonListener.shared)
 

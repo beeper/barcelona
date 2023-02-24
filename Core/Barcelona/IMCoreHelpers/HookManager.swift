@@ -170,13 +170,13 @@ private func IMIDSHooks() throws -> Interpose {
     }
 }
 
-public class HookManager {
-    public static let shared = HookManager()
+class HookManager {
+    static let shared = HookManager()
 
-    let hooks = [/*IMChatHooks, */IMIDSHooks, CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks]
+    let hooks = [ /*IMChatHooks, */IMIDSHooks, CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks]
     private var appliedHooks: [Interpose]?
 
-    public func apply() throws {
+    func apply() throws {
         try revert()
 
         #if DEBUG
@@ -200,7 +200,7 @@ public class HookManager {
         #endif
     }
 
-    public func revert() throws {
+    func revert() throws {
         guard let appliedHooks = appliedHooks else {
             return
         }

@@ -206,7 +206,7 @@ internal func ERResolveGUIDsForChats(
 
 // MARK: - API
 
-public func BLLoadIMMessageItems(withGUIDs guids: [String]) -> [IMMessageItem] {
+func BLLoadIMMessageItems(withGUIDs guids: [String]) -> [IMMessageItem] {
     if guids.count == 0 {
         return []
     }
@@ -219,11 +219,12 @@ public func BLLoadIMMessageItems(withGUIDs guids: [String]) -> [IMMessageItem] {
     }
 }
 
-public func BLLoadIMMessageItem(withGUID guid: String) -> IMMessageItem? {
+func BLLoadIMMessageItem(withGUID guid: String) -> IMMessageItem? {
     BLLoadIMMessageItems(withGUIDs: [guid]).first
 }
 
-public func BLLoadIMMessages(withGUIDs guids: [String]) -> [IMMessage] {
+@usableFromInline
+func BLLoadIMMessages(withGUIDs guids: [String]) -> [IMMessage] {
     BLLoadIMMessageItems(withGUIDs: guids).compactMap(IMMessage.message(fromUnloadedItem:))
 }
 
@@ -265,7 +266,7 @@ public func BLLoadChatItems(
     return buffers + bufVal
 }
 
-public func BLLoadChatItems(withGraph graph: [String: ([String], IMServiceStyle)]) async throws -> [ChatItem] {
+func BLLoadChatItems(withGraph graph: [String: ([String], IMServiceStyle)]) async throws -> [ChatItem] {
     if graph.count == 0 {
         return []
     }
@@ -362,7 +363,7 @@ private let IMFileTransferFromIMDAttachmentRecordRef = unsafeBitCast(
     to: IMFileTransferFromIMDAttachmentRecordRefType.self
 )
 
-public func BLLoadFileTransfer(withGUID guid: String) -> IMFileTransfer? {
+func BLLoadFileTransfer(withGUID guid: String) -> IMFileTransfer? {
     guard let attachment = IMDAttachmentRecordCopyAttachmentForGUID(guid as CFString) else {
         return nil
     }
@@ -370,6 +371,6 @@ public func BLLoadFileTransfer(withGUID guid: String) -> IMFileTransfer? {
     return IMFileTransferFromIMDAttachmentRecordRef(attachment)
 }
 
-public func BLLoadAttachmentPathForTransfer(withGUID guid: String) -> String? {
+func BLLoadAttachmentPathForTransfer(withGUID guid: String) -> String? {
     BLLoadFileTransfer(withGUID: guid)?.localPath
 }

@@ -10,8 +10,8 @@ import Foundation
 import GRDB
 
 /// Represents a chat record in the chat.db file
-public class RawChat: Record {
-    public required init(row: Row) {
+class RawChat: Record {
+    required init(row: Row) {
         ROWID = row[Columns.ROWID]
         guid = row[Columns.guid]
         style = row[Columns.style]
@@ -42,9 +42,9 @@ public class RawChat: Record {
         super.init(row: row)
     }
 
-    public override class var databaseTableName: String { "chat" }
+    override class var databaseTableName: String { "chat" }
 
-    public override func encode(to container: inout PersistenceContainer) {
+    override func encode(to container: inout PersistenceContainer) {
         container[Columns.ROWID] = ROWID
         container[Columns.guid] = guid
         container[Columns.style] = style
@@ -74,38 +74,38 @@ public class RawChat: Record {
         container[Columns.is_blackholed] = is_blackholed
     }
 
-    public enum Columns: String, ColumnExpression {
+    enum Columns: String, ColumnExpression {
         case ROWID, guid, style, state, account_id, properties, chat_identifier, service_name, room_name, account_login,
             is_archived, last_addressed_handle, display_name, group_id, is_filtered, successful_query, engram_id,
             server_change_token, ck_sync_state, original_group_id, last_read_message_timestamp, sr_server_change_token,
             sr_ck_sync_state, cloudkit_record_id, sr_cloudkit_record_id, last_addressed_sim_id, is_blackholed
     }
 
-    public var ROWID: Int64?
-    public var guid: String?
-    public var style: Int64?
-    public var state: Int64?
-    public var account_id: String?
-    public var properties: Data?
-    public var chat_identifier: String?
-    public var service_name: String?
-    public var room_name: String?
-    public var account_login: String?
-    public var is_archived: Int64?
-    public var last_addressed_handle: String?
-    public var display_name: String?
-    public var group_id: String?
-    public var is_filtered: Int64?
-    public var successful_query: Int64?
-    public var engram_id: String?
-    public var server_change_token: String?
-    public var ck_sync_state: Int64?
-    public var original_group_id: String?
-    public var last_read_message_timestamp: Int64?
-    public var sr_server_change_token: String?
-    public var sr_ck_sync_state: Int64?
-    public var cloudkit_record_id: String?
-    public var sr_cloudkit_record_id: String?
-    public var last_addressed_sim_id: String?
-    public var is_blackholed: Int64?
+    var ROWID: Int64?
+    var guid: String?
+    var style: Int64?
+    var state: Int64?
+    var account_id: String?
+    var properties: Data?
+    var chat_identifier: String?
+    var service_name: String?
+    var room_name: String?
+    var account_login: String?
+    var is_archived: Int64?
+    var last_addressed_handle: String?
+    var display_name: String?
+    var group_id: String?
+    var is_filtered: Int64?
+    var successful_query: Int64?
+    var engram_id: String?
+    var server_change_token: String?
+    var ck_sync_state: Int64?
+    var original_group_id: String?
+    var last_read_message_timestamp: Int64?
+    var sr_server_change_token: String?
+    var sr_ck_sync_state: Int64?
+    var cloudkit_record_id: String?
+    var sr_cloudkit_record_id: String?
+    var last_addressed_sim_id: String?
+    var is_blackholed: Int64?
 }
