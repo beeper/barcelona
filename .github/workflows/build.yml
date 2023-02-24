@@ -33,4 +33,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: darwin-barcelona-mautrix
-          path: Build/macOS/Build/Products/Release/barcelona-mautrix-macOS
+          path: Build/macOS/Build/Products/Release/barcelona-mautrix
