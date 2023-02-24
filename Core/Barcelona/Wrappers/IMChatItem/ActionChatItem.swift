@@ -36,10 +36,10 @@ extension IMMessageActionChatItem: IMMessageActionItemParseable {
     }
 }
 
-public struct ActionChatItem: ChatItemOwned, Hashable {
-    public static let ingestionClasses: [NSObject.Type] = [IMMessageActionItem.self, IMMessageActionChatItem.self]
+struct ActionChatItem: ChatItemOwned, Hashable {
+    static let ingestionClasses: [NSObject.Type] = [IMMessageActionItem.self, IMMessageActionChatItem.self]
 
-    public init?(ingesting item: NSObject, context: IngestionContext) {
+    init?(ingesting item: NSObject, context: IngestionContext) {
         switch item {
         case let item as IMMessageActionItem:
             self.init(item, chat: context.chatID)
@@ -62,17 +62,17 @@ public struct ActionChatItem: ChatItemOwned, Hashable {
         otherHandle = item.otherHandleID
     }
 
-    public var id: String
-    public var chatID: String
-    public var fromMe: Bool
-    public var time: Double
-    public var threadIdentifier: String?
-    public var threadOriginator: String?
-    public var sender: String?
-    public var otherHandle: String?
-    public var actionType: Int64
+    var id: String
+    var chatID: String
+    var fromMe: Bool
+    var time: Double
+    var threadIdentifier: String?
+    var threadOriginator: String?
+    var sender: String?
+    var otherHandle: String?
+    var actionType: Int64
 
-    public var type: ChatItemType {
+    var type: ChatItemType {
         .action
     }
 }

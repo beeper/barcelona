@@ -10,7 +10,7 @@ import Foundation
 import IMCore
 import IMSharedUtilities
 
-public protocol IMCoreDataResolvable: NSObjectProtocol {
+protocol IMCoreDataResolvable: NSObjectProtocol {
     var id: String { get }
     var isFromMe: Bool { get }
     var effectiveTime: Double { get }

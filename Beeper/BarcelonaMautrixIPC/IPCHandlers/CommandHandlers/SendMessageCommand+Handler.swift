@@ -15,7 +15,7 @@ import Sentry
 private let log = Logger(label: "SendMessageCommand")
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [

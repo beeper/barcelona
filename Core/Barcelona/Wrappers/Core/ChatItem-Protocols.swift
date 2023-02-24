@@ -176,15 +176,15 @@ extension ChatItem {
     }
 }
 
-public protocol ChatItemOwned: ChatItem {
+protocol ChatItemOwned: ChatItem {
     var sender: String? { get set }
 }
 
-public protocol ChatItemAssociable: ChatItemOwned {
+protocol ChatItemAssociable: ChatItemOwned {
     var associatedID: String { get set }
 }
 
-public protocol ChatItemAcknowledgable: ChatItem {
+protocol ChatItemAcknowledgable: ChatItem {
     var acknowledgments: [AcknowledgmentChatItem]? { get set }
 }
 

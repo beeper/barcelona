@@ -17,9 +17,9 @@ import Logging
 private let IMCopyThreadNameForChat: (@convention(c) (String, String, IMChatStyle) -> Unmanaged<NSString>)? =
     CBWeakLink(against: .privateFramework(name: "IMFoundation"), .symbol("IMCopyThreadNameForChat"))
 
-public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
-    public var chats: [CBChatIdentifier: CBChat] = [:]
-    public var allChats: [ObjectIdentifier: CBChat] = [:]
+class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
+    var chats: [CBChatIdentifier: CBChat] = [:]
+    var allChats: [ObjectIdentifier: CBChat] = [:]
 
     var messageIDReverseLookup: [String: CBChatIdentifier] = [:]
     private var subscribers: Set<AnyCancellable> = Set()
@@ -31,7 +31,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         IMDaemonController.shared().listener.addHandler(self)
     }
 
-    public func setupComplete(_ success: Bool, info: [AnyHashable: Any]!) {
+    func setupComplete(_ success: Bool, info: [AnyHashable: Any]!) {
         if let chats = info["personMergedChats"] as? [[AnyHashable: Any]] {
             for chat in chats {
                 _ = handle(chat: chat)
@@ -41,7 +41,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         }
     }
 
-    public func chat(_ persistentIdentifier: String!, updated updateDictionary: [AnyHashable: Any]!) {
+    func chat(_ persistentIdentifier: String!, updated updateDictionary: [AnyHashable: Any]!) {
         trace(
             nil,
             nil,
@@ -50,7 +50,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         _ = handle(chat: updateDictionary)
     }
 
-    public func chat(_ persistentIdentifier: String!, propertiesUpdated properties: [AnyHashable: Any]!) {
+    func chat(_ persistentIdentifier: String!, propertiesUpdated properties: [AnyHashable: Any]!) {
         trace(
             nil,
             nil,
@@ -62,17 +62,17 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         ])
     }
 
-    public func chat(_ persistentIdentifier: String!, engramIDUpdated engramID: String!) {
+    func chat(_ persistentIdentifier: String!, engramIDUpdated engramID: String!) {
         trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) engram \(engramID ?? "nil")")
     }
 
-    public func chat(_ guid: String!, lastAddressedHandleUpdated lastAddressedHandle: String!) {
+    func chat(_ guid: String!, lastAddressedHandleUpdated lastAddressedHandle: String!) {
 
     }
 
     var loadedChatsByChatIdentifierCallback: [String: [([IMChat]) -> Void]] = [:]
 
-    public func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) {
+    func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) {
         trace(chatIdentifier, nil, "chats loaded: \((chatDictionaries as NSArray))")
         guard let callbacks = loadedChatsByChatIdentifierCallback.removeValue(forKey: chatIdentifier) else {
             return
@@ -83,11 +83,11 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         }
     }
 
-    public func lastMessage(forAllChats chatIDToLastMessageDictionary: [AnyHashable: Any]!) {
+    func lastMessage(forAllChats chatIDToLastMessageDictionary: [AnyHashable: Any]!) {
         trace(nil, nil, "loaded last message for all chats \((chatIDToLastMessageDictionary as NSDictionary))")
     }
 
-    public func service(
+    func service(
         _ serviceID: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
@@ -99,7 +99,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         }
     }
 
-    public func account(
+    func account(
         _ accountUniqueID: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
@@ -109,7 +109,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         trace(chatIdentifier, nil, "error \((error as NSError).debugDescription)")
     }
 
-    public func account(
+    func account(
         _ accountUniqueID: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
@@ -132,7 +132,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         )
     }
 
-    public func account(
+    func account(
         _ accountUniqueID: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
@@ -148,7 +148,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         }
     }
 
-    public func account(
+    func account(
         _ accountUniqueID: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
@@ -161,7 +161,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
 
     }
 
-    public func account(
+    func account(
         _ accountUniqueID: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
@@ -176,7 +176,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         }
     }
 
-    public func account(
+    func account(
         _ accountUniqueID: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
@@ -252,7 +252,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         handle(chat: chatID, item: item)
     }
 
-    public func account(
+    func account(
         _ accountUniqueID: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
@@ -265,7 +265,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
     }
 
-    public func account(
+    func account(
         _ accountUniqueID: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
@@ -279,7 +279,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         )
     }
 
-    public func account(
+    func account(
         _ accountUniqueID: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
@@ -290,7 +290,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
     }
 
-    public func account(
+    func account(
         _ accountUniqueID: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
@@ -376,7 +376,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         }
     }
 
-    public func loadedChats(_ chats: [[AnyHashable: Any]]!, queryID: String!) {
+    func loadedChats(_ chats: [[AnyHashable: Any]]!, queryID: String!) {
         guard queryCallbacks.keys.contains(queryID) else {
             return
         }
@@ -390,7 +390,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     var loadedChatsCallbacks: [() -> Void] = []
     private let loadedChatsCallbacksLock = NSRecursiveLock()
 
-    public func loadedChats(_ chats: [[AnyHashable: Any]]!) {
+    func loadedChats(_ chats: [[AnyHashable: Any]]!) {
         _ = internalize(chats: chats)
         loadedChatsCallbacksLock.withLock {
             let loadedChatsCallbacks = loadedChatsCallbacks
@@ -401,7 +401,7 @@ public class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         }
     }
 
-    public func onLoadedChats(_ callback: @escaping () -> Void) {
+    func onLoadedChats(_ callback: @escaping () -> Void) {
         if hasLoadedChats {
             callback()
         } else {
@@ -508,7 +508,7 @@ extension CBChatRegistry {
 
 #if canImport(IMSharedUtilities)
 extension CBChatRegistry {
-    public func handle(chat: [AnyHashable: Any], item: IMItem) -> Bool {
+    func handle(chat: [AnyHashable: Any], item: IMItem) -> Bool {
         guard let identifier = handle(chat: chat).1 else {
             log.warning("cant handle message \(item) via chat dictionary: couldnt find a chat for it")
             return false
@@ -517,7 +517,7 @@ extension CBChatRegistry {
         return true
     }
 
-    public func handle(chat: CBChatIdentifier, item: IMItem) {
+    func handle(chat: CBChatIdentifier, item: IMItem) {
         if let guid = item.guid, !messageIDReverseLookup.keys.contains(guid) {
             messageIDReverseLookup[guid] = chat
         }

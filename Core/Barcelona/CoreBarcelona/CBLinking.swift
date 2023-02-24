@@ -76,7 +76,7 @@ public enum CBLinkerConstraint: Hashable, Equatable, CustomDebugStringConvertibl
 }
 
 /// Value representing a physical location on disk that holds a symbol
-public enum CBLinkingTarget {
+enum CBLinkingTarget {
     /// A framework in /System/Library/Frameworks
     case framework(name: String)
     /// A framework in /System/Library/PrivateFrameworks
@@ -152,7 +152,7 @@ private func cast<T>(_ pointer: UnsafeMutableRawPointer) -> T {
 
 /// Attempts to link a symbol against a target, reconciling availability constraints and selecting the option that is safest to use
 /// If no symbol is safe to use, or the target cannot be opened, nil is returned.
-public func CBWeakLink<T>(against target: CBLinkingTarget, options: [LinkingOption]) -> T? {
+func CBWeakLink<T>(against target: CBLinkingTarget, options: [LinkingOption]) -> T? {
     guard let handle = dlopen(target.path, RTLD_LAZY) else {
         log.warning("Failed to open CBLinkingTarget at path \(target.path)")
         return nil
@@ -179,17 +179,17 @@ public func CBWeakLink<T>(against target: CBLinkingTarget, options: [LinkingOpti
 
 /// Attempts to link a symbol against a target, reconciling availability constraints and selecting the option that is safest to use
 /// If no symbol is safe to use, or the target cannot be opened, nil is returned.
-public func CBWeakLink<T>(against target: CBLinkingTarget, _ symbol: LinkingOption) -> T? {
+func CBWeakLink<T>(against target: CBLinkingTarget, _ symbol: LinkingOption) -> T? {
     CBWeakLink(against: target, options: [symbol])
 }
 
 /// Attempts to link a symbol against a target, reconciling availability constraints and selecting the option that is safest to use
 /// If no symbol is safe to use, or the target cannot be opened, nil is returned.
-public func CBWeakLink<T>(against target: CBLinkingTarget, _ options: LinkingOption...) -> T? {
+func CBWeakLink<T>(against target: CBLinkingTarget, _ options: LinkingOption...) -> T? {
     CBWeakLink(against: target, options: options)
 }
 
-public func CBSelectLinkingPath<Output>(_ paths: [[CBLinkerConstraint]: Output]) -> Output? {
+func CBSelectLinkingPath<Output>(_ paths: [[CBLinkerConstraint]: Output]) -> Output? {
     for option in paths.keys {
         if LinkingOption(constraints: option, symbol: "").safe {
             return paths[option]!

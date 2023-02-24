@@ -13,7 +13,7 @@ import Logging
 private let log = Logger(label: "BLIngestObjects")
 
 // MARK: - Public API
-public func BLIngestObjects(
+func BLIngestObjects(
     _ objects: [NSObject],
     inChat chatId: String? = nil,
     service: IMServiceStyle
@@ -72,7 +72,7 @@ public func BLIngestObjects(
     return tapbacks
 }
 
-public func BLIngestObject(
+func BLIngestObject(
     _ object: NSObject,
     inChat chatId: String? = nil,
     service: IMServiceStyle

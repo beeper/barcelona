@@ -15,7 +15,7 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
     var log: Logging.Logger {
         Logger(label: "GetMessagesAfterCommand")
     }
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
@@ -77,7 +77,7 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
 }
 
 extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [

@@ -21,7 +21,7 @@ extension Array where Element == String {
 }
 
 extension GetChatsCommand: Runnable {
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
@@ -74,7 +74,7 @@ extension GetGroupChatInfoCommand: Runnable {
     var log: Logging.Logger {
         Logger(label: "TapbackCommand")
     }
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
@@ -118,7 +118,7 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
     var log: Logging.Logger {
         Logger(label: "TapbackCommand")
     }
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
@@ -160,7 +160,7 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
 }
 
 extension SendTypingCommand: Runnable, AuthenticatedAsserting {
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
@@ -199,7 +199,7 @@ extension SendTypingCommand: Runnable, AuthenticatedAsserting {
 }
 
 extension GetGroupChatAvatarCommand: Runnable {
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [

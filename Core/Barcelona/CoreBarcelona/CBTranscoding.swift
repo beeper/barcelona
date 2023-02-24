@@ -8,7 +8,7 @@
 import CoreImage
 import Foundation
 
-public struct CBTranscoding {
+struct CBTranscoding {
 }
 
 extension CBTranscoding {

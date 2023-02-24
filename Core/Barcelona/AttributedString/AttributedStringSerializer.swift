@@ -52,7 +52,7 @@ extension NSAttributedString {
     }
 }
 
-public func ERTextParts(from string: NSAttributedString?) -> [TextPart] {
+func ERTextParts(from string: NSAttributedString?) -> [TextPart] {
     guard let string = string else {
         return []
     }

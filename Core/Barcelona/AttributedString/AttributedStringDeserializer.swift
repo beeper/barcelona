@@ -26,7 +26,7 @@ extension NSMutableAttributedString {
 }
 
 /// Parses an array of MessageParts and returns a single NSAttributedString representing the contents
-public func ERAttributedString(from parts: [MessagePart]) -> MessagePartParseResult {
+func ERAttributedString(from parts: [MessagePart]) -> MessagePartParseResult {
     let results = parts.map(ERAttributedString(from:))
     let strings = results.map(\.string)
     let transferGUIDs = results.flatMap(\.transferGUIDs)

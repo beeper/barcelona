@@ -9,10 +9,10 @@
 import Foundation
 import IMCore
 
-public struct DateItem: ChatItem, Hashable {
-    public static let ingestionClasses: [NSObject.Type] = [IMDateChatItem.self]
+struct DateItem: ChatItem, Hashable {
+    static let ingestionClasses: [NSObject.Type] = [IMDateChatItem.self]
 
-    public init(ingesting item: NSObject, context: IngestionContext) {
+    init(ingesting item: NSObject, context: IngestionContext) {
         self.init(item as! IMDateChatItem, chatID: context.chatID)
     }
 
@@ -25,14 +25,14 @@ public struct DateItem: ChatItem, Hashable {
         threadOriginator = item.threadOriginatorID
     }
 
-    public var id: String
-    public var chatID: String
-    public var fromMe: Bool
-    public var time: Double
-    public var threadIdentifier: String?
-    public var threadOriginator: String?
+    var id: String
+    var chatID: String
+    var fromMe: Bool
+    var time: Double
+    var threadIdentifier: String?
+    var threadOriginator: String?
 
-    public var type: ChatItemType {
+    var type: ChatItemType {
         .date
     }
 }

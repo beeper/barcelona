@@ -33,7 +33,7 @@ public struct ParticipantSortRule: Equatable, Hashable, Sendable {
     }
 }
 
-public protocol ERTimeSortedParticipantsManagerIngestible {
+protocol ERTimeSortedParticipantsManagerIngestible {
     var senderID: String? { get }
     var effectiveTime: Double { get }
 }
@@ -123,7 +123,7 @@ public actor ERTimeSortedParticipantsManager {
 
     // MARK: - Properties
 
-    public static let sharedInstance = ERTimeSortedParticipantsManager()
+    static let sharedInstance = ERTimeSortedParticipantsManager()
 
     private var chatToParticipantSortRules: [String: [ParticipantSortRule]] = [:]
 
@@ -137,7 +137,7 @@ public actor ERTimeSortedParticipantsManager {
 
     // MARK: - Methods
 
-    public func sortedParticipants(forChat chat: String) -> [String] {
+    func sortedParticipants(forChat chat: String) -> [String] {
         let breadcrumb = Breadcrumb(level: .debug, category: "ERTimeSortedParticipantsManager")
         breadcrumb.message = "Getting sorted participants"
         breadcrumb.data = [
@@ -149,27 +149,27 @@ public actor ERTimeSortedParticipantsManager {
         return chatToParticipantSortRules[chat]?.map(\.handleID) ?? []
     }
 
-    public func ingest(item: IMItem, inChat chat: String) {
+    func ingest(item: IMItem, inChat chat: String) {
         self.ingest(item: item as ERTimeSortedParticipantsManagerIngestible, inChat: chat)
     }
 
-    public func ingest(item: IMMessageItem, inChat chat: String) {
+    func ingest(item: IMMessageItem, inChat chat: String) {
         self.ingest(item: item as ERTimeSortedParticipantsManagerIngestible, inChat: chat)
     }
 
-    public func ingest(item: IMMessage, inChat chat: String) {
+    func ingest(item: IMMessage, inChat chat: String) {
         self.ingest(item: item as ERTimeSortedParticipantsManagerIngestible, inChat: chat)
     }
 
-    public func unload(chatID: String) {
+    func unload(chatID: String) {
         self.chatToParticipantSortRules[chatID] = nil
     }
 
-    public func bootstrap(chat: IMChat) throws {
+    func bootstrap(chat: IMChat) throws {
         try bootstrap(chats: [chat])
     }
 
-    public func bootstrap(chats: [IMChat]) throws {
+    func bootstrap(chats: [IMChat]) throws {
         let records = try DBReader.shared.handleTimestampRecords(
             forChatIdentifiers: chats.compactMap { $0.chatIdentifier }
         )

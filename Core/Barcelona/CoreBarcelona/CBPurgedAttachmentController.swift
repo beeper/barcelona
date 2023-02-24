@@ -62,13 +62,13 @@ extension Notification {
     }
 }
 
-public class CBFileTransferCenter {
-    public static let shared = CBFileTransferCenter()
+class CBFileTransferCenter {
+    static let shared = CBFileTransferCenter()
 
     private let queue = DispatchQueue(label: "com.ericrabil.barcelona.CBFileTransferCenter")
     private lazy var operationQueue = queue.makeOperationQueue()
 
-    public init() {
+    init() {
         NotificationCenter.default.addObserver(
             forName: .IMFileTransferCreated,
             object: nil,
@@ -89,7 +89,7 @@ public class CBFileTransferCenter {
         )
     }
 
-    public private(set) var transfers: [String: IMFileTransfer] = [:]
+    private(set) var transfers: [String: IMFileTransfer] = [:]
 
     private let log = Logger(label: "FileTransfers")
 
@@ -133,7 +133,7 @@ public class CBFileTransferCenter {
         .resolve(on: queue)
     }
 
-    public func transferCompletionPromise(_ id: String) -> Promise<Void> {
+    func transferCompletionPromise(_ id: String) -> Promise<Void> {
         queue.sync {
             guard let transfer = transferForID(id) else {
                 return .failure(BarcelonaError(code: 404, message: "Unknown transfer with ID \(id)"))

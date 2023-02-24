@@ -34,7 +34,7 @@ extension OperationBuffer {
     }
 }
 
-public class OperationBuffer<Output, Discriminator: Hashable> {
+class OperationBuffer<Output, Discriminator: Hashable> {
     @usableFromInline
     typealias RawBuffer = Task<[Output], Never>
 
@@ -49,7 +49,7 @@ public class OperationBuffer<Output, Discriminator: Hashable> {
     @usableFromInline
     internal var lock = NSRecursiveLock()
 
-    public init(discriminatorKeyPath: KeyPath<Output, Discriminator>) {
+    init(discriminatorKeyPath: KeyPath<Output, Discriminator>) {
         self.discriminatorKeyPath = discriminatorKeyPath
     }
 

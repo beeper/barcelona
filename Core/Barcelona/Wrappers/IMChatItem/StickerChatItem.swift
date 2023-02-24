@@ -93,10 +93,10 @@ public struct StickerInformation: Codable, Hashable {
     }
 }
 
-public struct StickerChatItem: ChatItemAssociable, Hashable {
-    public static let ingestionClasses: [NSObject.Type] = [IMAssociatedStickerChatItem.self]
+struct StickerChatItem: ChatItemAssociable, Hashable {
+    static let ingestionClasses: [NSObject.Type] = [IMAssociatedStickerChatItem.self]
 
-    public init(ingesting item: NSObject, context: IngestionContext) {
+    init(ingesting item: NSObject, context: IngestionContext) {
         self.init(item as! IMAssociatedStickerChatItem, chatID: context.chatID)
     }
 
@@ -115,17 +115,17 @@ public struct StickerChatItem: ChatItemAssociable, Hashable {
         }
     }
 
-    public var id: String
-    public var chatID: String
-    public var fromMe: Bool
-    public var time: Double
-    public var threadIdentifier: String?
-    public var threadOriginator: String?
-    public var associatedID: String
-    public var attachment: Attachment?
-    public var sender: String?
+    var id: String
+    var chatID: String
+    var fromMe: Bool
+    var time: Double
+    var threadIdentifier: String?
+    var threadOriginator: String?
+    var associatedID: String
+    var attachment: Attachment?
+    var sender: String?
 
-    public var type: ChatItemType {
+    var type: ChatItemType {
         .sticker
     }
 }

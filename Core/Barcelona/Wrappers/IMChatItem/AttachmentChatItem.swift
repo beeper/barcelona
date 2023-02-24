@@ -10,10 +10,10 @@ import Foundation
 import IMCore
 
 /// Represents an attachment item
-public struct AttachmentChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
-    public static let ingestionClasses: [NSObject.Type] = [IMAttachmentMessagePartChatItem.self]
+struct AttachmentChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
+    static let ingestionClasses: [NSObject.Type] = [IMAttachmentMessagePartChatItem.self]
 
-    public init(ingesting item: NSObject, context: IngestionContext) {
+    init(ingesting item: NSObject, context: IngestionContext) {
         self.init(item as! IMAttachmentMessagePartChatItem, metadata: context.attachment, chatID: context.chatID)
     }
 
@@ -27,17 +27,17 @@ public struct AttachmentChatItem: ChatItem, ChatItemAcknowledgable, Hashable {
         metadata = attachmentRepresentation ?? Attachment(guid: item.transferGUID)
     }
 
-    public var id: String
-    public var chatID: String
-    public var fromMe: Bool
-    public var time: Double
-    public var threadIdentifier: String?
-    public var threadOriginator: String?
-    public var transferID: String
-    public var metadata: Attachment?
-    public var acknowledgments: [AcknowledgmentChatItem]?
+    var id: String
+    var chatID: String
+    var fromMe: Bool
+    var time: Double
+    var threadIdentifier: String?
+    var threadOriginator: String?
+    var transferID: String
+    var metadata: Attachment?
+    var acknowledgments: [AcknowledgmentChatItem]?
 
-    public var type: ChatItemType {
+    var type: ChatItemType {
         .attachment
     }
 }

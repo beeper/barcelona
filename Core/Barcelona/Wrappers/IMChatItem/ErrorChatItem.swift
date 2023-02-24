@@ -8,14 +8,14 @@
 import Foundation
 import IMCore
 
-public struct ErrorChatItem: ChatItem, Hashable {
-    public var type: ChatItemType {
+struct ErrorChatItem: ChatItem, Hashable {
+    var type: ChatItemType {
         .error
     }
 
-    public static let ingestionClasses: [NSObject.Type] = [IMErrorMessagePartChatItem.self]
+    static let ingestionClasses: [NSObject.Type] = [IMErrorMessagePartChatItem.self]
 
-    public init?(ingesting item: NSObject, context: IngestionContext) {
+    init?(ingesting item: NSObject, context: IngestionContext) {
         self.init(item as! IMErrorMessagePartChatItem, chatID: context.chatID)
     }
 
@@ -31,10 +31,10 @@ public struct ErrorChatItem: ChatItem, Hashable {
         }
     }
 
-    public var id: String
-    public var chatID: String
-    public var fromMe: Bool
-    public var time: Double
-    public var threadIdentifier: String?
-    public var threadOriginator: String?
+    var id: String
+    var chatID: String
+    var fromMe: Bool
+    var time: Double
+    var threadIdentifier: String?
+    var threadOriginator: String?
 }

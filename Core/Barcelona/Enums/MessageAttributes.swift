@@ -12,7 +12,7 @@ import IMFoundation
 import IMSharedUtilities
 
 /// Various attributes in an IMMessage attributed string. Some are no longer used by iMessage.
-public struct MessageAttributes {
+struct MessageAttributes {
     static let link = NSAttributedString.Key(rawValue: IMLinkAttributeName)
     static let writingDirection = NSAttributedString.Key(rawValue: IMBaseWritingDirectionAttributeName)
     static let transferGUID = NSAttributedString.Key(rawValue: IMFileTransferGUIDAttributeName)

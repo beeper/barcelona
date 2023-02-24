@@ -18,6 +18,6 @@ import IMFoundation
 import IDS
 #endif
 
-public func _scratchboxMain() {
+func _scratchboxMain() {
 
 }

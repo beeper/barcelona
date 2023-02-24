@@ -22,7 +22,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
     var log: Logging.Logger {
         Logger(label: "SendMediaMessageCommand")
     }
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [

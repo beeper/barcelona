@@ -25,7 +25,7 @@ extension Array: Identifiable, Resolvable, _ConcreteBasicResolvable where Elemen
     }
 }
 
-public protocol _ConcreteBasicResolvable: Resolvable {}
+protocol _ConcreteBasicResolvable: Resolvable {}
 extension _ConcreteBasicResolvable {
     public static func resolve(withIdentifier identifier: ID) -> instancetype? {
         resolve(withIdentifiers: [identifier]).first
