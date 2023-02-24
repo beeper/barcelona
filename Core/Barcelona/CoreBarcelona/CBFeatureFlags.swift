@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("internal-diagnostics", defaultValue: isDebugBuild)
-    public var internalDiagnostics: Bool
-
     @FeatureFlag("xcode", domain: .debugging, defaultValue: false)
     public var runningFromXcode: Bool
 
@@ -128,12 +125,6 @@ public class _CBLoggingFlags: FlagProvider {
 
 public let CBFeatureFlags = _CBFeatureFlags()
 public let CBLoggingFlags = _CBLoggingFlags()
-
-@_transparent internal func ifInternal(_ block: () -> Void) {
-    if CBFeatureFlags.internalDiagnostics {
-        block()
-    }
-}
 
 @_transparent internal func ifDebugBuild(_ block: () -> Void) {
     #if DEBUG
