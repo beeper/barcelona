@@ -761,7 +761,7 @@ extension CBDaemonListener {
         lazy var messageItem: IMMessageItem? = message as? IMMessageItem
         lazy var sendProgress = messageItem?.sendProgress
 
-        if CBFeatureFlags.withholdDupes, nonces.contains(message.nonce) {
+        if nonces.contains(message.nonce) {
             // only let failed messages emit more than once, as failed messages may not first fail with their error code
             guard sendProgress == .failed else {
                 log.debug("withholding message \(String(describing: message.guid)): dedupe")

@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("withhold-dupes", defaultValue: true)
-    private var _withholdDupes: Bool
-
     @FeatureFlag("blocklist", defaultValue: true)
     public var enableBlocklist: Bool
 
@@ -37,15 +34,6 @@ public class _CBFeatureFlags: FlagProvider {
 
     @FeatureFlag("migrated-database", defaultValue: false)
     public var migratedDatabase: Bool
-
-    public var withholdDupes: Bool {
-        get {
-            _withholdDupes
-        }
-        set {
-            _withholdDupes = newValue
-        }
-    }
 }
 
 extension String {
