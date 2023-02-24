@@ -22,9 +22,6 @@ public class _CBFeatureFlags: FlagProvider {
         public static var adHocRichLinks: Bool = true
     }
     public let suiteName = "com.ericrabil.barcelona"
-
-    @FeatureFlag("migrated-database", defaultValue: false)
-    public var migratedDatabase: Bool
 }
 
 extension String {
