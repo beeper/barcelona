@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("blocklist", defaultValue: true)
-    public var enableBlocklist: Bool
-
     @FeatureFlag("media-monitor-timeout", defaultValue: true)
     public var mediaMonitorTimeout: Bool
 

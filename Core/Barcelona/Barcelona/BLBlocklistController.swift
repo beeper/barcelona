@@ -15,9 +15,6 @@ extension BLBlocklistController {
     public static let shared = BLBlocklistController()
 
     public func isSenderBlocked(_ sender: String) -> Bool {
-        guard CBFeatureFlags.enableBlocklist else {
-            return false
-        }
         if testingOverride.contains(sender) {
             return true
         }
