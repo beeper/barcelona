@@ -257,10 +257,6 @@ extension CBDaemonListener {
 
         ifDebugBuild {
             _scratchboxMain()
-
-            if CBFeatureFlags.exitAfterScratchbox {
-                exit(0)
-            }
         }
     }
 }

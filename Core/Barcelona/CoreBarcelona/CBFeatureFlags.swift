@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("exit-after-scratchbox", domain: .debugging, defaultValue: false)
-    public var exitAfterScratchbox: Bool
-
     @FeatureFlag("prewarm-item-rules", defaultValue: true)
     public var prewarmItemRules: Bool
 
