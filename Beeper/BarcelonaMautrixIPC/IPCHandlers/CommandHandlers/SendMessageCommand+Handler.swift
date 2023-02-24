@@ -69,7 +69,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
             }
 
             var isRichLink: Bool {
-                CBFeatureFlags.adHocRichLinks ? rich_link != nil : simpleRichLinkValid
+                rich_link != nil
             }
 
             if isRichLink, let url = rich_link?.originalURL ?? rich_link?.URL ?? richLinkURL {
@@ -94,7 +94,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                             message.metadata = metadata
                         }
                         var afterSend: () -> Void = {}
-                        if CBFeatureFlags.adHocRichLinks, let richLink = rich_link {
+                        if let richLink = rich_link {
                             do {
                                 #if DEBUG
 
@@ -106,10 +106,6 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                                 span.finish(status: .internalError)
                                 return
                             }
-                        } else if !CBFeatureFlags.adHocRichLinks, let url = richLinkURL,
-                            IMMessage.supportedRichLinkURL(url, additionalSupportedSchemes: [])
-                        {
-                            message.loadLinkMetadata(at: url)
                         }
                         imChat.send(message)
                         afterSend()

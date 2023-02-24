@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("ad-hoc-rich-links", defaultValue: Defaults.adHocRichLinks)
-    public var adHocRichLinks: Bool
-
     @FeatureFlag("matrix-audio", defaultValue: false)
     public var permitAudioOverMautrix: Bool
 
