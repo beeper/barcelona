@@ -23,9 +23,6 @@ public class _CBFeatureFlags: FlagProvider {
     }
     public let suiteName = "com.ericrabil.barcelona"
 
-    @FeatureFlag("xcode", domain: .debugging, defaultValue: false)
-    public var runningFromXcode: Bool
-
     @FeatureFlag("any-country", defaultValue: false)
     public var ignoresSameCountryCodeAssertion: Bool
 

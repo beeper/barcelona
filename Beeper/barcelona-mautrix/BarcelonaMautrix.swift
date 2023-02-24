@@ -103,7 +103,6 @@ class BarcelonaMautrix {
     }
 
     func run() {
-        checkArguments()
         bootstrap()
 
         RunLoop.main.run()
@@ -145,15 +144,6 @@ class BarcelonaMautrix {
                 bootstrapSpan?.finish()
                 startupSpan?.finish()
             }
-    }
-
-    func checkArguments() {
-        // apply debug overlays for easier log reading
-        if ProcessInfo.processInfo.arguments.contains("-d") {
-            LoggingDrivers =
-                CBFeatureFlags.runningFromXcode ? [OSLogDriver.shared] : [OSLogDriver.shared, ConsoleDriver.shared]
-            BLMetricStore.shared.set(true, forKey: .shouldDebugPayloads)
-        }
     }
 
     // starts the bridge state interval
