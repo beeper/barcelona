@@ -35,9 +35,9 @@ No preparation is neededot build for mcaOS.
 Compiling with Xcode is very straightforward, just select the scheme and build. For your convenience, there is a `tools` scheme which builds all of the command-line tools, and all of the frameworks as a side-effect.
 
 ### Compiling from the Terminal
-Barcelona has a [Makefile](Makefile) which can build grapple and barcelona-mautrix for both iOS and macOS.
+Barcelona has a [Makefile](Makefile) which can build and barcelona-mautrix for both iOS and macOS.
 
-| Host  | Grapple            | Mautrix            | Both       |
-|-------|--------------------|--------------------|------------|
-| macOS | make grapple-macos | make mautrix-macos | make macos |
-| iOS   | make grapple-ios   | make mautrix-ios   | make ios   |
+| Host  | Mautrix            | Both       |
+|-------|--------------------|------------|
+| macOS | make mautrix-macos | make macos |
+| iOS   | make mautrix-ios   | make ios   |

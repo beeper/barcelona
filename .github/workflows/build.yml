@@ -34,9 +34,3 @@ jobs:
         with:
           name: darwin-barcelona-mautrix
           path: Build/macOS/Build/Products/Release/barcelona-mautrix-macOS
-
-      #- name: Upload grapple artifact
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: darwin-grapple
-      #    path: Build/macOS/Build/Products/Release/grapple-macOS
