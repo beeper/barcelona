@@ -3,9 +3,8 @@ BUILD_DIR = ./Build
 MACOS_DERIVED_DIR = $(BUILD_DIR)/macOS
 MACOS_DESTINATION = "generic/platform=macOS,name=Any Mac"
 
-GIT_TAG := $(shell git tag --points-at HEAD)
-ifeq ($(GIT_TAG),)
-GIT_TAG := $(shell git log -q -n 1 | head -n 1 | cut -f 2 -d ' ')
+ifndef GIT_TAG
+    GIT_TAG := $(shell git log -q -n 1 | head -n 1 | cut -f 2 -d ' ')
 endif
 
 clean:
