@@ -39,6 +39,18 @@ class BarcelonaMautrix {
             options.profilesSampleRate = 1
             options.tracesSampleRate = 0.1
             options.maxBreadcrumbs = 200
+            if let info = Bundle.main.infoDictionary,
+                let bundleIdentifier = info["CFBundleIdentifier"],
+                let bundleVersion = info["CFBundleVersion"] as? String
+            {
+                options.releaseName = "\(bundleIdentifier)@\(bundleVersion)"
+            }
+
+            if let serial = getSerial() {
+                SentrySDK.configureScope { scope in
+                    scope.setTag(value: "device.serial", key: serial)
+                }
+            }
         }
     }
 
@@ -152,5 +164,35 @@ class BarcelonaMautrix {
         }
 
         BLHealthTicker.shared.run(schedulingNext: true)
+    }
+
+    private static func getSerial() -> String? {
+        let platformExpert = IOServiceGetMatchingService(
+            kIOMasterPortDefault,
+            IOServiceMatching("IOPlatformExpertDevice")
+        )
+        defer {
+            IOObjectRelease(platformExpert)
+        }
+
+        guard platformExpert > 0 else {
+            return nil
+        }
+
+        guard
+            let serialNumber =
+                (IORegistryEntryCreateCFProperty(
+                    platformExpert,
+                    kIOPlatformSerialNumberKey as CFString,
+                    kCFAllocatorDefault,
+                    0
+                )
+                .takeUnretainedValue() as? String)?
+                .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        else {
+            return nil
+        }
+
+        return serialNumber
     }
 }
