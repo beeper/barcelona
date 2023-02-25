@@ -252,6 +252,10 @@ extension CBDaemonListener {
             notification in
             log.debug("IMChatParticipantsDidChange: \(notification.object), \(notification.userInfo)")
         }
+
+        #if DEBUG
+        _scratchboxMain()
+        #endif
     }
 }
 
