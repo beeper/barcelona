@@ -431,7 +431,7 @@ extension CBMessage {
             return
         }
         message.isBeingRetried = true
-        IMDaemonController.shared().updateMessage(message)
+        IMDaemonController.sharedInstance().updateMessage(message)
         let id = id
         log.info("Loaded message item for \(id)")
         guard let chat = locateCBChat() else {

@@ -23,4 +23,19 @@ extension NSObjectProtocol {
             }
     }
 }
+
+extension Protocol {
+    public func methodList(requiredOnly: Bool = false, instanceOnly: Bool = false) -> [String]? {
+        var count: UInt32 = 0
+        let countPointer = withUnsafeMutablePointer(to: &count, { $0 })
+        guard let mList = protocol_copyMethodDescriptionList(self, requiredOnly, instanceOnly, countPointer) else {
+            return nil
+        }
+
+        return (0...Int(count))
+            .map {
+                "Method #\($0): \(sel_getName(mList[$0].name!))"
+            }
+    }
+}
 #endif

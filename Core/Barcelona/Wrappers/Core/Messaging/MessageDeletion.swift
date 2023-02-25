@@ -19,7 +19,7 @@ extension Chat {
                 }
 
                 if fullMessage {
-                    IMDaemonController.shared().deleteMessage(withGUIDs: [messageID], queryID: NSString.stringGUID())
+                    IMDaemonController.sharedInstance().deleteMessage(withGUIDs: [messageID], queryID: NSString.stringGUID())
                 } else {
                     if let imChat = self.imChat, let chatItems = imChat.chatItems(for: [message._imMessageItem]) {
                         let items: [IMChatItem] = parts.compactMap {
@@ -32,7 +32,7 @@ extension Chat {
                             fromItem: message._imMessageItem
                         )
 
-                        IMDaemonController.shared().updateMessage(newItem)
+                        IMDaemonController.sharedInstance().updateMessage(newItem)
                     }
                 }
             }
