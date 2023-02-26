@@ -17,18 +17,20 @@ import Logging
 private let IMCopyThreadNameForChat: (@convention(c) (String, String, IMChatStyle) -> Unmanaged<NSString>)? =
     CBWeakLink(against: .privateFramework(name: "IMFoundation"), .symbol("IMCopyThreadNameForChat"))
 
-class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
+class CBChatRegistry {
     var chats: [CBChatIdentifier: CBChat] = [:]
     var allChats: [ObjectIdentifier: CBChat] = [:]
 
     var messageIDReverseLookup: [String: CBChatIdentifier] = [:]
     private var subscribers: Set<AnyCancellable> = Set()
 
+    private let listenerBridge = IMDaemonListenerBridge()
+
     private let log = Logger(label: "CBChatRegistry")
 
-    override init() {
-        super.init()
-        IMDaemonController.shared().listener.addHandler(self)
+    init() {
+        listenerBridge.registry = self
+        IMDaemonController.shared().listener.addHandler(listenerBridge)
     }
 
     func setupComplete(_ success: Bool, info: [AnyHashable: Any]!) {
