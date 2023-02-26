@@ -12,55 +12,59 @@ import IMSharedUtilities
 import Logging
 
 /// Bridges delegate methods form `IMDaemonListenerProtocol` to `CBChatRegistry`.
-class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol {
+class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sendable {
 
     // MARK: - Properties
 
-    weak var registry: CBChatRegistry?
+    private weak var registry: CBChatRegistry!
 
     private let log = Logger(label: "CBChatRegistry")
 
-    // MARK: - Methods
+    init(registry: CBChatRegistry) {
+        self.registry = registry
+    }
+
+    // MARK: - IMDaemonListenerProtocol
 
     func setupComplete(_ success: Bool, info: [AnyHashable: Any]!) {
         Task {
-            await registry?.setupComplete(success, info: info)
+            await registry.setupComplete(success, info: info)
         }
     }
 
     func chat(_ persistentIdentifier: String!, updated updateDictionary: [AnyHashable: Any]!) {
         Task {
-            await registry?.chat(persistentIdentifier, updated: updateDictionary)
+            await registry.chat(persistentIdentifier, updated: updateDictionary)
         }
     }
 
     func chat(_ persistentIdentifier: String!, propertiesUpdated properties: [AnyHashable: Any]!) {
         Task {
-            await registry?.chat(persistentIdentifier, propertiesUpdated: properties)
+            await registry.chat(persistentIdentifier, propertiesUpdated: properties)
         }
     }
 
     func chat(_ persistentIdentifier: String!, engramIDUpdated engramID: String!) {
         Task {
-            await registry?.chat(persistentIdentifier, engramIDUpdated: engramID)
+            await registry.chat(persistentIdentifier, engramIDUpdated: engramID)
         }
     }
 
     func chat(_ guid: String!, lastAddressedHandleUpdated lastAddressedHandle: String!) {
         Task {
-            await registry?.chat(guid, lastAddressedHandleUpdated: lastAddressedHandle)
+            await registry.chat(guid, lastAddressedHandleUpdated: lastAddressedHandle)
         }
     }
 
     func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) {
         Task {
-            await registry?.chatLoaded(withChatIdentifier: chatIdentifier, chats: chatDictionaries)
+            await registry.chatLoaded(withChatIdentifier: chatIdentifier, chats: chatDictionaries)
         }
     }
 
     func lastMessage(forAllChats chatIDToLastMessageDictionary: [AnyHashable: Any]!) {
         Task {
-            await registry?.lastMessage(forAllChats: chatIDToLastMessageDictionary)
+            await registry.lastMessage(forAllChats: chatIDToLastMessageDictionary)
         }
     }
 
@@ -71,7 +75,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol {
         messagesUpdated messages: [[AnyHashable: Any]]!
     ) {
         Task {
-            await registry?.service(serviceID, chat: chatIdentifier, style: chatStyle, messagesUpdated: messages)
+            await registry.service(serviceID, chat: chatIdentifier, style: chatStyle, messagesUpdated: messages)
         }
     }
 
@@ -83,7 +87,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol {
         error: Error!
     ) {
         Task {
-            await registry?
+            await registry
                 .account(
                     accountUniqueID,
                     chat: chatIdentifier,
@@ -103,7 +107,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol {
         sendTime: NSNumber!
     ) {
         Task {
-            await registry?
+            await registry
                 .account(
                     accountUniqueID,
                     chat: chatIdentifier,
@@ -126,7 +130,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol {
         messagesComingFromStorage fromStorage: Bool
     ) {
         Task {
-            await registry?
+            await registry
                 .account(
                     accountUniqueID,
                     chat: chatIdentifier,
@@ -151,7 +155,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol {
         handleInfo: [Any]!
     ) {
         Task {
-            await registry?
+            await registry
                 .account(
                     accountUniqueID,
                     chat: chatIdentifier,
@@ -175,7 +179,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol {
         messagesReceived messages: [IMItem]!
     ) {
         Task {
-            await registry?
+            await registry
                 .account(
                     accountUniqueID,
                     chat: chatIdentifier,
@@ -198,7 +202,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol {
         messageReceived msg: IMItem!
     ) {
         Task {
-            await registry?
+            await registry
                 .account(
                     accountUniqueID,
                     chat: chatIdentifier,
@@ -221,7 +225,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol {
         messageSent msg: IMMessageItem!
     ) {
         Task {
-            await registry?
+            await registry
                 .account(
                     accountUniqueID,
                     chat: chatIdentifier,
@@ -242,7 +246,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol {
         updateProperties update: [AnyHashable: Any]!
     ) {
         Task {
-            await registry?
+            await registry
                 .account(
                     accountUniqueID,
                     chat: chatIdentifier,
@@ -261,7 +265,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol {
         messageUpdated msg: IMItem!
     ) {
         Task {
-            await registry?
+            await registry
                 .account(
                     accountUniqueID,
                     chat: chatIdentifier,
@@ -280,7 +284,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol {
         messagesUpdated messages: [NSObject]!
     ) {
         Task {
-            await registry?
+            await registry
                 .account(
                     accountUniqueID,
                     chat: chatIdentifier,
@@ -293,13 +297,13 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol {
 
     func loadedChats(_ chats: [[AnyHashable: Any]]!, queryID: String!) {
         Task {
-            await registry?.loadedChats(chats, queryID: queryID)
+            await registry.loadedChats(chats, queryID: queryID)
         }
     }
 
     func loadedChats(_ chats: [[AnyHashable: Any]]!) {
         Task {
-            await registry?.loadedChats(chats)
+            await registry.loadedChats(chats)
         }
     }
 }

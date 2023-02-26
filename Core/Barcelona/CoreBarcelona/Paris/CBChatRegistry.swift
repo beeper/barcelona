@@ -32,15 +32,16 @@ actor CBChatRegistry {
     private var loadedChatsCallbacks: [() -> Void] = []
     private var queryCallbacks: [String: [() -> Void]] = [:]
 
-    private let listenerBridge = IMDaemonListenerBridge()
+    private lazy var listenerBridge = IMDaemonListenerBridge(registry: self)
     private let log = Logger(label: "CBChatRegistry")
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Initializers
 
     init() {
-        listenerBridge.registry = self
-        IMDaemonController.shared().listener.addHandler(listenerBridge)
+        Task {
+            await IMDaemonController.shared().listener.addHandler(listenerBridge)
+        }
     }
 
     // MARK: - IMDaemonListenerProtocol
