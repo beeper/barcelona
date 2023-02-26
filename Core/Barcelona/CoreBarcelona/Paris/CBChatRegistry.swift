@@ -18,20 +18,32 @@ private let IMCopyThreadNameForChat: (@convention(c) (String, String, IMChatStyl
     CBWeakLink(against: .privateFramework(name: "IMFoundation"), .symbol("IMCopyThreadNameForChat"))
 
 actor CBChatRegistry {
-    var chats: [CBChatIdentifier: CBChat] = [:]
-    var allChats: [ObjectIdentifier: CBChat] = [:]
 
-    var messageIDReverseLookup: [String: CBChatIdentifier] = [:]
-    private var subscribers: Set<AnyCancellable> = Set()
+    // MARK: - Properties
+
+    static let shared = CBChatRegistry()
+
+    var chats: [CBChatIdentifier: CBChat] = [:]
+
+    private var allChats: [ObjectIdentifier: CBChat] = [:]
+    private var messageIDReverseLookup: [String: CBChatIdentifier] = [:]
+    private var loadedChatsByChatIdentifierCallback: [String: [([IMChat]) -> Void]] = [:]
+    private var hasLoadedChats = false
+    private var loadedChatsCallbacks: [() -> Void] = []
+    private var queryCallbacks: [String: [() -> Void]] = [:]
 
     private let listenerBridge = IMDaemonListenerBridge()
-
     private let log = Logger(label: "CBChatRegistry")
+    private var cancellables = Set<AnyCancellable>()
+
+    // MARK: - Initializers
 
     init() {
         listenerBridge.registry = self
         IMDaemonController.shared().listener.addHandler(listenerBridge)
     }
+
+    // MARK: - IMDaemonListenerProtocol
 
     func setupComplete(_ success: Bool, info: [AnyHashable: Any]!) {
         if let chats = info["personMergedChats"] as? [[AnyHashable: Any]] {
@@ -68,11 +80,7 @@ actor CBChatRegistry {
         trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) engram \(engramID ?? "nil")")
     }
 
-    func chat(_ guid: String!, lastAddressedHandleUpdated lastAddressedHandle: String!) {
-
-    }
-
-    var loadedChatsByChatIdentifierCallback: [String: [([IMChat]) -> Void]] = [:]
+    func chat(_ guid: String!, lastAddressedHandleUpdated lastAddressedHandle: String!) {}
 
     func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) {
         trace(chatIdentifier, nil, "chats loaded: \((chatDictionaries as NSArray))")
@@ -123,17 +131,6 @@ actor CBChatRegistry {
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
     }
 
-    private func trace(
-        _ chatIdentifier: String!,
-        _ personCentricID: String!,
-        _ message: String,
-        _ function: StaticString = #function
-    ) {
-        log.debug(
-            "chat \(chatIdentifier ?? "nil") pcID \(personCentricID ?? "nil") \(message): \(function.description)"
-        )
-    }
-
     func account(
         _ accountUniqueID: String!,
         chat chatIdentifier: String!,
@@ -159,9 +156,7 @@ actor CBChatRegistry {
         chatPersonCentricID personCentricID: String!,
         statusChanged status: FZChatStatus,
         handleInfo: [Any]!
-    ) {
-
-    }
+    ) {}
 
     func account(
         _ accountUniqueID: String!,
@@ -189,6 +184,160 @@ actor CBChatRegistry {
     ) {
         trace(chatIdentifier, personCentricID, "received message \(msg.singleLineDebugDescription)")
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
+    }
+
+    func account(
+        _ accountUniqueID: String!,
+        chat chatIdentifier: String!,
+        style chatStyle: IMChatStyle,
+        chatProperties properties: [AnyHashable: Any]!,
+        groupID: String!,
+        chatPersonCentricID personCentricID: String!,
+        messageSent msg: IMMessageItem!
+    ) {
+        trace(chatIdentifier, personCentricID, "sent message \(msg)")
+        handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
+    }
+
+    func account(
+        _ accountUniqueID: String!,
+        chat chatIdentifier: String!,
+        style chatStyle: IMChatStyle,
+        chatProperties properties: [AnyHashable: Any]!,
+        updateProperties update: [AnyHashable: Any]!
+    ) {
+        trace(
+            chatIdentifier,
+            nil,
+            "properties \(((properties ?? [:]) as NSDictionary)) updated to \(((update ?? [:]) as NSDictionary).singleLineDebugDescription)"
+        )
+    }
+
+    func account(
+        _ accountUniqueID: String!,
+        chat chatIdentifier: String!,
+        style chatStyle: IMChatStyle,
+        chatProperties properties: [AnyHashable: Any]!,
+        messageUpdated msg: IMItem!
+    ) {
+        trace(chatIdentifier, nil, "message updated \(msg)")
+        handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
+    }
+
+    func account(
+        _ accountUniqueID: String!,
+        chat chatIdentifier: String!,
+        style chatStyle: IMChatStyle,
+        chatProperties properties: [AnyHashable: Any]!,
+        messagesUpdated messages: [NSObject]!
+    ) {
+        trace(chatIdentifier, nil, "messages updated \((messages! as NSArray).singleLineDebugDescription)")
+        messages.forEach {
+            handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: $0)
+        }
+    }
+
+    func loadedChats(_ chats: [[AnyHashable: Any]]!, queryID: String!) {
+        guard queryCallbacks.keys.contains(queryID) else {
+            return
+        }
+        _ = internalize(chats: chats)
+        for callback in queryCallbacks.removeValue(forKey: queryID) ?? [] {
+            callback()
+        }
+    }
+
+    func loadedChats(_ chats: [[AnyHashable: Any]]!) {
+        _ = internalize(chats: chats)
+        let loadedChatsCallbacks = loadedChatsCallbacks
+        self.loadedChatsCallbacks = []
+        for callback in loadedChatsCallbacks {
+            callback()
+        }
+    }
+
+    func onLoadedChats(_ callback: @Sendable @escaping () -> Void) {
+        if hasLoadedChats {
+            callback()
+        } else {
+            loadedChatsCallbacks.append(callback)
+        }
+    }
+
+    // MARK: - Handling
+
+    private func handle(chat: [AnyHashable: Any], item: IMItem) -> Bool {
+        guard let identifier = handle(chat: chat).1 else {
+            log.warning("cant handle message \(item) via chat dictionary: couldnt find a chat for it")
+            return false
+        }
+        handle(chat: identifier, item: item)
+        return true
+    }
+
+    private func handle(chat: CBChatIdentifier, item: IMItem) {
+        if let guid = item.guid, !messageIDReverseLookup.keys.contains(guid) {
+            messageIDReverseLookup[guid] = chat
+        }
+        if let cbChat = chats[chat] {
+            cbChat.handle(leaf: chat, item: item)
+        } else {
+            log.info("where is chat?!")
+        }
+    }
+
+    private func handle(chat: CBChatIdentifier, item: [AnyHashable: Any]) {
+        if let guid = item["guid"] as? String, !messageIDReverseLookup.keys.contains(guid) {
+            messageIDReverseLookup[guid] = chat
+        }
+        if let cbChat = chats[chat] {
+            cbChat.handle(leaf: chat, item: item)
+        } else {
+            log.info("where is chat?!")
+        }
+    }
+
+    @_disfavoredOverload
+    private func handle(chat: CBChatIdentifier, item: NSObject) {
+        switch item {
+        case let item as IMItem:
+            handle(chat: chat, item: item)
+        case let item as [AnyHashable: Any]:
+            handle(chat: chat, item: item)
+        case let item:
+            preconditionFailure(
+                "This method only accepts IMItem subclasses or dictionaries, but you gave me \(String(describing: type(of: item)))"
+            )
+        }
+    }
+
+    private func handle(chat: [AnyHashable: Any]) -> (CBChat?, CBChatIdentifier?) {
+        var leaf = CBChatLeaf()
+        leaf.handle(identifiable: chat)
+
+        enum FoundError: Error { case found(CBChat) }
+        do {
+            try leaf.forEachIdentifier { identifier in
+                if let cbChat = self.chats[identifier] {
+                    cbChat.handle(dictionary: chat)
+                    //                    log.debug("Notifying CBChat of updated chat \(String(describing: identifier))")
+                    throw FoundError.found(cbChat)
+                }
+            }
+        } catch {
+            guard case .found(let chat) = error as? FoundError else {
+                preconditionFailure()
+            }
+            return (chat, leaf.mostUniqueIdentifier)
+        }
+
+        guard let style = (chat["style"] as? CBChatStyle.RawValue).flatMap(CBChatStyle.init(rawValue:)) else {
+            return (nil, leaf.mostUniqueIdentifier)
+        }
+        let cbChat = CBChat(style: style)
+        cbChat.handle(dictionary: chat)
+        store(chat: cbChat)
+        return (cbChat, leaf.mostUniqueIdentifier)
     }
 
     private func handle(chatIdentifier: String?, properties: [AnyHashable: Any]?, groupID: String?, item: NSObject) {
@@ -254,58 +403,7 @@ actor CBChatRegistry {
         handle(chat: chatID, item: item)
     }
 
-    func account(
-        _ accountUniqueID: String!,
-        chat chatIdentifier: String!,
-        style chatStyle: IMChatStyle,
-        chatProperties properties: [AnyHashable: Any]!,
-        groupID: String!,
-        chatPersonCentricID personCentricID: String!,
-        messageSent msg: IMMessageItem!
-    ) {
-        trace(chatIdentifier, personCentricID, "sent message \(msg)")
-        handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
-    }
-
-    func account(
-        _ accountUniqueID: String!,
-        chat chatIdentifier: String!,
-        style chatStyle: IMChatStyle,
-        chatProperties properties: [AnyHashable: Any]!,
-        updateProperties update: [AnyHashable: Any]!
-    ) {
-        trace(
-            chatIdentifier,
-            nil,
-            "properties \(((properties ?? [:]) as NSDictionary)) updated to \(((update ?? [:]) as NSDictionary).singleLineDebugDescription)"
-        )
-    }
-
-    func account(
-        _ accountUniqueID: String!,
-        chat chatIdentifier: String!,
-        style chatStyle: IMChatStyle,
-        chatProperties properties: [AnyHashable: Any]!,
-        messageUpdated msg: IMItem!
-    ) {
-        trace(chatIdentifier, nil, "message updated \(msg)")
-        handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
-    }
-
-    func account(
-        _ accountUniqueID: String!,
-        chat chatIdentifier: String!,
-        style chatStyle: IMChatStyle,
-        chatProperties properties: [AnyHashable: Any]!,
-        messagesUpdated messages: [NSObject]!
-    ) {
-        trace(chatIdentifier, nil, "messages updated \((messages! as NSArray).singleLineDebugDescription)")
-        messages.forEach {
-            handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: $0)
-        }
-    }
-
-    var queryCallbacks: [String: [() -> Void]] = [:]
+    // MARK: - Private
 
     private func internalize(chats: [[AnyHashable: Any]]) -> [IMChat] {
         func getMutableDictionary(_ key: String) -> NSMutableDictionary {
@@ -378,96 +476,6 @@ actor CBChatRegistry {
         }
     }
 
-    func loadedChats(_ chats: [[AnyHashable: Any]]!, queryID: String!) {
-        guard queryCallbacks.keys.contains(queryID) else {
-            return
-        }
-        _ = internalize(chats: chats)
-        for callback in queryCallbacks.removeValue(forKey: queryID) ?? [] {
-            callback()
-        }
-    }
-
-    var hasLoadedChats = false
-    var loadedChatsCallbacks: [() -> Void] = []
-
-    func loadedChats(_ chats: [[AnyHashable: Any]]!) {
-        _ = internalize(chats: chats)
-        let loadedChatsCallbacks = loadedChatsCallbacks
-        self.loadedChatsCallbacks = []
-        for callback in loadedChatsCallbacks {
-            callback()
-        }
-    }
-
-    func onLoadedChats(_ callback: @Sendable @escaping () -> Void) {
-        if hasLoadedChats {
-            callback()
-        } else {
-            loadedChatsCallbacks.append(callback)
-        }
-    }
-}
-
-extension CBChatRegistry {
-    public static let shared = CBChatRegistry()
-
-    public func handle(chat: [AnyHashable: Any]) -> (CBChat?, CBChatIdentifier?) {
-        var leaf = CBChatLeaf()
-        leaf.handle(identifiable: chat)
-
-        enum FoundError: Error { case found(CBChat) }
-        do {
-            try leaf.forEachIdentifier { identifier in
-                if let cbChat = self.chats[identifier] {
-                    cbChat.handle(dictionary: chat)
-                    //                    log.debug("Notifying CBChat of updated chat \(String(describing: identifier))")
-                    throw FoundError.found(cbChat)
-                }
-            }
-        } catch {
-            guard case .found(let chat) = error as? FoundError else {
-                preconditionFailure()
-            }
-            return (chat, leaf.mostUniqueIdentifier)
-        }
-
-        guard let style = (chat["style"] as? CBChatStyle.RawValue).flatMap(CBChatStyle.init(rawValue:)) else {
-            return (nil, leaf.mostUniqueIdentifier)
-        }
-        let cbChat = CBChat(style: style)
-        cbChat.handle(dictionary: chat)
-        store(chat: cbChat)
-        return (cbChat, leaf.mostUniqueIdentifier)
-    }
-
-    public func handle(chat: CBChatIdentifier, item: [AnyHashable: Any]) {
-        if let guid = item["guid"] as? String, !messageIDReverseLookup.keys.contains(guid) {
-            messageIDReverseLookup[guid] = chat
-        }
-        if let cbChat = chats[chat] {
-            cbChat.handle(leaf: chat, item: item)
-        } else {
-            log.info("where is chat?!")
-        }
-    }
-
-    @_disfavoredOverload
-    public func handle(chat: CBChatIdentifier, item: NSObject) {
-        switch item {
-        #if canImport(IMSharedUtilities)
-        case let item as IMItem:
-            handle(chat: chat, item: item)
-        #endif
-        case let item as [AnyHashable: Any]:
-            handle(chat: chat, item: item)
-        case let item:
-            preconditionFailure(
-                "This method only accepts IMItem subclasses or dictionaries, but you gave me \(String(describing: type(of: item)))"
-            )
-        }
-    }
-
     private func store(chat: CBChat) {
         allChats[ObjectIdentifier(chat)] = chat
         chat.$identifiers.removeDuplicates()
@@ -495,34 +503,22 @@ extension CBChatRegistry {
                         }
                         continue
                     }
-                    //                self.log.info("Storing \(String(describing: identifier))")
                     self.chats[identifier] = chat
                 }
             }
-            .store(in: &subscribers)
-    }
-}
-
-#if canImport(IMSharedUtilities)
-extension CBChatRegistry {
-    func handle(chat: [AnyHashable: Any], item: IMItem) -> Bool {
-        guard let identifier = handle(chat: chat).1 else {
-            log.warning("cant handle message \(item) via chat dictionary: couldnt find a chat for it")
-            return false
-        }
-        handle(chat: identifier, item: item)
-        return true
+            .store(in: &cancellables)
     }
 
-    func handle(chat: CBChatIdentifier, item: IMItem) {
-        if let guid = item.guid, !messageIDReverseLookup.keys.contains(guid) {
-            messageIDReverseLookup[guid] = chat
-        }
-        if let cbChat = chats[chat] {
-            cbChat.handle(leaf: chat, item: item)
-        } else {
-            log.info("where is chat?!")
-        }
+    // MARK: - Logging
+
+    private func trace(
+        _ chatIdentifier: String!,
+        _ personCentricID: String!,
+        _ message: String,
+        _ function: StaticString = #function
+    ) {
+        log.debug(
+            "chat \(chatIdentifier ?? "nil") pcID \(personCentricID ?? "nil") \(message): \(function.description)"
+        )
     }
 }
-#endif
