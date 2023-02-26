@@ -17,7 +17,7 @@ import Logging
 private let IMCopyThreadNameForChat: (@convention(c) (String, String, IMChatStyle) -> Unmanaged<NSString>)? =
     CBWeakLink(against: .privateFramework(name: "IMFoundation"), .symbol("IMCopyThreadNameForChat"))
 
-class CBChatRegistry {
+actor CBChatRegistry {
     var chats: [CBChatIdentifier: CBChat] = [:]
     var allChats: [ObjectIdentifier: CBChat] = [:]
 
@@ -390,26 +390,21 @@ class CBChatRegistry {
 
     var hasLoadedChats = false
     var loadedChatsCallbacks: [() -> Void] = []
-    private let loadedChatsCallbacksLock = NSRecursiveLock()
 
     func loadedChats(_ chats: [[AnyHashable: Any]]!) {
         _ = internalize(chats: chats)
-        loadedChatsCallbacksLock.withLock {
-            let loadedChatsCallbacks = loadedChatsCallbacks
-            self.loadedChatsCallbacks = []
-            for callback in loadedChatsCallbacks {
-                callback()
-            }
+        let loadedChatsCallbacks = loadedChatsCallbacks
+        self.loadedChatsCallbacks = []
+        for callback in loadedChatsCallbacks {
+            callback()
         }
     }
 
-    func onLoadedChats(_ callback: @escaping () -> Void) {
+    func onLoadedChats(_ callback: @Sendable @escaping () -> Void) {
         if hasLoadedChats {
             callback()
         } else {
-            loadedChatsCallbacksLock.withLock {
-                loadedChatsCallbacks.append(callback)
-            }
+            loadedChatsCallbacks.append(callback)
         }
     }
 }

@@ -379,8 +379,8 @@ extension CBMessage {
 }
 
 extension CBMessage {
-    func locateCBChat() -> CBChat? {
-        switch CBChatRegistry.shared.chats[chat] {
+    func locateCBChat() async -> CBChat? {
+        switch await CBChatRegistry.shared.chats[chat] {
         case .some(let chat):
             return chat
         case .none:
@@ -421,68 +421,68 @@ extension CBMessage {
     }
 
     public func resend() {
-        guard let message = loadIMMessageItem() else {
-            return
-        }
-        if message.isBeingRetried {
-            log.info(
-                "Ignoring request to resend message \(String(describing: message.guid)), it is already being retried"
-            )
-            return
-        }
-        message.isBeingRetried = true
-        IMDaemonController.sharedInstance().updateMessage(message)
-        let id = id
-        log.info("Loaded message item for \(id)")
-        guard let chat = locateCBChat() else {
-            return
-        }
-        log.info("Located origin chat for \(id)")
-
-        guard let imChat = chat.IMChats.first(where: { $0.hasStoredMessage(withGUID: id) }) else {
-            log.info("Can't resend \(message.id) because all IMChats claim to not contain this message")
-            #if canImport(IMFoundation) && canImport(BarcelonaDB)
-            // only if we have CBDaemonListener
-            if let style = service?.IMServiceStyle {
-                CBDaemonListener.shared.messagePipeline.send(
-                    Message(
-                        messageItem: message,
-                        chatID: DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id)
-                            ?? chat.chatIdentifiers[0],
-                        service: style
-                    )
-                )
-            }
-            #endif
-            return
-        }
-
-        log.info("I will re-send \(id) on \(String(describing: imChat.guid))")
-        if service == .SMS {
-            var messageFlags = IMMessageFlags(rawValue: message.flags)
-            messageFlags.insert(.downgraded)
-            message._updateFlags(messageFlags.rawValue)
-            log.debug("Added downgraded flag to message \(id)")
-            // let serviceName = service.IMServiceStyle.rawValue
-            let serviceName = "SMS"
-            message.account = serviceName
-            log.debug("Changed account name for message \(id) to \(serviceName)")
-            if let newAccountID = service?.IMServiceStyle.service.accountIDs.first as? String {
-                message.accountID = newAccountID
-                log.debug("Changed account ID for message \(id) to \(newAccountID)")
-            } else {
-                log.warning("Failed to find valid account ID for re-sending message \(id), this is not good...")
-            }
-            message.service = serviceName
-            IMDaemonController.sharedInstance().updateMessage(message)
-            log.debug("Changed service for message \(id) to \(serviceName)")
-        }
-        guard imChat.account.serviceName == service?.IMServiceStyle.service.name else {
-            log.error("Misaligned IMChat/IMMessage/CBChat service when trying to re-send message \(id)!!!!!!")
-            return
-        }
-        log.info("Re-sending message \(id) on chat \(String(describing: imChat.guid))")
         Task {
+            guard let message = loadIMMessageItem() else {
+                return
+            }
+            if message.isBeingRetried {
+                log.info(
+                    "Ignoring request to resend message \(String(describing: message.guid)), it is already being retried"
+                )
+                return
+            }
+            message.isBeingRetried = true
+            IMDaemonController.sharedInstance().updateMessage(message)
+            let id = id
+            log.info("Loaded message item for \(id)")
+            guard let chat = await locateCBChat() else {
+                return
+            }
+            log.info("Located origin chat for \(id)")
+
+            guard let imChat = chat.IMChats.first(where: { $0.hasStoredMessage(withGUID: id) }) else {
+                log.info("Can't resend \(message.id) because all IMChats claim to not contain this message")
+                #if canImport(IMFoundation) && canImport(BarcelonaDB)
+                // only if we have CBDaemonListener
+                if let style = service?.IMServiceStyle {
+                    CBDaemonListener.shared.messagePipeline.send(
+                        Message(
+                            messageItem: message,
+                            chatID: DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id)
+                                ?? chat.chatIdentifiers[0],
+                            service: style
+                        )
+                    )
+                }
+                #endif
+                return
+            }
+
+            log.info("I will re-send \(id) on \(String(describing: imChat.guid))")
+            if service == .SMS {
+                var messageFlags = IMMessageFlags(rawValue: message.flags)
+                messageFlags.insert(.downgraded)
+                message._updateFlags(messageFlags.rawValue)
+                log.debug("Added downgraded flag to message \(id)")
+                // let serviceName = service.IMServiceStyle.rawValue
+                let serviceName = "SMS"
+                message.account = serviceName
+                log.debug("Changed account name for message \(id) to \(serviceName)")
+                if let newAccountID = service?.IMServiceStyle.service.accountIDs.first as? String {
+                    message.accountID = newAccountID
+                    log.debug("Changed account ID for message \(id) to \(newAccountID)")
+                } else {
+                    log.warning("Failed to find valid account ID for re-sending message \(id), this is not good...")
+                }
+                message.service = serviceName
+                IMDaemonController.sharedInstance().updateMessage(message)
+                log.debug("Changed service for message \(id) to \(serviceName)")
+            }
+            guard imChat.account.serviceName == service?.IMServiceStyle.service.name else {
+                log.error("Misaligned IMChat/IMMessage/CBChat service when trying to re-send message \(id)!!!!!!")
+                return
+            }
+            log.info("Re-sending message \(id) on chat \(String(describing: imChat.guid))")
             await chat.send(message: message, chat: imChat)
         }
     }
