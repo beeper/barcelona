@@ -83,12 +83,12 @@ actor CBChatRegistry {
 
     func chat(_ guid: String!, lastAddressedHandleUpdated lastAddressedHandle: String!) {}
 
-    func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) {
+    func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) async {
         trace(chatIdentifier, nil, "chats loaded: \((chatDictionaries as NSArray))")
         guard let callbacks = loadedChatsByChatIdentifierCallback.removeValue(forKey: chatIdentifier) else {
             return
         }
-        let parsed = internalize(chats: chatDictionaries.compactMap { $0 as? [AnyHashable: Any] })
+        let parsed = await internalize(chats: chatDictionaries.compactMap { $0 as? [AnyHashable: Any] })
         for callback in callbacks {
             callback(parsed)
         }
@@ -238,18 +238,18 @@ actor CBChatRegistry {
         }
     }
 
-    func loadedChats(_ chats: [[AnyHashable: Any]]!, queryID: String!) {
+    func loadedChats(_ chats: [[AnyHashable: Any]]!, queryID: String!) async {
         guard queryCallbacks.keys.contains(queryID) else {
             return
         }
-        _ = internalize(chats: chats)
+        _ = await internalize(chats: chats)
         for callback in queryCallbacks.removeValue(forKey: queryID) ?? [] {
             callback()
         }
     }
 
-    func loadedChats(_ chats: [[AnyHashable: Any]]!) {
-        _ = internalize(chats: chats)
+    func loadedChats(_ chats: [[AnyHashable: Any]]!) async {
+        _ = await internalize(chats: chats)
         let loadedChatsCallbacks = loadedChatsCallbacks
         self.loadedChatsCallbacks = []
         for callback in loadedChatsCallbacks {
@@ -406,7 +406,8 @@ actor CBChatRegistry {
 
     // MARK: - Private
 
-    private func internalize(chats: [[AnyHashable: Any]]) -> [IMChat] {
+    @MainActor
+    private func internalize(chats: [[AnyHashable: Any]]) async -> [IMChat] {
         func getMutableDictionary(_ key: String) -> NSMutableDictionary {
             if let dict = IMChatRegistry.shared.value(forKey: key) as? NSMutableDictionary {
                 return dict
@@ -440,41 +441,43 @@ actor CBChatRegistry {
                 return getMutableArray("_allChatsInThreadNameMap")
             }
         }()
-        return chats.compactMap { chat in
-            let guid = chat["guid"] as? String
-            _ = handle(chat: chat)
-            if let guid = guid, let existingChat = chatGUIDToChatMap[guid] as? IMChat, existingChat.guid == guid {
-                return existingChat
-            }
-            guard
-                let imChat = IMChat()
-                    ._init(withDictionaryRepresentation: chat, items: nil, participantsHint: nil, accountHint: nil)
-            else {
-                return nil
-            }
-            if let groupID = chat["groupID"] as? String {
-                groupIDToChatMap[groupID] = imChat
-            }
-            if let guid = guid {
-                chatGUIDToChatMap[guid] = imChat
-                if let IMCopyThreadNameForChat = IMCopyThreadNameForChat,
-                    let chatIdentifier = chat["chatIdentifier"] as? String,
-                    let accountID = imChat.account.uniqueID
-                {
-                    let threadName = IMCopyThreadNameForChat(chatIdentifier, accountID, imChat.chatStyle)
-                    if chatGUIDToCurrentThreadMap[guid] == nil {
-                        chatGUIDToCurrentThreadMap[guid] = threadName
-                    }
-                    if threadNameToChatMap[threadName] == nil {
-                        threadNameToChatMap[threadName] = imChat
+        return
+            await chats.asyncMap { chat in
+                let guid = chat["guid"] as? String
+                _ = await handle(chat: chat)
+                if let guid = guid, let existingChat = chatGUIDToChatMap[guid] as? IMChat, existingChat.guid == guid {
+                    return existingChat
+                }
+                guard
+                    let imChat = IMChat()
+                        ._init(withDictionaryRepresentation: chat, items: nil, participantsHint: nil, accountHint: nil)
+                else {
+                    return nil
+                }
+                if let groupID = chat["groupID"] as? String {
+                    groupIDToChatMap[groupID] = imChat
+                }
+                if let guid = guid {
+                    chatGUIDToChatMap[guid] = imChat
+                    if let IMCopyThreadNameForChat = IMCopyThreadNameForChat,
+                        let chatIdentifier = chat["chatIdentifier"] as? String,
+                        let accountID = imChat.account.uniqueID
+                    {
+                        let threadName = IMCopyThreadNameForChat(chatIdentifier, accountID, imChat.chatStyle)
+                        if chatGUIDToCurrentThreadMap[guid] == nil {
+                            chatGUIDToCurrentThreadMap[guid] = threadName
+                        }
+                        if threadNameToChatMap[threadName] == nil {
+                            threadNameToChatMap[threadName] = imChat
+                        }
                     }
                 }
+                if !allChatsInThreadNameMap.containsObjectIdentical(to: imChat) {
+                    allChatsInThreadNameMap.add(imChat)
+                }
+                return imChat
             }
-            if !allChatsInThreadNameMap.containsObjectIdentical(to: imChat) {
-                allChatsInThreadNameMap.add(imChat)
-            }
-            return imChat
-        }
+            .compactMap { $0 }
     }
 
     private func store(chat: CBChat) {
