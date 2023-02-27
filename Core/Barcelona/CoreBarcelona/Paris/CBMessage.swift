@@ -440,7 +440,8 @@ extension CBMessage {
             }
             log.info("Located origin chat for \(id)")
 
-            guard let imChat = chat.IMChats.first(where: { $0.hasStoredMessage(withGUID: id) }) else {
+            let imChats = chat.IMChats
+            guard let imChat = imChats.first(where: { $0.hasStoredMessage(withGUID: id) }) else {
                 log.info("Can't resend \(message.id) because all IMChats claim to not contain this message")
                 #if canImport(IMFoundation) && canImport(BarcelonaDB)
                 // only if we have CBDaemonListener
