@@ -88,7 +88,12 @@ extension Chat {
     }
 
     private var cbChat: CBChat? {
-        imChat.flatMap { CBChatRegistry.shared.chats[.guid($0.guid)] }
+        get async {
+            guard let imChat else {
+                return nil
+            }
+            return await CBChatRegistry.shared.chats[.guid(imChat.guid)]
+        }
     }
 
     public func sendReturningRaw(message createMessage: CreateMessage, from: String? = nil) async throws -> IMMessage {
@@ -98,7 +103,7 @@ extension Chat {
 
         let log = Logger(label: "Chat")
 
-        if let cbChat = cbChat {
+        if let cbChat = await cbChat {
             // If we're targeting the SMS service and call imChat.refreshServiceForSending(), it'll probably retarget to iMessage,
             // which we distinctly don't want it to do. Plus, we're implementing this to solve BE-7179, which has only happened
             // over iMessage as far as we can tell, so we don't need to work with SMS

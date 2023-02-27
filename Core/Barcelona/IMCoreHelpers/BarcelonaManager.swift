@@ -94,7 +94,7 @@ func BLTeardown() {
 @_cdecl("BLBootstrapController")
 public func BLBootstrapController(
     _ callbackC: (@convention(c) (Bool) -> Void)? = nil,
-    _ callbackSwift: ((Bool) -> Void)? = nil
+    _ callbackSwift: (@Sendable (Bool) -> Void)? = nil
 ) -> Bool {
     guard BLSwizzleDaemonController() else {
         callbackC?(false)
@@ -175,11 +175,13 @@ public func BLBootstrapController(
         IMSimulatedDaemonController.beginSimulatingDaemon()
     }
 
-    CBChatRegistry.shared.onLoadedChats {
-        CBDaemonListener.shared.startListening()
-        callbackC?(true)
-        callbackSwift?(true)
-        log.info("All systems go!")
+    Task {
+        await CBChatRegistry.shared.onLoadedChats {
+            CBDaemonListener.shared.startListening()
+            callbackC?(true)
+            callbackSwift?(true)
+            log.info("All systems go!")
+        }
     }
 
     return true

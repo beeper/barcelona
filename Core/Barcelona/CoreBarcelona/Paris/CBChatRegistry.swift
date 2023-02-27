@@ -17,19 +17,34 @@ import Logging
 private let IMCopyThreadNameForChat: (@convention(c) (String, String, IMChatStyle) -> Unmanaged<NSString>)? =
     CBWeakLink(against: .privateFramework(name: "IMFoundation"), .symbol("IMCopyThreadNameForChat"))
 
-class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
+actor CBChatRegistry {
+
+    // MARK: - Properties
+
+    static let shared = CBChatRegistry()
+
     var chats: [CBChatIdentifier: CBChat] = [:]
-    var allChats: [ObjectIdentifier: CBChat] = [:]
 
-    var messageIDReverseLookup: [String: CBChatIdentifier] = [:]
-    private var subscribers: Set<AnyCancellable> = Set()
+    private var allChats: [ObjectIdentifier: CBChat] = [:]
+    private var messageIDReverseLookup: [String: CBChatIdentifier] = [:]
+    private var loadedChatsByChatIdentifierCallback: [String: [([IMChat]) -> Void]] = [:]
+    private var hasLoadedChats = false
+    private var loadedChatsCallbacks: [() -> Void] = []
+    private var queryCallbacks: [String: [() -> Void]] = [:]
 
+    private lazy var listenerBridge = IMDaemonListenerBridge(registry: self)
     private let log = Logger(label: "CBChatRegistry")
+    private var cancellables = Set<AnyCancellable>()
 
-    override init() {
-        super.init()
-        IMDaemonController.shared().listener.addHandler(self)
+    // MARK: - Initializers
+
+    init() {
+        Task { @MainActor in
+            await IMDaemonController.shared().listener.addHandler(listenerBridge)
+        }
     }
+
+    // MARK: - IMDaemonListenerProtocol
 
     func setupComplete(_ success: Bool, info: [AnyHashable: Any]!) {
         if let chats = info["personMergedChats"] as? [[AnyHashable: Any]] {
@@ -66,18 +81,14 @@ class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) engram \(engramID ?? "nil")")
     }
 
-    func chat(_ guid: String!, lastAddressedHandleUpdated lastAddressedHandle: String!) {
+    func chat(_ guid: String!, lastAddressedHandleUpdated lastAddressedHandle: String!) {}
 
-    }
-
-    var loadedChatsByChatIdentifierCallback: [String: [([IMChat]) -> Void]] = [:]
-
-    func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) {
+    func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) async {
         trace(chatIdentifier, nil, "chats loaded: \((chatDictionaries as NSArray))")
         guard let callbacks = loadedChatsByChatIdentifierCallback.removeValue(forKey: chatIdentifier) else {
             return
         }
-        let parsed = internalize(chats: chatDictionaries.compactMap { $0 as? [AnyHashable: Any] })
+        let parsed = await internalize(chats: chatDictionaries.compactMap { $0 as? [AnyHashable: Any] })
         for callback in callbacks {
             callback(parsed)
         }
@@ -121,17 +132,6 @@ class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
     }
 
-    private func trace(
-        _ chatIdentifier: String!,
-        _ personCentricID: String!,
-        _ message: String,
-        _ function: StaticString = #function
-    ) {
-        log.debug(
-            "chat \(chatIdentifier ?? "nil") pcID \(personCentricID ?? "nil") \(message): \(function.description)"
-        )
-    }
-
     func account(
         _ accountUniqueID: String!,
         chat chatIdentifier: String!,
@@ -157,9 +157,7 @@ class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         chatPersonCentricID personCentricID: String!,
         statusChanged status: FZChatStatus,
         handleInfo: [Any]!
-    ) {
-
-    }
+    ) {}
 
     func account(
         _ accountUniqueID: String!,
@@ -187,6 +185,160 @@ class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
     ) {
         trace(chatIdentifier, personCentricID, "received message \(msg.singleLineDebugDescription)")
         handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
+    }
+
+    func account(
+        _ accountUniqueID: String!,
+        chat chatIdentifier: String!,
+        style chatStyle: IMChatStyle,
+        chatProperties properties: [AnyHashable: Any]!,
+        groupID: String!,
+        chatPersonCentricID personCentricID: String!,
+        messageSent msg: IMMessageItem!
+    ) {
+        trace(chatIdentifier, personCentricID, "sent message \(msg)")
+        handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
+    }
+
+    func account(
+        _ accountUniqueID: String!,
+        chat chatIdentifier: String!,
+        style chatStyle: IMChatStyle,
+        chatProperties properties: [AnyHashable: Any]!,
+        updateProperties update: [AnyHashable: Any]!
+    ) {
+        trace(
+            chatIdentifier,
+            nil,
+            "properties \(((properties ?? [:]) as NSDictionary)) updated to \(((update ?? [:]) as NSDictionary).singleLineDebugDescription)"
+        )
+    }
+
+    func account(
+        _ accountUniqueID: String!,
+        chat chatIdentifier: String!,
+        style chatStyle: IMChatStyle,
+        chatProperties properties: [AnyHashable: Any]!,
+        messageUpdated msg: IMItem!
+    ) {
+        trace(chatIdentifier, nil, "message updated \(msg)")
+        handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
+    }
+
+    func account(
+        _ accountUniqueID: String!,
+        chat chatIdentifier: String!,
+        style chatStyle: IMChatStyle,
+        chatProperties properties: [AnyHashable: Any]!,
+        messagesUpdated messages: [NSObject]!
+    ) {
+        trace(chatIdentifier, nil, "messages updated \((messages! as NSArray).singleLineDebugDescription)")
+        messages.forEach {
+            handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: $0)
+        }
+    }
+
+    func loadedChats(_ chats: [[AnyHashable: Any]]!, queryID: String!) async {
+        guard queryCallbacks.keys.contains(queryID) else {
+            return
+        }
+        _ = await internalize(chats: chats)
+        for callback in queryCallbacks.removeValue(forKey: queryID) ?? [] {
+            callback()
+        }
+    }
+
+    func loadedChats(_ chats: [[AnyHashable: Any]]!) async {
+        _ = await internalize(chats: chats)
+        let loadedChatsCallbacks = loadedChatsCallbacks
+        self.loadedChatsCallbacks = []
+        for callback in loadedChatsCallbacks {
+            callback()
+        }
+    }
+
+    func onLoadedChats(_ callback: @Sendable @escaping () -> Void) {
+        if hasLoadedChats {
+            callback()
+        } else {
+            loadedChatsCallbacks.append(callback)
+        }
+    }
+
+    // MARK: - Handling
+
+    private func handle(chat: [AnyHashable: Any], item: IMItem) -> Bool {
+        guard let identifier = handle(chat: chat).1 else {
+            log.warning("cant handle message \(item) via chat dictionary: couldnt find a chat for it")
+            return false
+        }
+        handle(chat: identifier, item: item)
+        return true
+    }
+
+    private func handle(chat: CBChatIdentifier, item: IMItem) {
+        if let guid = item.guid, !messageIDReverseLookup.keys.contains(guid) {
+            messageIDReverseLookup[guid] = chat
+        }
+        if let cbChat = chats[chat] {
+            cbChat.handle(leaf: chat, item: item)
+        } else {
+            log.info("where is chat?!")
+        }
+    }
+
+    private func handle(chat: CBChatIdentifier, item: [AnyHashable: Any]) {
+        if let guid = item["guid"] as? String, !messageIDReverseLookup.keys.contains(guid) {
+            messageIDReverseLookup[guid] = chat
+        }
+        if let cbChat = chats[chat] {
+            cbChat.handle(leaf: chat, item: item)
+        } else {
+            log.info("where is chat?!")
+        }
+    }
+
+    @_disfavoredOverload
+    private func handle(chat: CBChatIdentifier, item: NSObject) {
+        switch item {
+        case let item as IMItem:
+            handle(chat: chat, item: item)
+        case let item as [AnyHashable: Any]:
+            handle(chat: chat, item: item)
+        case let item:
+            preconditionFailure(
+                "This method only accepts IMItem subclasses or dictionaries, but you gave me \(String(describing: type(of: item)))"
+            )
+        }
+    }
+
+    private func handle(chat: [AnyHashable: Any]) -> (CBChat?, CBChatIdentifier?) {
+        var leaf = CBChatLeaf()
+        leaf.handle(identifiable: chat)
+
+        enum FoundError: Error { case found(CBChat) }
+        do {
+            try leaf.forEachIdentifier { identifier in
+                if let cbChat = self.chats[identifier] {
+                    cbChat.handle(dictionary: chat)
+                    //                    log.debug("Notifying CBChat of updated chat \(String(describing: identifier))")
+                    throw FoundError.found(cbChat)
+                }
+            }
+        } catch {
+            guard case .found(let chat) = error as? FoundError else {
+                preconditionFailure()
+            }
+            return (chat, leaf.mostUniqueIdentifier)
+        }
+
+        guard let style = (chat["style"] as? CBChatStyle.RawValue).flatMap(CBChatStyle.init(rawValue:)) else {
+            return (nil, leaf.mostUniqueIdentifier)
+        }
+        let cbChat = CBChat(style: style)
+        cbChat.handle(dictionary: chat)
+        store(chat: cbChat)
+        return (cbChat, leaf.mostUniqueIdentifier)
     }
 
     private func handle(chatIdentifier: String?, properties: [AnyHashable: Any]?, groupID: String?, item: NSObject) {
@@ -252,60 +404,10 @@ class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
         handle(chat: chatID, item: item)
     }
 
-    func account(
-        _ accountUniqueID: String!,
-        chat chatIdentifier: String!,
-        style chatStyle: IMChatStyle,
-        chatProperties properties: [AnyHashable: Any]!,
-        groupID: String!,
-        chatPersonCentricID personCentricID: String!,
-        messageSent msg: IMMessageItem!
-    ) {
-        trace(chatIdentifier, personCentricID, "sent message \(msg)")
-        handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
-    }
+    // MARK: - Private
 
-    func account(
-        _ accountUniqueID: String!,
-        chat chatIdentifier: String!,
-        style chatStyle: IMChatStyle,
-        chatProperties properties: [AnyHashable: Any]!,
-        updateProperties update: [AnyHashable: Any]!
-    ) {
-        trace(
-            chatIdentifier,
-            nil,
-            "properties \(((properties ?? [:]) as NSDictionary)) updated to \(((update ?? [:]) as NSDictionary).singleLineDebugDescription)"
-        )
-    }
-
-    func account(
-        _ accountUniqueID: String!,
-        chat chatIdentifier: String!,
-        style chatStyle: IMChatStyle,
-        chatProperties properties: [AnyHashable: Any]!,
-        messageUpdated msg: IMItem!
-    ) {
-        trace(chatIdentifier, nil, "message updated \(msg)")
-        handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
-    }
-
-    func account(
-        _ accountUniqueID: String!,
-        chat chatIdentifier: String!,
-        style chatStyle: IMChatStyle,
-        chatProperties properties: [AnyHashable: Any]!,
-        messagesUpdated messages: [NSObject]!
-    ) {
-        trace(chatIdentifier, nil, "messages updated \((messages! as NSArray).singleLineDebugDescription)")
-        messages.forEach {
-            handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: $0)
-        }
-    }
-
-    var queryCallbacks: [String: [() -> Void]] = [:]
-
-    private func internalize(chats: [[AnyHashable: Any]]) -> [IMChat] {
+    @MainActor
+    private func internalize(chats: [[AnyHashable: Any]]) async -> [IMChat] {
         func getMutableDictionary(_ key: String) -> NSMutableDictionary {
             if let dict = IMChatRegistry.shared.value(forKey: key) as? NSMutableDictionary {
                 return dict
@@ -339,136 +441,43 @@ class CBChatRegistry: NSObject, IMDaemonListenerProtocol {
                 return getMutableArray("_allChatsInThreadNameMap")
             }
         }()
-        return chats.compactMap { chat in
-            let guid = chat["guid"] as? String
-            _ = handle(chat: chat)
-            if let guid = guid, let existingChat = chatGUIDToChatMap[guid] as? IMChat, existingChat.guid == guid {
-                return existingChat
-            }
-            guard
-                let imChat = IMChat()
-                    ._init(withDictionaryRepresentation: chat, items: nil, participantsHint: nil, accountHint: nil)
-            else {
-                return nil
-            }
-            if let groupID = chat["groupID"] as? String {
-                groupIDToChatMap[groupID] = imChat
-            }
-            if let guid = guid {
-                chatGUIDToChatMap[guid] = imChat
-                if let IMCopyThreadNameForChat = IMCopyThreadNameForChat,
-                    let chatIdentifier = chat["chatIdentifier"] as? String,
-                    let accountID = imChat.account.uniqueID
-                {
-                    let threadName = IMCopyThreadNameForChat(chatIdentifier, accountID, imChat.chatStyle)
-                    if chatGUIDToCurrentThreadMap[guid] == nil {
-                        chatGUIDToCurrentThreadMap[guid] = threadName
-                    }
-                    if threadNameToChatMap[threadName] == nil {
-                        threadNameToChatMap[threadName] = imChat
+        return
+            await chats.asyncMap { chat in
+                let guid = chat["guid"] as? String
+                _ = await handle(chat: chat)
+                if let guid = guid, let existingChat = chatGUIDToChatMap[guid] as? IMChat, existingChat.guid == guid {
+                    return existingChat
+                }
+                guard
+                    let imChat = IMChat()
+                        ._init(withDictionaryRepresentation: chat, items: nil, participantsHint: nil, accountHint: nil)
+                else {
+                    return nil
+                }
+                if let groupID = chat["groupID"] as? String {
+                    groupIDToChatMap[groupID] = imChat
+                }
+                if let guid = guid {
+                    chatGUIDToChatMap[guid] = imChat
+                    if let IMCopyThreadNameForChat = IMCopyThreadNameForChat,
+                        let chatIdentifier = chat["chatIdentifier"] as? String,
+                        let accountID = imChat.account.uniqueID
+                    {
+                        let threadName = IMCopyThreadNameForChat(chatIdentifier, accountID, imChat.chatStyle)
+                        if chatGUIDToCurrentThreadMap[guid] == nil {
+                            chatGUIDToCurrentThreadMap[guid] = threadName
+                        }
+                        if threadNameToChatMap[threadName] == nil {
+                            threadNameToChatMap[threadName] = imChat
+                        }
                     }
                 }
-            }
-            if !allChatsInThreadNameMap.containsObjectIdentical(to: imChat) {
-                allChatsInThreadNameMap.add(imChat)
-            }
-            return imChat
-        }
-    }
-
-    func loadedChats(_ chats: [[AnyHashable: Any]]!, queryID: String!) {
-        guard queryCallbacks.keys.contains(queryID) else {
-            return
-        }
-        _ = internalize(chats: chats)
-        for callback in queryCallbacks.removeValue(forKey: queryID) ?? [] {
-            callback()
-        }
-    }
-
-    var hasLoadedChats = false
-    var loadedChatsCallbacks: [() -> Void] = []
-    private let loadedChatsCallbacksLock = NSRecursiveLock()
-
-    func loadedChats(_ chats: [[AnyHashable: Any]]!) {
-        _ = internalize(chats: chats)
-        loadedChatsCallbacksLock.withLock {
-            let loadedChatsCallbacks = loadedChatsCallbacks
-            self.loadedChatsCallbacks = []
-            for callback in loadedChatsCallbacks {
-                callback()
-            }
-        }
-    }
-
-    func onLoadedChats(_ callback: @escaping () -> Void) {
-        if hasLoadedChats {
-            callback()
-        } else {
-            loadedChatsCallbacksLock.withLock {
-                loadedChatsCallbacks.append(callback)
-            }
-        }
-    }
-}
-
-extension CBChatRegistry {
-    public static let shared = CBChatRegistry()
-
-    public func handle(chat: [AnyHashable: Any]) -> (CBChat?, CBChatIdentifier?) {
-        var leaf = CBChatLeaf()
-        leaf.handle(identifiable: chat)
-
-        enum FoundError: Error { case found(CBChat) }
-        do {
-            try leaf.forEachIdentifier { identifier in
-                if let cbChat = self.chats[identifier] {
-                    cbChat.handle(dictionary: chat)
-                    //                    log.debug("Notifying CBChat of updated chat \(String(describing: identifier))")
-                    throw FoundError.found(cbChat)
+                if !allChatsInThreadNameMap.containsObjectIdentical(to: imChat) {
+                    allChatsInThreadNameMap.add(imChat)
                 }
+                return imChat
             }
-        } catch {
-            guard case .found(let chat) = error as? FoundError else {
-                preconditionFailure()
-            }
-            return (chat, leaf.mostUniqueIdentifier)
-        }
-
-        guard let style = (chat["style"] as? CBChatStyle.RawValue).flatMap(CBChatStyle.init(rawValue:)) else {
-            return (nil, leaf.mostUniqueIdentifier)
-        }
-        let cbChat = CBChat(style: style)
-        cbChat.handle(dictionary: chat)
-        store(chat: cbChat)
-        return (cbChat, leaf.mostUniqueIdentifier)
-    }
-
-    public func handle(chat: CBChatIdentifier, item: [AnyHashable: Any]) {
-        if let guid = item["guid"] as? String, !messageIDReverseLookup.keys.contains(guid) {
-            messageIDReverseLookup[guid] = chat
-        }
-        if let cbChat = chats[chat] {
-            cbChat.handle(leaf: chat, item: item)
-        } else {
-            log.info("where is chat?!")
-        }
-    }
-
-    @_disfavoredOverload
-    public func handle(chat: CBChatIdentifier, item: NSObject) {
-        switch item {
-        #if canImport(IMSharedUtilities)
-        case let item as IMItem:
-            handle(chat: chat, item: item)
-        #endif
-        case let item as [AnyHashable: Any]:
-            handle(chat: chat, item: item)
-        case let item:
-            preconditionFailure(
-                "This method only accepts IMItem subclasses or dictionaries, but you gave me \(String(describing: type(of: item)))"
-            )
-        }
+            .compactMap { $0 }
     }
 
     private func store(chat: CBChat) {
@@ -498,34 +507,22 @@ extension CBChatRegistry {
                         }
                         continue
                     }
-                    //                self.log.info("Storing \(String(describing: identifier))")
                     self.chats[identifier] = chat
                 }
             }
-            .store(in: &subscribers)
-    }
-}
-
-#if canImport(IMSharedUtilities)
-extension CBChatRegistry {
-    func handle(chat: [AnyHashable: Any], item: IMItem) -> Bool {
-        guard let identifier = handle(chat: chat).1 else {
-            log.warning("cant handle message \(item) via chat dictionary: couldnt find a chat for it")
-            return false
-        }
-        handle(chat: identifier, item: item)
-        return true
+            .store(in: &cancellables)
     }
 
-    func handle(chat: CBChatIdentifier, item: IMItem) {
-        if let guid = item.guid, !messageIDReverseLookup.keys.contains(guid) {
-            messageIDReverseLookup[guid] = chat
-        }
-        if let cbChat = chats[chat] {
-            cbChat.handle(leaf: chat, item: item)
-        } else {
-            log.info("where is chat?!")
-        }
+    // MARK: - Logging
+
+    private func trace(
+        _ chatIdentifier: String!,
+        _ personCentricID: String!,
+        _ message: String,
+        _ function: StaticString = #function
+    ) {
+        log.debug(
+            "chat \(chatIdentifier ?? "nil") pcID \(personCentricID ?? "nil") \(message): \(function.description)"
+        )
     }
 }
-#endif
