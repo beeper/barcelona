@@ -64,8 +64,7 @@ extension TapbackCommand: Runnable, AuthenticatedAsserting {
             span.finish()
         } catch {
             SentrySDK.capture(error: error)
-            // girl fuck
-            log.error("failed to send tapback: \(error as NSError)", source: "BLMautrix")
+            log.error("failed to send tapback: \(error as NSError)")
             payload.fail(strategy: .internal_error(error.localizedDescription), ipcChannel: ipcChannel)
             span.finish(status: .internalError)
         }

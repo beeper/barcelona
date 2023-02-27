@@ -13,10 +13,44 @@ import Logging
 
 private let chatItemGUIDExtractor = try! NSRegularExpression(pattern: "(?:\\w+:\\d+)\\/([\\w-]+)")
 
+enum TapbackError: CustomNSError {
+    /// Unknown message.
+    case unknownMessage(guid: String)
+    /// Unknown subpart.
+    case unknownSubpart
+    /// Can't create tapback.
+    case createTapbackFailed
+    /// Couldn't create sender for the tapback.
+    case createSenderFailed
+    /// Couldn't create `instantMessage` to send in chat.
+    case createInstantMessageFailed
+    /// Couldn't create the content for the tapback message.
+    case createSuperFormatFailed
+
+    var error: String {
+        switch self {
+        case .unknownMessage(let guid):
+            return "Unknown message"
+        case .unknownSubpart:
+            return "Unknown subpart"
+        case .createTapbackFailed:
+            return "Can't create tapback"
+        case .createSenderFailed:
+            return "Couldn't create sender for the tapback"
+        case .createInstantMessageFailed:
+            return "Couldn't create instantMessage to send in chat"
+        case .createSuperFormatFailed:
+            return "Couldn't create the content for the tapback message"
+        }
+    }
+
+    var errorUserInfo: [String: Any] {
+        [NSDebugDescriptionErrorKey: error]
+    }
+}
+
 extension IMChat {
-    /**
-     Sends a tapback for a given message, calling back with a Vapor abort if the operation fails. This must be invoked on the main thread.
-     */
+    /// Sends a tapback for a given message, calling back with a Vapor abort if the operation fails. This must be invoked on the main thread.
     @MainActor
     public func tapback(
         guid: String,
@@ -26,11 +60,7 @@ extension IMChat {
         metadata: Message.Metadata? = nil
     ) throws -> IMMessage {
         guard let message = BLLoadIMMessage(withGUID: guid) else {
-            throw BarcelonaError(code: 404, message: "Unknown message: \(guid)")
-        }
-
-        guard Thread.isMainThread else {
-            preconditionFailure("IMChat.tapback() must be invoked on the main thread")
+            throw TapbackError.unknownMessage(guid: guid)
         }
 
         let correctGUID: String = {
@@ -45,7 +75,7 @@ extension IMChat {
             let summaryInfo = subpart.summaryInfo(for: message, in: self, itemTypeOverride: overridingItemType)
                 as? [AnyHashable: Any]
         else {
-            throw BarcelonaError(code: 404, message: "Unknown subpart")
+            throw TapbackError.unknownSubpart
         }
 
         let rawType = Int64(type)
@@ -67,7 +97,7 @@ extension IMChat {
     }
 
     @available(macOS 13.0, *)
-    public func venturaTapback(
+    private func venturaTapback(
         associatedMessageType: Int64,
         messageSummaryInfo: [AnyHashable: Any],
         messagePartChatItem: IMMessagePartChatItem
@@ -78,11 +108,11 @@ extension IMChat {
                 messageSummaryInfo: messageSummaryInfo
             )
         else {
-            throw BarcelonaError(code: 500, message: "Can't create tapback")
+            throw TapbackError.createTapbackFailed
         }
         guard let sender = IMTapbackSender(tapback: tapback, chat: self, messagePartChatItem: messagePartChatItem)
         else {
-            throw BarcelonaError(code: 500, message: "Couldn't create sender for the tapback")
+            throw TapbackError.createSenderFailed
         }
 
         // This is a simplified implementation of IMTapbackSender's `send` method, but the thing is that we need
@@ -99,7 +129,7 @@ extension IMChat {
                 threadIdentifier: sender.threadIdentifier()
             )
         else {
-            throw BarcelonaError(code: 500, message: "Couldn't create instantMessage to send in chat")
+            throw TapbackError.createInstantMessageFailed
         }
 
         send(message)
@@ -108,7 +138,7 @@ extension IMChat {
     }
 
     @available(macOS, obsoleted: 13.0, message: "Use venturaTapback instead")
-    public func preVenturaTapback(
+    private func preVenturaTapback(
         type: Int64,
         overridingItemType: UInt8?,
         subpart: IMMessagePartChatItem,
@@ -118,7 +148,7 @@ extension IMChat {
         guard let compatibilityString = CBGeneratePreviewStringForAcknowledgmentType(type, summaryInfo: summaryInfo),
             let superFormat = IMCreateSuperFormatStringFromPlainTextString(compatibilityString)
         else {
-            throw BarcelonaError(code: 500, message: "Internal server error")
+            throw TapbackError.createSuperFormatFailed
         }
 
         let adjustedSummaryInfo = IMChat.__im_adjustMessageSummaryInfo(forSending: summaryInfo)
@@ -149,7 +179,7 @@ extension IMChat {
         }
 
         guard let toSendMessage else {
-            throw BarcelonaError(code: 500, message: "Couldn't create tapback message")
+            throw TapbackError.createInstantMessageFailed
         }
 
         if let metadata {
