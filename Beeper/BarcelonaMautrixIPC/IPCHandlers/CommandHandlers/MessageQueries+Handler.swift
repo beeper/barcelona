@@ -27,11 +27,8 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
         }
         let span = SentrySDK.startTransaction(name: "GetMessagesAfterCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "GetMessagesAfterCommand"
+        breadcrumb.message = "GetMessagesAfterCommand/\(payload.id ?? 0)"
         breadcrumb.type = "user"
-        breadcrumb.data = [
-            "payload_id": String(describing: payload.id)
-        ]
         SentrySDK.addBreadcrumb(breadcrumb)
         log.debug("Getting messages for chat guid \(chat_guid) after time \(timestamp)")
 
@@ -89,11 +86,8 @@ extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
         }
         let span = SentrySDK.startTransaction(name: "GetRecentMessagesCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "GetRecentMessagesCommand"
+        breadcrumb.message = "GetRecentMessagesCommand/\(payload.id ?? 0)"
         breadcrumb.type = "user"
-        breadcrumb.data = [
-            "payload_id": String(describing: payload.id)
-        ]
         SentrySDK.addBreadcrumb(breadcrumb)
         guard let chat = await chat else {
             payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)

@@ -33,11 +33,8 @@ extension GetChatsCommand: Runnable {
         }
         let span = SentrySDK.startTransaction(name: "GetChatsCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "GetChatsCommand"
+        breadcrumb.message = "GetChatsCommand/\(payload.id ?? 0)"
         breadcrumb.type = "user"
-        breadcrumb.data = [
-            "payload_id": String(describing: payload.id)
-        ]
         SentrySDK.addBreadcrumb(breadcrumb)
         if min_timestamp <= 0 {
             payload.reply(
@@ -86,11 +83,8 @@ extension GetGroupChatInfoCommand: Runnable {
         }
         let span = SentrySDK.startTransaction(name: "GetGroupChatInfoCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "GetGroupChatInfoCommand"
+        breadcrumb.message = "GetGroupChatInfoCommand/\(payload.id ?? 0)"
         breadcrumb.type = "user"
-        breadcrumb.data = [
-            "payload_id": String(describing: payload.id)
-        ]
         SentrySDK.addBreadcrumb(breadcrumb)
         log.info("Getting chat with id \(chat_guid)", source: "MautrixIPC")
 
@@ -130,11 +124,8 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
         }
         let span = SentrySDK.startTransaction(name: "SendReadReceiptCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "SendReadReceiptCommand"
+        breadcrumb.message = "SendReadReceiptCommand/\(payload.id ?? 0)"
         breadcrumb.type = "user"
-        breadcrumb.data = [
-            "payload_id": String(describing: payload.id)
-        ]
         SentrySDK.addBreadcrumb(breadcrumb)
         let chatGUID = await cbChat?.blChatGUID
         log.info("Sending read receipt to \(String(describing: chatGUID))", source: "MautrixIPC")
@@ -172,11 +163,8 @@ extension SendTypingCommand: Runnable, AuthenticatedAsserting {
         }
         let span = SentrySDK.startTransaction(name: "SendTypingCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "SendTypingCommand"
+        breadcrumb.message = "SendTypingCommand/\(payload.id ?? 0)"
         breadcrumb.type = "user"
-        breadcrumb.data = [
-            "payload_id": String(describing: payload.id)
-        ]
         SentrySDK.addBreadcrumb(breadcrumb)
         guard let chat = await cbChat else {
             payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
@@ -211,11 +199,8 @@ extension GetGroupChatAvatarCommand: Runnable {
         }
         let span = SentrySDK.startTransaction(name: "GetGroupChatAvatarCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "GetGroupChatAvatarCommand"
+        breadcrumb.message = "GetGroupChatAvatarCommand/\(payload.id ?? 0)"
         breadcrumb.type = "user"
-        breadcrumb.data = [
-            "payload_id": String(describing: payload.id)
-        ]
         SentrySDK.addBreadcrumb(breadcrumb)
         guard let chat = await chat, let groupPhotoID = chat.groupPhotoID else {
             payload.respond(.chat_avatar(nil), ipcChannel: ipcChannel)

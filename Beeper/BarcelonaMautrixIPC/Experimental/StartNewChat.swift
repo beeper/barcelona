@@ -40,11 +40,8 @@ extension ResolveIdentifierCommand: Runnable {
         }
         let span = SentrySDK.startTransaction(name: "ResolveIdentifierCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "ResolveIdentifierCommand"
+        breadcrumb.message = "ResolveIdentifierCommand/\(payload.id ?? 0)/\(payload.id ?? 0)"
         breadcrumb.type = "user"
-        breadcrumb.data = [
-            "payload_id": String(describing: payload.id)
-        ]
         SentrySDK.addBreadcrumb(breadcrumb)
         let log = Logger(label: "ResolveIdentifierCommand")
         var retrievedGuid: GUIDResponse? = nil
@@ -123,11 +120,8 @@ extension PrepareDMCommand: Runnable {
         }
         let span = SentrySDK.startTransaction(name: "PrepareDMCommand", operation: "run", bindToScope: true)
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "PrepareDMCommand"
+        breadcrumb.message = "PrepareDMCommand/\(payload.id ?? 0)"
         breadcrumb.type = "user"
-        breadcrumb.data = [
-            "payload_id": String(describing: payload.id)
-        ]
         SentrySDK.addBreadcrumb(breadcrumb)
         let log = Logger(label: "ResolveIdentifierCommand")
 

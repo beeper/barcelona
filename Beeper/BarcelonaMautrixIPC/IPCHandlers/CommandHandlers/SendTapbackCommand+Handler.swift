@@ -42,12 +42,8 @@ extension TapbackCommand: Runnable, AuthenticatedAsserting {
             )
         }
         let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "SendTypingCommand"
+        breadcrumb.message = "SendTypingCommand/\(payload.id ?? 0)"
         breadcrumb.type = "user"
-        breadcrumb.data = [
-            "payload_id": String(describing: payload.id),
-            "chat_id": chat.id,
-        ]
         SentrySDK.addBreadcrumb(breadcrumb)
 
         guard let creation = creation else {
