@@ -81,7 +81,7 @@ public struct IPCPayload: Codable {
                 source: "Mautrix"
             )
             let breadcrumb = Breadcrumb(level: .debug, category: "IPC")
-            breadcrumb.message = "Reply issued for a command that had no ID/\(payload.id ?? 0)"
+            breadcrumb.message = "Reply issued for a command that had no ID"
             breadcrumb.data = [
                 "inbound_name": self.command.name.rawValue,
                 "outbound": command.name.rawValue,
@@ -95,7 +95,7 @@ public struct IPCPayload: Codable {
 
     public func reply(withResponse response: IPCResponse, ipcChannel: MautrixIPCChannel) {
         let breadcrumb = Breadcrumb(level: .info, category: "IPC")
-        breadcrumb.message = "reply/\(payload.id ?? 0)"
+        breadcrumb.message = "reply"
         breadcrumb.data = [
             "id": id ?? -1
         ]
@@ -105,7 +105,7 @@ public struct IPCPayload: Codable {
 
     public func fail(code: String, message: String, ipcChannel: MautrixIPCChannel) {
         let breadcrumb = Breadcrumb(level: .error, category: "IPC")
-        breadcrumb.message = "fail/\(payload.id ?? 0)"
+        breadcrumb.message = "fail"
         breadcrumb.data = [
             "id": id ?? -1,
             "code": code,
@@ -116,7 +116,7 @@ public struct IPCPayload: Codable {
 
     public func fail(strategy: ErrorStrategy, ipcChannel: MautrixIPCChannel) {
         let breadcrumb = Breadcrumb(level: .error, category: "IPC")
-        breadcrumb.message = "fail/\(payload.id ?? 0)"
+        breadcrumb.message = "fail"
         breadcrumb.data = [
             "id": id ?? -1,
             "strategy": strategy,
