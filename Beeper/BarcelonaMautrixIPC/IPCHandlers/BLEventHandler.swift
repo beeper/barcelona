@@ -10,6 +10,7 @@ import Barcelona
 import IDS
 import IMCore
 import Logging
+import Combine
 
 private let log = Logger(label: "self.ipcChannel.writePayload")
 
@@ -25,6 +26,7 @@ extension CBMessageStatusChange {
 public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
 
     private let ipcChannel: MautrixIPCChannel
+	private var bag = Set<AnyCancellable>()
 
     public init(ipcChannel: MautrixIPCChannel) {
         self.ipcChannel = ipcChannel
@@ -53,10 +55,10 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
     }
 
     public func run() {
-        CBDaemonListener.shared.unreadCountPipeline.pipe(unreadCountChanged)
-        CBDaemonListener.shared.typingPipeline.pipe(receiveTyping)
+		CBDaemonListener.shared.unreadCountPipeline.sink(receiveValue: self.unreadCountChanged).store(in: &bag)
+		CBDaemonListener.shared.typingPipeline.sink(receiveValue: receiveTyping).store(in: &bag)
 
-        CBDaemonListener.shared.messageStatusPipeline.pipe { change in
+        CBDaemonListener.shared.messageStatusPipeline.sink { change in
             guard change.type == .read else {
                 return
             }
@@ -86,9 +88,9 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                     )
                 )
             )
-        }
+		}.store(in: &bag)
 
-        BLMessageExpert.shared.eventPipeline.pipe { event -> Void in
+        BLMessageExpert.shared.eventPipeline.sink { event -> Void in
             switch event {
             case .message(let message):
                 if let senderID = message.senderID, BLBlocklistController.shared.isSenderBlocked(senderID) {
@@ -177,7 +179,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                 // don't do anything; these are handled elsewhere
                 break
             }
-        }
+		}.store(in: &bag)
     }
 
     public func purgedTransferFailed(_ transfer: IMFileTransfer) {

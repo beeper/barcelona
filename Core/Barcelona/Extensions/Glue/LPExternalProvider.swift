@@ -11,6 +11,7 @@ import IMSharedUtilities
 import LinkPresentation
 import LinkPresentationPrivate
 import Logging
+import Combine
 
 extension IMBalloonPluginManager {
     var richLinkPlugin: IMBalloonPlugin? {
@@ -134,21 +135,6 @@ extension IMBalloonPluginCarrier {
 extension IMMessage {
     private static var retains: [IMMessage: Set<AnyHashable>] = [:]
 
-    private func onceSent() -> Promise<Void> {
-        if isSent {
-            return .success(())
-        }
-        return Promise { resolve in
-            var pipeline: CBPipeline<Void> = .init()
-            pipeline = CBDaemonListener.shared.messagePipeline.pipe { message in
-                if message.id == self.id, message.isSent {
-                    pipeline.cancel()
-                    resolve(())
-                }
-            }
-        }
-    }
-
     public func loadLinkMetadata(at url: URL) {
         guard let dataSource = decodePluginDataSource() else {
             return
@@ -168,10 +154,16 @@ extension IMMessage {
             dataSource.payloadWillSendFromShelf()
             richLinkDataSource._startFetchingMetadata()
             IMMessage.retains[self] = .init(arrayLiteral: metadata, dataSource)
-            onceSent()
-                .then {
-                    IMMessage.retains.removeValue(forKey: self)
-                }
+
+			if !self.isSent {
+				var cancellable: AnyCancellable?
+				cancellable = CBDaemonListener.shared.messagePipeline.sink { message in
+					if message.id == self.id, message.isSent {
+						IMMessage.retains.removeValue(forKey: self)
+						cancellable?.cancel()
+					}
+				}
+			}
         }
 
         if Thread.isMainThread {

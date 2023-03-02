@@ -9,6 +9,7 @@ import Foundation
 import IMCore
 import IMFoundation
 import Logging
+import Combine
 
 /// The BLMessageExpert offers a simplified API for monitoring message state events
 public class BLMessageExpert {
@@ -78,14 +79,19 @@ public class BLMessageExpert {
     }
 
     private let log = Logger(label: "BLMessageExpert")
+	private var bag = Set<AnyCancellable>()
 
     /// The pipeline where BLMessageExpert sends message events
-    public let eventPipeline = CBPipeline<BLMessageEvent>()
+    public let eventPipeline = PassthroughSubject<BLMessageEvent, Never>()
 
     public init() {
-        CBDaemonListener.shared.messageStatusPipeline.pipe { change in self.queue.async { self.process(change: change) }
-        }
-        CBDaemonListener.shared.messagePipeline.pipe { message in self.queue.async { self.process(message: message) } }
+		CBDaemonListener.shared.messageStatusPipeline.sink { change in
+			self.queue.async { self.process(change: change) }
+		}.store(in: &bag)
+		CBDaemonListener.shared.messagePipeline.sink { message in
+			self.queue.async { self.process(message: message) }
+		}.store(in: &bag)
+
         seenMessages.reserveCapacity(100)
     }
 
@@ -284,7 +290,7 @@ extension BLMessageExpert {
         /// A closure to the monitoring messageID – this is a closure so that an observer can be created immediately prior to a message being sent.
         public let messageID: () -> String
         private var callback: ((BLMessageEvent) -> NextStep)?
-        private var pipeline: CBPipeline<Void>?
+        private var pipeline: AnyCancellable?
 
         public init(
             id: @autoclosure @escaping () -> String,
@@ -293,7 +299,7 @@ extension BLMessageExpert {
         ) {
             self.messageID = id
             self.callback = callback
-            self.pipeline = expert.eventPipeline.pipe { [self] event in
+            self.pipeline = expert.eventPipeline.sink { [self] event in
                 guard event.id == self.messageID() else {
                     return
                 }

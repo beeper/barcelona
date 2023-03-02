@@ -10,6 +10,7 @@ import IDS
 import IMCore
 import IMDPersistence
 import IMFoundation
+import Combine
 
 extension IDSListenerCapabilities {
     static func rawValue(for capabilities: IDSListenerCapabilities...) -> RawValue {
@@ -48,7 +49,7 @@ public class CBIDSListener: ERBaseIDSListener {
         return listener
     }()
 
-    public let reflectedReadReceiptPipeline = CBPipeline<(guid: String, service: IMServiceStyle, time: Date)>()
+    public let reflectedReadReceiptPipeline = PassthroughSubject<(guid: String, service: IMServiceStyle, time: Date), Never>()
 
     private var myDestinationURIs: [String] {
         IMAccountController.shared.iMessageAccount?.aliases.map { IDSDestination(uri: $0).uri().prefixedURI } ?? []
