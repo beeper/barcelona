@@ -296,12 +296,14 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
     }
 
     func loadedChats(_ chats: [[AnyHashable: Any]]!, queryID: String!) {
+        log.info("loadedChats queryID: \(queryID)")
         Task {
             await registry.loadedChats(chats, queryID: queryID)
         }
     }
 
     func loadedChats(_ chats: [[AnyHashable: Any]]!) {
+        log.info("loadedChats")
         Task {
             await registry.loadedChats(chats)
         }

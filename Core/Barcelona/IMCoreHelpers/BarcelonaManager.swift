@@ -176,6 +176,7 @@ public func BLBootstrapController(
     }
 
     Task {
+        log.info("Waiting for CBChatRegistry to load chats")
         await CBChatRegistry.shared.onLoadedChats {
             CBDaemonListener.shared.startListening()
             callbackC?(true)

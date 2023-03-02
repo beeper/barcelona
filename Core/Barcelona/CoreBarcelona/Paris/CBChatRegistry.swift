@@ -39,7 +39,9 @@ actor CBChatRegistry {
     // MARK: - Initializers
 
     init() {
+        log.info("init")
         Task { @MainActor in
+            log.info("Registering IMDaemonListenerBridge")
             await IMDaemonController.shared().listener.addHandler(listenerBridge)
         }
     }
@@ -239,9 +241,11 @@ actor CBChatRegistry {
     }
 
     func loadedChats(_ chats: [[AnyHashable: Any]]!, queryID: String!) async {
+        log.info("loadedChats queryID:\(queryID)")
         guard queryCallbacks.keys.contains(queryID) else {
             return
         }
+        log.info("loadedChats calling query callbacks")
         _ = await internalize(chats: chats)
         for callback in queryCallbacks.removeValue(forKey: queryID) ?? [] {
             callback()
@@ -249,6 +253,7 @@ actor CBChatRegistry {
     }
 
     func loadedChats(_ chats: [[AnyHashable: Any]]!) async {
+        log.info("loadedChats calling callbacks")
         _ = await internalize(chats: chats)
         let loadedChatsCallbacks = loadedChatsCallbacks
         self.loadedChatsCallbacks = []
@@ -259,8 +264,10 @@ actor CBChatRegistry {
 
     func onLoadedChats(_ callback: @Sendable @escaping () -> Void) {
         if hasLoadedChats {
+            log.info("Already ready, let's go!")
             callback()
         } else {
+            log.info("Not ready yet, waiting...")
             loadedChatsCallbacks.append(callback)
         }
     }
