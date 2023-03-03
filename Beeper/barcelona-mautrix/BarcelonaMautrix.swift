@@ -72,6 +72,7 @@ class BarcelonaMautrix {
                 [
                     handler,
                     SentryLogHandler(label: label),
+                    OSLogHandler(label: label),
                 ]
             )
         }
