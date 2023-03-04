@@ -14,13 +14,6 @@ import Logging
 
 private let log = Logger(label: "Hooks")
 
-internal struct BLMessageStatusChange {
-    let message: IMMessage
-    let wasSent: Bool
-    let wasDelivered: Bool
-    let wasRead: Bool
-}
-
 private func CNLogSilencerHooks() throws -> Interpose? {
     try NSClassFromString("CNCDPersistenceMetrics").flatMap(object_getClass(_:))
         .map { cls in
@@ -70,80 +63,6 @@ private func IMHandleHooks() throws -> Interpose {
     }
 }
 
-/*private func IMChatHooks() throws -> Interpose {
-    try Interpose(IMChat.self) {
-        try $0.prepareHook(#selector(IMChat._handleIncomingItem(_:))) {
-            (
-                store: TypedHook<
-                    @convention(c) (AnyObject, Selector, AnyObject) -> Bool, @convention(block) (IMChat, IMItem) -> Bool
-                >
-            ) in
-            { chat, item in
-                let index = chat._index(of: item)
-
-                let oldItem: IMItem? = index < chat._items.count ? chat._items[Int(index)] : nil
-
-                if let message = item.message(), let oldMessage = oldItem?.message() {
-                    let wasDelivered = message.isDelivered && !oldMessage.isDelivered
-                    let wasRead = message.isRead && !oldMessage.isRead
-
-                    if wasRead || wasDelivered {
-                        let statusItem = IMMessageStatusChatItem()
-
-                        if wasRead {
-                            statusItem._init(
-                                withItem: item,
-                                statusType: StatusType.read.rawValue,
-                                time: message.timeRead,
-                                count: 1
-                            )
-                        } else {
-                            statusItem._init(
-                                withItem: item,
-                                statusType: StatusType.delivered.rawValue,
-                                time: message.timeDelivered,
-                                count: 1
-                            )
-                        }
-
-                        NotificationCenter.default.post(
-                            name: BLMessageStatusChangedNotification,
-                            object: StatusChatItem(item: statusItem, chatID: chat.chatIdentifier)
-                        )
-
-                        do {
-                            let hook = try Interpose(NotificationCenter.self) {
-                                try $0.prepareHook(#selector(NotificationCenter.post(name:object:userInfo:))) {
-                                    (
-                                        store: TypedHook<
-                                            @convention(c) (AnyObject, Selector, AnyObject, AnyObject?, AnyObject?) ->
-                                                Void,
-                                            @convention(block) (AnyObject, AnyObject, AnyObject?, AnyObject?) -> Void
-                                        >
-                                    ) in
-                                    { `self`, name, object, userInfo in
-
-                                    }
-                                }
-                            }
-
-                            let result = store.original(chat, store.selector, item)
-
-                            try hook.revert()
-
-                            return result
-                        } catch {
-                            fatalError(error.localizedDescription)
-                        }
-                    }
-                }
-
-                return store.original(chat, store.selector, item)
-            }
-        }
-    }
-}*/
-
 private func IDSServiceHooks() throws -> Interpose {
     try Interpose(NSClassFromString("_IDSService")!) {
         try $0.prepareHook(Selector("_enforceSandboxPolicy")) {
@@ -155,25 +74,10 @@ private func IDSServiceHooks() throws -> Interpose {
     }
 }
 
-private func IMIDSHooks() throws -> Interpose {
-    try Interpose(NSClassFromString("IDSIDQueryController")!) {
-        try $0.prepareHook(Selector("_hasCacheForService:")) {
-            (
-                store: TypedHook<
-                    @convention(c) (AnyObject, Selector, AnyObject) -> Bool, @convention(block) (AnyObject) -> CChar
-                >
-            ) in
-            { _ in
-                0
-            }
-        }
-    }
-}
-
 class HookManager {
     static let shared = HookManager()
 
-    let hooks = [ /*IMChatHooks, */IMIDSHooks, CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks]
+    let hooks = [CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks]
     private var appliedHooks: [Interpose]?
 
     func apply() throws {
