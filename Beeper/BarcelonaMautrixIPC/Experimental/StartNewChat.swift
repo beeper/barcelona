@@ -83,6 +83,10 @@ extension ResolveIdentifierCommand: Runnable {
         }
 
         if let retrievedGuid {
+            log.info(
+                "Responding that \(identifier) is available on \(retrievedGuid.guid)",
+                source: "ResolveIdentifier"
+            )
             payload.respond(.guid(retrievedGuid), ipcChannel: ipcChannel)
             span.finish()
         } else if IMServiceImpl.smsEnabled() {
@@ -93,6 +97,10 @@ extension ResolveIdentifierCommand: Runnable {
             payload.respond(.guid(.init("SMS;-;\(identifier)")), ipcChannel: ipcChannel)
             span.finish()
         } else {
+            log.info(
+                "Responding that \(identifier) is unavailable",
+                source: "ResolveIdentifier"
+            )
             payload.fail(
                 code: "err_destination_unreachable",
                 message: "Identifier resolution failed and SMS service is unavailable",

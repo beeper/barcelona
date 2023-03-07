@@ -206,8 +206,10 @@ func BLResolveIDStatusForIDs(
             uncached,
             destination in
             if let status = BLIDSIDQueryCache.shared.result(for: destination) {
+                log.info("Got cached result \(destination): \(status)")
                 cached[destination] = status
             } else {
+                log.info("Cache miss, going to lookup \(destination)")
                 uncached.append(destination)
             }
         }

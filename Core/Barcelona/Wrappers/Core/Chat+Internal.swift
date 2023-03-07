@@ -8,6 +8,9 @@
 import Foundation
 import IMCore
 import Pwomise
+import Logging
+
+private let log = Logger(label: "ChatLocator")
 
 /// APIs for creating a chat!
 public struct ChatLocator {
@@ -15,6 +18,7 @@ public struct ChatLocator {
         await withCheckedContinuation { continuation in
             do {
                 try BLResolveIDStatusForIDs([handle], onService: .iMessage) { result in
+                    log.info("BLResolveIDStatusForIDs \(handle) result: \(result)")
                     continuation.resume(returning: result[handle] == .available)
                 }
             } catch {
