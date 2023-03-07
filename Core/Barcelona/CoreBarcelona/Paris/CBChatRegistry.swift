@@ -29,7 +29,7 @@ actor CBChatRegistry {
     private var messageIDReverseLookup: [String: CBChatIdentifier] = [:]
     private var loadedChatsByChatIdentifierCallback: [String: [([IMChat]) -> Void]] = [:]
     private var hasLoadedChats = false
-    private var loadedChatsCallbacks: [() -> Void] = []
+    private var loadedChatsCallbacks: [@Sendable () -> Void] = []
     private var queryCallbacks: [String: [() -> Void]] = [:]
 
     private lazy var listenerBridge = IMDaemonListenerBridge(registry: self)
@@ -257,15 +257,19 @@ actor CBChatRegistry {
         _ = await internalize(chats: chats)
         let loadedChatsCallbacks = loadedChatsCallbacks
         self.loadedChatsCallbacks = []
-        for callback in loadedChatsCallbacks {
-            callback()
+        Task { @MainActor in
+            for callback in loadedChatsCallbacks {
+                callback()
+            }
         }
     }
 
     func onLoadedChats(_ callback: @Sendable @escaping () -> Void) {
         if hasLoadedChats {
             log.info("Already ready, let's go!")
-            callback()
+            Task { @MainActor in
+                callback()
+            }
         } else {
             log.info("Not ready yet, waiting...")
             loadedChatsCallbacks.append(callback)
