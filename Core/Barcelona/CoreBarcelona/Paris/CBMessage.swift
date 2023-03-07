@@ -33,6 +33,7 @@ public struct CBMessage: Codable, CustomDebugStringConvertible {
     public var timeDelivered: Date?
     /// The bitflags for this message
     public var flags: Flags = .none
+    public var retryCount: Int? = 0
 
     /// Initializes the message from a dictionary representation
     public init?(dictionary: [AnyHashable: Any], chat: CBChatIdentifier) {
@@ -88,7 +89,13 @@ public struct CBMessage: Codable, CustomDebugStringConvertible {
     private mutating func updated() -> CBMessage {
         if eligibleToResend {
             let id = id
+            if retryCount ?? 0 > 5 {
+                // TODO does this need to explode more to send a checkpoint?
+                log.warning("\(id) has been retried too many times!")
+                return self
+            }
             log.info("\(id) is eligible to resend, trying now")
+            self.retryCount = (self.retryCount ?? 0) + 1
             resend()
         }
         return self
@@ -97,7 +104,7 @@ public struct CBMessage: Codable, CustomDebugStringConvertible {
     /// An XML-like string describing the message
     public var debugDescription: String {
         """
-        <CBMessage rawFlags=\(flags.rawValue) error=\(error) time=\(time?.description ?? "nil") timeDelivered=\(timeDelivered?.description ?? "nil") timeRead=\(timeRead?.description ?? "nil") sender=\(sender) \(flags.description)/>"
+        <CBMessage retryCount=\(retryCount ?? 0) rawFlags=\(flags.rawValue) error=\(error) time=\(time?.description ?? "nil") timeDelivered=\(timeDelivered?.description ?? "nil") timeRead=\(timeRead?.description ?? "nil") sender=\(sender) \(flags.description)/>"
         """
     }
 }
@@ -483,6 +490,7 @@ extension CBMessage {
                 log.error("Misaligned IMChat/IMMessage/CBChat service when trying to re-send message \(id)!!!!!!")
                 return
             }
+            chat.refreshServiceForSendingIfNeeded()
             log.info("Re-sending message \(id) on chat \(String(describing: imChat.guid))")
             await chat.send(message: message, chat: imChat)
         }
