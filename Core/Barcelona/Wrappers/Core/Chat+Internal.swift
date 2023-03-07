@@ -20,9 +20,12 @@ public struct ChatLocator {
                 try BLResolveIDStatusForIDs([handle], onService: .iMessage) { result in
                     log.info("BLResolveIDStatusForIDs \(handle) result: \(result)")
                     if (result.values.first == .available) {
+                        // Success! Return the key that resolved from our handle as this will be better formatted
                         continuation.resume(returning: result.keys.first)
+                    } else {
+                        // Not available
+                        continuation.resume(returning: nil)
                     }
-                    continuation.resume(returning: nil)
                 }
             } catch {
                 continuation.resume(returning: nil)
