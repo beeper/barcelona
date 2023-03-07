@@ -19,6 +19,8 @@ targets:
       - package: SwiftNIO
         product: NIOFoundationCompat
       - package: Paris
+        product: CommonUtilities 
+      - package: Paris
         product: CommunicationsFilter
       - package: Paris
         product: DataDetectorsCore

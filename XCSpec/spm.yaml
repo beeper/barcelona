@@ -34,7 +34,7 @@ packages:
     exactVersion: 8.2.0
   Paris:
     url: https://github.com/EricRabil/Paris
-    revision: "75924f023c0197ee6063592dd0fa7bd11eec45dd"
+    revision: "f3b9efc5e929e2fa4d458bf6b807d9ba61febaf7"
   SwiftNIO:
     url: https://github.com/apple/swift-nio
     from: 2.0.0
