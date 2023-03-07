@@ -19,7 +19,7 @@ public struct ChatLocator {
             do {
                 try BLResolveIDStatusForIDs([handle], onService: .iMessage) { result in
                     log.info("BLResolveIDStatusForIDs \(handle) result: \(result)")
-                    continuation.resume(returning: result[handle] == .available)
+                    continuation.resume(returning: result.values.first == .available)
                 }
             } catch {
                 continuation.resume(returning: false)
