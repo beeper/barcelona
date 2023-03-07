@@ -14,33 +14,36 @@ private let log = Logger(label: "ChatLocator")
 
 /// APIs for creating a chat!
 public struct ChatLocator {
-    static func handleIsRegisteredForIMessage(_ handle: String) async throws -> Bool {
+    static func handleIsRegisteredForIMessage(_ handle: String) async throws -> String? {
         await withCheckedContinuation { continuation in
             do {
                 try BLResolveIDStatusForIDs([handle], onService: .iMessage) { result in
                     log.info("BLResolveIDStatusForIDs \(handle) result: \(result)")
-                    continuation.resume(returning: result.values.first == .available)
+                    if (result.values.first == .available) {
+                        continuation.resume(returning: result.keys.first)
+                    }
+                    continuation.resume(returning: nil)
                 }
             } catch {
-                continuation.resume(returning: false)
+                continuation.resume(returning: nil)
             }
         }
     }
 
     public enum ServiceResult {
-        case service(IMServiceStyle)
+        case service(IMServiceStyle, String)
         case failed(String)
     }
 
     public static func service(for handle: String) async throws -> ServiceResult {
         if handle.isBusinessID {
-            return .service(.iMessage)
+            return .service(.iMessage, handle)
         }
 
         let registered = try await handleIsRegisteredForIMessage(handle)
 
-        if registered {
-            return .service(.iMessage)
+        if let registered {
+            return .service(.iMessage, registered)
         }
         guard handle.isPhoneNumber else {
             return .failed("This address is not registered with iMessage, nor can you SMS it.")
@@ -48,7 +51,7 @@ public struct ChatLocator {
         guard IMServiceImpl.smsEnabled() else {
             return .failed("You are not currently capable of using SMS.")
         }
-        return .service(.SMS)
+        return .service(.SMS, handle)
     }
 
     public enum SenderGUIDResult {
@@ -59,8 +62,8 @@ public struct ChatLocator {
     public static func senderGUID(for handle: String) async throws -> SenderGUIDResult {
         let result = try await service(for: handle)
         switch result {
-        case .service(let service):
-            return .guid(service.rawValue + ";-;" + handle)
+        case .service(let service, let matchingHandle):
+            return .guid(service.rawValue + ";-;" + matchingHandle)
         case .failed(let message):
             return .failed(message)
         }
