@@ -153,6 +153,8 @@ public func BLBootstrapController(
         // top-level async functions would never catch, but if we never call the controller, they do catch)
         // _ = CBSenderCorrelationController.shared
 
+        sleep(1)
+
         #if DEBUG
         log.debug("Loaded correlation controller. Loading all chats...")
         #endif
