@@ -18,7 +18,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
 
     private weak var registry: CBChatRegistry!
 
-    private let log = Logger(label: "CBChatRegistry")
+    private let log = Logger(label: "IMDaemonListenerBridge")
 
     init(registry: CBChatRegistry) {
         log.debug("Creating IMDaemonListenerBridge with registry \(registry)")
@@ -32,42 +32,49 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
     // MARK: - IMDaemonListenerProtocol
 
     func setupComplete(_ success: Bool, info: [AnyHashable: Any]!) {
+        log.trace("IMDaemonListenerBridge.setupComplete(_:info:)")
         Task {
             await registry.setupComplete(success, info: info)
         }
     }
 
     func chat(_ persistentIdentifier: String!, updated updateDictionary: [AnyHashable: Any]!) {
+        log.trace("IMDaemonListenerBridge.chat(_:updated:)")
         Task {
             await registry.chat(persistentIdentifier, updated: updateDictionary)
         }
     }
 
     func chat(_ persistentIdentifier: String!, propertiesUpdated properties: [AnyHashable: Any]!) {
+        log.trace("IMDaemonListenerBridge.chat(_:propertiesUpdated:)")
         Task {
             await registry.chat(persistentIdentifier, propertiesUpdated: properties)
         }
     }
 
     func chat(_ persistentIdentifier: String!, engramIDUpdated engramID: String!) {
+        log.trace("IMDaemonListenerBridge.chat(_:engramIDUpdated:)")
         Task {
             await registry.chat(persistentIdentifier, engramIDUpdated: engramID)
         }
     }
 
     func chat(_ guid: String!, lastAddressedHandleUpdated lastAddressedHandle: String!) {
+        log.trace("IMDaemonListenerBridge.chat(_:lastAddressedHandleUpdated:)")
         Task {
             await registry.chat(guid, lastAddressedHandleUpdated: lastAddressedHandle)
         }
     }
 
     func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) {
+        log.trace("IMDaemonListenerBridge.chatLoaded(withChatIdentifier:chats:)")
         Task {
             await registry.chatLoaded(withChatIdentifier: chatIdentifier, chats: chatDictionaries)
         }
     }
 
     func lastMessage(forAllChats chatIDToLastMessageDictionary: [AnyHashable: Any]!) {
+        log.trace("IMDaemonListenerBridge.lastMessage(forAllChats:)")
         Task {
             await registry.lastMessage(forAllChats: chatIDToLastMessageDictionary)
         }
@@ -79,6 +86,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
         style chatStyle: IMChatStyle,
         messagesUpdated messages: [[AnyHashable: Any]]!
     ) {
+        log.trace("IMDaemonListenerBridge.service(_:chat:style:messagesUpdated:)")
         Task {
             await registry.service(serviceID, chat: chatIdentifier, style: chatStyle, messagesUpdated: messages)
         }
@@ -91,6 +99,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
         chatProperties properties: [AnyHashable: Any]!,
         error: Error!
     ) {
+        log.trace("IMDaemonListenerBridge.account(_:chat:style:chatProperties:error:)")
         Task {
             await registry
                 .account(
@@ -111,6 +120,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
         notifySentMessage msg: IMMessageItem!,
         sendTime: NSNumber!
     ) {
+        log.trace("IMDaemonListenerBridge.account(_:chat:style:chatProperties:notifySentMessage:sendTime:)")
         Task {
             await registry
                 .account(
@@ -134,6 +144,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
         messagesReceived messages: [IMItem]!,
         messagesComingFromStorage fromStorage: Bool
     ) {
+        log.trace("IMDaemonListenerBridge.account(_:chat:style:chatProperties:groupID:chatPersonCentricID:messagesReceived:messagesComingFromStorage:)")
         Task {
             await registry
                 .account(
@@ -159,6 +170,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
         statusChanged status: FZChatStatus,
         handleInfo: [Any]!
     ) {
+        log.trace("IMDaemonListenerBridge.account(_:chat:style:chatProperties:groupID:chatPersonCentricID:statusChanged:handleInfo:)")
         Task {
             await registry
                 .account(
@@ -183,6 +195,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
         chatPersonCentricID personCentricID: String!,
         messagesReceived messages: [IMItem]!
     ) {
+        log.trace("IMDaemonListenerBridge.account(_:chat:style:chatProperties:groupID:chatPersonCentricID:messagesReceived:)")
         Task {
             await registry
                 .account(
@@ -206,6 +219,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
         chatPersonCentricID personCentricID: String!,
         messageReceived msg: IMItem!
     ) {
+        log.trace("IMDaemonListenerBridge.account(_:chat:style:chatProperties:groupID:chatPersonCentricID:messageReceived:)")
         Task {
             await registry
                 .account(
@@ -229,6 +243,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
         chatPersonCentricID personCentricID: String!,
         messageSent msg: IMMessageItem!
     ) {
+        log.trace("IMDaemonListenerBridge.account(_:chat:style:chatProperties:groupID:chatPersonCentricID:messageSent:)")
         Task {
             await registry
                 .account(
@@ -250,6 +265,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
         chatProperties properties: [AnyHashable: Any]!,
         updateProperties update: [AnyHashable: Any]!
     ) {
+        log.trace("IMDaemonListenerBridge.account(_:chat:style:chatProperties:updateProperties:)")
         Task {
             await registry
                 .account(
@@ -269,6 +285,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
         chatProperties properties: [AnyHashable: Any]!,
         messageUpdated msg: IMItem!
     ) {
+        log.trace("IMDaemonListenerBridge.account(_:chat:style:chatProperties:messageUpdated:)")
         Task {
             await registry
                 .account(
@@ -288,6 +305,7 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
         chatProperties properties: [AnyHashable: Any]!,
         messagesUpdated messages: [NSObject]!
     ) {
+        log.trace("IMDaemonListenerBridge.account(_:chat:style:chatProperties:messagesUpdated:)")
         Task {
             await registry
                 .account(
@@ -301,14 +319,14 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
     }
 
     func loadedChats(_ chats: [[AnyHashable: Any]]!, queryID: String!) {
-        log.info("loadedChats queryID: \(queryID)")
+        log.trace("IMDaemonListenerBridge.loadedChats(_:queryID:)")
         Task {
             await registry.loadedChats(chats, queryID: queryID)
         }
     }
 
     func loadedChats(_ chats: [[AnyHashable: Any]]!) {
-        log.info("loadedChats")
+        log.trace("IMDaemonListenerBridge.loadedChats(_:)")
         Task {
             await registry.loadedChats(chats)
         }
