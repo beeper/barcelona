@@ -490,7 +490,7 @@ extension CBMessage {
                 log.error("Misaligned IMChat/IMMessage/CBChat service when trying to re-send message \(id)!!!!!!")
                 return
             }
-            chat.refreshServiceForSendingIfNeeded()
+            imChat.refreshServiceForSendingIfNeeded()
             log.info("Re-sending message \(id) on chat \(String(describing: imChat.guid))")
             await chat.send(message: message, chat: imChat)
         }
