@@ -20,6 +20,7 @@ options:
   defaultConfig: Debug
   bundleIdPrefix: com.barcelona
   createIntermediateGroups: true
+  usesTabs: false
 
 configFiles:
   Debug: XCSpec/Settings/Barcelona.xcconfig

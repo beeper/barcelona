@@ -151,50 +151,50 @@ func BLResolveIDStatusForIDs(
         log.warning("Some IDs are malformed and will not be queried, partial results will be returned")
     }
 
-	guard !destinations.isEmpty else {
-		return callback([:])
-	}
+    guard !destinations.isEmpty else {
+        return callback([:])
+    }
 
-	log.info(
-		"Requesting ID status from cache for destinations \(destinations.joined(separator: ",")) on service \(service.idsIdentifier)"
-	)
+    log.info(
+        "Requesting ID status from cache for destinations \(destinations.joined(separator: ",")) on service \(service.idsIdentifier)"
+    )
 
-	// Get all the destinations that we have cached values for
-	let cached: [String: IDSState] = Dictionary(uniqueKeysWithValues: destinations.compactMap { dest in
-		BLIDSIDQueryCache.shared.result(for: dest).map { (dest, $0) }
-	})
+    // Get all the destinations that we have cached values for
+    let cached: [String: IDSState] = Dictionary(uniqueKeysWithValues: destinations.compactMap { dest in
+        BLIDSIDQueryCache.shared.result(for: dest).map { (dest, $0) }
+    })
 
-	log.info("Got cached results for \(cached)")
+    log.info("Got cached results for \(cached)")
 
-	// If we already got all of the results from the cache, then just return them
-	guard cached.count < destinations.count else {
-		return callback(cached.mapKeys(\.idsURIStripped))
-	}
+    // If we already got all of the results from the cache, then just return them
+    guard cached.count < destinations.count else {
+        return callback(cached.mapKeys(\.idsURIStripped))
+    }
 
-	log.info(
-		"Requesting ID status from server for destinations \(destinations.joined(separator: ",")) on service \(service.idsIdentifier)"
-	)
+    log.info(
+        "Requesting ID status from server for destinations \(destinations.joined(separator: ",")) on service \(service.idsIdentifier)"
+    )
 
-	IDSIDQueryController.sharedInstance()!
-		.forceRefreshIDStatus(
-			forDestinations: destinations,
-			service: service.idsIdentifier,
-			listenerID: IDSListenerID,
-			queue: HandleQueue
-		) { states in
-			// Since we are requesting the status for all the destinations, just take the returned values
-			let mappedStates = states.mapValues { IDSState(rawValue: $0.intValue) }
+    IDSIDQueryController.sharedInstance()!
+        .forceRefreshIDStatus(
+            forDestinations: destinations,
+            service: service.idsIdentifier,
+            listenerID: IDSListenerID,
+            queue: HandleQueue
+        ) { states in
+            // Since we are requesting the status for all the destinations, just take the returned values
+            let mappedStates = states.mapValues { IDSState(rawValue: $0.intValue) }
 
-			// And then save them to the cache
-			lazy var now = Date()
-			for state in mappedStates {
-				BLIDSIDQueryCache.shared.cache(state.value, for: state.key, time: now)
-			}
+            // And then save them to the cache
+            lazy var now = Date()
+            for state in mappedStates {
+                BLIDSIDQueryCache.shared.cache(state.value, for: state.key, time: now)
+            }
 
-			// And return them in the callback
-			log.debug("forceRefreshIDStatus completed with result: \(mappedStates) (original: \(states))")
-			callback(mappedStates.mapKeys(\.idsURIStripped))
-		}
+            // And return them in the callback
+            log.debug("forceRefreshIDStatus completed with result: \(mappedStates) (original: \(states))")
+            callback(mappedStates.mapKeys(\.idsURIStripped))
+        }
 }
 
 /// Synchronously resolves the latest IDS status for a set of handles on a given service.
