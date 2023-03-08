@@ -40,7 +40,7 @@ actor CBChatRegistry {
 
     init() {
         log.info("init")
-        Task { @MainActor in
+        Task {
             log.info("Registering IMDaemonListenerBridge")
             await IMDaemonController.shared().listener.addHandler(listenerBridge)
         }

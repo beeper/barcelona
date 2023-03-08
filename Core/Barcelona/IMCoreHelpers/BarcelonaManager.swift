@@ -177,7 +177,7 @@ public func BLBootstrapController(
         IMSimulatedDaemonController.beginSimulatingDaemon()
     }
 
-    Task { @MainActor in
+    Task {
         log.info("Waiting for CBChatRegistry to load chats")
         await CBChatRegistry.shared.onLoadedChats {
             CBDaemonListener.shared.startListening()
