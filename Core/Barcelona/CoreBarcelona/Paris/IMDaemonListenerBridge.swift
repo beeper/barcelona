@@ -21,7 +21,12 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
     private let log = Logger(label: "CBChatRegistry")
 
     init(registry: CBChatRegistry) {
+        log.debug("Creating IMDaemonListenerBridge with registry \(registry)")
         self.registry = registry
+    }
+
+    deinit {
+        log.debug("IMDaemonListenerBridge deinit")
     }
 
     // MARK: - IMDaemonListenerProtocol
