@@ -14,7 +14,7 @@ import Logging
 
 private let log = Logger(label: "CBMessage")
 
-public struct CBMessage: Codable, CustomDebugStringConvertible {
+public struct CBMessage: CustomDebugStringConvertible {
     /// The chat this message originated from
     public var chat: CBChatIdentifier
     /// The GUID of this message
@@ -33,7 +33,7 @@ public struct CBMessage: Codable, CustomDebugStringConvertible {
     public var timeDelivered: Date?
     /// The bitflags for this message
     public var flags: Flags = .none
-    public var retryCount: Int? = 0
+    private var retryCount = 0
 
     /// Initializes the message from a dictionary representation
     public init?(dictionary: [AnyHashable: Any], chat: CBChatIdentifier) {
@@ -89,13 +89,13 @@ public struct CBMessage: Codable, CustomDebugStringConvertible {
     private mutating func updated() -> CBMessage {
         if eligibleToResend {
             let id = id
-            if retryCount ?? 0 > 5 {
+            if retryCount > 5 {
                 // TODO does this need to explode more to send a checkpoint?
                 log.warning("\(id) has been retried too many times!")
                 return self
             }
             log.info("\(id) is eligible to resend, trying now")
-            self.retryCount = (self.retryCount ?? 0) + 1
+            retryCount += 1
             resend()
         }
         return self
