@@ -94,7 +94,7 @@ public struct CBMessage: CustomDebugStringConvertible {
                 log.warning("\(id) has been retried too many times!")
                 return self
             }
-            log.info("\(id) is eligible to resend, trying now")
+            log.info("\(id) is eligible to resend, trying in \(retryCount) seconds")
             retryCount += 1
             resend()
         }
@@ -429,6 +429,7 @@ extension CBMessage {
 
     public func resend() {
         Task {
+            try await Task.sleep(nanoseconds: UInt64(retryCount) * 1000000000)
             guard let message = loadIMMessageItem() else {
                 return
             }
