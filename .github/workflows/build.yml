@@ -6,7 +6,7 @@ on:
 jobs:
   mac-builder:
     name: Barcelona macOS
-    runs-on: macos-12
+    runs-on: self-hosted
 
     steps:
       - uses: maxim-lobanov/setup-xcode@v1
