@@ -181,24 +181,7 @@ func BLResolveIDStatusForIDs(
         throw BarcelonaError(code: 500, message: "_IDSIDQueryController is unavailable; our memory tricks don't work anymore")
     }
 
-    controller._idStatus(
-        forDestinations: destinations as NSArray,
-        service: service.idsIdentifier,
-        listenerID: IDSListenerID,
-        allowRenew: true,
-        respectExpiry: true,
-        waitForReply: true,
-        forceRefresh: true,
-        bypassLimit: true
-    ) { (result: CUTResult<NSDictionary>) in
-        guard let states = (result as CUTResult<NSDictionary>).inValue() as? [String: Int64] else {
-            log.error("Failed to get IDS statuses: \(result.inError()?.localizedDescription ?? "Unknown Error")")
-            return callback(allUnavailable)
-        }
-
-        // Since we are requesting the status for all the destinations, just take the returned values
-        let mappedStates = states.mapValues { IDSState(rawValue: $0) }
-
+    let completion: ([String: IDSState]) -> () = { mappedStates in
         // And then save them to the cache
         lazy var now = Date()
         for state in mappedStates {
@@ -206,8 +189,39 @@ func BLResolveIDStatusForIDs(
         }
 
         // And return them in the callback
-        log.debug("forceRefreshIDStatus completed with result: \(mappedStates) (original: \(states))")
+        log.debug("forceRefreshIDStatus completed with result: \(mappedStates)")
         callback(mappedStates.mapKeys(\.idsURIStripped))
+    }
+
+    if #available(macOS 13.0, *) {
+        controller._idStatus(
+            forDestinations: destinations as NSArray,
+            service: service.idsIdentifier,
+            listenerID: IDSListenerID,
+            allowRenew: true,
+            respectExpiry: true,
+            waitForReply: true,
+            forceRefresh: true,
+            bypassLimit: true
+        ) { (result: CUTResult<NSDictionary>) in
+            guard let states = (result as CUTResult<NSDictionary>).inValue() as? [String: Int64] else {
+                log.error("Failed to get IDS statuses: \(result.inError()?.localizedDescription ?? "Unknown Error")")
+                return callback(allUnavailable)
+            }
+
+            // Since we are requesting the status for all the destinations, just take the returned values
+            completion(states.mapValues(IDSState.init(rawValue:)))
+        }
+    } else {
+        IDSIDQueryController.sharedInstance()
+            .forceRefreshIDStatus(
+                forDestinations: destinations,
+                service: service.idsIdentifier,
+                listenerID: IDSListenerID,
+                queue: HandleQueue
+            ) { states in
+                completion(states.mapValues { IDSState.init(rawValue: $0.intValue) })
+            }
     }
 }
 

@@ -11,6 +11,7 @@ import CommonUtilities
 
 @objc public protocol InternalQueryController: NSObjectProtocol {
     // The NSDictionary in the result should be of type [String: Int64]
+    @available(macOS 13.0, *)
     @objc func _idStatus(forDestinations: NSArray, service: String, listenerID: String, allowRenew: Bool, respectExpiry: Bool, waitForReply: Bool, forceRefresh: Bool, bypassLimit: Bool, completionBlock: @escaping (CUTResult<NSDictionary>) -> ())
 
 }

@@ -266,14 +266,14 @@ public class CBDaemonListener: ERBaseDaemonListener {
     public let phantomPipeline = PassthroughSubject<PhantomChatItem, Never>()
     public let messageStatusPipeline = PassthroughSubject<CBMessageStatusChange, Never>()
     public let chatConfigurationPipeline = PassthroughSubject<ChatConfiguration, Never>()
-	public let disconnectPipeline = NotificationCenter.default.publisher(for: .IMDaemonDidDisconnect)
+    public let disconnectPipeline = NotificationCenter.default.publisher(for: .IMDaemonDidDisconnect)
 
-	public private(set) lazy var aggregatePipeline: AnyPublisher<PipelineEvent, Never> = Publishers.MergeMany(
-		unreadCountPipeline.map(PipelineEvent.unreadCount(chat:count:)).eraseToAnyPublisher(),
-		typingPipeline.map(PipelineEvent.typing(chat:service:typing:)).eraseToAnyPublisher(),
-		chatNamePipeline.map(PipelineEvent.chatName(chat:name:)).eraseToAnyPublisher(),
-		chatParticipantsPipeline.map(PipelineEvent.chatParticipants(chat:participants:)).eraseToAnyPublisher(),
-		blocklistPipeline.map(PipelineEvent.blocklist(entries:)).eraseToAnyPublisher(),
+    public private(set) lazy var aggregatePipeline: AnyPublisher<PipelineEvent, Never> = Publishers.MergeMany(
+        unreadCountPipeline.map(PipelineEvent.unreadCount(chat:count:)).eraseToAnyPublisher(),
+        typingPipeline.map(PipelineEvent.typing(chat:service:typing:)).eraseToAnyPublisher(),
+        chatNamePipeline.map(PipelineEvent.chatName(chat:name:)).eraseToAnyPublisher(),
+        chatParticipantsPipeline.map(PipelineEvent.chatParticipants(chat:participants:)).eraseToAnyPublisher(),
+        blocklistPipeline.map(PipelineEvent.blocklist(entries:)).eraseToAnyPublisher(),
         messagesDeletedPipeline.map(PipelineEvent.messagesDeleted(ids:)).eraseToAnyPublisher(),
         chatsDeletedPipeline.map(PipelineEvent.chatsDeleted(chatIDs:)).eraseToAnyPublisher(),
         chatJoinStatePipeline.map(PipelineEvent.chatJoinState(chat:joinState:)).eraseToAnyPublisher(),
@@ -281,7 +281,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
         phantomPipeline.map(PipelineEvent.phantom(_:)).eraseToAnyPublisher(),
         messageStatusPipeline.map(PipelineEvent.messageStatus(_:)).eraseToAnyPublisher(),
         chatConfigurationPipeline.map(PipelineEvent.configuration(_:)).eraseToAnyPublisher()
-	).eraseToAnyPublisher()
+    ).eraseToAnyPublisher()
 
     private override init() {
         super.init()
@@ -299,10 +299,10 @@ public class CBDaemonListener: ERBaseDaemonListener {
     // Dedupes messages sent from self - we should have a cleanup routine for this
     private var nonces = Set<Int>()
 
-	private var bag = Set<AnyCancellable>()
+    private var bag = Set<AnyCancellable>()
 
     private lazy var listenForDisconnectsOnce: AnyCancellable = {
-		disconnectPipeline.sink { _ in self.disconnectedFromDaemon() }
+        disconnectPipeline.sink { _ in self.disconnectedFromDaemon() }
     }()
 
     /// In the event a reflected read receipt is processed immediately before an SMS relay message, it will die. This buffer tracks the n most recent GUIDs, which should support this edge case.
@@ -398,7 +398,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
             }
 
             self.pushToSMSReadBuffer(status.messageID)
-		}.store(in: &bag)
+        }.store(in: &bag)
 
         // Apparently in Ventura, macOS started ignoring certain chats to make the iMessage
         // service more lean, so we have to manually tell the system to listen to all of the
@@ -445,22 +445,22 @@ public class CBDaemonListener: ERBaseDaemonListener {
         }
 
         NotificationCenter.default.addObserver(forName: .IMPeopleAdded, object: nil, queue: nil) { notification in
-			log.debug("IMPeopleAdded: \(notification.object.singleLineDebugDescription), \(notification.userInfo?.singleLineDebugDescription)")
+            log.debug("IMPeopleAdded: \(notification.object.singleLineDebugDescription), \(notification.userInfo?.singleLineDebugDescription)")
         }
 
         NotificationCenter.default.addObserver(forName: .IMChatRegistryDidRegisterChat, object: nil, queue: nil) {
             notification in
-			log.debug("IMChatRegistryDidRegisterChat: \(notification.object.singleLineDebugDescription), \(notification.userInfo?.singleLineDebugDescription)")
+            log.debug("IMChatRegistryDidRegisterChat: \(notification.object.singleLineDebugDescription), \(notification.userInfo?.singleLineDebugDescription)")
         }
 
         NotificationCenter.default.addObserver(forName: .IMHandleStatusChanged, object: nil, queue: nil) {
             notification in
-			log.debug("IMHandleStatusChanged: \(notification.object.singleLineDebugDescription), \(notification.userInfo?.singleLineDebugDescription)")
+            log.debug("IMHandleStatusChanged: \(notification.object.singleLineDebugDescription), \(notification.userInfo?.singleLineDebugDescription)")
         }
 
         NotificationCenter.default.addObserver(forName: .IMChatParticipantsDidChange, object: nil, queue: nil) {
             notification in
-			log.debug("IMChatParticipantsDidChange: \(notification.object.singleLineDebugDescription), \(notification.userInfo?.singleLineDebugDescription)")
+            log.debug("IMChatParticipantsDidChange: \(notification.object.singleLineDebugDescription), \(notification.userInfo?.singleLineDebugDescription)")
         }
 
         #if DEBUG
