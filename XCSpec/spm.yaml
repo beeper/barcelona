@@ -33,8 +33,8 @@ packages:
     url: https://github.com/getsentry/sentry-cocoa
     exactVersion: 8.2.0
   Paris:
-    url: https://github.com/EricRabil/Paris
-    revision: "f3b9efc5e929e2fa4d458bf6b807d9ba61febaf7"
+    url: https://github.com/beeper/Paris
+    revision: "427fc6f61498c89e157bac3117fc4c84bd4d7024"
   SwiftNIO:
     url: https://github.com/apple/swift-nio
     from: 2.0.0
