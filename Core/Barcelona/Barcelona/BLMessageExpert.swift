@@ -85,12 +85,12 @@ public class BLMessageExpert {
     public let eventPipeline = PassthroughSubject<BLMessageEvent, Never>()
 
     public init() {
-		CBDaemonListener.shared.messageStatusPipeline.sink { change in
-			self.queue.async { self.process(change: change) }
-		}.store(in: &bag)
-		CBDaemonListener.shared.messagePipeline.sink { message in
-			self.queue.async { self.process(message: message) }
-		}.store(in: &bag)
+        CBDaemonListener.shared.messageStatusPipeline.sink { change in
+            self.queue.async { self.process(change: change) }
+        }.store(in: &bag)
+        CBDaemonListener.shared.messagePipeline.sink { message in
+            self.queue.async { self.process(message: message) }
+        }.store(in: &bag)
 
         seenMessages.reserveCapacity(100)
     }

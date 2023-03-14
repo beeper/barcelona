@@ -136,7 +136,8 @@ extension Chat {
 
         imChat.refreshServiceForSendingIfNeeded()
 
-        let message = try createMessage.imMessage(inChat: self.id, service: service)
+        //let message = try createMessage.imMessage(inChat: self.id, service: service)
+        let message = try createMessage.newIMMessage(inChat: self.id, service: service)
 
         Chat.delegate?.chat(self, willSendMessages: [message], fromCreateMessage: createMessage)
 

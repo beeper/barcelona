@@ -11,11 +11,18 @@ import IMCore
 import IMSharedUtilities
 import Logging
 
-protocol CreateMessageBase: Codable {
-    var threadIdentifier: String? { get set }
-    var replyToGUID: String? { get set }
-    var replyToPart: Int? { get set }
-    var metadata: Message.Metadata? { get set }
+// protocol CreateMessageBase: Codable {
+protocol CreateMessageBase {
+    var threadIdentifier: String? { get }
+    var replyToGUID: String? { get }
+    var replyToPart: Int? { get }
+    var metadata: Message.Metadata? { get }
+    var combinedFlags: IMMessageFlags { get }
+    var attributedSubject: NSMutableAttributedString? { get }
+    var balloonBundleID: String? { get }
+    var payloadData: Data? { get }
+    var bodyText: NSAttributedString { get }
+    var transferGUIDs: [String] { get }
 
     func imMessage(inChat chatIdentifier: String, service: IMServiceStyle) throws -> IMMessage
     func parseToAttributed() -> MessagePartParseResult
@@ -23,49 +30,28 @@ protocol CreateMessageBase: Codable {
         withThreadIdentifier threadIdentifier: String?,
         withChatIdentifier chatIdentifier: String,
         withParseResult parseResult: MessagePartParseResult
-    ) throws -> (IMMessageItem, NSMutableAttributedString?)
+    ) throws -> IMMessageItem
 }
 
 extension CreateMessageBase {
+    @available(macOS 10.16, *)
     func resolvedThreadIdentifier(chat: IMChat) -> String? {
-        if #available(macOS 10.16, *) {
-            if let threadIdentifier = threadIdentifier {
-                return threadIdentifier
-            } else if let replyToGUID = replyToGUID {
-                return IMChatItem.resolveThreadIdentifier(
-                    forMessageWithGUID: replyToGUID,
-                    part: replyToPart ?? 0,
-                    chat: chat
-                )
-            }
+        if let threadIdentifier = threadIdentifier {
+            return threadIdentifier
+        } else if let replyToGUID = replyToGUID {
+            return IMChatItem.resolveThreadIdentifier(
+                forMessageWithGUID: replyToGUID,
+                part: replyToPart ?? 0,
+                chat: chat
+            )
         }
         return nil
-    }
-
-    func finalize(
-        imMessageItem: IMMessageItem,
-        chat: IMChat,
-        withSubject subject: NSMutableAttributedString?
-    ) throws -> IMMessage {
-        if #available(macOS 10.16, *), chat.account.service == .iMessage() {
-            imMessageItem.setThreadIdentifier(resolvedThreadIdentifier(chat: chat))
-        }
-
-        guard let message = IMMessage.message(fromUnloadedItem: imMessageItem, withSubject: subject) else {
-            throw BarcelonaError(code: 500, message: "Failed to construct IMMessage from IMMessageItem")
-        }
-
-        if let metadata = metadata {
-            message.metadata = metadata
-        }
-
-        return message
     }
 
     public func imMessage(inChat chatIdentifier: String, service: IMServiceStyle) throws -> IMMessage {
         let parseResult = parseToAttributed()
 
-        let (imMessageItem, subject) = try createIMMessageItem(
+        let imMessageItem = try createIMMessageItem(
             withThreadIdentifier: nil,
             withChatIdentifier: chatIdentifier,
             withParseResult: parseResult
@@ -78,12 +64,60 @@ extension CreateMessageBase {
         imMessageItem.service = chat.account.serviceName
         imMessageItem.accountID = chat.account.uniqueID
 
-        return try finalize(imMessageItem: imMessageItem, chat: chat, withSubject: subject)
+        if #available(macOS 10.16, *), chat.account.service == .iMessage() {
+            imMessageItem.setThreadIdentifier(resolvedThreadIdentifier(chat: chat))
+        }
+
+        guard let message = IMMessage.message(fromUnloadedItem: imMessageItem, withSubject: attributedSubject) else {
+            throw BarcelonaError(code: 500, message: "Failed to construct IMMessage from IMMessageItem")
+        }
+
+        if let metadata = metadata {
+            message.metadata = metadata
+        }
+
+        return message
+    }
+
+    @available(macOS 11.0, *)
+    public func newIMMessage(inChat chatId: String, service: IMServiceStyle) throws -> IMMessage {
+        guard let chat = IMChat.chat(withIdentifier: chatId, onService: service, style: nil) else {
+            throw CreateMessageError.noIMChatForIdAndService
+        }
+
+        let message = IMMessage.instantMessage(
+            withText: bodyText,
+            messageSubject: attributedSubject,
+            fileTransferGUIDs: transferGUIDs,
+            flags: combinedFlags.rawValue,
+            threadIdentifier: resolvedThreadIdentifier(chat: chat)
+        )
+
+        guard let myHandle = Registry.sharedInstance.suitableHandle(for: service.rawValue) else {
+            throw CreateMessageError.noHandleForSelf
+        }
+
+        message.sender = myHandle
+
+        if let metadata {
+            message.metadata = metadata
+        }
+
+        if let balloonBundleID {
+            message.balloonBundleID = balloonBundleID
+        }
+
+        if let payloadData {
+            message.payloadData = payloadData
+        }
+
+        return message
     }
 }
 
 enum CreateMessageError: Error {
     case noIMChatForIdAndService
+    case noHandleForSelf
 }
 
 extension Promise {

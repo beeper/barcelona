@@ -11,12 +11,6 @@ import IMCore
 import IMSharedUtilities
 import Logging
 
-private func additionalFlags(forCreation creation: CreateMessage) -> IMMessageFlags {
-    if let _ = creation.ballonBundleID { return .hasDDResults }
-    if let audio = creation.isAudioMessage { if audio { return [.expirable, .audioMessage] } }
-    return []
-}
-
 public enum MessagePartType: String, Codable {
     case text
     case attachment
@@ -53,14 +47,15 @@ extension CreateMessage {
     }
 }
 
-public struct CreateMessage: Codable, CreateMessageBase {
+// public struct CreateMessage: Codable, CreateMessageBase {
+public struct CreateMessage: CreateMessageBase {
     public init(
         subject: String? = nil,
         parts: [MessagePart],
         isAudioMessage: Bool? = nil,
         flags: CLongLong? = nil,
-        ballonBundleID: String? = nil,
-        payloadData: String? = nil,
+        balloonBundleID: String? = nil,
+        // payloadData: String? = nil,
         expressiveSendStyleID: String? = nil,
         threadIdentifier: String? = nil,
         replyToPart: Int? = nil,
@@ -71,59 +66,73 @@ public struct CreateMessage: Codable, CreateMessageBase {
         self.parts = parts
         self.isAudioMessage = isAudioMessage
         self.flags = flags
-        self.ballonBundleID = ballonBundleID
-        self.payloadData = payloadData
+        self.balloonBundleID = balloonBundleID
+        // self.payloadData = payloadData
         self.expressiveSendStyleID = expressiveSendStyleID
         self.threadIdentifier = threadIdentifier
         self.replyToPart = replyToPart
         self.replyToGUID = replyToGUID
         self.metadata = metadata
+
+        let parseResult = ERAttributedString(from: parts)
+        self.bodyText = parseResult.string
+        self.transferGUIDs = parseResult.transferGUIDs
     }
 
     public var subject: String?
     public var parts: [MessagePart]
     public var isAudioMessage: Bool?
     public var flags: CLongLong?
-    public var ballonBundleID: String?
-    public var payloadData: String?
+    public var balloonBundleID: String?
+    // public var payloadData: String?
     public var expressiveSendStyleID: String?
     public var threadIdentifier: String?
     public var replyToGUID: String?
     public var replyToPart: Int?
     public var metadata: Message.Metadata?
-
-    public func parseToAttributed() -> MessagePartParseResult {
-        ERAttributedString(from: self.parts)
-    }
+    public var bodyText: NSAttributedString
+    public var transferGUIDs: [String]
+    let payloadData: Data? = nil
 
     static let baseFlags: IMMessageFlags = [
         .finished, .fromMe, .delivered, .sent, .dataDetected,
     ]
 
+    public var combinedFlags: IMMessageFlags {
+        var additionalFlags: IMMessageFlags {
+            if balloonBundleID != nil { return .hasDDResults }
+            if isAudioMessage == true { return [.expirable, .audioMessage] }
+            return []
+        }
+
+        return Self.baseFlags.union(additionalFlags)
+    }
+
+    public var attributedSubject: NSMutableAttributedString? {
+        subject.map { NSMutableAttributedString(string: $0) }
+    }
+
+    public func parseToAttributed() -> MessagePartParseResult {
+        ERAttributedString(from: self.parts)
+    }
+
     public func createIMMessageItem(
         withThreadIdentifier threadIdentifier: String?,
         withChatIdentifier chatIdentifier: String,
         withParseResult parseResult: MessagePartParseResult
-    ) throws -> (IMMessageItem, NSMutableAttributedString?) {
+    ) throws -> IMMessageItem {
         let text = parseResult.string
-        let fileTransferGUIDs = parseResult.transferGUIDs
 
         if text.length == 0 {
             throw BarcelonaError(code: 400, message: "Cannot send an empty message")
-        }
-
-        var subject: NSMutableAttributedString?
-
-        if let rawSubject = self.subject {
-            subject = NSMutableAttributedString(string: rawSubject)
         }
 
         /** Creates a base message using the computed attributed string */
 
         let messageItem = IMMessageItem.init(sender: nil, time: nil, guid: nil, type: 0)!
         messageItem.body = text
-        messageItem.flags = Self.baseFlags.union(additionalFlags(forCreation: self)).rawValue
+        messageItem.flags = combinedFlags.rawValue
 
-        return (messageItem, subject)
+        return messageItem
     }
 }

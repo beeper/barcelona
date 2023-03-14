@@ -26,12 +26,10 @@ func ERApplyMessageExtensionQuirks(
 }
 #endif
 
-func ERAttributedString(forExtensionOptions options: CreatePluginMessage) -> MessagePartParseResult {
-    var parts: [MessagePart] = []
-
-    if let attachmentID = options.attachmentID {
-        parts.append(.init(type: .attachment, details: attachmentID))
-    }
-
-    return ERAttributedString(from: parts)
+func ERAttributedString(forAttachment attachmentID: String?) -> MessagePartParseResult {
+    ERAttributedString(
+        from: attachmentID.map {
+            [MessagePart(type: .attachment, details: $0)]
+        } ?? []
+    )
 }
