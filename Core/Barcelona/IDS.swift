@@ -8,6 +8,7 @@
 import Foundation
 import IDS
 import Logging
+import CommonUtilities
 
 private let log = Logger(label: "IDS")
 
@@ -175,26 +176,39 @@ func BLResolveIDStatusForIDs(
         "Requesting ID status from server for destinations \(destinations.joined(separator: ",")) on service \(service.idsIdentifier)"
     )
 
-    IDSIDQueryController.sharedInstance()!
-        .forceRefreshIDStatus(
-            forDestinations: destinations,
-            service: service.idsIdentifier,
-            listenerID: IDSListenerID,
-            queue: HandleQueue
-        ) { states in
-            // Since we are requesting the status for all the destinations, just take the returned values
-            let mappedStates = states.mapValues { IDSState(rawValue: $0.intValue) }
+    // I honestly don't know for certain that this method is available on macOS below monterey, so we're just trusting here.
+    guard let controller = IDSIDQueryController.sharedInstance().internalController else {
+        throw BarcelonaError(code: 500, message: "_IDSIDQueryController is unavailable; our memory tricks don't work anymore")
+    }
 
-            // And then save them to the cache
-            lazy var now = Date()
-            for state in mappedStates {
-                BLIDSIDQueryCache.shared.cache(state.value, for: state.key, time: now)
-            }
-
-            // And return them in the callback
-            log.debug("forceRefreshIDStatus completed with result: \(mappedStates) (original: \(states))")
-            callback(mappedStates.mapKeys(\.idsURIStripped))
+    controller._idStatus(
+        forDestinations: destinations as NSArray,
+        service: service.idsIdentifier,
+        listenerID: IDSListenerID,
+        allowRenew: true,
+        respectExpiry: true,
+        waitForReply: true,
+        forceRefresh: true,
+        bypassLimit: true
+    ) { (result: CUTResult<NSDictionary>) in
+        guard let states = (result as CUTResult<NSDictionary>).inValue() as? [String: Int64] else {
+            log.error("Failed to get IDS statuses: \(result.inError()?.localizedDescription ?? "Unknown Error")")
+            return callback(allUnavailable)
         }
+
+        // Since we are requesting the status for all the destinations, just take the returned values
+        let mappedStates = states.mapValues { IDSState(rawValue: $0) }
+
+        // And then save them to the cache
+        lazy var now = Date()
+        for state in mappedStates {
+            BLIDSIDQueryCache.shared.cache(state.value, for: state.key, time: now)
+        }
+
+        // And return them in the callback
+        log.debug("forceRefreshIDStatus completed with result: \(mappedStates) (original: \(states))")
+        callback(mappedStates.mapKeys(\.idsURIStripped))
+    }
 }
 
 /// Synchronously resolves the latest IDS status for a set of handles on a given service.

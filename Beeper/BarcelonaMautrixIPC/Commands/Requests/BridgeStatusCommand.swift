@@ -279,12 +279,12 @@ extension BridgeStatusCommand {
             }
         }()
 
-		let aliases = allAddresses.map {
-			[
-				"alias": $0,
-				"active": (account?._aliasInfo(forAlias: $0) as? [String: Any])?["Status"] as? Int64 == 3
-			]
-		}
+        let aliases = allAddresses.map {
+            [
+                "alias": $0,
+                "active": account?._aliasInfo(forAlias: $0)?["Status"] as? Int64 == 3
+            ]
+        }
 
         return BridgeStatusCommand(
             state_event: state,
@@ -296,12 +296,12 @@ extension BridgeStatusCommand {
             remote_name: fullName,  // Account Name
             info: [
                 "sms_forwarding_enabled": IMAccountController.shared.accounts(for: .sms())?.first?.allowsSMSRelay == true,
-				"sms_forwarding_capable": IMAccountController.shared.accounts(for: .sms())?.first?.isSMSRelayCapable == true,
+                "sms_forwarding_capable": IMAccountController.shared.accounts(for: .sms())?.first?.isSMSRelayCapable == true,
                 "active_alias_acount": addresses.count,
                 "active_phone_number_count": addresses.filter(\.isPhoneNumber).count,
                 "active_email_count": addresses.filter(\.isEmail).count,
                 "alias_count": allAddresses.count,
-				"aliases": aliases,
+                "aliases": aliases,
                 "phone_number_count": allAddresses.filter(\.isPhoneNumber).count,
                 "email_count": allAddresses.filter(\.isEmail).count,
                 "loginStatusMessage": account?.loginStatusMessage,
