@@ -6,26 +6,29 @@
 //  Copyright © 2021 Eric Rabil. All rights reserved.
 //
 
+import Barcelona
 import BarcelonaFoundation
 import Combine
 import Foundation
 
 public class BLPayloadReader {
     private let ipcChannel: MautrixIPCChannel
+    private let chatRegistry: CBChatRegistry
 
     private var queue = [IPCPayload]()
 
     private var bag = Set<AnyCancellable>()
 
-    public init(ipcChannel: MautrixIPCChannel) {
+    public init(ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) {
         self.ipcChannel = ipcChannel
+        self.chatRegistry = chatRegistry
 
         ipcChannel.receivedPayloads
             .sink { [weak self] in
                 guard let self else { return }
 
                 if self.ready {
-                    BLHandlePayload($0, ipcChannel: ipcChannel)
+                    BLHandlePayload($0, ipcChannel: ipcChannel, chatRegistry: chatRegistry)
                 } else {
                     self.queue.append($0)
                 }
@@ -41,7 +44,7 @@ public class BLPayloadReader {
         didSet {
             let queue = queue
 
-            queue.forEach { BLHandlePayload($0, ipcChannel: self.ipcChannel) }
+            queue.forEach { BLHandlePayload($0, ipcChannel: ipcChannel, chatRegistry: chatRegistry) }
         }
     }
 }
