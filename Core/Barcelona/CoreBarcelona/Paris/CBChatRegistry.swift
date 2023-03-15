@@ -108,7 +108,11 @@ actor CBChatRegistry {
     ) {
         trace(chatIdentifier, nil, "messages updated \(messages.singleLineDebugDescription)")
         messages.forEach {
-            handle(chat: .chatIdentifier(chatIdentifier), item: $0)
+            do {
+                try handle(chat: .chatIdentifier(chatIdentifier), item: $0)
+            } catch {
+                log.error("Could not handle item: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -131,7 +135,11 @@ actor CBChatRegistry {
         sendTime: NSNumber!
     ) {
         trace(chatIdentifier, nil, "sent message \(msg.guid ?? "nil") \(msg.singleLineDebugDescription)")
-        handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
+        do {
+            try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
+        } catch {
+            log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
+        }
     }
 
     func account(
@@ -146,7 +154,11 @@ actor CBChatRegistry {
     ) {
         trace(chatIdentifier, personCentricID, "received \(messages!) from storage \(fromStorage)")
         messages.forEach {
-            handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: $0)
+            do {
+                try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: $0)
+            } catch {
+                log.error("Could not handle message \($0.guid ?? "nil"): \(error.localizedDescription)")
+            }
         }
     }
 
@@ -172,7 +184,11 @@ actor CBChatRegistry {
     ) {
         trace(chatIdentifier, personCentricID, "received \(messages!)")
         messages.forEach {
-            handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: $0)
+            do {
+                try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: $0)
+            } catch {
+                log.error("Could not handle message \($0.guid ?? "nil"): \(error.localizedDescription)")
+            }
         }
     }
 
@@ -186,7 +202,11 @@ actor CBChatRegistry {
         messageReceived msg: IMItem!
     ) {
         trace(chatIdentifier, personCentricID, "received message \(msg.singleLineDebugDescription)")
-        handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
+        do {
+            try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
+        } catch {
+            log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
+        }
     }
 
     func account(
@@ -199,7 +219,11 @@ actor CBChatRegistry {
         messageSent msg: IMMessageItem!
     ) {
         trace(chatIdentifier, personCentricID, "sent message \(msg)")
-        handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
+        do {
+            try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
+        } catch {
+            log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
+        }
     }
 
     func account(
@@ -224,7 +248,11 @@ actor CBChatRegistry {
         messageUpdated msg: IMItem!
     ) {
         trace(chatIdentifier, nil, "message updated \(msg)")
-        handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
+        do {
+            try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
+        } catch {
+            log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
+        }
     }
 
     func account(
@@ -236,7 +264,11 @@ actor CBChatRegistry {
     ) {
         trace(chatIdentifier, nil, "messages updated \((messages! as NSArray).singleLineDebugDescription)")
         messages.forEach {
-            handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: $0)
+            do {
+                try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: $0)
+            } catch {
+                log.error("Could not handle message: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -278,44 +310,44 @@ actor CBChatRegistry {
 
     // MARK: - Handling
 
-    private func handle(chat: [AnyHashable: Any], item: IMItem) -> Bool {
+    private func handle(chat: [AnyHashable: Any], item: IMItem) throws -> Bool {
         guard let identifier = handle(chat: chat).1 else {
             log.warning("cant handle message \(item) via chat dictionary: couldnt find a chat for it")
             return false
         }
-        handle(chat: identifier, item: item)
+        try handle(chat: identifier, item: item)
         return true
     }
 
-    private func handle(chat: CBChatIdentifier, item: IMItem) {
+    private func handle(chat: CBChatIdentifier, item: IMItem) throws {
         if let guid = item.guid, !messageIDReverseLookup.keys.contains(guid) {
             messageIDReverseLookup[guid] = chat
         }
         if let cbChat = chats[chat] {
-            cbChat.handle(leaf: chat, item: item)
+            try cbChat.handle(leaf: chat, item: item)
         } else {
             log.info("where is chat?!")
         }
     }
 
-    private func handle(chat: CBChatIdentifier, item: [AnyHashable: Any]) {
+    private func handle(chat: CBChatIdentifier, item: [AnyHashable: Any]) throws {
         if let guid = item["guid"] as? String, !messageIDReverseLookup.keys.contains(guid) {
             messageIDReverseLookup[guid] = chat
         }
         if let cbChat = chats[chat] {
-            cbChat.handle(leaf: chat, item: item)
+            try cbChat.handle(leaf: chat, item: item)
         } else {
             log.info("where is chat?!")
         }
     }
 
     @_disfavoredOverload
-    private func handle(chat: CBChatIdentifier, item: NSObject) {
+    private func handle(chat: CBChatIdentifier, item: NSObject) throws {
         switch item {
         case let item as IMItem:
-            handle(chat: chat, item: item)
+            try handle(chat: chat, item: item)
         case let item as [AnyHashable: Any]:
-            handle(chat: chat, item: item)
+            try handle(chat: chat, item: item)
         case let item:
             preconditionFailure(
                 "This method only accepts IMItem subclasses or dictionaries, but you gave me \(String(describing: type(of: item)))"
@@ -352,7 +384,12 @@ actor CBChatRegistry {
         return (cbChat, leaf.mostUniqueIdentifier)
     }
 
-    private func handle(chatIdentifier: String?, properties: [AnyHashable: Any]?, groupID: String?, item: NSObject) {
+    private func handle(
+        chatIdentifier: String?,
+        properties: [AnyHashable: Any]?,
+        groupID: String?,
+        item: NSObject
+    ) throws {
         lazy var guid: String? = {
             switch item {
             case let item as IMItem:
@@ -412,7 +449,7 @@ actor CBChatRegistry {
             trace(chatIdentifier, nil, "dropping message \(guid ?? "nil") because i cant find the chat its for?!")
             return
         }
-        handle(chat: chatID, item: item)
+        try handle(chat: chatID, item: item)
     }
 
     // MARK: - Private
