@@ -20,11 +20,14 @@ class BarcelonaMautrix {
     private let mautrixIPCChannel: MautrixIPCChannel
     private let reader: BLPayloadReader
     private let eventHandler: BLEventHandler
+    private let chatRegistry: CBChatRegistry
 
     init(_ mautrixIPCChannel: MautrixIPCChannel) {
         self.mautrixIPCChannel = mautrixIPCChannel
-        reader = BLPayloadReader(ipcChannel: mautrixIPCChannel)
+        let chatRegistry = CBChatRegistry()
+        reader = BLPayloadReader(ipcChannel: mautrixIPCChannel, chatRegistry: chatRegistry)
         eventHandler = BLEventHandler(ipcChannel: mautrixIPCChannel)
+        self.chatRegistry = chatRegistry
     }
 
     static private func configureSentry(dsn: String) {
@@ -125,7 +128,7 @@ class BarcelonaMautrix {
         let bootstrapSpan = startupSpan?.startChild(operation: "bootstrap")
         log.info("Bootstrapping")
 
-        BarcelonaManager.shared.bootstrap()
+        BarcelonaManager.shared.bootstrap(chatRegistry: chatRegistry)
             .catch { error in
                 log.error("fatal error while setting up barcelona: \(String(describing: error))")
                 startupSpan?.finish(status: .internalError)

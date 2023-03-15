@@ -17,13 +17,11 @@ import Logging
 private let IMCopyThreadNameForChat: (@convention(c) (String, String, IMChatStyle) -> Unmanaged<NSString>)? =
     CBWeakLink(against: .privateFramework(name: "IMFoundation"), .symbol("IMCopyThreadNameForChat"))
 
-actor CBChatRegistry {
+public actor CBChatRegistry {
 
     // MARK: - Properties
 
-    static let shared = CBChatRegistry()
-
-    var chats: [CBChatIdentifier: CBChat] = [:]
+    public var chats: [CBChatIdentifier: CBChat] = [:]
 
     private var allChats: [ObjectIdentifier: CBChat] = [:]
     private var messageIDReverseLookup: [String: CBChatIdentifier] = [:]
@@ -38,7 +36,7 @@ actor CBChatRegistry {
 
     // MARK: - Initializers
 
-    init() {
+    public init() {
         log.info("init")
         Task {
             log.info("Registering IMDaemonListenerBridge")
@@ -324,7 +322,7 @@ actor CBChatRegistry {
             messageIDReverseLookup[guid] = chat
         }
         if let cbChat = chats[chat] {
-            try cbChat.handle(leaf: chat, item: item)
+            try cbChat.handle(chat: cbChat, item: item)
         } else {
             log.info("where is chat?!")
         }
@@ -335,7 +333,7 @@ actor CBChatRegistry {
             messageIDReverseLookup[guid] = chat
         }
         if let cbChat = chats[chat] {
-            try cbChat.handle(leaf: chat, item: item)
+            try cbChat.handle(chat: cbChat, item: item)
         } else {
             log.info("where is chat?!")
         }
