@@ -344,7 +344,7 @@ extension CBMessage {
     }
 
     /// Initializes the message using an `IMMessageItem` instance
-    public init(item: IMMessageItem, chat: CBChat) throws {
+    public init(item: IMMessageItem, chat: CBChat?) throws {
         self.id = item.id
         try handle(item: item, in: chat)
     }
