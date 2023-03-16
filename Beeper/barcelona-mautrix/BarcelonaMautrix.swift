@@ -8,6 +8,7 @@
 
 import Barcelona
 import BarcelonaMautrixIPC
+import Combine
 import Foundation
 import IMCore
 import Logging
@@ -21,6 +22,8 @@ class BarcelonaMautrix {
     private let reader: BLPayloadReader
     private let eventHandler: BLEventHandler
     private let chatRegistry: CBChatRegistry
+
+    private var cancellables = Set<AnyCancellable>()
 
     init(_ mautrixIPCChannel: MautrixIPCChannel) {
         self.mautrixIPCChannel = mautrixIPCChannel

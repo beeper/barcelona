@@ -35,6 +35,25 @@ public class BLPayloadReader {
             }
             .store(in: &bag)
 
+        Task {
+            await chatRegistry.failedMessages
+                .sink { messageInfo in
+                    ipcChannel.writePayload(
+                        IPCPayload(
+                            command: .send_message_status(
+                                .init(
+                                    guid: messageInfo.guid,
+                                    chatGUID: messageInfo.chatGUID,
+                                    status: .failed,
+                                    service: ""
+                                )
+                            )
+                        )
+                    )
+                }
+                .store(in: &bag)
+        }
+
         if ProcessInfo.processInfo.arguments.contains("-d") {
             self.ready = true
         }
