@@ -7,6 +7,7 @@
 
 import Foundation
 import IDS
+import IDSFoundation
 import Logging
 import CommonUtilities
 
@@ -176,11 +177,6 @@ func BLResolveIDStatusForIDs(
         "Requesting ID status from server for destinations \(destinations.joined(separator: ",")) on service \(service.idsIdentifier)"
     )
 
-    // I honestly don't know for certain that this method is available on macOS below monterey, so we're just trusting here.
-    guard let controller = IDSIDQueryController.sharedInstance().internalController else {
-        throw BarcelonaError(code: 500, message: "_IDSIDQueryController is unavailable; our memory tricks don't work anymore")
-    }
-
     let completion: ([String: IDSState]) -> () = { mappedStates in
         // And then save them to the cache
         lazy var now = Date()
@@ -193,35 +189,29 @@ func BLResolveIDStatusForIDs(
         callback(mappedStates.mapKeys(\.idsURIStripped))
     }
 
-    if #available(macOS 13.0, *) {
-        controller._idStatus(
-            forDestinations: destinations as NSArray,
-            service: service.idsIdentifier,
-            listenerID: IDSListenerID,
-            allowRenew: true,
-            respectExpiry: true,
-            waitForReply: true,
-            forceRefresh: true,
-            bypassLimit: true
-        ) { (result: CUTResult<NSDictionary>) in
-            guard let states = (result as CUTResult<NSDictionary>).inValue() as? [String: Int64] else {
-                log.error("Failed to get IDS statuses: \(result.inError()?.localizedDescription ?? "Unknown Error")")
-                return callback(allUnavailable)
-            }
+    let sharedController: IDSIDQueryController = IDSIDQueryController.sharedInstance()!
 
-            // Since we are requesting the status for all the destinations, just take the returned values
-            completion(states.mapValues(IDSState.init(rawValue:)))
+    if #available(macOS 13.0, *) {
+        sharedController.idInfo(
+            forDestinations: destinations,
+            service: service.idsIdentifier,
+            // I don't quite know what `infoTypes` is asking for, but ChatKit passes in 0x2
+            infoTypes: 0x2,
+            options: .refreshIDInfo(),
+            listenerID: IDSListenerID,
+            queue: HandleQueue
+        ) {
+            callback($0.mapValues { IDSState(rawValue: $0.status()) })
         }
     } else {
-        IDSIDQueryController.sharedInstance()
-            .forceRefreshIDStatus(
-                forDestinations: destinations,
-                service: service.idsIdentifier,
-                listenerID: IDSListenerID,
-                queue: HandleQueue
-            ) { states in
-                completion(states.mapValues { IDSState.init(rawValue: $0.intValue) })
-            }
+        sharedController.forceRefreshIDStatus(
+            forDestinations: destinations,
+            service: service.idsIdentifier,
+            listenerID: IDSListenerID,
+            queue: HandleQueue
+        ) { states in
+            completion(states.mapValues { IDSState.init(rawValue: $0.intValue) })
+        }
     }
 }
 
