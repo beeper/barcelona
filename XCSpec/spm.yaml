@@ -34,7 +34,7 @@ packages:
     exactVersion: 8.2.0
   Paris:
     url: https://github.com/beeper/Paris
-    revision: "427fc6f61498c89e157bac3117fc4c84bd4d7024"
+    revision: "15737720158bf0827657896a1e71d8a1a4ef3128"
   SwiftNIO:
     url: https://github.com/apple/swift-nio
     from: 2.0.0
