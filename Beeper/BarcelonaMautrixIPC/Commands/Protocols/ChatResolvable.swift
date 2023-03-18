@@ -29,8 +29,7 @@ extension ChatResolvable {
                 if id.isPhoneNumber || id.isEmail || id.isBusinessID {
                     return await Chat.directMessage(withHandleID: id, service: service).imChat
                 } else {
-                    parsed.service = service == .iMessage ? "SMS" : "iMessage"
-                    return IMChatRegistry.shared.existingChat(withGUID: parsed.description)
+                    return nil
                 }
             }
         }
