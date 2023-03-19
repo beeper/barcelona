@@ -9,6 +9,9 @@
 import Barcelona
 import Foundation
 import IMCore
+import Logging
+
+private let log = Logger(label: "ChatResolvable")
 
 protocol ChatResolvable {
     var chat_guid: String { get set }
@@ -27,11 +30,15 @@ extension ChatResolvable {
                 let id = parsed.last
 
                 if id.isPhoneNumber || id.isEmail || id.isBusinessID {
-                    return await Chat.directMessage(withHandleID: id, service: service).imChat
-                } else {
-                    return nil
+                    if let dmChat = await Chat.directMessage(withHandleID: id, service: service).imChat {
+                        log.warning("No chat found for \(chat_guid) but using directMessage chat for \(id)")
+                        return dmChat
+                    }
                 }
             }
+
+            log.warning("No chat found for \(chat_guid)")
+            return nil
         }
     }
 
