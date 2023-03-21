@@ -26,12 +26,10 @@ enum TapbackError: CustomNSError {
     case createInstantMessageFailed
     /// Couldn't create the content for the tapback message.
     case createSuperFormatFailed
-    /// The IMChat that we're trying to send in can't retrieve an IMHandle associated with its lastAddressedHandleID
-    case noHandleForLastAddressedID
 
     var error: String {
         switch self {
-        case .unknownMessage(_):
+        case .unknownMessage(let guid):
             return "Unknown message"
         case .unknownSubpart:
             return "Unknown subpart"
@@ -43,8 +41,6 @@ enum TapbackError: CustomNSError {
             return "Couldn't create instantMessage to send in chat"
         case .createSuperFormatFailed:
             return "Couldn't create the content for the tapback message"
-        case .noHandleForLastAddressedID:
-            return "Couldn't find valid sender IMHandle"
         }
     }
 
@@ -53,11 +49,7 @@ enum TapbackError: CustomNSError {
     }
 }
 
-public extension IMChat {
-    var senderHandle: IMHandle? {
-        lastAddressedHandleID.flatMap { account.imHandle(withID: $0, alreadyCanonical: false) }
-    }
-
+extension IMChat {
     /// Sends a tapback for a given message, calling back with a Vapor abort if the operation fails. This must be invoked on the main thread.
     @MainActor
     public func tapback(
@@ -140,11 +132,6 @@ public extension IMChat {
             throw TapbackError.createInstantMessageFailed
         }
 
-        guard let senderHandle else {
-            throw TapbackError.noHandleForLastAddressedID
-        }
-        message.sender = senderHandle
-
         send(message)
 
         return message
@@ -198,11 +185,6 @@ public extension IMChat {
         if let metadata {
             toSendMessage.metadata = metadata
         }
-
-        guard let senderHandle else {
-            throw TapbackError.noHandleForLastAddressedID
-        }
-        toSendMessage.sender = senderHandle
 
         send(toSendMessage)
 

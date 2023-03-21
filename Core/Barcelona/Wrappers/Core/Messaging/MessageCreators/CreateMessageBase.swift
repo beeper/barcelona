@@ -78,20 +78,12 @@ extension CreateMessageBase {
         imMessageItem.service = chat.account.serviceName
         imMessageItem.accountID = chat.account.uniqueID
 
-        let imMessage =  try finalize(imMessageItem: imMessageItem, chat: chat, withSubject: subject)
-
-        guard let senderHandle = chat.senderHandle else {
-            throw CreateMessageError.noHandleForLastAddressedID
-        }
-        imMessage.sender = senderHandle
-
-        return imMessage
+        return try finalize(imMessageItem: imMessageItem, chat: chat, withSubject: subject)
     }
 }
 
 enum CreateMessageError: Error {
     case noIMChatForIdAndService
-    case noHandleForLastAddressedID
 }
 
 extension Promise {
