@@ -45,7 +45,9 @@ public class BLPayloadReader {
                                     guid: messageInfo.guid,
                                     chatGUID: messageInfo.chatGUID,
                                     status: .failed,
-                                    service: messageInfo.service
+                                    service: messageInfo.service,
+                                    message: messageInfo.error.localizedDescription,
+                                    statusCode: (messageInfo.error as? CustomNSError)?.errorUserInfo[NSDebugDescriptionErrorKey] as? String
                                 )
                             )
                         )

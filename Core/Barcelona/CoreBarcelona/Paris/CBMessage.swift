@@ -14,9 +14,27 @@ import Logging
 
 private let log = Logger(label: "CBMessage")
 
-enum CBMessageError: Error {
+enum CBMessageError: CustomNSError, LocalizedError {
     /// Retried too many times without success.
-    case exceededRetries
+    case exceededRetries(underlyingError: FZErrorType)
+
+    var error: String {
+        switch self {
+        case .exceededRetries(underlyingError: let fzErrorType):
+            return "exceededRetries: \(fzErrorType.description)"
+        }
+    }
+
+    var errorUserInfo: [String: Any] {
+        [NSDebugDescriptionErrorKey: error]
+    }
+
+    var errorDescription: String? {
+        switch self {
+        case .exceededRetries(underlyingError: let fzErrorType):
+            return fzErrorType.localizedDescription
+        }
+    }
 }
 
 public struct CBMessage: CustomDebugStringConvertible {
@@ -95,7 +113,7 @@ public struct CBMessage: CustomDebugStringConvertible {
         if eligibleToResend {
             let id = id
             if retryCount > 5 {
-                throw CBMessageError.exceededRetries
+                throw CBMessageError.exceededRetries(underlyingError: error)
             }
             log.info("\(id) is eligible to resend, trying in \(retryCount) seconds")
             retryCount += 1

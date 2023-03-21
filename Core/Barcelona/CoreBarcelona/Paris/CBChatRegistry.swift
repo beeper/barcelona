@@ -13,6 +13,7 @@ import IMDPersistence
 import IMFoundation
 import IMSharedUtilities
 import Logging
+import Sentry
 
 private let IMCopyThreadNameForChat: (@convention(c) (String, String, IMChatStyle) -> Unmanaged<NSString>)? =
     CBWeakLink(against: .privateFramework(name: "IMFoundation"), .symbol("IMCopyThreadNameForChat"))
@@ -23,7 +24,7 @@ public actor CBChatRegistry {
 
     public var chats: [CBChatIdentifier: CBChat] = [:]
 
-    public let failedMessages = PassthroughSubject<(guid: String, chatGUID: String, service: String), Never>()
+    public let failedMessages = PassthroughSubject<(guid: String, chatGUID: String, service: String, error: Error), Never>()
 
     private var allChats: [ObjectIdentifier: CBChat] = [:]
     private var messageIDReverseLookup: [String: CBChatIdentifier] = [:]
@@ -111,9 +112,10 @@ public actor CBChatRegistry {
             do {
                 try handle(chat: .chatIdentifier(chatIdentifier), item: $0)
             } catch {
+                SentrySDK.capture(error: error)
                 let chatGUID = "\(serviceID ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
                 failedMessages.send(
-                    (guid: $0["guid"] as? String ?? "nil", chatGUID: chatGUID, service: serviceID)
+                    (guid: $0["guid"] as? String ?? "nil", chatGUID: chatGUID, service: serviceID, error: error)
                 )
                 log.error("Could not handle item: \(error.localizedDescription)")
             }
@@ -142,8 +144,9 @@ public actor CBChatRegistry {
         do {
             try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
         } catch {
+            SentrySDK.capture(error: error)
             let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
-            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service))
+            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service, error: error))
             log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
         }
     }
@@ -163,8 +166,9 @@ public actor CBChatRegistry {
             do {
                 try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: $0)
             } catch {
+                SentrySDK.capture(error: error)
                 let chatGUID = "\($0.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
-                failedMessages.send((guid: $0.guid, chatGUID: chatGUID, service: $0.service))
+                failedMessages.send((guid: $0.guid, chatGUID: chatGUID, service: $0.service, error: error))
                 log.error("Could not handle message \($0.guid ?? "nil"): \(error.localizedDescription)")
             }
         }
@@ -195,8 +199,9 @@ public actor CBChatRegistry {
             do {
                 try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: $0)
             } catch {
+                SentrySDK.capture(error: error)
                 let chatGUID = "\($0.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
-                failedMessages.send((guid: $0.guid, chatGUID: chatGUID, service: $0.service))
+                failedMessages.send((guid: $0.guid, chatGUID: chatGUID, service: $0.service, error: error))
                 log.error("Could not handle message \($0.guid ?? "nil"): \(error.localizedDescription)")
             }
         }
@@ -215,8 +220,9 @@ public actor CBChatRegistry {
         do {
             try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
         } catch {
+            SentrySDK.capture(error: error)
             let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
-            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service))
+            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service, error: error))
             log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
         }
     }
@@ -234,8 +240,9 @@ public actor CBChatRegistry {
         do {
             try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
         } catch {
+            SentrySDK.capture(error: error)
             let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
-            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service))
+            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service, error: error))
             log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
         }
     }
@@ -265,8 +272,9 @@ public actor CBChatRegistry {
         do {
             try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
         } catch {
+            SentrySDK.capture(error: error)
             let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
-            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service))
+            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service, error: error))
             log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
         }
     }
@@ -283,6 +291,7 @@ public actor CBChatRegistry {
             do {
                 try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: $0)
             } catch {
+                SentrySDK.capture(error: error)
                 let item = $0
                 lazy var guid: String? = {
                     switch item {
@@ -306,7 +315,7 @@ public actor CBChatRegistry {
                 }()
                 if let guid, let service {
                     let chatGUID = "\(service);\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
-                    failedMessages.send((guid: guid, chatGUID: chatGUID, service: service))
+                    failedMessages.send((guid: guid, chatGUID: chatGUID, service: service, error: error))
                 }
                 log.error("Could not handle message: \(error.localizedDescription)")
             }
