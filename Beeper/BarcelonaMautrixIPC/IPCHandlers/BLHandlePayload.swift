@@ -46,7 +46,7 @@ extension IPCPayload {
     }
 }
 
-func BLHandlePayload(_ payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
+func BLHandlePayload(_ payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) {
     guard let runnable = payload.runnable else {
         return log.warning("Received unhandleable payload type \(payload.command.name)")
     }
@@ -67,6 +67,6 @@ func BLHandlePayload(_ payload: IPCPayload, ipcChannel: MautrixIPCChannel) {
     }
 
     Task { @MainActor in
-        await runnable.run(payload: payload, ipcChannel: ipcChannel)
+        await runnable.run(payload: payload, ipcChannel: ipcChannel, chatRegistry: chatRegistry)
     }
 }

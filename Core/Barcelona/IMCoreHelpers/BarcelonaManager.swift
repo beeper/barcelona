@@ -91,13 +91,11 @@ func BLTeardown() {
     controller.disconnectFromDaemon()
 }
 
-@_cdecl("BLBootstrapController")
 public func BLBootstrapController(
-    _ callbackC: (@convention(c) (Bool) -> Void)? = nil,
+    chatRegistry: CBChatRegistry,
     _ callbackSwift: (@Sendable (Bool) -> Void)? = nil
 ) -> Bool {
     guard BLSwizzleDaemonController() else {
-        callbackC?(false)
         callbackSwift?(false)
         return false
     }
@@ -135,7 +133,6 @@ public func BLBootstrapController(
     controller.listener.addHandler(CBDaemonListener.shared)
 
     _ = CBFileTransferCenter.shared
-    _ = CBChatRegistry.shared
 
     RunLoop.main.schedule {
         log.info("Connecting to daemon...")
@@ -179,9 +176,8 @@ public func BLBootstrapController(
 
     Task {
         log.info("Waiting for CBChatRegistry to load chats")
-        await CBChatRegistry.shared.onLoadedChats {
+        await chatRegistry.onLoadedChats {
             CBDaemonListener.shared.startListening()
-            callbackC?(true)
             callbackSwift?(true)
             log.info("All systems go!")
         }
@@ -201,14 +197,14 @@ public class BarcelonaManager {
         BLTeardownController()
     }
 
-    public func bootstrap() -> Bool {
-        BLBootstrapController()
+    public func bootstrap(chatRegistry: CBChatRegistry) -> Bool {
+        BLBootstrapController(chatRegistry: chatRegistry)
     }
 
-    public func bootstrap() -> Promise<Bool> {
+    public func bootstrap(chatRegistry: CBChatRegistry) -> Promise<Bool> {
         let lifetime = BarcelonaManager.bootstrapTimeout
         return Promise<Bool> { resolve in
-            guard BLBootstrapController(nil, resolve) else {
+            guard BLBootstrapController(chatRegistry: chatRegistry, resolve) else {
                 return resolve(false)
             }
         }

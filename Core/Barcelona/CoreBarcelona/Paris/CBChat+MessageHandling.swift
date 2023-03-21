@@ -23,22 +23,22 @@ extension CBChat {
             }
         }
 
-        public func handle(message: CBMessage?, leaf: CBChatIdentifier) -> CBMessage {
+        public func handle(message: CBMessage?, chat: CBChat) throws -> CBMessage {
             var message = message
             switch self {
             case .item(let item):
                 if message != nil {
-                    message!.handle(item: item)
+                    try message!.handle(item: item, in: chat)
                     return message!
                 }
-                message = CBMessage(item: item, chat: leaf)
+                message = try CBMessage(item: item, chat: chat)
                 return message!
             case .dict(let dict):
                 if message != nil {
-                    message!.handle(dictionary: dict)
+                    try message!.handle(dictionary: dict, in: chat)
                     return message!
                 }
-                message = CBMessage(dictionary: dict, chat: leaf)
+                message = try CBMessage(dictionary: dict, chat: chat)
                 return message!
             }
         }
@@ -60,24 +60,27 @@ extension CBChat {
         }
     }
 
-    @discardableResult public func handle(leaf: CBChatIdentifier, input item: MessageInput) -> CBMessage? {
+    @discardableResult public func handle(chat: CBChat, input item: MessageInput) throws -> CBMessage? {
         guard let id = item.guid else {
             log.warning("dropping message \(item.debugDescription) as it has an invalid guid?!")
             return nil
         }
-        let handledMessage = item.handle(message: messages[id], leaf: leaf)
+        let handledMessage = try item.handle(message: messages[id], chat: chat)
         messages[id] = handledMessage
         log.info("handled message \(id), \(handledMessage.debugDescription)")
         return handledMessage
     }
 
-    @discardableResult public func handle(leaf: CBChatIdentifier, item dictionary: [AnyHashable: Any]) -> CBMessage? {
-        handle(leaf: leaf, input: .dict(dictionary))
+    @discardableResult public func handle(
+        chat: CBChat,
+        item dictionary: [AnyHashable: Any]
+    ) throws -> CBMessage? {
+        try handle(chat: chat, input: .dict(dictionary))
     }
 }
 
 extension CBChat {
-    @discardableResult public func handle(leaf: CBChatIdentifier, item: IMItem) -> CBMessage? {
-        handle(leaf: leaf, input: .item(item))
+    @discardableResult public func handle(chat: CBChat, item: IMItem) throws -> CBMessage? {
+        try handle(chat: chat, input: .item(item))
     }
 }
