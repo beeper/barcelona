@@ -23,7 +23,7 @@ public actor CBChatRegistry {
 
     public var chats: [CBChatIdentifier: CBChat] = [:]
 
-    public let failedMessages = PassthroughSubject<(guid: String, chatGUID: String), Never>()
+    public let failedMessages = PassthroughSubject<(guid: String, chatGUID: String, service: String), Never>()
 
     private var allChats: [ObjectIdentifier: CBChat] = [:]
     private var messageIDReverseLookup: [String: CBChatIdentifier] = [:]
@@ -111,7 +111,10 @@ public actor CBChatRegistry {
             do {
                 try handle(chat: .chatIdentifier(chatIdentifier), item: $0)
             } catch {
-                failedMessages.send((guid: $0["guid"] as? String ?? "nil", chatGUID: chatIdentifier))
+                let chatGUID = "\(serviceID ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
+                failedMessages.send(
+                    (guid: $0["guid"] as? String ?? "nil", chatGUID: chatGUID, service: serviceID)
+                )
                 log.error("Could not handle item: \(error.localizedDescription)")
             }
         }
@@ -139,7 +142,8 @@ public actor CBChatRegistry {
         do {
             try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
         } catch {
-            failedMessages.send((guid: msg.guid, chatGUID: chatIdentifier))
+            let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
+            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service))
             log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
         }
     }
@@ -159,7 +163,8 @@ public actor CBChatRegistry {
             do {
                 try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: $0)
             } catch {
-                failedMessages.send((guid: $0.guid, chatGUID: chatIdentifier))
+                let chatGUID = "\($0.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
+                failedMessages.send((guid: $0.guid, chatGUID: chatGUID, service: $0.service))
                 log.error("Could not handle message \($0.guid ?? "nil"): \(error.localizedDescription)")
             }
         }
@@ -190,7 +195,8 @@ public actor CBChatRegistry {
             do {
                 try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: $0)
             } catch {
-                failedMessages.send((guid: $0.guid, chatGUID: chatIdentifier))
+                let chatGUID = "\($0.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
+                failedMessages.send((guid: $0.guid, chatGUID: chatGUID, service: $0.service))
                 log.error("Could not handle message \($0.guid ?? "nil"): \(error.localizedDescription)")
             }
         }
@@ -209,7 +215,8 @@ public actor CBChatRegistry {
         do {
             try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
         } catch {
-            failedMessages.send((guid: msg.guid, chatGUID: chatIdentifier))
+            let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
+            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service))
             log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
         }
     }
@@ -227,7 +234,8 @@ public actor CBChatRegistry {
         do {
             try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
         } catch {
-            failedMessages.send((guid: msg.guid, chatGUID: chatIdentifier))
+            let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
+            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service))
             log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
         }
     }
@@ -257,7 +265,8 @@ public actor CBChatRegistry {
         do {
             try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
         } catch {
-            failedMessages.send((guid: msg.guid, chatGUID: chatIdentifier))
+            let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
+            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service))
             log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
         }
     }
@@ -285,8 +294,19 @@ public actor CBChatRegistry {
                         return nil
                     }
                 }()
-                if let guid {
-                    failedMessages.send((guid: guid, chatGUID: chatIdentifier))
+                lazy var service: String? = {
+                    switch item {
+                    case let item as IMItem:
+                        return item.service
+                    case let item as NSDictionary:
+                        return item["service"] as? String
+                    default:
+                        return nil
+                    }
+                }()
+                if let guid, let service {
+                    let chatGUID = "\(service);\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
+                    failedMessages.send((guid: guid, chatGUID: chatGUID, service: service))
                 }
                 log.error("Could not handle message: \(error.localizedDescription)")
             }

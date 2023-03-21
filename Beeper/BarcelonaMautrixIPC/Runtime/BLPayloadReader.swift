@@ -45,7 +45,7 @@ public class BLPayloadReader {
                                     guid: messageInfo.guid,
                                     chatGUID: messageInfo.chatGUID,
                                     status: .failed,
-                                    service: ""
+                                    service: messageInfo.service
                                 )
                             )
                         )
