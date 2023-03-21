@@ -26,10 +26,12 @@ enum TapbackError: CustomNSError {
     case createInstantMessageFailed
     /// Couldn't create the content for the tapback message.
     case createSuperFormatFailed
+    /// The IMChat that we're trying to send in can't retrieve an IMHandle associated with its lastAddressedHandleID
+    case noHandleForLastAddressedID
 
     var error: String {
         switch self {
-        case .unknownMessage(let guid):
+        case .unknownMessage(_):
             return "Unknown message"
         case .unknownSubpart:
             return "Unknown subpart"
@@ -41,6 +43,8 @@ enum TapbackError: CustomNSError {
             return "Couldn't create instantMessage to send in chat"
         case .createSuperFormatFailed:
             return "Couldn't create the content for the tapback message"
+        case .noHandleForLastAddressedID:
+            return "Couldn't find valid sender IMHandle"
         }
     }
 
@@ -49,10 +53,16 @@ enum TapbackError: CustomNSError {
     }
 }
 
-extension IMChat {
+public extension IMChat {
+    var senderHandle: IMHandle? {
+        if let lastAddressedHandleID, !lastAddressedHandleID.isEmpty {
+            return account.imHandle(withID: lastAddressedHandleID, alreadyCanonical: false)
+        }
+        return account.loginIMHandle
+    }
+
     /// Sends a tapback for a given message, calling back with a Vapor abort if the operation fails. This must be invoked on the main thread.
-    @MainActor
-    public func tapback(
+    @MainActor func tapback(
         guid: String,
         itemGUID: String,
         type: Int,
@@ -132,6 +142,11 @@ extension IMChat {
             throw TapbackError.createInstantMessageFailed
         }
 
+        guard let senderHandle else {
+            throw TapbackError.noHandleForLastAddressedID
+        }
+        message.sender = senderHandle
+
         send(message)
 
         return message
@@ -185,6 +200,11 @@ extension IMChat {
         if let metadata {
             toSendMessage.metadata = metadata
         }
+
+        guard let senderHandle else {
+            throw TapbackError.noHandleForLastAddressedID
+        }
+        toSendMessage.sender = senderHandle
 
         send(toSendMessage)
 
