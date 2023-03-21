@@ -47,7 +47,6 @@ extension CreateMessage {
     }
 }
 
-// public struct CreateMessage: Codable, CreateMessageBase {
 public struct CreateMessage: CreateMessageBase {
     public init(
         subject: String? = nil,
@@ -55,7 +54,6 @@ public struct CreateMessage: CreateMessageBase {
         isAudioMessage: Bool? = nil,
         flags: CLongLong? = nil,
         balloonBundleID: String? = nil,
-        // payloadData: String? = nil,
         expressiveSendStyleID: String? = nil,
         threadIdentifier: String? = nil,
         replyToPart: Int? = nil,
@@ -67,7 +65,6 @@ public struct CreateMessage: CreateMessageBase {
         self.isAudioMessage = isAudioMessage
         self.flags = flags
         self.balloonBundleID = balloonBundleID
-        // self.payloadData = payloadData
         self.expressiveSendStyleID = expressiveSendStyleID
         self.threadIdentifier = threadIdentifier
         self.replyToPart = replyToPart
@@ -84,7 +81,6 @@ public struct CreateMessage: CreateMessageBase {
     public var isAudioMessage: Bool?
     public var flags: CLongLong?
     public var balloonBundleID: String?
-    // public var payloadData: String?
     public var expressiveSendStyleID: String?
     public var threadIdentifier: String?
     public var replyToGUID: String?
@@ -110,29 +106,5 @@ public struct CreateMessage: CreateMessageBase {
 
     public var attributedSubject: NSMutableAttributedString? {
         subject.map { NSMutableAttributedString(string: $0) }
-    }
-
-    public func parseToAttributed() -> MessagePartParseResult {
-        ERAttributedString(from: self.parts)
-    }
-
-    public func createIMMessageItem(
-        withThreadIdentifier threadIdentifier: String?,
-        withChatIdentifier chatIdentifier: String,
-        withParseResult parseResult: MessagePartParseResult
-    ) throws -> IMMessageItem {
-        let text = parseResult.string
-
-        if text.length == 0 {
-            throw BarcelonaError(code: 400, message: "Cannot send an empty message")
-        }
-
-        /** Creates a base message using the computed attributed string */
-
-        let messageItem = IMMessageItem.init(sender: nil, time: nil, guid: nil, type: 0)!
-        messageItem.body = text
-        messageItem.flags = combinedFlags.rawValue
-
-        return messageItem
     }
 }

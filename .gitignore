@@ -8,3 +8,4 @@ archive
 SourcePackages
 *.xcodeproj
 Beeper/barcelona-mautrix/Info.plist
+.idea

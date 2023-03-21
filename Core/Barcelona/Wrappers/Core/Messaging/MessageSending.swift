@@ -87,23 +87,18 @@ extension Chat {
         imChat?.markAllMessagesAsRead()
     }
 
-    private var cbChat: CBChat? {
-        get async {
-            guard let imChat else {
-                return nil
-            }
-            return await CBChatRegistry.shared.chats[.guid(imChat.guid)]
-        }
-    }
-
-    public func sendReturningRaw(message createMessage: CreateMessage, from: String? = nil) async throws -> IMMessage {
+    public func sendReturningRaw(
+        message createMessage: CreateMessage,
+        from: String? = nil,
+        in cbChat: CBChat?
+    ) async throws -> IMMessage {
         guard let imChat, let service else {
             throw BarcelonaError(code: 500, message: "No imChat or service to send with for \(self.id)")
         }
 
         let log = Logger(label: "Chat")
 
-        if let cbChat = await cbChat {
+        if let cbChat {
             // If we're targeting the SMS service and call imChat.refreshServiceForSending(), it'll probably retarget to iMessage,
             // which we distinctly don't want it to do. Plus, we're implementing this to solve BE-7179, which has only happened
             // over iMessage as far as we can tell, so we don't need to work with SMS
@@ -136,8 +131,7 @@ extension Chat {
 
         imChat.refreshServiceForSendingIfNeeded()
 
-        //let message = try createMessage.imMessage(inChat: self.id, service: service)
-        let message = try createMessage.newIMMessage(inChat: self.id, service: service)
+        let message = try createMessage.imMessage(inChat: self.id, service: service)
 
         Chat.delegate?.chat(self, willSendMessages: [message], fromCreateMessage: createMessage)
 
@@ -153,13 +147,17 @@ extension Chat {
         return message
     }
 
-    public func send(message createMessage: CreateMessage, from: String? = nil) async throws -> Message {
+    public func send(
+        message createMessage: CreateMessage,
+        from: String? = nil,
+        in chat: CBChat?
+    ) async throws -> Message {
         guard let imChat, let service else {
             throw BarcelonaError(code: 500, message: "No IMChat or service for \(id)")
         }
 
         return Message(
-            messageItem: try await sendReturningRaw(message: createMessage, from: from)._imMessageItem,
+            messageItem: try await sendReturningRaw(message: createMessage, from: from, in: chat)._imMessageItem,
             chatID: imChat.chatIdentifier,
             service: service
         )

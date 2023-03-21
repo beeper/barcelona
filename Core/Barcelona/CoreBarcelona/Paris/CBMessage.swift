@@ -14,9 +14,30 @@ import Logging
 
 private let log = Logger(label: "CBMessage")
 
+enum CBMessageError: CustomNSError, LocalizedError {
+    /// Retried too many times without success.
+    case exceededRetries(underlyingError: FZErrorType)
+
+    var error: String {
+        switch self {
+        case .exceededRetries(underlyingError: let fzErrorType):
+            return "exceededRetries: \(fzErrorType.description)"
+        }
+    }
+
+    var errorUserInfo: [String: Any] {
+        [NSDebugDescriptionErrorKey: error]
+    }
+
+    var errorDescription: String? {
+        switch self {
+        case .exceededRetries(underlyingError: let fzErrorType):
+            return fzErrorType.localizedDescription
+        }
+    }
+}
+
 public struct CBMessage: CustomDebugStringConvertible {
-    /// The chat this message originated from
-    public var chat: CBChatIdentifier
     /// The GUID of this message
     public var id: String
     /// The service this message originated from
@@ -36,13 +57,12 @@ public struct CBMessage: CustomDebugStringConvertible {
     private var retryCount = 0
 
     /// Initializes the message from a dictionary representation
-    public init?(dictionary: [AnyHashable: Any], chat: CBChatIdentifier) {
+    public init?(dictionary: [AnyHashable: Any], chat: CBChat?) throws {
         guard let id = dictionary["guid"] as? String else {
             return nil
         }
         self.id = id
-        self.chat = chat
-        self.handle(dictionary: dictionary)
+        try handle(dictionary: dictionary, in: chat)
     }
 
     /// Updates the sender and timestamps according to the person who triggered the update
@@ -50,8 +70,9 @@ public struct CBMessage: CustomDebugStringConvertible {
         time: Date?,
         timeDelivered: Date?,
         timeRead: Date?,
-        sender deltaSender: CBSender
-    ) -> CBMessage {
+        sender deltaSender: CBSender,
+        chat: CBChat?
+    ) throws -> CBMessage {
         if flags.contains(.fromMe) {
             if deltaSender.scheme != .me {
                 self.timeDelivered = timeDelivered
@@ -67,36 +88,36 @@ public struct CBMessage: CustomDebugStringConvertible {
             self.timeRead = timeRead
             self.sender = deltaSender
         }
-        return updated()
+        return try updated(in: chat)
     }
 
     /// Updates the message using a dictionary representation
-    @discardableResult public mutating func handle(dictionary: [AnyHashable: Any]) -> CBMessage {
+    @discardableResult public mutating func handle(dictionary: [AnyHashable: Any], in chat: CBChat?) throws -> CBMessage
+    {
         service = (dictionary["service"] as? String).flatMap(CBServiceName.init(rawValue:)) ?? service
         error = (dictionary["error"] as? UInt32).flatMap(FZErrorType.init(rawValue:)) ?? error
         func extractTime(_ key: String) -> Date? {
             (dictionary[key] as? Double).flatMap(Date.init(timeIntervalSinceReferenceDate:))
         }
         flags.handle(dictionary: dictionary)
-        return handle(
+        return try handle(
             time: extractTime("time"),
             timeDelivered: extractTime("timeDelivered"),
             timeRead: extractTime("timeRead"),
-            sender: CBSender(dictionary: dictionary)
+            sender: CBSender(dictionary: dictionary),
+            chat: chat
         )
     }
 
-    private mutating func updated() -> CBMessage {
+    private mutating func updated(in chat: CBChat?) throws -> CBMessage {
         if eligibleToResend {
             let id = id
             if retryCount > 5 {
-                // TODO does this need to explode more to send a checkpoint?
-                log.warning("\(id) has been retried too many times!")
-                return self
+                throw CBMessageError.exceededRetries(underlyingError: error)
             }
             log.info("\(id) is eligible to resend, trying in \(retryCount) seconds")
             retryCount += 1
-            resend()
+            try resend(in: chat)
         }
         return self
     }
@@ -331,44 +352,46 @@ extension CBMessage.Flags {
 
 extension CBMessage {
     /// Initializes the message using an `IMItem` instance
-    @_disfavoredOverload public init(item: IMItem, chat: CBChatIdentifier) {
+    @_disfavoredOverload public init(item: IMItem, chat: CBChat?) throws {
         if let item = item as? IMMessageItem {
-            self = CBMessage(item: item, chat: chat)
+            self = try CBMessage(item: item, chat: chat)
         } else {
-            self.chat = chat
             self.id = item.id
-            self.handle(item: item)
+            try handle(item: item, in: chat)
         }
     }
 
     /// Initializes the message using an `IMMessageItem` instance
-    public init(item: IMMessageItem, chat: CBChatIdentifier) {
+    public init(item: IMMessageItem, chat: CBChat?) throws {
         self.id = item.id
-        self.chat = chat
-        self.handle(item: item)
+        try handle(item: item, in: chat)
     }
 
     /// Updates the message using an `IMItem` instance
-    @discardableResult @_disfavoredOverload public mutating func handle(item: IMItem) -> CBMessage {
+    @discardableResult @_disfavoredOverload public mutating func handle(
+        item: IMItem,
+        in chat: CBChat?
+    ) throws -> CBMessage {
         if let item = item as? IMMessageItem {
-            return handle(item: item)
+            return try handle(item: item, in: chat)
         }
         service = item.serviceStyle.map(CBServiceName.init(style:)) ?? service
         error = .noError
         flags.handle(item: item)
-        return handle(time: item.time, timeDelivered: nil, timeRead: nil, sender: CBSender(item: item))
+        return try handle(time: item.time, timeDelivered: nil, timeRead: nil, sender: CBSender(item: item), chat: chat)
     }
 
     /// Updates the message using an `IMMessageItem` instance
-    @discardableResult public mutating func handle(item: IMMessageItem) -> CBMessage {
+    @discardableResult public mutating func handle(item: IMMessageItem, in chat: CBChat?) throws -> CBMessage {
         service = item.serviceStyle.map(CBServiceName.init(style:)) ?? service
         error = item.errorCode
         flags.handle(item: item)
-        return handle(
+        return try handle(
             time: item.time,
             timeDelivered: item.timeDelivered,
             timeRead: item.timeRead,
-            sender: CBSender(item: item)
+            sender: CBSender(item: item),
+            chat: chat
         )
     }
 }
@@ -380,18 +403,6 @@ extension CBMessage {
             return message
         case .none:
             log.warning("Failed to locate message \(id)")
-            return nil
-        }
-    }
-}
-
-extension CBMessage {
-    func locateCBChat() async -> CBChat? {
-        switch await CBChatRegistry.shared.chats[chat] {
-        case .some(let chat):
-            return chat
-        case .none:
-            log.warning("Failed to locate chat \(chat.rawValue)")
             return nil
         }
     }
@@ -427,9 +438,9 @@ extension CBMessage {
         }
     }
 
-    public func resend() {
+    public func resend(in chat: CBChat?) throws {
         Task {
-            try await Task.sleep(nanoseconds: UInt64(retryCount) * 1000000000)
+            try await Task.sleep(nanoseconds: UInt64(retryCount) * 1_000_000_000)
             guard let message = loadIMMessageItem() else {
                 return
             }
@@ -443,7 +454,7 @@ extension CBMessage {
             IMDaemonController.sharedInstance().updateMessage(message)
             let id = id
             log.info("Loaded message item for \(id)")
-            guard let chat = await locateCBChat() else {
+            guard let chat else {
                 return
             }
             log.info("Located origin chat for \(id)")

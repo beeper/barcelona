@@ -180,42 +180,4 @@ public struct CreatePluginMessage: CreateMessageBase {
     var combinedFlags: IMMessageFlags {
         [.finished, .fromMe]
     }
-
-    public func parseToAttributed() -> MessagePartParseResult {
-        ERAttributedString(forAttachment: attachmentID)
-    }
-
-    public func createIMMessageItem(
-        withThreadIdentifier threadIdentifier: String?,
-        withChatIdentifier chatIdentifier: String,
-        withParseResult parseResult: MessagePartParseResult
-    ) throws -> IMMessageItem {
-        var payloadData = extensionData
-        payloadData.data = payloadData.data ?? payloadData.synthesizedData
-
-        let messageString = NSMutableAttributedString(attributedString: parseResult.string)
-        messageString.append(.init(string: IMBreadcrumbCharacterString))
-
-        messageString.addAttributes(
-            [
-                MessageAttributes.writingDirection: -1,
-                MessageAttributes.breadcrumbOptions: 0,
-                MessageAttributes.breadcrumbMarker: extensionData.layoutInfo?.caption ?? "Message Extension",
-            ],
-            range: messageString.range(of: IMBreadcrumbCharacterString)
-        )
-
-        let messageItem = IMMessageItem.init(sender: nil, time: nil, guid: nil, type: 0)!
-
-        messageItem.body = messageString
-        messageItem.balloonBundleID = bundleID
-        messageItem.payloadData = payloadData.archive
-        messageItem.flags = 5
-
-        #if false
-        ERApplyMessageExtensionQuirks(toMessageItem: messageItem, inChatID: chatIdentifier, forOptions: self)
-        #endif
-
-        return messageItem
-    }
 }

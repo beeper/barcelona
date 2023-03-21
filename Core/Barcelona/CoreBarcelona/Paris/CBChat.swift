@@ -255,7 +255,6 @@ extension CBChat {
             )
         }
         let message = try message.imMessage(inChat: chat.chatIdentifier, service: service)
-        // let message = try message.newIMMessage(inChat: chat.chatIdentifier, service: service)
         await send(message: message, chat: chat)
         return message
     }

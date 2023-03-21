@@ -13,7 +13,7 @@ import Logging
 import Sentry
 
 protocol Runnable {
-    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) async
 }
 
 protocol AuthenticatedAsserting {}
@@ -22,7 +22,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
     var log: Logging.Logger {
         Logger(label: "SendMediaMessageCommand")
     }
-    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
@@ -116,7 +116,8 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                 withExtendedLifetime(monitor) { monitor = nil }
             }
 
-            message = try await chat.sendReturningRaw(message: messageCreation)
+            let cbChat = await chatRegistry.chats[.guid(imChat.guid)]
+            message = try await chat.sendReturningRaw(message: messageCreation, in: cbChat)
 
             payload.reply(
                 withResponse: .message_receipt(
