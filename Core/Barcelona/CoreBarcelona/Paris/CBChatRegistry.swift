@@ -336,6 +336,7 @@ public actor CBChatRegistry {
 
     func loadedChats(_ chats: [[AnyHashable: Any]]!) async {
         log.info("loadedChats calling callbacks")
+        hasLoadedChats = true
         _ = await internalize(chats: chats)
         let loadedChatsCallbacks = loadedChatsCallbacks
         self.loadedChatsCallbacks = []
