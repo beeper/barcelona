@@ -28,16 +28,14 @@ protocol CreateMessageBase: Codable {
 
 extension CreateMessageBase {
     func resolvedThreadIdentifier(chat: IMChat) -> String? {
-        if #available(macOS 10.16, *) {
-            if let threadIdentifier = threadIdentifier {
-                return threadIdentifier
-            } else if let replyToGUID = replyToGUID {
-                return IMChatItem.resolveThreadIdentifier(
-                    forMessageWithGUID: replyToGUID,
-                    part: replyToPart ?? 0,
-                    chat: chat
-                )
-            }
+        if let threadIdentifier = threadIdentifier {
+            return threadIdentifier
+        } else if let replyToGUID = replyToGUID {
+            return IMChatItem.resolveThreadIdentifier(
+                forMessageWithGUID: replyToGUID,
+                part: replyToPart ?? 0,
+                chat: chat
+            )
         }
         return nil
     }
@@ -47,7 +45,7 @@ extension CreateMessageBase {
         chat: IMChat,
         withSubject subject: NSMutableAttributedString?
     ) throws -> IMMessage {
-        if #available(macOS 10.16, *), chat.account.service == .iMessage() {
+        if chat.account.service == .iMessage() {
             imMessageItem.setThreadIdentifier(resolvedThreadIdentifier(chat: chat))
         }
 
@@ -78,7 +76,7 @@ extension CreateMessageBase {
         imMessageItem.service = chat.account.serviceName
         imMessageItem.accountID = chat.account.uniqueID
 
-        let imMessage =  try finalize(imMessageItem: imMessageItem, chat: chat, withSubject: subject)
+        let imMessage = try finalize(imMessageItem: imMessageItem, chat: chat, withSubject: subject)
 
         guard let senderHandle = chat.senderHandle else {
             throw CreateMessageError.noHandleForLastAddressedID

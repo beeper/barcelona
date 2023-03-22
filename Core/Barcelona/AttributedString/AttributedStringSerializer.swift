@@ -69,9 +69,7 @@ func ERTextParts(from string: NSAttributedString?) -> [TextPart] {
                 textPart = ERTextPart(fromCalendar: substring)
             } else if substring.hasAttribute(forKey: MessageAttributes.breadcrumbOptions) {
                 textPart = ERTextPart(fromBreadcrumb: substring)
-            } else if #available(macOS 10.16, watchOS 7, *),
-                substring.hasAttribute(forKey: MessageAttributes.mentionName)
-            {
+            } else if substring.hasAttribute(forKey: MessageAttributes.mentionName) {
                 textPart = ERTextPart(fromMention: substring)
             } else {
                 textPart = ERTextPart(fromText: substring)
