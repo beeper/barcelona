@@ -504,7 +504,7 @@ extension CBMessage {
             }
             imChat.refreshServiceForSendingIfNeeded()
             log.info("Re-sending message \(id) on chat \(String(describing: imChat.guid))")
-            await chat.send(message: message, chat: imChat)
+            await imChat.send(message: message)
         }
     }
 }
