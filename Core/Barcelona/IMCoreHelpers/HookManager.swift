@@ -121,7 +121,14 @@ private func IDSQueryHooks() throws -> Interpose {
 class HookManager {
     static let shared = HookManager()
 
-    let hooks = [CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks, IDSQueryHooks]
+    lazy var hooks = {
+        var h = [CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks]
+        if #available(macOS 12.0, *) {
+            h.append(IDSQueryHooks)
+        }
+        return h
+    }()
+
     private var appliedHooks: [Interpose]?
 
     func apply() throws {
