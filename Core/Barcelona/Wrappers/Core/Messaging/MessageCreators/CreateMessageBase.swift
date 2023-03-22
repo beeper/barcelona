@@ -23,15 +23,11 @@ protocol CreateMessageBase {
     var bodyText: NSAttributedString { get }
     var transferGUIDs: [String] { get }
 
-    func imMessage(inChat chatIdentifier: String, service: IMServiceStyle) throws -> IMMessage
+    func imMessage(inChat chat: IMChat) throws -> IMMessage
 }
 
 extension CreateMessageBase {
-    public func imMessage(inChat chatId: String, service: IMServiceStyle) throws -> IMMessage {
-        guard let chat = IMChat.chat(withIdentifier: chatId, onService: service, style: nil) else {
-            throw CreateMessageError.noIMChatForIdAndService
-        }
-
+    public func imMessage(inChat chat: IMChat) throws -> IMMessage {
         let message = IMMessage.instantMessage(
             withText: bodyText,
             messageSubject: attributedSubject,
@@ -65,7 +61,6 @@ extension CreateMessageBase {
 }
 
 enum CreateMessageError: Error {
-    case noIMChatForIdAndService
     case noHandleForLastAddressedID
 }
 

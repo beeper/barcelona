@@ -121,7 +121,7 @@ extension Chat {
         }
 
         log.info("Using CBChat for sending per feature flags", source: "MessageSending")
-        return try await imChat.send(message: createMessage, guid: imChat.guid, service: service)
+        return try await imChat.send(message: createMessage)
     }
 
     public func send(message createMessage: CreateMessage) async throws -> Message {

@@ -237,13 +237,17 @@ extension IMHandle {
 
 // MARK: - Message sending
 extension IMChat {
-    @MainActor public func send(message: IMMessageItem) async {
-        send(IMMessage(fromIMMessageItem: message, sender: nil, subject: nil))
+    @MainActor public func send(message: IMMessage) {
+        send(message)
     }
 
-    @MainActor public func send(message: CreateMessage, guid: String, service: IMServiceStyle) async throws -> IMMessage {
-        let message = try message.imMessage(inChat: self.chatIdentifier, service: service)
-        send(message)
+    public func send(message: IMMessageItem) async {
+        await send(message: IMMessage(fromIMMessageItem: message, sender: nil, subject: nil))
+    }
+
+    public func send(message: CreateMessage) async throws -> IMMessage {
+        let message = try message.imMessage(inChat: self)
+        await send(message: message)
         return message
     }
 }
