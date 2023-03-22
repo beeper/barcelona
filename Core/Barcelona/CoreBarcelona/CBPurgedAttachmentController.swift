@@ -39,6 +39,7 @@ extension IMFileTransfer {
         let state = state
         if state == .error, error == 24, existsAtLocalPath {
             // i have no clue what is going on but the attachment is present and usable
+            log.debug("have error 24, treating as finished")
             return .finished
         }
         return state
@@ -119,9 +120,7 @@ class CBFileTransferCenter {
                         resolve(())
                         timer.cancel()
                     } else {
-                        #if DEBUG
                         self.log.debug("Transfer \(transfer.guid ?? "nil") is still not done")
-                        #endif
                     }
                 }
                 timer.schedule(deadline: .now().advanced(by: .milliseconds(10)), repeating: .milliseconds(10))
@@ -158,9 +157,7 @@ class CBFileTransferCenter {
             return
         }
         transfers[guid] = transfer
-        #if DEBUG
         log.debug("Transfer \(guid) was created!")
-        #endif
     }
 
     private func transferUpdated(_ notification: Notification) {
@@ -186,9 +183,7 @@ class CBFileTransferCenter {
             return
         }
         transfers[transferGUID] = transfer
-        #if DEBUG
         log.debug("Transfer \(transferGUID) has finished!")
-        #endif
         switch transfer.actualState {
         case .finished:
             transferTrulyFinishedPromise(transfer)
@@ -232,7 +227,8 @@ extension IMFileTransfer {
     }
 
     public var inSandboxedLocation: Bool {
-        localPath.hasPrefix("/var/folders")
+        log.debug("checking inSandboxedLocation for localPath: \(localPath as String?)")
+        return localPath.hasPrefix("/var/folders")
     }
 
     public var isTrulyFinished: Bool {
