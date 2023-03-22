@@ -42,6 +42,8 @@
 		<string>com.apple.madrid</string>
 		<string>com.apple.private.alloy.biz</string>
 	</array>
+	<key>com.apple.private.ids.registration</key>
+	<true/>
 	<key>com.apple.private.imcore.imdpersistence.database-access</key>
 	<true/>
 	<key>com.apple.private.imcore.imremoteurlconnection</key>
@@ -89,6 +91,7 @@
 		<string>com.apple.imagent.desktop.Launched</string>
 		<string>com.apple.identityservicesd.desktop.auth</string>
 		<string>com.apple.identityservicesd.idquery.desktop.auth</string>
+		<string>com.apple.identityservicesd.idquery.embedded.auth</string>
 		<string>com.apple.logind</string>
 	</array>
 	<key>com.apple.security.temporary-exception.shared-preference.read-only</key>

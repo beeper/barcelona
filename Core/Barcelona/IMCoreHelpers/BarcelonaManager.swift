@@ -91,12 +91,8 @@ func BLTeardown() {
     controller.disconnectFromDaemon()
 }
 
-public func BLBootstrapController(
-    chatRegistry: CBChatRegistry,
-    _ callbackSwift: (@Sendable (Bool) -> Void)? = nil
-) -> Bool {
+func BLBootstrapController(chatRegistry: CBChatRegistry) async -> Bool {
     guard BLSwizzleDaemonController() else {
-        callbackSwift?(false)
         return false
     }
 
@@ -174,13 +170,10 @@ public func BLBootstrapController(
         IMSimulatedDaemonController.beginSimulatingDaemon()
     }
 
-    Task {
-        log.info("Waiting for CBChatRegistry to load chats")
-        await chatRegistry.onLoadedChats {
-            CBDaemonListener.shared.startListening()
-            callbackSwift?(true)
-            log.info("All systems go!")
-        }
+    log.info("Adding callback for CBChatRegistry to load chats")
+    await chatRegistry.onLoadedChats {
+        CBDaemonListener.shared.startListening()
+        log.info("All systems go!")
     }
 
     return true
@@ -197,25 +190,24 @@ public class BarcelonaManager {
         BLTeardownController()
     }
 
-    public func bootstrap(chatRegistry: CBChatRegistry) -> Bool {
-        BLBootstrapController(chatRegistry: chatRegistry)
-    }
-
-    public func bootstrap(chatRegistry: CBChatRegistry) -> Promise<Bool> {
-        let lifetime = BarcelonaManager.bootstrapTimeout
-        return Promise<Bool> { resolve in
-            guard BLBootstrapController(chatRegistry: chatRegistry, resolve) else {
-                return resolve(false)
-            }
+    @MainActor public func bootstrap(chatRegistry: CBChatRegistry) async throws -> Bool {
+        let bootstrapTask = Task {
+            let result = await BLBootstrapController(chatRegistry: chatRegistry)
+            try Task.checkCancellation()
+            return result
         }
-        .resolve(on: RunLoop.main).withLifetime(lifetime: lifetime)
-        .then { result in
-            switch result {
-            case .timedOut:
-                throw BarcelonaError(code: 504, message: "Barcelona took more than \(lifetime)s to bootstrap")
-            case .finished(let result):
-                return result
-            }
+
+        let timeoutTask = Task {
+            try await Task.sleep(nanoseconds: UInt64(Self.bootstrapTimeout) * NSEC_PER_SEC)
+            bootstrapTask.cancel()
+        }
+
+        do {
+            let result = try await bootstrapTask.value
+            timeoutTask.cancel()
+            return result
+        } catch {
+            throw BarcelonaError(code: 504, message: "Barcelona took more than \(Self.bootstrapTimeout)s to bootstrap")
         }
     }
 }
