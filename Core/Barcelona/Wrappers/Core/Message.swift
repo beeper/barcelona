@@ -16,11 +16,9 @@ import Logging
 private func CBExtractThreadOriginatorAndPartFromIdentifier(_ identifier: String) -> (String, Int)? {
     let parts = identifier.split(separator: ",")
 
-    if #available(macOS 10.16, *),
-        let identifierData = CBMessageItemIdentifierData(
-            rawValue: IMMessageCreateAssociatedMessageGUIDFromThreadIdentifier(identifier)
-        )
-    {
+    if let identifierData = CBMessageItemIdentifierData(
+        rawValue: IMMessageCreateAssociatedMessageGUIDFromThreadIdentifier(identifier)
+    ) {
         guard let part = identifierData.part else {
             return nil
         }
@@ -463,20 +461,18 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     }
 
     private mutating func load(message: IMMessage?, backing: IMMessageItem?) {
-        if #available(macOS 10.16, *) {
-            if let rawThreadIdentifier = message?.threadIdentifier() ?? backing?.threadIdentifier {
-                guard
-                    let (threadIdentifier, threadOriginatorPart) = CBExtractThreadOriginatorAndPartFromIdentifier(
-                        rawThreadIdentifier
-                    )
-                else {
-                    return
-                }
-
-                self.threadIdentifier = threadIdentifier
-                self.threadOriginator = threadIdentifier
-                self.threadOriginatorPart = threadOriginatorPart
+        if let rawThreadIdentifier = message?.threadIdentifier() ?? backing?.threadIdentifier {
+            guard
+                let (threadIdentifier, threadOriginatorPart) = CBExtractThreadOriginatorAndPartFromIdentifier(
+                    rawThreadIdentifier
+                )
+            else {
+                return
             }
+
+            self.threadIdentifier = threadIdentifier
+            self.threadOriginator = threadIdentifier
+            self.threadOriginatorPart = threadOriginatorPart
         }
     }
 

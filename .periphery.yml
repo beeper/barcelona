@@ -1,0 +1,8 @@
+project: barcelona.xcodeproj
+schemes:
+  - barcelona-mautrix
+targets:
+  - BarcelonaMautrixIPC
+  - Barcelona
+  - BarcelonaDB
+  - barcelona-mautrix

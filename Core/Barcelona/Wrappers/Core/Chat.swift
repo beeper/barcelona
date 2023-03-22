@@ -151,20 +151,12 @@ extension Chat {
 
         let inviteText = add ? "Get in my van, kid." : "Goodbye, skank."
 
-        if #available(macOS 10.16, *) {
-            reasonMessage = IMMessage.instantMessage(
-                withText: NSAttributedString(string: inviteText),
-                messageSubject: nil,
-                flags: 0x5,
-                threadIdentifier: nil
-            )
-        } else {
-            reasonMessage = IMMessage.instantMessage(
-                withText: NSAttributedString(string: inviteText),
-                messageSubject: nil,
-                flags: 0x5
-            )
-        }
+        reasonMessage = IMMessage.instantMessage(
+            withText: NSAttributedString(string: inviteText),
+            messageSubject: nil,
+            flags: 0x5,
+            threadIdentifier: nil
+        )
 
         if add {
             if imChat.canAddParticipants(handles) {
