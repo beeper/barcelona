@@ -35,6 +35,7 @@ targets:
         PRODUCT_NAME: barcelona-mautrix
         PRODUCT_MODULE_NAME: barcelona_mautrix
         CREATE_INFOPLIST_SECTION_IN_BINARY: YES
+        MACOSX_DEPLOYMENT_TARGET: "11.0"
     info:
       path: ../Beeper/barcelona-mautrix/Info.plist
       properties:
