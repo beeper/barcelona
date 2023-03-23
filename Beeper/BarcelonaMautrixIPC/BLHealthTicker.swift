@@ -17,7 +17,7 @@ public class BLHealthTicker {
     public static let shared = BLHealthTicker()
 
     private var timer: Timer? = nil
-    public private(set) lazy var multi = $latestStatus.removeDuplicates()
+    public private(set) lazy var debouncedDeduplicatedBridgeRemoteState = $latestStatus.removeDuplicates()
         .debounce(for: .milliseconds(100), scheduler: DispatchQueue.global(qos: .userInitiated))
 
     public init() {
@@ -76,15 +76,5 @@ public class BLHealthTicker {
         if shouldScheduleNext {
             scheduleNext()
         }
-    }
-
-    private static var cancellables: Set<AnyCancellable> = Set()
-    public func subscribeForever(_ callback: @escaping (BridgeStatusCommand) -> Void) {
-        let semaphore = DispatchSemaphore(value: 0)
-        FileHandle.standardInput.performOnThread {
-            self.multi.receive(on: RunLoop.current).sink(receiveValue: callback).store(in: &Self.cancellables)
-            semaphore.signal()
-        }
-        semaphore.wait()
     }
 }

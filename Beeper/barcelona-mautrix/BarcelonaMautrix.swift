@@ -125,6 +125,7 @@ class BarcelonaMautrix {
             await bootstrap()
         }
 
+        log.info("Starting the RunLoop")
         RunLoop.main.run()
     }
 
@@ -168,10 +169,13 @@ class BarcelonaMautrix {
 
     // starts the bridge state interval
     func startHealthTicker() {
-        BLHealthTicker.shared.subscribeForever { command in
-            self.mautrixIPCChannel.writePayload(IPCPayload(command: .bridge_status(command)))
-        }
+        BLHealthTicker.shared.debouncedDeduplicatedBridgeRemoteState
+            .sink { command in
+                self.mautrixIPCChannel.writePayload(IPCPayload(command: .bridge_status(command)))
+            }
+            .store(in: &cancellables)
 
+        log.info("Sending initial bridge remote state")
         BLHealthTicker.shared.run(schedulingNext: true)
     }
 

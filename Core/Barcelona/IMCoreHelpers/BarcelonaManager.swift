@@ -61,6 +61,9 @@ func BLSwizzleDaemonController() -> Bool {
     }
 }
 
+/**
+ * This function is only used for unit tests
+ */
 public func BLSetup() -> Bool {
     do {
         try HookManager.shared.apply()
@@ -72,7 +75,7 @@ public func BLSetup() -> Bool {
     let controller = IMDaemonController.sharedInstance()
     controller.listener.addHandler(CBDaemonListener.shared)
 
-    log.info("Connecting to daemon...")
+    log.info("BLSetup Connecting to daemon...")
 
     controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
     controller.blockUntilConnected()
@@ -131,7 +134,7 @@ func BLBootstrapController(chatRegistry: CBChatRegistry) async -> Bool {
     _ = CBFileTransferCenter.shared
 
     RunLoop.main.schedule {
-        log.info("Connecting to daemon...")
+        log.info("BLBootstrapController Connecting to daemon...")
         controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
         controller.blockUntilConnected()
         log.info("Connected to daemon.")
@@ -199,6 +202,7 @@ public class BarcelonaManager {
 
         let timeoutTask = Task {
             try await Task.sleep(nanoseconds: UInt64(Self.bootstrapTimeout) * NSEC_PER_SEC)
+            log.error("BLBootstrapController timeout hit")
             bootstrapTask.cancel()
         }
 
