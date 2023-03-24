@@ -54,7 +54,7 @@ extension ResolveIdentifierCommand: Runnable {
                     try await ChatLocator.senderGUID(for: identifier)
                 }
                 group.addTask {
-                    let timeout: UInt64 = 12
+                    let timeout: UInt64 = 30
                     try await Task.sleep(nanoseconds: timeout * 1_000_000_000)
                     log.warning(
                         "Resolving identifier for \(identifier) timed out in \(timeout) seconds",
