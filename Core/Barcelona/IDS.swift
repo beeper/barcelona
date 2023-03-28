@@ -35,7 +35,7 @@ class IDSResolver {
     /// - Parameters:
     ///   - id: Handle to check the status for.
     ///   - service: The service to check the status for.
-    ///   - force: Skip IDS service cache (only applicable on macOS 12 and older).
+    ///   - force: Skip IDS service cache.
     /// - Returns: Resolved and enhanced ID with the URI prefix stripped and the status for that ID.
     static func resolveStatus(
         for id: String,
@@ -69,28 +69,27 @@ class IDSResolver {
         }
     }
 
-    /// Wraps the macOS version specific IDS query methods.
+    /// Query IDS with or without cached results.
     /// - Parameters:
     ///   - destinations: Destination handles.
     ///   - service: ``IMServiceStyle`` to query the status for.
-    ///   - force: Do a force refresh (only applicable on macOS 12 and older).
+    ///   - force: If `true`, use a force query that skips the cache in IDS side.
     /// - Returns: Dictionary mapping the destinations to ``IDSState``.
     private static func resolveIDS(
         for destinations: [String],
         on service: IMServiceStyle,
         force: Bool
     ) async throws -> [String: IDSState] {
-        if #available(macOS 13.0, *) {
-            return await idInfo(for: destinations, with: service.idsIdentifier)
-                .mapValues {
-                    IDSState(rawValue: $0.status())
-                }
-        } else {
-            return await forceRefreshIDStatus(for: destinations, with: service.idsIdentifier)
-                .mapValues {
-                    IDSState(rawValue: Int(truncating: $0))
-                }
-        }
+        let result =
+            force
+            ? await forceRefreshIDStatus(for: destinations, with: service.idsIdentifier)
+            : await refreshIDStatus(for: destinations, with: service.idsIdentifier)
+
+        return
+            result
+            .mapValues {
+                IDSState(rawValue: Int(truncating: $0))
+            }
     }
 
     /// Wraps
@@ -133,34 +132,6 @@ class IDSResolver {
             sharedController.refreshIDStatus(
                 forDestinations: destinations,
                 service: serviceIDSIdentifier,
-                listenerID: idsListenerID,
-                queue: handleQueue
-            ) {
-                continuation.resume(returning: $0)
-            }
-        }
-    }
-
-    /// Wraps
-    /// `IDSIDQueryController.refreshIDStatus(forDestinations:service:listenerID:queue:errorCompletionBlock:)`
-    /// as an `async` method.
-    /// - Parameters:
-    ///   - destinations: String from `IDSCopyIDFor[handle type]Address` methods.
-    ///   - serviceIDSIdentifier: ``IMServiceStyle/idsIdentifier`` of the ``IMServiceStyle``.
-    /// - Returns: A dictionary mapping IDs to `IDSIDInfoResult`.
-    @available(macOS 13.0, *)
-    @MainActor
-    private static func idInfo(
-        for destinations: [String],
-        with serviceIDSIdentifier: String
-    ) async -> [String: IDSIDInfoResult] {
-        await withCheckedContinuation { continuation in
-            sharedController.idInfo(
-                forDestinations: destinations,
-                service: serviceIDSIdentifier,
-                // I don't quite know what `infoTypes` is asking for, but ChatKit passes in 0x2
-                infoTypes: 0x2,
-                options: .refreshIDInfo(),
                 listenerID: idsListenerID,
                 queue: handleQueue
             ) {
