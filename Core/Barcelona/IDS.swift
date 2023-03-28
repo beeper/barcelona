@@ -13,17 +13,6 @@ import CommonUtilities
 
 private let log = Logger(label: "IDS")
 
-public enum IDStatusError: Error, CustomDebugStringConvertible {
-    case malformedID
-
-    public var debugDescription: String {
-        switch self {
-        case .malformedID:
-            return "the provided handle ID could not be cast to a destination"
-        }
-    }
-}
-
 public enum IDSState: Int, Codable {
     /// the state has either not been resolved or failed to resolve
     case unknown = 0
@@ -215,24 +204,6 @@ func BLResolveIDStatusForIDs(
     }
 }
 
-/// Synchronously resolves the latest IDS status for a set of handles on a given service.
-public func BLResolveIDStatusForIDs(
-    _ ids: [String],
-    onService service: IMServiceStyle
-) throws -> [String: IDSState] {
-    let semaphore = DispatchSemaphore(value: 0)
-    var results: [String: IDSState] = [:]
-
-    try BLResolveIDStatusForIDs(ids, onService: service) {
-        results = $0
-        semaphore.signal()
-    }
-
-    semaphore.wait()
-
-    return results
-}
-
 /// Helper variables when processing string IDs into IDS destinations
 extension String {
     fileprivate var destination: String? {
@@ -249,21 +220,6 @@ extension String {
 
 /// Helper functions for processing IDS results
 extension Dictionary {
-    fileprivate func splitFilter(_ check: (Element) -> Bool) -> (included: Dictionary, excluded: Dictionary) {
-        var included: Dictionary = [:]
-        var excluded: Dictionary = [:]
-
-        forEach { element in
-            if check(element) {
-                included[element.key] = element.value
-            } else {
-                excluded[element.key] = element.value
-            }
-        }
-
-        return (included, excluded)
-    }
-
     fileprivate func mapKeys<NewKey: Hashable>(_ transform: (Key) throws -> NewKey) rethrows -> [NewKey: Value] {
         var newDictionary: [NewKey: Value] = [:]
 

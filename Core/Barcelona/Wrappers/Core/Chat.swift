@@ -231,32 +231,8 @@ extension Chat {
 
     /// Returns a chat targeted at the appropriate service for a handleID
     @MainActor
-    public static func directMessage(withHandleID handleID: String) async -> Chat {
-        await Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID)))
-    }
-
-    /// Returns a chat targeted at the appropriate service for a handleID
-    @MainActor
     public static func directMessage(withHandleID handleID: String, service: IMServiceStyle) async -> Chat {
         await Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service)))
-    }
-
-    /// Returns a chat targeted at the appropriate service for a set of handleIDs
-    @MainActor
-    public static func chat(withHandleIDs handleIDs: [String], service: IMServiceStyle) async -> Chat {
-        guard handleIDs.count > 0 else {
-            preconditionFailure("chat(withHandleIDs) requires at least one handle ID to be non-null return type")
-        }
-
-        if handleIDs.count == 1 {
-            return await directMessage(withHandleID: handleIDs.first!, service: service)
-        } else {
-            if let account = service.account {
-                return await Chat(IMChatRegistry.shared.chat(for: handleIDs.map(account.imHandle(withID:))))
-            } else {
-                return await Chat(IMChatRegistry.shared.chat(for: homogenousHandles(forIDs: handleIDs)))
-            }
-        }
     }
 
     public static func firstChatRegardlessOfService(withId chatId: String) async -> Chat? {
