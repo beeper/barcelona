@@ -121,7 +121,9 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                     .init(type: .text, details: text)
                 ])
 
-                messageCreation.replyToGUID = reply_to
+                if let reply_to, !reply_to.isEmpty {
+                    messageCreation.replyToGUID = reply_to
+                }
                 messageCreation.replyToPart = reply_to_part
                 messageCreation.metadata = metadata
 
