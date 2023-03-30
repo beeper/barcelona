@@ -37,7 +37,7 @@ class ERIMSimulationTools {
     private init() {
         iMessageService = IMServiceImpl.service(withInternalName: "iMessage")!
         iMessageAccount = IMSimulatedAccount.init(service: iMessageService)
-        loginHandle = iMessageAccount.imHandle(withID: SIMULATION_OUTGOING_ID, alreadyCanonical: false) as! IMHandle
+        loginHandle = iMessageAccount.imHandle(withID: SIMULATION_OUTGOING_ID, alreadyCanonical: false)!
 
         iMessageAccount.loginHandle = loginHandle
 
