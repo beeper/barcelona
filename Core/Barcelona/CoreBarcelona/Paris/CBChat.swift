@@ -9,6 +9,7 @@ import Combine
 import Foundation
 import IMFoundation
 import IMSharedUtilities
+import IMCore
 import Logging
 
 /// An entity tracking a single logical conversation comprised of potentially several different chats
@@ -195,9 +196,6 @@ extension CBChat {
     }
 }
 
-#if canImport(IMCore)
-import IMCore
-
 extension CBChat {
     public var IMChats: [IMChat] {
         leaves.values.compactMap(\.IMChat)
@@ -251,4 +249,3 @@ extension IMChat {
         return message
     }
 }
-#endif
