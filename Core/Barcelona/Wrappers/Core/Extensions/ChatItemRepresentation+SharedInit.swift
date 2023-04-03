@@ -24,7 +24,7 @@ private let sel_threadIdentifier = Selector("threadIdentifier")
 
 extension IMCoreDataResolvable {
     public var threadIdentifier: String? {
-        guard #available(macOS 10.16, *), self.responds(to: sel_threadIdentifier) else {
+        guard self.responds(to: sel_threadIdentifier) else {
             return nil
         }
 
@@ -32,7 +32,7 @@ extension IMCoreDataResolvable {
     }
 
     public var threadOriginator: IMMessageItem? {
-        guard #available(macOS 10.16, *), self.responds(to: sel_threadOriginator) else {
+        guard self.responds(to: sel_threadOriginator) else {
             return nil
         }
 

@@ -77,7 +77,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                         log.debug("I am processing a rich link! text '\(text)'", source: "BLMautrix")
 
                         let message = ERCreateBlankRichLinkMessage(text.trimmingCharacters(in: [" "]), url) { item in
-                            if #available(macOS 11.0, *), let replyToGUID = reply_to {
+                            if let replyToGUID = reply_to {
                                 item.setThreadIdentifier(
                                     IMChatItem.resolveThreadIdentifier(
                                         forMessageWithGUID: replyToGUID,

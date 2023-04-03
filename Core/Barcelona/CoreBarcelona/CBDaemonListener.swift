@@ -17,6 +17,7 @@ import Foundation
 import IMCore
 import IMDaemonCore
 import IMFoundation
+import IMDMessageServices
 import IMSharedUtilities
 import Logging
 
@@ -444,25 +445,6 @@ public class CBDaemonListener: ERBaseDaemonListener {
             self.chatConfigurationPipeline.send(chat.configurationBits)
         }
 
-        NotificationCenter.default.addObserver(forName: .IMPeopleAdded, object: nil, queue: nil) { notification in
-            log.debug("IMPeopleAdded: \(notification.object.singleLineDebugDescription), \(notification.userInfo?.singleLineDebugDescription)")
-        }
-
-        NotificationCenter.default.addObserver(forName: .IMChatRegistryDidRegisterChat, object: nil, queue: nil) {
-            notification in
-            log.debug("IMChatRegistryDidRegisterChat: \(notification.object.singleLineDebugDescription), \(notification.userInfo?.singleLineDebugDescription)")
-        }
-
-        NotificationCenter.default.addObserver(forName: .IMHandleStatusChanged, object: nil, queue: nil) {
-            notification in
-            log.debug("IMHandleStatusChanged: \(notification.object.singleLineDebugDescription), \(notification.userInfo?.singleLineDebugDescription)")
-        }
-
-        NotificationCenter.default.addObserver(forName: .IMChatParticipantsDidChange, object: nil, queue: nil) {
-            notification in
-            log.debug("IMChatParticipantsDidChange: \(notification.object.singleLineDebugDescription), \(notification.userInfo?.singleLineDebugDescription)")
-        }
-
         #if DEBUG
         _scratchboxMain()
         #endif
@@ -794,56 +776,6 @@ extension CBDaemonListener {
         )
     }
 
-    fileprivate func recover(failedMessage: IMMessageItem, chatIdentifier: String) -> Bool {
-        lazy var chat = IMChatRegistry.shared.existingChat(withChatIdentifier: chatIdentifier)
-
-        switch failedMessage.errorCode {
-        case .remoteUserDoesNotExist:
-            guard failedMessage.serviceStyle == .iMessage else {
-                log.info(
-                    "Message \(failedMessage.id) failed with remoteUserDoesNotExist but it is not on iMessage. I can't fix this."
-                )
-                return false
-            }
-            guard let chat = chat, chat.participantHandleIDs().allSatisfy({ $0.isPhoneNumber || $0.isEmail }) else {
-                log.info(
-                    "Message \(failedMessage.id) failed with remoteUserDoesNotExist but I could not guarantee that the chat is downgradeable. I won't fix this."
-                )
-                return false
-            }
-            log.info("Downgrading failed message \(failedMessage.id) to SMS")
-            if chat.participants.count == 1 {
-                let manualDowngradesCount = chat._consecutiveDowngradeAttempts(viaManualDowngrades: true) as? Int ?? 0
-                if manualDowngradesCount > 5 {
-                    log.info(
-                        "Chat \(chatIdentifier) has had five consecutive downgrade attempts, persisting the downgrade."
-                    )
-                    chat._updateDowngradeState(true, checkAgainInterval: 10)
-                } else {
-                    log.info("Incrementing downgrade counter for chat \(chatIdentifier)")
-                    chat._setAndIncrementDowngradeMarkers(forManual: true)
-                }
-            }
-            chat._target(toService: IMServiceImpl.sms(), newComposition: false)
-            var flags = IMMessageFlags(rawValue: failedMessage.flags)
-            flags.insert(.downgraded)
-            nonces.remove(failedMessage.nonce)
-            failedMessage._updateFlags(flags.rawValue)
-            failedMessage.service = "SMS"
-            failedMessage.account = IMAccountController.shared.activeSMSAccount!.uniqueID
-            chat.send(
-                IMMessage.init(
-                    fromIMMessageItem: failedMessage,
-                    sender: failedMessage.sender(),
-                    subject: failedMessage.subject
-                )
-            )
-            return true
-        default:
-            return false
-        }
-    }
-
     fileprivate func process(newMessage: IMItem, chatIdentifier: String) {
         if !preflight(message: newMessage) {
             log.warning("withholding message \(String(describing: newMessage.guid)): preflight failure")
@@ -888,6 +820,11 @@ extension CBDaemonListener {
             }
 
             if item.errorCode == .remoteUserDoesNotExist {
+                // Request Re-routing so that we can get more information on what this error means
+                let guid = item.service + ";-;" + chatIdentifier
+                IMDMessageServicesCenter.sharedInstance().requestRouting(forMessageGuid: item.guid, inChat: guid, error: nil) { response in
+                    log.debug("Got response from requesting reroute for \(String(describing: item.guid)) in \(guid): \(response.singleLineDebugDescription)")
+                }
                 return
             }
 

@@ -121,55 +121,61 @@ class BarcelonaMautrix {
     }
 
     func run() {
-        bootstrap()
+        Task {
+            await bootstrap()
+        }
 
+        log.info("Starting the RunLoop")
         RunLoop.main.run()
     }
 
-    func bootstrap() {
+    func bootstrap() async {
         let startupSpan = SentrySDK.span
         let bootstrapSpan = startupSpan?.startChild(operation: "bootstrap")
         log.info("Bootstrapping")
 
-        BarcelonaManager.shared.bootstrap(chatRegistry: chatRegistry)
-            .catch { error in
-                log.error("fatal error while setting up barcelona: \(String(describing: error))")
+        do {
+            let success = try await BarcelonaManager.shared.bootstrap(chatRegistry: chatRegistry)
+
+            guard success else {
+                log.error("Failed to bootstrap")
                 startupSpan?.finish(status: .internalError)
                 bootstrapSpan?.finish(status: .internalError)
-                exit(197)
+                exit(-1)
             }
-            .then { success in
-                guard success else {
-                    log.error("Failed to bootstrap")
-                    startupSpan?.finish(status: .internalError)
-                    bootstrapSpan?.finish(status: .internalError)
-                    exit(-1)
-                }
 
-                // allow payloads to start flowing
-                self.reader.ready = true
-                BLHealthTicker.shared.pinnedBridgeState = nil
+            // allow payloads to start flowing
+            self.reader.ready = true
+            BLHealthTicker.shared.pinnedBridgeState = nil
 
-                CBPurgedAttachmentController.shared.enabled = true
-                CBPurgedAttachmentController.shared.delegate = self.eventHandler
+            CBPurgedAttachmentController.shared.enabled = true
+            CBPurgedAttachmentController.shared.delegate = self.eventHandler
 
-                // starts the imessage notification processor
-                self.eventHandler.run()
+            // starts the imessage notification processor
+            self.eventHandler.run()
 
-                log.info("BLMautrix is ready")
+            log.info("BLMautrix is ready")
 
-                self.startHealthTicker()
-                bootstrapSpan?.finish()
-                startupSpan?.finish()
-            }
+            self.startHealthTicker()
+            bootstrapSpan?.finish()
+            startupSpan?.finish()
+        } catch {
+            log.error("fatal error while setting up barcelona: \(String(describing: error))")
+            startupSpan?.finish(status: .internalError)
+            bootstrapSpan?.finish(status: .internalError)
+            exit(197)
+        }
     }
 
     // starts the bridge state interval
     func startHealthTicker() {
-        BLHealthTicker.shared.subscribeForever { command in
-            self.mautrixIPCChannel.writePayload(IPCPayload(command: .bridge_status(command)))
-        }
+        BLHealthTicker.shared.debouncedDeduplicatedBridgeRemoteState
+            .sink { command in
+                self.mautrixIPCChannel.writePayload(IPCPayload(command: .bridge_status(command)))
+            }
+            .store(in: &cancellables)
 
+        log.info("Sending initial bridge remote state")
         BLHealthTicker.shared.run(schedulingNext: true)
     }
 

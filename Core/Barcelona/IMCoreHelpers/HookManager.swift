@@ -7,8 +7,10 @@
 //
 
 import Foundation
+import IDS
 import IMCore
 import IMSharedUtilities
+import IMFoundation
 import InterposeKit
 import Logging
 
@@ -42,7 +44,7 @@ private let PNCopyBestGuessCountryCodeForNumber:
     )!
 
 private func IMHandleHooks() throws -> Interpose {
-    return try Interpose(IMHandle.self) {
+    try Interpose(IMHandle.self) {
         try $0.prepareHook(#selector(getter:IMHandle.countryCode)) {
             (
                 store: TypedHook<
@@ -74,10 +76,59 @@ private func IDSServiceHooks() throws -> Interpose {
     }
 }
 
+private func IDSQueryHooks() throws -> Interpose {
+    let log = Logger(label: "IDSQueryHook")
+
+    // Can't use the class itself since IDS.framework doesn't expose it to be linked against
+    return try Interpose(NSClassFromString("_IDSIDQueryController")!) {
+        try $0.prepareHook(#selector(_IDSIDQueryController.__sendMessage(_:queue:reply:failBlock:waitForReply:))) {
+            (
+                store: TypedHook<@convention (c) (
+                    AnyObject,
+                    Selector,
+                    OS_xpc_object,
+                    DispatchQueue,
+                    @escaping (OS_xpc_object?) -> Void,
+                    @escaping (NSError?) -> Void,
+                    Bool
+                ) -> Void,
+                @convention(block) (
+                    AnyObject, // _IDSIDQueryController; can't link against
+                    OS_xpc_object, // the message we're sending
+                    DispatchQueue, // the queue it's being sent on
+                    @escaping @convention(block) (OS_xpc_object?) -> Void, // The block that gets called when it succeeds the xpc call
+                    @escaping @convention(block) (NSError?) -> Void, // The block that gets called when it fails (not certain what 'failure' exactly is here)
+                    Bool // if we want the request to be synchronous
+                ) -> Void>
+            ) in
+            { controller, message, queue, replyBlock, failBlock, waitForReply  in
+                let logReplyBlock: (OS_xpc_object?) -> Void = { [replyBlock] replyObject in
+                    log.debug("Got reply for __sendMessage, is object: \(String(describing: replyObject))")
+                    replyBlock(replyObject)
+                }
+
+                let logFailureBlock: (NSError?) -> Void = { [failBlock] error in
+                    log.error("Got failure for __sendMessage, error is \(String(describing: error))")
+                    failBlock(error)
+                }
+
+                store.original(controller, store.selector, message, queue, logReplyBlock, logFailureBlock, waitForReply)
+            }
+        }
+    }
+}
+
 class HookManager {
     static let shared = HookManager()
 
-    let hooks = [CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks]
+    lazy var hooks = {
+        var h = [CNLogSilencerHooks, IMHandleHooks, IDSServiceHooks]
+        if #available(macOS 12.0, *) {
+            h.append(IDSQueryHooks)
+        }
+        return h
+    }()
+
     private var appliedHooks: [Interpose]?
 
     func apply() throws {

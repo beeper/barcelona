@@ -48,10 +48,12 @@ internal func _BLLoadFileTransfers(forObjects objects: [NSObject]) async throws 
 
     log.info("loading \(unloadedFileTransferGUIDs.count) transfers")
 
-    try await DBReader.shared.attachments(withGUIDs: unloadedFileTransferGUIDs).compactMap(\.attachment)
-        .forEach {
-            $0.initializeFileTransferIfNeeded()
-        }
+    for attachment in try await DBReader.shared
+        .attachments(withGUIDs: unloadedFileTransferGUIDs)
+        .compactMap(\.attachment)
+    {
+        await attachment.initializeFileTransferIfNeeded()
+    }
 }
 
 @inlinable

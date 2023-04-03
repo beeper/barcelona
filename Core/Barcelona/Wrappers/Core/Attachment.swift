@@ -137,11 +137,11 @@ public struct Attachment: Codable, Hashable {
     }
 
     @discardableResult
-    public func initializeFileTransferIfNeeded() -> IMFileTransfer? {
+    public func initializeFileTransferIfNeeded() async -> IMFileTransfer? {
         if let transfer = existingFileTransfer {
             return transfer
         } else if let url = url {
-            return CBInitializeFileTransfer(filename: filename, path: url)
+            return await CBInitializeFileTransfer(filename: filename, path: url)
         } else {
             return nil
         }

@@ -46,8 +46,7 @@ extension IMChat: ChatConfigurationRepresentable {
             IMChatPropertyGroupPhotoGUID.map(value(forChatProperty:)) as? String
         }
         set {
-            guard let IMChatPropertyGroupPhotoGUID = IMChatPropertyGroupPhotoGUID,
-                #available(macOS 11.0, *)
+            guard let IMChatPropertyGroupPhotoGUID = IMChatPropertyGroupPhotoGUID
             else {
                 return
             }

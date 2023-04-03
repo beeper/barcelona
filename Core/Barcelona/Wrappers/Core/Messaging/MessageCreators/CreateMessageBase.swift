@@ -63,15 +63,3 @@ extension CreateMessageBase {
 enum CreateMessageError: Error {
     case noHandleForLastAddressedID
 }
-
-extension Promise {
-    convenience init(_ cb: () throws -> Output) {
-        self.init { resolve, reject in
-            do {
-                try resolve(cb())
-            } catch {
-                reject(error)
-            }
-        }
-    }
-}

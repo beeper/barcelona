@@ -40,6 +40,8 @@ targets:
         product: IMFoundation
       - package: Paris
         product: IMDPersistence
+      - package: Paris
+        product: IMDMessageServices
       - package: swift-log
         product: Logging
       - target: BarcelonaDB

@@ -52,7 +52,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             )
         }
 
-        let transfer = CBInitializeFileTransfer(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
+        let transfer = await CBInitializeFileTransfer(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
         guard let guid = transfer.guid else {
             payload.fail(
                 strategy: .internal_error("created transfer was not assigned a guid!!!"),
