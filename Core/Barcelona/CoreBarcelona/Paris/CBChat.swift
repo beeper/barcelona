@@ -14,19 +14,14 @@ import Logging
 
 /// An entity tracking a single logical conversation comprised of potentially several different chats
 public class CBChat {
-    private let log = Logger(label: "CBChat")
     /// All cached messages for this chat
     public internal(set) var messages: [String: CBMessage] = [:]
-    /// The style of this chat
-    public internal(set) var style: CBChatStyle
 
     private var subscribers: Set<AnyCancellable> = Set()
 
-    public init(style: CBChatStyle) {
-        self.style = style
+    public init() {
         $leaves.sink { [weak self] leaves in
             self?.refreshIdentifiers(leaves)
-            self?.refreshParticipants(leaves)
         }
         .store(in: &subscribers)
     }
@@ -72,23 +67,6 @@ public class CBChat {
     /// All chat identifiers that should match against this conversation
     @Published public internal(set) var identifiers: Set<CBChatIdentifier> = Set()
 
-    @Published public internal(set) var mergedID: String = ""
-
-    @Published public internal(set) var mergedRecipientIDs: Set<String> = []
-
-    private func refreshParticipants(_ leaves: [String: CBChatLeaf]? = nil) {
-        let leaves = leaves ?? self.leaves
-        guard style == .instantMessage else {
-            mergedRecipientIDs = []
-            return
-        }
-        mergedRecipientIDs = leaves.values.reduce(into: Set()) { recipients, leaf in
-            if let last = leaf.participants.last {
-                recipients.insert(last.personID)
-            }
-        }
-    }
-
     /// Immediately calculates and updates the latest value for the chat identifiers
     private func refreshIdentifiers(_ leaves: [String: CBChatLeaf]? = nil) {
         let currentIdentifiers = calculateIdentifiers(leaves)
@@ -96,11 +74,6 @@ public class CBChat {
             return
         }
         identifiers = currentIdentifiers
-        mergedID =
-            identifiers.filter {
-                $0.scheme == .chatIdentifier
-            }
-            .map(\.value).sorted(by: >).joined(separator: ",")
     }
 
     /// Handle a chat update in dictionary representation
@@ -113,123 +86,12 @@ public class CBChat {
 }
 
 public struct CBChatParticipant {
-    public var countryCode: String?
-    public var unformattedName: String?
-    public var personID: String
-
-    public init?(dictionary: [AnyHashable: Any]) {
-        guard let personID = dictionary["FZPersonID"] as? String else {
-            return nil
-        }
-        self.personID = personID
-        self.unformattedName = dictionary["FZPersonUnformattedName"] as? String
-        self.countryCode = dictionary["FZPersonCountryCode"] as? String
-    }
-}
-
-extension CBChat {
-    public var sortedMessages: [CBMessage] {
-        messages.values.lazy.sorted(by: >)
-    }
-
-    /// Returns the most recent message matching the given flags
-    public func lastMessage(with flags: CBMessage.Flags) -> CBMessage? {
-        sortedMessages.first(where: { $0.flags.contains(flags) })
-    }
-}
-
-extension CBMessage {
-    /// Whether the message was sent by me.
-    var isFromMe: Bool {
-        flags.contains(.fromMe)
-    }
-
-    /// Whether the message was successfully delivered.
-    var isDelivered: Bool {
-        flags.contains(.delivered)
-    }
-
-    /// Whether the message is finished sending.
-    var isFinished: Bool {
-        flags.contains(.finished)
-    }
-
-    /// Whether the message was successfully sent. Still true if an error was encountered after sending.
-    var isSent: Bool {
-        flags.contains(.sent)
-    }
-
-    /// Whether this message was sent over SMS.
-    var isSMS: Bool {
-        service == .SMS
-    }
-
-    /// Whether this message was sent over iMessage.
-    var isMadrid: Bool {
-        service == .iMessage
-    }
-
-    /// Whether this message has any non-successful error code.
-    var hasError: Bool {
-        error != .noError
-    }
-
-    /// Whether this message was successfuly sent to the recipient.
-    var isSuccessful: Bool {
-        guard !hasError && isFinished else {
-            return false
-        }
-        guard isFromMe else {
-            return false
-        }
-        if isSMS {
-            return isSent
-        } else {
-            return isDelivered
-        }
-    }
-}
-
-extension CBChat {
-    public var successfulMessages: [CBMessage] {
-        sortedMessages.filter(\.isSuccessful).sorted(by: >)
-    }
+    public init?(dictionary: [AnyHashable: Any]) {}
 }
 
 extension CBChat {
     public var IMChats: [IMChat] {
         leaves.values.compactMap(\.IMChat)
-    }
-
-    public var participants: [String] {
-        leaves.values.first?.participants.map(\.personID) ?? []
-    }
-
-    public var canonicalIDSParticipants: [String] {
-        leaves.values.first?.participants.map(\.personID).map { ($0 as NSString)._bestGuessURI() as! String } ?? []
-    }
-
-    public var mostRecentChat: IMChat? {
-        leaves.values.sorted(usingKey: \.lastSentMesageDate, by: >).first?.IMChat
-    }
-
-    public var senderLastAddressedHandle: String? {
-        mostRecentChat?.lastAddressedHandleID
-    }
-
-    public var senderLastAddressedSIMID: String? {
-        mostRecentChat?.lastAddressedSIMID
-    }
-
-    public func chatForSending(with guid: String) -> IMChat? {
-        IMChats.first(where: { $0.guid == guid })
-    }
-}
-
-extension IMHandle {
-    fileprivate var chat: IMChat? {
-        IMChatRegistry.shared._existingChat(withIdentifier: id, style: 0x2d, account: service.internalName)
-            ?? IMChatRegistry.shared.chat(for: self)
     }
 }
 
