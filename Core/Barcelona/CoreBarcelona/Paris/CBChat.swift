@@ -9,7 +9,6 @@ import Combine
 import Foundation
 import IMFoundation
 import IMSharedUtilities
-import IMCore
 import Logging
 
 /// An entity tracking a single logical conversation comprised of potentially several different chats
@@ -196,6 +195,9 @@ extension CBChat {
     }
 }
 
+#if canImport(IMCore)
+import IMCore
+
 extension CBChat {
     public var IMChats: [IMChat] {
         leaves.values.compactMap(\.IMChat)
@@ -234,18 +236,27 @@ extension IMHandle {
 }
 
 // MARK: - Message sending
-extension IMChat {
-    @MainActor public func send(message: IMMessage) {
-        send(message)
+extension CBChat {
+    @MainActor
+    public func send(message: IMMessage, chat: IMChat) {
+        chat.send(message)
     }
 
-    public func send(message: IMMessageItem) async {
-        await send(message: IMMessage(fromIMMessageItem: message, sender: nil, subject: nil))
+    public func send(message: IMMessageItem, chat: IMChat) async {
+        await send(message: IMMessage(fromIMMessageItem: message, sender: nil, subject: nil), chat: chat)
     }
 
-    public func send(message: CreateMessage) async throws -> IMMessage {
-        let message = try message.imMessage(inChat: self)
-        await send(message: message)
+    public func send(message: CreateMessage, guid: String, service: IMServiceStyle) async throws -> IMMessage {
+        guard let chat = chatForSending(with: guid) else {
+            throw BarcelonaError(
+                code: 400,
+                message:
+                    "You can't send messages to this chat. If this is an SMS, make sure forwarding is still enabled. If this is an iMessage, check your connection to Apple."
+            )
+        }
+        let message = try message.imMessage(inChat: chat.chatIdentifier, service: service)
+        await send(message: message, chat: chat)
         return message
     }
 }
+#endif

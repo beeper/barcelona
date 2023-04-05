@@ -11,55 +11,95 @@ import IMCore
 import IMSharedUtilities
 import Logging
 
-protocol CreateMessageBase {
-    var threadIdentifier: String? { get }
-    var replyToGUID: String? { get }
-    var replyToPart: Int? { get }
-    var metadata: Message.Metadata? { get }
-    var combinedFlags: IMMessageFlags { get }
-    var attributedSubject: NSMutableAttributedString? { get }
-    var balloonBundleID: String? { get }
-    var payloadData: Data? { get }
-    var bodyText: NSAttributedString { get }
-    var transferGUIDs: [String] { get }
+protocol CreateMessageBase: Codable {
+    var threadIdentifier: String? { get set }
+    var replyToGUID: String? { get set }
+    var replyToPart: Int? { get set }
+    var metadata: Message.Metadata? { get set }
 
-    func imMessage(inChat chat: IMChat) throws -> IMMessage
+    func imMessage(inChat chatIdentifier: String, service: IMServiceStyle) throws -> IMMessage
+    func parseToAttributed() -> MessagePartParseResult
+    func createIMMessageItem(
+        withThreadIdentifier threadIdentifier: String?,
+        withChatIdentifier chatIdentifier: String,
+        withParseResult parseResult: MessagePartParseResult
+    ) throws -> (IMMessageItem, NSMutableAttributedString?)
 }
 
 extension CreateMessageBase {
-    public func imMessage(inChat chat: IMChat) throws -> IMMessage {
-        let message = IMMessage.instantMessage(
-            withText: bodyText,
-            messageSubject: attributedSubject,
-            fileTransferGUIDs: transferGUIDs,
-            flags: combinedFlags.rawValue,
-            threadIdentifier: threadIdentifier ?? replyToGUID.flatMap {
-                IMChatItem.resolveThreadIdentifier(forMessageWithGUID: $0, part: replyToPart ?? 0, chat: chat)
-            }
-        )
+    func resolvedThreadIdentifier(chat: IMChat) -> String? {
+        if let threadIdentifier = threadIdentifier {
+            return threadIdentifier
+        } else if let replyToGUID = replyToGUID {
+            return IMChatItem.resolveThreadIdentifier(
+                forMessageWithGUID: replyToGUID,
+                part: replyToPart ?? 0,
+                chat: chat
+            )
+        }
+        return nil
+    }
 
-        guard let myHandle = chat.senderHandle else {
-            throw CreateMessageError.noHandleForLastAddressedID
+    func finalize(
+        imMessageItem: IMMessageItem,
+        chat: IMChat,
+        withSubject subject: NSMutableAttributedString?
+    ) throws -> IMMessage {
+        if chat.account.service == .iMessage() {
+            imMessageItem.setThreadIdentifier(resolvedThreadIdentifier(chat: chat))
         }
 
-        message.sender = myHandle
+        guard let message = IMMessage.message(fromUnloadedItem: imMessageItem, withSubject: subject) else {
+            throw BarcelonaError(code: 500, message: "Failed to construct IMMessage from IMMessageItem")
+        }
 
-        if let metadata {
+        if let metadata = metadata {
             message.metadata = metadata
-        }
-
-        if let balloonBundleID {
-            message.balloonBundleID = balloonBundleID
-        }
-
-        if let payloadData {
-            message.payloadData = payloadData
         }
 
         return message
     }
+
+    public func imMessage(inChat chatIdentifier: String, service: IMServiceStyle) throws -> IMMessage {
+        let parseResult = parseToAttributed()
+
+        let (imMessageItem, subject) = try createIMMessageItem(
+            withThreadIdentifier: nil,
+            withChatIdentifier: chatIdentifier,
+            withParseResult: parseResult
+        )
+
+        imMessageItem.fileTransferGUIDs = parseResult.transferGUIDs
+        guard let chat = IMChat.chat(withIdentifier: chatIdentifier, onService: service, style: nil) else {
+            throw CreateMessageError.noIMChatForIdAndService
+        }
+        imMessageItem.service = chat.account.serviceName
+        imMessageItem.accountID = chat.account.uniqueID
+
+        let imMessage = try finalize(imMessageItem: imMessageItem, chat: chat, withSubject: subject)
+
+        guard let senderHandle = chat.senderHandle else {
+            throw CreateMessageError.noHandleForLastAddressedID
+        }
+        imMessage.sender = senderHandle
+
+        return imMessage
+    }
 }
 
 enum CreateMessageError: Error {
+    case noIMChatForIdAndService
     case noHandleForLastAddressedID
+}
+
+extension Promise {
+    convenience init(_ cb: () throws -> Output) {
+        self.init { resolve, reject in
+            do {
+                try resolve(cb())
+            } catch {
+                reject(error)
+            }
+        }
+    }
 }

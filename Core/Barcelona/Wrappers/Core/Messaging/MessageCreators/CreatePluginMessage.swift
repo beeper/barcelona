@@ -117,8 +117,7 @@ public func ERCreateBlankRichLinkMessage(
     return IMMessage.message(fromUnloadedItem: messageItem)!
 }
 
-// public struct CreatePluginMessage: Codable, CreateMessageBase {
-public struct CreatePluginMessage: CreateMessageBase {
+public struct CreatePluginMessage: Codable, CreateMessageBase {
     public init(
         extensionData: MessageExtensionsData,
         attachmentID: String? = nil,
@@ -137,11 +136,32 @@ public struct CreatePluginMessage: CreateMessageBase {
         self.replyToGUID = replyToGUID
         self.replyToPart = replyToPart
         self.metadata = metadata
+    }
 
-        let parseResult = ERAttributedString(forAttachment: attachmentID)
+    public var extensionData: MessageExtensionsData
+    public var attachmentID: String?
+    public var bundleID: String
+    public var expressiveSendStyleID: String?
+    public var threadIdentifier: String?
+    public var replyToPart: Int?
+    public var replyToGUID: String?
+    public var metadata: Message.Metadata?
+
+    public func parseToAttributed() -> MessagePartParseResult {
+        ERAttributedString(forExtensionOptions: self)
+    }
+
+    public func createIMMessageItem(
+        withThreadIdentifier threadIdentifier: String?,
+        withChatIdentifier chatIdentifier: String,
+        withParseResult parseResult: MessagePartParseResult
+    ) throws -> (IMMessageItem, NSMutableAttributedString?) {
+        var payloadData = extensionData
+        payloadData.data = payloadData.data ?? payloadData.synthesizedData
 
         let messageString = NSMutableAttributedString(attributedString: parseResult.string)
         messageString.append(.init(string: IMBreadcrumbCharacterString))
+
         messageString.addAttributes(
             [
                 MessageAttributes.writingDirection: -1,
@@ -151,33 +171,17 @@ public struct CreatePluginMessage: CreateMessageBase {
             range: messageString.range(of: IMBreadcrumbCharacterString)
         )
 
-        self.bodyText = messageString as NSAttributedString
-        self.transferGUIDs = parseResult.transferGUIDs
+        let messageItem = IMMessageItem.init(sender: nil, time: nil, guid: nil, type: 0)!
 
-        var tempPayloadData = extensionData
-        tempPayloadData.data  = tempPayloadData.data ?? tempPayloadData.synthesizedData
-        self.payloadData = tempPayloadData.archive
-        self.balloonBundleID = bundleID
-    }
+        messageItem.body = messageString
+        messageItem.balloonBundleID = bundleID
+        messageItem.payloadData = payloadData.archive
+        messageItem.flags = 5
 
-    public let extensionData: MessageExtensionsData
-    public let attachmentID: String?
-    public let bundleID: String
-    public let expressiveSendStyleID: String?
-    public let threadIdentifier: String?
-    public let replyToPart: Int?
-    public let replyToGUID: String?
-    public let metadata: Message.Metadata?
-    let balloonBundleID: String?
-    let payloadData: Data?
-    let bodyText: NSAttributedString
-    let transferGUIDs: [String]
+        #if false
+        ERApplyMessageExtensionQuirks(toMessageItem: messageItem, inChatID: chatIdentifier, forOptions: self)
+        #endif
 
-    public var attributedSubject: NSMutableAttributedString? {
-        nil
-    }
-
-    var combinedFlags: IMMessageFlags {
-        [.finished, .fromMe]
+        return (messageItem, nil)
     }
 }

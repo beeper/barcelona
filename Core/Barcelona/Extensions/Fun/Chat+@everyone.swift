@@ -36,6 +36,6 @@ extension Chat {
                 )
             }
         }
-        return try await send(message: .init(parts: parts))
+        return try await send(message: .init(parts: parts), in: chat)
     }
 }
