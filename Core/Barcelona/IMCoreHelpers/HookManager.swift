@@ -8,6 +8,7 @@
 
 import Foundation
 import IDS
+import IDSFoundation
 import IMCore
 import IMSharedUtilities
 import IMFoundation
@@ -81,14 +82,14 @@ private func IDSQueryHooks() throws -> Interpose {
 
     // Can't use the class itself since IDS.framework doesn't expose it to be linked against
     return try Interpose(NSClassFromString("_IDSIDQueryController")!) {
-        try $0.prepareHook(#selector(_IDSIDQueryController.__sendMessage(_:queue:reply:failBlock:waitForReply:))) {
+        try $0.prepareHook(#selector(_IDSIDQueryController.__sendMessage(_:queue:reply:fail:waitForReply:))) {
             (
                 store: TypedHook<@convention (c) (
                     AnyObject,
                     Selector,
                     OS_xpc_object,
                     DispatchQueue,
-                    @escaping (OS_xpc_object?) -> Void,
+                    @escaping (OS_xpc_object) -> Void,
                     @escaping (NSError?) -> Void,
                     Bool
                 ) -> Void,
@@ -96,14 +97,37 @@ private func IDSQueryHooks() throws -> Interpose {
                     AnyObject, // _IDSIDQueryController; can't link against
                     OS_xpc_object, // the message we're sending
                     DispatchQueue, // the queue it's being sent on
-                    @escaping @convention(block) (OS_xpc_object?) -> Void, // The block that gets called when it succeeds the xpc call
+                    @escaping @convention(block) (OS_xpc_object) -> Void, // The block that gets called when it succeeds the xpc call
                     @escaping @convention(block) (NSError?) -> Void, // The block that gets called when it fails (not certain what 'failure' exactly is here)
                     Bool // if we want the request to be synchronous
                 ) -> Void>
             ) in
             { controller, message, queue, replyBlock, failBlock, waitForReply  in
-                let logReplyBlock: (OS_xpc_object?) -> Void = { [replyBlock] replyObject in
-                    log.debug("Got reply for __sendMessage, is object: \(String(describing: replyObject))")
+                let logReplyBlock: (OS_xpc_object) -> Void = { [replyBlock] replyObject in
+
+                    if let swiftDict = replyObject.toSwiftDictionary() {
+                        // If we can turn it into a parseable dictionary, then print that instead of just the object
+                        log.debug("Got reply for __sendMessage, is dict: \(swiftDict.singleLineDebugDescription)")
+
+                        // I'm not certain some of these IDS types are available in lower than ventura, so we're not taking chances
+                        if #available(macOS 13.0, *),
+                           // Get the destinations
+                           let dest = swiftDict["destinations"] as? Data,
+                           // Unarchive it to a more understandable format
+                           let obj = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: [
+                                NSDictionary.classForKeyedUnarchiver(),
+                                NSString.classForKeyedUnarchiver(),
+                                NSUUID.classForKeyedUnarchiver(),
+                                IDSIDInfoResult.classForKeyedUnarchiver(),
+                                IDSIDKTData.classForKeyedUnarchiver()
+                           ], from: dest) as? [String: IDSIDInfoResult]
+                        {
+                            log.debug("__sendMessage was invoked for an ids query, result is: \(obj.mapValues { $0.status() }.singleLineDebugDescription)")
+                        }
+                    } else {
+                        log.debug("Got reply for __sendMessage, is object: \(String(describing: replyObject))")
+                    }
+
                     replyBlock(replyObject)
                 }
 
