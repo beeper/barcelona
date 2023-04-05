@@ -129,33 +129,33 @@ extension IMChat {
         messageSummaryInfo: [AnyHashable: Any],
         messagePartChatItem: IMMessagePartChatItem
     ) throws -> IMMessage {
-        guard
-            let tapback = IMTapback(
-                associatedMessageType: associatedMessageType,
-                messageSummaryInfo: messageSummaryInfo
-            )
-        else {
+        guard let tapback = IMTapback(
+            associatedMessageType: associatedMessageType,
+            messageSummaryInfo: messageSummaryInfo
+        ) else {
             throw TapbackError.createTapbackFailed
         }
-        guard let sender = IMTapbackSender(tapback: tapback, chat: self, messagePartChatItem: messagePartChatItem)
-        else {
+
+        guard let sender = IMTapbackSender(
+            tapback: tapback,
+            chat: self,
+            messagePartChatItem: messagePartChatItem
+        ) else {
             throw TapbackError.createSenderFailed
         }
 
         // This is a simplified implementation of IMTapbackSender's `send` method, but the thing is that we need
         // to return the IMMessage that is being sent, and the `send` method just returns void, so we can't use it
 
-        guard
-            let message = IMMessage.instantMessage(
-                withAssociatedMessageContent: sender.attributedContentString(),
-                flags: 0,
-                associatedMessageGUID: sender.messageGUID(),
-                associatedMessageType: associatedMessageType,
-                associatedMessageRange: sender.messagePartRange(),
-                messageSummaryInfo: sender.messageSummaryInfo(),
-                threadIdentifier: sender.threadIdentifier()
-            )
-        else {
+        guard let message = IMMessage.instantMessage(
+            withAssociatedMessageContent: sender.attributedContentString(),
+            flags: CreateMessage.baseFlags.rawValue,
+            associatedMessageGUID: sender.messageGUID(),
+            associatedMessageType: associatedMessageType,
+            associatedMessageRange: sender.messagePartRange(),
+            messageSummaryInfo: sender.messageSummaryInfo(),
+            threadIdentifier: sender.threadIdentifier()
+        ) else {
             throw TapbackError.createInstantMessageFailed
         }
 

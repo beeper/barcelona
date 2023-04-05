@@ -121,12 +121,13 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                     .init(type: .text, details: text)
                 ])
 
-                messageCreation.replyToGUID = reply_to
+                if let reply_to, !reply_to.isEmpty {
+                    messageCreation.replyToGUID = reply_to
+                }
                 messageCreation.replyToPart = reply_to_part
                 messageCreation.metadata = metadata
 
-                let cbChat = await chatRegistry.chats[.guid(imChat.guid)]
-                finalMessage = try await chat.send(message: messageCreation, in: cbChat)
+                finalMessage = try await chat.send(message: messageCreation)
             }
 
             payload.reply(

@@ -116,8 +116,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                 withExtendedLifetime(monitor) { monitor = nil }
             }
 
-            let cbChat = await chatRegistry.chats[.guid(imChat.guid)]
-            message = try await chat.sendReturningRaw(message: messageCreation, in: cbChat)
+            message = try await chat.sendReturningRaw(message: messageCreation)
 
             payload.reply(
                 withResponse: .message_receipt(
