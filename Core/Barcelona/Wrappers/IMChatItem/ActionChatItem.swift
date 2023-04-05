@@ -11,7 +11,6 @@ import IMCore
 
 protocol IMMessageActionItemParseable: IMCoreDataResolvable {
     var actionType: Int64 { get }
-    var senderID: String? { get }
     var otherHandleID: String? { get }
     var resolvedSenderID: String? { get }
 }
@@ -27,10 +26,6 @@ extension IMMessageActionItem: IMMessageActionItemParseable {
 }
 
 extension IMMessageActionChatItem: IMMessageActionItemParseable {
-    var senderID: String? {
-        sender?.id
-    }
-
     var otherHandleID: String? {
         otherHandle?.id
     }
