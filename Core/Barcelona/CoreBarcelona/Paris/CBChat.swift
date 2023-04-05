@@ -7,9 +7,9 @@
 
 import Combine
 import Foundation
+import IMCore
 import IMFoundation
 import IMSharedUtilities
-import IMCore
 import Logging
 
 /// An entity tracking a single logical conversation comprised of potentially several different chats
@@ -83,10 +83,6 @@ public class CBChat {
         }
         leaves[guid, default: CBChatLeaf()].handle(dictionary: dictionary)
     }
-}
-
-public struct CBChatParticipant {
-    public init?(dictionary: [AnyHashable: Any]) {}
 }
 
 extension CBChat {

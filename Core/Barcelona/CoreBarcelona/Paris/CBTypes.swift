@@ -8,35 +8,21 @@
 import Foundation
 import IMCore
 import IMFoundation
+import Logging
 
 public enum CBChatStyle: UInt8, CaseIterable {
     case group = 43
     case instantMessage = 45
 }
 
-extension CBChatStyle {
-    public var character: Character {
-        switch self {
-        case .group: return "+"
-        case .instantMessage: return "-"
-        }
-    }
-}
-
-extension CBChatStyle {
-    var IMCore: IMChatStyle {
-        switch self {
-        case .group: return .group
-        case .instantMessage: return .instantMessage
-        }
-    }
-}
-
 extension IMChatStyle {
     var CBChat: CBChatStyle {
+        let log = Logger(label: "CBChatStyle")
         switch self {
         case .group: return .group
         case .instantMessage: return .instantMessage
+        @unknown default:
+            fatalError("unknown IMChatStyle case")
         }
     }
 }
