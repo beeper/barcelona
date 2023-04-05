@@ -231,12 +231,6 @@ extension Chat {
 
     /// Returns a chat targeted at the appropriate service for a handleID
     @MainActor
-    public static func directMessage(withHandleID handleID: String) async -> Chat {
-        await Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID)))
-    }
-
-    /// Returns a chat targeted at the appropriate service for a handleID
-    @MainActor
     public static func directMessage(withHandleID handleID: String, service: IMServiceStyle) async -> Chat {
         await Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service)))
     }

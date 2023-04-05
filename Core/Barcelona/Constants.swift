@@ -8,12 +8,8 @@
 
 import Foundation
 
-let HandleQueue = DispatchQueue.init(label: "HandleIDS")
-
 /// Imma be real witchu idk why this is the attachment string but IMCore uses this
 let IMAttachmentString = String(data: Data(base64Encoded: "77+8")!, encoding: .utf8)!
-
-internal let IDSListenerID = "SOIDSListener-com.apple.imessage-rest"
 
 /// flag |= MessageModifier
 enum MessageModifiers: UInt64 {

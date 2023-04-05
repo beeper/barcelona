@@ -7,30 +7,24 @@
 
 import Foundation
 import IMCore
-import Pwomise
 import Logging
+import Pwomise
 
 private let log = Logger(label: "ChatLocator")
 
 /// APIs for creating a chat!
 public struct ChatLocator {
     static func handleIsRegisteredForIMessage(_ handle: String) async throws -> String? {
-        await withCheckedContinuation { continuation in
-            do {
-                try BLResolveIDStatusForIDs([handle], onService: .iMessage) { result in
-                    log.info("BLResolveIDStatusForIDs \(handle) result: \(result)")
-                    if (result.values.first == .available) {
-                        // Success! Return the key that resolved from our handle as this will be better formatted
-                        continuation.resume(returning: result.keys.first)
-                    } else {
-                        // Not available
-                        continuation.resume(returning: nil)
-                    }
-                }
-            } catch {
-                continuation.resume(returning: nil)
+        do {
+            let (id, status) = try await IDSResolver.resolveStatus(for: handle, on: .iMessage)
+            if status == .available {
+                return id
             }
+            return nil
+        } catch {
+            log.error("Failed to resolve IDS status for \(handle): \(error)")
         }
+        return nil
     }
 
     public enum ServiceResult {
@@ -81,34 +75,12 @@ public struct ChatLocator {
 
 // MARK: - Utilities
 extension Chat {
-    static func handlesAreiMessageEligible(_ handles: [String]) -> Bool {
-        guard let statuses = try? BLResolveIDStatusForIDs(handles, onService: .iMessage) else {
-            return false
-        }
-
-        return statuses.values.allSatisfy {
-            $0 == .available
-        }
-    }
-
     static func iMessageHandle(forID id: String) -> IMHandle? {
         IMAccountController.shared.iMessageAccount?.imHandle(withID: id)
     }
 
     static var smsAccount: IMAccount {
         IMAccountController.shared.activeSMSAccount ?? IMAccount(service: IMServiceStyle.SMS.service)!
-    }
-
-    static func homogenousHandles(forIDs ids: [String]) -> [IMHandle] {
-        if handlesAreiMessageEligible(ids) {
-            return ids.compactMap(iMessageHandle(forID:))
-        }
-
-        return ids.map(smsAccount.imHandle(withID:))
-    }
-
-    static func bestHandle(forID id: String) -> IMHandle {
-        homogenousHandles(forIDs: [id]).first!
     }
 
     static func bestHandle(forID id: String, service: IMServiceStyle) -> IMHandle {
