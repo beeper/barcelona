@@ -48,12 +48,6 @@ public enum ChatItemType: String, Codable, CaseIterable {
         .participantChange, .groupAction, .groupTitle, .typing,
     ]
 
-    static let chatItems: [ChatItemType] = [
-        .action, .attachment, .plugin,
-        .text, .acknowledgment,
-        .sticker, .message,
-    ]
-
     var decodingClass: ChatItem.Type {
         switch self {
         case .date:
@@ -103,20 +97,7 @@ public struct IngestionContext {
     public let service: IMServiceStyle
     public let attachment: Attachment? = nil
     public let textParts: [TextPart]? = nil
-    public let text: String? = nil
     public let message: IMMessage? = nil
-}
-
-extension Optional where Wrapped == String {
-    var debugString: String {
-        self ?? "(nil)"
-    }
-}
-
-extension Optional where Wrapped == Bool {
-    var debugString: String {
-        (self ?? false).description
-    }
 }
 
 @_typeEraser(AnyChatItem)
@@ -133,9 +114,6 @@ public protocol ChatItem: Codable, CustomDebugStringConvertible {
     var threadOriginator: String? { get set }
     var type: ChatItemType { get }
     var isTranscriptItem: Bool { get }
-    var isChatItem: Bool { get }
-    var isMessage: Bool { get }
-    var isNotMessage: Bool { get }
 
     func hash(into hasher: inout Hasher)
 }
@@ -157,22 +135,6 @@ extension ChatItem {
 
     public var isTranscriptItem: Bool {
         ChatItemType.transcriptItems.contains(type)
-    }
-
-    public var isChatItem: Bool {
-        ChatItemType.chatItems.contains(type)
-    }
-
-    public var isMessage: Bool {
-        type == .message
-    }
-
-    public var isNotMessage: Bool {
-        type != .message
-    }
-
-    public var isAcknowledgable: Bool {
-        self is ChatItemAcknowledgable
     }
 }
 
@@ -280,10 +242,6 @@ public class AnyChatItem: ChatItem, Hashable, ChatItemOwned, ChatItemAcknowledga
         self.item = ChatItemType.ingest(object: item, context: context)
     }
 
-    public init(_ item: ChatItem) {
-        self.item = item
-    }
-
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -293,10 +251,6 @@ public class AnyChatItem: ChatItem, Hashable, ChatItemOwned, ChatItemAcknowledga
 
     private enum CodingKeys: CodingKey {
         case payload, type
-    }
-
-    private func setting<Proto: ChatItem>(type: Proto.Type, _ cb: (inout Proto) -> Void) {
-
     }
 
     public func encode(to encoder: Encoder) throws {

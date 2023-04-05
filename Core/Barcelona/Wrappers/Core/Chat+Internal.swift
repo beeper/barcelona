@@ -65,12 +65,6 @@ public struct ChatLocator {
             return .failed(message)
         }
     }
-
-    public enum ChatResult {
-        case existing(Chat)
-        case created(Chat)
-        case failed(String)
-    }
 }
 
 // MARK: - Utilities

@@ -12,21 +12,8 @@ import IMCore
 import IMDPersistence
 import Logging
 
-extension Date {
-    static func now() -> Date { Date() }
-}
-
 extension IMChat {
     static var regressionTesting_disableServiceRefresh = false
-}
-
-extension Encodable {
-    var prettyJSON: String {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
-
-        return try! String(decoding: encoder.encode(encode(to:)), as: UTF8.self)
-    }
 }
 
 extension IMChat {
@@ -75,7 +62,7 @@ extension IMChat {
         refreshServiceForSending()
         let id = self.chatIdentifier
         let serviceName = account.serviceName ?? "nil"
-        log.info("The resolved service for \(id) is currently \(serviceName)", source: "ERChat")
+        log.info("The resolved service for \(String(describing: id)) is currently \(serviceName)", source: "ERChat")
     }
 }
 
