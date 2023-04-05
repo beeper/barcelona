@@ -12,16 +12,6 @@ import DigitalTouchShared
 import Foundation
 
 public struct ETSketchData: Codable {
-    init(_ message: ETSketchMessage) {
-        numberOfColors = message.numberOfColors
-
-        colors = message.colorsInMessage.compactMap {
-            Color(fromUnknown: $0)
-        }
-
-        strokes = []
-    }
-
     let numberOfColors: UInt64
     let colors: [Color]
     let strokes: [[Data]]
