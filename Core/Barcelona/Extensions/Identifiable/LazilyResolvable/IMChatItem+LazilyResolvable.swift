@@ -62,28 +62,3 @@ public struct CBMessageItemIdentifierData: Codable, CustomStringConvertible, Raw
         .joined(separator: "")
     }
 }
-
-extension String {
-    public var cb_messageIDExtracted: String {
-        guard let splitted = self.split(separator: ":").last?.split(separator: "/").last else {
-            return self
-        }
-
-        return String(splitted)
-    }
-}
-
-extension IMChatItem: LazilyResolvable, ConcreteLazilyBasicResolvable {
-    public static func lazyResolve(withIdentifiers identifiers: [String]) -> Promise<[IMChatItem]> {
-        IMMessage.lazyResolve(withIdentifiers: identifiers.map(\.cb_messageIDExtracted))
-            .flatMap(\._imMessageItem.chatItems)
-            .filter {
-                guard let transcriptChatItem = $0 as? IMTranscriptChatItem,
-                    identifiers.contains(transcriptChatItem.guid)
-                else {
-                    return false
-                }
-                return true
-            }
-    }
-}
