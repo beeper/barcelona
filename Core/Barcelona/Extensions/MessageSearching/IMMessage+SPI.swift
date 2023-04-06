@@ -11,8 +11,6 @@ import IMCore
 import IMSharedUtilities
 import os.log
 
-private let message_log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "IMMessage+SPI")
-
 extension IMMessage {
     /**
      Takes an IMMessageItem that has no context object and resolves it into a fully formed IMMessage
@@ -41,31 +39,5 @@ extension IMMessage {
 
     public static func message(fromUnloadedItem item: IMMessageItem) -> IMMessage? {
         message(fromUnloadedItem: item, withSubject: nil)
-    }
-
-    public static func message(
-        withGUID guid: String,
-        in chat: String? = nil,
-        service: IMServiceStyle
-    ) async throws -> ChatItem? {
-        try await messages(withGUIDs: [guid], in: chat, service: service).first
-    }
-
-    public static func messages(
-        withGUIDs guids: [String],
-        in chat: String? = nil,
-        service: IMServiceStyle
-    ) async throws -> [ChatItem] {
-        if guids.count == 0 {
-            return []
-        }
-
-        if BLIsSimulation {
-            let items = await IMChatHistoryController.sharedInstance()!.loadMessages(withGUIDs: guids)
-                .compactMap(\._imMessageItem)
-            return try await BLIngestObjects(items, inChat: chat, service: service)
-        } else {
-            return try await BLLoadChatItems(withGUIDs: guids, chatID: chat, service: service)
-        }
     }
 }
