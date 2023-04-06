@@ -19,21 +19,6 @@ private let log = Logger(label: "BarcelonaManager")
 let BLListenerIdentifier = "com.ericrabil.imessage-rest"
 let BLIsSimulation = IMCoreSimulatedEnvironmentEnabled()
 
-@_cdecl("BLTeardownController")
-public func BLTeardownController() {
-    let controller = IMDaemonController.sharedInstance()
-
-    controller.disconnectFromDaemon()
-    controller.listener.removeHandler(CBDaemonListener.shared)
-    controller.removeListenerID(BLListenerIdentifier)
-
-    IMChatRegistry.shared.allChats
-        .map(\.guid)
-        .forEach(IMChatRegistry.shared._unregisterChat(withGUID:))
-
-    IMFileTransferCenter.sharedInstance()._clearTransfers()
-}
-
 @_cdecl("BLSwizzleDaemonController")
 func BLSwizzleDaemonController() -> Bool {
     do {
@@ -59,39 +44,6 @@ func BLSwizzleDaemonController() -> Bool {
         log.error("failed to swizzle daemon controller: \(String(describing: error))")
         return false
     }
-}
-
-/**
- * This function is only used for unit tests
- */
-public func BLSetup() -> Bool {
-    do {
-        try HookManager.shared.apply()
-    } catch {
-        log.error("Failed to apply hooks: \(String(describing: error))")
-        return false
-    }
-
-    let controller = IMDaemonController.sharedInstance()
-    controller.listener.addHandler(CBDaemonListener.shared)
-
-    log.info("BLSetup Connecting to daemon...")
-
-    controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)
-    controller.blockUntilConnected()
-
-    log.info("Connected.")
-
-    return true
-}
-
-func BLTeardown() {
-    let controller = IMDaemonController.sharedInstance()
-    controller.listener.removeHandler(CBDaemonListener.shared)
-
-    log.info("Disconnecting from daemon...")
-
-    controller.disconnectFromDaemon()
 }
 
 func BLBootstrapController(chatRegistry: CBChatRegistry) async -> Bool {
@@ -184,14 +136,6 @@ func BLBootstrapController(chatRegistry: CBChatRegistry) async -> Bool {
 
 public class BarcelonaManager {
     public static let shared = BarcelonaManager()
-
-    public var daemonController: IMDaemonController {
-        IMDaemonController.sharedInstance()
-    }
-
-    public func teardown() {
-        BLTeardownController()
-    }
 
     @MainActor public func bootstrap(chatRegistry: CBChatRegistry) async throws -> Bool {
         let bootstrapTask = Task {
