@@ -9,8 +9,6 @@ import Foundation
 import IDS
 import Logging
 
-private let log = Logger(label: "imagent")
-
 extension DispatchQueue {
     static let IDSProcessingQueue = DispatchQueue(label: "com.barcelona.imagent.IDSProcessingQueue")
 }
@@ -33,7 +31,7 @@ class BLDaemon {
 
 extension IDSDaemonController {
     static var `default`: IDSDaemonController {
-        sharedInstance() as! IDSDaemonController
+        sharedInstance()
     }
 }
 
