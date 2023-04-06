@@ -426,10 +426,7 @@ public actor CBChatRegistry {
             return (chat, leaf.mostUniqueIdentifier)
         }
 
-        guard let style = (chat["style"] as? CBChatStyle.RawValue).flatMap(CBChatStyle.init(rawValue:)) else {
-            return (nil, leaf.mostUniqueIdentifier)
-        }
-        let cbChat = CBChat(style: style)
+        let cbChat = CBChat()
         cbChat.handle(dictionary: chat)
         store(chat: cbChat)
         return (cbChat, leaf.mostUniqueIdentifier)
