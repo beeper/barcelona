@@ -123,7 +123,7 @@ extension Chat {
         )
     }
 
-    public func tapback(_ creation: TapbackCreation, metadata: Message.Metadata? = nil) async throws -> Message {
+    public func tapback(_ creation: TapbackCreation) async throws -> Message {
         markAsRead()
         guard let imChat, let service else {
             throw BarcelonaError(code: 500, message: "No IMChat or service for \(id)")
