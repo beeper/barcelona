@@ -15,20 +15,13 @@ import Combine
 import CommunicationsFilter
 import Foundation
 import IMCore
+import IMDMessageServices
 import IMDaemonCore
 import IMFoundation
-import IMDMessageServices
 import IMSharedUtilities
 import Logging
 
 private let log = Logger(label: "ERDaemonListener")
-
-// set to false and the logging conditions (probably) wont even compile, but they will be disabled
-#if DEBUG
-@usableFromInline internal let verboseLoggingEnabled = true
-#else
-@usableFromInline internal let verboseLoggingEnabled = true
-#endif
 
 extension String {
     fileprivate var bl_mergedID: String {
@@ -187,73 +180,10 @@ class OrderedDictionary<K: Hashable, V> {
             }
         }
     }
-
-    var count: Int {
-        orderedSet.count
-    }
-
-    func index(of key: K) -> Int {
-        orderedSet.index(of: key)
-    }
-
-    var keys: Dictionary<K, V>.Keys {
-        dictionary.keys
-    }
-
-    var values: Dictionary<K, V>.Values {
-        dictionary.values
-    }
-
-    func removeOldest(_ n: Int) {
-        Array(orderedSet.prefix(n))
-            .forEach { element in
-                self[(element as! K)] = nil
-            }
-    }
-
-    func shrink(to size: Int) {
-        let overflow = max(count - size, 0)
-        guard overflow > 0 else {
-            return
-        }
-        removeOldest(overflow)
-    }
 }
 
 public class CBDaemonListener: ERBaseDaemonListener {
     public static let shared = CBDaemonListener()
-
-    public enum PipelineEvent: Codable {
-        case unreadCount(chat: String, count: Int)
-        case typing(chat: String, service: IMServiceStyle, typing: Bool)
-        case chatName(chat: String, name: String?)
-        case chatParticipants(chat: String, participants: [String])
-        case blocklist(entries: [String])
-        case messagesDeleted(ids: [String])
-        case chatsDeleted(chatIDs: [String])
-        case chatJoinState(chat: String, joinState: IMChatJoinState)
-        case message(payload: Message)
-        case phantom(item: PhantomChatItem)
-        case messageStatus(change: CBMessageStatusChange)
-        case resetHandle(ids: [String])
-        case configuration(updated: ChatConfiguration)
-
-        static func message(_ message: Message) -> PipelineEvent {
-            return .message(payload: message)
-        }
-
-        static func phantom(_ item: PhantomChatItem) -> PipelineEvent {
-            return .phantom(item: item)
-        }
-
-        static func messageStatus(_ change: CBMessageStatusChange) -> PipelineEvent {
-            return .messageStatus(change: change)
-        }
-
-        static func configuration(_ updated: ChatConfiguration) -> PipelineEvent {
-            return .configuration(updated: updated)
-        }
-    }
 
     public let unreadCountPipeline = PassthroughSubject<(chat: String, count: Int), Never>()
     public let typingPipeline = PassthroughSubject<(chat: String, service: IMServiceStyle, typing: Bool), Never>()
@@ -269,26 +199,9 @@ public class CBDaemonListener: ERBaseDaemonListener {
     public let chatConfigurationPipeline = PassthroughSubject<ChatConfiguration, Never>()
     public let disconnectPipeline = NotificationCenter.default.publisher(for: .IMDaemonDidDisconnect)
 
-    public private(set) lazy var aggregatePipeline: AnyPublisher<PipelineEvent, Never> = Publishers.MergeMany(
-        unreadCountPipeline.map(PipelineEvent.unreadCount(chat:count:)).eraseToAnyPublisher(),
-        typingPipeline.map(PipelineEvent.typing(chat:service:typing:)).eraseToAnyPublisher(),
-        chatNamePipeline.map(PipelineEvent.chatName(chat:name:)).eraseToAnyPublisher(),
-        chatParticipantsPipeline.map(PipelineEvent.chatParticipants(chat:participants:)).eraseToAnyPublisher(),
-        blocklistPipeline.map(PipelineEvent.blocklist(entries:)).eraseToAnyPublisher(),
-        messagesDeletedPipeline.map(PipelineEvent.messagesDeleted(ids:)).eraseToAnyPublisher(),
-        chatsDeletedPipeline.map(PipelineEvent.chatsDeleted(chatIDs:)).eraseToAnyPublisher(),
-        chatJoinStatePipeline.map(PipelineEvent.chatJoinState(chat:joinState:)).eraseToAnyPublisher(),
-        messagePipeline.map(PipelineEvent.message(_:)).eraseToAnyPublisher(),
-        phantomPipeline.map(PipelineEvent.phantom(_:)).eraseToAnyPublisher(),
-        messageStatusPipeline.map(PipelineEvent.messageStatus(_:)).eraseToAnyPublisher(),
-        chatConfigurationPipeline.map(PipelineEvent.configuration(_:)).eraseToAnyPublisher()
-    ).eraseToAnyPublisher()
-
     private override init() {
         super.init()
     }
-
-    public var automaticallyReconnect = true
 
     // Caches for determining whether an update notification is needed
     private var unreadCounts: [String: Int] = [:]
@@ -399,7 +312,8 @@ public class CBDaemonListener: ERBaseDaemonListener {
             }
 
             self.pushToSMSReadBuffer(status.messageID)
-        }.store(in: &bag)
+        }
+        .store(in: &bag)
 
         // Apparently in Ventura, macOS started ignoring certain chats to make the iMessage
         // service more lean, so we have to manually tell the system to listen to all of the
@@ -822,9 +736,12 @@ extension CBDaemonListener {
             if item.errorCode == .remoteUserDoesNotExist {
                 // Request Re-routing so that we can get more information on what this error means
                 let guid = item.service + ";-;" + chatIdentifier
-                IMDMessageServicesCenter.sharedInstance().requestRouting(forMessageGuid: item.guid, inChat: guid, error: nil) { response in
-                    log.debug("Got response from requesting reroute for \(String(describing: item.guid)) in \(guid): \(response.singleLineDebugDescription)")
-                }
+                IMDMessageServicesCenter.sharedInstance()
+                    .requestRouting(forMessageGuid: item.guid, inChat: guid, error: nil) { response in
+                        log.debug(
+                            "Got response from requesting reroute for \(String(describing: item.guid)) in \(guid): \(response.singleLineDebugDescription)"
+                        )
+                    }
                 return
             }
 
@@ -988,10 +905,6 @@ extension CBDaemonListener {
 }
 
 extension CBDaemonListener {
-    func flushSMSReadBuffer() {
-        smsReadBuffer.removeAll()
-    }
-
     func pushToSMSReadBuffer(_ guid: String) {
         guard !smsReadBuffer.contains(guid) else {
             return

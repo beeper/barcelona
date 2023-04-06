@@ -90,30 +90,6 @@ extension CBSender.Scheme: Codable {
 
 // MARK: - IMCore interop
 
-#if canImport(IMCore)
-import IMCore
-
-extension CBSender {
-    public init(handle: IMHandle) {
-        if handle.isLoginIMHandle {
-            scheme = .me
-        } else if handle.isBusiness() {
-            scheme = .biz
-            value = handle.id
-        } else {
-            value = handle.id
-            if value.isEmail {
-                scheme = .email
-            } else if value.isPhoneNumber {
-                scheme = .phone
-            } else {
-                scheme = .other("")
-            }
-        }
-    }
-}
-#endif
-
 #if canImport(IMSharedUtilities)
 import IMSharedUtilities
 

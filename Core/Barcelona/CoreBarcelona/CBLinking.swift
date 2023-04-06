@@ -122,11 +122,6 @@ public struct LinkingOption: CustomDebugStringConvertible {
         LinkingOption(constraints: constraints + [.monterey], symbol: symbol)
     }
 
-    /// Constrains the symbol to preBigSur
-    public var preBigSur: LinkingOption {
-        LinkingOption(constraints: constraints + [.preBigSur], symbol: symbol)
-    }
-
     /// Constraints the symbol to big sur or newer
     public var bigSur: LinkingOption {
         LinkingOption(constraints: constraints + [.bigSur], symbol: symbol)
@@ -187,14 +182,4 @@ func CBWeakLink<T>(against target: CBLinkingTarget, _ symbol: LinkingOption) -> 
 /// If no symbol is safe to use, or the target cannot be opened, nil is returned.
 func CBWeakLink<T>(against target: CBLinkingTarget, _ options: LinkingOption...) -> T? {
     CBWeakLink(against: target, options: options)
-}
-
-func CBSelectLinkingPath<Output>(_ paths: [[CBLinkerConstraint]: Output]) -> Output? {
-    for option in paths.keys {
-        if LinkingOption(constraints: option, symbol: "").safe {
-            return paths[option]!
-        }
-    }
-
-    return nil
 }

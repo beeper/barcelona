@@ -53,7 +53,9 @@ public struct CBMessage: CustomDebugStringConvertible {
     /// The time this message was delivered (to the recipient if `fromMe && !group`, otherwise to you)
     public var timeDelivered: Date?
     /// The bitflags for this message
-    public var flags: Flags = .none
+    public var flags: Flags = []
+
+    /// How many times the sending has been retried.
     private var retryCount = 0
 
     /// Initializes the message from a dictionary representation
@@ -125,7 +127,7 @@ public struct CBMessage: CustomDebugStringConvertible {
     /// An XML-like string describing the message
     public var debugDescription: String {
         """
-        <CBMessage retryCount=\(retryCount ?? 0) rawFlags=\(flags.rawValue) error=\(error) time=\(time?.description ?? "nil") timeDelivered=\(timeDelivered?.description ?? "nil") timeRead=\(timeRead?.description ?? "nil") sender=\(sender) \(flags.description)/>"
+        <CBMessage retryCount=\(retryCount) rawFlags=\(flags.rawValue) error=\(error) time=\(time?.description ?? "nil") timeDelivered=\(timeDelivered?.description ?? "nil") timeRead=\(timeRead?.description ?? "nil") sender=\(sender) \(flags.description)/>"
         """
     }
 }
@@ -144,8 +146,6 @@ extension CBMessage {
 }
 
 extension CBMessage.Flags {
-    /// No flags
-    public static let none = Self(rawValue: 0)
     /// The message was successfully sent
     public static let sent = Self(rawValue: 1 << 0)
     /// The message was successfully delivered
@@ -181,8 +181,6 @@ extension CBMessage.Flags {
     public static let locationMessage = Self(rawValue: 1 << 16)
     /// The message has no contents, and is symbolic. Used for receipts and typing.
     public static let empty = Self(rawValue: 1 << 17)
-    public static let reserved2 = Self(rawValue: 1 << 18)
-    public static let reserved3 = Self(rawValue: 1 << 19)
     /// The message is a typing message when you have sent an empty message.
     public static let typing: Self = [.sent, .empty]
 

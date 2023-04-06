@@ -75,10 +75,6 @@ extension CBChatIdentifier: Codable {
 
 // MARK: - Convenience
 extension CBChatIdentifier {
-    public static func handleID(_ value: String) -> CBChatIdentifier {
-        CBChatIdentifier(scheme: .handleID, value: value)
-    }
-
     public static func chatIdentifier(_ value: String) -> CBChatIdentifier {
         CBChatIdentifier(scheme: .chatIdentifier, value: value)
     }

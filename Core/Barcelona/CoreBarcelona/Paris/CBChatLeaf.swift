@@ -25,8 +25,6 @@ public struct CBChatLeaf {
     public var groupID: String = ""
     /// The original groupID for this chat (sometimes different from groupID)
     public var originalGroupID: String = ""
-    /// An array of participants for this chat
-    public var participants: [CBChatParticipant] = []
 
     /// Returns the identifier with the most specificity for this chat
     public var mostUniqueIdentifier: CBChatIdentifier? {
@@ -67,9 +65,6 @@ public struct CBChatLeaf {
         chatIdentifier = dictionary["chatIdentifier"] as? String ?? chatIdentifier
         groupID = dictionary["groupID"] as? String ?? groupID
         originalGroupID = dictionary["originalGroupID"] as? String ?? originalGroupID
-        if let participants = dictionary["participants"] as? [[AnyHashable: Any]] {
-            self.participants = participants.compactMap(CBChatParticipant.init(dictionary:))
-        }
         return self
     }
 

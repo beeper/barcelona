@@ -238,68 +238,6 @@ extension IMFileTransfer {
     public var needsUnpurging: Bool {
         state == .waitingForAccept && canAutoDownload && CBPurgedAttachmentController.maxBytes > totalBytes
     }
-
-    private var currentResult: Result<Void, Error>? {
-        switch state {
-        case .finished:
-            if inSandboxedLocation {
-                log.debug(
-                    "Waiting for \(self.guid ?? "nil") to move to the final attachments folder",
-                    source: "IMFileTransfer"
-                )
-                return nil
-            }
-            return .success(())
-        case .recoverableError, .error:
-            return .failure(
-                BarcelonaError(
-                    code: 500,
-                    message: "Failed to download file transfer: \(errorDescription ?? error.description)"
-                )
-            )
-        default:
-            return nil
-        }
-    }
-
-    public func completionPromise() -> Promise<Void> {
-        Promise<Void> { resolve, reject in
-            NotificationCenter.default.addObserver(forName: .IMFileTransferUpdated, object: nil, queue: .main) {
-                [unowned self] notification, unsubscribe in
-                guard let object = notification.object as? IMFileTransfer, let guid = object.guid,
-                    object.guid == self.guid
-                else {
-                    return
-                }
-
-                log.debug("transfer \(guid) moved to state \(object.state)", source: "IMFileTransfer")
-
-                switch object.state {
-                case .finished:
-                    if object.inSandboxedLocation {
-                        log.debug(
-                            "Waiting for \(guid) to move to the final attachments folder",
-                            source: "IMFileTransfer"
-                        )
-                        return
-                    }
-                    unsubscribe()
-                    resolve(())
-                case .recoverableError, .error:
-                    unsubscribe()
-                    reject(
-                        BarcelonaError(
-                            code: 500,
-                            message:
-                                "Failed to download file transfer: \(object.errorDescription ?? object.error.description)"
-                        )
-                    )
-                default:
-                    return
-                }
-            }
-        }
-    }
 }
 
 // Automatically downloads purged attachments according to a set of configurable conditions
