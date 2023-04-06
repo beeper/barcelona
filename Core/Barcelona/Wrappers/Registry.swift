@@ -32,12 +32,6 @@ class Registry {
         }
     }
 
-    var allMeHandles: [IMHandle] {
-        allAccounts.flatMap { account in
-            account.aliases.compactMap(account.imHandle(withID:))
-        }
-    }
-
     var uniqueMeHandleIDs: [String] {
         allAccounts.flatMap(\.aliases).unique
     }
