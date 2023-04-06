@@ -118,6 +118,8 @@ extension FZErrorType: CustomStringConvertible {
             return "The attachment couldn't be downloaded because it is no longer available."
         case .textRenderingPreflightFailed:
             return "The message couldn't be processed because it is corrupted."
+        case .messageWasBlackholed:
+            return "Your message was blackholed"
         case .unknownError, .sendFailed, .internalFailure:
             fallthrough
         @unknown default:
@@ -213,6 +215,8 @@ extension FZErrorType: CustomStringConvertible {
             return "attachmentDownloadFailureFileNotFound"
         case .textRenderingPreflightFailed:
             return "textRenderingPreflightFailed"
+        case .messageWasBlackholed:
+            return "messageWasBlackholed"
         @unknown default:
             return "unknown(\(rawValue)"
         }
@@ -220,84 +224,6 @@ extension FZErrorType: CustomStringConvertible {
 }
 
 public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
-    public init(
-        id: String,
-        chatID: String,
-        fromMe: Bool,
-        time: Double,
-        sender: String? = nil,
-        subject: String? = nil,
-        timeDelivered: Double = 0,
-        timePlayed: Double = 0,
-        timeRead: Double = 0,
-        messageSubject: String? = nil,
-        isSOS: Bool,
-        isTypingMessage: Bool,
-        isCancelTypingMessage: Bool,
-        isDelivered: Bool,
-        isAudioMessage: Bool,
-        isRead: Bool = false,
-        description: String? = nil,
-        flags: IMMessageFlags,
-        failed: Bool,
-        failureCode: FZErrorType,
-        failureDescription: String,
-        items: [AnyChatItem],
-        service: IMServiceStyle,
-        fileTransferIDs: [String],
-        associatedMessageID: String? = nil,
-        threadIdentifier: String? = nil,
-        threadOriginator: String? = nil,
-        threadOriginatorPart: Int? = nil
-    ) {
-        self.id = id
-        self.chatID = chatID
-        self.fromMe = fromMe
-        self.time = time
-        self.sender = sender
-        self.subject = subject
-        self.timeDelivered = timeDelivered
-        self.timePlayed = timePlayed
-        self.timeRead = timeRead
-        self.messageSubject = messageSubject
-        self.isSOS = isSOS
-        self.isTypingMessage = isTypingMessage
-        self.isCancelTypingMessage = isCancelTypingMessage
-        self.isDelivered = isDelivered
-        self.isAudioMessage = isAudioMessage
-        self.isRead = isRead
-        self.description = description
-        self.flags = flags
-        self.failed = failed
-        self.failureCode = failureCode
-        self.failureDescription = failureDescription
-        self.items = items
-        self.service = service
-        self.fileTransferIDs = fileTransferIDs
-        self.associatedMessageID = associatedMessageID
-        self.threadIdentifier = threadIdentifier
-        self.threadOriginator = threadOriginator
-        self.threadOriginatorPart = threadOriginatorPart
-    }
-
-    /*static func message(withGUID guid: String, in chatID: String? = nil) -> Promise<Message?> {
-        IMMessage.message(withGUID: guid, in: chatID).then {
-            $0 as? Message
-        }
-    }
-
-    static func messages(withGUIDs guids: [String], in chat: String? = nil) -> Promise<[Message]> {
-        IMMessage.messages(withGUIDs: guids, in: chat).compactMap {
-            $0 as? Message
-        }
-    }
-
-    public static func messages(matching query: String, limit: Int) -> Promise<[Message]> {
-        DBReader.shared.messages(matching: query, limit: limit)
-            .then { guids in BLLoadChatItems(withGUIDs: guids) }
-            .compactMap { $0 as? Message }
-    }*/
-
     public static let ingestionClasses: [NSObject.Type] = [
         IMItem.self, IMMessage.self, IMMessageItem.self, IMAssociatedMessageItem.self,
     ]
@@ -600,10 +526,6 @@ extension Message {
 
         return Message(messageItem: item, chatID: chatID, service: service)
     }
-}
-
-extension MessageAttributes {
-    static let metadataAttribute: NSAttributedString.Key = .init("com.ericrabil.metadata")
 }
 
 public protocol IMMessageSummaryInfoProvider: NSObjectProtocol {

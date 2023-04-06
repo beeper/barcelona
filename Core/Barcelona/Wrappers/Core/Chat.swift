@@ -35,15 +35,6 @@ public struct ChatConfiguration: Codable, Hashable, ChatConfigurationRepresentab
     public var groupPhotoID: String?
 }
 
-public protocol ChatDelegate {
-    func chat(_ chat: Chat, willSendMessages messages: [IMMessage], fromCreateMessage createMessage: CreateMessage)
-    func chat(
-        _ chat: Chat,
-        willSendMessages messages: [IMMessage],
-        fromCreatePluginMessage createPluginMessage: CreatePluginMessage
-    )
-}
-
 extension IMChatStyle: Codable {
     public init(from decoder: Decoder) throws {
         self.init(rawValue: try RawValue.init(from: decoder))!
@@ -66,9 +57,6 @@ extension IMChatStyle: Hashable {
 
 // (bl-api-exposed)
 public struct Chat: Codable, ChatConfigurationRepresentable, Hashable, Sendable {
-    /// Useful for adding application-specific behavior, allows you to hook into different APIs on Chat (like sending)
-    public static var delegate: ChatDelegate?
-
     public init(_ backing: IMChat) async {
         joinState = backing.joinState
         roomName = backing.roomName
@@ -106,13 +94,6 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable, Sendable 
     public var ignoreAlerts: Bool
     public var groupPhotoID: String?
 
-    mutating func setTimeSortedParticipants(participants: [HandleTimestampRecord]) {
-        self.participants =
-            participants
-            .map(\.handle_id)
-            .filter(self.participants.contains)
-    }
-
     /// The underlying IMChat this Chat was created from
     public var imChat: IMChat? {
         let chat = service.flatMap { IMChat.chat(withIdentifier: id, onService: $0, style: style.CBChat) }
@@ -122,51 +103,6 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable, Sendable 
             )
         }
         return chat
-    }
-}
-
-// MARK: - Participants
-extension Chat {
-    public func addParticipants(_ participants: [String]) -> [String] {
-        toggleParticipants(participants, add: true)
-    }
-
-    public func removeParticipants(_ participants: [String]) -> [String] {
-        toggleParticipants(participants, add: false)
-    }
-
-    public func toggleParticipants(_ participants: [String], add: Bool) -> [String] {
-        /*
-         {"handles":["1234","eric@net.com"]}
-         */
-        guard let imChat else {
-            return []
-        }
-
-        let handles = participants.compactMap {
-            Registry.sharedInstance.imHandle(withID: $0, onAccount: imChat.account)
-        }
-
-        var reasonMessage: IMMessage!
-
-        let inviteText = add ? "Get in my van, kid." : "Goodbye, skank."
-
-        reasonMessage = IMMessage.instantMessage(
-            withText: NSAttributedString(string: inviteText),
-            messageSubject: nil,
-            flags: 0x5,
-            threadIdentifier: nil
-        )
-
-        if add {
-            if imChat.canAddParticipants(handles) {
-                imChat.inviteParticipantsToiMessageChat(handles, reason: reasonMessage)
-            }
-        } else {
-            imChat.removeParticipantsFromiMessageChat(handles, reason: reasonMessage)
-        }
-
-        return imChat.participantHandleIDs()
     }
 }
 
@@ -205,11 +141,6 @@ extension IMChat {
 }
 
 extension Chat {
-    /// Marks a series of messages as read
-    public func markMessagesRead(withIDs messageIDs: [String]) {
-        imChat?.markDirectRead(items: BLLoadIMMessageItems(withGUIDs: messageIDs))
-    }
-
     public func markMessageAsRead(withID messageID: String) {
         BLLoadIMMessageItem(withGUID: messageID)
             .map { message in
@@ -220,77 +151,16 @@ extension Chat {
 
 // MARK: - Querying
 extension Chat {
-    @MainActor
-    public static var allChats: [Chat] {
-        get async {
-            await IMChatRegistry.shared.allChats.asyncMap { imChat in
-                await Chat(imChat)
-            }
-        }
-    }
-
     /// Returns a chat targeted at the appropriate service for a handleID
     @MainActor
     public static func directMessage(withHandleID handleID: String, service: IMServiceStyle) async -> Chat {
         await Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service)))
-    }
-
-    public static func firstChatRegardlessOfService(withId chatId: String) async -> Chat? {
-        for service in [IMServiceStyle.iMessage, IMServiceStyle.SMS] {
-            if let chat = IMChat.chat(withIdentifier: chatId, onService: service, style: nil) {
-                return await Chat(chat)
-            }
-        }
-        return nil
     }
 }
 
 extension Thread {
     public func sync(_ block: @convention(block) @escaping () -> Void) {
         __im_performBlock(block, waitUntilDone: true)
-    }
-
-    public func async(_ block: @convention(block) @escaping () -> Void) {
-        __im_performBlock(block, waitUntilDone: false)
-    }
-}
-
-// MARK: - Message Sending
-extension Chat {
-    public func messages(before: String? = nil, limit: Int? = nil, beforeDate: Date? = nil) async throws -> [Message] {
-        guard let service else {
-            log.warning(
-                "Cannot get messages(before: \(String(describing: before))) because service is nil; would not know what chat to check"
-            )
-            throw BarcelonaError(code: 500, message: "Chat.service is nil")
-        }
-
-        if BLIsSimulation {
-            let guids: [String] =
-                imChat?.chatItemRules._items()
-                .compactMap { item in
-                    if let chatItem = item as? IMChatItem {
-                        return chatItem._item()?.guid
-                    } else if let item = item as? IMItem {
-                        return item.guid
-                    }
-
-                    return nil
-                } ?? []
-
-            return try await IMMessage.messages(withGUIDs: guids, in: self.id, service: service)
-                .compactMap { message -> Message? in
-                    message as? Message
-                }
-                .sorted(usingKey: \.time, by: >)
-        }
-
-        log.info("Querying IMD for recent messages using chat fast-path")
-
-        return try await BLLoadChatItems(withChats: [(self.id, service)], beforeGUID: before, limit: limit)
-            .compactMap {
-                $0 as? Message
-            }
     }
 }
 

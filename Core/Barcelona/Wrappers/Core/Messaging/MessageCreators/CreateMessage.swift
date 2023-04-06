@@ -41,31 +41,20 @@ public struct TapbackCreation: Codable {
     }
 }
 
-extension CreateMessage {
-    public static func text(_ text: String) -> CreateMessage {
-        .init(parts: [.init(type: .text, details: text)])
-    }
-}
-
 public struct CreateMessage: CreateMessageBase {
     public init(
         subject: String? = nil,
         parts: [MessagePart],
         isAudioMessage: Bool? = nil,
-        flags: CLongLong? = nil,
         balloonBundleID: String? = nil,
-        expressiveSendStyleID: String? = nil,
         threadIdentifier: String? = nil,
         replyToPart: Int? = nil,
         replyToGUID: String? = nil,
         metadata: Message.Metadata? = nil
     ) {
         self.subject = subject
-        self.parts = parts
         self.isAudioMessage = isAudioMessage
-        self.flags = flags
         self.balloonBundleID = balloonBundleID
-        self.expressiveSendStyleID = expressiveSendStyleID
         self.threadIdentifier = threadIdentifier
         self.replyToPart = replyToPart
         self.replyToGUID = replyToGUID
@@ -77,11 +66,8 @@ public struct CreateMessage: CreateMessageBase {
     }
 
     public var subject: String?
-    public var parts: [MessagePart]
     public var isAudioMessage: Bool?
-    public var flags: CLongLong?
     public var balloonBundleID: String?
-    public var expressiveSendStyleID: String?
     public var threadIdentifier: String?
     public var replyToGUID: String?
     public var replyToPart: Int?
