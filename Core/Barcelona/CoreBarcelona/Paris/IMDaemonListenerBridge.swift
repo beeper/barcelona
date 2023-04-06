@@ -61,9 +61,6 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
 
     func chat(_ guid: String!, lastAddressedHandleUpdated lastAddressedHandle: String!) {
         log.trace("IMDaemonListenerBridge.chat(_:lastAddressedHandleUpdated:)")
-        Task {
-            await registry.chat(guid, lastAddressedHandleUpdated: lastAddressedHandle)
-        }
     }
 
     func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) {
@@ -171,19 +168,6 @@ class IMDaemonListenerBridge: NSObject, IMDaemonListenerProtocol, @unchecked Sen
         handleInfo: [Any]!
     ) {
         log.trace("IMDaemonListenerBridge.account(_:chat:style:chatProperties:groupID:chatPersonCentricID:statusChanged:handleInfo:)")
-        Task {
-            await registry
-                .account(
-                    accountUniqueID,
-                    chat: chatIdentifier,
-                    style: chatStyle,
-                    chatProperties: properties,
-                    groupID: groupID,
-                    chatPersonCentricID: personCentricID,
-                    statusChanged: status,
-                    handleInfo: handleInfo
-                )
-        }
     }
 
     func account(

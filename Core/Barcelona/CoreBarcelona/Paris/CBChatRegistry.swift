@@ -22,7 +22,7 @@ public actor CBChatRegistry {
 
     // MARK: - Properties
 
-    public var chats: [CBChatIdentifier: CBChat] = [:]
+    var chats: [CBChatIdentifier: CBChat] = [:]
 
     public let failedMessages = PassthroughSubject<(guid: String, chatGUID: String, service: String, error: Error), Never>()
 
@@ -49,7 +49,7 @@ public actor CBChatRegistry {
 
     // MARK: - IMDaemonListenerProtocol
 
-    func setupComplete(_ success: Bool, info: [AnyHashable: Any]!) {
+    func setupComplete(_ _: Bool, info: [AnyHashable: Any]!) {
         if let chats = info["personMergedChats"] as? [[AnyHashable: Any]] {
             for chat in chats {
                 _ = handle(chat: chat)
@@ -83,8 +83,6 @@ public actor CBChatRegistry {
     func chat(_ persistentIdentifier: String!, engramIDUpdated engramID: String!) {
         trace(nil, nil, "persistentIdentifier \(persistentIdentifier!) engram \(engramID ?? "nil")")
     }
-
-    func chat(_ guid: String!, lastAddressedHandleUpdated lastAddressedHandle: String!) {}
 
     func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) async {
         trace(chatIdentifier, nil, "chats loaded: \((chatDictionaries as NSArray))")
@@ -123,22 +121,22 @@ public actor CBChatRegistry {
     }
 
     func account(
-        _ accountUniqueID: String!,
+        _ _: String!,
         chat chatIdentifier: String!,
-        style chatStyle: IMChatStyle,
-        chatProperties properties: [AnyHashable: Any]!,
+        style _: IMChatStyle,
+        chatProperties _: [AnyHashable: Any]!,
         error: Error!
     ) {
         trace(chatIdentifier, nil, "error \((error as NSError).debugDescription)")
     }
 
     func account(
-        _ accountUniqueID: String!,
+        _ _: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
         chatProperties properties: [AnyHashable: Any]!,
         notifySentMessage msg: IMMessageItem!,
-        sendTime: NSNumber!
+        sendTime _: NSNumber!
     ) {
         trace(chatIdentifier, nil, "sent message \(msg.guid ?? "nil") \(msg.singleLineDebugDescription)")
         do {
@@ -152,7 +150,7 @@ public actor CBChatRegistry {
     }
 
     func account(
-        _ accountUniqueID: String!,
+        _ _: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
         chatProperties properties: [AnyHashable: Any]!,
@@ -175,18 +173,7 @@ public actor CBChatRegistry {
     }
 
     func account(
-        _ accountUniqueID: String!,
-        chat chatIdentifier: String!,
-        style chatStyle: IMChatStyle,
-        chatProperties properties: [AnyHashable: Any]!,
-        groupID: String!,
-        chatPersonCentricID personCentricID: String!,
-        statusChanged status: FZChatStatus,
-        handleInfo: [Any]!
-    ) {}
-
-    func account(
-        _ accountUniqueID: String!,
+        _ _: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
         chatProperties properties: [AnyHashable: Any]!,
@@ -208,7 +195,7 @@ public actor CBChatRegistry {
     }
 
     func account(
-        _ accountUniqueID: String!,
+        _ _: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
         chatProperties properties: [AnyHashable: Any]!,
@@ -228,7 +215,7 @@ public actor CBChatRegistry {
     }
 
     func account(
-        _ accountUniqueID: String!,
+        _ _: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
         chatProperties properties: [AnyHashable: Any]!,
@@ -236,7 +223,7 @@ public actor CBChatRegistry {
         chatPersonCentricID personCentricID: String!,
         messageSent msg: IMMessageItem!
     ) {
-        trace(chatIdentifier, personCentricID, "sent message \(msg)")
+        trace(chatIdentifier, personCentricID, "sent message \(String(describing: msg))")
         do {
             try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
         } catch {
@@ -248,9 +235,9 @@ public actor CBChatRegistry {
     }
 
     func account(
-        _ accountUniqueID: String!,
+        _ _: String!,
         chat chatIdentifier: String!,
-        style chatStyle: IMChatStyle,
+        style _: IMChatStyle,
         chatProperties properties: [AnyHashable: Any]!,
         updateProperties update: [AnyHashable: Any]!
     ) {
@@ -262,13 +249,13 @@ public actor CBChatRegistry {
     }
 
     func account(
-        _ accountUniqueID: String!,
+        _ _: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
         chatProperties properties: [AnyHashable: Any]!,
         messageUpdated msg: IMItem!
     ) {
-        trace(chatIdentifier, nil, "message updated \(msg)")
+        trace(chatIdentifier, nil, "message updated \(String(describing: msg))")
         do {
             try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
         } catch {
@@ -280,7 +267,7 @@ public actor CBChatRegistry {
     }
 
     func account(
-        _ accountUniqueID: String!,
+        _ _: String!,
         chat chatIdentifier: String!,
         style chatStyle: IMChatStyle,
         chatProperties properties: [AnyHashable: Any]!,
@@ -323,7 +310,7 @@ public actor CBChatRegistry {
     }
 
     func loadedChats(_ chats: [[AnyHashable: Any]]!, queryID: String!) async {
-        log.info("loadedChats queryID:\(queryID)")
+        log.info("loadedChats queryID:\(String(describing: queryID))")
         guard queryCallbacks.keys.contains(queryID) else {
             return
         }
@@ -360,15 +347,6 @@ public actor CBChatRegistry {
     }
 
     // MARK: - Handling
-
-    private func handle(chat: [AnyHashable: Any], item: IMItem) throws -> Bool {
-        guard let identifier = handle(chat: chat).1 else {
-            log.warning("cant handle message \(item) via chat dictionary: couldnt find a chat for it")
-            return false
-        }
-        try handle(chat: identifier, item: item)
-        return true
-    }
 
     private func handle(chat: CBChatIdentifier, item: IMItem) throws {
         if let guid = item.guid, !messageIDReverseLookup.keys.contains(guid) {
