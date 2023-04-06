@@ -16,10 +16,6 @@ public struct TimeReceipt {
     public var timeRead: Double = 0
     public var timePlayed: Double = 0
 
-    public var asTuple: (Double, Double, Double, Double) {
-        (time, timeDelivered, timeRead, timePlayed)
-    }
-
     public mutating func merge(receipt: TimeReceipt) {
         if time == 0 {
             time = receipt.time
@@ -38,9 +34,9 @@ public struct TimeReceipt {
         }
     }
 
-    public func merging(receipt: TimeReceipt) -> TimeReceipt {
+    public func merging(receipt newReceipt: TimeReceipt) -> TimeReceipt {
         var receipt = self
-        receipt.merge(receipt: receipt)
+        receipt.merge(receipt: newReceipt)
 
         return receipt
     }
@@ -59,10 +55,6 @@ extension Optional where Wrapped == Date {
     }
 }
 
-protocol TimeReceiptFactory {
-    var receipt: TimeReceipt { get }
-}
-
 extension IMItem {
     var bareReceipt: TimeReceipt {
         TimeReceipt(
@@ -74,7 +66,7 @@ extension IMItem {
     }
 }
 
-extension IMMessageItem: TimeReceiptFactory {
+extension IMMessageItem {
     var receipt: TimeReceipt {
         TimeReceipt(
             time: time.normalized,
@@ -85,7 +77,7 @@ extension IMMessageItem: TimeReceiptFactory {
     }
 }
 
-extension IMMessage: TimeReceiptFactory {
+extension IMMessage {
     var receipt: TimeReceipt {
         TimeReceipt(
             time: time.normalized,
