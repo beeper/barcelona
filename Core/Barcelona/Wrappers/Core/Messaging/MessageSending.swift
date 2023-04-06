@@ -133,8 +133,7 @@ extension Chat {
             guid: creation.message,
             itemGUID: creation.item,
             type: creation.type,
-            overridingItemType: nil,
-            metadata: metadata
+            overridingItemType: nil
         )
 
         return Message(messageItem: message._imMessageItem, chatID: imChat.chatIdentifier, service: service)
