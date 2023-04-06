@@ -11,7 +11,6 @@ import IMFoundation
 import IMSharedUtilities
 
 public protocol MessageDataSource {
-    var id: String { get }
     var isFinished: Bool { get }
     var isSent: Bool { get }
     var isFromMe: Bool { get }
@@ -56,17 +55,5 @@ public enum MessageSendProgress {
 extension MessageDataSource {
     public var sendProgress: MessageSendProgress? {
         MessageSendProgress(self)
-    }
-
-    public var isSending: Bool {
-        sendProgress == .sending
-    }
-
-    public var isUnsent: Bool {
-        sendProgress == .failed
-    }
-
-    public func refreshedErrorCode() -> FZErrorType {
-        BLLoadIMMessageItem(withGUID: id)?.errorCode ?? .noError
     }
 }
