@@ -18,8 +18,6 @@ struct OSLogHandler: LogHandler {
     var metadata: Logging.Logger.Metadata = Logger.Metadata()
     var logLevel: Logging.Logger.Level = .debug
 
-    private static let logSystemLogger = OSLog(subsystem: "com.beeper.barcelona-mautrix", category: "OSLogHandler")
-
     private let logger: OSLog
     private let jsonEncoder = JSONEncoder()
 
