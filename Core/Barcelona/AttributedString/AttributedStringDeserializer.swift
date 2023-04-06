@@ -11,7 +11,7 @@ import Foundation
 import IMCore
 import IMFoundation
 
-public struct MessagePartParseResult {
+struct MessagePartParseResult {
     var string: NSAttributedString
     var transferGUIDs: [String]
 }
