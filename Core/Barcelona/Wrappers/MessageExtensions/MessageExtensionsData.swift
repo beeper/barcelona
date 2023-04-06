@@ -31,23 +31,6 @@ private let UnarchivingClasses = [
 private let IMBusinessTapActionKey = "tap-action"
 
 extension String {
-    var numberValue: NSNumber? {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        return formatter.number(from: self)
-    }
-
-    var boolValue: Bool? {
-        switch self.lowercased() {
-        case "true":
-            return true
-        case "false":
-            return false
-        default:
-            return nil
-        }
-    }
-
     var expandingTildeInPath: String {
         (self as NSString).expandingTildeInPath
     }
