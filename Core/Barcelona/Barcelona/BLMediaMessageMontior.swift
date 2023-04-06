@@ -146,7 +146,7 @@ public class BLMediaMessageMonitor {
         }
     }
 
-    private func handle(transferNotification notification: Notification, subscription: NotificationSubscription) {
+    private func handle(transferNotification notification: Notification, subscription _: NotificationSubscription) {
         guard let transfer = notification.decodeObject(to: IMFileTransfer.self) else {
             return
         }
