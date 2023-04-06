@@ -22,13 +22,4 @@ extension String {
     public var isPhoneNumber: Bool {
         IMStringIsPhoneNumber(self)
     }
-
-    public var style: HandleIDStyle {
-        switch true {
-        case isEmail: return .email
-        case isPhoneNumber: return .phoneNumber
-        case isBusinessID: return .businessID
-        default: return .unknown
-        }
-    }
 }
