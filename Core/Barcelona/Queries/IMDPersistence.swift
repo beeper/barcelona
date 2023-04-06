@@ -113,25 +113,6 @@ private func BLLoadIMDMessageRecordRefsWithGUIDs(_ guids: [String]) -> NSArray {
 
 // MARK: - Private API
 
-/// Parses an array of IMDMessageRecordRef
-/// - Parameters:
-///   - refs: the refs to parse
-///   - chat: the ID of the chat the messages reside in. if omitted, the chat ID will be resolved at ingestion
-/// - Returns: The `ChatItem`s representing the ingested refs
-private func BLIngestIMDMessageRecordRefs(
-    _ refs: NSArray,
-    in chat: String? = nil,
-    service: IMServiceStyle
-) async throws -> [ChatItem] {
-    if refs.count == 0 {
-        return []
-    }
-
-    let items = BLCreateIMItemFromIMDMessageRecordRefs(refs)
-
-    return try await BLIngestObjects(items, inChat: chat, service: service)
-}
-
 internal func ERResolveGUIDsForChats(
     withChatIdentifiers chatIdentifiers: [String],
     afterDate: Date? = nil,
