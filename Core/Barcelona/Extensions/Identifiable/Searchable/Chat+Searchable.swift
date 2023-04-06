@@ -35,36 +35,6 @@ extension IMChatJoinState: Codable {
 }
 
 public struct ChatSearchParameters: QueryParameters {
-    public init(
-        identifiers: [String]? = nil,
-        participants: [String]? = nil,
-        display_name: String? = nil,
-        read_receipts: Bool? = nil,
-        ignore_alerts: Bool? = nil,
-        style: IMChatStyle? = nil,
-        join_state: IMChatJoinState? = nil,
-        services: [IMServiceStyle]? = nil,
-        has_unread: Bool? = nil,
-        has_failed: Bool? = nil,
-        last_message_text: String? = nil,
-        limit: Int? = nil,
-        page: Int? = nil
-    ) {
-        self.identifiers = identifiers
-        self.participants = participants
-        self.display_name = display_name
-        self.read_receipts = read_receipts
-        self.ignore_alerts = ignore_alerts
-        self.style = style
-        self.join_state = join_state
-        self.services = services
-        self.has_unread = has_unread
-        self.has_failed = has_failed
-        self.last_message_text = last_message_text
-        self.limit = limit
-        self.page = page
-    }
-
     /// Narrow the results to a subset of chat identifiers
     public var identifiers: [String]?
     /// Narrow the results to a subset of participants
