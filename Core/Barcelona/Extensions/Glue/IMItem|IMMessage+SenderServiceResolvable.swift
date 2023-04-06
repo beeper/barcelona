@@ -12,27 +12,6 @@ import IDS
 import IMCore
 import IMSharedUtilities
 
-struct CBHandleFormatter {
-    enum OutputFormat {
-        case withResource
-        case withoutResource
-    }
-
-    var format: OutputFormat
-
-    static let prefixedFormatter = CBHandleFormatter(format: .withResource)
-    static let unprefixedFormatter = CBHandleFormatter(format: .withoutResource)
-
-    func format(_ id: String) -> String {
-        // IDSDestination takes whatever you throw at it and parses it
-        let destination = IDSDestination(uri: id)
-        switch format {
-        case .withResource: return destination.uri().prefixedURI
-        case .withoutResource: return destination.uri().unprefixedURI
-        }
-    }
-}
-
 internal func CBResolveSenderHandle(originalHandle: String?, isFromMe: Bool, service: IMServiceStyle?) -> String? {
     guard isFromMe, let service = service?.service else {
         return originalHandle
