@@ -113,12 +113,6 @@ extension Notification {
     }
 }
 
-extension NotificationCenter {
-    func addObserver(forName: Notification.Name, using: @escaping (Notification) -> Void) {
-        addObserver(forName: forName, object: nil, queue: nil, using: using)
-    }
-}
-
 public actor ERTimeSortedParticipantsManager {
 
     // MARK: - Properties
@@ -139,22 +133,6 @@ public actor ERTimeSortedParticipantsManager {
 
     func sortedParticipants(forChat chat: String) -> [String] {
         return chatToParticipantSortRules[chat]?.map(\.handleID) ?? []
-    }
-
-    func ingest(item: IMItem, inChat chat: String) {
-        self.ingest(item: item as ERTimeSortedParticipantsManagerIngestible, inChat: chat)
-    }
-
-    func ingest(item: IMMessageItem, inChat chat: String) {
-        self.ingest(item: item as ERTimeSortedParticipantsManagerIngestible, inChat: chat)
-    }
-
-    func ingest(item: IMMessage, inChat chat: String) {
-        self.ingest(item: item as ERTimeSortedParticipantsManagerIngestible, inChat: chat)
-    }
-
-    func unload(chatID: String) {
-        self.chatToParticipantSortRules[chatID] = nil
     }
 
     func bootstrap(chat: IMChat) throws {
@@ -224,14 +202,6 @@ public actor ERTimeSortedParticipantsManager {
             .sort(by: { r1, r2 in
                 r1.lastSentMessageTime > r2.lastSentMessageTime
             })
-    }
-
-    private func ingest(item: ERTimeSortedParticipantsManagerIngestible, inChat chat: String) {
-        guard let sortRule = item.sortRule else {
-            return
-        }
-
-        self.ingest(rule: sortRule, inChat: chat)
     }
 
     private func ingest(items: [ERTimeSortedParticipantsManagerIngestible], inChat chat: String) {
