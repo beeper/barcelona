@@ -9,8 +9,4 @@
 import DigitalTouchShared
 import Foundation
 
-public struct ETAngerData: Codable {
-    init(_ message: ETAngerMessage) {
-
-    }
-}
+public struct ETAngerData: Codable {}
