@@ -11,8 +11,6 @@ import LinkPresentationPrivate
 
 /// Wire-serializable struct for rich links
 public struct RichLinkMetadata: Codable, Hashable {
-    public typealias RichLinkImage = RichLinkAsset.Source
-
     public struct RichLinkAsset: Codable, Hashable {
         public enum Source: Codable, Hashable {
             /// Where is the asset downloaded to
