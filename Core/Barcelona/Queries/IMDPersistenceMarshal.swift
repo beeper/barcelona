@@ -9,14 +9,6 @@
 import Combine
 import Foundation
 
-extension Dictionary {
-    fileprivate func merge(into dictionary: inout Dictionary) {
-        forEach {
-            dictionary[$0.key] = $0.value
-        }
-    }
-}
-
 extension Collection where Element: Hashable {
     fileprivate func intersects<SomeCollection: Collection>(collection: SomeCollection) -> Bool
     where SomeCollection.Element == Element {
