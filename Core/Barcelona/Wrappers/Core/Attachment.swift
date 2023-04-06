@@ -32,25 +32,6 @@ extension IMFileTransfer {
         "__kIMFileTransferCompatibilityGUIDKey"
     }
 
-    private func setCompatibilityGUID(_ guid: String) {
-        objc_setAssociatedObject(self, compatibilityGUIDKey, guid, .OBJC_ASSOCIATION_COPY_NONATOMIC)
-    }
-
-    /// A fake GUID created in place of a real GUID. This is constant for the lifetime of this instance. This is a shim, and will result in strange behavior.
-    private var compatibilityGUID: String {
-        get {
-            if let guid = objc_getAssociatedObject(self, compatibilityGUIDKey) as? String {
-                return guid
-            }
-            let guid = UUID().uuidString
-            setCompatibilityGUID(guid)
-            return guid
-        }
-        set {
-            setCompatibilityGUID(newValue)
-        }
-    }
-
     /// A non-nil GUID which will more than likely be true to the underlying transfer.
     public var assertedGUID: String {
         if let guid = guid {
