@@ -81,8 +81,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                                 item.setThreadIdentifier(
                                     IMChatItem.resolveThreadIdentifier(
                                         forMessageWithGUID: replyToGUID,
-                                        part: reply_to_part ?? 0,
-                                        chat: imChat
+                                        part: reply_to_part ?? 0
                                     )
                                 )
                             }
