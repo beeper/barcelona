@@ -25,11 +25,3 @@ func ERApplyMessageExtensionQuirks(
     }
 }
 #endif
-
-func ERAttributedString(forAttachment attachmentID: String?) -> MessagePartParseResult {
-    ERAttributedString(
-        from: attachmentID.map {
-            [MessagePart(type: .attachment, details: $0)]
-        } ?? []
-    )
-}
