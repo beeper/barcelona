@@ -86,9 +86,6 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                                 )
                             }
                         }
-                        if let metadata = metadata {
-                            message.metadata = metadata
-                        }
                         var afterSend: () -> Void = {}
                         if let richLink = rich_link {
                             do {

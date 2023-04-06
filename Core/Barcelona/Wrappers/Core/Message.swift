@@ -528,7 +528,7 @@ extension Message {
     }
 }
 
-public protocol IMMessageSummaryInfoProvider: NSObjectProtocol {
+protocol IMMessageSummaryInfoProvider: NSObjectProtocol {
     var messageSummaryInfo: [AnyHashable: Any]! { get set }
     var sourceApplicationID: String! { get set }
 }
@@ -551,7 +551,7 @@ extension IMMessageSummaryInfoProvider {
 let metadataPrefix = "com.ericrabil.barcelona.metadata:00000000:"
 extension IMMessageSummaryInfoProvider {
 
-    public func calculateMetadata() -> Message.Metadata {
+    func calculateMetadata() -> Message.Metadata {
         guard let sourceApplicationID = sourceApplicationID, sourceApplicationID.starts(with: metadataPrefix) else {
             return [:]
         }
@@ -567,7 +567,7 @@ extension IMMessageSummaryInfoProvider {
         }
     }
 
-    public var metadata: Message.Metadata {
+    var metadata: Message.Metadata {
         get {
             if sourceApplicationID == nil {
                 return [:]
