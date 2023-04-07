@@ -106,7 +106,7 @@ class SendMessageCommand: Command {
 
 class DaemonCommand: Command {
     let name = "daemon"
-    
+
     @Key("-u", "--unix-socket", description: "Path to the unix socket to use for IPC with mautrix-imessage")
     var unixSocket: String?
 
@@ -115,7 +115,7 @@ class DaemonCommand: Command {
             log.error("No --unix-socket specified")
             return
         }
-        
+
         log.info("DaemonCommand")
         BarcelonaMautrix.run(unixSocket)
     }
@@ -123,7 +123,7 @@ class DaemonCommand: Command {
 
 var commands: [Routable] = [
     SendMessageCommand(),
-    DaemonCommand()
+    DaemonCommand(),
 ]
 
 let arguments = ProcessInfo.processInfo.arguments
