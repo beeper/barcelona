@@ -9,7 +9,7 @@
 import Foundation
 import IMFoundation
 
-enum FZListenerCapabilities: UInt32 {
+public enum FZListenerCapabilities: UInt32 {
     case Status = 1
     case Notifications = 2
     case Chats = 4
@@ -34,7 +34,7 @@ enum FZListenerCapabilities: UInt32 {
         .MessageHistory, .IDQueries, .ChatCounts, .OnDemandRegistry,
     ]
 
-    static var defaults_: UInt32 {
+    public static var defaults_: UInt32 {
         defaults.map(\.rawValue).reduce(into: 0, |=)
     }
 }

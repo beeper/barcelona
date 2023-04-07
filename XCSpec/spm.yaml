@@ -41,3 +41,6 @@ packages:
   swift-log:
     url: https://github.com/apple/swift-log
     from: 1.0.0
+  SwiftCLI:
+    url: https://github.com/jakeheis/SwiftCLI
+    from: 6.0.2
