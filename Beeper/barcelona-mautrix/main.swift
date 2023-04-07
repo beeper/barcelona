@@ -95,16 +95,7 @@ if let userID = ProcessInfo.processInfo.environment["BARCELONA_SENTRY_USER_ID"] 
 CFPreferencesSetAppValue("Log" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
 CFPreferencesSetAppValue("Log.All" as CFString, false as CFBoolean, kCFPreferencesCurrentApplication)
 
-// Commands
-class SendMessageCommand: Command {
-    let name = "send_message"
-
-    func execute() throws {
-        log.info("SendMessageCommand")
-    }
-}
-
-class DaemonCommand: Command {
+class DaemonCLICommand: Command {
     let name = "daemon"
 
     @Key("-u", "--unix-socket", description: "Path to the unix socket to use for IPC with mautrix-imessage")
@@ -116,14 +107,14 @@ class DaemonCommand: Command {
             return
         }
 
-        log.info("DaemonCommand")
+        log.info("DaemonCLICommand")
         BarcelonaMautrix.run(unixSocket)
     }
 }
 
 var commands: [Routable] = [
-    SendMessageCommand(),
-    DaemonCommand(),
+    SendMessageCLICommand(),
+    DaemonCLICommand(),
 ]
 
 let arguments = ProcessInfo.processInfo.arguments
