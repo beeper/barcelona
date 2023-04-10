@@ -29,6 +29,25 @@ class SendMessageCLICommand: Command {
     @Param var chatGuid: String
     @Param var message: String?
 
+    private func sendMessage() async {
+        let chat = await getIMChatForChatGuid(self.chatGuid)
+        log.info("Got chat \(String(describing: chat))")
+        guard let chat else {
+            log.error("No chat with that guid found")
+            exit(1)
+        }
+
+        let messageCreation = CreateMessage(parts: [
+            .init(type: .text, details: self.message ?? "Test Message")
+        ])
+
+        log.info("Message send task starting")
+        let _ = try! await chat.send(message: messageCreation)
+
+        log.info("Message sent!")
+        exit(0)
+    }
+
     func execute() throws {
         log.info("SendMessageCLICommand")
 
@@ -45,24 +64,8 @@ class SendMessageCLICommand: Command {
         // Set up a pipeline to send the message once we've finished loading
         let readyPipeline = listener.readySubject.sink {
             log.info("Chats are loaded!")
-
-            let chat = IMChatRegistry.shared.existingChat(withGUID: self.chatGuid)
-            log.info("Got chat \(String(describing: chat))")
-            guard let chat else {
-                log.error("No chat with that guid found")
-                exit(1)
-            }
-
-            let messageCreation = CreateMessage(parts: [
-                .init(type: .text, details: self.message ?? "Test Message")
-            ])
-
             _Concurrency.Task {
-                log.info("Message send task starting")
-                let _ = try await chat.send(message: messageCreation)
-
-                log.info("Message sent!")
-                exit(0)
+                await self.sendMessage()
             }
         }
 

@@ -175,3 +175,59 @@ extension Chat {
         }
     }
 }
+
+public struct ParsedGUID: Codable, CustomStringConvertible {
+    public var service: String?
+    public var style: String?
+    public var last: String
+
+    public init(rawValue: String) {
+        guard rawValue.contains(";") else {
+            last = rawValue
+            return
+        }
+
+        let split = rawValue.split(separator: ";")
+
+        guard split.count == 3 else {
+            last = rawValue
+            return
+        }
+
+        service = String(split[0])
+        style = String(split[1])
+        last = String(split[2])
+    }
+
+    public var description: String {
+        guard let service = service, let style = style else {
+            return last
+        }
+        return "\(service);\(style);\(last)"
+    }
+}
+
+public func getIMServiceStyleForChatGuid(_ chatGuid: String) -> IMServiceStyle {
+    return ParsedGUID(rawValue: chatGuid).service == "iMessage" ? IMServiceStyle.iMessage : .SMS
+}
+
+public func getIMChatForChatGuid(_ chatGuid: String) async -> IMChat? {
+    if let chat = IMChatRegistry.shared.existingChat(withGUID: chatGuid) {
+        return chat
+    } else {
+        var parsed = ParsedGUID(rawValue: chatGuid)
+
+        let service = parsed.service == "iMessage" ? IMServiceStyle.iMessage : .SMS
+        let id = parsed.last
+
+        if id.isPhoneNumber || id.isEmail || id.isBusinessID {
+            if let dmChat = await Chat.directMessage(withHandleID: id, service: service).imChat {
+                log.warning("No chat found for \(chatGuid) but using directMessage chat for \(id)")
+                return dmChat
+            }
+        }
+    }
+
+    log.warning("No chat found for \(chatGuid)")
+    return nil
+}
