@@ -18,10 +18,6 @@ extension Array where Element: Hashable {
 class Registry {
     static let sharedInstance = Registry()
 
-    func account(withUniqueID uniqueID: String) -> IMAccount {
-        return IMAccountController.shared.account(forUniqueID: uniqueID)
-    }
-
     func imHandle(withID id: String) -> IMHandle? {
         if let account = IMAccountController.shared.iMessageAccount,
             let handle = imHandle(withID: id, onAccount: account)
@@ -50,24 +46,8 @@ class Registry {
         IMAccountController.shared.accounts
     }
 
-    func imHandle(withID id: String, onService service: String) -> IMHandle? {
-        guard let account = bestAccount(for: service) else {
-            return nil
-        }
-
-        return imHandle(withID: id, onAccount: account)
-    }
-
-    func imHandle(withID id: String, onService service: IMService) -> IMHandle? {
-        guard let account = bestAccount(for: service) else {
-            return nil
-        }
-
-        return imHandle(withID: id, onAccount: account)
-    }
-
     func imHandle(withID id: String, onAccount account: IMAccount) -> IMHandle? {
-        account.imHandle(withID: id) ?? account.existingIMHandle(withID: id)
+        account.imHandle(withID: id)
     }
 
     func suitableHandle(for service: String) -> IMHandle? {
@@ -86,14 +66,6 @@ class Registry {
         return account.loginIMHandle
     }
 
-    func bestAccount(for service: String) -> IMAccount? {
-        guard let service = resolve(service: service) else {
-            return nil
-        }
-
-        return bestAccount(for: service)
-    }
-
     func bestAccount(for service: IMService) -> IMAccount? {
         if let serviceImpl = service as? IMServiceImpl,
             let account = serviceImpl.value(forKey: "bestAccount") as? IMAccount
@@ -110,13 +82,6 @@ class Registry {
         return IMServiceAgentImpl.shared()?.service(withName: service)
     }
 
-    func iMessageAccount() -> IMAccount? {
-        return IMAccountController.shared.iMessageAccount
-    }
-
-    func SMSAccount() -> IMAccount? {
-        return IMAccountController.shared.activeSMSAccount
-    }
 
     private func _connect() {
         if _fastPath(IMDaemonController.shared().isConnected) {
