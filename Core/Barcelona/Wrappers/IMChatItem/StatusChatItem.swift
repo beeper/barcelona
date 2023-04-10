@@ -9,7 +9,7 @@
 import Foundation
 import IMCore
 
-public enum StatusType: CLongLong, Codable, Hashable {
+enum StatusType: CLongLong, Codable, Hashable {
     case delivered = 1
     case read = 2
     case played = 3
@@ -28,28 +28,6 @@ extension Optional where Wrapped == StatusType {
 }
 
 struct StatusChatItem: ChatItemOwned, Hashable {
-    public init(
-        id: String,
-        chatID: String,
-        fromMe: Bool,
-        time: Double,
-        sender: String? = nil,
-        threadIdentifier: String? = nil,
-        threadOriginator: String? = nil,
-        statusType: StatusType? = nil,
-        itemID: String
-    ) {
-        self.id = id
-        self.chatID = chatID
-        self.fromMe = fromMe
-        self.time = time
-        self.sender = sender
-        self.threadIdentifier = threadIdentifier
-        self.threadOriginator = threadOriginator
-        self.statusType = statusType
-        self.itemID = itemID
-    }
-
     static let ingestionClasses: [NSObject.Type] = [IMMessageStatusChatItem.self]
 
     init(ingesting item: NSObject, context: IngestionContext) {

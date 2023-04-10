@@ -10,8 +10,6 @@ import AnyCodable
 import Foundation
 import IMCore
 
-private let regex = try! NSRegularExpression(pattern: "<body.*?>([\\s\\S]*)<\\/body>")
-
 enum TextContentType: String, Codable {
     case link
     case calendar
