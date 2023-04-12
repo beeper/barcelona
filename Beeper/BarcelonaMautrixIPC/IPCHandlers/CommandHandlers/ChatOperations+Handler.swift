@@ -21,7 +21,7 @@ extension Array where Element == String {
 }
 
 extension GetChatsCommand: Runnable {
-    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
@@ -71,7 +71,7 @@ extension GetGroupChatInfoCommand: Runnable {
     var log: Logging.Logger {
         Logger(label: "TapbackCommand")
     }
-    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
@@ -112,7 +112,7 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
     var log: Logging.Logger {
         Logger(label: "TapbackCommand")
     }
-    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
@@ -151,7 +151,7 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
 }
 
 extension SendTypingCommand: Runnable, AuthenticatedAsserting {
-    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
@@ -187,7 +187,7 @@ extension SendTypingCommand: Runnable, AuthenticatedAsserting {
 }
 
 extension GetGroupChatAvatarCommand: Runnable {
-    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [

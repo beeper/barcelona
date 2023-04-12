@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum IDSState: Int, Codable, CustomStringConvertible {
+enum IDSState: Int, Codable, CustomStringConvertible {
     /// the state has either not been resolved or failed to resolve
     case unknown = 0
     /// this destination can be reached on this service
@@ -15,11 +15,11 @@ public enum IDSState: Int, Codable, CustomStringConvertible {
     /// this destination can not and will not be reached on this service
     case unavailable = 2
 
-    public var isAvailable: Bool {
+    var isAvailable: Bool {
         self == .available
     }
 
-    public init(rawValue: Int) {
+    init(rawValue: Int) {
         switch rawValue {
         case 1: self = .available
         case 2: self = .unavailable
@@ -27,11 +27,7 @@ public enum IDSState: Int, Codable, CustomStringConvertible {
         }
     }
 
-    public init(rawValue: Int64) {
-        self = .init(rawValue: Int(rawValue))
-    }
-
-    public var description: String {
+    var description: String {
         switch self {
         case .unknown:
             return "unknown"

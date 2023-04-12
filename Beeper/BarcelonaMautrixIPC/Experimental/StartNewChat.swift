@@ -28,7 +28,7 @@ enum ResolveIdentifierCommandError: Error {
 }
 
 extension ResolveIdentifierCommand: Runnable {
-    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
@@ -116,7 +116,7 @@ public struct PrepareDMCommand: Codable {
 }
 
 extension PrepareDMCommand: Runnable {
-    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [

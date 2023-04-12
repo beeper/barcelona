@@ -9,8 +9,6 @@ import Foundation
 import IMCore
 import Logging
 
-private let log = Logger(label: "IMChat")
-
 extension IMChat {
     /// Returns true if the next message sent will be sent over SMS
     public var willSendSMS: Bool {

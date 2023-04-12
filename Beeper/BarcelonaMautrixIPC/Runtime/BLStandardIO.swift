@@ -51,15 +51,6 @@ extension FileHandle {
         return thread
     }
 
-    public func performOnThread(_ callback: @escaping () -> Void) {
-        guard let runLoop = Self.runLoops[self] else {
-            callback()
-            return
-        }
-        CFRunLoopPerformBlock(runLoop, CFRunLoopMode.commonModes.rawValue, callback)
-        CFRunLoopWakeUp(runLoop)
-    }
-
     public func handleDataAsynchronously(_ cb: @escaping (Data) -> Void) {
         dataCallback = cb
         thread.start()

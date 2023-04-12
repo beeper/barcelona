@@ -13,7 +13,7 @@ import Logging
 import Sentry
 
 protocol Runnable {
-    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) async
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async
 }
 
 protocol AuthenticatedAsserting {}
@@ -22,7 +22,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
     var log: Logging.Logger {
         Logger(label: "SendMediaMessageCommand")
     }
-    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [

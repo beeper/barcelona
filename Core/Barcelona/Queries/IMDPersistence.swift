@@ -111,65 +111,7 @@ private func BLLoadIMDMessageRecordRefsWithGUIDs(_ guids: [String]) -> NSArray {
     return results as NSArray
 }
 
-// MARK: - Helpers
-private func ERCreateIMMessageFromIMItem(_ items: [IMItem]) -> [IMMessage] {
-    #if DEBUG
-    log.debug("converting \(items.count) IMItems to IMMessage")
-    #endif
-
-    guard items.count > 0 else {
-        #if DEBUG
-        log.debug("early-exit: empty array passed for conversion")
-        #endif
-        return []
-    }
-
-    let items = items.compactMap {
-        $0 as? IMMessageItem
-    }
-
-    guard items.count > 0 else {
-        #if DEBUG
-        log.debug("early-exit: no IMMessageItem found")
-        #endif
-        return []
-    }
-
-    let messages = items.compactMap {
-        IMMessage.message(fromUnloadedItem: $0)
-    }
-
-    #if DEBUG
-    log.debug("loaded \(messages.count) IMMessages from \(items.count) items")
-    #endif
-
-    return messages
-}
-
-private func BLCreateIMMessageFromIMDMessageRecordRefs(_ refs: NSArray) -> [IMMessage] {
-    ERCreateIMMessageFromIMItem(BLCreateIMItemFromIMDMessageRecordRefs(refs))
-}
-
 // MARK: - Private API
-
-/// Parses an array of IMDMessageRecordRef
-/// - Parameters:
-///   - refs: the refs to parse
-///   - chat: the ID of the chat the messages reside in. if omitted, the chat ID will be resolved at ingestion
-/// - Returns: The `ChatItem`s representing the ingested refs
-private func BLIngestIMDMessageRecordRefs(
-    _ refs: NSArray,
-    in chat: String? = nil,
-    service: IMServiceStyle
-) async throws -> [ChatItem] {
-    if refs.count == 0 {
-        return []
-    }
-
-    let items = BLCreateIMItemFromIMDMessageRecordRefs(refs)
-
-    return try await BLIngestObjects(items, inChat: chat, service: service)
-}
 
 internal func ERResolveGUIDsForChats(
     withChatIdentifiers chatIdentifiers: [String],
@@ -230,40 +172,6 @@ func BLLoadIMMessages(withGUIDs guids: [String]) -> [IMMessage] {
 
 public func BLLoadIMMessage(withGUID guid: String) -> IMMessage? {
     BLLoadIMMessages(withGUIDs: [guid]).first
-}
-
-/// Resolves ChatItems with the given GUIDs
-/// - Parameters:
-///   - guids: GUIDs of messages to load
-///   - chat: ID of the chat to load. if omitted, it will be resolved at ingestion.
-/// - Returns: The requested `ChatItem`s
-public func BLLoadChatItems(
-    withGUIDs guids: [String],
-    chatID: String? = nil,
-    service: IMServiceStyle
-) async throws -> [ChatItem] {
-    if guids.count == 0 {
-        return []
-    }
-
-    let (buffer, remaining) = IMDPersistenceMarshal.partialBuffer(guids)
-
-    guard let guids = remaining else {
-        return await buffer.value
-    }
-
-    let refs = BLLoadIMDMessageRecordRefsWithGUIDs(guids)
-
-    let ingestFut = Task<[ChatItem], Never> {
-        (try? await BLIngestIMDMessageRecordRefs(refs, in: chatID, service: service)) ?? []
-    }
-
-    IMDPersistenceMarshal.putBuffers(guids, ingestFut)
-
-    let buffers = await ingestFut.value
-    let bufVal = await buffer.value
-
-    return buffers + bufVal
 }
 
 func BLLoadChatItems(withGraph graph: [String: ([String], IMServiceStyle)]) async throws -> [ChatItem] {

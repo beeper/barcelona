@@ -51,11 +51,8 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
         send(.typing(.init(chat_guid: chat.blChatGUID, typing: typing)))
     }
 
-    public func unreadCountChanged(_ chat: String, _ count: Int) {
-    }
 
     public func run() {
-		CBDaemonListener.shared.unreadCountPipeline.sink(receiveValue: self.unreadCountChanged).store(in: &bag)
 		CBDaemonListener.shared.typingPipeline.sink(receiveValue: receiveTyping).store(in: &bag)
 
         CBDaemonListener.shared.messageStatusPipeline.sink { change in

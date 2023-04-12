@@ -31,7 +31,6 @@ public class MautrixIPCChannel {
     // Send writes through this subject to serialize writes
     private let writeSubject = Combine.PassthroughSubject<Data, Never>()
 
-    private let inputHandle: MautrixIPCInputChannel
     private let outputHandle: MautrixIPCOutputChannel
 
     let sharedBarcelonaStream: ERBufferedStream<IPCPayload> = {
@@ -46,7 +45,6 @@ public class MautrixIPCChannel {
     private var combineCancellables = Set<Combine.AnyCancellable>()
 
     public init(inputHandle: MautrixIPCInputChannel, outputHandle: MautrixIPCOutputChannel) {
-        self.inputHandle = inputHandle
         self.outputHandle = outputHandle
 
         sharedBarcelonaStream.subject
@@ -117,7 +115,7 @@ public class MautrixIPCChannel {
         return encoder
     }()
 
-    public func writePayload(_ payload: @autoclosure () -> IPCPayload, log: Bool = true) {
+    public func writePayload(_ payload: @autoclosure () -> IPCPayload) {
         self.writePayloads([payload()])
     }
 

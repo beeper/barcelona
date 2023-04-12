@@ -16,7 +16,7 @@ extension TapbackCommand: Runnable, AuthenticatedAsserting {
         Logger(label: "TapbackCommand")
     }
 
-    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) async {
+    public func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
@@ -54,7 +54,7 @@ extension TapbackCommand: Runnable, AuthenticatedAsserting {
 
         do {
             payload.respond(
-                .message_receipt(try await chat.tapback(creation, metadata: metadata).partialMessage),
+                .message_receipt(try await chat.tapback(creation).partialMessage),
                 ipcChannel: ipcChannel
             )
             span.finish()

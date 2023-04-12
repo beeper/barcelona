@@ -34,7 +34,7 @@ extension CreateMessageBase {
             fileTransferGUIDs: transferGUIDs,
             flags: combinedFlags.rawValue,
             threadIdentifier: threadIdentifier ?? replyToGUID.flatMap {
-                IMChatItem.resolveThreadIdentifier(forMessageWithGUID: $0, part: replyToPart ?? 0, chat: chat)
+                IMChatItem.resolveThreadIdentifier(forMessageWithGUID: $0, part: replyToPart ?? 0)
             }
         )
 

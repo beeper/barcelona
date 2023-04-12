@@ -11,8 +11,6 @@ import IMCore
 import IMSharedUtilities
 import Logging
 
-private let chatItemGUIDExtractor = try! NSRegularExpression(pattern: "(?:\\w+:\\d+)\\/([\\w-]+)")
-
 enum TapbackError: CustomNSError {
     /// Unknown message.
     case unknownMessage(guid: String)
@@ -83,8 +81,7 @@ extension IMChat {
         guid: String,
         itemGUID: String,
         type: Int,
-        overridingItemType: UInt8?,
-        metadata: Message.Metadata? = nil
+        overridingItemType: UInt8?
     ) throws -> IMMessage {
         guard let message = BLLoadIMMessage(withGUID: guid) else {
             throw TapbackError.unknownMessage(guid: guid)
@@ -116,7 +113,6 @@ extension IMChat {
         } else {
             return try preVenturaTapback(
                 type: rawType,
-                overridingItemType: overridingItemType,
                 subpart: subpart,
                 summaryInfo: summaryInfo
             )
@@ -172,7 +168,6 @@ extension IMChat {
     @available(macOS, obsoleted: 13.0, message: "Use venturaTapback instead")
     private func preVenturaTapback(
         type: Int64,
-        overridingItemType: UInt8?,
         subpart: IMMessagePartChatItem,
         summaryInfo: [AnyHashable: Any],
         metadata: Message.Metadata? = nil

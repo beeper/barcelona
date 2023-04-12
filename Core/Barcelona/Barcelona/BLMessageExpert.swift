@@ -45,16 +45,6 @@ public class BLMessageExpert {
             }
         }
 
-        public var imChat: IMChat? {
-            switch self {
-            case .failed(_, _, let chat, _), .delivered(_, _, let chat, _), .read(_, _, let chat, _),
-                .sending(_, _, let chat, _), .sent(_, _, let chat, _):
-                return chat
-            case .message(let message):
-                return message.imChat
-            }
-        }
-
         public var service: IMServiceStyle {
             switch self {
             case .failed(_, let service, _, _), .delivered(_, let service, _, _), .read(_, let service, _, _),
@@ -325,31 +315,12 @@ extension BLMessageExpert {
             }
         }
 
-        public convenience init(
-            id: @autoclosure @escaping () -> String,
-            callback: @escaping (BLMessageEvent) -> NextStep
-        ) {
-            self.init(id: id(), expert: .shared, callback: callback)
-        }
-
-        public convenience init(id: @autoclosure @escaping () -> String, callback: @escaping (BLMessageEvent) -> Void) {
-            self.init(id: id(), expert: .shared, callback: callback)
-        }
-
         /// Manually cancels the expert.
         public func cancel() {
             pipeline?.cancel()
             callback = nil
             pipeline = nil
         }
-    }
-
-    @_disfavoredOverload
-    public func observer(
-        forMessage id: @autoclosure @escaping () -> String,
-        callback: @escaping (BLMessageEvent) -> BLMessageObserver.NextStep
-    ) -> BLMessageObserver {
-        BLMessageObserver(id: id(), expert: self, callback: callback)
     }
 
     public func observer(

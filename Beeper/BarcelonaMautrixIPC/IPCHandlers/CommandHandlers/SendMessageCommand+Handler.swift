@@ -15,7 +15,7 @@ import Sentry
 private let log = Logger(label: "SendMessageCommand")
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
-    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
@@ -81,14 +81,10 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
                                 item.setThreadIdentifier(
                                     IMChatItem.resolveThreadIdentifier(
                                         forMessageWithGUID: replyToGUID,
-                                        part: reply_to_part ?? 0,
-                                        chat: imChat
+                                        part: reply_to_part ?? 0
                                     )
                                 )
                             }
-                        }
-                        if let metadata = metadata {
-                            message.metadata = metadata
                         }
                         var afterSend: () -> Void = {}
                         if let richLink = rich_link {

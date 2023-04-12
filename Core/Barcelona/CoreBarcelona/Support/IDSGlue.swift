@@ -100,18 +100,4 @@ struct IDSListenerCapabilities: OptionSet, ExpressibleByIntegerLiteral {
     typealias RawValue = UInt32
 
     static let consumesIncomingMessages: IDSListenerCapabilities = 1
-    static let consumesOutgoingMessageUpdates: IDSListenerCapabilities = 2
-    static let consumesSessionMessages: IDSListenerCapabilities = 4
-    static let consumesIncomingData: IDSListenerCapabilities = 8
-    static let consumesIncomingProtobuf: IDSListenerCapabilities = 16
-    static let consumesIncomingResource: IDSListenerCapabilities = 32
-    static let consumesEngram: IDSListenerCapabilities = 64
-    static let consumesCheckTransportLogHint: IDSListenerCapabilities = 128
-    static let consumesAccessoryReportMessages: IDSListenerCapabilities = 256
-    static let consumesGroupSessionParticipantUpdates: IDSListenerCapabilities = 512
-}
-
-// Circumvents MessageSuppression
-public class CBIDSConnection {
-    public static let shared = CBIDSConnection()
 }
