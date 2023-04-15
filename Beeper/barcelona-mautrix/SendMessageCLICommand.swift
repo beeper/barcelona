@@ -11,6 +11,7 @@ import Foundation
 import IMCore
 import Logging
 import SwiftCLI
+import BarcelonaMautrixIPC
 
 private let log = Logger(label: "SendMessageCLICommand")
 
@@ -28,6 +29,7 @@ class SendMessageCLICommand: Command {
 
     @Param var chatGuid: String
     @Param var message: String?
+    @Param var overwriteAvailability: Bool?
 
     private func sendMessage() async {
         let chat = await getIMChatForChatGuid(self.chatGuid)
@@ -37,15 +39,48 @@ class SendMessageCLICommand: Command {
             exit(1)
         }
 
+        if let overwriteAvailability {
+            IDSResolver.overwrittenStatuses[chat.chatIdentifier] = overwriteAvailability ? 1 : 2
+        }
+
         let messageCreation = CreateMessage(parts: [
             .init(type: .text, details: self.message ?? "Test Message")
         ])
 
         log.info("Message send task starting")
-        let _ = try! await chat.send(message: messageCreation)
+        let msg = try! await chat.send(message: messageCreation)
 
-        log.info("Message sent!")
-        exit(0)
+        log.info("Message sent: \(msg)\nAwaiting statuses...")
+
+        CBDaemonListener.shared.messageStatusPipeline.retainingSink { comp in
+            // I don't think we'll ever get a completion for this pipeline. if we do, just quit
+            log.info(":( messageStatusPipeline gave up on us: (\(comp))")
+            exit(1)
+        } receiveValue: { status in
+            guard status.messageID == msg.id else {
+                return
+            }
+
+            switch status.type {
+            case .sent:
+                log.info("Message was sent!")
+                if chat.account.service?.id != .iMessage || chat.isGroupChat {
+                    log.info("Message was sent to chat where there are no delivered statuses; exiting")
+                    exit(0)
+                }
+            case .delivered:
+                log.info("Message was delivered!! woohoo!!")
+                exit(0)
+            case .notDelivered:
+                log.info(":( Message was not delivered: \(status.message.errorCode)")
+                exit(0)
+            case .downgraded:
+                log.info("Uhhhh Message was downgraded somehow??: \(status.message.errorCode)")
+            default:
+                // don't care about anything else
+                break
+            }
+        }
     }
 
     func execute() throws {
@@ -56,32 +91,14 @@ class SendMessageCLICommand: Command {
         let controller = IMDaemonController.sharedInstance()
         controller.listener.addHandler(listener)
 
-        log.info("Connecting to daemon...")
-        controller.addListenerID("com.beeper.barcelona.send_message", capabilities: FZListenerCapabilities.defaults_)
-        controller.blockUntilConnected()
-        log.info("Connected to daemon.")
-
         // Set up a pipeline to send the message once we've finished loading
-        let readyPipeline = listener.readySubject.sink {
+        listener.readySubject.retainingSink { _ in } receiveValue: {
             log.info("Chats are loaded!")
             _Concurrency.Task {
                 await self.sendMessage()
             }
         }
 
-        log.info("Loading chats")
-        if #available(macOS 12, *) {
-            controller.loadAllChats()
-        } else {
-            controller.loadChats(withChatID: "all")
-        }
-
-        for account in IMAccountController.shared.accounts {
-            // We want to make sure that nothing is prohibited us
-            account.updateCapabilities(UInt64.max)
-        }
-
-        log.info("Starting the RunLoop")
-        RunLoop.main.run()
+        BarcelonaMautrix.run("/dev/null")
     }
 }

@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 
-extension Publisher {
+public extension Publisher {
     @discardableResult
     func retainingSink(
         receiveCompletion: @escaping (Subscribers.Completion<Failure>) -> Void,

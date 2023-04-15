@@ -268,7 +268,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
 
     static var didStartListening = false
 
-    func startListening() async {
+    public func startListening() async {
         guard CBDaemonListener.didStartListening == false else {
             return
         }
