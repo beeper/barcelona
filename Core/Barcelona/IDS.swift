@@ -69,6 +69,15 @@ class IDSResolver {
         }
     }
 
+    /// Queries echobot (or whatever other mule we're using) for the actual status of the given identifiers
+    ///  - Parameters:
+    ///    - ids: the identifiers to query, containing their `mailto:` or `tel:` prefixes
+    ///  - Returns: Dictionary mapping the destinations to the Int64 value of their state (as is returned by IDSIDQueryController)
+    static func queryMule(for ids: [String]) async throws -> [String: Int64] {
+        // hehe everything's available
+        ids.reduce(into: [:]) { $0[$1] = 1 }
+    }
+
     /// Query IDS with or without cached results.
     /// - Parameters:
     ///   - destinations: Destination handles.

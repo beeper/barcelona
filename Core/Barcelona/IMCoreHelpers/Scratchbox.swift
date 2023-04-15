@@ -18,6 +18,6 @@ import IMFoundation
 import IDS
 #endif
 
-func _scratchboxMain() {
-
+func _scratchboxMain() async {
+    let res = try! await IDSResolver.resolveStatus(for: "10293847474388383", on: .iMessage)
 }
