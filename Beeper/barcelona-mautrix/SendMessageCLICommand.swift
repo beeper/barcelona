@@ -29,7 +29,9 @@ class SendMessageCLICommand: Command {
 
     @Param var chatGuid: String
     @Param var message: String?
-    @Param var overwriteAvailability: Bool?
+
+    @Flag("--force-available")
+    var overwriteAvailability: Bool
 
     private func sendMessage() async {
         let chat = await getIMChatForChatGuid(self.chatGuid)
@@ -39,7 +41,8 @@ class SendMessageCLICommand: Command {
             exit(1)
         }
 
-        if let overwriteAvailability {
+        if overwriteAvailability {
+            log.info("Forcing any IDS lookups to resolve to \"available\"")
             IDSResolver.overwrittenStatuses[chat.chatIdentifier] = overwriteAvailability ? 1 : 2
         }
 
