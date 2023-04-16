@@ -127,7 +127,7 @@ func BLBootstrapController(chatRegistry: CBChatRegistry) async -> Bool {
 
     log.info("Adding callback for CBChatRegistry to load chats")
     await chatRegistry.onLoadedChats {
-        CBDaemonListener.shared.startListening()
+        await CBDaemonListener.shared.startListening()
         log.info("All systems go!")
     }
 

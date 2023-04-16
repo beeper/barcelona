@@ -18,6 +18,6 @@ import IMFoundation
 import IDS
 #endif
 
-func _scratchboxMain() {
+func _scratchboxMain() async {
 
 }

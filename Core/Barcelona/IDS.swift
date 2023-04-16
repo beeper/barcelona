@@ -19,7 +19,7 @@ enum IDSResolverError: Error {
     case statusNotFound
 }
 
-class IDSResolver {
+public class IDSResolver {
 
     // MARK: - Properties
 
@@ -28,6 +28,11 @@ class IDSResolver {
     private static let log = Logger(label: "IDSResolver")
     private static let handleQueue = DispatchQueue.init(label: "HandleIDS")
     private static let idsListenerID = "SOIDSListener-com.apple.imessage-rest"
+
+    // Used for SendMessageCLICommand; allows you to overwrite specific ids
+    // so that when you request for their statuses, it always says that they're
+    // available through IDS (or not available, whatever you want)
+    public static var overwrittenStatuses = [String: Int64]()
 
     // MARK: - Methods
 
@@ -66,6 +71,23 @@ class IDSResolver {
                 throw IDSResolverError.statusNotFound
             }
             return (IDSURI(prefixedURI: resolvedID)!.unprefixedURI, status)
+        }
+    }
+
+    /// Queries echobot (or whatever other mule we're using) for the actual status of the given identifiers
+    ///  - Parameters:
+    ///    - ids: the identifiers to query, containing their `mailto:` or `tel:` prefixes
+    ///  - Returns: Dictionary mapping the destinations to the Int64 value of their state (as is returned by IDSIDQueryController)
+    static func queryMule(for ids: [String]) async throws -> [String: Int64] {
+        // hehe everything's available
+        ids.reduce(into: [:]) { dict, id in
+            // If any of the overwritten IDs are this id (or this id contains one of them,
+            // such as how "tel:+12345678900" contains "+12345678900"), then it's available
+            let overwrittenStatus = Self.overwrittenStatuses.first {
+                id.contains($0.key)
+            }?.value
+
+            dict[id] = overwrittenStatus ?? 0
         }
     }
 

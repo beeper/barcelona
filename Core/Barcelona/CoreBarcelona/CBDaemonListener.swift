@@ -268,7 +268,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
 
     static var didStartListening = false
 
-    func startListening() {
+    public func startListening() async {
         guard CBDaemonListener.didStartListening == false else {
             return
         }
@@ -360,7 +360,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
         }
 
         #if DEBUG
-        _scratchboxMain()
+        await _scratchboxMain()
         #endif
     }
 

@@ -53,7 +53,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
 
 
     public func run() {
-		CBDaemonListener.shared.typingPipeline.sink(receiveValue: receiveTyping).store(in: &bag)
+        CBDaemonListener.shared.typingPipeline.sink(receiveValue: receiveTyping).store(in: &bag)
 
         CBDaemonListener.shared.messageStatusPipeline.sink { change in
             guard change.type == .read else {
