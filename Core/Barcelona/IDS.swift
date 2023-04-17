@@ -74,6 +74,97 @@ public class IDSResolver {
         }
     }
 
+    public static func hijackIDSResponse(in response: inout OS_xpc_object) async {
+        guard let swiftDict = response.toSwiftDictionary() else {
+            log.debug("Got reply for __sendMessage, is object: \(String(describing: response))")
+            return
+        }
+
+        // If we can turn it into a parseable dictionary,
+        // then print that instead of just the object
+        log.debug("Got reply for __sendMessage, is dict: \(swiftDict.singleLineDebugDescription)")
+
+        // I think the IDSIDKTData type is not available in < ventura, so we can't proceed
+        // if that's the case
+        guard #available(macOS 13.0, *), let dest = swiftDict["destinations"] as? Data else {
+            return
+        }
+
+        func reinsertData(
+            statuses: [String: Int64],
+            _ getData: @escaping ([String: Int64]) throws -> Data
+        ) async {
+            // If all the statuses say that they're available,
+            // then we don't need to ask anybody else about statuses
+            if statuses.values.allSatisfy({ $0 == 1 }) {
+                return
+            }
+
+            // Query echobot or whatever for the correct statuses
+            let realValues: [String: Int64]
+            do {
+                realValues = try await IDSResolver.queryMule(for: Array(statuses.keys))
+            } catch {
+                log.error("Couldn't query mule for real statuses of \(statuses.keys): \(error)")
+                return
+            }
+
+            do {
+                let dataVal = try getData(realValues)
+
+                // and if we got a good value, insert them
+                dataVal.withUnsafeBytes {
+                    guard let dataPtr = $0.baseAddress else {
+                        log.warning("Couldn't get baseAddress for data pointer to re-processed data")
+                        return
+                    }
+                    xpc_dictionary_set_data(response, "destinations", dataPtr, dataVal.count)
+                }
+            } catch {
+                log.warning("Couldn't convert new statuses to data in __sendMessage: \(error)")
+            }
+        }
+
+        // Unarchive it to a more understandable format
+        if let obj = (try? NSKeyedUnarchiver.unarchivedObject(ofClasses: [
+            NSDictionary.classForKeyedUnarchiver(),
+            NSString.classForKeyedUnarchiver(),
+            NSUUID.classForKeyedUnarchiver(),
+            IDSIDInfoResult.classForKeyedUnarchiver(),
+            IDSIDKTData.classForKeyedUnarchiver()
+        ], from: dest) as? [String: IDSIDInfoResult]) {
+            log.debug("__sendMessage was invoked for an ids query, returned archive is: \(obj.mapValues{ $0.status() }.singleLineDebugDescription)")
+
+            await reinsertData(statuses: obj.mapValues { $0.status() }) { realValues in
+                let results: [String: IDSIDInfoResult] = realValues.map {
+                    IDSIDInfoResult(uri: $0, status: $1, endpoints: nil, ktData: nil, gameCenterData: nil)
+                }.reduce(into: [:], { $0[$1.uri()] = $1 })
+
+                return try NSKeyedArchiver.archivedData(withRootObject: results, requiringSecureCoding: false)
+            }
+        } else if let obj = try? PropertyListSerialization.propertyList(from: dest, format: nil) as? any CustomDebugStringConvertible {
+            log.debug("__sendMessage was invoked for an ids query, returned plist is: \(obj.singleLineDebugDescription)")
+
+            // It should be in this format, but we just want to make sure
+            guard let obj = obj as? [String: [String: Int64]],
+                  let stat = obj["com.apple.madrid"] else {
+                log.warning("__sendMessage obj was a plist, but not a dictionary; can't continue querying mule")
+                return
+            }
+
+            await reinsertData(statuses: stat) { realValues in
+                return try PropertyListSerialization.data(
+                    fromPropertyList: ["com.apple.madrid": realValues.mapValues { $0 as NSNumber }],
+                    format: .binary,
+                    options: 0
+                )
+            }
+        } else {
+            // If we don't know what format it's in, just log and exit :(
+            log.warning("__sendMessage return value was not a known decodable format: \(dest)")
+        }
+    }
+
     /// Queries echobot (or whatever other mule we're using) for the actual status of the given identifiers
     ///  - Parameters:
     ///    - ids: the identifiers to query, containing their `mailto:` or `tel:` prefixes
