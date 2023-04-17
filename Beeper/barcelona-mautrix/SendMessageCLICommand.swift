@@ -43,7 +43,7 @@ class SendMessageCLICommand: Command {
 
         if overwriteAvailability {
             log.info("Forcing any IDS lookups to resolve to \"available\"")
-            IDSResolver.overwrittenStatuses[chat.chatIdentifier] = overwriteAvailability ? 1 : 2
+            IDSResolver.overwrittenStatuses[chat.chatIdentifier] = 1
         }
 
         let messageCreation = CreateMessage(parts: [
@@ -51,7 +51,7 @@ class SendMessageCLICommand: Command {
         ])
 
         log.info("Message send task starting")
-        let msg = try! await chat.send(message: messageCreation)
+        let msg = try! await Chat(chat).sendReturningRaw(message: messageCreation)
 
         log.info("Message sent: \(msg)\nAwaiting statuses...")
 
