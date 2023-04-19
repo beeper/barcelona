@@ -256,6 +256,7 @@ public class IDSResolver {
     /// Calls the relevant `IDSCopyIDFor[handle style]` to get the destination.
     /// - Throws: `IDSResolverError.unknownHandleStyle` if `handleStyle` is ``HandleIDStyle/unknown``.
     private static func destination(for id: String, handleStyle: HandleIDStyle) throws -> String {
+        log.debug("Getting destination for id: \(id), handleStyle: \(handleStyle)")
         switch handleStyle {
         case .email:
             return IDSCopyIDForEmailAddress(id as CFString)
