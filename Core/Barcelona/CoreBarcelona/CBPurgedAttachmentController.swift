@@ -123,7 +123,7 @@ class CBFileTransferCenter {
                         self.log.debug("Transfer \(transfer.guid ?? "nil") is still not done: \(transfer.localPath as String?) \(transfer.isFinished) \(transfer.existsAtLocalPath) \(!transfer.inSandboxedLocation)")
                     }
                 }
-                timer.schedule(deadline: .now().advanced(by: .milliseconds(10)), repeating: .milliseconds(10))
+                timer.schedule(deadline: .now().advanced(by: .milliseconds(200)), repeating: .milliseconds(200))
                 timer.resume()
             } else {
                 resolve(())
