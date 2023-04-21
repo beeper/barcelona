@@ -9,6 +9,7 @@
 import Barcelona
 import Foundation
 import IMCore
+import IMFoundation
 import Logging
 import Sentry
 
@@ -22,6 +23,21 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
     var log: Logging.Logger {
         Logger(label: "SendMediaMessageCommand")
     }
+
+    func uploadAndRetry(filename: String, path: String) async throws -> String {
+        let uploader = MediaUploader()
+        for attempt in 1..<3 {
+            do {
+                return try await uploader.uploadFile(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
+            } catch {
+                log.debug("Upload attempt \(attempt) failed: \(error.localizedDescription). Retrying in \(attempt)s")
+                try await Task.sleep(nanoseconds: UInt64(attempt) * 1_000_000_000)
+                continue
+            }
+        }
+        return try await uploader.uploadFile(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
+    }
+
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
@@ -52,83 +68,50 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             )
         }
 
-        let transfer = await CBInitializeFileTransfer(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
-        guard let guid = transfer.guid else {
-            payload.fail(
-                strategy: .internal_error("created transfer was not assigned a guid!!!"),
-                ipcChannel: ipcChannel
-            )
-            span.finish(status: .internalError)
-            return
-        }
-        var messageCreation = CreateMessage(parts: [
-            .init(type: .attachment, details: guid)
-        ])
-        messageCreation.metadata = metadata
-
         do {
-            var monitor: BLMediaMessageMonitor?
-            var message: IMMessage?
+            log.debug("Starting attachment upload")
+            let guid = try await uploadAndRetry(filename: file_name, path: path_on_disk)
+            log.debug("Attachment upload finished with GUID: \(guid)")
 
-            func resolveMessageService() -> String {
-                if let message = message {
-                    if let item = message._imMessageItem {
-                        return item.service
-                    }
-                    if message.wasDowngraded {
-                        return "SMS"
-                    }
+            var messageCreation = CreateMessage(parts: [
+                .init(type: .attachment, details: guid)
+            ])
+            messageCreation.metadata = metadata
+
+            let message = try await chat.sendReturningRaw(message: messageCreation)
+
+            let service: String = {
+                if let item = message._imMessageItem {
+                    return item.service
+                }
+                if message.wasDowngraded {
+                    return "SMS"
                 }
                 if imChat.isDowngraded() {
                     return "SMS"
                 }
                 return imChat.account.serviceName
-            }
-
-            monitor = BLMediaMessageMonitor(messageID: message?.id ?? "", transferGUIDs: [guid]) {
-                success,
-                failureCode,
-                shouldCancel in
-                guard let message = message else {
-                    return
-                }
-                if !success && shouldCancel {
-                    let chatGuid = imChat.blChatGUID
-                    ipcChannel.writePayload(
-                        .init(
-                            command: .send_message_status(
-                                .init(
-                                    guid: message.id,
-                                    chatGUID: chatGuid,
-                                    status: .failed,
-                                    service: resolveMessageService(),
-                                    message: failureCode?.localizedDescription,
-                                    statusCode: failureCode?.description
-                                )
-                            )
-                        )
-                    )
-                }
-                if !success && shouldCancel {
-                    imChat.cancel(message)
-                }
-
-                withExtendedLifetime(monitor) { monitor = nil }
-            }
-
-            message = try await chat.sendReturningRaw(message: messageCreation)
+            }()
 
             payload.reply(
                 withResponse: .message_receipt(
                     BLPartialMessage(
-                        guid: message!.id,
-                        service: resolveMessageService(),
+                        guid: message.id,
+                        service: service,
                         timestamp: Date().timeIntervalSinceNow
                     )
                 ),
                 ipcChannel: ipcChannel
             )
-            span.finish()
+        } catch let error as LocalizedError & CustomNSError {
+            SentrySDK.capture(error: error)
+            log.error("failed to send media message: \(error as NSError)", source: "BLMautrix")
+            payload.fail(
+                code: error.errorUserInfo[NSDebugDescriptionErrorKey] as? String ?? "unknown",
+                message: error.localizedDescription,
+                ipcChannel: ipcChannel
+            )
+            span.finish(status: .internalError)
         } catch {
             SentrySDK.capture(error: error)
             log.error("failed to send media message: \(error as NSError)", source: "BLMautrix")
