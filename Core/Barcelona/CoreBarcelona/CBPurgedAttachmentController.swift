@@ -120,7 +120,7 @@ class CBFileTransferCenter {
                         resolve(())
                         timer.cancel()
                     } else {
-                        self.log.debug("Transfer \(transfer.guid ?? "nil") is still not done")
+                        // self.log.debug("Transfer \(transfer.guid ?? "nil") is still not done")
                     }
                 }
                 timer.schedule(deadline: .now().advanced(by: .milliseconds(10)), repeating: .milliseconds(10))
