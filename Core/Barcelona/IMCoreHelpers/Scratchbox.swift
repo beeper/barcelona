@@ -15,6 +15,7 @@ import Foundation
 import IMCore
 import IMSharedUtilities
 import IMFoundation
+import IDSFoundation
 import IDS
 #endif
 

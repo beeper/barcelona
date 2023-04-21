@@ -25,9 +25,9 @@ public class IDSResolver {
 
     private static let sharedController: IDSIDQueryController = IDSIDQueryController.sharedInstance()!
 
+    public static let idsListenerID = "SOIDSListener-com.apple.imessage-rest"
     private static let log = Logger(label: "IDSResolver")
     private static let handleQueue = DispatchQueue.init(label: "HandleIDS")
-    private static let idsListenerID = "SOIDSListener-com.apple.imessage-rest"
 
     // Used for SendMessageCLICommand; allows you to overwrite specific ids
     // so that when you request for their statuses, it always says that they're
@@ -119,6 +119,7 @@ public class IDSResolver {
                         return
                     }
                     xpc_dictionary_set_data(response, "destinations", dataPtr, dataVal.count)
+                    log.debug("Successfully overwrote current XPC value for hijacking to \(realValues.singleLineDebugDescription)")
                 }
             } catch {
                 log.warning("Couldn't convert new statuses to data in __sendMessage: \(error)")
@@ -126,6 +127,9 @@ public class IDSResolver {
         }
 
         // Unarchive it to a more understandable format
+        // I've found that you can force it to return an object of the archive format if you use the
+        // `IDSIDQueryController.idInfoForDestinations(_:...)` fund with an `IDSIDInfoOptions`
+        // object passed in where all the parameters are true.
         if let obj = (try? NSKeyedUnarchiver.unarchivedObject(ofClasses: [
             NSDictionary.classForKeyedUnarchiver(),
             NSString.classForKeyedUnarchiver(),
@@ -133,11 +137,12 @@ public class IDSResolver {
             IDSIDInfoResult.classForKeyedUnarchiver(),
             IDSIDKTData.classForKeyedUnarchiver()
         ], from: dest) as? [String: IDSIDInfoResult]) {
-            log.debug("__sendMessage was invoked for an ids query, returned archive is: \(obj.mapValues{ $0.status() }.singleLineDebugDescription)")
+            log.debug("__sendMessage was invoked for an ids query, returned archive is: \(obj.mapValues { $0.status() }.singleLineDebugDescription)")
 
             await reinsertData(statuses: obj.mapValues { $0.status() }) { realValues in
                 let results: [String: IDSIDInfoResult] = realValues.map {
-                    IDSIDInfoResult(uri: $0, status: $1, endpoints: nil, ktData: nil, gameCenterData: nil)
+                    let orig = obj[$0]
+                    return IDSIDInfoResult(uri: $0, status: $1, endpoints: orig?.endpoints(), ktData: orig?.ktData(), gameCenterData: orig?.gameCenterData())
                 }.reduce(into: [:], { $0[$1.uri()] = $1 })
 
                 return try NSKeyedArchiver.archivedData(withRootObject: results, requiringSecureCoding: false)
@@ -178,7 +183,7 @@ public class IDSResolver {
                 id.contains($0.key)
             }?.value
 
-            dict[id] = overwrittenStatus ?? 0
+            dict[id] = overwrittenStatus ?? 2
         }
     }
 
