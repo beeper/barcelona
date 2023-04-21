@@ -31,7 +31,7 @@ packages:
     from: 1.0.4
   Sentry:
     url: https://github.com/getsentry/sentry-cocoa
-    exactVersion: 8.5.0
+    exactVersion: 8.2.0
   Paris:
     url: https://github.com/beeper/Paris
     revision: "bd04987ca22ac12d68f4ad2194ae27c80a578589"
