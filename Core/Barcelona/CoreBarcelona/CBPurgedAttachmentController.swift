@@ -169,9 +169,9 @@ class CBFileTransferCenter {
             return
         }
         transfers[guid] = transfer
-        log.debug(
-            "Transfer \(guid) has updated! isFinished \(transfer.isFinished) state \(transfer.actualState.description) error \(transfer.errorDescription ?? "nil")"
-        )
+        // log.debug(
+        //     "Transfer \(guid) has updated! isFinished \(transfer.isFinished) state \(transfer.actualState.description) error \(transfer.errorDescription ?? "nil")"
+        // )
         if transfer.isFinished {
             transferFinished(transfer)
         }
