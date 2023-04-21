@@ -120,7 +120,7 @@ class CBFileTransferCenter {
                         resolve(())
                         timer.cancel()
                     } else {
-                        // self.log.debug("Transfer \(transfer.guid ?? "nil") is still not done")
+                        self.log.debug("Transfer \(transfer.guid ?? "nil") is still not done: \(transfer.localPath as String?) \(transfer.isFinished) \(transfer.existsAtLocalPath) \(!transfer.inSandboxedLocation)")
                     }
                 }
                 timer.schedule(deadline: .now().advanced(by: .milliseconds(10)), repeating: .milliseconds(10))
@@ -169,9 +169,9 @@ class CBFileTransferCenter {
             return
         }
         transfers[guid] = transfer
-        // log.debug(
-        //     "Transfer \(guid) has updated! isFinished \(transfer.isFinished) state \(transfer.actualState.description) error \(transfer.errorDescription ?? "nil")"
-        // )
+        log.debug(
+            "Transfer \(guid) has updated! isFinished \(transfer.isFinished) state \(transfer.actualState.description) error \(transfer.errorDescription ?? "nil")"
+        )
         if transfer.isFinished {
             transferFinished(transfer)
         }
