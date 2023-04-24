@@ -58,41 +58,48 @@ public class CBPurgedAttachmentController {
     public var delegate: CBPurgedAttachmentControllerDelegate?
 
     private let log = Logger(label: "PurgedAttachments")
-    private var processingTransfers: [String: Promise<Void>] = [:]  // used to mux together purged transfers, to prevent a race in which two operations are both fetching a transfer
-    private var processingTransferTasks: [String: Task<Void, Error>] = [:]
+    private var processingTransfers: [String: Task<Void, Error>] = [:]
 
     public func process(transferIDs: [String]) async {
+        log.debug("Processing transfers: \(transferIDs)")
         for transferID in transferIDs {
             guard let transfer = IMFileTransferCenter.sharedInstance().transfer(forGUID: transferID),
                 let guid = transfer.guid
             else {
+                log.warning("Could not find a transfer for \(transferID)")
                 continue
             }
+            log.info("Processing transfer \(guid)")
+            log.debug("\(guid) isIncoming: \(transfer.isIncoming), state: \(transfer.state)")
             guard transfer.isIncoming && (transfer.needsUnpurging || !transfer.isTrulyFinished) else {
+                log.info("Transfer \(guid) does not need processing, skipping")
                 continue
             }
+            log.debug("Unpurging \(guid)")
             do {
-                if let task = processingTransferTasks[guid] {
+                if let task = processingTransfers[guid] {
+                    log.debug("Transfer \(guid) already processing, returning existing task")
                     try await task.value
                 } else {
+                    log.debug("Starting unpurging of transfer \(guid)")
                     let task = Task<Void, Error> {
-                        try await waitForCompletion(transferGUID: transferID)
-
-                        guard transfer.needsUnpurging else {
-                            return
-                        }
-
+                        log.debug("Accepting transfer \(guid)")
                         IMFileTransferCenter.sharedInstance().acceptTransfer(transfer.guid)
+
+                        log.debug("Waiting for completion of \(guid)")
+                        try await waitForCompletion(transferGUID: transferID)
+                        log.debug("Transfer \(guid) completed")
 
                         processingTransfers.removeValue(forKey: guid)
                         self.delegate?.purgedTransferResolved(transfer)
                     }
-                    processingTransferTasks[guid] = task
+                    processingTransfers[guid] = task
+                    log.debug("Waiting for unpurging of \(guid)")
                     try await task.value
                 }
             } catch {
                 log.error("Failed to download \(transferID), skipping")
-                self.delegate?.purgedTransferFailed(transfer)
+                delegate?.purgedTransferFailed(transfer)
             }
         }
     }

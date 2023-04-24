@@ -98,7 +98,9 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                         }
                         if CBPurgedAttachmentController.shared.enabled {
                             if message.fileTransferIDs.count > 0 {
+                                log.debug("Message \(message.id) has attachments, processing")
                                 await CBPurgedAttachmentController.shared.process(transferIDs: message.fileTransferIDs)
+                                log.debug("Processed attachments for \(message.id)")
                                 ipcChannel.writePayload(
                                     .init(command: .message(BLMessage(message: message.refresh())))
                                 )
