@@ -60,13 +60,18 @@ public class MediaUploader {
         let updated = NotificationCenter.default.publisher(for: .IMFileTransferUpdated)
         let finished = NotificationCenter.default.publisher(for: .IMFileTransferFinished)
         let transferEvents = updated.merge(with: finished)
+            .tryMap { notification -> IMFileTransfer in
+                guard let transfer = notification.object as? IMFileTransfer else {
+                    throw MediaUploadError.tranferObservationFailed
+                }
+                return transfer
+            }
+            .filter { transfer in
+                transfer.guid == transferGUID
+            }
             .throttle(for: 0.1, scheduler: DispatchQueue.main, latest: true)
 
-        for try await notification in transferEvents.values {
-            guard let transfer = notification.object as? IMFileTransfer else {
-                throw MediaUploadError.tranferObservationFailed
-            }
-
+        for try await transfer in transferEvents.values {
             guard let guid = transfer.guid, guid == transferGUID else {
                 continue
             }
