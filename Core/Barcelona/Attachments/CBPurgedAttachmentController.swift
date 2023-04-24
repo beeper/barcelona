@@ -43,6 +43,11 @@ extension Notification {
     }
 }
 
+enum FileTransferError: Error {
+    case transferNotFound(id: String)
+    case downloadFailed
+}
+
 // Automatically downloads purged attachments according to a set of configurable conditions
 // Disabled by default!
 public class CBPurgedAttachmentController {
@@ -54,119 +59,93 @@ public class CBPurgedAttachmentController {
 
     private let log = Logger(label: "PurgedAttachments")
     private var processingTransfers: [String: Promise<Void>] = [:]  // used to mux together purged transfers, to prevent a race in which two operations are both fetching a transfer
+    private var processingTransferTasks: [String: Task<Void, Error>] = [:]
 
-    public func process(transferIDs: [String]) -> Promise<Void> {
-        let (transfers, supplemented) =
-            transferIDs
-            .compactMap(IMFileTransferCenter.sharedInstance().transfer(forGUID:))
-            .filter {
-                $0.isIncoming
+    public func process(transferIDs: [String]) async {
+        for transferID in transferIDs {
+            guard let transfer = IMFileTransferCenter.sharedInstance().transfer(forGUID: transferID),
+                let guid = transfer.guid
+            else {
+                continue
             }
-            .filter { transfer in
-                transfer.needsUnpurging || !transfer.isTrulyFinished
+            guard transfer.isIncoming && (transfer.needsUnpurging || !transfer.isTrulyFinished) else {
+                continue
             }
-            .splitReduce(intoLeft: [IMFileTransfer](), intoRight: [Promise<Void>]()) { transfers, promises, transfer in
-                guard let guid = transfer.guid else {
-                    // we cant do anything, and we certainly wont wait!
-                    promises.append(Promise.success(()))
-                    return
-                }
-                if let pendingPromise = processingTransfers[guid] {
-                    promises.append(pendingPromise)  // existing download in progress, return that instead
+            do {
+                if let task = processingTransferTasks[guid] {
+                    try await task.value
                 } else {
-                    transfers.append(transfer)  // clear for takeoff
-                }
-            }
-
-        guard transfers.count > 0 else {
-            if supplemented.count > 0 {
-                return Promise.all(supplemented).replace(with: ())  // return summative promise over all existing operations
-            }
-
-            return .success(())
-        }
-
-        log.info("fetching \(transfers.count) guids from cloudkit")
-
-        return
-            Promise.all(
-                supplemented
-                    + transfers.map { transfer in
-                        guard let guid = transfer.guid else {
-                            log.error(
-                                "Transfers were filtered out to only the ones with GUIDs, but encountered a transfer without one."
-                            )
-                            return Promise.success(())
-                        }
-
-                        var promise = CBFileTransferCenter.shared.transferCompletionPromise(guid)
+                    let task = Task<Void, Error> {
+                        try await waitForCompletion(transferGUID: transferID)
 
                         guard transfer.needsUnpurging else {
-                            return promise
+                            return
                         }
-
-                        promise =
-                            promise.observeOutput {
-                                self.processingTransfers.removeValue(forKey: guid)
-                                self.delegate?.purgedTransferResolved(transfer)
-                            }
-                            .observeFailure { _ in
-                                self.delegate?.purgedTransferFailed(transfer)
-                            }
-
-                        processingTransfers[guid] = promise
 
                         IMFileTransferCenter.sharedInstance().acceptTransfer(transfer.guid)
 
-                        return promise
+                        processingTransfers.removeValue(forKey: guid)
+                        self.delegate?.purgedTransferResolved(transfer)
                     }
-            )
-            .replace(with: ()).resolve(on: DispatchQueue.main).timeout(.seconds(60))
-            .then { result in
-                switch result {
-                case .timedOut:
-                    let unavailableTransfers = transfers.filter { !$0.isTrulyFinished }
-                    if unavailableTransfers.isEmpty {
-                        self.log.error(
-                            "File transfer completion promise never fired, but all attachments seem to have finished."
-                        )
-                    } else {
-                        let transferIDS = unavailableTransfers.map(\.guid)
-                        self.log.warning(
-                            "Continuing message processing despite unsuccessful attachment loading! The following transfers are incomplete/unavailable: \(transferIDS)"
-                        )
-                    }
-                default:
-                    break
+                    processingTransferTasks[guid] = task
+                    try await task.value
                 }
+            } catch {
+                log.error("Failed to download \(transferID), skipping")
+                self.delegate?.purgedTransferFailed(transfer)
             }
+        }
     }
-}
 
-extension Promise {
-    func timeout(_ interval: DispatchTimeInterval) -> Promise<TimedResult> {
-        Promise<Any>
-            .any([
-                OpaquePromise(self),
-                OpaquePromise(
-                    Promise<Void> { resolve in
-                        guard let queue = resolveQueue as? DispatchQueue else {
-                            preconditionFailure("This timeout implementation only supports libdispatch")
-                        }
-                        let timer = DispatchSource.makeTimerSource(flags: .strict, queue: queue)
-                        timer.schedule(deadline: .now().advanced(by: interval))
-                        timer.setEventHandler(handler: { resolve(()) })
-                        timer.resume()
-                    }
-                ),
-            ])
-            .then { output in
-                switch output {
-                case let output as Output:
-                    return .finished(output)
-                default:
-                    return .timedOut
+    private func waitForCompletion(transferGUID: String) async throws {
+        let updateFinishedNotification = NotificationCenter.default.publisher(for: .IMFileTransferUpdated)
+            .filter { [weak self] notification in
+                guard let transfer = notification.object as? IMFileTransfer else {
+                    return false
                 }
+                if transfer.guid == transferGUID && transfer.state == .finished {
+                    self?.log.debug("Got updated notification for: \(transferGUID) with state: \(transfer.state)")
+                    return true
+                }
+                return false
             }
+
+        let finishedNotification = NotificationCenter.default.publisher(for: .IMFileTransferFinished)
+            .filter { [weak self] notification in
+                guard let transfer = notification.object as? IMFileTransfer else {
+                    return false
+                }
+                if transfer.guid == transferGUID {
+                    self?.log.debug("Got finished notification for: \(transferGUID) with state: \(transfer.state)")
+                    return true
+                }
+                return false
+            }
+
+        let updates = updateFinishedNotification.merge(with: finishedNotification)
+            .throttle(for: 0.1, scheduler: DispatchQueue.main, latest: true)
+
+        for try await notification in updates.values {
+            guard let transfer = notification.object as? IMFileTransfer else {
+                continue
+            }
+            guard let transferGUID = transfer.guid else {
+                log.warning("Witnessed transferFinished for a transfer with no GUID")
+                continue
+            }
+
+            switch transfer.actualState {
+            case .finished:
+                while !transfer.isTrulyFinished {
+                    log.debug("Waiting for \(transferGUID) to be truly finished")
+                    try await Task.sleep(nanoseconds: 200 * 1_000_000)
+                }
+                log.debug("Transfer \(transferGUID) is truly finished")
+
+                return
+            default:
+                throw FileTransferError.downloadFailed
+            }
+        }
     }
 }
