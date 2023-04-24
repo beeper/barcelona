@@ -149,7 +149,7 @@ class CBFileTransferCenter {
     }
 
     private func transferCreated(_ notification: Notification) {
-        guard let transfer = notification.decodeObject(to: IMFileTransfer.self) else {
+        guard let transfer = notification.decodeObject(to: IMFileTransfer.self), transfer.isIncoming else {
             return
         }
         guard let guid = transfer.guid else {
@@ -161,7 +161,7 @@ class CBFileTransferCenter {
     }
 
     private func transferUpdated(_ notification: Notification) {
-        guard let transfer = notification.decodeObject(to: IMFileTransfer.self) else {
+        guard let transfer = notification.decodeObject(to: IMFileTransfer.self), transfer.isIncoming else {
             return
         }
         guard let guid = transfer.guid else {
@@ -256,6 +256,9 @@ public class CBPurgedAttachmentController {
         let (transfers, supplemented) =
             transferIDs
             .compactMap(IMFileTransferCenter.sharedInstance().transfer(forGUID:))
+            .filter {
+                $0.isIncoming
+            }
             .filter { transfer in
                 transfer.needsUnpurging || !transfer.isTrulyFinished
             }
