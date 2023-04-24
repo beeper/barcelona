@@ -83,7 +83,7 @@ public class MediaUploader {
                 )
                 throw MediaUploadError.transferFailed(
                     code: transfer.error,
-                    description: transfer.errorDescription,
+                    description: transfer.errorDescription ?? "unknown error",
                     isRecoverable: false
                 )
             case .recoverableError:
@@ -92,7 +92,7 @@ public class MediaUploader {
                 )
                 throw MediaUploadError.transferFailed(
                     code: transfer.error,
-                    description: transfer.errorDescription,
+                    description: transfer.errorDescription ?? "unknown error",
                     isRecoverable: true
                 )
             default:
