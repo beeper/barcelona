@@ -83,6 +83,10 @@ public class MediaUploader {
                 log.debug("Transfer \(guid) isFinished: \(transfer.isFinished)")
                 return guid
             case .error:
+                if transfer.error == 24 && transfer.existsAtLocalPath {
+                    log.info("Got error 24 when uploading attachment, treating as success")
+                    return guid
+                }
                 log.error(
                     "Transfer \(guid) has an error: \(transfer.error) with description: \(String(describing: transfer.errorDescription))"
                 )
