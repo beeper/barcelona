@@ -83,8 +83,9 @@ public class MediaUploader {
                 log.debug("Transfer \(guid) isFinished: \(transfer.isFinished)")
                 return guid
             case .error:
-                if transfer.error == 24 && transfer.existsAtLocalPath {
+                if transfer.error == 24 {
                     log.info("Got error 24 when uploading attachment, treating as success")
+                    log.debug("Transfer exists at local path: \(transfer.existsAtLocalPath), isFinished: \(transfer.isFinished)")
                     return guid
                 }
                 log.error(
