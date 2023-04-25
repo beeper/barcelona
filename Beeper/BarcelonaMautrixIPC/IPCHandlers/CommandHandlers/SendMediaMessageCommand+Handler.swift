@@ -108,16 +108,17 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             )
         } catch let error as LocalizedError & CustomNSError {
             SentrySDK.capture(error: error)
-            log.error("failed to send media message: \(error as NSError)", source: "BLMautrix")
+            let userError = FZErrorType.attachmentUploadFailure
+            log.error("failed to send media message: \(error) replying to user with: \(userError.description)")
             payload.fail(
-                code: error.errorUserInfo[NSDebugDescriptionErrorKey] as? String ?? "unknown",
-                message: error.localizedDescription,
+                code: userError.description,
+                message: userError.localizedDescription ?? "Unkown error",
                 ipcChannel: ipcChannel
             )
             span.finish(status: .internalError)
         } catch {
             SentrySDK.capture(error: error)
-            log.error("failed to send media message: \(error as NSError)", source: "BLMautrix")
+            log.error("failed to send media message: \(error)")
             payload.fail(
                 code: "internal_error",
                 message: "Sorry, we're having trouble processing your attachment upload.",
