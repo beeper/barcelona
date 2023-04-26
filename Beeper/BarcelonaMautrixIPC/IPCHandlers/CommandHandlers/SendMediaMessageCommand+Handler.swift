@@ -29,9 +29,9 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         for attempt in 1..<3 {
             log.debug("Upload file attempt \(attempt)")
             do {
-                log.trace("Uploading")
+                log.debug("Uploading")
                 let guid = try await uploader.uploadFile(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
-                log.trace("Uploaded file with transfer guid \(guid)")
+                log.debug("Uploaded file with transfer guid \(guid)")
                 return guid
             } catch {
                 log.debug("Upload attempt \(attempt) failed: \(error.localizedDescription). Retrying in \(attempt)s")
@@ -88,9 +88,9 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             ])
             messageCreation.metadata = metadata
 
-            log.trace("Sending message with transfer \(guid)")
+            log.debug("Sending message with transfer \(guid)")
             let message = try await chat.sendReturningRaw(message: messageCreation)
-            log.trace("Message sent, got: \(message)")
+            log.debug("Message sent, got: \(message)")
 
             let service: String = {
                 if let item = message._imMessageItem {
@@ -105,7 +105,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                 return imChat.account.serviceName
             }()
 
-            log.trace("Responding to payload with message_receipt")
+            log.debug("Responding to payload with message_receipt")
             payload.reply(
                 withResponse: .message_receipt(
                     BLPartialMessage(

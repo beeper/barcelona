@@ -52,12 +52,12 @@ public class MediaUploader {
     public init() {}
 
     public func uploadFile(filename: String, path: URL) async throws -> String {
-        log.trace("Creating file transfer")
+        log.debug("Creating file transfer")
         let transfer = try await createFileTransfer(for: filename, path: path)
         guard let transferGUID = transfer.guid else {
             throw MediaUploadError.transferCreationFailed
         }
-        log.trace("Got file transfer with guid: \(transferGUID)")
+        log.debug("Got file transfer with guid: \(transferGUID)")
 
         let updated = NotificationCenter.default.publisher(for: .IMFileTransferUpdated).print("transferUpdated")
         let finished = NotificationCenter.default.publisher(for: .IMFileTransferFinished).print("transferFinished")
@@ -120,42 +120,42 @@ public class MediaUploader {
     private func createFileTransfer(for filename: String, path: URL) throws -> IMFileTransfer {
         let transferCenter = IMFileTransferCenter.sharedInstance()
 
-        log.trace("Getting a guid for a new outgoing transfer")
+        log.debug("Getting a guid for a new outgoing transfer")
         let guid = transferCenter.guidForNewOutgoingTransfer(withLocalURL: path, useLegacyGuid: true)
-        log.trace("Got guid: \(String(describing: guid)), getting a transfer for it")
+        log.debug("Got guid: \(String(describing: guid)), getting a transfer for it")
         guard let transfer = transferCenter.transfer(forGUID: guid) else {
             throw MediaUploadError.transferCreationFailed
         }
-        log.trace("Got transfer")
+        log.debug("Got transfer")
 
-        log.trace("Getting a persistent path for the transfer")
+        log.debug("Getting a persistent path for the transfer")
         if let persistentPath = IMAttachmentPersistentPath(guid, filename, transfer.mimeType, transfer.type) {
             let persistentURL = URL(fileURLWithPath: persistentPath)
-            log.trace("Got persistent URL: \(persistentURL)")
+            log.debug("Got persistent URL: \(persistentURL)")
 
             try FileManager.default.createDirectory(
                 at: persistentURL.deletingLastPathComponent(),
                 withIntermediateDirectories: true,
                 attributes: nil
             )
-            log.trace("Copying file to persistent path")
+            log.debug("Copying file to persistent path")
             try FileManager.default.copyItem(at: path, to: persistentURL)
-            log.trace("Retargeting transfer")
+            log.debug("Retargeting transfer")
             transferCenter.cbRetargetTransfer(transfer, toPath: persistentPath)
-            log.trace("Retargeted, setting localURL to: \(persistentURL)")
+            log.debug("Retargeted, setting localURL to: \(persistentURL)")
             transfer.localURL = persistentURL
             log.debug("Retargeted file transfer \(guid ?? "nil") from \(path) to \(persistentURL)")
         } else {
             log.debug("No persistent path for transfer: \(String(describing: guid))")
         }
 
-        log.trace("Setting a filename for the transfer")
+        log.debug("Setting a filename for the transfer")
         transfer.transferredFilename = filename
-        log.trace("Registering transfer with daemon")
+        log.debug("Registering transfer with daemon")
         transferCenter.registerTransfer(withDaemon: guid)
-        log.trace("Accepting transfer")
+        log.debug("Accepting transfer")
         transferCenter.acceptTransfer(transfer.guid!)
-        log.trace("Transfer accepted, returning")
+        log.debug("Transfer accepted, returning")
 
         return transfer
     }
