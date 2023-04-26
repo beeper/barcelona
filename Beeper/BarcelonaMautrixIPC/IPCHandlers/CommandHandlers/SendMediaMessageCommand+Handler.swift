@@ -27,15 +27,22 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
     func uploadAndRetry(filename: String, path: String) async throws -> String {
         let uploader = MediaUploader()
         for attempt in 1..<3 {
+            log.debug("Upload file attempt \(attempt)")
             do {
-                return try await uploader.uploadFile(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
+                log.trace("Uploading")
+                let guid = try await uploader.uploadFile(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
+                log.trace("Uploaded file with transfer guid \(guid)")
+                return guid
             } catch {
                 log.debug("Upload attempt \(attempt) failed: \(error.localizedDescription). Retrying in \(attempt)s")
                 try await Task.sleep(nanoseconds: UInt64(attempt) * 1_000_000_000)
                 continue
             }
         }
-        return try await uploader.uploadFile(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
+        log.debug("Trying to upload the file one last time")
+        let guid = try await uploader.uploadFile(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
+        log.debug("Final upload attempt succeeded with guid: \(guid)")
+        return guid
     }
 
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
@@ -81,7 +88,9 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             ])
             messageCreation.metadata = metadata
 
+            log.trace("Sending message with transfer \(guid)")
             let message = try await chat.sendReturningRaw(message: messageCreation)
+            log.trace("Message sent, got: \(message)")
 
             let service: String = {
                 if let item = message._imMessageItem {
@@ -96,6 +105,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                 return imChat.account.serviceName
             }()
 
+            log.trace("Responding to payload with message_receipt")
             payload.reply(
                 withResponse: .message_receipt(
                     BLPartialMessage(
