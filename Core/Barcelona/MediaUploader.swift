@@ -65,6 +65,7 @@ public class MediaUploader {
             let updated = NotificationCenter.default.publisher(for: .IMFileTransferUpdated).print("transferUpdated")
             let finished = NotificationCenter.default.publisher(for: .IMFileTransferFinished).print("transferFinished")
             let transferEvents = updated.merge(with: finished)
+                .receive(on: DispatchQueue.global(qos: .userInitiated))
 
             log.debug("Start notification loop")
             for try await notification in transferEvents.values {
