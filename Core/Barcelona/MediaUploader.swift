@@ -61,10 +61,12 @@ public class MediaUploader {
         log.debug("Got file transfer with guid: \(transferGUID)")
 
         let transferFinished = Task {
+            log.debug("Starting observation task")
             let updated = NotificationCenter.default.publisher(for: .IMFileTransferUpdated).print("transferUpdated")
             let finished = NotificationCenter.default.publisher(for: .IMFileTransferFinished).print("transferFinished")
             let transferEvents = updated.merge(with: finished)
 
+            log.debug("Start notification loop")
             for try await notification in transferEvents.values {
                 log.debug("Handling transfer status event")
                 guard let transfer = notification.object as? IMFileTransfer else {
@@ -72,8 +74,13 @@ public class MediaUploader {
                     throw MediaUploadError.tranferObservationFailed
                 }
 
-                guard let guid = transfer.guid, guid == transferGUID else {
-                    log.debug("Got transfer notification for nil or non-matching guid, skipping")
+                guard let guid = transfer.guid else {
+                    log.debug("Got transfer notification with nil guid, skipping")
+                    continue
+                }
+
+                guard guid == transferGUID else {
+                    log.debug("Got notification for guid: \(guid) but interested in \(transferGUID), skipping")
                     continue
                 }
 
