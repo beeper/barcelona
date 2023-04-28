@@ -211,6 +211,7 @@ public func getIMServiceStyleForChatGuid(_ chatGuid: String) -> IMServiceStyle {
     return ParsedGUID(rawValue: chatGuid).service == "iMessage" ? IMServiceStyle.iMessage : .SMS
 }
 
+@MainActor
 public func getIMChatForChatGuid(_ chatGuid: String) async -> IMChat? {
     if let chat = IMChatRegistry.shared.existingChat(withGUID: chatGuid) {
         return chat
