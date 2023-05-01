@@ -565,11 +565,58 @@ public class CBDaemonListener: ERBaseDaemonListener {
     // MARK: - File Transfers
 
     public override func fileTransfer(_ guid: String!, createdWithProperties properties: [AnyHashable: Any]!) {
+        log.debug(
+            "CBDaemonListener.fileTransfer(_:createdWithProperties:) guid=\(String(describing: guid)) properties=\(String(describing: properties))"
+        )
         _ = CBPurgedAttachmentController.shared.process(transferIDs: [guid])
     }
 
     public override func fileTransfer(_ guid: String!, updatedWithProperties properties: [AnyHashable: Any]!) {
+        log.debug(
+            "CBDaemonListener.fileTransfer(_:updatedWithProperties:) guid=\(String(describing: guid)) properties=\(String(describing: properties))"
+        )
         _ = CBPurgedAttachmentController.shared.process(transferIDs: [guid])
+    }
+
+    public override func fileTransfers(_ guids: [Any]!, createdWithLocalPaths paths: [Any]!) {
+        log.debug(
+            "CBDaemonListener.fileTransfers(_:createdWithLocalPaths:) guids=\(String(describing: guids)) paths=\(String(describing: paths))"
+        )
+        super.fileTransfers(guids, createdWithLocalPaths: paths)
+    }
+
+    public override func standaloneFileTransferRegistered(_ guid: String!) {
+        log.debug("CBDaemonListener.standaloneFileTransferRegistered(_:) guid=\(String(describing: guid))")
+        super.standaloneFileTransferRegistered(guid)
+    }
+
+    public override func fileTransfer(
+        _ guid: String!,
+        updatedWithCurrentBytes currentBytes: UInt64,
+        totalBytes: UInt64,
+        averageTransferRate: UInt64
+    ) {
+        log.debug(
+            "CBDaemonListener.fileTransfer(_:updatedWithCurrentBytes:totalBytes:averageTransferRate:) guid=\(String(describing: guid)) currentBytes=\(currentBytes) totalBytes=\(totalBytes) averageTransferRate=\(averageTransferRate)"
+        )
+        super
+            .fileTransfer(
+                guid,
+                updatedWithCurrentBytes: currentBytes,
+                totalBytes: totalBytes,
+                averageTransferRate: averageTransferRate
+            )
+    }
+
+    public override func fileTransferHighQualityDownloadFailed(_ guid: String!) {
+        log.debug("CBDaemonListener.fileTransferHighQualityDownloadFailed(_:) guid=\(String(describing: guid))")
+        super.fileTransferHighQualityDownloadFailed(guid)
+    }
+
+    public override func fileTransfer(_ guid: String!, highQualityDownloadSucceededWithPath path: String!) {
+        log.debug(
+            "CBDaemonListener.fileTransfer(_:highQualityDownloadSucceededWithPath:) guid=\(String(describing: guid)) path=\(String(describing: path))"
+        )
     }
 }
 
