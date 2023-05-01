@@ -125,6 +125,9 @@ public class MediaUploader {
             throw MediaUploadError.tranferObservationFailed
         }
 
+        log.debug("Waiting 100ms before accepting")
+        try await Task.sleep(nanoseconds: 100000000)
+
         log.debug("Registering transfer with daemon")
         transferCenter.registerTransfer(withDaemon: transferGUID)
         log.debug("Accepting transfer")
