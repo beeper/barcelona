@@ -82,10 +82,7 @@ public class MediaUploader {
             transferCenter.acceptTransfer(transfer.guid!)
             log.debug("Transfer accepted")
 
-            group.addTask { [weak self] in
-                guard let self else {
-                    throw CancellationError()
-                }
+            group.addTask { [log] in
                 await Task.yield()
                 log.debug("Starting a 30s timeout for the transfer")
                 try await Task.sleep(nanoseconds: 30 * 1000000000)
