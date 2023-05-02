@@ -72,7 +72,7 @@ public class MediaUploader {
                     guard let self else {
                         throw CancellationError()
                     }
-                    return try await receivedFinishNotification(for: transferGUID, continuation: continuation)
+                    return try await self.receivedFinishNotification(for: transferGUID, continuation: continuation)
                 }
             }
 
