@@ -19,4 +19,5 @@ public struct SendMediaMessageCommand: Codable, ChatResolvable {
     public var reply_to_part: Int?
     public var is_audio_message: Bool?
     public var metadata: Message.Metadata?
+    public var text: String?
 }

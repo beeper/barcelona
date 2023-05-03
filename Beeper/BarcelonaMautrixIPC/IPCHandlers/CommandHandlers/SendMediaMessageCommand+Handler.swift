@@ -83,9 +83,15 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             let guid = try await uploadAndRetry(filename: file_name, path: path_on_disk)
             log.debug("Attachment upload finished with GUID: \(guid)")
 
-            var messageCreation = CreateMessage(parts: [
-                .init(type: .attachment, details: guid)
-            ])
+            var parts: [MessagePart] = [
+                .init(type: .attachment, details: guid),
+            ]
+
+            if let text, !text.isEmpty {
+                parts.append(.init(type: .text, details: text))
+            }
+
+            var messageCreation = CreateMessage(parts: parts)
             messageCreation.metadata = metadata
 
             log.debug("Sending message with transfer \(guid)")
