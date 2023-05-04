@@ -41,13 +41,11 @@ extension Publisher {
     /// The stream will yield each output value produced by the
     /// publisher and will finish once the publisher completes.
     public var values: AsyncThrowingStream<Output, Error> {
-        let logger = Logger(label: "NotificationValues")
-        return AsyncThrowingStream { continuation in
+        AsyncThrowingStream { continuation in
             var cancellable: AnyCancellable?
             let onTermination = { cancellable?.cancel() }
 
             continuation.onTermination = { @Sendable _ in
-                logger.debug("Notification stream terminated")
                 onTermination()
             }
 
@@ -55,10 +53,8 @@ extension Publisher {
                 receiveCompletion: { completion in
                     switch completion {
                     case .finished:
-                        logger.debug("Received finish from publisher, finishing continuation")
                         continuation.finish()
                     case .failure(let error):
-                        logger.debug("Received error from publisher, throwing")
                         continuation.finish(throwing: error)
                     }
                 },
