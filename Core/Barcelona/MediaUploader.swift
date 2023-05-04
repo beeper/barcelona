@@ -17,6 +17,8 @@ public enum MediaUploadError: CustomNSError, LocalizedError {
     case tranferObservationFailed
     /// The underlying `IMFileTransfer` had an error.
     case transferFailed(code: Int64, description: String, isRecoverable: Bool)
+    /// Timed out waiting for the transfer to finish.
+    case timeout
 
     var error: String {
         switch self {
@@ -26,6 +28,8 @@ public enum MediaUploadError: CustomNSError, LocalizedError {
             return "tranferObservationFailed"
         case .transferFailed(code: _, let description, let isRecoverable):
             return "transferFailed: \(description), recoverable: \(isRecoverable)"
+        case .timeout:
+            return "timeout"
         }
     }
 
@@ -41,6 +45,8 @@ public enum MediaUploadError: CustomNSError, LocalizedError {
             return "Failed to get the status of the attachment upload"
         case .transferFailed(code: _, let description, isRecoverable: _):
             return "Failed to upload the attachment: \(description)"
+        case .timeout:
+            return "Timed out waiting for the transfer to finish"
         }
     }
 }
@@ -52,6 +58,7 @@ public class MediaUploader {
     public init() {}
 
     public func uploadFile(filename: String, path: URL) async throws -> String {
+        let transferCenter = IMFileTransferCenter.sharedInstance()
         log.debug("Creating file transfer")
         let transfer = try await createFileTransfer(for: filename, path: path)
         guard let transferGUID = transfer.guid else {
@@ -59,22 +66,69 @@ public class MediaUploader {
         }
         log.debug("Got file transfer with guid: \(transferGUID)")
 
+        return try await withThrowingTaskGroup(of: String.self) { group in
+            await withCheckedContinuation { continuation in
+                group.addTask { [weak self] in
+                    guard let self else {
+                        throw CancellationError()
+                    }
+                    return try await self.receivedFinishNotification(for: transferGUID, continuation: continuation)
+                }
+            }
+
+            log.debug("Registering transfer with daemon")
+            transferCenter.registerTransfer(withDaemon: transferGUID)
+            log.debug("Accepting transfer")
+            transferCenter.acceptTransfer(transfer.guid!)
+            log.debug("Transfer accepted")
+
+            group.addTask { [log] in
+                await Task.yield()
+                log.debug("Starting a 30s timeout for the transfer")
+                try await Task.sleep(nanoseconds: 30 * 1000000000)
+                log.debug("Reached timeout for the transfer")
+                try Task.checkCancellation()
+
+                log.debug("Checking if the transfer is finished before timing out")
+                if let transfer = transferCenter.transfer(forGUID: transferGUID), let guid = transfer.guid, transfer.isFinished {
+                    log.debug("Transfer is finished with state=\(transfer.state) error=\(transfer.error)")
+                    return guid
+                }
+                throw MediaUploadError.timeout
+            }
+
+            defer { group.cancelAll() }
+            log.debug("Waiting for transfer to be finished")
+            let result = try await group.next()!
+            log.debug("Got finished status from observation")
+            return result
+        }
+    }
+
+    private func receivedFinishNotification(for transferGUID: String, continuation: CheckedContinuation<Void, Never>) async throws -> String {
+        log.debug("Starting observation task")
         let updated = NotificationCenter.default.publisher(for: .IMFileTransferUpdated).print("transferUpdated")
         let finished = NotificationCenter.default.publisher(for: .IMFileTransferFinished).print("transferFinished")
         let transferEvents = updated.merge(with: finished)
-            .tryMap { notification -> IMFileTransfer in
-                guard let transfer = notification.object as? IMFileTransfer else {
-                    throw MediaUploadError.tranferObservationFailed
-                }
-                return transfer
-            }
-            .filter { transfer in
-                transfer.guid == transferGUID
-            }
-            .throttle(for: 0.1, scheduler: DispatchQueue.main, latest: true)
+            .receive(on: DispatchQueue.global(qos: .userInitiated))
 
-        for try await transfer in transferEvents.values {
-            guard let guid = transfer.guid, guid == transferGUID else {
+        log.debug("Start notification loop")
+        continuation.resume()
+        for try await notification in transferEvents.values {
+            try Task.checkCancellation()
+            log.debug("Handling transfer status event")
+            guard let transfer = notification.object as? IMFileTransfer else {
+                log.error("Got transfer notification with non-transfer data")
+                throw MediaUploadError.tranferObservationFailed
+            }
+
+            guard let guid = transfer.guid else {
+                log.debug("Got transfer notification with nil guid, skipping")
+                continue
+            }
+
+            guard guid == transferGUID else {
+                log.debug("Got notification for guid: \(guid) but interested in \(transferGUID), skipping")
                 continue
             }
 
@@ -87,7 +141,9 @@ public class MediaUploader {
             case .error:
                 if transfer.error == 24 {
                     log.info("Got error 24 when uploading attachment, treating as success")
-                    log.debug("Transfer exists at local path: \(transfer.existsAtLocalPath), isFinished: \(transfer.isFinished)")
+                    log.debug(
+                        "Transfer exists at local path: \(transfer.existsAtLocalPath), isFinished: \(transfer.isFinished)"
+                    )
                     return guid
                 }
                 log.error(
@@ -151,11 +207,6 @@ public class MediaUploader {
 
         log.debug("Setting a filename for the transfer")
         transfer.transferredFilename = filename
-        log.debug("Registering transfer with daemon")
-        transferCenter.registerTransfer(withDaemon: guid)
-        log.debug("Accepting transfer")
-        transferCenter.acceptTransfer(transfer.guid!)
-        log.debug("Transfer accepted, returning")
 
         return transfer
     }
