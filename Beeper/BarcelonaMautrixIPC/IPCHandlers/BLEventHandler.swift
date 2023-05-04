@@ -104,12 +104,6 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                         return
                     }
                 }
-                #if DEBUG
-                if NSUserName() == "ericrabil" || NSUserName() == "3AFBF1C7-8088-4ACF-B998-BC84C6947233" {
-                    let message = BLLoadIMMessage(withGUID: message.id)
-                    log.debug("\(message.debugDescription)", source: "")
-                }
-                #endif
                 let blMessage = BLMessage(message: message)
                 log.debug(
                     "Sending message payload \(blMessage.guid) \(blMessage.chat_guid) \(blMessage.sender_guid ?? "nil") \(blMessage.service)"

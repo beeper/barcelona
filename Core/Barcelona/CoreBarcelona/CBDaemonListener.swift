@@ -188,7 +188,6 @@ public class CBDaemonListener: ERBaseDaemonListener {
     public let unreadCountPipeline = PassthroughSubject<(chat: String, count: Int), Never>()
     public let typingPipeline = PassthroughSubject<(chat: String, service: IMServiceStyle, typing: Bool), Never>()
     public let chatNamePipeline = PassthroughSubject<(chat: String, name: String?), Never>()
-    public let chatParticipantsPipeline = PassthroughSubject<(chat: String, participants: [String]), Never>()
     public let blocklistPipeline = PassthroughSubject<[String], Never>()
     public let messagesDeletedPipeline = PassthroughSubject<[String], Never>()
     public let chatsDeletedPipeline = PassthroughSubject<[String], Never>()
@@ -660,21 +659,6 @@ extension CBDaemonListener {
         if emitIfNeeded && previousDisplayName != displayName {
             chatNamePipeline.send((chatIdentifier, displayName))
         }
-
-        apply(
-            chatIdentifier: chatIdentifier,
-            participants: extractParticipants(dict["participants"]),
-            emitIfNeeded: emitIfNeeded
-        )
-    }
-
-    fileprivate func apply(chatIdentifier: String, participants chatParticipants: [String], emitIfNeeded: Bool = true) {
-        let previousParticipants = participants[chatIdentifier] ?? []
-        participants[chatIdentifier] = chatParticipants
-
-        if emitIfNeeded && previousParticipants != chatParticipants {
-            chatParticipantsPipeline.send((chatIdentifier, chatParticipants))
-        }
     }
 }
 
@@ -805,20 +789,6 @@ extension CBDaemonListener {
                 var additionalFileTransfers = [String]()
 
                 switch representation {
-                case let participantChange as ParticipantChangeItem:
-                    guard let targetID = participantChange.targetID, var chatParticipants = participants[chatIdentifier]
-                    else {
-                        break
-                    }
-
-                    // Apply participant change to the cached participants and emit if needed
-                    if participantChange.changeType == 0 && !chatParticipants.contains(targetID) {
-                        chatParticipants.append(targetID)
-                        apply(chatIdentifier: chatIdentifier, participants: chatParticipants, emitIfNeeded: true)
-                    } else if participantChange.changeType == 1 && chatParticipants.contains(targetID) {
-                        chatParticipants.removeAll(where: { $0 == targetID })
-                        apply(chatIdentifier: chatIdentifier, participants: chatParticipants, emitIfNeeded: true)
-                    }
                 case let groupAction as GroupActionItem:
                     if groupAction.actionType.rawValue == 1,
                         let groupPhoto = IMChat.chat(withIdentifier: chatIdentifier, onService: service, style: nil)?

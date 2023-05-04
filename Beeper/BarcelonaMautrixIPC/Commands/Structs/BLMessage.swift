@@ -67,6 +67,7 @@ extension Message {
 extension ParticipantChangeItem {
     fileprivate func blTargetGUID(on service: String, isGroup: Bool) -> String? {
         guard let targetID = targetID else {
+            log.warning("targetID is nil for change item \(id); can't create target GUID")
             return nil
         }
 
@@ -92,7 +93,7 @@ public struct BLMessage: Codable, ChatResolvable {
     public var is_audio_message: Bool?
     public var is_read: Bool
     public var item_type: Int64?
-    public var target: String?
+    public var target_guid: String?
     public var rich_link: RichLinkMetadata?
     public var metadata: Message.Metadata?
 
@@ -127,7 +128,7 @@ public struct BLMessage: Codable, ChatResolvable {
             case let action as ParticipantChangeItem:
                 self.group_action_type = Int(action.changeType)
                 self.item_type = IMItemType.participantChange.rawValue
-                self.target = action.blTargetGUID(on: service, isGroup: message.imChat?.isGroup == true)
+                self.target_guid = action.blTargetGUID(on: service, isGroup: message.imChat?.isGroup == true)
             case let item as GroupActionItem:
                 self.group_action_type = Int(item.actionType.rawValue)
                 self.item_type = IMItemType.groupAction.rawValue
