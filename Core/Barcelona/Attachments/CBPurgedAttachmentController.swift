@@ -43,10 +43,39 @@ extension Notification {
     }
 }
 
-enum FileTransferError: Error {
+enum FileTransferError: CustomNSError, LocalizedError {
+    /// Could not find the referenced transfer.
     case transferNotFound(id: String)
+    /// Failed to download the attachment.
     case downloadFailed
+    /// Downloading the attachment timed out.
     case timeout
+
+    var error: String {
+        switch self {
+        case .transferNotFound:
+            return "transferNotFound"
+        case .downloadFailed:
+            return "downloadFailed"
+        case .timeout:
+            return "timeout"
+        }
+    }
+
+    public var errorUserInfo: [String: Any] {
+        [NSDebugDescriptionErrorKey: error]
+    }
+
+    public var errorDescription: String? {
+        switch self {
+        case .transferNotFound:
+            return "Could not find the referenced transfer."
+        case .downloadFailed:
+            return "Failed to download the attachment."
+        case .timeout:
+            return "Downloading the attachment timed out."
+        }
+    }
 }
 
 // Automatically downloads purged attachments according to a set of configurable conditions
