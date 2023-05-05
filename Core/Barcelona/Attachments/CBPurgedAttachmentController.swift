@@ -72,7 +72,7 @@ public class CBPurgedAttachmentController {
             }
             log.info("Processing transfer \(guid)")
             log.debug("\(guid) isIncoming: \(transfer.isIncoming), state: \(transfer.state)")
-            guard transfer.isIncoming && transfer.needsUnpurging else {
+            guard transfer.isIncoming && (transfer.needsUnpurging || !transfer.isTrulyFinished) else {
                 log.info("Transfer \(guid) does not need processing, skipping")
                 continue
             }
@@ -82,10 +82,12 @@ public class CBPurgedAttachmentController {
                 _ = try await withThrowingTaskGroup(of: String.self) { group in
                     await withCheckedContinuation { continuation in
                         group.addTask { [log] in
-                            let guid = try await TransferCenter.receivedFinishNotification(
-                                for: guid,
-                                continuation: continuation
-                            )
+                            if transfer.state != .finished {
+                                _ = try await TransferCenter.receivedFinishNotification(
+                                    for: guid,
+                                    continuation: continuation
+                                )
+                            }
                             while !transfer.isTrulyFinished {
                                 try Task.checkCancellation()
                                 log.debug("Waiting for \(guid) to be truly finished")
