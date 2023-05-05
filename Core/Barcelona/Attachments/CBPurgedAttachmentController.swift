@@ -46,6 +46,7 @@ extension Notification {
 enum FileTransferError: Error {
     case transferNotFound(id: String)
     case downloadFailed
+    case timeout
 }
 
 // Automatically downloads purged attachments according to a set of configurable conditions
@@ -58,9 +59,9 @@ public class CBPurgedAttachmentController {
     public var delegate: CBPurgedAttachmentControllerDelegate?
 
     private let log = Logger(label: "PurgedAttachments")
-    private var processingTransfers: [String: Task<Void, Error>] = [:]
 
     public func process(transferIDs: [String]) async {
+        let transferCenter = IMFileTransferCenter.sharedInstance()
         log.debug("Processing transfers: \(transferIDs)")
         for transferID in transferIDs {
             guard let transfer = IMFileTransferCenter.sharedInstance().transfer(forGUID: transferID),
@@ -71,87 +72,62 @@ public class CBPurgedAttachmentController {
             }
             log.info("Processing transfer \(guid)")
             log.debug("\(guid) isIncoming: \(transfer.isIncoming), state: \(transfer.state)")
-            guard transfer.isIncoming && (transfer.needsUnpurging || !transfer.isTrulyFinished) else {
+            guard transfer.isIncoming && transfer.needsUnpurging else {
                 log.info("Transfer \(guid) does not need processing, skipping")
                 continue
             }
             log.debug("Unpurging \(guid)")
+
             do {
-                if let task = processingTransfers[guid] {
-                    log.debug("Transfer \(guid) already processing, returning existing task")
-                    try await task.value
-                } else {
-                    log.debug("Starting unpurging of transfer \(guid)")
-                    let task = Task<Void, Error> {
-                        log.debug("Accepting transfer \(guid)")
-                        IMFileTransferCenter.sharedInstance().acceptTransfer(transfer.guid)
+                _ = try await withThrowingTaskGroup(of: String.self) { group in
+                    await withCheckedContinuation { continuation in
+                        group.addTask { [log] in
+                            let guid = try await TransferCenter.receivedFinishNotification(
+                                for: guid,
+                                continuation: continuation
+                            )
+                            while !transfer.isTrulyFinished {
+                                try Task.checkCancellation()
+                                log.debug("Waiting for \(guid) to be truly finished")
+                                try await Task.sleep(nanoseconds: 200 * 1_000_000)
+                            }
 
-                        log.debug("Waiting for completion of \(guid)")
-                        try await waitForCompletion(transferGUID: transferID)
-                        log.debug("Transfer \(guid) completed")
-
-                        processingTransfers.removeValue(forKey: guid)
-                        self.delegate?.purgedTransferResolved(transfer)
+                            return guid
+                        }
                     }
-                    processingTransfers[guid] = task
-                    log.debug("Waiting for unpurging of \(guid)")
-                    try await task.value
+
+                    log.debug("Registering transfer with daemon")
+                    transferCenter.registerTransfer(withDaemon: guid)
+                    log.debug("Accepting transfer")
+                    transferCenter.acceptTransfer(transfer.guid!)
+                    log.debug("Transfer accepted")
+
+                    group.addTask { [log] in
+                        await Task.yield()
+                        log.debug("Starting a 30s timeout for the transfer")
+                        try await Task.sleep(nanoseconds: 30 * 1_000_000_000)
+                        log.debug("Reached timeout for the transfer")
+                        try Task.checkCancellation()
+
+                        log.debug("Checking if the transfer is finished before timing out")
+                        if let transfer = transferCenter.transfer(forGUID: guid), let guid = transfer.guid,
+                            transfer.isFinished
+                        {
+                            log.debug("Transfer is finished with state=\(transfer.state) error=\(transfer.error)")
+                            return guid
+                        }
+                        throw FileTransferError.timeout
+                    }
+
+                    defer { group.cancelAll() }
+                    log.debug("Waiting for transfer to be finished")
+                    let result = try await group.next()!
+                    log.debug("Got finished status from observation")
+                    return result
                 }
+                delegate?.purgedTransferResolved(transfer)
             } catch {
-                log.error("Failed to download \(transferID), skipping")
                 delegate?.purgedTransferFailed(transfer)
-            }
-        }
-    }
-
-    private func waitForCompletion(transferGUID: String) async throws {
-        let updateFinishedNotification = NotificationCenter.default.publisher(for: .IMFileTransferUpdated)
-            .filter { [weak self] notification in
-                guard let transfer = notification.object as? IMFileTransfer else {
-                    return false
-                }
-                if transfer.guid == transferGUID && transfer.state == .finished {
-                    self?.log.debug("Got updated notification for: \(transferGUID) with state: \(transfer.state)")
-                    return true
-                }
-                return false
-            }
-
-        let finishedNotification = NotificationCenter.default.publisher(for: .IMFileTransferFinished)
-            .filter { [weak self] notification in
-                guard let transfer = notification.object as? IMFileTransfer else {
-                    return false
-                }
-                if transfer.guid == transferGUID {
-                    self?.log.debug("Got finished notification for: \(transferGUID) with state: \(transfer.state)")
-                    return true
-                }
-                return false
-            }
-
-        let updates = updateFinishedNotification.merge(with: finishedNotification)
-            .throttle(for: 0.1, scheduler: DispatchQueue.main, latest: true)
-
-        for try await notification in updates.values {
-            guard let transfer = notification.object as? IMFileTransfer else {
-                continue
-            }
-            guard let transferGUID = transfer.guid else {
-                log.warning("Witnessed transferFinished for a transfer with no GUID")
-                continue
-            }
-
-            switch transfer.actualState {
-            case .finished:
-                while !transfer.isTrulyFinished {
-                    log.debug("Waiting for \(transferGUID) to be truly finished")
-                    try await Task.sleep(nanoseconds: 200 * 1_000_000)
-                }
-                log.debug("Transfer \(transferGUID) is truly finished")
-
-                return
-            default:
-                throw FileTransferError.downloadFailed
             }
         }
     }
