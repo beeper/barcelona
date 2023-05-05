@@ -83,8 +83,6 @@ func BLBootstrapController(chatRegistry: CBChatRegistry) async -> Bool {
     /** Registers with imagent */
     controller.listener.addHandler(CBDaemonListener.shared)
 
-    _ = CBFileTransferCenter.shared
-
     RunLoop.main.schedule {
         log.info("BLBootstrapController Connecting to daemon...")
         controller.addListenerID(BLListenerIdentifier, capabilities: FZListenerCapabilities.defaults_)

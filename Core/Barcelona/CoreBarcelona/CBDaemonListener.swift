@@ -567,14 +567,18 @@ public class CBDaemonListener: ERBaseDaemonListener {
         log.debug(
             "CBDaemonListener.fileTransfer(_:createdWithProperties:) guid=\(String(describing: guid)) properties=\(String(describing: properties))"
         )
-        _ = CBPurgedAttachmentController.shared.process(transferIDs: [guid])
+        Task {
+            _ = await CBPurgedAttachmentController.shared.process(transferIDs: [guid])
+        }
     }
 
     public override func fileTransfer(_ guid: String!, updatedWithProperties properties: [AnyHashable: Any]!) {
         log.debug(
             "CBDaemonListener.fileTransfer(_:updatedWithProperties:) guid=\(String(describing: guid)) properties=\(String(describing: properties))"
         )
-        _ = CBPurgedAttachmentController.shared.process(transferIDs: [guid])
+        Task {
+            _ = await CBPurgedAttachmentController.shared.process(transferIDs: [guid])
+        }
     }
 
     public override func fileTransfers(_ guids: [Any]!, createdWithLocalPaths paths: [Any]!) {
