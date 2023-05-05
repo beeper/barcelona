@@ -91,7 +91,7 @@ public class CBPurgedAttachmentController {
                             while !transfer.isTrulyFinished {
                                 try Task.checkCancellation()
                                 log.debug("Waiting for \(guid) to be truly finished")
-                                try await Task.sleep(nanoseconds: 200 * 1_000_000)
+                                try await Task.sleep(nanoseconds: 1_000_000_000)
                             }
 
                             return guid
