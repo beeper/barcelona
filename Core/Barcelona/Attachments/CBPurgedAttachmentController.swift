@@ -14,7 +14,7 @@ import IMDaemonCore
 import IMFoundation
 import IMSharedUtilities
 import Logging
-import Pwomise
+import Sentry
 
 public protocol CBPurgedAttachmentControllerDelegate {
     func purgedTransferResolved(_ transfer: IMFileTransfer)
@@ -158,6 +158,7 @@ public class CBPurgedAttachmentController {
                 }
                 delegate?.purgedTransferResolved(transfer)
             } catch {
+                SentrySDK.capture(error: error)
                 delegate?.purgedTransferFailed(transfer)
             }
         }
