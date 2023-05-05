@@ -75,9 +75,6 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             )
         }
 
-        let canSend = imChat.canSendTransfer(imChat)
-        log.debug("Can send transfer to chat \(String(describing: imChat.guid)): \(canSend)")
-
         do {
             log.debug("Starting attachment upload")
             let guid = try await uploadAndRetry(filename: file_name, path: path_on_disk)
