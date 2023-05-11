@@ -8,6 +8,7 @@
 
 import BarcelonaDB
 import Combine
+import Extensions
 import Foundation
 import IMCore
 import IMDPersistence
@@ -194,12 +195,10 @@ func BLLoadChatItems(withGraph graph: [String: ([String], IMServiceStyle)]) asyn
     }
 
     let pendingIngestion = Task<[ChatItem], Never> {
-        let results: [ChatItem] =
-            await values.asyncMap {
-                let (chatID, (items, service)) = $0
-                return (try? await BLIngestObjects(items, inChat: chatID, service: service)) ?? []
-            }
-            .flatten()
+        let results: [ChatItem] = await values.asyncMap {
+            let (chatID, (items, service)) = $0
+            return (try? await BLIngestObjects(items, inChat: chatID, service: service)) ?? []
+        }.flatten()
 
         return results
     }

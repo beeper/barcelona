@@ -1,17 +1,16 @@
 //
-//  Publishers.swift
-//  Barcelona
+//  Combine.swift
+//  Extensions
 //
-//  Created by June Welker on 2/15/23.
+//  Created by June Welker on 5/10/23.
 //
 
-import Combine
 import Foundation
-import Logging
+import Combine
 
-extension Publisher {
+public extension Publisher {
     @discardableResult
-    public func retainingSink(
+    func retainingSink(
         receiveCompletion: @escaping (Subscribers.Completion<Failure>) -> Void,
         receiveValue: @escaping (Output) -> Void
     ) -> AnyCancellable? {
@@ -27,6 +26,28 @@ extension Publisher {
 
         return cancellable
     }
+
+    func asyncFirst() async throws -> Output {
+        try await withCheckedThrowingContinuation { continuation in
+            first().retainingSink { completion in
+                if case let .failure(error) = completion {
+                    continuation.resume(throwing: error)
+                }
+            } receiveValue: { value in
+                continuation.resume(returning: value)
+            }
+        }
+    }
+}
+
+extension Publisher where Failure == Never {
+    public func asyncFirst() async -> Output {
+        await withCheckedContinuation { continuation in
+            first().retainingSink { _ in } receiveValue: { value in
+                continuation.resume(returning: value)
+            }
+        }
+    }
 }
 
 // Copied from // https://github.com/JohnSundell/AsyncCompatibilityKit  as it doesn't have macOS support.
@@ -35,12 +56,12 @@ extension Publisher {
     deprecated: 12.0,
     message: "AsyncCompatibilityKit is only useful when targeting macOS versions earlier than 12"
 )
-extension Publisher {
+public extension Publisher {
     /// Convert this publisher into an `AsyncThrowingStream` that
     /// can be iterated over asynchronously using `for try await`.
     /// The stream will yield each output value produced by the
     /// publisher and will finish once the publisher completes.
-    public var values: AsyncThrowingStream<Output, Error> {
+    var values: AsyncThrowingStream<Output, Error> {
         AsyncThrowingStream { continuation in
             var cancellable: AnyCancellable?
             let onTermination = { cancellable?.cancel() }
@@ -63,15 +84,5 @@ extension Publisher {
                 }
             )
         }
-    }
-}
-
-extension Sequence {
-    func asyncMap<T>(_ transform: (Element) async throws -> T) async rethrows -> [T] {
-        var values = [T]()
-        for element in self {
-            values.append(try await transform(element))
-        }
-        return values
     }
 }

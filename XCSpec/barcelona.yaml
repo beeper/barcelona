@@ -48,6 +48,9 @@ targets:
       - target: BarcelonaDB
         embed: true
         link: true
+      - target: Extensions
+        embed: true
+        link: true
   BarcelonaDB:
     group: Core
     templates:
@@ -60,3 +63,9 @@ targets:
       - package: Sentry
       - package: swift-log
         product: Logging
+  Extensions:
+    group: Core
+    templates:
+      - BLFramework
+    sources:
+      - ../Core/Extensions
