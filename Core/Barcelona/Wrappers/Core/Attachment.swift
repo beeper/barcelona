@@ -74,6 +74,7 @@ public struct Attachment: Codable, Hashable {
         id = transfer.assertedGUID
         uti = transfer.type
         size = transfer.mediaSize
+        path = transfer.localPath
 
         if transfer.isSticker {
             sticker = StickerInformation(transfer.stickerUserInfo)
@@ -109,9 +110,7 @@ public struct Attachment: Codable, Hashable {
         BLLoadFileTransfer(withGUID: id)
     }
 
-    public var path: String? {
-        existingFileTransfer?.localPath
-    }
+    public var path: String?
 
     public var url: URL? {
         path.map(URL.init(fileURLWithPath:))
