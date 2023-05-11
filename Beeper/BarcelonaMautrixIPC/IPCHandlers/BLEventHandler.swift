@@ -102,7 +102,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
                                 await CBPurgedAttachmentController.shared.process(transferIDs: message.fileTransferIDs)
                                 log.debug("Processed attachments for \(message.id)")
                                 ipcChannel.writePayload(
-                                    .init(command: .message(BLMessage(message: message.refresh())))
+                                    .init(command: .message(BLMessage(message: message)))
                                 )
                                 return
                             }
