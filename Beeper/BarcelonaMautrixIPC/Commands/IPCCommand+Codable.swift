@@ -23,6 +23,7 @@ extension IPCCommand: Codable {
         case bridge_status
         case resolve_identifier
         case prepare_dm
+        case prepare_group_chat
         case ping
         case pre_startup_sync
         case unknown
@@ -81,6 +82,8 @@ extension IPCCommand: Codable {
             return .pre_startup_sync
         case .prepare_dm:
             return .prepare_dm
+        case .prepare_group_chat:
+            return .prepare_group_chat
         case .unknown:
             return .unknown
         }
@@ -133,6 +136,8 @@ extension IPCCommand: Codable {
         case .resolve_identifier(let data):
             try container.encode(data, forKey: .data)
         case .prepare_dm(let data):
+            try container.encode(data, forKey: .data)
+        case .prepare_group_chat(let data):
             try container.encode(data, forKey: .data)
         case .ping:
             try container.encodeNil(forKey: .data)
@@ -195,6 +200,8 @@ extension IPCCommand: Codable {
             self = .resolve_identifier(try container.decode(ResolveIdentifierCommand.self, forKey: .data))
         case .prepare_dm:
             self = .prepare_dm(try container.decode(PrepareDMCommand.self, forKey: .data))
+        case .prepare_group_chat:
+            self = .prepare_group_chat(try container.decode(PrepareGroupChatCommand.self, forKey: .data))
         case .unknown:
             self = .unknown
         }

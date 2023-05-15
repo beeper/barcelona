@@ -35,6 +35,7 @@ public enum IPCCommand {
     case bridge_status(BridgeStatusCommand)
     case resolve_identifier(ResolveIdentifierCommand)
     case prepare_dm(PrepareDMCommand)
+    case prepare_group_chat(PrepareGroupChatCommand)
     case ping
     case pre_startup_sync
     case unknown

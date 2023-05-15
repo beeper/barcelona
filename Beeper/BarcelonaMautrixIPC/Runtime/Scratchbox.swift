@@ -6,12 +6,11 @@
 //
 //  Traps Barcelona right after initialization and performs arbitrary work
 //
-//  This file has special attributes so that any changes you make will not be committed.
-//
 
 import Foundation
 
 #if DEBUG
+import Barcelona
 import IMCore
 import IMSharedUtilities
 import IMFoundation
@@ -19,6 +18,5 @@ import IDSFoundation
 import IDS
 #endif
 
-func _scratchboxMain() async {
-
+public func _scratchboxMain(chatRegistry: CBChatRegistry) async {
 }

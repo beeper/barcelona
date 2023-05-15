@@ -73,6 +73,12 @@ class BarcelonaMautrix {
                 exit(-1)
             }
 
+            #if DEBUG
+            await chatRegistry.onLoadedChats {
+                await _scratchboxMain(chatRegistry: self.chatRegistry)
+            }
+            #endif
+
             // allow payloads to start flowing
             self.reader.ready = true
             BLHealthTicker.shared.pinnedBridgeState = nil

@@ -131,7 +131,7 @@ extension PrepareDMCommand: Runnable {
         breadcrumb.message = "PrepareDMCommand/\(payload.id ?? 0)"
         breadcrumb.type = "user"
         SentrySDK.addBreadcrumb(breadcrumb)
-        let log = Logger(label: "ResolveIdentifierCommand")
+        let log = Logger(label: "PrepareDMCommand")
 
         let parsed = ParsedGUID(rawValue: guid)
 
@@ -147,6 +147,49 @@ extension PrepareDMCommand: Runnable {
 
         let chat = await Chat.directMessage(withHandleID: parsed.last, service: service)
         log.info("Prepared chat \(chat.id) on service \(service.rawValue)", source: "PrepareDM")
+
+        payload.respond(.ack, ipcChannel: ipcChannel)
+        span.finish()
+    }
+}
+
+public struct PrepareGroupChatCommand: Codable, Runnable {
+    public var guids: [String]
+
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": String(describing: payload.id),
+                    "command": payload.command.name.rawValue,
+                ],
+                key: "payload"
+            )
+        }
+        let span = SentrySDK.startTransaction(name: "PrepareGroupChatCommand", operation: "run", bindToScope: true)
+        let breadcrumb = Breadcrumb(level: .debug, category: "command")
+        breadcrumb.message = "PrepareGroupChatCommand/\(payload.id ?? 0)"
+        breadcrumb.type = "user"
+        SentrySDK.addBreadcrumb(breadcrumb)
+        let log = Logger(label: "PrepareGroupChatCommand")
+
+        let parsed = guids.map(ParsedGUID.init(rawValue:))
+        let services = parsed.map { $0.service.flatMap(IMServiceStyle.init(rawValue:)) }
+
+        guard !services.contains(where: { $0 == nil }) else {
+            payload.fail(
+                code: "err_invalid_service",
+                message: "One or more of the provided services do not exist",
+                ipcChannel: ipcChannel
+            )
+            span.finish(status: .invalidArgument)
+            return
+        }
+
+        let service: IMServiceStyle = services.allSatisfy { $0 == .iMessage } ? .iMessage : .SMS
+
+        let chat = await Chat.groupChat(withHandleIDs: parsed.map(\.last), service: service)
+        log.info("Prepared chat \(chat.id) on service \(service.rawValue)", source: "PrepareGroupChatCommand")
 
         payload.respond(.ack, ipcChannel: ipcChannel)
         span.finish()

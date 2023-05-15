@@ -357,10 +357,6 @@ public class CBDaemonListener: ERBaseDaemonListener {
 
             self.chatConfigurationPipeline.send(chat.configurationBits)
         }
-
-        #if DEBUG
-        await _scratchboxMain()
-        #endif
     }
 
     // MARK: - Chat events

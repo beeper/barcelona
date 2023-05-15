@@ -136,22 +136,10 @@ public class BarcelonaManager {
     public static let shared = BarcelonaManager()
 
     @MainActor public func bootstrap(chatRegistry: CBChatRegistry) async throws -> Bool {
-        let bootstrapTask = Task {
-            let result = await BLBootstrapController(chatRegistry: chatRegistry)
-            try Task.checkCancellation()
-            return result
-        }
-
-        let timeoutTask = Task {
-            try await Task.sleep(nanoseconds: UInt64(Self.bootstrapTimeout) * NSEC_PER_SEC)
-            log.error("BLBootstrapController timeout hit")
-            bootstrapTask.cancel()
-        }
-
         do {
-            let result = try await bootstrapTask.value
-            timeoutTask.cancel()
-            return result
+            return try await Task(timeout: Self.bootstrapTimeout) {
+                await BLBootstrapController(chatRegistry: chatRegistry)
+            }.value
         } catch {
             throw BarcelonaError(code: 504, message: "Barcelona took more than \(Self.bootstrapTimeout)s to bootstrap")
         }

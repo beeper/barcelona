@@ -156,6 +156,12 @@ extension Chat {
     public static func directMessage(withHandleID handleID: String, service: IMServiceStyle) async -> Chat {
         await Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service)))
     }
+
+    @MainActor
+    public static func groupChat(withHandleIDs handleIDs: [String], service: IMServiceStyle) async -> Chat {
+        let handles = handleIDs.map { bestHandle(forID: $0, service: service) }
+        return await Chat(IMChatRegistry.shared.chat(for: handles))
+    }
 }
 
 extension Thread {

@@ -336,7 +336,7 @@ public actor CBChatRegistry {
         }
     }
 
-    func onLoadedChats(_ callback: @Sendable @escaping ()  async -> Void) {
+    public func onLoadedChats(_ callback: @Sendable @escaping ()  async -> Void) {
         if hasLoadedChats {
             log.info("Already ready, let's go!")
             Task { @MainActor in
