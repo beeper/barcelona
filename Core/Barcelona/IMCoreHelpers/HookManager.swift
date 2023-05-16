@@ -109,11 +109,8 @@ private func IDSQueryHooks() throws -> Interpose {
                 }
 
                 let logReplyBlock: (OS_xpc_object) -> Void = { [replyBlock] replyObject in
-                    Task {
-                        var replyObject = replyObject
-                        await IDSResolver.hijackIDSResponse(in: &replyObject)
-                        replyBlock(replyObject)
-                    }
+                    log.debug("Got reply for __sendMessage, swift representation is: \(replyObject.toSwift())")
+                    replyBlock(replyObject)
                 }
 
                 store.original(controller, store.selector, message, queue, logReplyBlock, logFailureBlock, waitForReply)
