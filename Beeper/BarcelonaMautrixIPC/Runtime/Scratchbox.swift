@@ -8,9 +8,9 @@
 //
 
 import Foundation
+import Barcelona
 
 #if DEBUG
-import Barcelona
 import IMCore
 import IMSharedUtilities
 import IMFoundation
