@@ -7,6 +7,24 @@
 
 import Foundation
 
+public extension Task {
+    static func fromFallableCompletion(completion: @escaping (CheckedContinuation<Success, Error>) -> Void) -> Task<Success, Error> {
+        Task<Success, Error> {
+            try await withCheckedThrowingContinuation { continuation in
+                completion(continuation)
+            }
+        }
+    }
+
+    static func fromCompletion(completion: @escaping (CheckedContinuation<Success, Never>) -> Void) -> Task<Success, Never> {
+        Task<Success, Never> {
+            await withCheckedContinuation { continuation in
+                completion(continuation)
+            }
+        }
+    }
+}
+
 // Stolen shamelessly from https://gist.github.com/swhitty/9be89dfe97dbb55c6ef0f916273bbb97
 // I tested it in a playground where the `operation` was blocked by a non-async function and it still
 // correctly threw the timeout error (which other implementations of this same concept didn't do), so
