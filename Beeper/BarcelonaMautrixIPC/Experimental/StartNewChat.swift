@@ -191,7 +191,17 @@ public struct PrepareGroupChatCommand: Codable, Runnable {
         let chat = await Chat.groupChat(withHandleIDs: parsed.map(\.last), service: service)
         log.info("Prepared chat \(chat.id) on service \(service.rawValue)", source: "PrepareGroupChatCommand")
 
-        payload.respond(.ack, ipcChannel: ipcChannel)
+        guard let guid = chat.blChatGUID else {
+            payload.fail(
+                code: "err_no_guid",
+                message: "The requested chat was created, but had no backing IMChat and thus no guid",
+                ipcChannel: ipcChannel
+            )
+            span.finish(status: .internalError)
+            return
+        }
+
+        payload.respond(.guid(.init(guid)), ipcChannel: ipcChannel)
         span.finish()
     }
 }
