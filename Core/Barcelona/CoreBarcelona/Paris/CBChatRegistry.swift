@@ -22,11 +22,11 @@ public actor CBChatRegistry {
 
     // MARK: - Properties
 
-    var chats: [CBChatIdentifier: CBChat] = [:]
+    var chats: [CBChatIdentifier: Chat] = [:]
 
     public let failedMessages = PassthroughSubject<(guid: String, chatGUID: String, service: String, error: Error), Never>()
 
-    private var allChats: [ObjectIdentifier: CBChat] = [:]
+    private var allChats: [ObjectIdentifier: Chat] = [:]
     private var messageIDReverseLookup: [String: CBChatIdentifier] = [:]
     private var loadedChatsByChatIdentifierCallback: [String: [([IMChat]) -> Void]] = [:]
     private var hasLoadedChats = false
@@ -51,30 +51,32 @@ public actor CBChatRegistry {
 
     func setupComplete(_ _: Bool, info: [AnyHashable: Any]!) {
         if let chats = info["personMergedChats"] as? [[AnyHashable: Any]] {
-            for chat in chats {
-                _ = handle(chat: chat)
+            Task {
+                for chat in chats {
+                    await storeChat(withDetails: chat)
+                }
             }
         } else {
             log.warning("Did not receive personMergedChats in setup info")
         }
     }
 
-    func chat(_ persistentIdentifier: String!, updated updateDictionary: [AnyHashable: Any]!) {
+    func chat(_ persistentIdentifier: String!, updated updateDictionary: [AnyHashable: Any]!) async {
         trace(
             nil,
             nil,
             "persistentIdentifier \(persistentIdentifier!) updated \(updateDictionary.singleLineDebugDescription)"
         )
-        _ = handle(chat: updateDictionary)
+        await storeChat(withDetails: updateDictionary)
     }
 
-    func chat(_ persistentIdentifier: String!, propertiesUpdated properties: [AnyHashable: Any]!) {
+    func chat(_ persistentIdentifier: String!, propertiesUpdated properties: [AnyHashable: Any]!) async {
         trace(
             nil,
             nil,
             "persistentIdentifier \(persistentIdentifier!) properties \(properties.singleLineDebugDescription)"
         )
-        _ = handle(chat: [
+        await storeChat(withDetails: [
             "guid": persistentIdentifier as Any,
             "properties": properties as Any,
         ])
@@ -99,6 +101,21 @@ public actor CBChatRegistry {
         trace(nil, nil, "loaded last message for all chats \((chatIDToLastMessageDictionary as NSDictionary))")
     }
 
+    private func handleAndCaptureError(service: String?, chatStyle: IMChatStyle, chatIdentifier: String?, guid: String?, handle: @escaping () async throws -> Void) {
+        Task {
+            do {
+                try await handle()
+            } catch {
+                SentrySDK.capture(error: error)
+                let chatGUID = "\(service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
+                failedMessages.send(
+                    (guid: guid ?? "nil", chatGUID: chatGUID, service: service ?? "nil", error: error)
+                )
+                log.error("Could not handle item: \(error.localizedDescription)")
+            }
+        }
+    }
+
     func service(
         _ serviceID: String!,
         chat chatIdentifier: String!,
@@ -106,16 +123,9 @@ public actor CBChatRegistry {
         messagesUpdated messages: [[AnyHashable: Any]]!
     ) {
         trace(chatIdentifier, nil, "messages dict updated \(messages.singleLineDebugDescription)")
-        messages.forEach {
-            do {
-                try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: serviceID, properties: nil, groupID: nil, item: $0 as NSObject)
-            } catch {
-                SentrySDK.capture(error: error)
-                let chatGUID = "\(serviceID ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
-                failedMessages.send(
-                    (guid: $0["guid"] as? String ?? "nil", chatGUID: chatGUID, service: serviceID, error: error)
-                )
-                log.error("Could not handle item: \(error.localizedDescription)")
+        messages.forEach { msg in
+            handleAndCaptureError(service: serviceID, chatStyle: chatStyle, chatIdentifier: chatIdentifier, guid: msg["guid"] as? String) {
+                try await self.handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: serviceID, properties: nil, groupID: nil, item: msg as NSObject)
             }
         }
     }
@@ -139,13 +149,8 @@ public actor CBChatRegistry {
         sendTime _: NSNumber!
     ) {
         trace(chatIdentifier, nil, "sent message \(msg.guid ?? "nil") \(msg.singleLineDebugDescription)")
-        do {
-            try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: msg.service, properties: properties, groupID: nil, item: msg)
-        } catch {
-            SentrySDK.capture(error: error)
-            let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
-            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service, error: error))
-            log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
+        handleAndCaptureError(service: msg.service, chatStyle: chatStyle, chatIdentifier: chatIdentifier, guid: msg.guid) {
+            try await self.handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: msg.service, properties: properties, groupID: nil, item: msg)
         }
     }
 
@@ -160,14 +165,9 @@ public actor CBChatRegistry {
         messagesComingFromStorage fromStorage: Bool
     ) {
         trace(chatIdentifier, personCentricID, "received \(messages!) from storage \(fromStorage)")
-        messages.forEach {
-            do {
-                try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: $0.service, properties: properties, groupID: groupID, item: $0)
-            } catch {
-                SentrySDK.capture(error: error)
-                let chatGUID = "\($0.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
-                failedMessages.send((guid: $0.guid, chatGUID: chatGUID, service: $0.service, error: error))
-                log.error("Could not handle message \($0.guid ?? "nil"): \(error.localizedDescription)")
+        messages.forEach { msg in
+            handleAndCaptureError(service: msg.service, chatStyle: chatStyle, chatIdentifier: chatIdentifier, guid: msg.guid) {
+                try await self.handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: msg.service, properties: properties, groupID: groupID, item: msg)
             }
         }
     }
@@ -182,14 +182,9 @@ public actor CBChatRegistry {
         messagesReceived messages: [IMItem]!
     ) {
         trace(chatIdentifier, personCentricID, "received \(messages!)")
-        messages.forEach {
-            do {
-                try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: $0.service, properties: properties, groupID: groupID, item: $0)
-            } catch {
-                SentrySDK.capture(error: error)
-                let chatGUID = "\($0.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
-                failedMessages.send((guid: $0.guid, chatGUID: chatGUID, service: $0.service, error: error))
-                log.error("Could not handle message \($0.guid ?? "nil"): \(error.localizedDescription)")
+        messages.forEach { msg in
+            handleAndCaptureError(service: msg.service, chatStyle: chatStyle, chatIdentifier: chatIdentifier, guid: msg.guid) {
+                try await self.handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: msg.service, properties: properties, groupID: groupID, item: msg)
             }
         }
     }
@@ -204,13 +199,8 @@ public actor CBChatRegistry {
         messageReceived msg: IMItem!
     ) {
         trace(chatIdentifier, personCentricID, "received message \(msg.singleLineDebugDescription)")
-        do {
-            try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: msg.service, properties: properties, groupID: groupID, item: msg)
-        } catch {
-            SentrySDK.capture(error: error)
-            let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
-            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service, error: error))
-            log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
+        handleAndCaptureError(service: msg.service, chatStyle: chatStyle, chatIdentifier: chatIdentifier, guid: msg.guid) {
+            try await self.handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: msg.service, properties: properties, groupID: groupID, item: msg)
         }
     }
 
@@ -224,13 +214,8 @@ public actor CBChatRegistry {
         messageSent msg: IMMessageItem!
     ) {
         trace(chatIdentifier, personCentricID, "sent message \(String(describing: msg))")
-        do {
-            try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: msg.service, properties: properties, groupID: groupID, item: msg)
-        } catch {
-            SentrySDK.capture(error: error)
-            let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
-            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service, error: error))
-            log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
+        handleAndCaptureError(service: msg.service, chatStyle: chatStyle, chatIdentifier: chatIdentifier, guid: msg.guid) {
+            try await self.handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: msg.service, properties: properties, groupID: groupID, item: msg)
         }
     }
 
@@ -256,13 +241,8 @@ public actor CBChatRegistry {
         messageUpdated msg: IMItem!
     ) {
         trace(chatIdentifier, nil, "message updated \(String(describing: msg))")
-        do {
-            try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: msg.service, properties: properties, groupID: nil, item: msg)
-        } catch {
-            SentrySDK.capture(error: error)
-            let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
-            failedMessages.send((guid: msg.guid, chatGUID: chatGUID, service: msg.service, error: error))
-            log.error("Could not handle message \(msg.guid ?? "nil"): \(error.localizedDescription)")
+        handleAndCaptureError(service: msg.service, chatStyle: chatStyle, chatIdentifier: chatIdentifier, guid: msg.guid) {
+            try await self.handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: msg.service, properties: properties, groupID: nil, item: msg)
         }
     }
 
@@ -285,26 +265,20 @@ public actor CBChatRegistry {
                     return nil
                 }
             }()
-
-            do {
-                try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: service, properties: properties, groupID: nil, item: item)
-            } catch {
-                SentrySDK.capture(error: error)
-                lazy var guid: String? = {
-                    switch item {
-                    case let item as IMItem:
-                        return item.guid
-                    case let item as NSDictionary:
-                        return item["guid"] as? String
-                    default:
-                        return nil
-                    }
-                }()
-                if let guid, let service {
-                    let chatGUID = "\(service);\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
-                    failedMessages.send((guid: guid, chatGUID: chatGUID, service: service, error: error))
+            lazy var guid: String? = {
+                switch item {
+                case let item as IMItem:
+                    return item.guid
+                case let item as NSDictionary:
+                    return item["guid"] as? String
+                default:
+                    return nil
                 }
-                log.error("Could not handle message: \(error.localizedDescription)")
+            }()
+
+
+            handleAndCaptureError(service: service, chatStyle: chatStyle, chatIdentifier: chatIdentifier, guid: guid) {
+                try await self.handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: service, properties: properties, groupID: nil, item: item)
             }
         }
     }
@@ -386,30 +360,31 @@ public actor CBChatRegistry {
         }
     }
 
-    private func handle(chat: [AnyHashable: Any]) -> (CBChat?, CBChatIdentifier?) {
+    private func storeChat(withDetails details: [AnyHashable: Any]) async -> CBChatIdentifier? {
+        // this CBChatLeaf is only used to extract identifiers from the `details` dictionary, and then
+        // use them to find the chat to which these details pertain to pull it into memory.
+        // It used to process all the details from the `details` dict and store all the properties of
+        // the chat (`shouldForceToSMS`, `lastAddressedHandle`, etc), but we don't use those and can already
+        // query IMChats for them anyways, so we're ignoring them now.
         var leaf = CBChatLeaf()
-        leaf.handle(identifiable: chat)
+        leaf.handle(identifiable: details)
 
-        enum FoundError: Error { case found(CBChat) }
-        do {
-            try leaf.forEachIdentifier { identifier in
-                if let cbChat = self.chats[identifier] {
-                    cbChat.handle(dictionary: chat)
-                    //                    log.debug("Notifying CBChat of updated chat \(String(describing: identifier))")
-                    throw FoundError.found(cbChat)
-                }
+        var id: CBChatIdentifier?
+        leaf.forEachIdentifier { identifier in
+            if self.chats[identifier] != nil {
+                id = identifier
             }
-        } catch {
-            guard case .found(let chat) = error as? FoundError else {
-                preconditionFailure()
-            }
-            return (chat, leaf.mostUniqueIdentifier)
+        }
+        if let id { return id }
+
+        // You can't have `await`s on the right side of `??`
+        let chatFromGroupID = await getIMChatForGroupID(leaf.groupID)
+        guard let imchat = (await getIMChatForChatGuid(leaf.guid)) ?? chatFromGroupID else {
+            return nil
         }
 
-        let cbChat = CBChat()
-        cbChat.handle(dictionary: chat)
-        store(chat: cbChat)
-        return (cbChat, leaf.mostUniqueIdentifier)
+        store(chat: await Chat(imchat))
+        return .guid(imchat.guid)
     }
 
     private func handle(
@@ -419,7 +394,7 @@ public actor CBChatRegistry {
         properties: [AnyHashable: Any]?,
         groupID: String?,
         item: NSObject
-    ) throws {
+    ) async throws {
         lazy var guid: String? = {
             switch item {
             case let item as IMItem:
@@ -443,8 +418,8 @@ public actor CBChatRegistry {
         var reverseChatIdentifier: CBChatIdentifier? {
             guid.flatMap { messageIDReverseLookup[$0] }
         }
-        var chatID: CBChatIdentifier? {
-            if let properties = properties, let id = handle(chat: properties).1 {
+        let chatID: CBChatIdentifier? = await {
+            if let properties, let id = await storeChat(withDetails: properties) {
                 return id
             } else if let reverseChatIdentifier {
                 return reverseChatIdentifier
@@ -452,7 +427,7 @@ public actor CBChatRegistry {
                 return .groupID(groupID)
             } else if let chatIdentifier, let service {
                 return .guid("\(service);\(chatStyle == .group ? "+" : "-");\(chatIdentifier)")
-            } else if let messageID = messageID {
+            } else if let messageID {
                 func withPersistenceAccess<P>(_ callback: () throws -> P) rethrows -> P {
                     if !IMDIsRunningInDatabaseServerProcess() {
                         IMDSetIsRunningInDatabaseServerProcess(1)
@@ -466,7 +441,7 @@ public actor CBChatRegistry {
                 }
                 return withPersistenceAccess {
                     if let chat = IMDChatRecordCopyChatForMessageID(messageID),
-                        let chatGUID = IMDChatRecordCopyGUID(kCFAllocatorDefault, chat)
+                       let chatGUID = IMDChatRecordCopyGUID(kCFAllocatorDefault, chat)
                     {
                         return .guid(chatGUID as String)
                     }
@@ -474,8 +449,8 @@ public actor CBChatRegistry {
                 }
             }
             return nil
-        }
-        guard let chatID = chatID else {
+        }()
+        guard let chatID else {
             trace(chatIdentifier, nil, "dropping message \(guid ?? "nil") because i cant find the chat its for?!")
             return
         }
@@ -522,7 +497,7 @@ public actor CBChatRegistry {
         return
             await chats.asyncMap { chat in
                 let guid = chat["guid"] as? String
-                _ = await handle(chat: chat)
+                _ = await storeChat(withDetails: chat)
                 if let guid = guid, let existingChat = chatGUIDToChatMap[guid] as? IMChat, existingChat.guid == guid {
                     return existingChat
                 }
@@ -558,37 +533,10 @@ public actor CBChatRegistry {
             .compactMap { $0 }
     }
 
-    private func store(chat: CBChat) {
+    private func store(chat: Chat) {
         allChats[ObjectIdentifier(chat)] = chat
-        chat.$identifiers.removeDuplicates()
-            .scan((Set<CBChatIdentifier>(), Set<CBChatIdentifier>())) {
-                ($0.1, $1)
-            }
-            .sink { oldIdentifiers, newIdentifiers in
-                var newIdentifiers = newIdentifiers
-                for identifier in oldIdentifiers {
-                    let existed = newIdentifiers.remove(identifier) != nil
-                    if existed {
-                        continue
-                    }
-                    if self.chats[identifier] === chat {
-                        self.log.warning("Forgetting \(String(describing: identifier))")
-                        self.chats[identifier] = nil
-                    }
-                }
-                for identifier in newIdentifiers {
-                    if let chat = self.chats[identifier] {
-                        if chat !== chat {
-                            self.log.warning(
-                                "Encountered two different CBChats with the same identifier \(String(describing: identifier))"
-                            )
-                        }
-                        continue
-                    }
-                    self.chats[identifier] = chat
-                }
-            }
-            .store(in: &cancellables)
+        chats[.guid(chat.guid)] = chat
+        chats[.groupID(chat.imChat.groupID)] = chat
     }
 
     // MARK: - Logging

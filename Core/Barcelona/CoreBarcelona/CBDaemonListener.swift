@@ -195,7 +195,6 @@ public class CBDaemonListener: ERBaseDaemonListener {
     public let messagePipeline = PassthroughSubject<Message, Never>()
     public let phantomPipeline = PassthroughSubject<PhantomChatItem, Never>()
     public let messageStatusPipeline = PassthroughSubject<CBMessageStatusChange, Never>()
-    public let chatConfigurationPipeline = PassthroughSubject<ChatConfiguration, Never>()
     public let disconnectPipeline = NotificationCenter.default.publisher(for: .IMDaemonDidDisconnect)
 
     private override init() {
@@ -347,15 +346,6 @@ public class CBDaemonListener: ERBaseDaemonListener {
             }
 
             self.chatJoinStatePipeline.send((chat.chatIdentifier, chat.joinState))
-        }
-
-        NotificationCenter.default.addObserver(forName: .IMChatPropertiesChanged, object: nil, queue: nil) {
-            notification in
-            guard let chat = notification.object as? IMChat else {
-                return
-            }
-
-            self.chatConfigurationPipeline.send(chat.configurationBits)
         }
     }
 

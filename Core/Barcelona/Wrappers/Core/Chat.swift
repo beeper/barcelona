@@ -15,26 +15,6 @@ import Logging
 
 private let log = Logger(label: "Chat")
 
-protocol ChatConfigurationRepresentable {
-    var id: String { get }
-    var readReceipts: Bool { get set }
-    var ignoreAlerts: Bool { get set }
-    var groupPhotoID: String? { get set }
-}
-
-extension ChatConfigurationRepresentable {
-    public var configurationBits: ChatConfiguration {
-        ChatConfiguration(id: id, readReceipts: readReceipts, ignoreAlerts: ignoreAlerts, groupPhotoID: groupPhotoID)
-    }
-}
-
-public struct ChatConfiguration: Codable, Hashable, ChatConfigurationRepresentable {
-    public var id: String
-    public var readReceipts: Bool
-    public var ignoreAlerts: Bool
-    public var groupPhotoID: String?
-}
-
 extension IMChatStyle: Codable {
     public init(from decoder: Decoder) throws {
         self.init(rawValue: try RawValue.init(from: decoder))!
@@ -55,8 +35,18 @@ extension IMChatStyle: Hashable {
     }
 }
 
+public extension IMChat {
+    var blFacingService: String {
+        account.serviceName
+    }
+
+    var blChatGUID: String {
+        "\(blFacingService);\(isGroup ? "+" : "-");\(id)"
+    }
+}
+
 // (bl-api-exposed)
-public struct Chat: Codable, ChatConfigurationRepresentable, Hashable, Sendable {
+public class Chat {
     public init(_ backing: IMChat) async {
         joinState = backing.joinState
         roomName = backing.roomName
@@ -77,6 +67,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable, Sendable 
         readReceipts = backing.readReceipts
         ignoreAlerts = backing.ignoreAlerts
         groupPhotoID = backing.groupPhotoID
+        imChat = backing
     }
 
     public var id: String
@@ -93,16 +84,17 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable, Sendable 
     public var readReceipts: Bool
     public var ignoreAlerts: Bool
     public var groupPhotoID: String?
+    public var imChat: IMChat
+    
+    /// All cached messages for this chat
+    public internal(set) var messages: [String: CBMessage] = [:]
 
-    /// The underlying IMChat this Chat was created from
-    public var imChat: IMChat? {
-        let chat = service.flatMap { IMChat.chat(withIdentifier: id, onService: $0) }
-        if chat == nil {
-            log.warning(
-                "IMChat.chat(withIdentifier: \(id), onService: \(String(describing: service)), style: \(style.CBChat)) returned nil"
-            )
-        }
-        return chat
+    public var guid: String {
+        imChat.guid
+    }
+
+    public var blChatGUID: String? {
+        imChat.blChatGUID
     }
 }
 
@@ -144,7 +136,7 @@ extension Chat {
     public func markMessageAsRead(withID messageID: String) {
         BLLoadIMMessageItem(withGUID: messageID)
             .map { message in
-                imChat?.markDirectRead(items: [message])
+                imChat.markDirectRead(items: [message])
             }
     }
 }
@@ -154,7 +146,8 @@ extension Chat {
     /// Returns a chat targeted at the appropriate service for a handleID
     @MainActor
     public static func directMessage(withHandleID handleID: String, service: IMServiceStyle) async -> Chat {
-        await Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service)))
+        // We have a service specified;
+        try! await Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service)))
     }
 
     @MainActor
@@ -222,19 +215,40 @@ public func getIMChatForChatGuid(_ chatGuid: String) async -> IMChat? {
     if let chat = IMChatRegistry.shared.existingChat(withGUID: chatGuid) {
         return chat
     } else {
-        var parsed = ParsedGUID(rawValue: chatGuid)
+        let parsed = ParsedGUID(rawValue: chatGuid)
 
         let service = parsed.service == "iMessage" ? IMServiceStyle.iMessage : .SMS
         let id = parsed.last
 
         if id.isPhoneNumber || id.isEmail || id.isBusinessID {
-            if let dmChat = await Chat.directMessage(withHandleID: id, service: service).imChat {
-                log.warning("No chat found for \(chatGuid) but using directMessage chat for \(id)")
-                return dmChat
-            }
+            let chat = await Chat.directMessage(withHandleID: id, service: service)
+            log.warning("No chat found for \(chatGuid) but using directMessage chat for \(id)")
+            return chat.imChat
         }
     }
 
     log.warning("No chat found for \(chatGuid)")
     return nil
+}
+
+@MainActor
+public func getIMChatForGroupID(_ groupID: String) async -> IMChat? {
+    IMChatRegistry.shared.existingChat(withGroupID: groupID)
+}
+
+// MARK: - Message sending
+extension IMChat {
+    @MainActor public func send(message: IMMessage) {
+        send(message)
+    }
+
+    public func send(message: IMMessageItem) async {
+        await send(message: IMMessage(fromIMMessageItem: message, sender: nil, subject: nil))
+    }
+
+    public func send(message: CreateMessage) async throws -> IMMessage {
+        let message = try message.imMessage(inChat: self)
+        await send(message: message)
+        return message
+    }
 }

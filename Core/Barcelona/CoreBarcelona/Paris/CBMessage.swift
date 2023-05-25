@@ -59,7 +59,7 @@ public struct CBMessage: CustomDebugStringConvertible {
     private var retryCount = 0
 
     /// Initializes the message from a dictionary representation
-    public init?(dictionary: [AnyHashable: Any], chat: CBChat?) throws {
+    public init?(dictionary: [AnyHashable: Any], chat: Chat?) throws {
         guard let id = dictionary["guid"] as? String else {
             return nil
         }
@@ -73,7 +73,7 @@ public struct CBMessage: CustomDebugStringConvertible {
         timeDelivered: Date?,
         timeRead: Date?,
         sender deltaSender: CBSender,
-        chat: CBChat?
+        chat: Chat?
     ) throws -> CBMessage {
         if flags.contains(.fromMe) {
             if deltaSender.scheme != .me {
@@ -94,7 +94,7 @@ public struct CBMessage: CustomDebugStringConvertible {
     }
 
     /// Updates the message using a dictionary representation
-    @discardableResult public mutating func handle(dictionary: [AnyHashable: Any], in chat: CBChat?) throws -> CBMessage
+    @discardableResult public mutating func handle(dictionary: [AnyHashable: Any], in chat: Chat?) throws -> CBMessage
     {
         service = (dictionary["service"] as? String).flatMap(CBServiceName.init(rawValue:)) ?? service
         error = (dictionary["error"] as? UInt32).flatMap(FZErrorType.init(rawValue:)) ?? error
@@ -111,7 +111,7 @@ public struct CBMessage: CustomDebugStringConvertible {
         )
     }
 
-    private mutating func updated(in chat: CBChat?) throws -> CBMessage {
+    private mutating func updated(in chat: Chat?) throws -> CBMessage {
         if eligibleToResend {
             let id = id
             if retryCount > 5 {
@@ -350,7 +350,7 @@ extension CBMessage.Flags {
 
 extension CBMessage {
     /// Initializes the message using an `IMItem` instance
-    @_disfavoredOverload public init(item: IMItem, chat: CBChat?) throws {
+    @_disfavoredOverload public init(item: IMItem, chat: Chat?) throws {
         if let item = item as? IMMessageItem {
             self = try CBMessage(item: item, chat: chat)
         } else {
@@ -360,7 +360,7 @@ extension CBMessage {
     }
 
     /// Initializes the message using an `IMMessageItem` instance
-    public init(item: IMMessageItem, chat: CBChat?) throws {
+    public init(item: IMMessageItem, chat: Chat?) throws {
         self.id = item.id
         try handle(item: item, in: chat)
     }
@@ -368,7 +368,7 @@ extension CBMessage {
     /// Updates the message using an `IMItem` instance
     @discardableResult @_disfavoredOverload public mutating func handle(
         item: IMItem,
-        in chat: CBChat?
+        in chat: Chat?
     ) throws -> CBMessage {
         if let item = item as? IMMessageItem {
             return try handle(item: item, in: chat)
@@ -380,7 +380,7 @@ extension CBMessage {
     }
 
     /// Updates the message using an `IMMessageItem` instance
-    @discardableResult public mutating func handle(item: IMMessageItem, in chat: CBChat?) throws -> CBMessage {
+    @discardableResult public mutating func handle(item: IMMessageItem, in chat: Chat?) throws -> CBMessage {
         service = item.serviceStyle.map(CBServiceName.init(style:)) ?? service
         error = item.errorCode
         flags.handle(item: item)
@@ -436,7 +436,7 @@ extension CBMessage {
         }
     }
 
-    public func resend(in chat: CBChat?) throws {
+    public func resend(in chat: Chat?) throws {
         Task {
             try await Task.sleep(nanoseconds: UInt64(retryCount) * 1_000_000_000)
             guard let message = loadIMMessageItem() else {
@@ -456,25 +456,7 @@ extension CBMessage {
                 return
             }
             log.info("Located origin chat for \(id)")
-
-            let imChats = chat.IMChats
-            guard let imChat = imChats.first(where: { $0.hasStoredMessage(withGUID: id) }) else {
-                log.info("Can't resend \(message.id) because all IMChats claim to not contain this message")
-                #if canImport(IMFoundation) && canImport(BarcelonaDB)
-                // only if we have CBDaemonListener
-                if let style = service?.IMServiceStyle {
-                    CBDaemonListener.shared.messagePipeline.send(
-                        Message(
-                            messageItem: message,
-                            chatID: DBReader.shared.immediateChatIdentifier(forMessageGUID: message.id)
-                                ?? chat.chatIdentifiers[0],
-                            service: style
-                        )
-                    )
-                }
-                #endif
-                return
-            }
+            let imChat = chat.imChat
 
             log.info("I will re-send \(id) on \(String(describing: imChat.guid))")
             if service == .SMS {

@@ -17,7 +17,7 @@ private let IMChatPropertyGroupPhotoGUID: NSString? = CBWeakLink(
     ]
 )
 
-extension IMChat: ChatConfigurationRepresentable {
+extension IMChat {
 
     public var id: String {
         chatIdentifier

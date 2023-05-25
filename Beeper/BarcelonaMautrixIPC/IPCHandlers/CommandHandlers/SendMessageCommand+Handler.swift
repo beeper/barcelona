@@ -33,10 +33,12 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
         breadcrumb.message = "SendMessageCommand/\(payload.id ?? 0)"
         breadcrumb.type = "user"
         SentrySDK.addBreadcrumb(breadcrumb)
-        guard let chat = await cbChat, let imChat = chat.imChat else {
+        guard let chat = await cbChat else {
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
             span.finish(status: .notFound)
         }
+        let imChat = chat.imChat
+
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [

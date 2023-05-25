@@ -11,7 +11,7 @@ import Logging
 
 private let log = Logger(label: "CBChat")
 
-extension CBChat {
+extension Chat {
     public enum MessageInput: CustomDebugStringConvertible, CustomStringConvertible {
         case item(IMItem)
         case dict([AnyHashable: Any])
@@ -23,7 +23,7 @@ extension CBChat {
             }
         }
 
-        public func handle(message: CBMessage?, chat: CBChat) throws -> CBMessage {
+        public func handle(message: CBMessage?, chat: Chat) throws -> CBMessage {
             var message = message
             switch self {
             case .item(let item):
@@ -60,7 +60,7 @@ extension CBChat {
         }
     }
 
-    @discardableResult public func handle(chat: CBChat, input item: MessageInput) throws -> CBMessage? {
+    @discardableResult public func handle(chat: Chat, input item: MessageInput) throws -> CBMessage? {
         guard let id = item.guid else {
             log.warning("dropping message \(item.debugDescription) as it has an invalid guid?!")
             return nil
@@ -72,15 +72,15 @@ extension CBChat {
     }
 
     @discardableResult public func handle(
-        chat: CBChat,
+        chat: Chat,
         item dictionary: [AnyHashable: Any]
     ) throws -> CBMessage? {
         try handle(chat: chat, input: .dict(dictionary))
     }
 }
 
-extension CBChat {
-    @discardableResult public func handle(chat: CBChat, item: IMItem) throws -> CBMessage? {
+extension Chat {
+    @discardableResult public func handle(chat: Chat, item: IMItem) throws -> CBMessage? {
         try handle(chat: chat, input: .item(item))
     }
 }

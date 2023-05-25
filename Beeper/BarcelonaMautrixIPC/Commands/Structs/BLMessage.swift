@@ -13,22 +13,6 @@ import Logging
 
 private let log = Logger(label: "BLMessage")
 
-extension Chat {
-    var blChatGUID: String? {
-        imChat?.blChatGUID
-    }
-}
-
-extension IMChat {
-    var blFacingService: String {
-        account.serviceName
-    }
-
-    var blChatGUID: String {
-        "\(blFacingService);\(isGroup ? "+" : "-");\(id)"
-    }
-}
-
 extension Message {
     fileprivate var blSenderGUID: String? {
         guard let sender = sender, !fromMe else {

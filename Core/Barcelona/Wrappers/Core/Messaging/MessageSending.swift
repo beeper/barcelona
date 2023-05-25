@@ -71,12 +71,12 @@ extension Chat {
         if ProcessInfo.processInfo.environment.keys.contains("BARCELONA_GHOST_REPLIES") {
             return
         }
-        imChat?.markAllMessagesAsRead()
+        imChat.markAllMessagesAsRead()
     }
 
     public func sendReturningRaw(message createMessage: CreateMessage) async throws -> IMMessage {
-        guard let imChat, let service else {
-            throw BarcelonaError(code: 500, message: "No imChat or service to send with for \(self.id)")
+        guard let service else {
+            throw BarcelonaError(code: 500, message: "No service to send with for \(self.id)")
         }
 
         let log = Logger(label: "Chat")
@@ -107,13 +107,13 @@ extension Chat {
             }
         }
 
-        log.info("Using CBChat for sending per feature flags", source: "MessageSending")
+        log.info("Using Chat for sending per feature flags", source: "MessageSending")
         return try await imChat.send(message: createMessage)
     }
 
     public func send(message createMessage: CreateMessage) async throws -> Message {
-        guard let imChat, let service else {
-            throw BarcelonaError(code: 500, message: "No IMChat or service for \(id)")
+        guard let service else {
+            throw BarcelonaError(code: 500, message: "No service for \(id)")
         }
 
         return Message(
@@ -125,8 +125,8 @@ extension Chat {
 
     public func tapback(_ creation: TapbackCreation) async throws -> Message {
         markAsRead()
-        guard let imChat, let service else {
-            throw BarcelonaError(code: 500, message: "No IMChat or service for \(id)")
+        guard let service else {
+            throw BarcelonaError(code: 500, message: "No service for \(id)")
         }
 
         let message = try await imChat.tapback(
