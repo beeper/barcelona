@@ -34,9 +34,6 @@ public struct CBChatLeaf {
         if !groupID.isEmpty {
             return .groupID(groupID)
         }
-        if !chatIdentifier.isEmpty {
-            return .chatIdentifier(chatIdentifier)
-        }
         if !originalGroupID.isEmpty {
             return .originalGroupID(originalGroupID)
         }
@@ -47,9 +44,6 @@ public struct CBChatLeaf {
     public func forEachIdentifier(_ callback: (CBChatIdentifier) throws -> Void) rethrows {
         if !guid.isEmpty {
             try callback(.guid(guid))
-        }
-        if !chatIdentifier.isEmpty {
-            try callback(.chatIdentifier(chatIdentifier))
         }
         if !groupID.isEmpty {
             try callback(.groupID(groupID))

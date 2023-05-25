@@ -13,6 +13,10 @@ import Logging
 public enum CBChatStyle: UInt8, CaseIterable {
     case group = 43
     case instantMessage = 45
+
+    public static func from(chatIdentifier: String) -> Self {
+        (IMStringIsEmail(chatIdentifier) || IMStringIsPhoneNumber(chatIdentifier) || IMStringIsBusinessID(chatIdentifier)) ? .instantMessage : .group
+    }
 }
 
 extension IMChatStyle {

@@ -69,7 +69,7 @@ public class BLMessageExpert {
     }
 
     private let log = Logger(label: "BLMessageExpert")
-	private var bag = Set<AnyCancellable>()
+    private var bag = Set<AnyCancellable>()
 
     /// The pipeline where BLMessageExpert sends message events
     public let eventPipeline = PassthroughSubject<BLMessageEvent, Never>()
@@ -192,6 +192,11 @@ public class BLMessageExpert {
 
         if #available(macOS 13.0, *) {
             message.imChat?.watchAllHandles()
+        }
+
+        if !message.fileTransferIDs.isEmpty {
+            // If the message has any file transfers, just start downloading everything in the chat
+            message.imChat?.downloadPurgedAttachments()
         }
 
         send(.message(message))

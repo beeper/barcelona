@@ -96,7 +96,7 @@ public struct Chat: Codable, ChatConfigurationRepresentable, Hashable, Sendable 
 
     /// The underlying IMChat this Chat was created from
     public var imChat: IMChat? {
-        let chat = service.flatMap { IMChat.chat(withIdentifier: id, onService: $0, style: style.CBChat) }
+        let chat = service.flatMap { IMChat.chat(withIdentifier: id, onService: $0) }
         if chat == nil {
             log.warning(
                 "IMChat.chat(withIdentifier: \(id), onService: \(String(describing: service)), style: \(style.CBChat)) returned nil"

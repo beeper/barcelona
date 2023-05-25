@@ -104,7 +104,7 @@ public struct CBMessageStatusChange: Codable, Hashable {
     private var context: CBMessageStatusChangeContext = .init()
 
     public var chat: IMChat? {
-        IMChat.chat(withIdentifier: chatID, onService: service, style: nil)
+        IMChat.chat(withIdentifier: chatID, onService: service)
     }
 
     public var hasFullMessage: Bool {
@@ -306,7 +306,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
 
             // Since this is only processing things on the SMS Read Buffer, we only want to continue
             // if we have a chat for this chatID on SMS
-            guard IMChat.chat(withIdentifier: status.chatID, onService: .SMS, style: nil) != nil else {
+            guard IMChat.chat(withIdentifier: status.chatID, onService: .SMS) != nil else {
                 return
             }
 
@@ -791,8 +791,7 @@ extension CBDaemonListener {
                 switch representation {
                 case let groupAction as GroupActionItem:
                     if groupAction.actionType.rawValue == 1,
-                        let groupPhoto = IMChat.chat(withIdentifier: chatIdentifier, onService: service, style: nil)?
-                            .groupPhotoID
+                        let groupPhoto = IMChat.chat(withIdentifier: chatIdentifier, onService: service)?.groupPhotoID
                     {
                         additionalFileTransfers.append(groupPhoto)
                     }

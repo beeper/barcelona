@@ -37,7 +37,7 @@ public class BLEventHandler: CBPurgedAttachmentControllerDelegate {
     }
 
     public func receiveTyping(_ chat: String, service: IMServiceStyle, _ typing: Bool) {
-        guard let chat = IMChat.chat(withIdentifier: chat, onService: service, style: nil) else {
+        guard let chat = IMChat.chat(withIdentifier: chat, onService: service) else {
             return
         }
 

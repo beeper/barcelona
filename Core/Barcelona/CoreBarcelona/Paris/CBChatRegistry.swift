@@ -108,7 +108,7 @@ public actor CBChatRegistry {
         trace(chatIdentifier, nil, "messages dict updated \(messages.singleLineDebugDescription)")
         messages.forEach {
             do {
-                try handle(chat: .chatIdentifier(chatIdentifier), item: $0)
+                try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: serviceID, properties: nil, groupID: nil, item: $0 as NSObject)
             } catch {
                 SentrySDK.capture(error: error)
                 let chatGUID = "\(serviceID ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
@@ -140,7 +140,7 @@ public actor CBChatRegistry {
     ) {
         trace(chatIdentifier, nil, "sent message \(msg.guid ?? "nil") \(msg.singleLineDebugDescription)")
         do {
-            try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
+            try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: msg.service, properties: properties, groupID: nil, item: msg)
         } catch {
             SentrySDK.capture(error: error)
             let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
@@ -162,7 +162,7 @@ public actor CBChatRegistry {
         trace(chatIdentifier, personCentricID, "received \(messages!) from storage \(fromStorage)")
         messages.forEach {
             do {
-                try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: $0)
+                try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: $0.service, properties: properties, groupID: groupID, item: $0)
             } catch {
                 SentrySDK.capture(error: error)
                 let chatGUID = "\($0.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
@@ -184,7 +184,7 @@ public actor CBChatRegistry {
         trace(chatIdentifier, personCentricID, "received \(messages!)")
         messages.forEach {
             do {
-                try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: $0)
+                try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: $0.service, properties: properties, groupID: groupID, item: $0)
             } catch {
                 SentrySDK.capture(error: error)
                 let chatGUID = "\($0.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
@@ -205,7 +205,7 @@ public actor CBChatRegistry {
     ) {
         trace(chatIdentifier, personCentricID, "received message \(msg.singleLineDebugDescription)")
         do {
-            try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
+            try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: msg.service, properties: properties, groupID: groupID, item: msg)
         } catch {
             SentrySDK.capture(error: error)
             let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
@@ -225,7 +225,7 @@ public actor CBChatRegistry {
     ) {
         trace(chatIdentifier, personCentricID, "sent message \(String(describing: msg))")
         do {
-            try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: groupID, item: msg)
+            try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: msg.service, properties: properties, groupID: groupID, item: msg)
         } catch {
             SentrySDK.capture(error: error)
             let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
@@ -257,7 +257,7 @@ public actor CBChatRegistry {
     ) {
         trace(chatIdentifier, nil, "message updated \(String(describing: msg))")
         do {
-            try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: msg)
+            try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: msg.service, properties: properties, groupID: nil, item: msg)
         } catch {
             SentrySDK.capture(error: error)
             let chatGUID = "\(msg.service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
@@ -274,28 +274,28 @@ public actor CBChatRegistry {
         messagesUpdated messages: [NSObject]!
     ) {
         trace(chatIdentifier, nil, "messages updated \((messages! as NSArray).singleLineDebugDescription)")
-        messages.forEach {
+        messages.forEach { item in
+            lazy var service: String? = {
+                switch item {
+                case let item as IMItem:
+                    return item.service
+                case let item as NSDictionary:
+                    return item["service"] as? String
+                default:
+                    return nil
+                }
+            }()
+
             do {
-                try handle(chatIdentifier: chatIdentifier, properties: properties, groupID: nil, item: $0)
+                try handle(chatIdentifier: chatIdentifier, chatStyle: chatStyle, service: service, properties: properties, groupID: nil, item: item)
             } catch {
                 SentrySDK.capture(error: error)
-                let item = $0
                 lazy var guid: String? = {
                     switch item {
                     case let item as IMItem:
                         return item.guid
                     case let item as NSDictionary:
                         return item["guid"] as? String
-                    default:
-                        return nil
-                    }
-                }()
-                lazy var service: String? = {
-                    switch item {
-                    case let item as IMItem:
-                        return item.service
-                    case let item as NSDictionary:
-                        return item["service"] as? String
                     default:
                         return nil
                     }
@@ -414,6 +414,8 @@ public actor CBChatRegistry {
 
     private func handle(
         chatIdentifier: String?,
+        chatStyle: IMChatStyle,
+        service: String?,
         properties: [AnyHashable: Any]?,
         groupID: String?,
         item: NSObject
@@ -444,12 +446,12 @@ public actor CBChatRegistry {
         var chatID: CBChatIdentifier? {
             if let properties = properties, let id = handle(chat: properties).1 {
                 return id
-            } else if let reverseChatIdentifier = reverseChatIdentifier {
+            } else if let reverseChatIdentifier {
                 return reverseChatIdentifier
-            } else if let groupID = groupID {
+            } else if let groupID {
                 return .groupID(groupID)
-            } else if let chatIdentifier = chatIdentifier {
-                return .chatIdentifier(chatIdentifier)
+            } else if let chatIdentifier, let service {
+                return .guid("\(service);\(chatStyle == .group ? "+" : "-");\(chatIdentifier)")
             } else if let messageID = messageID {
                 func withPersistenceAccess<P>(_ callback: () throws -> P) rethrows -> P {
                     if !IMDIsRunningInDatabaseServerProcess() {

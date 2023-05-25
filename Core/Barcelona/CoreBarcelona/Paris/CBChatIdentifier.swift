@@ -16,7 +16,6 @@ public struct CBChatIdentifier: Hashable, Equatable {
 
     public enum Scheme: String {
         case handleID = "handle"
-        case chatIdentifier = "chat"
         case guid = "guid"
         case groupID = "gid"
         case originalGroupID = "ogid"
@@ -75,10 +74,6 @@ extension CBChatIdentifier: Codable {
 
 // MARK: - Convenience
 extension CBChatIdentifier {
-    public static func chatIdentifier(_ value: String) -> CBChatIdentifier {
-        CBChatIdentifier(scheme: .chatIdentifier, value: value)
-    }
-
     public static func guid(_ value: String) -> CBChatIdentifier {
         CBChatIdentifier(scheme: .guid, value: value)
     }
@@ -99,9 +94,7 @@ import BarcelonaDB
 extension CBChatIdentifier {
     public var IMChat: IMChat? {
         switch scheme {
-        case .chatIdentifier: return IMChatRegistry.shared.existingChat(withChatIdentifier: value)
-        case .guid:
-            return (IMChatRegistry.shared.value(forKey: "_chatGUIDToChatMap") as! NSMutableDictionary)[value] as? IMChat
+        case .guid: return (IMChatRegistry.shared.value(forKey: "_chatGUIDToChatMap") as! NSMutableDictionary)[value] as? IMChat
         case .groupID: return IMChatRegistry.shared.existingChat(withGroupID: value)
         case .handleID: return IMChatRegistry.shared.existingChat(withChatIdentifier: value)
         default: return nil

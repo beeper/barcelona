@@ -288,7 +288,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         description = item.message()?
             .description(
                 forPurpose: .SPI,
-                in: IMChat.chat(withIdentifier: chatID, onService: service, style: nil),
+                in: IMChat.chat(withIdentifier: chatID, onService: service),
                 senderDisplayName: nil
             )
         failureCode = item.errorCode
@@ -359,7 +359,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
         failed = failureCode != .noError
         failureDescription = failureCode.description
 
-        if let chat = IMChat.chat(withIdentifier: chatID, onService: service, style: nil) {
+        if let chat = IMChat.chat(withIdentifier: chatID, onService: service) {
             description = message.description(forPurpose: .conversationList, in: chat)
         }
 
@@ -462,7 +462,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     }
 
     public var imChat: IMChat? {
-        IMChat.chat(withIdentifier: chatID, onService: service, style: nil)
+        IMChat.chat(withIdentifier: chatID, onService: service)
     }
 
     public var chat: Chat? {
