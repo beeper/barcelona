@@ -53,7 +53,7 @@ public actor CBChatRegistry {
         if let chats = info["personMergedChats"] as? [[AnyHashable: Any]] {
             Task {
                 for chat in chats {
-                    await storeChat(withDetails: chat)
+                    _ = await storeChat(withDetails: chat)
                 }
             }
         } else {
@@ -67,7 +67,7 @@ public actor CBChatRegistry {
             nil,
             "persistentIdentifier \(persistentIdentifier!) updated \(updateDictionary.singleLineDebugDescription)"
         )
-        await storeChat(withDetails: updateDictionary)
+        _ = await storeChat(withDetails: updateDictionary)
     }
 
     func chat(_ persistentIdentifier: String!, propertiesUpdated properties: [AnyHashable: Any]!) async {
@@ -76,7 +76,7 @@ public actor CBChatRegistry {
             nil,
             "persistentIdentifier \(persistentIdentifier!) properties \(properties.singleLineDebugDescription)"
         )
-        await storeChat(withDetails: [
+        _ = await storeChat(withDetails: [
             "guid": persistentIdentifier as Any,
             "properties": properties as Any,
         ])

@@ -146,8 +146,7 @@ extension Chat {
     /// Returns a chat targeted at the appropriate service for a handleID
     @MainActor
     public static func directMessage(withHandleID handleID: String, service: IMServiceStyle) async -> Chat {
-        // We have a service specified;
-        try! await Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service)))
+        await Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service)))
     }
 
     @MainActor

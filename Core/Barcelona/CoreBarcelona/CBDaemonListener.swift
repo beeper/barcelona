@@ -511,7 +511,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
         chatProperties properties: [AnyHashable: Any]!,
         messagesUpdated messages: [NSObject]!
     ) {
-        log.debug("messagesUpdated[account]: \(messages.debugDescription.singleLineDebugDescription)")
+        log.debug("messagesUpdated[account]: \(messages.singleLineDebugDescription)")
 
         for message in messages as? [IMItem] ?? CBCreateItemsFromSerializedArray(messages) {
             switch message {

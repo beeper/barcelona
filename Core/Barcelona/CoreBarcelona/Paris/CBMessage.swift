@@ -119,7 +119,7 @@ public struct CBMessage: CustomDebugStringConvertible {
             }
             log.info("\(id) is eligible to resend, trying in \(retryCount) seconds")
             retryCount += 1
-            try resend(in: chat)
+            resend(in: chat)
         }
         return self
     }
@@ -436,7 +436,7 @@ extension CBMessage {
         }
     }
 
-    public func resend(in chat: Chat?) throws {
+    public func resend(in chat: Chat?) {
         Task {
             try await Task.sleep(nanoseconds: UInt64(retryCount) * 1_000_000_000)
             guard let message = loadIMMessageItem() else {
