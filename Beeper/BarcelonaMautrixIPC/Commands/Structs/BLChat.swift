@@ -15,7 +15,8 @@ extension IMChat {
         BLChat(
             chat_guid: blChatGUID,
             title: displayName,
-            members: participants.map(\.id)
+            members: participants.map(\.id),
+            thread_id: groupID
         )
     }
 }
@@ -23,5 +24,7 @@ extension IMChat {
 public struct BLChat: Codable, ChatResolvable {
     public var chat_guid: String
     public var title: String?
-    public var members: [String]
+    public var members: [String]?
+    // This is the stable-ish chat UUID, called thread_id because mautrix-imessage already has that field
+    public var thread_id: String?
 }
