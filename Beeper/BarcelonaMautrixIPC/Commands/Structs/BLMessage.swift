@@ -97,7 +97,7 @@ public struct BLMessage: Codable, ChatResolvable {
         }
 
         chat_guid = message.blChatGUID ?? "unknown"
-        thread_id = message.groupID ?? ""
+        thread_id = message.groupID
         sender_guid = message.blSenderGUID
         service = message.service.rawValue
         is_from_me = message.fromMe
