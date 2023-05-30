@@ -194,11 +194,6 @@ public class BLMessageExpert {
             message.imChat?.watchAllHandles()
         }
 
-        if !message.fileTransferIDs.isEmpty {
-            // If the message has any file transfers, just start downloading everything in the chat
-            message.imChat?.downloadPurgedAttachments()
-        }
-
         send(.message(message))
     }
 }
