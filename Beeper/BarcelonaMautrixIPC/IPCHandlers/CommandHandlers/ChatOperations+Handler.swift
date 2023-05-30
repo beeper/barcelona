@@ -22,7 +22,8 @@ extension Array where Element == String {
 
 extension GetChatsCommand: Runnable {
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
-        SentrySDK.configureScope { scope in
+        payload.fail(strategy: .internal_error("get_chats is not supported"), ipcChannel: ipcChannel)
+        /*SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
                     "id": String(describing: payload.id),
@@ -63,7 +64,7 @@ extension GetChatsCommand: Runnable {
             payload.fail(strategy: .internal_error(error.localizedDescription), ipcChannel: ipcChannel)
             SentrySDK.capture(error: error)
             span.finish(status: .internalError)
-        }
+        }*/
     }
 }
 

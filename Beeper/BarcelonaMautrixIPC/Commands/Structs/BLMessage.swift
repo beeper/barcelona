@@ -26,6 +26,10 @@ extension Message {
         imChat?.blChatGUID
     }
 
+    fileprivate var groupID: String? {
+        imChat?.groupID
+    }
+
     fileprivate var isGroup: Bool? {
         imChat?.isGroup
     }
@@ -65,6 +69,7 @@ public struct BLMessage: Codable, ChatResolvable {
     public var subject: String?
     public var text: String
     public var chat_guid: String
+    public var thread_id: String?
     public var sender_guid: String?
     public var service: String
     public var is_from_me: Bool
@@ -92,6 +97,7 @@ public struct BLMessage: Codable, ChatResolvable {
         }
 
         chat_guid = message.blChatGUID ?? "unknown"
+        thread_id = message.groupID ?? ""
         sender_guid = message.blSenderGUID
         service = message.service.rawValue
         is_from_me = message.fromMe
