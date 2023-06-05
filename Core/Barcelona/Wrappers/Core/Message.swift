@@ -450,8 +450,9 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
 
     public var debugDescription: String {
         String(
-            format: "Message(id=%@,sender=%@,typing=%d,items=[%@],failed=%d,sent=%d,error=%d)",
+            format: "Message(id=%@,chatID=%@,sender=%@,typing=%d,items=[%@],failed=%d,sent=%d,error=%d)",
             id,
+            chatID,
             sender ?? "(nil)",
             isTypingMessage,
             items.map(\.debugDescription).joined(separator: ", "),

@@ -15,7 +15,9 @@ public enum CBChatStyle: UInt8, CaseIterable {
     case instantMessage = 45
 
     public static func from(chatIdentifier: String) -> Self {
-        (IMStringIsEmail(chatIdentifier) || IMStringIsPhoneNumber(chatIdentifier) || IMStringIsBusinessID(chatIdentifier)) ? .instantMessage : .group
+        // All the group chatIdentifiers I've seen have 16-18 numbers after the `chat` prefix, but I just want to be safe, so we're
+        // saying that they have to have 12-20 digits (just in case we're missing something)
+        chatIdentifier.range(of: "^chat\\d{12,20}$", options: .regularExpression, range: nil, locale: nil) != nil ? .group : .instantMessage
     }
 }
 
