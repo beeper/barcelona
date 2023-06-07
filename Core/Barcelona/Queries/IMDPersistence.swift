@@ -114,23 +114,25 @@ private func BLLoadIMDMessageRecordRefsWithGUIDs(_ guids: [String]) -> NSArray {
 
 // MARK: - Private API
 
-internal func ERResolveGUIDsForChats(
-    withChatIdentifiers chatIdentifiers: [String],
+internal func ERResolveGUIDsForChat(
+    withChatIdentifier chatIdentifier: String,
+    onService service: IMServiceStyle,
     afterDate: Date? = nil,
     beforeDate: Date? = nil,
     afterGUID: String? = nil,
     beforeGUID: String? = nil,
     limit: Int? = nil
-) async throws -> [(messageID: String, chatID: String)] {
+) async throws -> [String] {
     #if DEBUG
     log.debug(
-        "Resolving GUIDs for chat \(chatIdentifiers) before time \((beforeDate?.timeIntervalSince1970 ?? 0).description) before guid \( beforeGUID ?? "(nil)") limit \((limit ?? -1).description)"
+        "Resolving GUIDs for chat \(chatIdentifier) on service \(service) before time \((beforeDate?.timeIntervalSince1970 ?? 0).description) before guid \( beforeGUID ?? "(nil)") limit \((limit ?? -1).description)"
     )
     #endif
 
     do {
         let guids = try await DBReader.shared.newestMessageGUIDs(
-            forChatIdentifiers: chatIdentifiers,
+            forChatIdentifier: chatIdentifier,
+            onService: service.service.name,
             beforeDate: beforeDate,
             afterDate: afterDate,
             beforeMessageGUID: beforeGUID,
@@ -175,12 +177,11 @@ public func BLLoadIMMessage(withGUID guid: String) -> IMMessage? {
     BLLoadIMMessages(withGUIDs: [guid]).first
 }
 
-func BLLoadChatItems(withGraph graph: [String: ([String], IMServiceStyle)]) async throws -> [ChatItem] {
-    if graph.count == 0 {
+func BLLoadChatItems(withGUIDs guids: [String], inChat chatID: String, onService service: IMServiceStyle) async throws -> [ChatItem] {
+    if guids.count == 0 {
         return []
     }
 
-    let guids = graph.values.flatMap(\.0)
     let (buffer, remaining) = IMDPersistenceMarshal.partialBuffer(guids)
 
     guard let guids = remaining else {
@@ -188,19 +189,9 @@ func BLLoadChatItems(withGraph graph: [String: ([String], IMServiceStyle)]) asyn
     }
 
     let refs = BLCreateIMItemFromIMDMessageRecordRefs(BLLoadIMDMessageRecordRefsWithGUIDs(guids))
-    let items = refs.dictionary(keyedBy: \.id)
-
-    let values = graph.mapValues { (guids, service) in
-        (guids.compactMap { items[$0] }, service)
-    }
 
     let pendingIngestion = Task<[ChatItem], Never> {
-        let results: [ChatItem] = await values.asyncMap {
-            let (chatID, (items, service)) = $0
-            return (try? await BLIngestObjects(items, inChat: chatID, service: service)) ?? []
-        }.flatten()
-
-        return results
+        (try? await BLIngestObjects(refs, inChat: chatID, service: service)) ?? []
     }
 
     IMDPersistenceMarshal.putBuffers(guids, pendingIngestion)
@@ -216,19 +207,18 @@ func BLLoadChatItems(withGraph graph: [String: ([String], IMServiceStyle)]) asyn
 ///   - limit: max number of messages to return
 /// - Returns: The requested `ChatItem`s
 public func BLLoadChatItems(
-    withChats chats: [(id: String, service: IMServiceStyle)],
+    withChat chatID: String,
+    onService service: IMServiceStyle,
     afterDate: Date? = nil,
     beforeDate: Date? = nil,
     afterGUID: String? = nil,
     beforeGUID: String? = nil,
     limit: Int? = nil
 ) async throws -> [ChatItem] {
-    // We turn the list of chats into just a list of chatIdentifiers
-    let chatIdentifiers = chats.map(\.0)
-
     // Then we load the messages in those chats with the specified guid bounds
-    let messages = try await ERResolveGUIDsForChats(
-        withChatIdentifiers: chatIdentifiers,
+    let messages = try await ERResolveGUIDsForChat(
+        withChatIdentifier: chatID,
+        onService: service,
         afterDate: afterDate,
         beforeDate: beforeDate,
         afterGUID: afterGUID,
@@ -236,24 +226,7 @@ public func BLLoadChatItems(
         limit: limit
     )
 
-    // Once we've got the messages, we turn them into the graph form that the other function wants
-    let graph = messages.reduce(into: [String: ([String], IMServiceStyle)]()) { dict, value in
-        // We get the chat that this one relates to so that we can grab its service
-        if let chat = chats.first(where: { $0.id == value.chatID }) {
-            // Then, if it's new to the dictionary, we just insert it
-            if dict[chat.id] == nil {
-                dict[chat.id] = ([value.messageID], chat.service)
-            } else {
-                // Else, we append it to what's already there
-                // And we have to do the nasty `.0.0` thing because subscript can return a (K, V) tuple,
-                // and swift is inferring that's what we wnat here, so we have to grab the value from the
-                // tuple that it returns, then append to the first item in that tuple.
-                dict[chat.id]?.0.append(value.messageID)
-            }
-        }
-    }
-
-    return try await BLLoadChatItems(withGraph: graph)
+    return try await BLLoadChatItems(withGUIDs: messages, inChat: chatID, onService: service)
 }
 
 typealias IMFileTransferFromIMDAttachmentRecordRefType = @convention(c) (_ record: Any) -> IMFileTransfer?

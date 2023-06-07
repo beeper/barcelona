@@ -67,13 +67,14 @@ extension DBReader {
     ///   - limit: max number of results to return
     /// - Returns: array of message GUIDs matching the query
     public func newestMessageGUIDs(
-        forChatIdentifiers chatIdentifiers: [String],
+        forChatIdentifier chatIdentifier: String,
+        onService service: String,
         beforeDate: Date? = nil,
         afterDate: Date? = nil,
         beforeMessageGUID: String? = nil,
         afterMessageGUID: String? = nil,
         limit: Int? = nil
-    ) async throws -> [(messageID: String, chatID: String)] {
+    ) async throws -> [String] {
         try await read { db in
             class MessageGUIDCursor: GRDB.Record {
                 required init(row: Row) {
@@ -86,11 +87,11 @@ extension DBReader {
 
             var sql =
                 """
-                SELECT message.guid, chat.chat_identifier
+                SELECT message.guid
                 FROM message
                 INNER JOIN chat_message_join cmj ON cmj.message_id = message.ROWID
                 INNER JOIN chat ON cmj.chat_id = chat.ROWID
-                WHERE chat.chat_identifier IN \(chatIdentifiers)
+                WHERE chat.chat_identifier = \(chatIdentifier) AND chat.service_name = \(service)
                 """ as SQLLiteral
 
             if let beforeMessageGUID = beforeMessageGUID {
@@ -136,7 +137,7 @@ extension DBReader {
                     """
             )
 
-            return try SQLRequest<Row>(literal: sql).fetchAll(db).map { ($0["guid"], $0["chat_identifier"]) }
+            return try SQLRequest<Row>(literal: sql).fetchAll(db).map { $0["guid"] }
         }
     }
 }

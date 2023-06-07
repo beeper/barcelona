@@ -42,7 +42,7 @@ extension IPCPayload {
             return req
         case .prepare_group_chat(let req):
             return req
-        default:
+        case .message, .read_receipt, .typing, .chat, .send_message_status, .error, .log, .response, .bridge_status, .ping, .pre_startup_sync, .unknown:
             return nil
         }
     }

@@ -219,10 +219,18 @@ public func getIMChatForChatGuid(_ chatGuid: String) async -> IMChat? {
         let service = parsed.service == "iMessage" ? IMServiceStyle.iMessage : .SMS
         let id = parsed.last
 
-        if id.isPhoneNumber || id.isEmail || id.isBusinessID {
-            let chat = await Chat.directMessage(withHandleID: id, service: service)
+        // If it's an instantMessage GUID
+        if parsed.style == "-" {
+            let imChat = await Chat.directMessage(withHandleID: id, service: service).imChat
             log.warning("No chat found for \(chatGuid) but using directMessage chat for \(id)")
-            return chat.imChat
+
+            let chatService = imChat.account.service?.name
+            let serviceName = service.service.name
+            if chatService != serviceName {
+                log.warning("getIMChatforChatGuid pulled an imChat with a mismatching service (\(chatService ?? "nil") vs expected \(serviceName ?? "nil"))")
+            }
+
+            return imChat
         }
     }
 

@@ -75,39 +75,6 @@ extension Chat {
     }
 
     public func sendReturningRaw(message createMessage: CreateMessage) async throws -> IMMessage {
-        guard let service else {
-            throw BarcelonaError(code: 500, message: "No service to send with for \(self.id)")
-        }
-
-        let log = Logger(label: "Chat")
-
-        // If we're targeting the SMS service and call imChat.refreshServiceForSending(), it'll probably retarget to iMessage,
-        // which we distinctly don't want it to do. Plus, we're implementing this to solve BE-7179, which has only happened
-        // over iMessage as far as we can tell, so we don't need to work with SMS
-        if service == .iMessage {
-            imChat.refreshServiceForSending()
-
-            let newService = imChat.account.service?.id
-            if newService != service {
-                log.warning(
-                    "Refreshing IMChat \(String(describing: imChat.guid)) caused service to change from \(service) to \(String(describing: newService)); forcibly retargeting to iMessage"
-                )
-
-                guard let account = IMAccountController.shared.__activeIMessageAccount else {
-                    log.warning(
-                        "Couldn't get IMAccount for iMessage and thus couldn't retarget IMChat \(String(describing: imChat.guid)) to iMessage instead of SMS. Bailing."
-                    )
-                    throw BarcelonaError(
-                        code: 500,
-                        message: "Your iMessage account claims to not exist; please contact support."
-                    )
-                }
-
-                imChat._setAccount(account, locally: true)
-            }
-        }
-
-        log.info("Using Chat for sending per feature flags", source: "MessageSending")
         return try await imChat.send(message: createMessage)
     }
 

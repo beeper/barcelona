@@ -47,11 +47,7 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
             )
         }
 
-        let siblings = [chat]
-
-        if let lastMessageTime = siblings.compactMap(\.lastMessage?.time?.timeIntervalSince1970).max(),
-            lastMessageTime < timestamp
-        {
+        if let lastMessageTime = chat.lastMessage?.time?.timeIntervalSince1970, lastMessageTime < timestamp {
             log.debug(
                 "Not processing get_messages_after because chats last message timestamp \(lastMessageTime) is before req.timestamp \(timestamp)"
             )
@@ -61,8 +57,7 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
         }
 
         do {
-            let chats = siblings.compactMap(\.chatIdentifier).map({ ($0, service) })
-            let messages = try await BLLoadChatItems(withChats: chats, afterDate: date, limit: limit).blMessages
+            let messages = try await BLLoadChatItems(withChat: chat.chatIdentifier, onService: service, afterDate: date, limit: limit).blMessages
             payload.respond(.messages(messages), ipcChannel: ipcChannel)
             span.finish()
         } catch {
@@ -103,15 +98,9 @@ extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
             )
         }
 
-        let siblings = [chat]
-
         Task {
             do {
-                let messages = try await BLLoadChatItems(
-                    withChats: siblings.compactMap(\.chatIdentifier).map({ ($0, service) }),
-                    limit: limit
-                )
-                .blMessages
+                let messages = try await BLLoadChatItems(withChat: chat.chatIdentifier, onService: service, limit: limit).blMessages
                 payload.respond(.messages(messages), ipcChannel: ipcChannel)
                 span.finish()
             } catch {
