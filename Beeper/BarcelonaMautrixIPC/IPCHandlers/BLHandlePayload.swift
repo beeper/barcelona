@@ -40,6 +40,8 @@ extension IPCPayload {
             return req
         case .prepare_dm(let req):
             return req
+        case .prepare_group_chat(let req):
+            return req
         default:
             return nil
         }
