@@ -40,6 +40,8 @@ extension IPCPayload {
             return req
         case .prepare_dm(let req):
             return req
+        case .prepare_group_chat(let req):
+            return req
         default:
             return nil
         }
@@ -48,6 +50,10 @@ extension IPCPayload {
 
 func BLHandlePayload(_ payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) {
     guard let runnable = payload.runnable else {
+        payload.fail(
+            strategy: .unhandled_command,
+            ipcChannel: ipcChannel
+        )
         return log.warning("Received unhandleable payload type \(payload.command.name)")
     }
 

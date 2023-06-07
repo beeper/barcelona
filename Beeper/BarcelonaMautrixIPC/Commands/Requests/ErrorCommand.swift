@@ -16,6 +16,7 @@ public struct ErrorCommand: Codable {
 public enum ErrorStrategy {
     case not_found
     case chat_not_found
+    case unhandled_command
     case command_not_found(String)
     case internal_error(String)
 
@@ -23,6 +24,8 @@ public enum ErrorStrategy {
         switch self {
         case .chat_not_found, .not_found:
             return "not_found"
+        case .unhandled_command:
+            return "unhandled_command"
         case .command_not_found(_):
             return "unknown_command"
         case .internal_error(_):
@@ -36,6 +39,8 @@ public enum ErrorStrategy {
             return "That resource does not exist"
         case .chat_not_found:
             return "That chat does not exist"
+        case .unhandled_command:
+            return "Command isn't marked as runnable 🤔"
         case .command_not_found(let command):
             return "Unknown command ".appendingFormat("'%@'", command)
         case .internal_error(let error):
