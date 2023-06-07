@@ -50,6 +50,10 @@ extension IPCPayload {
 
 func BLHandlePayload(_ payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry: CBChatRegistry) {
     guard let runnable = payload.runnable else {
+        payload.fail(
+            strategy: .unhandled_command,
+            ipcChannel: ipcChannel
+        )
         return log.warning("Received unhandleable payload type \(payload.command.name)")
     }
 
