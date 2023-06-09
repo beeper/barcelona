@@ -65,6 +65,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             span.finish(status: .notFound)
             return
         }
+
         let imChat = chat.imChat
         SentrySDK.configureScope { scope in
             scope.setContext(
@@ -120,6 +121,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
                 ),
                 ipcChannel: ipcChannel
             )
+            span.finish(status: .ok)
         } catch let error as LocalizedError & CustomNSError {
             SentrySDK.capture(error: error)
             let userError = FZErrorType.attachmentUploadFailure

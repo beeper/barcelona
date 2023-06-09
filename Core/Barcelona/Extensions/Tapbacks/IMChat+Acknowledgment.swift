@@ -24,8 +24,6 @@ enum TapbackError: CustomNSError {
     case createInstantMessageFailed
     /// Couldn't create the content for the tapback message.
     case createSuperFormatFailed
-    /// The IMChat that we're trying to send in can't retrieve an IMHandle associated with its lastAddressedHandleID
-    case noHandleForLastAddressedID
 
     var error: String {
         switch self {
@@ -41,8 +39,6 @@ enum TapbackError: CustomNSError {
             return "Couldn't create instantMessage to send in chat"
         case .createSuperFormatFailed:
             return "Couldn't create the content for the tapback message"
-        case .noHandleForLastAddressedID:
-            return "Couldn't find valid sender IMHandle"
         }
     }
 
@@ -52,30 +48,6 @@ enum TapbackError: CustomNSError {
 }
 
 extension IMChat {
-    public var senderHandle: IMHandle? {
-        // We get false positives when sending a message without a sender which correlates to the lastAddressedHandleID
-        // of the chat that we're currently in, so use this method to get the correct sender handle
-        if let lastAddressedHandleID,
-            !lastAddressedHandleID.isEmpty,
-            let lastAddressedHandle = account.imHandle(withID: lastAddressedHandleID, alreadyCanonical: false)
-        {
-            return lastAddressedHandle
-        }
-        // If there is no lastAddressedHandleID, this is the first message in the chat. In that case, we want to get the
-        // handle that corresponds to our default alias, since that just makes sense? That's what we want to send from, by default.
-        if let defaultSendingAlias = account.displayName,
-            !defaultSendingAlias.isEmpty,
-            let defaultHandle = account.imHandle(withID: defaultSendingAlias, alreadyCanonical: false)
-        {
-            return defaultHandle
-        }
-        // Otherwise, something is probably off, so log and return the default loginIMHandle
-        log.warning(
-            "IMChat \(String(describing: self.guid)): lastAddressedHandleID (\(String(describing: lastAddressedHandleID))) and displayName (\(String(describing: account.displayName))) have no associated handles to use for sending"
-        )
-        return account.loginIMHandle
-    }
-
     /// Sends a tapback for a given message, calling back with a Vapor abort if the operation fails. This must be invoked on the main thread.
     @MainActor public func tapback(
         guid: String,
@@ -155,11 +127,6 @@ extension IMChat {
             throw TapbackError.createInstantMessageFailed
         }
 
-        guard let senderHandle else {
-            throw TapbackError.noHandleForLastAddressedID
-        }
-        message.sender = senderHandle
-
         send(message)
 
         return message
@@ -201,11 +168,6 @@ extension IMChat {
         if let metadata {
             toSendMessage.metadata = metadata
         }
-
-        guard let senderHandle else {
-            throw TapbackError.noHandleForLastAddressedID
-        }
-        toSendMessage.sender = senderHandle
 
         send(toSendMessage)
 

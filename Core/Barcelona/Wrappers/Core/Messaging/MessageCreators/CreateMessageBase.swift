@@ -38,12 +38,6 @@ extension CreateMessageBase {
             }
         )
 
-        guard let myHandle = chat.senderHandle else {
-            throw CreateMessageError.noHandleForLastAddressedID
-        }
-
-        message.sender = myHandle
-
         if let metadata {
             message.metadata = metadata
         }

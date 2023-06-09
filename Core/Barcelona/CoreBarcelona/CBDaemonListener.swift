@@ -476,7 +476,7 @@ public class CBDaemonListener: ERBaseDaemonListener {
         style chatStyle: IMChatStyle,
         messagesUpdated messages: [[AnyHashable: Any]]!
     ) {
-        log.debug("messagesUpdated[service]: \(messages.debugDescription.singleLineDebugDescription)")
+        log.debug("messagesUpdated[service]: \(messages.singleLineDebugDescription)")
 
         for message in CBCreateItemsFromSerializedArray(messages) {
             switch message {
