@@ -23,7 +23,6 @@ public enum CBChatStyle: UInt8, CaseIterable {
 
 extension IMChatStyle {
     var CBChat: CBChatStyle {
-        let log = Logger(label: "CBChatStyle")
         switch self {
         case .group: return .group
         case .instantMessage: return .instantMessage

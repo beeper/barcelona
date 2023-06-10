@@ -39,6 +39,40 @@ public enum IPCCommand {
     case ping
     case pre_startup_sync
     case unknown
+
+    #if DEBUG
+    var runnable: Runnable? {
+        switch self {
+        case .send_message(let run as Runnable),
+                .send_media(let run as Runnable),
+                .send_tapback(let run as Runnable),
+                .send_read_receipt(let run as Runnable),
+                .set_typing(let run as Runnable),
+                .get_chats(let run as Runnable),
+                .get_chat(let run as Runnable),
+                .get_chat_avatar(let run as Runnable),
+                .get_messages_after(let run as Runnable),
+                .get_recent_messages(let run as Runnable),
+                .resolve_identifier(let run as Runnable),
+                .prepare_dm(let run as Runnable),
+                .prepare_group_chat(let run as Runnable):
+            return run
+        case .message, .read_receipt, .typing, .chat, .send_message_status, .error, .log, .response, .bridge_status, .ping, .pre_startup_sync, .unknown:
+            return nil
+        }
+    }
+
+    func runDummy() async {
+        guard let runnable else {
+            return
+        }
+
+        let socket = UnixSocketMautrixIPCChannel("/dev/null")
+        let ipc = MautrixIPCChannel(inputHandle: socket, outputHandle: socket)
+        let payload = IPCPayload(command: self)
+        await runnable.run(payload: payload, ipcChannel: ipc)
+    }
+    #endif // DEBUG
 }
 
 private let log = Logger(label: "IPCPayload")

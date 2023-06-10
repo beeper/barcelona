@@ -23,11 +23,11 @@ protocol CreateMessageBase {
     var bodyText: NSAttributedString { get }
     var transferGUIDs: [String] { get }
 
-    func imMessage(inChat chat: IMChat) throws -> IMMessage
+    func imMessage(inChat chat: IMChat) -> IMMessage
 }
 
 extension CreateMessageBase {
-    public func imMessage(inChat chat: IMChat) throws -> IMMessage {
+    public func imMessage(inChat chat: IMChat) -> IMMessage {
         let message = IMMessage.instantMessage(
             withText: bodyText,
             messageSubject: attributedSubject,

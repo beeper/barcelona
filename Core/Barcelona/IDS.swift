@@ -29,11 +29,6 @@ public class IDSResolver {
     private static let log = Logger(label: "IDSResolver")
     private static let handleQueue = DispatchQueue.init(label: "HandleIDS")
 
-    // Used for SendMessageCLICommand; allows you to overwrite specific ids
-    // so that when you request for their statuses, it always says that they're
-    // available through IDS (or not available, whatever you want)
-    public static var overwrittenStatuses = [String: Int64]()
-
     // MARK: - Methods
 
     /// Resolve the IDS status for an id.

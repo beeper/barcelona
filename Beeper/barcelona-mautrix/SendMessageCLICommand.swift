@@ -30,9 +30,6 @@ class SendMessageCLICommand: Command {
     @Param var chatGuid: String
     @Param var message: String?
 
-    @Flag("--force-available")
-    var overwriteAvailability: Bool
-
     private func sendMessage() async {
         let chat = await getIMChatForChatGuid(self.chatGuid)
         log.info("Got chat \(String(describing: chat))")
@@ -41,17 +38,12 @@ class SendMessageCLICommand: Command {
             exit(1)
         }
 
-        if overwriteAvailability {
-            log.info("Forcing any IDS lookups to resolve to \"available\"")
-            IDSResolver.overwrittenStatuses[chat.chatIdentifier] = 1
-        }
-
         let messageCreation = CreateMessage(parts: [
             .init(type: .text, details: self.message ?? "Test Message")
         ])
 
         log.info("Message send task starting")
-        let msg = try! await Chat(chat).sendReturningRaw(message: messageCreation)
+        let msg = await chat.send(message: messageCreation)
 
         log.info("Message sent: \(msg)\nAwaiting statuses...")
 

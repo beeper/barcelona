@@ -253,8 +253,8 @@ extension IMChat {
         await send(message: IMMessage(fromIMMessageItem: message, sender: nil, subject: nil))
     }
 
-    public func send(message: CreateMessage) async throws -> IMMessage {
-        let message = try message.imMessage(inChat: self)
+    public func send(message: CreateMessage) async -> IMMessage {
+        let message = message.imMessage(inChat: self)
         await send(message: message)
         return message
     }

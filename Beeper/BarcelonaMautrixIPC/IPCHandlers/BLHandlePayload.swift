@@ -73,6 +73,6 @@ func BLHandlePayload(_ payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatR
     }
 
     Task { @MainActor in
-        await runnable.run(payload: payload, ipcChannel: ipcChannel, chatRegistry: chatRegistry)
+        await runnable.run(payload: payload, ipcChannel: ipcChannel)
     }
 }

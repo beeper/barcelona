@@ -74,8 +74,8 @@ extension Chat {
         imChat.markAllMessagesAsRead()
     }
 
-    public func sendReturningRaw(message createMessage: CreateMessage) async throws -> IMMessage {
-        return try await imChat.send(message: createMessage)
+    public func sendReturningRaw(message createMessage: CreateMessage) async -> IMMessage {
+        return await imChat.send(message: createMessage)
     }
 
     public func send(message createMessage: CreateMessage) async throws -> Message {
@@ -84,7 +84,7 @@ extension Chat {
         }
 
         return Message(
-            messageItem: try await sendReturningRaw(message: createMessage)._imMessageItem,
+            messageItem: await sendReturningRaw(message: createMessage)._imMessageItem,
             chatID: imChat.chatIdentifier,
             service: service
         )

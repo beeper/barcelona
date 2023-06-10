@@ -15,7 +15,7 @@ import Sentry
 private let log = Logger(label: "SendMessageCommand")
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
-    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
@@ -64,7 +64,7 @@ extension SendMessageCommand: Runnable, AuthenticatedAsserting {
 
             var simpleRichLinkValid: Bool {
                 richLinkURL.map {
-                    IMMessage.supportedRichLinkURL($0, additionalSupportedSchemes: [])
+                    IMMessage.supportedRichLinkURL($0, additionalSupportedSchemes: [] as NSArray)
                 } ?? false
             }
 

@@ -283,7 +283,7 @@ extension BridgeStatusCommand {
             [
                 "alias": $0,
                 "active": account?._aliasInfo(forAlias: $0)?["Status"] as? Int64 == 3
-            ]
+            ] as [String: Any]
         }
 
         return BridgeStatusCommand(
@@ -294,7 +294,7 @@ extension BridgeStatusCommand {
             message: IMAccountController.shared.message,
             remote_id: remoteID,  // Apple ID – absent when unconfigured. logged out includes the remote id, and then goes to unconfigured. everything else must include the remote ID
             remote_name: fullName,  // Account Name
-            info: [
+            info: ([
                 "sms_forwarding_enabled": IMAccountController.shared.accounts(for: .sms())?.first?.allowsSMSRelay == true,
                 "sms_forwarding_capable": IMAccountController.shared.accounts(for: .sms())?.first?.isSMSRelayCapable == true,
                 "active_alias_acount": addresses.count,
@@ -304,9 +304,9 @@ extension BridgeStatusCommand {
                 "aliases": aliases,
                 "phone_number_count": allAddresses.filter(\.isPhoneNumber).count,
                 "email_count": allAddresses.filter(\.isEmail).count,
-                "loginStatusMessage": account?.loginStatusMessage,
+                "loginStatusMessage": account?.loginStatusMessage as Any,
                 "registration_failure_alert_info": IMAccountController.shared.registrationFailureAlertInfo,
-            ]
+            ] as [String: Any])
             .mapValues(AnyCodable.init(_:))
         )
     }

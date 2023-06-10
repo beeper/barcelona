@@ -14,7 +14,7 @@ import Logging
 import Sentry
 
 protocol Runnable {
-    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async
 }
 
 protocol AuthenticatedAsserting {}
@@ -45,7 +45,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         return guid
     }
 
-    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel, chatRegistry _: CBChatRegistry) async {
+    func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         SentrySDK.configureScope { scope in
             scope.setContext(
                 value: [
@@ -94,7 +94,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             messageCreation.metadata = metadata
 
             log.debug("Sending message with transfer \(guid)")
-            let message = try await chat.sendReturningRaw(message: messageCreation)
+            let message = await chat.sendReturningRaw(message: messageCreation)
             log.debug("Message sent, got: \(message)")
 
             let service: String = {
