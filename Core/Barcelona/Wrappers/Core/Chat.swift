@@ -144,15 +144,12 @@ extension Chat {
 // MARK: - Querying
 extension Chat {
     /// Returns a chat targeted at the appropriate service for a handleID
-    @MainActor
-    public static func directMessage(withHandleID handleID: String, service: IMServiceStyle) async -> Chat {
-        await Chat(IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service)))
+    public static func directMessage(withHandleID handleID: String, service: IMServiceStyle) async -> Chat? {
+        await IMChat.directMessage(withHandleID: handleID, service: service).map(Chat.init)
     }
 
-    @MainActor
-    public static func groupChat(withHandleIDs handleIDs: [String], service: IMServiceStyle) async -> Chat {
-        let handles = handleIDs.map { bestHandle(forID: $0, service: service) }
-        return await Chat(IMChatRegistry.shared.chat(for: handles))
+    public static func groupChat(withHandleIDs handleIDs: [String], service: IMServiceStyle) async -> Chat? {
+        await IMChat.groupChat(withHandleIDs: handleIDs, service: service).map(Chat.init)
     }
 }
 
@@ -221,6 +218,10 @@ public func getIMServiceStyleForChatGuid(_ chatGuid: String) -> IMServiceStyle {
 @MainActor
 public func getIMChatForChatGuid(_ chatGuid: String) async -> IMChat? {
     if let chat = IMChatRegistry.shared.existingChat(withGUID: chatGuid) {
+        guard chat.guid == chatGuid else {
+            log.warning("Chat retrieved from registry has an incorrect guid (\(chat.guid) vs \(chatGuid)")
+            return nil
+        }
         return chat
     } else {
         let parsed = ParsedGUID(rawValue: chatGuid)
@@ -230,13 +231,23 @@ public func getIMChatForChatGuid(_ chatGuid: String) async -> IMChat? {
 
         // If it's an instantMessage GUID
         if parsed.style == "-" {
-            let imChat = await Chat.directMessage(withHandleID: id, service: service).imChat
+            guard let imChat = await IMChat.directMessage(withHandleID: id, service: service) else {
+                log.warning("Couldn't create direct message with handle \(id) on service \(service.rawValue)")
+                return nil
+            }
+
             log.warning("No chat found for \(chatGuid) but using directMessage chat for \(id)")
 
             let chatService = imChat.account.service?.name
-            let serviceName = service.service.name
-            if chatService != serviceName {
+            let serviceName = parsed.service
+            guard chatService == serviceName else {
                 log.warning("getIMChatforChatGuid pulled an imChat with a mismatching service (\(chatService ?? "nil") vs expected \(serviceName ?? "nil"))")
+                return nil
+            }
+
+            guard imChat.chatIdentifier == id else {
+                log.warning("getIMChatForChatGuid pulled an imChat with a mismatching chatID (\(imChat.chatIdentifier ?? "nil") vs expected \(id))")
+                return nil
             }
 
             return imChat
@@ -250,6 +261,19 @@ public func getIMChatForChatGuid(_ chatGuid: String) async -> IMChat? {
 @MainActor
 public func getIMChatForGroupID(_ groupID: String) async -> IMChat? {
     IMChatRegistry.shared.existingChat(withGroupID: groupID)
+}
+
+extension IMChat {
+    @MainActor
+    public static func directMessage(withHandleID handleID: String, service: IMServiceStyle) async -> IMChat? {
+        IMChatRegistry.shared.chat(for: bestHandle(forID: handleID, service: service))
+    }
+
+    @MainActor
+    public static func groupChat(withHandleIDs handleIDs: [String], service: IMServiceStyle) async -> IMChat? {
+        let handles = handleIDs.map { bestHandle(forID: $0, service: service) }
+        return IMChatRegistry.shared.chat(for: handles)
+    }
 }
 
 // MARK: - Message sending

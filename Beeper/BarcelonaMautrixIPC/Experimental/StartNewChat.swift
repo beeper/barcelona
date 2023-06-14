@@ -145,7 +145,11 @@ extension PrepareDMCommand: Runnable {
             return
         }
 
-        let chat = await Chat.directMessage(withHandleID: parsed.last, service: service)
+        guard let chat = await Chat.directMessage(withHandleID: parsed.last, service: service) else {
+            span.finish(status: .notFound)
+            return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
+        }
+        
         log.info("Prepared chat \(chat.id) on service \(service.rawValue)", source: "PrepareDM")
 
         payload.respond(.ack, ipcChannel: ipcChannel)
@@ -188,8 +192,14 @@ public struct PrepareGroupChatCommand: Codable, Runnable {
 
         let service: IMServiceStyle = services.allSatisfy { $0 == .iMessage } ? .iMessage : .SMS
 
-        let chat = await Chat.groupChat(withHandleIDs: parsed.map(\.last), service: service)
-        log.info("Prepared chat \(chat.id) on service \(service.rawValue)", source: "PrepareGroupChatCommand")
+        guard let chat = await Chat.groupChat(withHandleIDs: parsed.map(\.last), service: service) else {
+            payload.fail(
+                strategy: .chat_not_found,
+                ipcChannel: ipcChannel
+            )
+            span.finish(status: .internalError)
+            return
+        }
 
         guard let guid = chat.blChatGUID else {
             payload.fail(
@@ -200,6 +210,8 @@ public struct PrepareGroupChatCommand: Codable, Runnable {
             span.finish(status: .internalError)
             return
         }
+
+        log.info("Prepared chat \(chat.id) on service \(service.rawValue)", source: "PrepareGroupChatCommand")
 
         payload.respond(.guid(.init(guid)), ipcChannel: ipcChannel)
         span.finish()

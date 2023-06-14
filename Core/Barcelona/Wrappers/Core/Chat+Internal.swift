@@ -68,7 +68,7 @@ public struct ChatLocator {
 }
 
 // MARK: - Utilities
-extension Chat {
+extension IMChat {
     static func iMessageHandle(forID id: String) -> IMHandle? {
         IMAccountController.shared.iMessageAccount?.imHandle(withID: id)
     }

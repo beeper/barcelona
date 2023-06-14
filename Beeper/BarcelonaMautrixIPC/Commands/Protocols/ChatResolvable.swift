@@ -35,7 +35,7 @@ extension ChatResolvable {
                 return nil
             }
 
-            return await Chat(chat)
+            return Chat(chat)
         }
     }
 
