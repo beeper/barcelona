@@ -17,9 +17,10 @@ extension IMMessage {
      */
     public static func message(
         fromUnloadedItem item: IMMessageItem,
-        withSubject subject: NSMutableAttributedString?
+        withSubject subject: NSMutableAttributedString?,
+        service: IMServiceStyle
     ) -> IMMessage? {
-        var rawSender: String? = item.resolveSenderID(inService: item.serviceStyle)
+        var rawSender: String? = item.resolveSenderID(inService: service)
 
         if item.sender() == nil, item.isFromMe(),
             let suitableHandle = Registry.sharedInstance.suitableHandle(for: item.service)
@@ -37,7 +38,7 @@ extension IMMessage {
         return IMMessage(fromIMMessageItem: item, sender: sender, subject: subject)!
     }
 
-    public static func message(fromUnloadedItem item: IMMessageItem) -> IMMessage? {
-        message(fromUnloadedItem: item, withSubject: nil)
+    public static func message(fromUnloadedItem item: IMMessageItem, service: IMServiceStyle) -> IMMessage? {
+        message(fromUnloadedItem: item, withSubject: nil, service: service)
     }
 }

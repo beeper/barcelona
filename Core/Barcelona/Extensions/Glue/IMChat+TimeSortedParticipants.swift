@@ -24,21 +24,7 @@ extension Array where Element: Hashable {
 }
 
 extension IMChat {
-    fileprivate var cachedRecentParticipantHandleIDs: [String] {
-        get async {
-            await ERTimeSortedParticipantsManager.sharedInstance.sortedParticipants(forChat: chatIdentifier)
-                .filter(participantHandleIDs().contains)
-                .removingDuplicates()
-        }
-    }
-
     public var recentParticipantHandleIDs: [String] {
-        get async {
-            var cachedRecent = await cachedRecentParticipantHandleIDs
-
-            cachedRecent.append(contentsOf: participantHandleIDs().filter { !cachedRecent.contains($0) })
-
-            return cachedRecent
-        }
+        participantHandleIDs()
     }
 }

@@ -12,23 +12,23 @@ import IMSharedUtilities
 
 protocol IMGroupTitleItemConforming: IMCoreDataResolvable {
     var title: String! { get }
-    var senderID: String? { get }
+    var item: IMItem { get }
 }
 
 extension IMGroupTitleItemConforming {
-    var resolvedSenderID: String? {
-        switch self {
-        case let item as IMChatItem: return item.resolvedSenderID
-        case let item as IMItem: return item.resolveSenderID()
-        default: return senderID
-        }
+    func resolveSenderID(inService service: IMServiceStyle) -> String? {
+        item.resolveSenderID(inService: service)
     }
 }
 
-extension IMGroupTitleChangeItem: IMGroupTitleItemConforming {}
+extension IMGroupTitleChangeItem: IMGroupTitleItemConforming {
+    public var item: IMItem {
+        self
+    }
+}
 extension IMGroupTitleChangeChatItem: IMGroupTitleItemConforming {
-    public var senderID: String? {
-        (handle ?? sender)?.id
+    var item: IMItem {
+        self._item()
     }
 }
 
@@ -40,21 +40,21 @@ public struct GroupTitleChangeItem: ChatItemOwned, Hashable {
     public init?(ingesting item: NSObject, context: IngestionContext) {
         switch item {
         case let item as IMGroupTitleChangeItem:
-            self.init(item, chatID: context.chatID)
+            self.init(item, chatID: context.chatID, service: context.service)
         case let item as IMGroupTitleChangeChatItem:
-            self.init(item, chatID: context.chatID)
+            self.init(item, chatID: context.chatID, service: context.service)
         default:
             return nil
         }
     }
 
-    init(_ item: IMGroupTitleItemConforming, chatID: String) {
+    init(_ item: IMGroupTitleItemConforming, chatID: String, service: IMServiceStyle) {
         id = item.id
         self.chatID = chatID
         fromMe = item.isFromMe
         time = item.effectiveTime
         title = item.title
-        sender = item.resolvedSenderID
+        sender = item.resolveSenderID(inService: service)
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
     }

@@ -127,7 +127,7 @@ public class BLMediaMessageMonitor {
             log.debug("\(message.debugDescription); errorCode=\(message.errorCode.description)")
             #endif
             if message.isSent && message.isFinished {
-                if message._imMessageItem.serviceStyle == .SMS {
+                if message._imMessageItem.service?.service?.id == .SMS {
                     return snap(success: true, code: nil)
                 }
             }

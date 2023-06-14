@@ -350,7 +350,7 @@ extension CBMessage.Flags {
 
 extension CBMessage {
     /// Initializes the message using an `IMItem` instance
-    @_disfavoredOverload public init(item: IMItem, chat: Chat?) throws {
+    @_disfavoredOverload public init(item: IMItem, chat: Chat) throws {
         if let item = item as? IMMessageItem {
             self = try CBMessage(item: item, chat: chat)
         } else {
@@ -360,7 +360,7 @@ extension CBMessage {
     }
 
     /// Initializes the message using an `IMMessageItem` instance
-    public init(item: IMMessageItem, chat: Chat?) throws {
+    public init(item: IMMessageItem, chat: Chat) throws {
         self.id = item.id
         try handle(item: item, in: chat)
     }
@@ -368,20 +368,20 @@ extension CBMessage {
     /// Updates the message using an `IMItem` instance
     @discardableResult @_disfavoredOverload public mutating func handle(
         item: IMItem,
-        in chat: Chat?
+        in chat: Chat
     ) throws -> CBMessage {
         if let item = item as? IMMessageItem {
             return try handle(item: item, in: chat)
         }
-        service = item.serviceStyle.map(CBServiceName.init(style:)) ?? service
+        service = chat.service.map(CBServiceName.init(style:))
         error = .noError
         flags.handle(item: item)
         return try handle(time: item.time, timeDelivered: nil, timeRead: nil, sender: CBSender(item: item), chat: chat)
     }
 
     /// Updates the message using an `IMMessageItem` instance
-    @discardableResult public mutating func handle(item: IMMessageItem, in chat: Chat?) throws -> CBMessage {
-        service = item.serviceStyle.map(CBServiceName.init(style:)) ?? service
+    @discardableResult public mutating func handle(item: IMMessageItem, in chat: Chat) throws -> CBMessage {
+        service = chat.service.map(CBServiceName.init(style:))
         error = item.errorCode
         flags.handle(item: item)
         return try handle(
@@ -482,7 +482,6 @@ extension CBMessage {
                 log.error("Misaligned IMChat/IMMessage/CBChat service when trying to re-send message \(id)!!!!!!")
                 return
             }
-            imChat.refreshServiceForSendingIfNeeded()
             log.info("Re-sending message \(id) on chat \(String(describing: imChat.guid))")
             await imChat.send(message: message)
         }

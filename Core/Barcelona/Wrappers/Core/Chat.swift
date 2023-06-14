@@ -41,18 +41,18 @@ public extension IMChat {
     }
 
     var blChatGUID: String {
-        "\(blFacingService);\(isGroup ? "+" : "-");\(id)"
+        BLCreateGUID(blFacingService, CBChatStyle(chatStyle), chatIdentifier)
     }
 }
 
 // (bl-api-exposed)
 public class Chat {
-    public init(_ backing: IMChat) async {
+    public init(_ backing: IMChat) {
         joinState = backing.joinState
         roomName = backing.roomName
         displayName = backing.displayName
         id = backing.chatIdentifier
-        participants = await backing.recentParticipantHandleIDs
+        participants = backing.recentParticipantHandleIDs
         unreadMessageCount = backing.unreadMessageCount
         messageFailureCount = backing.messageFailureCount
         service = backing.account.service?.id
@@ -203,6 +203,15 @@ public struct ParsedGUID: Codable, CustomStringConvertible {
         }
         return "\(service);\(style);\(last)"
     }
+}
+
+public func BLCreateGUID(_ service: IMServiceStyle, _ chatStyle: CBChatStyle?, _ chatID: String) -> String {
+    return BLCreateGUID(service.service.name ?? service.rawValue, chatStyle, chatID)
+}
+
+public func BLCreateGUID(_ service: String, _ chatStyle: CBChatStyle?, _ chatID: String) -> String {
+    let style = chatStyle ?? CBChatStyle.from(chatIdentifier: chatID)
+    return "\(service);\(style == .group ? "+" : "-");\(chatID)"
 }
 
 public func getIMServiceStyleForChatGuid(_ chatGuid: String) -> IMServiceStyle {

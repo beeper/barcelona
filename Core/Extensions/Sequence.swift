@@ -16,5 +16,3 @@ public extension Sequence {
         return values
     }
 }
-
-public struct ExtensionsTesting { }

@@ -19,7 +19,7 @@ struct TypingItem: ChatItemOwned, Hashable {
     init(_ item: IMTypingChatItem, chatID: String) {
         id = item.id
         fromMe = item.isFromMe
-        sender = item.resolvedSenderID
+        sender = item._item().resolveSenderID(inService: .iMessage)
         time = item.effectiveTime
         self.chatID = chatID
     }

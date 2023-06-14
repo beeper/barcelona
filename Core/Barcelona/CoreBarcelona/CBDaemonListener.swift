@@ -767,12 +767,12 @@ extension CBDaemonListener {
             }
 
             log.debug(
-                "sending message \(String(describing: item.guid)) \(String(describing: item.service)) \(chatIdentifier) down the pipeline"
+                "sending message \(String(describing: item.guid)) \(String(describing: item.service)) \(item.sender ?? "nil") \(chatIdentifier) down the pipeline"
             )
             messagePipeline.send(Message(messageItem: item, chatID: chatIdentifier, service: service))
         case let item:
             // wrap non-message items and send them as transcript actions
-            switch transcriptRepresentation(item, chatID: chatIdentifier) {
+            switch transcriptRepresentation(item, chatID: chatIdentifier, service: service) {
             case let phantom as PhantomChatItem:
                 phantomPipeline.send(phantom)
             case let representation:
@@ -801,14 +801,14 @@ extension CBDaemonListener {
         }
     }
 
-    private func transcriptRepresentation(_ item: IMItem, chatID: String) -> ChatItem {
+    private func transcriptRepresentation(_ item: IMItem, chatID: String, service: IMServiceStyle) -> ChatItem {
         switch item {
         case let item as IMParticipantChangeItem:
             return ParticipantChangeItem(item, chatID: chatID)
         case let item as IMGroupTitleChangeItem:
-            return GroupTitleChangeItem(item, chatID: chatID)
+            return GroupTitleChangeItem(item, chatID: chatID, service: service)
         case let item as IMGroupActionItem:
-            return GroupActionItem(item, chatID: chatID)
+            return GroupActionItem(item, chatID: chatID, service: service)
         default:
             return PhantomChatItem(item, chatID: chatID)
         }
@@ -877,7 +877,7 @@ extension IMMessageItem {
             }
 
             if style == .group {
-                return resolveSenderID(inService: serviceStyle)
+                return resolveSenderID(inService: service)
             } else {
                 return chat  // chat identifier for DM is just the recipient
             }

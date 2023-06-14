@@ -19,32 +19,32 @@ public struct GroupActionItem: ChatItemOwned, Hashable {
     public init?(ingesting item: NSObject, context: IngestionContext) {
         switch item {
         case let item as IMGroupActionChatItem:
-            self.init(item, chatID: context.chatID)
+            self.init(item, chatID: context.chatID, service: context.service)
         case let item as IMGroupActionItem:
-            self.init(item, chatID: context.chatID)
+            self.init(item, chatID: context.chatID, service: context.service)
         default:
             return nil
         }
     }
 
-    init(_ item: IMGroupActionChatItem, chatID: String) {
+    init(_ item: IMGroupActionChatItem, chatID: String, service: IMServiceStyle) {
         id = item.id
         self.chatID = chatID
         fromMe = item.isFromMe
         time = item.effectiveTime
         actionType = item.actionType
-        sender = item.resolvedSenderID
+        sender = item._item().resolveSenderID(inService: service)
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
     }
 
-    init(_ item: IMGroupActionItem, chatID: String) {
+    init(_ item: IMGroupActionItem, chatID: String, service: IMServiceStyle) {
         id = item.id
         self.chatID = chatID
         fromMe = item.isFromMe
         time = item.effectiveTime
         actionType = item.actionType
-        sender = item.resolveSenderID()
+        sender = item.resolveSenderID(inService: service)
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
     }

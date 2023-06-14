@@ -8,16 +8,17 @@
 
 import Foundation
 import IMCore
+import IMSharedUtilities
 
 protocol IMMessageActionItemParseable: IMCoreDataResolvable {
     var actionType: Int64 { get }
     var otherHandleID: String? { get }
-    var resolvedSenderID: String? { get }
+    var item: IMItem { get }
 }
 
 extension IMMessageActionItem: IMMessageActionItemParseable {
-    var resolvedSenderID: String? {
-        resolveSenderID()
+    var item: IMItem {
+        self
     }
 
     var otherHandleID: String? {
@@ -26,6 +27,10 @@ extension IMMessageActionItem: IMMessageActionItemParseable {
 }
 
 extension IMMessageActionChatItem: IMMessageActionItemParseable {
+    var item: IMItem {
+        self._item()
+    }
+
     var otherHandleID: String? {
         otherHandle?.id
     }
@@ -37,15 +42,15 @@ struct ActionChatItem: ChatItemOwned, Hashable {
     init?(ingesting item: NSObject, context: IngestionContext) {
         switch item {
         case let item as IMMessageActionItem:
-            self.init(item, chat: context.chatID)
+            self.init(item, chat: context.chatID, service: context.service)
         case let item as IMMessageActionChatItem:
-            self.init(item, chat: context.chatID)
+            self.init(item, chat: context.chatID, service: context.service)
         default:
             return nil
         }
     }
 
-    init(_ item: IMMessageActionItemParseable, chat: String) {
+    init(_ item: IMMessageActionItemParseable, chat: String, service: IMServiceStyle) {
         id = item.id
         chatID = chat
         fromMe = item.isFromMe
@@ -53,7 +58,7 @@ struct ActionChatItem: ChatItemOwned, Hashable {
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
         actionType = item.actionType
-        sender = item.resolvedSenderID
+        sender = item.item.resolveSenderID(inService: service)
         otherHandle = item.otherHandleID
     }
 
