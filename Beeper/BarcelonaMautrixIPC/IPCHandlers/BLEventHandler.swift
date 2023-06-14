@@ -16,10 +16,10 @@ private let log = Logger(label: "self.ipcChannel.writePayload")
 
 extension CBMessageStatusChange {
     fileprivate var mautrixFriendlyGUID: String? {
-        guard let sender = sender else {
+        guard let sender else {
             return nil
         }
-        return "\(service.rawValue);\(chat?.isGroup ?? false ? "+" : "-");\(sender)"
+        return BLCreateGUID(service, chat?.chatStyle == .group ? .group : .instantMessage, sender)
     }
 }
 

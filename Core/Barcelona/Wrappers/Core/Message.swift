@@ -263,6 +263,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     init(messageItem item: IMMessageItem, chatID: String, service: IMServiceStyle, items: [AnyChatItem]? = nil) {
         id = item.id
         self.chatID = chatID
+        self.chatGUID =  BLCreateGUID(service, nil, chatID)
         fromMe = item.isFromMe()
         time = item.effectiveTime
         threadIdentifier = item.threadIdentifier
@@ -307,6 +308,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     ) {
         id = item.id
         self.chatID = chatID ?? transcriptRepresentation.chatID
+        self.chatGUID = BLCreateGUID(service, nil, self.chatID)
         fromMe = item.isFromMe
         time = item.effectiveTime
         threadIdentifier = item.threadIdentifier
@@ -339,6 +341,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     ) {
         id = message.id
         self.chatID = chatID
+        self.chatGUID = BLCreateGUID(service, nil, chatID)
         fromMe = message.isFromMe
         time = message.effectiveTime
         self.service = service
@@ -370,7 +373,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     }
 
     init(_ backing: IMMessageItem, items: [ChatItem], chatID: String, service: IMServiceStyle) {
-        if let message = backing.message() ?? IMMessage.message(fromUnloadedItem: backing) {
+        if let message = backing.message() ?? IMMessage.message(fromUnloadedItem: backing, service: service) {
             self.init(backing, message: message, items: items, chatID: chatID, service: service)
         } else {
             self.init(
@@ -404,6 +407,7 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
 
     public var id: String
     public var chatID: String
+    public var chatGUID: String
     public var fromMe: Bool
     public var time: Double
     public var sender: String?
@@ -467,12 +471,10 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
     }
 
     public var chat: Chat? {
-        get async {
-            guard let imChat else {
-                return nil
-            }
-            return await Chat(imChat)
+        guard let imChat else {
+            return nil
         }
+        return Chat(imChat)
     }
 
     public var associableItemIDs: [String] {
@@ -515,6 +517,10 @@ public struct Message: ChatItemOwned, CustomDebugStringConvertible, Hashable {
             return true
         }
         return false
+    }
+
+    public var senderID: String? {
+        self.sender ?? (fromMe ? Registry.sharedInstance.uniqueMeHandleIDs.first : nil)
     }
 }
 
@@ -596,4 +602,10 @@ extension IMMessageSummaryInfoProvider {
 
 extension Message {
     public typealias Metadata = [String: MetadataValue]
+}
+
+extension IMMessage {
+    public var effectiveTime: Double {
+        (self.time?.timeIntervalSince1970 ?? 0) * 1000
+    }
 }

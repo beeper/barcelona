@@ -19,11 +19,7 @@ extension Message {
             return nil
         }
 
-        return "\(service.rawValue);\(isGroup == true ? "+" : "-");\(sender)"
-    }
-
-    fileprivate var blChatGUID: String? {
-        imChat?.blChatGUID
+        return BLCreateGUID(service, isGroup == true ? .group : .instantMessage, sender)
     }
 
     fileprivate var groupID: String? {
@@ -53,13 +49,13 @@ extension Message {
 }
 
 extension ParticipantChangeItem {
-    fileprivate func blTargetGUID(on service: String, isGroup: Bool) -> String? {
-        guard let targetID = targetID else {
+    fileprivate func blTargetGUID(on service: IMServiceStyle, isGroup: Bool) -> String? {
+        guard let targetID else {
             log.warning("targetID is nil for change item \(id); can't create target GUID")
             return nil
         }
 
-        return "\(service);\(isGroup ? "+" : "-");\(targetID)"
+        return BLCreateGUID(service, isGroup ? .group : .instantMessage, targetID)
     }
 }
 
@@ -96,7 +92,7 @@ public struct BLMessage: Codable, ChatResolvable {
             log.warning("Creating BLMessage from Message with a nil imChat \(message.debugDescription)")
         }
 
-        chat_guid = message.blChatGUID ?? "unknown"
+        chat_guid = message.chatGUID
         thread_id = message.groupID
         sender_guid = message.blSenderGUID
         service = message.service.rawValue
@@ -118,7 +114,7 @@ public struct BLMessage: Codable, ChatResolvable {
             case let action as ParticipantChangeItem:
                 self.group_action_type = Int(action.changeType)
                 self.item_type = IMItemType.participantChange.rawValue
-                self.target_guid = action.blTargetGUID(on: service, isGroup: message.imChat?.isGroup == true)
+                self.target_guid = action.blTargetGUID(on: message.service, isGroup: message.imChat?.isGroup == true)
             case let item as GroupActionItem:
                 self.group_action_type = Int(item.actionType.rawValue)
                 self.item_type = IMItemType.groupAction.rawValue

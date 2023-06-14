@@ -14,6 +14,17 @@ public enum CBChatStyle: UInt8, CaseIterable {
     case group = 43
     case instantMessage = 45
 
+    init(_ style: IMChatStyle) {
+        switch style {
+        case .group:
+            self = .group
+        case .instantMessage:
+            self = .instantMessage
+        @unknown default:
+            fatalError("Had IMChatStyle of unknown value \(style.rawValue)")
+        }
+    }
+
     public static func from(chatIdentifier: String) -> Self {
         // All the group chatIdentifiers I've seen have 16-18 numbers after the `chat` prefix, but I just want to be safe, so we're
         // saying that they have to have 12-20 digits (just in case we're missing something)

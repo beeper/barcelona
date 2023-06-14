@@ -10,12 +10,6 @@ import Foundation
 import IMCore
 import Logging
 
-extension IMChatItem {
-    var resolvedSenderID: String? {
-        _item().resolveSenderID()
-    }
-}
-
 private let log = Logger(label: "AcknowledgmentChatItem")
 
 public struct AcknowledgmentChatItem: ChatItemAssociable, ChatItemOwned, Hashable {
@@ -39,7 +33,8 @@ public struct AcknowledgmentChatItem: ChatItemAssociable, ChatItemOwned, Hashabl
                 source: "AcknowledgmentChatItem"
             )
         }
-        sender = item.resolvedSenderID
+        // Tapbacks/Acknowledgements can only be sent on iMessage
+        sender = item._item().resolveSenderID(inService: .iMessage)
         associatedID = item.associatedMessageGUID
     }
 

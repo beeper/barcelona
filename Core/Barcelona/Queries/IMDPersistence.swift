@@ -170,7 +170,14 @@ func BLLoadIMMessageItem(withGUID guid: String) -> IMMessageItem? {
 
 @usableFromInline
 func BLLoadIMMessages(withGUIDs guids: [String]) -> [IMMessage] {
-    BLLoadIMMessageItems(withGUIDs: guids).compactMap(IMMessage.message(fromUnloadedItem:))
+    zip(BLLoadIMMessageItems(withGUIDs: guids), guids)
+        .compactMap { (item, guid) in
+            guard let service = ParsedGUID(rawValue: guid).service?.service?.id else {
+                return nil
+            }
+
+            return IMMessage.message(fromUnloadedItem: item, service: service)
+        }
 }
 
 public func BLLoadIMMessage(withGUID guid: String) -> IMMessage? {

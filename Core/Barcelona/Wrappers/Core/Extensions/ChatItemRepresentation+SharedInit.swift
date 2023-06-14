@@ -46,6 +46,23 @@ extension IMCoreDataResolvable {
 
 extension IMItem: IMCoreDataResolvable {
     public var id: String { guid! }
+
+    public var effectiveTime: Double {
+        (self.time?.timeIntervalSince1970 ?? 0) * 1000
+    }
 }
 
-extension IMTranscriptChatItem: IMCoreDataResolvable {}
+extension IMTranscriptChatItem: IMCoreDataResolvable {
+    private var reliableDate: Date? {
+        switch self {
+        case let item as IMMessageChatItem:
+            return item.time ?? _item()?.time
+        default:
+            return transcriptDate ?? _item()?.time
+        }
+    }
+    
+    public var effectiveTime: Double {
+        (reliableDate?.timeIntervalSince1970 ?? 0) * 1000
+    }
+}

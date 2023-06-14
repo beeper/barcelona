@@ -51,5 +51,5 @@ public func ERCreateBlankRichLinkMessage(
     messageItem.flags = 5
     initializer(messageItem)
 
-    return IMMessage.message(fromUnloadedItem: messageItem)!
+    return IMMessage.message(fromUnloadedItem: messageItem, service: .iMessage)!
 }

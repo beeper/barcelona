@@ -10,6 +10,10 @@ import IMCore
 import Logging
 
 extension IMChat {
+    public var log: Logging.Logger {
+        Logger(label: "IMChat")
+    }
+
     /// Returns true if the next message sent will be sent over SMS
     public var willSendSMS: Bool {
         account.service?.id == .SMS

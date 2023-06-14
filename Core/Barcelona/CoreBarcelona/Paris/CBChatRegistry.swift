@@ -107,7 +107,7 @@ public actor CBChatRegistry {
                 try await handle()
             } catch {
                 SentrySDK.capture(error: error)
-                let chatGUID = "\(service ?? "nil");\(chatStyle == .group ? "+" : "-");\(chatIdentifier ?? "nil")"
+                let chatGUID = BLCreateGUID(service ?? "nil", CBChatStyle(chatStyle), chatIdentifier ?? "nil")
                 failedMessages.send(
                     (guid: guid ?? "nil", chatGUID: chatGUID, service: service ?? "nil", error: error)
                 )
@@ -383,7 +383,7 @@ public actor CBChatRegistry {
             return nil
         }
 
-        store(chat: await Chat(imchat))
+        store(chat: Chat(imchat))
         return .guid(imchat.guid)
     }
 
@@ -426,7 +426,7 @@ public actor CBChatRegistry {
             } else if let groupID {
                 return .groupID(groupID)
             } else if let chatIdentifier, let service {
-                return .guid("\(service);\(chatStyle == .group ? "+" : "-");\(chatIdentifier)")
+                return .guid(BLCreateGUID(service, CBChatStyle(chatStyle), chatIdentifier))
             } else if let messageID {
                 func withPersistenceAccess<P>(_ callback: () throws -> P) rethrows -> P {
                     if !IMDIsRunningInDatabaseServerProcess() {

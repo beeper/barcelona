@@ -108,7 +108,7 @@ struct StickerChatItem: ChatItemAssociable, Hashable {
         threadIdentifier = item.threadIdentifier
         threadOriginator = item.threadOriginatorID
         associatedID = item.associatedMessageGUID
-        sender = item.resolvedSenderID
+        sender = item._item().resolveSenderID(inService: .iMessage)
 
         if let transfer = IMFileTransferCenter.sharedInstance().transfer(forGUID: item.transferGUID) {
             self.attachment = Attachment(transfer)

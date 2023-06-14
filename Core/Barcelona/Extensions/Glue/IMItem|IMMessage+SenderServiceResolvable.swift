@@ -12,39 +12,33 @@ import IDS
 import IMCore
 import IMSharedUtilities
 
-internal func CBResolveSenderHandle(originalHandle: String?, isFromMe: Bool, service: IMServiceStyle?) -> String? {
-    guard isFromMe, let service = service?.service else {
+internal func CBResolveSenderHandle(originalHandle: String?, isFromMe: Bool, service: IMServiceStyle) -> String? {
+    guard isFromMe else {
         return originalHandle
     }
 
-    switch service.id {
+    switch service {
     case .iMessage:
         return nil
     case .FaceTime:
         return nil
     default:
-        return Registry.sharedInstance.suitableHandle(for: service)?.idWithoutResource
-    }
-}
-
-extension IMItem {
-    var serviceStyle: IMServiceStyle? {
-        service?.service?.id
+        return Registry.sharedInstance.suitableHandle(for: service.service)?.idWithoutResource
     }
 }
 
 extension IMMessage {
-    func resolveSenderID(inService service: IMServiceStyle? = nil) -> String? {
+    func resolveSenderID(inService service: IMServiceStyle) -> String? {
         CBResolveSenderHandle(
             originalHandle: sender?.idWithoutResource,
             isFromMe: isFromMe,
-            service: service ?? _imMessageItem?.serviceStyle
+            service: service
         )
     }
 }
 
 extension IMItem {
-    func resolveSenderID(inService service: IMServiceStyle? = nil) -> String? {
-        CBResolveSenderHandle(originalHandle: sender, isFromMe: isFromMe, service: service ?? self.service?.service?.id)
+    func resolveSenderID(inService service: IMServiceStyle) -> String? {
+        CBResolveSenderHandle(originalHandle: sender, isFromMe: isFromMe, service: service)
     }
 }
