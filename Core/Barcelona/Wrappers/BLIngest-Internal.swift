@@ -66,7 +66,7 @@ internal func _BLLoadAcknowledgmentChatItems(
         return [:]
     }
 
-    return _BLParseObjects(BLLoadIMMessages(withGUIDs: messageGUIDs), inChat: chat, service: service)
+    return _BLParseObjects(BLLoadIMMessages(withGUIDs: messageGUIDs, onService: service), inChat: chat, service: service)
         .compactMap {
             $0 as? Message
         }

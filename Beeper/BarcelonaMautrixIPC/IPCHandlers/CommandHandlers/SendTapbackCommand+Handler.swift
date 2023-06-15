@@ -46,7 +46,7 @@ extension TapbackCommand: Runnable, AuthenticatedAsserting {
         breadcrumb.type = "user"
         SentrySDK.addBreadcrumb(breadcrumb)
 
-        guard let creation = creation else {
+        guard let creation else {
             payload.fail(strategy: .internal_error("Failed to create tapback operation"), ipcChannel: ipcChannel)
             span.finish(status: .internalError)
             return

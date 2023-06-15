@@ -55,7 +55,7 @@ extension IMChat {
         type: Int,
         overridingItemType: UInt8?
     ) throws -> IMMessage {
-        guard let message = BLLoadIMMessage(withGUID: guid) else {
+        guard let message = BLLoadIMMessage(withGUID: guid, onService: .iMessage) else {
             throw TapbackError.unknownMessage(guid: guid)
         }
 
