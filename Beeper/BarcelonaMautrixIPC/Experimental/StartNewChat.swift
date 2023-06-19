@@ -29,20 +29,8 @@ enum ResolveIdentifierCommandError: Error {
 
 extension ResolveIdentifierCommand: Runnable {
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
-        SentrySDK.configureScope { scope in
-            scope.setContext(
-                value: [
-                    "id": String(describing: payload.id),
-                    "command": payload.command.name.rawValue,
-                ],
-                key: "payload"
-            )
-        }
-        let span = SentrySDK.startTransaction(name: "ResolveIdentifierCommand", operation: "run", bindToScope: true)
-        let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "ResolveIdentifierCommand/\(payload.id ?? 0)/\(payload.id ?? 0)"
-        breadcrumb.type = "user"
-        SentrySDK.addBreadcrumb(breadcrumb)
+        let span = SentrySDK.startIPCTransaction(forPayload: payload, uppercasedName: "ResolveIdentifierCommand")
+
         let log = Logger(label: "ResolveIdentifierCommand")
         var retrievedGuid: GUIDResponse? = nil
 
@@ -117,20 +105,8 @@ public struct PrepareDMCommand: Codable {
 
 extension PrepareDMCommand: Runnable {
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
-        SentrySDK.configureScope { scope in
-            scope.setContext(
-                value: [
-                    "id": String(describing: payload.id),
-                    "command": payload.command.name.rawValue,
-                ],
-                key: "payload"
-            )
-        }
-        let span = SentrySDK.startTransaction(name: "PrepareDMCommand", operation: "run", bindToScope: true)
-        let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "PrepareDMCommand/\(payload.id ?? 0)"
-        breadcrumb.type = "user"
-        SentrySDK.addBreadcrumb(breadcrumb)
+        let span = SentrySDK.startIPCTransaction(forPayload: payload, uppercasedName: "PrepareDMCommand")
+
         let log = Logger(label: "PrepareDMCommand")
 
         let parsed = ParsedGUID(rawValue: guid)
@@ -161,20 +137,8 @@ public struct PrepareGroupChatCommand: Codable, Runnable {
     public var guids: [String]
 
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
-        SentrySDK.configureScope { scope in
-            scope.setContext(
-                value: [
-                    "id": String(describing: payload.id),
-                    "command": payload.command.name.rawValue,
-                ],
-                key: "payload"
-            )
-        }
-        let span = SentrySDK.startTransaction(name: "PrepareGroupChatCommand", operation: "run", bindToScope: true)
-        let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "PrepareGroupChatCommand/\(payload.id ?? 0)"
-        breadcrumb.type = "user"
-        SentrySDK.addBreadcrumb(breadcrumb)
+        let span = SentrySDK.startIPCTransaction(forPayload: payload, uppercasedName: "PrepareGroupChatCommand")
+
         let log = Logger(label: "PrepareGroupChatCommand")
 
         let parsed = guids.map(ParsedGUID.init(rawValue:))

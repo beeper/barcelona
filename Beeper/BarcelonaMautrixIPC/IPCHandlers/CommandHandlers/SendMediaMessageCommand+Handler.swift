@@ -17,6 +17,31 @@ protocol Runnable {
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async
 }
 
+public extension SentrySDK {
+    static func startIPCTransaction(
+        forPayload payload: IPCPayload,
+        uppercasedName: String
+    ) -> Sentry.Span {
+        SentrySDK.configureScope { scope in
+            scope.setContext(
+                value: [
+                    "id": String(describing: payload.id),
+                    "command": payload.command.name.rawValue
+                ],
+                key: "payload"
+            )
+        }
+
+        let span = SentrySDK.startTransaction(name: uppercasedName, operation: "run", bindToScope: true)
+        let breadcrumb = Breadcrumb(level: .debug, category: "command")
+        breadcrumb.message = "\(uppercasedName)/\(payload.id ?? 0)"
+        breadcrumb.type = "user"
+        SentrySDK.addBreadcrumb(breadcrumb)
+
+        return span
+    }
+}
+
 protocol AuthenticatedAsserting {}
 
 extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
@@ -46,20 +71,8 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
     }
 
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
-        SentrySDK.configureScope { scope in
-            scope.setContext(
-                value: [
-                    "id": String(describing: payload.id),
-                    "command": payload.command.name.rawValue,
-                ],
-                key: "payload"
-            )
-        }
-        let span = SentrySDK.startTransaction(name: "SendMediaMessageCommand", operation: "run", bindToScope: true)
-        let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "SendMediaMessageCommand/\(payload.id ?? 0)"
-        breadcrumb.type = "user"
-        SentrySDK.addBreadcrumb(breadcrumb)
+        let span = SentrySDK.startIPCTransaction(forPayload: payload, uppercasedName: "SendMediaMessageCommand")
+
         guard let chat = await cbChat else {
             payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
             span.finish(status: .notFound)

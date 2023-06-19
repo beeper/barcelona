@@ -73,20 +73,8 @@ extension GetGroupChatInfoCommand: Runnable {
         Logger(label: "TapbackCommand")
     }
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
-        SentrySDK.configureScope { scope in
-            scope.setContext(
-                value: [
-                    "id": String(describing: payload.id),
-                    "command": payload.command.name.rawValue,
-                ],
-                key: "payload"
-            )
-        }
-        let span = SentrySDK.startTransaction(name: "GetGroupChatInfoCommand", operation: "run", bindToScope: true)
-        let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "GetGroupChatInfoCommand/\(payload.id ?? 0)"
-        breadcrumb.type = "user"
-        SentrySDK.addBreadcrumb(breadcrumb)
+        let span = SentrySDK.startIPCTransaction(forPayload: payload, uppercasedName: "GetGroupChatInfoCommand")
+
         log.info("Getting chat with id \(chat_guid)", source: "MautrixIPC")
 
         guard let chat = await blChat else {
@@ -114,20 +102,8 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
         Logger(label: "TapbackCommand")
     }
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
-        SentrySDK.configureScope { scope in
-            scope.setContext(
-                value: [
-                    "id": String(describing: payload.id),
-                    "command": payload.command.name.rawValue,
-                ],
-                key: "payload"
-            )
-        }
-        let span = SentrySDK.startTransaction(name: "SendReadReceiptCommand", operation: "run", bindToScope: true)
-        let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "SendReadReceiptCommand/\(payload.id ?? 0)"
-        breadcrumb.type = "user"
-        SentrySDK.addBreadcrumb(breadcrumb)
+        let span = SentrySDK.startIPCTransaction(forPayload: payload, uppercasedName: "SendReadReceiptCommand")
+
         let chatGUID = await cbChat?.blChatGUID
         log.info("Sending read receipt to \(String(describing: chatGUID))", source: "MautrixIPC")
 
@@ -153,20 +129,8 @@ extension SendReadReceiptCommand: Runnable, AuthenticatedAsserting {
 
 extension SendTypingCommand: Runnable, AuthenticatedAsserting {
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
-        SentrySDK.configureScope { scope in
-            scope.setContext(
-                value: [
-                    "id": String(describing: payload.id),
-                    "command": payload.command.name.rawValue,
-                ],
-                key: "payload"
-            )
-        }
-        let span = SentrySDK.startTransaction(name: "SendTypingCommand", operation: "run", bindToScope: true)
-        let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "SendTypingCommand/\(payload.id ?? 0)"
-        breadcrumb.type = "user"
-        SentrySDK.addBreadcrumb(breadcrumb)
+        let span = SentrySDK.startIPCTransaction(forPayload: payload, uppercasedName: "SendTypingCommand")
+
         guard let chat = await cbChat else {
             payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
             span.finish(status: .notFound)
@@ -189,20 +153,8 @@ extension SendTypingCommand: Runnable, AuthenticatedAsserting {
 
 extension GetGroupChatAvatarCommand: Runnable {
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
-        SentrySDK.configureScope { scope in
-            scope.setContext(
-                value: [
-                    "id": String(describing: payload.id),
-                    "command": payload.command.name.rawValue,
-                ],
-                key: "payload"
-            )
-        }
-        let span = SentrySDK.startTransaction(name: "GetGroupChatAvatarCommand", operation: "run", bindToScope: true)
-        let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "GetGroupChatAvatarCommand/\(payload.id ?? 0)"
-        breadcrumb.type = "user"
-        SentrySDK.addBreadcrumb(breadcrumb)
+        let span = SentrySDK.startIPCTransaction(forPayload: payload, uppercasedName: "GetGroupChatAvatarCommand")
+
         guard let chat = await chat, let groupPhotoID = chat.groupPhotoID else {
             payload.respond(.chat_avatar(nil), ipcChannel: ipcChannel)
             span.finish()

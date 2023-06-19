@@ -16,23 +16,11 @@ private let log = Logger(label: "SendMessageCommand")
 
 extension SendMessageCommand: Runnable, AuthenticatedAsserting {
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
-        SentrySDK.configureScope { scope in
-            scope.setContext(
-                value: [
-                    "id": String(describing: payload.id),
-                    "command": payload.command.name.rawValue,
-                ],
-                key: "payload"
-            )
-        }
-        let span = SentrySDK.startTransaction(name: "SendMessageCommand", operation: "run", bindToScope: true)
+        let span = SentrySDK.startIPCTransaction(forPayload: payload, uppercasedName: "SendMessageCommand")
+
         defer {
             span.finish()
         }
-        let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "SendMessageCommand/\(payload.id ?? 0)"
-        breadcrumb.type = "user"
-        SentrySDK.addBreadcrumb(breadcrumb)
         guard let chat = await cbChat else {
             span.finish(status: .notFound)
             return payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)

@@ -16,20 +16,8 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
         Logger(label: "GetMessagesAfterCommand")
     }
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
-        SentrySDK.configureScope { scope in
-            scope.setContext(
-                value: [
-                    "id": String(describing: payload.id),
-                    "command": payload.command.name.rawValue,
-                ],
-                key: "payload"
-            )
-        }
-        let span = SentrySDK.startTransaction(name: "GetMessagesAfterCommand", operation: "run", bindToScope: true)
-        let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "GetMessagesAfterCommand/\(payload.id ?? 0)"
-        breadcrumb.type = "user"
-        SentrySDK.addBreadcrumb(breadcrumb)
+        let span = SentrySDK.startIPCTransaction(forPayload: payload, uppercasedName: "GetMessagesAfterCommand")
+
         log.debug("Getting messages for chat guid \(chat_guid) after time \(timestamp)")
 
         guard let chat = await chat else {
@@ -70,20 +58,8 @@ extension GetMessagesAfterCommand: Runnable, AuthenticatedAsserting {
 
 extension GetRecentMessagesCommand: Runnable, AuthenticatedAsserting {
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
-        SentrySDK.configureScope { scope in
-            scope.setContext(
-                value: [
-                    "id": String(describing: payload.id),
-                    "command": payload.command.name.rawValue,
-                ],
-                key: "payload"
-            )
-        }
-        let span = SentrySDK.startTransaction(name: "GetRecentMessagesCommand", operation: "run", bindToScope: true)
-        let breadcrumb = Breadcrumb(level: .debug, category: "command")
-        breadcrumb.message = "GetRecentMessagesCommand/\(payload.id ?? 0)"
-        breadcrumb.type = "user"
-        SentrySDK.addBreadcrumb(breadcrumb)
+        let span = SentrySDK.startIPCTransaction(forPayload: payload, uppercasedName: "GetRecentMessagesCommand")
+
         guard let chat = await chat else {
             payload.fail(strategy: .chat_not_found, ipcChannel: ipcChannel)
             span.finish(status: .notFound)

@@ -220,7 +220,9 @@ public func getIMChatForChatGuid(_ chatGuid: String) async -> IMChat? {
     if let chat = IMChatRegistry.shared.existingChat(withGUID: chatGuid) {
         guard chat.guid == chatGuid else {
             log.warning("Chat retrieved from registry has an incorrect guid (\(chat.guid) vs \(chatGuid)")
-            return nil
+            let goodChat = IMChat.chatMatchingGUID(chatGuid)
+            log.debug("Got chatMatchingGUID with guid \(goodChat?.guid ?? "nil")")
+            return goodChat
         }
         return chat
     } else {
@@ -238,15 +240,8 @@ public func getIMChatForChatGuid(_ chatGuid: String) async -> IMChat? {
 
             log.warning("No chat found for \(chatGuid) but using directMessage chat for \(id)")
 
-            let chatService = imChat.account.service?.name
-            let serviceName = parsed.service
-            guard chatService == serviceName else {
-                log.warning("getIMChatforChatGuid pulled an imChat with a mismatching service (\(chatService ?? "nil") vs expected \(serviceName ?? "nil"))")
-                return nil
-            }
-
-            guard imChat.chatIdentifier == id else {
-                log.warning("getIMChatForChatGuid pulled an imChat with a mismatching chatID (\(imChat.chatIdentifier ?? "nil") vs expected \(id))")
+            guard imChat.guid == chatGuid else {
+                log.warning("getIMChatForChatGuid pulled an imChat with a mismatching GUID (\(imChat.guid) vs expected \(chatGuid))")
                 return nil
             }
 
@@ -273,6 +268,10 @@ extension IMChat {
     public static func groupChat(withHandleIDs handleIDs: [String], service: IMServiceStyle) async -> IMChat? {
         let handles = handleIDs.map { bestHandle(forID: $0, service: service) }
         return IMChatRegistry.shared.chat(for: handles)
+    }
+
+    public static func chatMatchingGUID(_ guid: String) -> IMChat? {
+        IMChatRegistry.shared.allChats.first { $0.guid == guid }
     }
 }
 
