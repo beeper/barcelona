@@ -48,7 +48,19 @@ public struct ChatLocator {
         guard IMServiceImpl.smsEnabled() else {
             return .failed("You are not currently capable of using SMS.")
         }
-        return .service(.SMS, handle)
+        if handle.starts(with: "+") {
+            log.info("Returning fake SMS result for a well formed phone number")
+            return .service(.SMS, handle)
+        } else if handle.count == 10 {
+            // Whoever is asking didn't ask us for a proper phone number with a country code
+            // They're probably North American, so just prefix the result with +1
+            let cleanedUpHandle = "+1\(handle)"
+            log.info("Returning fake SMS result, before \(handle) after \(cleanedUpHandle)")
+            return .service(.SMS, cleanedUpHandle)
+        } else {
+            log.info("Returning a failed result because even though this looks like a phone number for SMS we don't trust it: \(handle)")
+            return .failed("SMS forwarding is enabled but request does not look like a phone number")
+        }
     }
 
     public enum SenderGUIDResult {

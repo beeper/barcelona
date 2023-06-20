@@ -77,13 +77,6 @@ extension ResolveIdentifierCommand: Runnable {
             )
             payload.respond(.guid(retrievedGuid), ipcChannel: ipcChannel)
             span.finish()
-        } else if IMServiceImpl.smsEnabled() {
-            log.info(
-                "Responding that \(identifier) is available on SMS due to availability of forwarding",
-                source: "ResolveIdentifier"
-            )
-            payload.respond(.guid(.init("SMS;-;\(identifier)")), ipcChannel: ipcChannel)
-            span.finish()
         } else {
             log.info(
                 "Responding that \(identifier) is unavailable",
