@@ -283,7 +283,13 @@ extension IMChat {
     }
 
     public static func chatMatchingGUID(_ guid: String) -> IMChat? {
-        IMChatRegistry.shared.allChats.first { $0.guid == guid }
+        if let chat = IMChatRegistry.shared.allChats.first(where: { $0.guid == guid }) {
+            return chat
+        }
+
+        return IMChatRegistry.shared.allChats.first { chat in
+            chat._guids.contains { $0 == guid }
+        }
     }
 }
 
