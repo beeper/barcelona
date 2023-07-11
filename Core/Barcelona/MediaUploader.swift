@@ -7,6 +7,7 @@
 
 import Foundation
 import IMCore
+import IMDaemonCore
 import IMSharedUtilities
 import Logging
 
@@ -51,14 +52,25 @@ public class MediaUploader {
 
     public init() {}
 
-    public func uploadFile(filename: String, path: URL) async throws -> String {
-        let transferCenter = IMFileTransferCenter.sharedInstance()
+    public func uploadFile(
+        filename: String,
+        path: URL,
+        isAudioMessage: Bool = false
+    ) async throws -> String {
         log.debug("Creating file transfer")
-        let transfer = try await createFileTransfer(for: filename, path: path)
+        let transfer = try await createFileTransfer(for: filename, path: path, isAudioMessage: isAudioMessage)
+        log.debug("Uploading transfer \(transfer.guid ?? "nil")")
+        return try await uploadTransfer(transfer)
+    }
+
+    public func uploadTransfer(_ transfer: IMFileTransfer) async throws -> String {
         guard let transferGUID = transfer.guid else {
             throw MediaUploadError.transferCreationFailed
         }
+
         log.debug("Got file transfer with guid: \(transferGUID)")
+
+        let transferCenter = IMFileTransferCenter.sharedInstance()
 
         return try await withThrowingTaskGroup(of: String.self) { group in
             await withCheckedContinuation { continuation in
@@ -102,8 +114,10 @@ public class MediaUploader {
     }
 
     @MainActor
-    private func createFileTransfer(for filename: String, path: URL) throws -> IMFileTransfer {
+    public func createFileTransfer(for filename: String, path: URL, isAudioMessage: Bool) async throws -> IMFileTransfer {
         let transferCenter = IMFileTransferCenter.sharedInstance()
+
+        transferCenter.setIssueSandboxEstensionsForTransfers(true)
 
         log.debug("Getting a guid for a new outgoing transfer")
         let guid = transferCenter.guidForNewOutgoingTransfer(withLocalURL: path, useLegacyGuid: true)
@@ -134,8 +148,31 @@ public class MediaUploader {
             log.debug("No persistent path for transfer: \(String(describing: guid))")
         }
 
-        log.debug("Setting a filename for the transfer")
-        transfer.transferredFilename = filename
+        if isAudioMessage {
+            if transfer.transcoderUserInfo == nil {
+                transfer.transcoderUserInfo = ["AVIsOpusAudioMessage": true]
+            } else {
+                transfer.transcoderUserInfo?["AVIsOpusAudioMessage"] = true
+            }
+
+            transfer.attributionInfo = [
+                IMFileTransferAttributionInfoPreviewGenerationSucceededKey: true,
+                IMFileTransferAttributionInfoPreviewGenerationSizeWidthKey: 0.0,
+                IMFileTransferAttributionInfoPreviewGenerationSizeHeightKey: 0.0,
+                IMFileTransferAttributionInfoPreviewGenerationConstraintsKey: [
+                    "mpw": "0.0",
+                    "mtw": "0.0",
+                    "mth": "0.0",
+                    "s": "0.0",
+                    "st": 0,
+                    "gm": 0
+                ] as [String : Any]
+            ]
+        }
+
+
+        /*log.debug("Setting a filename for the transfer")
+        transfer.transferredFilename = filename*/
 
         return transfer
     }

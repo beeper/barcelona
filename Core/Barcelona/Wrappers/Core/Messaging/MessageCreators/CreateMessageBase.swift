@@ -11,7 +11,7 @@ import IMCore
 import IMSharedUtilities
 import Logging
 
-protocol CreateMessageBase {
+public protocol CreateMessageBase {
     var threadIdentifier: String? { get }
     var replyToGUID: String? { get }
     var replyToPart: Int? { get }
@@ -26,8 +26,8 @@ protocol CreateMessageBase {
     func imMessage(inChat chat: IMChat) -> IMMessage
 }
 
-extension CreateMessageBase {
-    public func imMessage(inChat chat: IMChat) -> IMMessage {
+public extension CreateMessageBase {
+    func imMessage(inChat chat: IMChat) -> IMMessage {
         let message = IMMessage.instantMessage(
             withText: bodyText,
             messageSubject: attributedSubject,

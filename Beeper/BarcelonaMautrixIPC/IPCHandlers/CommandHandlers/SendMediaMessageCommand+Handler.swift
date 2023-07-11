@@ -49,13 +49,18 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         Logger(label: "SendMediaMessageCommand")
     }
 
-    func uploadAndRetry(filename: String, path: String) async throws -> String {
+    /*func uploadAndRetry(filename: String, path: String, forGuid messageGUID: String) async throws -> String {
         let uploader = MediaUploader()
         for attempt in 1..<3 {
             log.debug("Upload file attempt \(attempt)")
             do {
                 log.debug("Uploading")
-                let guid = try await uploader.uploadFile(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
+                let guid = try await uploader.uploadFile(
+                    filename: file_name,
+                    path: URL(fileURLWithPath: path_on_disk),
+                    isAudioMessage: true,
+                    forMessageGUID: messageGUID
+                )
                 log.debug("Uploaded file with transfer guid \(guid)")
                 return guid
             } catch {
@@ -68,7 +73,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         let guid = try await uploader.uploadFile(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
         log.debug("Final upload attempt succeeded with guid: \(guid)")
         return guid
-    }
+    }*/
 
     func run(payload: IPCPayload, ipcChannel: MautrixIPCChannel) async {
         let span = SentrySDK.startIPCTransaction(forPayload: payload, uppercasedName: "SendMediaMessageCommand")
@@ -91,9 +96,21 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         }
 
         do {
-            log.debug("Starting attachment upload")
-            let guid = try await uploadAndRetry(filename: file_name, path: path_on_disk)
-            log.debug("Attachment upload finished with GUID: \(guid)")
+            var send_file_name = file_name
+            var send_path = path_on_disk
+            if is_audio_message == true && file_name == "Voice message.caf" {
+                send_file_name = "Audio Message.caf"
+                if FileManager.default.fileExists(atPath: path_on_disk) {
+                    send_path = path_on_disk.replacingOccurrences(of: "Voice message.caf", with: "Audio Message.caf")
+                    try FileManager.default.moveItem(atPath: path_on_disk, toPath: send_path)
+                }
+            }
+
+            let uploader = MediaUploader()
+            let transfer = try await uploader.createFileTransfer(for: send_file_name, path: URL(fileURLWithPath: send_path), isAudioMessage: true)
+            guard let guid = transfer.guid else {
+                throw BarcelonaError(code: 500, message: "Transfer had no guid")
+            }
 
             var parts: [MessagePart] = [
                 .init(type: .attachment, details: guid),
@@ -105,9 +122,21 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
 
             var messageCreation = CreateMessage(parts: parts)
             messageCreation.metadata = metadata
+            messageCreation.isAudioMessage = is_audio_message
+
+            let message = messageCreation.imMessage(inChat: imChat)
+
+            transfer.messageGUID = message.guid;
+
+            log.debug("Starting attachment upload")
+            _ = try await uploader.uploadTransfer(transfer)
+
+            log.debug("Attachment upload finished with GUID: \(guid)")
 
             log.debug("Sending message with transfer \(guid)")
-            let message = await chat.sendReturningRaw(message: messageCreation)
+            await Task { @MainActor in
+                imChat.send(message)
+            }.value
             log.debug("Message sent, got: \(message)")
 
             let service: String = {

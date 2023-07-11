@@ -8,6 +8,7 @@
 
 import Foundation
 import IMCore
+import IMFoundation
 import IMSharedUtilities
 import Logging
 
@@ -61,7 +62,13 @@ public struct CreateMessage: CreateMessageBase {
         self.metadata = metadata
 
         let parseResult = ERAttributedString(from: parts)
-        self.bodyText = parseResult.string
+        if let attachment = parts.first(where: { $0.type == .attachment }) {
+            let text = parts.first(where: { $0.type == .text })?.details ?? ""
+            let attributed = NSAttributedString(string: text)
+            self.bodyText = IMCreateSuperFormatStringWithAppendedFileTransfers(attributed, [attachment.details])
+        } else {
+            self.bodyText = parseResult.string
+        }
         self.transferGUIDs = parseResult.transferGUIDs
     }
 
@@ -74,7 +81,7 @@ public struct CreateMessage: CreateMessageBase {
     public var metadata: Message.Metadata?
     public var bodyText: NSAttributedString
     public var transferGUIDs: [String]
-    let payloadData: Data? = nil
+    public let payloadData: Data? = nil
 
     static let baseFlags: IMMessageFlags = [
         .finished, .fromMe, .delivered, .sent, .dataDetected,

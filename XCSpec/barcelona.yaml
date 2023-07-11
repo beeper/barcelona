@@ -43,6 +43,8 @@ targets:
         product: IMDPersistence
       - package: Paris
         product: IMDMessageServices
+      - package: Paris
+        product: IMTransferServices
       - package: swift-log
         product: Logging
       - target: BarcelonaDB

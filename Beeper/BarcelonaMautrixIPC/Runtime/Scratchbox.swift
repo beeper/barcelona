@@ -12,11 +12,13 @@ import Barcelona
 
 #if DEBUG
 import IMCore
+import IMDaemonCore
 import IMSharedUtilities
 import IMFoundation
 import IDSFoundation
 import IDS
 #endif
 
+@MainActor
 public func _scratchboxMain(chatRegistry: CBChatRegistry) async {
 }

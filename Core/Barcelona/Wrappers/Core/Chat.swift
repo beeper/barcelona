@@ -9,6 +9,7 @@
 import BarcelonaDB
 import Foundation
 import IMCore
+import IMDaemonCore
 import IMFoundation
 import IMSharedUtilities
 import Logging
@@ -219,21 +220,9 @@ public func getIMServiceStyleForChatGuid(_ chatGuid: String) -> IMServiceStyle {
 public func getIMChatForChatGuid(_ chatGuid: String) async -> IMChat? {
     if let chat = IMChatRegistry.shared.existingChat(withGUID: chatGuid) {
         guard chat.guid == chatGuid else {
-            log.warning("Chat retrieved from registry has an incorrect guid (\(chat.guid) vs \(chatGuid)) (downgraded: \(chat.isDowngraded())")
+            log.warning("Chat retrieved from registry has an incorrect guid (\(chat.guid) vs \(chatGuid)) (downgraded: \(chat.isDowngraded()))")
             let goodChat = IMChat.chatMatchingGUID(chatGuid)
             log.debug("Got chatMatchingGUID with guid \(goodChat?.guid ?? "nil")")
-
-            if chat.isDowngraded() && goodChat == nil {
-                log.debug("Incorrect GUID chat was downgraded and we couldn't get a correct chat from IMChatRegistry.allExistingChats; trying to fix.")
-                chat._setAccount(IMAccountController.shared.iMessageAccount)
-                if chat.guid == chatGuid {
-                    log.debug("Setting iMessage account on incorrect GUID chat fixed the issue; returning it")
-                    return chat
-                } else {
-                    log.debug("Tried to set iMessage account on incorrect GUID chat, but it didn't fix the issue. Failing.")
-                }
-            }
-
             return goodChat
         }
         return chat

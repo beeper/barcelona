@@ -769,6 +769,7 @@ extension CBDaemonListener {
             log.debug(
                 "sending message \(String(describing: item.guid)) \(String(describing: item.service)) \(item.sender ?? "nil") \(chatIdentifier) down the pipeline"
             )
+
             messagePipeline.send(Message(messageItem: item, chatID: chatIdentifier, service: service))
         case let item:
             // wrap non-message items and send them as transcript actions
