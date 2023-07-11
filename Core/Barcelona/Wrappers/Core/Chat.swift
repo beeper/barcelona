@@ -291,7 +291,11 @@ public func loadChatMatchingGUID(_ guid: String) -> IMChat? {
     }
 
     log.warning("Couldn't get chat with `loadChats(withChatID: \(chatID))`; calling loadAllChats()")
-    IMDaemonController.sharedInstance().loadAllChats()
+    if #available(macOS 12, *) {
+        IMDaemonController.sharedInstance().loadAllChats()
+    } else {
+        IMDaemonController.sharedInstance().loadChats(withChatID: "all")
+    }
 
     let chat = checkChat()
 
