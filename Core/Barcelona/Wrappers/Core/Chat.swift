@@ -145,7 +145,13 @@ extension Chat {
 extension Chat {
     /// Returns a chat targeted at the appropriate service for a handleID
     public static func directMessage(withHandleID handleID: String, service: IMServiceStyle) async -> Chat? {
-        await IMChat.directMessage(withHandleID: handleID, service: service).map(Chat.init)
+        let imchat = await IMChat.directMessage(withHandleID: handleID, service: service)
+        if let imchat, (imchat.chatIdentifier != handleID || imchat.account.service?.id != service) {
+            log.warning("Chat.directMessage returned a chat with incorrect details (\(imchat.guid) vs \(handleID) and \(String(describing: service.service.name)))")
+            return nil
+        }
+
+        return imchat.map(Chat.init)
     }
 
     public static func groupChat(withHandleIDs handleIDs: [String], service: IMServiceStyle) async -> Chat? {
@@ -219,20 +225,8 @@ public func getIMServiceStyleForChatGuid(_ chatGuid: String) -> IMServiceStyle {
 public func getIMChatForChatGuid(_ chatGuid: String) async -> IMChat? {
     if let chat = IMChatRegistry.shared.existingChat(withGUID: chatGuid) {
         guard chat.guid == chatGuid else {
-            log.warning("Chat retrieved from registry has an incorrect guid (\(chat.guid) vs \(chatGuid)) (downgraded: \(chat.isDowngraded())")
-            let goodChat = IMChat.chatMatchingGUID(chatGuid)
-            log.debug("Got chatMatchingGUID with guid \(goodChat?.guid ?? "nil")")
-
-            if chat.isDowngraded() && goodChat == nil {
-                log.debug("Incorrect GUID chat was downgraded and we couldn't get a correct chat from IMChatRegistry.allExistingChats; trying to fix.")
-                chat._setAccount(IMAccountController.shared.iMessageAccount)
-                if chat.guid == chatGuid {
-                    log.debug("Setting iMessage account on incorrect GUID chat fixed the issue; returning it")
-                    return chat
-                } else {
-                    log.debug("Tried to set iMessage account on incorrect GUID chat, but it didn't fix the issue. Failing.")
-                }
-            }
+            let goodChat = loadChatMatchingGUID(chatGuid)
+            log.warning("Chat retrieved from registry has an incorrect guid (\(chat.guid) vs \(chatGuid)), chatMatchingGUID returned \(goodChat?.guid ?? "nil")")
 
             return goodChat
         }
@@ -265,6 +259,51 @@ public func getIMChatForChatGuid(_ chatGuid: String) async -> IMChat? {
     return nil
 }
 
+public func loadChatMatchingGUID(_ guid: String) -> IMChat? {
+    let sharedRegistry = IMChatRegistry.shared
+    let checkChat: () -> IMChat? = {
+        if let chat = sharedRegistry.existingChat(withGUID: guid), chat.guid == guid {
+            return chat
+        }
+
+        let allChats = sharedRegistry.allChats
+        if let chat = allChats.first(where: { $0.guid == guid }) {
+            return chat
+        }
+
+        return allChats.first { chat in
+            chat._guids.contains { $0 == guid }
+        }
+    }
+
+    if let chat = checkChat() {
+        return chat
+    }
+
+    let chatID = ParsedGUID(rawValue: guid).last
+    log.warning("Couldn't get chat \(guid) from `allChats`; trying to load chatID \(chatID)")
+
+    IMDaemonController.sharedInstance().loadChat(withChatIdentifier: chatID)
+
+    if let chat = checkChat() {
+        log.debug("loadChats(withChatID: \(chatID)) succeeded; got chat from allChats")
+        return chat
+    }
+
+    log.warning("Couldn't get chat with `loadChats(withChatID: \(chatID))`; calling loadAllChats()")
+    IMDaemonController.sharedInstance().loadAllChats()
+
+    let chat = checkChat()
+
+    if let chat, chat.guid == guid {
+        log.debug("loadAllChats allowed retrieval of correct chat with guid \(guid)")
+    } else {
+        log.warning("Could not find chat with guid \(guid) even after calling loadAllChats (got \(chat?.guid ?? "nil"))")
+    }
+
+    return chat
+}
+
 @MainActor
 public func getIMChatForGroupID(_ groupID: String) async -> IMChat? {
     IMChatRegistry.shared.existingChat(withGroupID: groupID)
@@ -280,16 +319,6 @@ extension IMChat {
     public static func groupChat(withHandleIDs handleIDs: [String], service: IMServiceStyle) async -> IMChat? {
         let handles = handleIDs.map { bestHandle(forID: $0, service: service) }
         return IMChatRegistry.shared.chat(for: handles)
-    }
-
-    public static func chatMatchingGUID(_ guid: String) -> IMChat? {
-        if let chat = IMChatRegistry.shared.allChats.first(where: { $0.guid == guid }) {
-            return chat
-        }
-
-        return IMChatRegistry.shared.allChats.first { chat in
-            chat._guids.contains { $0 == guid }
-        }
     }
 }
 
