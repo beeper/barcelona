@@ -49,18 +49,13 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         Logger(label: "SendMediaMessageCommand")
     }
 
-    /*func uploadAndRetry(filename: String, path: String, forGuid messageGUID: String) async throws -> String {
+    /*func uploadAndRetry(filename: String, path: String) async throws -> String {
         let uploader = MediaUploader()
         for attempt in 1..<3 {
             log.debug("Upload file attempt \(attempt)")
             do {
                 log.debug("Uploading")
-                let guid = try await uploader.uploadFile(
-                    filename: file_name,
-                    path: URL(fileURLWithPath: path_on_disk),
-                    isAudioMessage: true,
-                    forMessageGUID: messageGUID
-                )
+                let guid = try await uploader.uploadFile(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
                 log.debug("Uploaded file with transfer guid \(guid)")
                 return guid
             } catch {
@@ -107,7 +102,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             }
 
             let uploader = MediaUploader()
-            let transfer = try await uploader.createFileTransfer(for: send_file_name, path: URL(fileURLWithPath: send_path), isAudioMessage: true)
+            let transfer = try await uploader.createFileTransfer(for: send_file_name, path: URL(fileURLWithPath: send_path))
             guard let guid = transfer.guid else {
                 throw BarcelonaError(code: 500, message: "Transfer had no guid")
             }
