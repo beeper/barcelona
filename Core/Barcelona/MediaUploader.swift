@@ -52,13 +52,9 @@ public class MediaUploader {
 
     public init() {}
 
-    public func uploadFile(
-        filename: String,
-        path: URL,
-        isAudioMessage: Bool = false
-    ) async throws -> String {
+    public func uploadFile(filename: String, path: URL) async throws -> String {
         log.debug("Creating file transfer")
-        let transfer = try await createFileTransfer(for: filename, path: path, isAudioMessage: isAudioMessage)
+        let transfer = try await createFileTransfer(for: filename, path: path)
         log.debug("Uploading transfer \(transfer.guid ?? "nil")")
         return try await uploadTransfer(transfer)
     }
@@ -114,10 +110,8 @@ public class MediaUploader {
     }
 
     @MainActor
-    public func createFileTransfer(for filename: String, path: URL, isAudioMessage: Bool) async throws -> IMFileTransfer {
+    public func createFileTransfer(for filename: String, path: URL) async throws -> IMFileTransfer {
         let transferCenter = IMFileTransferCenter.sharedInstance()
-
-        // transferCenter.setIssueSandboxEstensionsForTransfers(true)
 
         log.debug("Getting a guid for a new outgoing transfer")
         let guid = transferCenter.guidForNewOutgoingTransfer(withLocalURL: path, useLegacyGuid: true)
@@ -147,31 +141,6 @@ public class MediaUploader {
         } else {
             log.debug("No persistent path for transfer: \(String(describing: guid))")
         }
-
-        /*if isAudioMessage {
-            if transfer.transcoderUserInfo == nil {
-                transfer.transcoderUserInfo = ["AVIsOpusAudioMessage": true]
-            } else {
-                transfer.transcoderUserInfo?["AVIsOpusAudioMessage"] = true
-            }
-
-            transfer.attributionInfo = [
-                IMFileTransferAttributionInfoPreviewGenerationSucceededKey: true,
-                IMFileTransferAttributionInfoPreviewGenerationSizeWidthKey: 0.0,
-                IMFileTransferAttributionInfoPreviewGenerationSizeHeightKey: 0.0,
-                IMFileTransferAttributionInfoPreviewGenerationConstraintsKey: [
-                    "mpw": "0.0",
-                    "mtw": "0.0",
-                    "mth": "0.0",
-                    "s": "0.0",
-                    "st": 0,
-                    "gm": 0
-                ] as [AnyHashable : Any]
-            ]
-        }
-
-        log.debug("Setting a filename for the transfer")
-        transfer.transferredFilename = filename*/
 
         return transfer
     }
