@@ -117,7 +117,7 @@ public class MediaUploader {
     public func createFileTransfer(for filename: String, path: URL, isAudioMessage: Bool) async throws -> IMFileTransfer {
         let transferCenter = IMFileTransferCenter.sharedInstance()
 
-        transferCenter.setIssueSandboxEstensionsForTransfers(true)
+        // transferCenter.setIssueSandboxEstensionsForTransfers(true)
 
         log.debug("Getting a guid for a new outgoing transfer")
         let guid = transferCenter.guidForNewOutgoingTransfer(withLocalURL: path, useLegacyGuid: true)
@@ -148,7 +148,7 @@ public class MediaUploader {
             log.debug("No persistent path for transfer: \(String(describing: guid))")
         }
 
-        if isAudioMessage {
+        /*if isAudioMessage {
             if transfer.transcoderUserInfo == nil {
                 transfer.transcoderUserInfo = ["AVIsOpusAudioMessage": true]
             } else {
@@ -166,12 +166,11 @@ public class MediaUploader {
                     "s": "0.0",
                     "st": 0,
                     "gm": 0
-                ] as [String : Any]
+                ] as [AnyHashable : Any]
             ]
         }
 
-
-        /*log.debug("Setting a filename for the transfer")
+        log.debug("Setting a filename for the transfer")
         transfer.transferredFilename = filename*/
 
         return transfer
