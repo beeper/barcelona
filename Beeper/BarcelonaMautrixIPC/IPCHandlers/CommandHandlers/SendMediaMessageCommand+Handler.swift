@@ -105,6 +105,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
 
             var messageCreation = CreateMessage(parts: parts)
             messageCreation.metadata = metadata
+            messageCreation.isAudioMessage = is_audio_message
 
             log.debug("Sending message with transfer \(guid)")
             let message = await chat.sendReturningRaw(message: messageCreation)
