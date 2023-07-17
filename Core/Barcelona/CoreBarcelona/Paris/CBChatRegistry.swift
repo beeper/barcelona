@@ -87,7 +87,7 @@ public actor CBChatRegistry {
     }
 
     func chatLoaded(withChatIdentifier chatIdentifier: String!, chats chatDictionaries: [Any]!) async {
-        trace(chatIdentifier, nil, "chats loaded: \((chatDictionaries as NSArray))")
+        trace(chatIdentifier, nil, "chats loaded: \((chatDictionaries as NSArray).singleLineDebugDescription)")
         guard let callbacks = loadedChatsByChatIdentifierCallback.removeValue(forKey: chatIdentifier) else {
             return
         }

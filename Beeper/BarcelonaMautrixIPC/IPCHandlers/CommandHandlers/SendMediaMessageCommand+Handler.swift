@@ -129,9 +129,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             log.debug("Attachment upload finished with GUID: \(guid)")
 
             log.debug("Sending message with transfer \(guid)")
-            await Task { @MainActor in
-                imChat.send(message)
-            }.value
+            await imChat.send(message: message)
             log.debug("Message sent, got: \(message)")
 
             let service: String = {
