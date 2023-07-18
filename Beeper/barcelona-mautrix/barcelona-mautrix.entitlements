@@ -93,6 +93,9 @@
 		<string>com.apple.identityservicesd.idquery.desktop.auth</string>
 		<string>com.apple.identityservicesd.idquery.embedded.auth</string>
 		<string>com.apple.logind</string>
+		<string>com.apple.distributed_notifications@Uv3</string>
+		<string>com.apple.system.notification_center</string>
+		<string>com.apple.coreservices.lsuseractivitymanager.xpc</string>
 	</array>
 	<key>com.apple.security.temporary-exception.shared-preference.read-only</key>
 	<array>
