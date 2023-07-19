@@ -120,7 +120,7 @@ public class CBPurgedAttachmentController {
                             while !transfer.isTrulyFinished {
                                 try Task.checkCancellation()
                                 log.debug("Waiting for \(guid) to be truly finished")
-                                try await Task.sleep(nanoseconds: 1_000_000_000)
+                                try await Task.sleep(nanoseconds: 1 * NSEC_PER_SEC)
                             }
 
                             return guid
@@ -136,7 +136,7 @@ public class CBPurgedAttachmentController {
                     group.addTask { [log] in
                         await Task.yield()
                         log.debug("Starting a 30s timeout for the transfer")
-                        try await Task.sleep(nanoseconds: 30 * 1_000_000_000)
+                        try await Task.sleep(nanoseconds: 30 * NSEC_PER_SEC)
                         log.debug("Reached timeout for the transfer")
                         try Task.checkCancellation()
 

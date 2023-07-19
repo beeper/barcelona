@@ -9,6 +9,7 @@
 import BarcelonaDB
 import Foundation
 import IMCore
+import IMDaemonCore
 import IMFoundation
 import IMSharedUtilities
 import Logging
@@ -225,7 +226,7 @@ public func getIMServiceStyleForChatGuid(_ chatGuid: String) -> IMServiceStyle {
 public func getIMChatForChatGuid(_ chatGuid: String) async -> IMChat? {
     if let chat = IMChatRegistry.shared.existingChat(withGUID: chatGuid) {
         guard chat.guid == chatGuid else {
-            let goodChat = loadChatMatchingGUID(chatGuid)
+            let goodChat = loadChatMatchingGUID(chatGuid, badChat: chat)
             log.warning("Chat retrieved from registry has an incorrect guid (\(chat.guid) vs \(chatGuid)), chatMatchingGUID returned \(goodChat?.guid ?? "nil")")
 
             return goodChat
@@ -259,7 +260,7 @@ public func getIMChatForChatGuid(_ chatGuid: String) async -> IMChat? {
     return nil
 }
 
-public func loadChatMatchingGUID(_ guid: String) -> IMChat? {
+public func loadChatMatchingGUID(_ guid: String, badChat: IMChat) -> IMChat? {
     let sharedRegistry = IMChatRegistry.shared
     let checkChat: () -> IMChat? = {
         if let chat = sharedRegistry.existingChat(withGUID: guid), chat.guid == guid {
@@ -281,31 +282,40 @@ public func loadChatMatchingGUID(_ guid: String) -> IMChat? {
     }
 
     let chatID = ParsedGUID(rawValue: guid).last
-    log.warning("Couldn't get chat \(guid) from `allChats`; trying to load chatID \(chatID)")
+    log.warning("Couldn't get chat \(guid) from `allChats`; trying to load chatID \(chatID) from IMDChatRegistry")
 
-    IMDaemonController.sharedInstance().loadChat(withChatIdentifier: chatID)
-
-    if let chat = checkChat() {
-        log.debug("loadChats(withChatID: \(chatID)) succeeded; got chat from allChats")
-        return chat
+    guard let imdchat = IMDChatRegistry.sharedInstance().existingChat(withGUID: guid) else {
+        log.warning("Can't get IMDChat for guid \(guid); failing")
+        return nil
     }
 
-    log.warning("Couldn't get chat with `loadChats(withChatID: \(chatID))`; calling loadAllChats()")
-    if #available(macOS 12, *) {
-        IMDaemonController.sharedInstance().loadAllChats()
-    } else {
-        IMDaemonController.sharedInstance().loadChats(withChatID: "all")
+    guard let dict = imdchat.chatProperties() else {
+        log.warning("Can't get dictionary representation for IMDChat \(imdchat)")
+        return nil
     }
 
-    let chat = checkChat()
-
-    if let chat, chat.guid == guid {
-        log.debug("loadAllChats allowed retrieval of correct chat with guid \(guid)")
-    } else {
-        log.warning("Could not find chat with guid \(guid) even after calling loadAllChats (got \(chat?.guid ?? "nil"))")
+    log.warning("Processing chat dictionaryRepresentation for guid \(guid) and hoping it returns a chat")
+    guard let cachedChats = sharedRegistry.value(forKey: "_chatGUIDToChatMap") as? NSMutableDictionary else {
+        log.error("The _chatGUIDToChatMap dictionary no longer exists; something is off or maybe the process is just starting up (probably the former)")
+        return nil
     }
 
-    return chat
+    // So, normally once we run into this situation, the cached map has the same
+    // object stored for both the good and bad guid. So we need to first remove
+    // them both from the map so that when we load in the chat's properties
+    // (down in `_processLoadedChatDictionaries`), it doesn't find the already-
+    // existing IMChat to point to instead. So once we remove them, we load in
+    // the properties, it creates a new IMChat with the correct properties and
+    // such, and then we put the old one back in the map so the bad guid will
+    // still work.
+    cachedChats.removeObject(forKey: guid)
+    let oldChat = cachedChats[badChat.guid]
+    cachedChats.removeObject(forKey: badChat.guid)
+
+    sharedRegistry._processLoadedChatDictionaries([dict])
+
+    cachedChats[badChat.guid] = oldChat
+    return checkChat()
 }
 
 @MainActor
