@@ -106,16 +106,17 @@ private func ERAttributedString(forAttachment attachment: String) -> MessagePart
         return MessagePartParseResult(string: NSAttributedString(), transferGUIDs: [])
     }
 
-    guard let guid = transfer.guid, let filename = transfer.filename else {
+    guard let guid = transfer.guid else {
         return MessagePartParseResult(string: NSAttributedString(), transferGUIDs: [])
     }
 
     let attachmentAttributes = NSMutableAttributedString(string: IMAttachmentString)
     attachmentAttributes.setAttributes(
         [
-            MessageAttributes.writingDirection: -1,
+            // MessageAttributes.writingDirection: -1,
             MessageAttributes.transferGUID: guid,
-            MessageAttributes.filename: filename,
+            // MessageAttributes.filename: filename,
+            MessageAttributes.messagePart: 0
         ],
         range: NSRange(location: 0, length: IMAttachmentString.count)
     )
