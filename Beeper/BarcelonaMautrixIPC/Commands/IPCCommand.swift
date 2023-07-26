@@ -7,7 +7,6 @@
 //
 
 import Barcelona
-import BarcelonaFoundation
 import Foundation
 import Logging
 import Sentry

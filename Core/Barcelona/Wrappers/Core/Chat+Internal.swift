@@ -8,7 +8,6 @@
 import Foundation
 import IMCore
 import Logging
-import Pwomise
 
 private let log = Logger(label: "ChatLocator")
 

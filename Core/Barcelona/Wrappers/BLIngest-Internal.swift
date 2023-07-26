@@ -113,7 +113,7 @@ internal func _BLLoadTapbacks(
             service: service
         )
 
-        if ledger.values.flatten().count > 0 {
+        if ledger.values.flatMap({ $0 }).count > 0 {
             ledger.forEach { itemID, tapbacks -> Void in
                 guard let messageID = associatedLedger[itemID], let message = messages[messageID] else {
                     return

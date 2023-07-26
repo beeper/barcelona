@@ -55,7 +55,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             log.debug("Upload file attempt \(attempt)")
             do {
                 log.debug("Uploading")
-                let guid = try await uploader.uploadFile(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
+                let guid = try await uploader.uploadFile(filename: filename, path: URL(fileURLWithPath: path))
                 log.debug("Uploaded file with transfer guid \(guid)")
                 return guid
             } catch {
@@ -65,7 +65,7 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
             }
         }
         log.debug("Trying to upload the file one last time")
-        let guid = try await uploader.uploadFile(filename: file_name, path: URL(fileURLWithPath: path_on_disk))
+        let guid = try await uploader.uploadFile(filename: filename, path: URL(fileURLWithPath: path))
         log.debug("Final upload attempt succeeded with guid: \(guid)")
         return guid
     }
@@ -91,8 +91,17 @@ extension SendMediaMessageCommand: Runnable, AuthenticatedAsserting {
         }
 
         do {
+            var send_file_name = file_name
+            var send_path = path_on_disk
+            let correct_name = "Audio Message.caf"
+            if is_audio_message == true && file_name != correct_name {
+                send_path = send_path.replacingOccurrences(of: file_name, with: correct_name)
+                send_file_name = correct_name
+                try FileManager.default.moveItem(atPath: path_on_disk, toPath: send_path)
+            }
+
             log.debug("Starting attachment upload")
-            let guid = try await uploadAndRetry(filename: file_name, path: path_on_disk)
+            let guid = try await uploadAndRetry(filename: send_file_name, path: send_path)
             log.debug("Attachment upload finished with GUID: \(guid)")
 
             var parts: [MessagePart] = [

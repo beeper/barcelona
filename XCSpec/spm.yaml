@@ -8,12 +8,9 @@ packages:
   Swime:
     url: https://github.com/sendyhalim/Swime
     from: 3.0.7
-  Pwomise:
-    url: https://github.com/EricRabil/Pwomise
-    from: 1.1.1
-  BarcelonaFoundation:
-    url: https://github.com/open-imcore/BarcelonaFoundation
-    from: 1.0.2
+  Swog:
+    url: https://github.com/ericrabil/swog
+    from: 1.0.9
   Gzip:
     url: https://github.com/1024jp/GzipSwift
     from: 5.1.1

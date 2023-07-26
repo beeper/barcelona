@@ -7,8 +7,8 @@
 
 import Foundation
 
-extension Collection {
-    public func splitReduce<A, B>(
+public extension Collection {
+    func splitReduce<A, B>(
         intoLeft left: A,
         intoRight right: B,
         callback: (inout A, inout B, Element) throws -> Void

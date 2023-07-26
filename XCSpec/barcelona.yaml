@@ -8,11 +8,10 @@ targets:
       - ../Core/Barcelona
     dependencies:
       - package: Swime
+      - package: Swog
       - package: AnyCodable
       - package: Gzip
       - package: InterposeKit
-      - package: BarcelonaFoundation
-      - package: Pwomise
       - package: Sentry
       - package: SwiftCLI
       - package: SwiftNIO
@@ -59,10 +58,12 @@ targets:
       - ../Core/BarcelonaDB
     dependencies:
       - package: GRDB
-      - package: BarcelonaFoundation
       - package: Sentry
       - package: swift-log
         product: Logging
+      - target: Extensions
+        embed: true
+        link: true
   Extensions:
     group: Core
     templates:

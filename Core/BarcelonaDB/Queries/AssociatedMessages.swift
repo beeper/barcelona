@@ -6,8 +6,8 @@
 //  Copyright © 2020 Eric Rabil. All rights reserved.
 //
 
-import BarcelonaFoundation
 import Foundation
+import Extensions
 
 extension DBReader {
     /// Loads messages associated with the given GUIDs

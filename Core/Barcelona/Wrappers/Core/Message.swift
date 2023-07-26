@@ -12,6 +12,7 @@ import IMCore
 import IMFoundation
 import IMSharedUtilities
 import Logging
+import Swog // for MetadataValue
 
 private func CBExtractThreadOriginatorAndPartFromIdentifier(_ identifier: String) -> (String, Int)? {
     let parts = identifier.split(separator: ",")
