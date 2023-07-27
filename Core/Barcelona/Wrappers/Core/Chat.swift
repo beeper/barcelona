@@ -10,6 +10,7 @@ import BarcelonaDB
 import Foundation
 import IMCore
 import IMDaemonCore
+import IMDPersistence
 import IMFoundation
 import IMSharedUtilities
 import Logging
@@ -284,10 +285,21 @@ public func loadChatMatchingGUID(_ guid: String, badChat: IMChat) -> IMChat? {
     let chatID = ParsedGUID(rawValue: guid).last
     log.warning("Couldn't get chat \(guid) from `allChats`; trying to load chatID \(chatID) from IMDChatRegistry")
 
+    // calling IMDSetIsRunningInDatabaseServerProcess is only to see if XPC is what is making existingChat(withGUID:) not work.
+    // See, if IMDChatRegistry doesn't have an IMDChat cached, it'll ask its IMDChatStore to grab it and return it. If
+    // `IMDIsRunningInDatabaseServerProcess() == 1`, IMDChatStore will read directly from chat.db to grab it. Else, it'll do
+    // an XPC call, which obviously is much more fraught towards failure. If we add this and calling existingChat becomes much
+    // more reliable, it's a weird XPC issue and we can start debugging that.
+    // However, setting this can cause issues ('cause we're telling the system that we only have read access to the db when
+    // that may not be true), so we reset it immediately after and hope we don't cause a race condition
+    IMDSetIsRunningInDatabaseServerProcess(1)
+
     guard let imdchat = IMDChatRegistry.sharedInstance().existingChat(withGUID: guid) else {
         log.warning("Can't get IMDChat for guid \(guid); failing")
         return nil
     }
+
+    IMDSetIsRunningInDatabaseServerProcess(0)
 
     guard let dict = imdchat.chatProperties() else {
         log.warning("Can't get dictionary representation for IMDChat \(imdchat)")
