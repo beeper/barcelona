@@ -12,6 +12,7 @@ import IMDPersistence
 import IMSharedUtilities
 import InterposeKit
 import Logging
+import notify
 
 private let log = Logger(label: "BarcelonaManager")
 

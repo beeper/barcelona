@@ -113,6 +113,7 @@ class DaemonCLICommand: Command {
 
 var commands: [Routable] = [
     SendMessageCLICommand(),
+    SetMessageRetentionCommand(),
     DaemonCLICommand(),
 ]
 
