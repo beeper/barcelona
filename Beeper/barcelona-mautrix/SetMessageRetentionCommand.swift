@@ -29,7 +29,7 @@ class SetMessageRetentionCommand: Command {
             if hasVal.pointee != true || val != days {
                 log.info("\(key) was not already set, changing to \(days)")
                 // If it's not set, just set it for the current user and host
-                CFPreferencesSetValue(key, days as CFNumber, mobileSMS, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost)
+                CFPreferencesSetValue(key, days as CFNumber, mobileSMS, kCFPreferencesCurrentUser, kCFPreferencesAnyHost)
                 CFPreferencesAppSynchronize(mobileSMS)
                 // the IMAutomaticHistoryDeletionAgent is only launched when manually invoked or this notification is posted, so this should activate it
                 notify_post("com.apple.imautomatichistorydeletionagent.prefchange")
